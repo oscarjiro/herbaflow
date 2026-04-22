@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Crantz",
+    "canonicalName": "Manihot esculenta",
+    "formattedName": "<i>Manihot</i> <i>esculenta</i> Crantz",
+    "genericName": "Manihot",
+    "key": "3060998",
+    "name": "Manihot esculenta Crantz",
+    "rank": "SPECIES",
+    "specificEpithet": "esculenta",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4691",
+      "name": "Euphorbiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3060685",
+      "name": "Manihot",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3060998",
+      "name": "Manihot esculenta",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 2,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 456080,
+  "right": 456085,
+  "synonym": true,
+  "usage": {
+    "authorship": "Pohl",
+    "canonicalName": "Manihot utilissima",
+    "formattedName": "<i>Manihot</i> <i>utilissima</i> Pohl",
+    "genericName": "Manihot",
+    "key": "3061039",
+    "name": "Manihot utilissima Pohl",
+    "rank": "SPECIES",
+    "specificEpithet": "utilissima",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

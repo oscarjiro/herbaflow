@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2941201",
+      "name": "Archidendron",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 324689,
+  "right": 324822,
+  "synonym": false,
+  "usage": {
+    "authorship": "F.Muell.",
+    "canonicalName": "Archidendron",
+    "formattedName": "<i>Archidendron</i> F.Muell.",
+    "key": "2941201",
+    "name": "Archidendron F.Muell.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

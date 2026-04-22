@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1171",
+      "name": "Dioscoreales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7694",
+      "name": "Dioscoreaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9375127",
+      "name": "Tacca",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2755891",
+      "name": "Tacca palmata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 95,
+    "matchType": "VARIANT",
+    "timeTaken": 7,
+    "timings": {
+      "luceneMatch": 7,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 129984,
+  "right": 129985,
+  "synonym": false,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Tacca palmata",
+    "formattedName": "<i>Tacca</i> <i>palmata</i> Blume",
+    "genericName": "Tacca",
+    "key": "2755891",
+    "name": "Tacca palmata Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "palmata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "164001",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6717",
+      "name": "Portulacaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3084696",
+      "name": "Portulaca",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3084719",
+      "name": "Portulaca oleracea",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 286430,
+  "right": 286435,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Portulaca oleracea",
+    "formattedName": "<i>Portulaca</i> <i>oleracea</i> L.",
+    "genericName": "Portulaca",
+    "key": "3084719",
+    "name": "Portulaca oleracea L.",
+    "rank": "SPECIES",
+    "specificEpithet": "oleracea",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

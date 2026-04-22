@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "152393",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2519",
+      "name": "Cactaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3084180",
+      "name": "Epiphyllum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5384031",
+      "name": "Epiphyllum oxypetalum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 271301,
+  "right": 271301,
+  "synonym": false,
+  "usage": {
+    "authorship": "(DC.) Haw.",
+    "canonicalName": "Epiphyllum oxypetalum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Epiphyllum</i> <i>oxypetalum</i> (DC.) Haw.",
+    "genericName": "Epiphyllum",
+    "key": "5384031",
+    "name": "Epiphyllum oxypetalum (DC.) Haw.",
+    "rank": "SPECIES",
+    "specificEpithet": "oxypetalum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

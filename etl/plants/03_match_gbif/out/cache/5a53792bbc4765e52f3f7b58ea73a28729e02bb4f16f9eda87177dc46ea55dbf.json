@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Vahl) R.M.King & H.Rob.",
+    "canonicalName": "Ayapana triplinervis",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Ayapana</i> <i>triplinervis</i> (Vahl) R.M.King & H.Rob.",
+    "genericName": "Ayapana",
+    "key": "3142644",
+    "name": "Ayapana triplinervis (Vahl) R.M.King & H.Rob.",
+    "rank": "SPECIES",
+    "specificEpithet": "triplinervis",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3126519",
+      "name": "Ayapana",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3142644",
+      "name": "Ayapana triplinervis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 196648,
+  "right": 196648,
+  "synonym": true,
+  "usage": {
+    "authorship": "Vahl",
+    "canonicalName": "Eupatorium triplinerve",
+    "formattedName": "<i>Eupatorium</i> <i>triplinerve</i> Vahl",
+    "genericName": "Eupatorium",
+    "key": "5402967",
+    "name": "Eupatorium triplinerve Vahl",
+    "rank": "SPECIES",
+    "specificEpithet": "triplinerve",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

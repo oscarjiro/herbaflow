@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "7228684",
+      "name": "Polypodiopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "392",
+      "name": "Polypodiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2368",
+      "name": "Polypodiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7126742",
+      "name": "Platycerium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7126767",
+      "name": "Platycerium bifurcatum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 590980,
+  "right": 590982,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Cav.) C.Chr.",
+    "canonicalName": "Platycerium bifurcatum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Platycerium</i> <i>bifurcatum</i> (Cav.) C.Chr.",
+    "genericName": "Platycerium",
+    "key": "7126767",
+    "name": "Platycerium bifurcatum (Cav.) C.Chr.",
+    "rank": "SPECIES",
+    "specificEpithet": "bifurcatum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "718",
+      "name": "Magnoliales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "9291",
+      "name": "Annonaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3154672",
+      "name": "Stelechocarpus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3154679",
+      "name": "Stelechocarpus burahol",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 7,
+    "timings": {
+      "luceneMatch": 6,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 445197,
+  "right": 445199,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Blume) Hook.f. & Thomson",
+    "canonicalName": "Stelechocarpus burahol",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Stelechocarpus</i> <i>burahol</i> (Blume) Hook.f. & Thomson",
+    "genericName": "Stelechocarpus",
+    "key": "3154679",
+    "name": "Stelechocarpus burahol (Blume) Hook.f. & Thomson",
+    "rank": "SPECIES",
+    "specificEpithet": "burahol",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

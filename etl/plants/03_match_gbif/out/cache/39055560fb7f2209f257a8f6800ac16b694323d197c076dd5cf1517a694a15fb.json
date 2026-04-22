@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Moench",
+    "canonicalName": "Baccharoides anthelmintica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Baccharoides</i> <i>anthelmintica</i> (L.) Moench",
+    "genericName": "Baccharoides",
+    "key": "3087253",
+    "name": "Baccharoides anthelmintica (L.) Moench",
+    "rank": "SPECIES",
+    "specificEpithet": "anthelmintica",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3087252",
+      "name": "Baccharoides",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3087253",
+      "name": "Baccharoides anthelmintica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 94,
+    "matchType": "VARIANT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 197323,
+  "right": 197324,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Willd.",
+    "canonicalName": "Vernonia anthelmintica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Vernonia</i> <i>anthelmintica</i> (L.) Willd.",
+    "genericName": "Vernonia",
+    "key": "5385185",
+    "name": "Vernonia anthelmintica (L.) Willd.",
+    "rank": "SPECIES",
+    "specificEpithet": "anthelmintica",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

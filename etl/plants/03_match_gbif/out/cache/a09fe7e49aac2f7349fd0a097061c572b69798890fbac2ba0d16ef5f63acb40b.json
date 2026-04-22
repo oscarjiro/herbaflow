@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "169579321",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2398",
+      "name": "Anacardiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3190592",
+      "name": "Spondias",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3661030",
+      "name": "Spondias pinnata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 549990,
+  "right": 549990,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.fil.) Kurz",
+    "canonicalName": "Spondias pinnata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Spondias</i> <i>pinnata</i> (L.fil.) Kurz",
+    "genericName": "Spondias",
+    "key": "3661030",
+    "name": "Spondias pinnata (L.fil.) Kurz",
+    "rank": "SPECIES",
+    "specificEpithet": "pinnata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

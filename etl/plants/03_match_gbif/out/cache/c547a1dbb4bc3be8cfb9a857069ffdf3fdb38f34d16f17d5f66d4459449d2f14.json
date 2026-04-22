@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7224005",
+      "name": "Cucurbitales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6634",
+      "name": "Cucurbitaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874611",
+      "name": "Sechium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2874612",
+      "name": "Sechium edule",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 7,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 8
+    }
+  },
+  "left": 294873,
+  "right": 294886,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Jacq.) Sw.",
+    "canonicalName": "Sechium edule",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Sechium</i> <i>edule</i> (Jacq.) Sw.",
+    "genericName": "Sechium",
+    "key": "2874612",
+    "name": "Sechium edule (Jacq.) Sw.",
+    "rank": "SPECIES",
+    "specificEpithet": "edule",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

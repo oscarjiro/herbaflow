@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "L.",
+    "canonicalName": "Cucumis maderaspatanus",
+    "formattedName": "<i>Cucumis</i> <i>maderaspatanus</i> L.",
+    "genericName": "Cucumis",
+    "key": "8364646",
+    "name": "Cucumis maderaspatanus L.",
+    "rank": "SPECIES",
+    "specificEpithet": "maderaspatanus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7224005",
+      "name": "Cucurbitales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6634",
+      "name": "Cucurbitaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874568",
+      "name": "Cucumis",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8364646",
+      "name": "Cucumis maderaspatanus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 294075,
+  "right": 294082,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Cogn.",
+    "canonicalName": "Coccinia cordifolia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Coccinia</i> <i>cordifolia</i> (L.) Cogn.",
+    "genericName": "Coccinia",
+    "key": "2874565",
+    "name": "Coccinia cordifolia (L.) Cogn.",
+    "rank": "SPECIES",
+    "specificEpithet": "cordifolia",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

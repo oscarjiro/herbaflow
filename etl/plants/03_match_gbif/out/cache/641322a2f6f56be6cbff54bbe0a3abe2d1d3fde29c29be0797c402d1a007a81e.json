@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "32353",
+      "status": "ENDANGERED",
+      "statusCode": "EN"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "244",
+      "name": "Ginkgoopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "418",
+      "name": "Ginkgoales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3070",
+      "name": "Ginkgoaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2687884",
+      "name": "Ginkgo",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2687885",
+      "name": "Ginkgo biloba",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 7,
+    "timings": {
+      "luceneMatch": 6,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 60460,
+  "right": 60462,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Ginkgo biloba",
+    "formattedName": "<i>Ginkgo</i> <i>biloba</i> L.",
+    "genericName": "Ginkgo",
+    "key": "2687885",
+    "name": "Ginkgo biloba L.",
+    "rank": "SPECIES",
+    "specificEpithet": "biloba",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

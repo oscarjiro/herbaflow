@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6699",
+      "name": "Balsaminaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2891766",
+      "name": "Impatiens",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2891773",
+      "name": "Impatiens balsamina",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 300593,
+  "right": 300597,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Impatiens balsamina",
+    "formattedName": "<i>Impatiens</i> <i>balsamina</i> L.",
+    "genericName": "Impatiens",
+    "key": "2891773",
+    "name": "Impatiens balsamina L.",
+    "rank": "SPECIES",
+    "specificEpithet": "balsamina",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

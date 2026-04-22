@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "149653493",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8807",
+      "name": "Phyllanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7729911",
+      "name": "Bridelia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3076290",
+      "name": "Bridelia stipularis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 463619,
+  "right": 463619,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Blume",
+    "canonicalName": "Bridelia stipularis",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Bridelia</i> <i>stipularis</i> (L.) Blume",
+    "genericName": "Bridelia",
+    "key": "3076290",
+    "name": "Bridelia stipularis (L.) Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "stipularis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

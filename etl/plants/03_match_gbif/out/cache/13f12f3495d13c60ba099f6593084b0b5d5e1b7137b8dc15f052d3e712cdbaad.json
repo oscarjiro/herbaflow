@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3064",
+      "name": "Amaranthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3084921",
+      "name": "Alternanthera",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3084923",
+      "name": "Alternanthera philoxeroides",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 23,
+    "timings": {
+      "luceneMatch": 23,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 23
+    }
+  },
+  "left": 266064,
+  "right": 266066,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Mart.) Griseb.",
+    "canonicalName": "Alternanthera philoxeroides",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Alternanthera</i> <i>philoxeroides</i> (Mart.) Griseb.",
+    "genericName": "Alternanthera",
+    "key": "3084923",
+    "name": "Alternanthera philoxeroides (Mart.) Griseb.",
+    "rank": "SPECIES",
+    "specificEpithet": "philoxeroides",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "117468429",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2756693",
+      "name": "Zingiber",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2757277",
+      "name": "Zingiber ottensii",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 177609,
+  "right": 177611,
+  "synonym": false,
+  "usage": {
+    "authorship": "Valeton",
+    "canonicalName": "Zingiber ottensii",
+    "formattedName": "<i>Zingiber</i> <i>ottensii</i> Valeton",
+    "genericName": "Zingiber",
+    "key": "2757277",
+    "name": "Zingiber ottensii Valeton",
+    "rank": "SPECIES",
+    "specificEpithet": "ottensii",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

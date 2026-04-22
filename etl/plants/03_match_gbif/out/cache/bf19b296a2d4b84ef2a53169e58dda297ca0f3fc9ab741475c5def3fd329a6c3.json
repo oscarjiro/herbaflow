@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "61210500",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7262656",
+      "name": "Antiaris",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7262663",
+      "name": "Antiaris toxicaria",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 527325,
+  "right": 527332,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Pers.) Lesch.",
+    "canonicalName": "Antiaris toxicaria",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Antiaris</i> <i>toxicaria</i> (Pers.) Lesch.",
+    "genericName": "Antiaris",
+    "key": "7262663",
+    "name": "Antiaris toxicaria (Pers.) Lesch.",
+    "rank": "SPECIES",
+    "specificEpithet": "toxicaria",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

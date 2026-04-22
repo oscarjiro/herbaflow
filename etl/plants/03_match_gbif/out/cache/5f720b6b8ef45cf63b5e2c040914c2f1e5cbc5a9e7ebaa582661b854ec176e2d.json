@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "153023665",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "407",
+      "name": "Laurales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6688",
+      "name": "Lauraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3033976",
+      "name": "Litsea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8224773",
+      "name": "Litsea resinosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 4,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 4
+    }
+  },
+  "left": 440499,
+  "right": 440499,
+  "synonym": false,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Litsea resinosa",
+    "formattedName": "<i>Litsea</i> <i>resinosa</i> Blume",
+    "genericName": "Litsea",
+    "key": "8224773",
+    "name": "Litsea resinosa Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "resinosa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

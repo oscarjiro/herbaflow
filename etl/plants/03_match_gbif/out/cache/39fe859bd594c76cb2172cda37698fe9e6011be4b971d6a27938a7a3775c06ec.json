@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3073",
+      "name": "Poaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7627509",
+      "name": "Imperata",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8424006",
+      "name": "Imperata cylindrica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 91,
+    "matchType": "VARIANT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 162643,
+  "right": 162651,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Raeusch.",
+    "canonicalName": "Imperata cylindrica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Imperata</i> <i>cylindrica</i> (L.) Raeusch.",
+    "genericName": "Imperata",
+    "key": "8424006",
+    "name": "Imperata cylindrica (L.) Raeusch.",
+    "rank": "SPECIES",
+    "specificEpithet": "cylindrica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

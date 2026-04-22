@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874693",
+      "name": "Ocimum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2927096",
+      "name": "Ocimum basilicum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 8
+    }
+  },
+  "left": 415504,
+  "right": 415507,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Ocimum basilicum",
+    "formattedName": "<i>Ocimum</i> <i>basilicum</i> L.",
+    "genericName": "Ocimum",
+    "key": "2927096",
+    "name": "Ocimum basilicum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "basilicum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

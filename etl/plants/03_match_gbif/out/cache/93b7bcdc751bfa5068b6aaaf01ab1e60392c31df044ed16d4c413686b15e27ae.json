@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Lour.) Müll.Arg.",
+    "canonicalName": "Cleistanthus monoicus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cleistanthus</i> <i>monoicus</i> (Lour.) Müll.Arg.",
+    "genericName": "Cleistanthus",
+    "key": "3081719",
+    "name": "Cleistanthus monoicus (Lour.) Müll.Arg.",
+    "rank": "SPECIES",
+    "specificEpithet": "monoicus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8807",
+      "name": "Phyllanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3081487",
+      "name": "Cleistanthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3081719",
+      "name": "Cleistanthus monoicus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 463761,
+  "right": 463761,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lour.) Merr.",
+    "canonicalName": "Bridelia monoica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Bridelia</i> <i>monoica</i> (Lour.) Merr.",
+    "genericName": "Bridelia",
+    "key": "3081720",
+    "name": "Bridelia monoica (Lour.) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "monoica",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

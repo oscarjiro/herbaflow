@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "147624399",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5014",
+      "name": "Myrtaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3187737",
+      "name": "Baeckea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3187799",
+      "name": "Baeckea frutescens",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 493107,
+  "right": 493107,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Baeckea frutescens",
+    "formattedName": "<i>Baeckea</i> <i>frutescens</i> L.",
+    "genericName": "Baeckea",
+    "key": "3187799",
+    "name": "Baeckea frutescens L.",
+    "rank": "SPECIES",
+    "specificEpithet": "frutescens",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

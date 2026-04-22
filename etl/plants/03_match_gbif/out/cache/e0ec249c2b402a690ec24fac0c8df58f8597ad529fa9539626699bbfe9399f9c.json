@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "198991191",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152129",
+      "name": "Sterculia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5406675",
+      "name": "Sterculia foetida",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 480920,
+  "right": 480920,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Sterculia foetida",
+    "formattedName": "<i>Sterculia</i> <i>foetida</i> L.",
+    "genericName": "Sterculia",
+    "key": "5406675",
+    "name": "Sterculia foetida L.",
+    "rank": "SPECIES",
+    "specificEpithet": "foetida",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

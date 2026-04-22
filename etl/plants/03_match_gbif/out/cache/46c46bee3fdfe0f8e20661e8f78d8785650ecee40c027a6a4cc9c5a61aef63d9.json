@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "211320684",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "554",
+      "name": "Pandanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3737",
+      "name": "Pandanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "8404076",
+      "name": "Pandanus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5328074",
+      "name": "Pandanus conoideus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 134493,
+  "right": 134493,
+  "synonym": false,
+  "usage": {
+    "authorship": "Lam.",
+    "canonicalName": "Pandanus conoideus",
+    "formattedName": "<i>Pandanus</i> <i>conoideus</i> Lam.",
+    "genericName": "Pandanus",
+    "key": "5328074",
+    "name": "Pandanus conoideus Lam.",
+    "rank": "SPECIES",
+    "specificEpithet": "conoideus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

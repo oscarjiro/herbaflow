@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Fryxell",
+    "canonicalName": "Talipariti tiliaceum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Talipariti</i> <i>tiliaceum</i> (L.) Fryxell",
+    "genericName": "Talipariti",
+    "key": "7115794",
+    "name": "Talipariti tiliaceum (L.) Fryxell",
+    "rank": "SPECIES",
+    "specificEpithet": "tiliaceum",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7115793",
+      "name": "Talipariti",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7115794",
+      "name": "Talipariti tiliaceum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 480975,
+  "right": 480976,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Hibiscus tiliaceus",
+    "formattedName": "<i>Hibiscus</i> <i>tiliaceus</i> L.",
+    "genericName": "Hibiscus",
+    "key": "3152584",
+    "name": "Hibiscus tiliaceus L.",
+    "rank": "SPECIES",
+    "specificEpithet": "tiliaceus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

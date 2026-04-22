@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Mill.",
+    "canonicalName": "Persea americana",
+    "formattedName": "<i>Persea</i> <i>americana</i> Mill.",
+    "genericName": "Persea",
+    "key": "3034046",
+    "name": "Persea americana Mill.",
+    "rank": "SPECIES",
+    "specificEpithet": "americana",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "407",
+      "name": "Laurales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6688",
+      "name": "Lauraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3034041",
+      "name": "Persea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3034046",
+      "name": "Persea americana",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 23,
+    "timings": {
+      "luceneMatch": 23,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 24
+    }
+  },
+  "left": 441799,
+  "right": 441807,
+  "synonym": true,
+  "usage": {
+    "authorship": "C.F.Gaertn.",
+    "canonicalName": "Persea gratissima",
+    "formattedName": "<i>Persea</i> <i>gratissima</i> C.F.Gaertn.",
+    "genericName": "Persea",
+    "key": "6407390",
+    "name": "Persea gratissima C.F.Gaertn.",
+    "rank": "SPECIES",
+    "specificEpithet": "gratissima",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

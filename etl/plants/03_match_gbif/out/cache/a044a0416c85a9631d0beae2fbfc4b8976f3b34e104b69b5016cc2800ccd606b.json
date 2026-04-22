@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2378",
+      "name": "Passifloraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874172",
+      "name": "Passiflora",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2874211",
+      "name": "Passiflora foetida",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 462633,
+  "right": 462658,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Passiflora foetida",
+    "formattedName": "<i>Passiflora</i> <i>foetida</i> L.",
+    "genericName": "Passiflora",
+    "key": "2874211",
+    "name": "Passiflora foetida L.",
+    "rank": "SPECIES",
+    "specificEpithet": "foetida",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

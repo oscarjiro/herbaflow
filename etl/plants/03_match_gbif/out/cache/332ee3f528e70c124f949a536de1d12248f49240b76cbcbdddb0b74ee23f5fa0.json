@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "156233789",
+      "status": "NEAR_THREATENED",
+      "statusCode": "NT"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2396",
+      "name": "Rutaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "8397331",
+      "name": "Aegle",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5421195",
+      "name": "Aegle marmelos",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 6,
+    "timings": {
+      "luceneMatch": 6,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 552958,
+  "right": 552961,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Corrêa",
+    "canonicalName": "Aegle marmelos",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Aegle</i> <i>marmelos</i> (L.) Corrêa",
+    "genericName": "Aegle",
+    "key": "5421195",
+    "name": "Aegle marmelos (L.) Corrêa",
+    "rank": "SPECIES",
+    "specificEpithet": "marmelos",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

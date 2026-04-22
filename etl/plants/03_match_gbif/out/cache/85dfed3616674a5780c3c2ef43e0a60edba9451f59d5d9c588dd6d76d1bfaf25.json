@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "66295794",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925344",
+      "name": "Premna",
+      "rank": "GENUS"
+    },
+    {
+      "key": "6411486",
+      "name": "Premna serratifolia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 416875,
+  "right": 416877,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Premna serratifolia",
+    "formattedName": "<i>Premna</i> <i>serratifolia</i> L.",
+    "genericName": "Premna",
+    "key": "6411486",
+    "name": "Premna serratifolia L.",
+    "rank": "SPECIES",
+    "specificEpithet": "serratifolia",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

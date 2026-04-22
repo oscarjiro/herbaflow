@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Kuntze",
+    "canonicalName": "Mesosphaerum suaveolens",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Mesosphaerum</i> <i>suaveolens</i> (L.) Kuntze",
+    "genericName": "Mesosphaerum",
+    "key": "3889017",
+    "name": "Mesosphaerum suaveolens (L.) Kuntze",
+    "rank": "SPECIES",
+    "specificEpithet": "suaveolens",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7307350",
+      "name": "Mesosphaerum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3889017",
+      "name": "Mesosphaerum suaveolens",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 414592,
+  "right": 414593,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Poit.",
+    "canonicalName": "Hyptis suaveolens",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Hyptis</i> <i>suaveolens</i> (L.) Poit.",
+    "genericName": "Hyptis",
+    "key": "2926823",
+    "name": "Hyptis suaveolens (L.) Poit.",
+    "rank": "SPECIES",
+    "specificEpithet": "suaveolens",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

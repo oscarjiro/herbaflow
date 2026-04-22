@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "33355",
+      "status": "VULNERABLE",
+      "statusCode": "VU"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6674",
+      "name": "Primulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169458",
+      "name": "Ardisia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5414375",
+      "name": "Ardisia elliptica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 312889,
+  "right": 312893,
+  "synonym": false,
+  "usage": {
+    "authorship": "Thunb.",
+    "canonicalName": "Ardisia elliptica",
+    "formattedName": "<i>Ardisia</i> <i>elliptica</i> Thunb.",
+    "genericName": "Ardisia",
+    "key": "5414375",
+    "name": "Ardisia elliptica Thunb.",
+    "rank": "SPECIES",
+    "specificEpithet": "elliptica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

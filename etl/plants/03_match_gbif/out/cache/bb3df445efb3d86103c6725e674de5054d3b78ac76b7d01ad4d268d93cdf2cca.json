@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6717",
+      "name": "Portulacaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3084696",
+      "name": "Portulaca",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3084700",
+      "name": "Portulaca grandiflora",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 286405,
+  "right": 286408,
+  "synonym": false,
+  "usage": {
+    "authorship": "Hook.",
+    "canonicalName": "Portulaca grandiflora",
+    "formattedName": "<i>Portulaca</i> <i>grandiflora</i> Hook.",
+    "genericName": "Portulaca",
+    "key": "3084700",
+    "name": "Portulaca grandiflora Hook.",
+    "rank": "SPECIES",
+    "specificEpithet": "grandiflora",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

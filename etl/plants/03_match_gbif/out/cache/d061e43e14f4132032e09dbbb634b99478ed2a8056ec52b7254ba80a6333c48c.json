@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984651",
+      "name": "Fatoua",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2984652",
+      "name": "Fatoua villosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 8
+    }
+  },
+  "left": 527805,
+  "right": 527806,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Thunb.) Nakai",
+    "canonicalName": "Fatoua villosa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Fatoua</i> <i>villosa</i> (Thunb.) Nakai",
+    "genericName": "Fatoua",
+    "key": "2984652",
+    "name": "Fatoua villosa (Thunb.) Nakai",
+    "rank": "SPECIES",
+    "specificEpithet": "villosa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "144220703",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7717",
+      "name": "Solanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928997",
+      "name": "Solanum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2931461",
+      "name": "Solanum erianthum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 573081,
+  "right": 573084,
+  "synonym": false,
+  "usage": {
+    "authorship": "D.Don",
+    "canonicalName": "Solanum erianthum",
+    "formattedName": "<i>Solanum</i> <i>erianthum</i> D.Don",
+    "genericName": "Solanum",
+    "key": "2931461",
+    "name": "Solanum erianthum D.Don",
+    "rank": "SPECIES",
+    "specificEpithet": "erianthum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

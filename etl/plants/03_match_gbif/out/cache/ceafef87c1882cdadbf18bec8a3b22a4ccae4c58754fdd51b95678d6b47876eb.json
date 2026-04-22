@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Lour.",
+    "canonicalName": "Coleus amboinicus",
+    "formattedName": "<i>Coleus</i> <i>amboinicus</i> Lour.",
+    "genericName": "Coleus",
+    "key": "5341313",
+    "name": "Coleus amboinicus Lour.",
+    "rank": "SPECIES",
+    "specificEpithet": "amboinicus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2927310",
+      "name": "Coleus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5341313",
+      "name": "Coleus amboinicus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 94,
+    "matchType": "VARIANT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 411935,
+  "right": 411935,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lour.) Spreng.",
+    "canonicalName": "Plectranthus amboinicus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Plectranthus</i> <i>amboinicus</i> (Lour.) Spreng.",
+    "genericName": "Plectranthus",
+    "key": "2926636",
+    "name": "Plectranthus amboinicus (Lour.) Spreng.",
+    "rank": "SPECIES",
+    "specificEpithet": "amboinicus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

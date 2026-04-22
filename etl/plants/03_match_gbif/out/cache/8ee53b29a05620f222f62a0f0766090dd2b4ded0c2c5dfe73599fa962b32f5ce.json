@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Thulin",
+    "canonicalName": "Trigastrotheca pentaphylla",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Trigastrotheca</i> <i>pentaphylla</i> (L.) Thulin",
+    "genericName": "Trigastrotheca",
+    "key": "9381433",
+    "name": "Trigastrotheca pentaphylla (L.) Thulin",
+    "rank": "SPECIES",
+    "specificEpithet": "pentaphylla",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2517",
+      "name": "Molluginaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3231669",
+      "name": "Trigastrotheca",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9381433",
+      "name": "Trigastrotheca pentaphylla",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 21,
+    "timings": {
+      "luceneMatch": 21,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 22
+    }
+  },
+  "left": 280273,
+  "right": 280274,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Mollugo pentaphylla",
+    "formattedName": "<i>Mollugo</i> <i>pentaphylla</i> L.",
+    "genericName": "Mollugo",
+    "key": "3084608",
+    "name": "Mollugo pentaphylla L.",
+    "rank": "SPECIES",
+    "specificEpithet": "pentaphylla",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

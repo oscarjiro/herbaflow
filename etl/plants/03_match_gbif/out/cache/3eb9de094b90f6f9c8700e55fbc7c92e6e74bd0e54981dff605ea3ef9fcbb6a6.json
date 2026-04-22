@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7717",
+      "name": "Solanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928997",
+      "name": "Solanum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2930262",
+      "name": "Solanum tuberosum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 573438,
+  "right": 573441,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Solanum tuberosum",
+    "formattedName": "<i>Solanum</i> <i>tuberosum</i> L.",
+    "genericName": "Solanum",
+    "key": "2930262",
+    "name": "Solanum tuberosum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "tuberosum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

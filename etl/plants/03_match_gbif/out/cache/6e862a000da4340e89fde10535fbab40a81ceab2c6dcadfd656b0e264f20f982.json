@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "42080",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "228",
+      "name": "Cycadopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "834",
+      "name": "Cycadales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6168",
+      "name": "Cycadaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2683206",
+      "name": "Cycas",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2683217",
+      "name": "Cycas revoluta",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 59135,
+  "right": 59140,
+  "synonym": false,
+  "usage": {
+    "authorship": "Thunb.",
+    "canonicalName": "Cycas revoluta",
+    "formattedName": "<i>Cycas</i> <i>revoluta</i> Thunb.",
+    "genericName": "Cycas",
+    "key": "2683217",
+    "name": "Cycas revoluta Thunb.",
+    "rank": "SPECIES",
+    "specificEpithet": "revoluta",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

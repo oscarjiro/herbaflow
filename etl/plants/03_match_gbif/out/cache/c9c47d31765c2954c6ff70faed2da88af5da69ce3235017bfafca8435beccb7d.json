@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4055896",
+      "name": "Talinaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3084663",
+      "name": "Talinum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3084672",
+      "name": "Talinum paniculatum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 286521,
+  "right": 286522,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Jacq.) Gaertn.",
+    "canonicalName": "Talinum paniculatum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Talinum</i> <i>paniculatum</i> (Jacq.) Gaertn.",
+    "genericName": "Talinum",
+    "key": "3084672",
+    "name": "Talinum paniculatum (Jacq.) Gaertn.",
+    "rank": "SPECIES",
+    "specificEpithet": "paniculatum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

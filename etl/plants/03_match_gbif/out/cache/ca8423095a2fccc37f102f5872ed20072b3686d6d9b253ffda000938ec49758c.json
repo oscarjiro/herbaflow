@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3119250",
+      "name": "Blumea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5395743",
+      "name": "Blumea riparia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 96,
+    "matchType": "VARIANT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 198365,
+  "right": 198369,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Blume) DC.",
+    "canonicalName": "Blumea riparia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Blumea</i> <i>riparia</i> (Blume) DC.",
+    "genericName": "Blumea",
+    "key": "5395743",
+    "name": "Blumea riparia (Blume) DC.",
+    "rank": "SPECIES",
+    "specificEpithet": "riparia",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

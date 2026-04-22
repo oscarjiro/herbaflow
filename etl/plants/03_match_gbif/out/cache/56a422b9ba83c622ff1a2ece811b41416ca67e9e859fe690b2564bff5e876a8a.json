@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "136145078",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8807",
+      "name": "Phyllanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3080069",
+      "name": "Glochidion",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3080907",
+      "name": "Glochidion obscurum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 464166,
+  "right": 464166,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Roxb. ex Willd.) Blume",
+    "canonicalName": "Glochidion obscurum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Glochidion</i> <i>obscurum</i> (Roxb. ex Willd.) Blume",
+    "genericName": "Glochidion",
+    "key": "3080907",
+    "name": "Glochidion obscurum (Roxb. ex Willd.) Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "obscurum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

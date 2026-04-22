@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "32837",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2502",
+      "name": "Loganiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169589",
+      "name": "Strychnos",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5414399",
+      "name": "Strychnos nux-vomica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 25,
+    "timings": {
+      "luceneMatch": 25,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 25
+    }
+  },
+  "left": 373404,
+  "right": 373407,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Strychnos nux-vomica",
+    "formattedName": "<i>Strychnos</i> <i>nux-vomica</i> L.",
+    "genericName": "Strychnos",
+    "key": "5414399",
+    "name": "Strychnos nux-vomica L.",
+    "rank": "SPECIES",
+    "specificEpithet": "nux-vomica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

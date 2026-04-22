@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "149853146",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169624",
+      "name": "Tabernaemontana",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3169625",
+      "name": "Tabernaemontana divaricata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 368977,
+  "right": 368977,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) R.Br. ex Roem. & Schult.",
+    "canonicalName": "Tabernaemontana divaricata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Tabernaemontana</i> <i>divaricata</i> (L.) R.Br. ex Roem. & Schult.",
+    "genericName": "Tabernaemontana",
+    "key": "3169625",
+    "name": "Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.",
+    "rank": "SPECIES",
+    "specificEpithet": "divaricata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

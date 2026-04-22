@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3170229",
+      "name": "Asclepias",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3170241",
+      "name": "Asclepias curassavica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 361764,
+  "right": 361766,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Asclepias curassavica",
+    "formattedName": "<i>Asclepias</i> <i>curassavica</i> L.",
+    "genericName": "Asclepias",
+    "key": "3170241",
+    "name": "Asclepias curassavica L.",
+    "rank": "SPECIES",
+    "specificEpithet": "curassavica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

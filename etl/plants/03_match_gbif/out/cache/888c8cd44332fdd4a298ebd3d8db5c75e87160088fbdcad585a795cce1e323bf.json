@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1169",
+      "name": "Asparagales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7682",
+      "name": "Amaryllidaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9624496",
+      "name": "Allium",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 19,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 72620,
+  "right": 74439,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Allium",
+    "formattedName": "<i>Allium</i> L.",
+    "key": "9624496",
+    "name": "Allium L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

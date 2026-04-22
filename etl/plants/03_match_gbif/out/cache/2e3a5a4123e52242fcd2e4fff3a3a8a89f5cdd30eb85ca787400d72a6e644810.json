@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984588",
+      "name": "Ficus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7694515",
+      "name": "Ficus glomerata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 529182,
+  "right": 529182,
+  "synonym": false,
+  "usage": {
+    "authorship": "hort. ex Miq., 1867",
+    "canonicalName": "Ficus glomerata",
+    "code": "ZOOLOGICAL",
+    "formattedName": "<i>Ficus</i> <i>glomerata</i> hort. ex Miq., 1867",
+    "genericName": "Ficus",
+    "key": "7694515",
+    "name": "Ficus glomerata hort. ex Miq., 1867",
+    "rank": "SPECIES",
+    "specificEpithet": "glomerata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

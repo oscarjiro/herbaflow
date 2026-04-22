@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5014",
+      "name": "Myrtaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3177662",
+      "name": "Eugenia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8283639",
+      "name": "Eugenia polyantha",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 17,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 18
+    }
+  },
+  "left": 496783,
+  "right": 496783,
+  "synonym": false,
+  "usage": {
+    "authorship": "Barb.Rodr.",
+    "canonicalName": "Eugenia polyantha",
+    "formattedName": "<i>Eugenia</i> <i>polyantha</i> Barb.Rodr.",
+    "genericName": "Eugenia",
+    "key": "8283639",
+    "name": "Eugenia polyantha Barb.Rodr.",
+    "rank": "SPECIES",
+    "specificEpithet": "polyantha",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

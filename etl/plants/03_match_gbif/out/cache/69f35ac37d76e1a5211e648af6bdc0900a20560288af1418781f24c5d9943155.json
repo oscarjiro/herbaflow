@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2502",
+      "name": "Loganiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169589",
+      "name": "Strychnos",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 7,
+    "timings": {
+      "luceneMatch": 7,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 373123,
+  "right": 373435,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Strychnos",
+    "formattedName": "<i>Strychnos</i> L.",
+    "key": "3169589",
+    "name": "Strychnos L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

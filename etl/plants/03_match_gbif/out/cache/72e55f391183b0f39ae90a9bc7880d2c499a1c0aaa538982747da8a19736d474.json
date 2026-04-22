@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1169",
+      "name": "Asparagales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7682",
+      "name": "Amaryllidaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2773870",
+      "name": "Crinum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2853796",
+      "name": "Crinum asiaticum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 23,
+    "timings": {
+      "luceneMatch": 23,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 24
+    }
+  },
+  "left": 74761,
+  "right": 74766,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Crinum asiaticum",
+    "formattedName": "<i>Crinum</i> <i>asiaticum</i> L.",
+    "genericName": "Crinum",
+    "key": "2853796",
+    "name": "Crinum asiaticum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "asiaticum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

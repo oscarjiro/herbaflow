@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3073",
+      "name": "Poaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2705264",
+      "name": "Cymbopogon",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2705267",
+      "name": "Cymbopogon nardus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 157874,
+  "right": 157874,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Rendle",
+    "canonicalName": "Cymbopogon nardus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cymbopogon</i> <i>nardus</i> (L.) Rendle",
+    "genericName": "Cymbopogon",
+    "key": "2705267",
+    "name": "Cymbopogon nardus (L.) Rendle",
+    "rank": "SPECIES",
+    "specificEpithet": "nardus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

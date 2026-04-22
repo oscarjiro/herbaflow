@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2982372",
+      "name": "Vigna",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 354451,
+  "right": 354694,
+  "synonym": false,
+  "usage": {
+    "authorship": "Savi",
+    "canonicalName": "Vigna",
+    "formattedName": "<i>Vigna</i> Savi",
+    "key": "2982372",
+    "name": "Vigna Savi",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

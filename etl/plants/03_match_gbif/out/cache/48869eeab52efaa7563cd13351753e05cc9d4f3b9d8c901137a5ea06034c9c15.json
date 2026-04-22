@@ -1,0 +1,54 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3990",
+      "name": "Lecythidaceae",
+      "rank": "FAMILY"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 309392,
+  "right": 309914,
+  "synonym": false,
+  "usage": {
+    "canonicalName": "Lecythidaceae",
+    "formattedName": "<i>Lecythidaceae</i>",
+    "key": "3990",
+    "name": "Lecythidaceae",
+    "rank": "FAMILY",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

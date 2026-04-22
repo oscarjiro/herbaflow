@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2947465",
+      "name": "Derris",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 45,
+    "timings": {
+      "luceneMatch": 45,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 46
+    }
+  },
+  "left": 335492,
+  "right": 335591,
+  "synonym": false,
+  "usage": {
+    "authorship": "Lour.",
+    "canonicalName": "Derris",
+    "formattedName": "<i>Derris</i> Lour.",
+    "key": "2947465",
+    "name": "Derris Lour.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

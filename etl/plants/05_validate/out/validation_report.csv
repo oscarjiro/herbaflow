@@ -1,0 +1,8 @@
+severity,check_name,table_name,row_index,plant_id,alias_id,column_name,value,details
+warning,suspicious_canonical_name,plants,131,pl_4f1a087e41ef14961edfce43,,canonical_scientific_name,"Clerodendrum serratum Spreng., 1825",Canonical scientific name looks suspicious or malformed.
+warning,suspicious_canonical_name,plants,171,pl_cc051b38d6ad21ab37b447fb,,canonical_scientific_name,"Desmodium gangeticum Puri, 1951",Canonical scientific name looks suspicious or malformed.
+warning,suspicious_canonical_name,plants,192,pl_56df9876789161d3b94df9a2,,canonical_scientific_name,"Equisetum debile Roxb. ex Wall., 1829",Canonical scientific name looks suspicious or malformed.
+warning,suspicious_canonical_name,plants,200,pl_bec6269da8ada12262c4a91f,,canonical_scientific_name,"Eugenia aromatica Kuntze, 1891",Canonical scientific name looks suspicious or malformed.
+warning,suspicious_canonical_name,plants,345,pl_1916be9b3a3d13f7db27e348,,canonical_scientific_name,"Orthosiphon spicatus (Thunb.) Backer, Bakh.f. & Steenis",Canonical scientific name looks suspicious or malformed.
+warning,suspicious_canonical_name,plants,454,pl_e1a062a18bffa0a01a640888,,canonical_scientific_name,"Spilanthes acmella A.Chev., 1920",Canonical scientific name looks suspicious or malformed.
+warning,suspicious_canonical_name,plants,503,pl_e46d82a45832069aa8da1a23,,canonical_scientific_name,"Vetiveria zizanioides Stapf, 1906",Canonical scientific name looks suspicious or malformed.

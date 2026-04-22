@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3138550",
+      "name": "Ageratum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5401673",
+      "name": "Ageratum conyzoides",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 7,
+    "timings": {
+      "luceneMatch": 7,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 193839,
+  "right": 193843,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Ageratum conyzoides",
+    "formattedName": "<i>Ageratum</i> <i>conyzoides</i> L.",
+    "genericName": "Ageratum",
+    "key": "5401673",
+    "name": "Ageratum conyzoides L.",
+    "rank": "SPECIES",
+    "specificEpithet": "conyzoides",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

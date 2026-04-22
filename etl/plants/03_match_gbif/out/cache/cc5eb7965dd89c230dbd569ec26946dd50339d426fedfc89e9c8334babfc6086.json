@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2389",
+      "name": "Convolvulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928509",
+      "name": "Ipomoea",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 92,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 33,
+    "timings": {
+      "luceneMatch": 33,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 33
+    }
+  },
+  "left": 567725,
+  "right": 568671,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Ipomoea",
+    "formattedName": "<i>Ipomoea</i> L.",
+    "key": "2928509",
+    "name": "Ipomoea L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1169",
+      "name": "Asparagales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7682",
+      "name": "Amaryllidaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9624496",
+      "name": "Allium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2856297",
+      "name": "Allium tuberosum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 74397,
+  "right": 74400,
+  "synonym": false,
+  "usage": {
+    "authorship": "Rottler ex Spreng.",
+    "canonicalName": "Allium tuberosum",
+    "formattedName": "<i>Allium</i> <i>tuberosum</i> Rottler ex Spreng.",
+    "genericName": "Allium",
+    "key": "2856297",
+    "name": "Allium tuberosum Rottler ex Spreng.",
+    "rank": "SPECIES",
+    "specificEpithet": "tuberosum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

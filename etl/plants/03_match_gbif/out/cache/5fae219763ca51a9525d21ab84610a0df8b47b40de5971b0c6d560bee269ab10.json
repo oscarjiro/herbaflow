@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2981525",
+      "name": "Trigonella",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5360475",
+      "name": "Trigonella foenum-graecum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 353601,
+  "right": 353602,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Trigonella foenum-graecum",
+    "formattedName": "<i>Trigonella</i> <i>foenum-graecum</i> L.",
+    "genericName": "Trigonella",
+    "key": "5360475",
+    "name": "Trigonella foenum-graecum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "foenum-graecum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

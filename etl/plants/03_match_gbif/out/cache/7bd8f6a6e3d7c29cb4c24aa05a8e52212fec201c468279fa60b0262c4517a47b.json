@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "103705618",
+      "status": "ENDANGERED",
+      "statusCode": "EN"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7224005",
+      "name": "Cucurbitales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6634",
+      "name": "Cucurbitaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874604",
+      "name": "Trichosanthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3623344",
+      "name": "Trichosanthes quinquangulata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 17,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 18
+    }
+  },
+  "left": 295210,
+  "right": 295210,
+  "synonym": false,
+  "usage": {
+    "authorship": "A.Gray",
+    "canonicalName": "Trichosanthes quinquangulata",
+    "formattedName": "<i>Trichosanthes</i> <i>quinquangulata</i> A.Gray",
+    "genericName": "Trichosanthes",
+    "key": "3623344",
+    "name": "Trichosanthes quinquangulata A.Gray",
+    "rank": "SPECIES",
+    "specificEpithet": "quinquangulata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

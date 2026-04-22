@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984588",
+      "name": "Ficus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5571130",
+      "name": "Ficus rumphii",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 529316,
+  "right": 529316,
+  "synonym": false,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Ficus rumphii",
+    "formattedName": "<i>Ficus</i> <i>rumphii</i> Blume",
+    "genericName": "Ficus",
+    "key": "5571130",
+    "name": "Ficus rumphii Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "rumphii",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

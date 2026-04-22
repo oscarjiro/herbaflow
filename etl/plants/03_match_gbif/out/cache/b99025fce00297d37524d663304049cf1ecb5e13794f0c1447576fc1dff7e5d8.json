@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "117309548",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2757518",
+      "name": "Curcuma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2757553",
+      "name": "Curcuma petiolata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 91,
+    "matchType": "VARIANT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 175860,
+  "right": 175861,
+  "synonym": false,
+  "usage": {
+    "authorship": "Roxb.",
+    "canonicalName": "Curcuma petiolata",
+    "formattedName": "<i>Curcuma</i> <i>petiolata</i> Roxb.",
+    "genericName": "Curcuma",
+    "key": "2757553",
+    "name": "Curcuma petiolata Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "petiolata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8798",
+      "name": "Rubiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2915706",
+      "name": "Oldenlandia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2911970",
+      "name": "Oldenlandia corymbosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 384489,
+  "right": 384498,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Oldenlandia corymbosa",
+    "formattedName": "<i>Oldenlandia</i> <i>corymbosa</i> L.",
+    "genericName": "Oldenlandia",
+    "key": "2911970",
+    "name": "Oldenlandia corymbosa L.",
+    "rank": "SPECIES",
+    "specificEpithet": "corymbosa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

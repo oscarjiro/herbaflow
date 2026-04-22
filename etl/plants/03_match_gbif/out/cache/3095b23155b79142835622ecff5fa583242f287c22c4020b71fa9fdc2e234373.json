@@ -1,0 +1,66 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1351",
+      "name": "Apiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6720",
+      "name": "Apiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3034560",
+      "name": "Angelica",
+      "rank": "GENUS"
+    },
+    {
+      "key": "6026372",
+      "name": "Angelica keiskei",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "synonym": false,
+  "usage": {
+    "authorship": "(Miq.) Koidz.",
+    "canonicalName": "Angelica keiskei",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Angelica</i> <i>keiskei</i> (Miq.) Koidz.",
+    "genericName": "Angelica",
+    "key": "6026372",
+    "name": "Angelica keiskei (Miq.) Koidz.",
+    "rank": "SPECIES",
+    "specificEpithet": "keiskei",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

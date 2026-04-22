@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7722389",
+      "name": "Mikania",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5398421",
+      "name": "Mikania micrantha",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 224323,
+  "right": 224325,
+  "synonym": false,
+  "usage": {
+    "authorship": "Kunth",
+    "canonicalName": "Mikania micrantha",
+    "formattedName": "<i>Mikania</i> <i>micrantha</i> Kunth",
+    "genericName": "Mikania",
+    "key": "5398421",
+    "name": "Mikania micrantha Kunth",
+    "rank": "SPECIES",
+    "specificEpithet": "micrantha",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

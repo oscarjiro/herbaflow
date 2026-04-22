@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "111376285",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152143",
+      "name": "Cola",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5406685",
+      "name": "Cola acuminata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 475601,
+  "right": 475601,
+  "synonym": false,
+  "usage": {
+    "authorship": "(P.Beauv.) Schott & Endl.",
+    "canonicalName": "Cola acuminata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cola</i> <i>acuminata</i> (P.Beauv.) Schott & Endl.",
+    "genericName": "Cola",
+    "key": "5406685",
+    "name": "Cola acuminata (P.Beauv.) Schott & Endl.",
+    "rank": "SPECIES",
+    "specificEpithet": "acuminata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

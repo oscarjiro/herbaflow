@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "61964429",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8802",
+      "name": "Sapotaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2885024",
+      "name": "Manilkara",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2885158",
+      "name": "Manilkara zapota",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 317139,
+  "right": 317142,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) P.Royen",
+    "canonicalName": "Manilkara zapota",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Manilkara</i> <i>zapota</i> (L.) P.Royen",
+    "genericName": "Manilkara",
+    "key": "2885158",
+    "name": "Manilkara zapota (L.) P.Royen",
+    "rank": "SPECIES",
+    "specificEpithet": "zapota",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

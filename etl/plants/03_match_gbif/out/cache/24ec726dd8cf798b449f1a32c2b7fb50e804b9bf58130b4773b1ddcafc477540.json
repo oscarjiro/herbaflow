@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "404",
+      "name": "Piperales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6678",
+      "name": "Piperaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3075433",
+      "name": "Piper",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3086342",
+      "name": "Piper retrofractum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 513063,
+  "right": 513067,
+  "synonym": false,
+  "usage": {
+    "authorship": "Vahl",
+    "canonicalName": "Piper retrofractum",
+    "formattedName": "<i>Piper</i> <i>retrofractum</i> Vahl",
+    "genericName": "Piper",
+    "key": "3086342",
+    "name": "Piper retrofractum Vahl",
+    "rank": "SPECIES",
+    "specificEpithet": "retrofractum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

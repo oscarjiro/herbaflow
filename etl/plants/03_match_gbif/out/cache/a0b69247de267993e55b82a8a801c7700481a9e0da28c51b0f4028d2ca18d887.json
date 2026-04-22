@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3098910",
+      "name": "Cosmos",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3098932",
+      "name": "Cosmos caudatus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 204295,
+  "right": 204295,
+  "synonym": false,
+  "usage": {
+    "authorship": "Kunth",
+    "canonicalName": "Cosmos caudatus",
+    "formattedName": "<i>Cosmos</i> <i>caudatus</i> Kunth",
+    "genericName": "Cosmos",
+    "key": "3098932",
+    "name": "Cosmos caudatus Kunth",
+    "rank": "SPECIES",
+    "specificEpithet": "caudatus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Blume) Seem.",
+    "canonicalName": "Heptapleurum ellipticum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Heptapleurum</i> <i>ellipticum</i> (Blume) Seem.",
+    "genericName": "Heptapleurum",
+    "key": "3038037",
+    "name": "Heptapleurum ellipticum (Blume) Seem.",
+    "rank": "SPECIES",
+    "specificEpithet": "ellipticum",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1351",
+      "name": "Apiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8800",
+      "name": "Araliaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7314503",
+      "name": "Heptapleurum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3038037",
+      "name": "Heptapleurum ellipticum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 187484,
+  "right": 187486,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Blume) Harms",
+    "canonicalName": "Schefflera elliptica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Schefflera</i> <i>elliptica</i> (Blume) Harms",
+    "genericName": "Schefflera",
+    "key": "3038016",
+    "name": "Schefflera elliptica (Blume) Harms",
+    "rank": "SPECIES",
+    "specificEpithet": "elliptica",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

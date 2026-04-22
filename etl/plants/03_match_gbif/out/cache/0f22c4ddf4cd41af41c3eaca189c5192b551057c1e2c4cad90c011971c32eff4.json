@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Burm.fil.) Fosberg",
+    "canonicalName": "Polyscias scutellaria",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Polyscias</i> <i>scutellaria</i> (Burm.fil.) Fosberg",
+    "genericName": "Polyscias",
+    "key": "3035778",
+    "name": "Polyscias scutellaria (Burm.fil.) Fosberg",
+    "rank": "SPECIES",
+    "specificEpithet": "scutellaria",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1351",
+      "name": "Apiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8800",
+      "name": "Araliaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3035574",
+      "name": "Polyscias",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3035778",
+      "name": "Polyscias scutellaria",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 96,
+    "matchType": "VARIANT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 188473,
+  "right": 188474,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Burm.fil.) Merr.",
+    "canonicalName": "Nothopanax scutellarius",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Nothopanax</i> <i>scutellarius</i> (Burm.fil.) Merr.",
+    "genericName": "Nothopanax",
+    "key": "3035790",
+    "name": "Nothopanax scutellarius (Burm.fil.) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "scutellarius",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

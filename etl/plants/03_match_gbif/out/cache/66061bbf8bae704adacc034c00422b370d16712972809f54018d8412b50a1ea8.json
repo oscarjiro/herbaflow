@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2395",
+      "name": "Simaroubaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7329629",
+      "name": "Eurycoma",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 23,
+    "timings": {
+      "luceneMatch": 23,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 23
+    }
+  },
+  "left": 559641,
+  "right": 559648,
+  "synonym": false,
+  "usage": {
+    "authorship": "Jack",
+    "canonicalName": "Eurycoma",
+    "formattedName": "<i>Eurycoma</i> Jack",
+    "key": "7329629",
+    "name": "Eurycoma Jack",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

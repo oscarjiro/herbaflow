@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "117233930",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2757518",
+      "name": "Curcuma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2757547",
+      "name": "Curcuma zanthorrhiza",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 175885,
+  "right": 175885,
+  "synonym": false,
+  "usage": {
+    "authorship": "Roxb.",
+    "canonicalName": "Curcuma zanthorrhiza",
+    "formattedName": "<i>Curcuma</i> <i>zanthorrhiza</i> Roxb.",
+    "genericName": "Curcuma",
+    "key": "2757547",
+    "name": "Curcuma zanthorrhiza Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "zanthorrhiza",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

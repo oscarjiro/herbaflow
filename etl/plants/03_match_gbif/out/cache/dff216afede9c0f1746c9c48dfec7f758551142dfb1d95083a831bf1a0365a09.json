@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169598",
+      "name": "Alyxia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7317401",
+      "name": "Alyxia reinwardtii",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 17,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 18
+    }
+  },
+  "left": 361372,
+  "right": 361372,
+  "synonym": false,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Alyxia reinwardtii",
+    "formattedName": "<i>Alyxia</i> <i>reinwardtii</i> Blume",
+    "genericName": "Alyxia",
+    "key": "7317401",
+    "name": "Alyxia reinwardtii Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "reinwardtii",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

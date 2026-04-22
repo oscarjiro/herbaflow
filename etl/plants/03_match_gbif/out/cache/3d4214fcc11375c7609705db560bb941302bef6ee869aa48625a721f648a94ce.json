@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "245",
+      "name": "Lycopodiopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "420",
+      "name": "Selaginellales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6724",
+      "name": "Selaginellaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2688177",
+      "name": "Selaginella",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2688193",
+      "name": "Selaginella plana",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 180046,
+  "right": 180046,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Desv. ex Poir.) Hieron.",
+    "canonicalName": "Selaginella plana",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Selaginella</i> <i>plana</i> (Desv. ex Poir.) Hieron.",
+    "genericName": "Selaginella",
+    "key": "2688193",
+    "name": "Selaginella plana (Desv. ex Poir.) Hieron.",
+    "rank": "SPECIES",
+    "specificEpithet": "plana",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

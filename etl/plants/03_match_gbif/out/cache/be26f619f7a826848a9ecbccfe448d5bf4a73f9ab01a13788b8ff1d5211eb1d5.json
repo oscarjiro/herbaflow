@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Blume) I.C.Nielsen",
+    "canonicalName": "Archidendron ellipticum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Archidendron</i> <i>ellipticum</i> (Blume) I.C.Nielsen",
+    "genericName": "Archidendron",
+    "key": "8638856",
+    "name": "Archidendron ellipticum (Blume) I.C.Nielsen",
+    "rank": "SPECIES",
+    "specificEpithet": "ellipticum",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2941201",
+      "name": "Archidendron",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8638856",
+      "name": "Archidendron ellipticum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 324799,
+  "right": 324804,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Blume) Hassk.",
+    "canonicalName": "Pithecellobium ellipticum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Pithecellobium</i> <i>ellipticum</i> (Blume) Hassk.",
+    "genericName": "Pithecellobium",
+    "key": "2941203",
+    "name": "Pithecellobium ellipticum (Blume) Hassk.",
+    "rank": "SPECIES",
+    "specificEpithet": "ellipticum",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

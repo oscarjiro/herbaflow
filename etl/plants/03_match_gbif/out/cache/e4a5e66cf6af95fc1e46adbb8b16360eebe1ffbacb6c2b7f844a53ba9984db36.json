@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "145823627",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925556",
+      "name": "Vitex",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2925564",
+      "name": "Vitex negundo",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 5
+    }
+  },
+  "left": 422201,
+  "right": 422207,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Vitex negundo",
+    "formattedName": "<i>Vitex</i> <i>negundo</i> L.",
+    "genericName": "Vitex",
+    "key": "2925564",
+    "name": "Vitex negundo L.",
+    "rank": "SPECIES",
+    "specificEpithet": "negundo",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "61889851",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984545",
+      "name": "Morus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5361889",
+      "name": "Morus alba",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 3,
+    "timings": {
+      "luceneMatch": 3,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 3
+    }
+  },
+  "left": 529506,
+  "right": 529516,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Morus alba",
+    "formattedName": "<i>Morus</i> <i>alba</i> L.",
+    "genericName": "Morus",
+    "key": "5361889",
+    "name": "Morus alba L.",
+    "rank": "SPECIES",
+    "specificEpithet": "alba",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

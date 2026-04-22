@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "179208922",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "718",
+      "name": "Magnoliales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "9291",
+      "name": "Annonaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3154482",
+      "name": "Goniothalamus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3154616",
+      "name": "Goniothalamus macrophyllus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 443840,
+  "right": 443843,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Blume) Hook.f. & Thomson",
+    "canonicalName": "Goniothalamus macrophyllus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Goniothalamus</i> <i>macrophyllus</i> (Blume) Hook.f. & Thomson",
+    "genericName": "Goniothalamus",
+    "key": "3154616",
+    "name": "Goniothalamus macrophyllus (Blume) Hook.f. & Thomson",
+    "rank": "SPECIES",
+    "specificEpithet": "macrophyllus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

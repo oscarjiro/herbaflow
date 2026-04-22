@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Mill.",
+    "canonicalName": "Senna alexandrina",
+    "formattedName": "<i>Senna</i> <i>alexandrina</i> Mill.",
+    "genericName": "Senna",
+    "key": "2958032",
+    "name": "Senna alexandrina Mill.",
+    "rank": "SPECIES",
+    "specificEpithet": "alexandrina",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2956904",
+      "name": "Senna",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2958032",
+      "name": "Senna alexandrina",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 2,
+    "timings": {
+      "luceneMatch": 2,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 2
+    }
+  },
+  "left": 350771,
+  "right": 350774,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Cassia senna",
+    "formattedName": "<i>Cassia</i> <i>senna</i> L.",
+    "genericName": "Cassia",
+    "key": "5354411",
+    "name": "Cassia senna L.",
+    "rank": "SPECIES",
+    "specificEpithet": "senna",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

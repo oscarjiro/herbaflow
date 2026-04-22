@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "31852",
+      "status": "VULNERABLE",
+      "statusCode": "VU"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "934",
+      "name": "Santalales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6661",
+      "name": "Santalaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2889778",
+      "name": "Santalum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2889785",
+      "name": "Santalum album",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 4,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 4
+    }
+  },
+  "left": 547032,
+  "right": 547033,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Santalum album",
+    "formattedName": "<i>Santalum</i> <i>album</i> L.",
+    "genericName": "Santalum",
+    "key": "2889785",
+    "name": "Santalum album L.",
+    "rank": "SPECIES",
+    "specificEpithet": "album",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

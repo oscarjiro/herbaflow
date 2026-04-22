@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "61998024",
+      "status": "VULNERABLE",
+      "statusCode": "VU"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6645",
+      "name": "Dipterocarpaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3189689",
+      "name": "Dryobalanops",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3189690",
+      "name": "Dryobalanops aromatica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 19,
+    "timings": {
+      "luceneMatch": 20,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 20
+    }
+  },
+  "left": 473338,
+  "right": 473338,
+  "synonym": false,
+  "usage": {
+    "authorship": "C.F.Gaertn.",
+    "canonicalName": "Dryobalanops aromatica",
+    "formattedName": "<i>Dryobalanops</i> <i>aromatica</i> C.F.Gaertn.",
+    "genericName": "Dryobalanops",
+    "key": "3189690",
+    "name": "Dryobalanops aromatica C.F.Gaertn.",
+    "rank": "SPECIES",
+    "specificEpithet": "aromatica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

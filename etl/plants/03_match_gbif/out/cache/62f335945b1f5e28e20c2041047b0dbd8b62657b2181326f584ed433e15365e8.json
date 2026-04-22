@@ -1,0 +1,57 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3146588",
+      "name": "Erigeron",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 92,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 18,
+    "timings": {
+      "sciNameMatch": 18
+    }
+  },
+  "left": 208211,
+  "right": 209013,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Erigeron",
+    "formattedName": "<i>Erigeron</i> L.",
+    "key": "3146588",
+    "name": "Erigeron L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

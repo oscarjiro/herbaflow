@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "5",
+      "name": "Fungi",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "34",
+      "name": "Basidiomycota",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "186",
+      "name": "Agaricomycetes",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1145",
+      "name": "Polyporales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3286",
+      "name": "Polyporaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2519220",
+      "name": "Ganoderma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2549730",
+      "name": "Ganoderma lucidum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 1051919,
+  "right": 1051940,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Curtis) P.Karst.",
+    "canonicalName": "Ganoderma lucidum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Ganoderma</i> <i>lucidum</i> (Curtis) P.Karst.",
+    "genericName": "Ganoderma",
+    "key": "2549730",
+    "name": "Ganoderma lucidum (Curtis) P.Karst.",
+    "rank": "SPECIES",
+    "specificEpithet": "lucidum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

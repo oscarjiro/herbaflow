@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8798",
+      "name": "Rubiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2905224",
+      "name": "Ixora",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 31,
+    "timings": {
+      "luceneMatch": 31,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 32
+    }
+  },
+  "left": 381473,
+  "right": 382169,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Ixora",
+    "formattedName": "<i>Ixora</i> L.",
+    "key": "2905224",
+    "name": "Ixora L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

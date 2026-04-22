@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4686",
+      "name": "Musaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2760990",
+      "name": "Musa",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2762752",
+      "name": "Musa paradisiaca",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 174593,
+  "right": 174594,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Musa paradisiaca",
+    "formattedName": "<i>Musa</i> × <i>paradisiaca</i> L.",
+    "genericName": "Musa",
+    "key": "2762752",
+    "name": "Musa × paradisiaca L.",
+    "rank": "SPECIES",
+    "specificEpithet": "paradisiaca",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

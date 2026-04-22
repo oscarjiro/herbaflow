@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152542",
+      "name": "Hibiscus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9064581",
+      "name": "Hibiscus schizopetalus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 477961,
+  "right": 477961,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Dyer) Hook.fil.",
+    "canonicalName": "Hibiscus schizopetalus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Hibiscus</i> <i>schizopetalus</i> (Dyer) Hook.fil.",
+    "genericName": "Hibiscus",
+    "key": "9064581",
+    "name": "Hibiscus schizopetalus (Dyer) Hook.fil.",
+    "rank": "SPECIES",
+    "specificEpithet": "schizopetalus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

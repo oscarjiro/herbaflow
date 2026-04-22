@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "19237651",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2389",
+      "name": "Convolvulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928509",
+      "name": "Ipomoea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2928531",
+      "name": "Ipomoea cairica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 568457,
+  "right": 568457,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Sweet",
+    "canonicalName": "Ipomoea cairica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Ipomoea</i> <i>cairica</i> (L.) Sweet",
+    "genericName": "Ipomoea",
+    "key": "2928531",
+    "name": "Ipomoea cairica (L.) Sweet",
+    "rank": "SPECIES",
+    "specificEpithet": "cairica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

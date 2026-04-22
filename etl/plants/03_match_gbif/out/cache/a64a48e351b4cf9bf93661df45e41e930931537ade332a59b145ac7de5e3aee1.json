@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "145351548",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6689",
+      "name": "Verbenaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925654",
+      "name": "Duranta",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2925655",
+      "name": "Duranta erecta",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 436370,
+  "right": 436372,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Duranta erecta",
+    "formattedName": "<i>Duranta</i> <i>erecta</i> L.",
+    "genericName": "Duranta",
+    "key": "2925655",
+    "name": "Duranta erecta L.",
+    "rank": "SPECIES",
+    "specificEpithet": "erecta",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

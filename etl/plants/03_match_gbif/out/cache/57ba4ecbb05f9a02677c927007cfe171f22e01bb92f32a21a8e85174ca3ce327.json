@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "L.",
+    "canonicalName": "Ipomoea quamoclit",
+    "formattedName": "<i>Ipomoea</i> <i>quamoclit</i> L.",
+    "genericName": "Ipomoea",
+    "key": "2928562",
+    "name": "Ipomoea quamoclit L.",
+    "rank": "SPECIES",
+    "specificEpithet": "quamoclit",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2389",
+      "name": "Convolvulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928509",
+      "name": "Ipomoea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2928562",
+      "name": "Ipomoea quamoclit",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 568604,
+  "right": 568605,
+  "synonym": true,
+  "usage": {
+    "authorship": "Bojer",
+    "canonicalName": "Quamoclit pennata",
+    "formattedName": "<i>Quamoclit</i> <i>pennata</i> Bojer",
+    "genericName": "Quamoclit",
+    "key": "5549024",
+    "name": "Quamoclit pennata Bojer",
+    "rank": "SPECIES",
+    "specificEpithet": "pennata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

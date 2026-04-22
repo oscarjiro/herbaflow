@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925347",
+      "name": "Clerodendrum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3889087",
+      "name": "Clerodendrum thomsoniae",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 411323,
+  "right": 411324,
+  "synonym": false,
+  "usage": {
+    "authorship": "Balf.f.",
+    "canonicalName": "Clerodendrum thomsoniae",
+    "formattedName": "<i>Clerodendrum</i> <i>thomsoniae</i> Balf.f.",
+    "genericName": "Clerodendrum",
+    "key": "3889087",
+    "name": "Clerodendrum thomsoniae Balf.f.",
+    "rank": "SPECIES",
+    "specificEpithet": "thomsoniae",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

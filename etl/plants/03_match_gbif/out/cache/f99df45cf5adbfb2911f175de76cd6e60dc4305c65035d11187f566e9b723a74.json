@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1169",
+      "name": "Asparagales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7682",
+      "name": "Amaryllidaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2859808",
+      "name": "Zephyranthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2859976",
+      "name": "Zephyranthes candida",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 76593,
+  "right": 76594,
+  "synonym": false,
+  "usage": {
+    "authorship": "Herb.",
+    "canonicalName": "Zephyranthes candida",
+    "formattedName": "<i>Zephyranthes</i> <i>candida</i> Herb.",
+    "genericName": "Zephyranthes",
+    "key": "2859976",
+    "name": "Zephyranthes candida Herb.",
+    "rank": "SPECIES",
+    "specificEpithet": "candida",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

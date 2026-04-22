@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3150914",
+      "name": "Echinacea",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 94,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 43,
+    "timings": {
+      "luceneMatch": 43,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 44
+    }
+  },
+  "left": 207315,
+  "right": 207331,
+  "synonym": false,
+  "usage": {
+    "authorship": "Moench",
+    "canonicalName": "Echinacea",
+    "formattedName": "<i>Echinacea</i> Moench",
+    "key": "3150914",
+    "name": "Echinacea Moench",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

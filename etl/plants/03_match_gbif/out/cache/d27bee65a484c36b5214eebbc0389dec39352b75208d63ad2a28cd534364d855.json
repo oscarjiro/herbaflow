@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8784",
+      "name": "Marantaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2757347",
+      "name": "Maranta",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2761352",
+      "name": "Maranta arundinacea",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 174095,
+  "right": 174095,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Maranta arundinacea",
+    "formattedName": "<i>Maranta</i> <i>arundinacea</i> L.",
+    "genericName": "Maranta",
+    "key": "2761352",
+    "name": "Maranta arundinacea L.",
+    "rank": "SPECIES",
+    "specificEpithet": "arundinacea",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

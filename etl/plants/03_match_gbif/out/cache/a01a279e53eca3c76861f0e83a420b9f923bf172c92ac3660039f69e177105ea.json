@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Zmitr.",
+    "canonicalName": "Fabisporus sanguineus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Fabisporus</i> <i>sanguineus</i> (L.) Zmitr.",
+    "genericName": "Fabisporus",
+    "key": "2546050",
+    "name": "Fabisporus sanguineus (L.) Zmitr.",
+    "rank": "SPECIES",
+    "specificEpithet": "sanguineus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "5",
+      "name": "Fungi",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "34",
+      "name": "Basidiomycota",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "186",
+      "name": "Agaricomycetes",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1145",
+      "name": "Polyporales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3286",
+      "name": "Polyporaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2545921",
+      "name": "Fabisporus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2546050",
+      "name": "Fabisporus sanguineus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 1051254,
+  "right": 1051259,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Murrill",
+    "canonicalName": "Pycnoporus sanguineus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Pycnoporus</i> <i>sanguineus</i> (L.) Murrill",
+    "genericName": "Pycnoporus",
+    "key": "5246472",
+    "name": "Pycnoporus sanguineus (L.) Murrill",
+    "rank": "SPECIES",
+    "specificEpithet": "sanguineus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

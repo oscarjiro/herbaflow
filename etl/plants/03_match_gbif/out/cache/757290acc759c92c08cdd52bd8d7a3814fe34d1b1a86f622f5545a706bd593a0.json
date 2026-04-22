@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "G.Forst.",
+    "canonicalName": "Phyllanthus virgatus",
+    "formattedName": "<i>Phyllanthus</i> <i>virgatus</i> G.Forst.",
+    "genericName": "Phyllanthus",
+    "key": "5382061",
+    "name": "Phyllanthus virgatus G.Forst.",
+    "rank": "SPECIES",
+    "specificEpithet": "virgatus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8807",
+      "name": "Phyllanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3061139",
+      "name": "Phyllanthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5382061",
+      "name": "Phyllanthus virgatus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 465714,
+  "right": 465721,
+  "synonym": true,
+  "usage": {
+    "authorship": "Retz.",
+    "canonicalName": "Phyllanthus simplex",
+    "formattedName": "<i>Phyllanthus</i> <i>simplex</i> Retz.",
+    "genericName": "Phyllanthus",
+    "key": "5382086",
+    "name": "Phyllanthus simplex Retz.",
+    "rank": "SPECIES",
+    "specificEpithet": "simplex",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

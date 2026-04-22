@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "61782438",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152218",
+      "name": "Ceiba",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5406697",
+      "name": "Ceiba pentandra",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 475406,
+  "right": 475409,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Gaertn.",
+    "canonicalName": "Ceiba pentandra",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Ceiba</i> <i>pentandra</i> (L.) Gaertn.",
+    "genericName": "Ceiba",
+    "key": "5406697",
+    "name": "Ceiba pentandra (L.) Gaertn.",
+    "rank": "SPECIES",
+    "specificEpithet": "pentandra",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

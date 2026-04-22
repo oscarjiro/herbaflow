@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "172170",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5015",
+      "name": "Rosaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3001068",
+      "name": "Malus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3001509",
+      "name": "Malus sylvestris",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 535142,
+  "right": 535144,
+  "synonym": false,
+  "usage": {
+    "authorship": "Mill.",
+    "canonicalName": "Malus sylvestris",
+    "formattedName": "<i>Malus</i> <i>sylvestris</i> Mill.",
+    "genericName": "Malus",
+    "key": "3001509",
+    "name": "Malus sylvestris Mill.",
+    "rank": "SPECIES",
+    "specificEpithet": "sylvestris",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

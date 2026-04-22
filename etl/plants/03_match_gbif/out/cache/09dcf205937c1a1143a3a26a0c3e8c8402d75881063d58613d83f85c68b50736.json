@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) H.Ohashi & K.Ohashi",
+    "canonicalName": "Grona heterocarpos",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Grona</i> <i>heterocarpos</i> (L.) H.Ohashi & K.Ohashi",
+    "genericName": "Grona",
+    "key": "10775938",
+    "name": "Grona heterocarpos (L.) H.Ohashi & K.Ohashi",
+    "rank": "SPECIES",
+    "specificEpithet": "heterocarpos",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9615544",
+      "name": "Grona",
+      "rank": "GENUS"
+    },
+    {
+      "key": "10775938",
+      "name": "Grona heterocarpos",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 338265,
+  "right": 338271,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) DC.",
+    "canonicalName": "Desmodium heterocarpon",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Desmodium</i> <i>heterocarpon</i> (L.) DC.",
+    "genericName": "Desmodium",
+    "key": "2967682",
+    "name": "Desmodium heterocarpon (L.) DC.",
+    "rank": "SPECIES",
+    "specificEpithet": "heterocarpon",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

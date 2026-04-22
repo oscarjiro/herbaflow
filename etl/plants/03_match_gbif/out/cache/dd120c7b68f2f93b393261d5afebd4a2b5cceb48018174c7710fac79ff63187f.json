@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7708",
+      "name": "Cyperaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2713455",
+      "name": "Cyperus",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 40,
+    "timings": {
+      "luceneMatch": 40,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 40
+    }
+  },
+  "left": 144453,
+  "right": 145913,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Cyperus",
+    "formattedName": "<i>Cyperus</i> L.",
+    "key": "2713455",
+    "name": "Cyperus L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

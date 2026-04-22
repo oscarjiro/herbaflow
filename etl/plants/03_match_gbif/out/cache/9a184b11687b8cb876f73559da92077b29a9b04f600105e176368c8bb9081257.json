@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7717",
+      "name": "Solanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928734",
+      "name": "Datura",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 36,
+    "timings": {
+      "luceneMatch": 35,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 36
+    }
+  },
+  "left": 569885,
+  "right": 569916,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Datura",
+    "formattedName": "<i>Datura</i> L.",
+    "key": "2928734",
+    "name": "Datura L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

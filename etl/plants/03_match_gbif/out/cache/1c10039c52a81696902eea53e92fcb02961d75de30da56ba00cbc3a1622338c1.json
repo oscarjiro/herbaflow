@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "61989853",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2431",
+      "name": "Combretaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3189387",
+      "name": "Terminalia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3189394",
+      "name": "Terminalia catappa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 484187,
+  "right": 484189,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Terminalia catappa",
+    "formattedName": "<i>Terminalia</i> <i>catappa</i> L.",
+    "genericName": "Terminalia",
+    "key": "3189394",
+    "name": "Terminalia catappa L.",
+    "rank": "SPECIES",
+    "specificEpithet": "catappa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

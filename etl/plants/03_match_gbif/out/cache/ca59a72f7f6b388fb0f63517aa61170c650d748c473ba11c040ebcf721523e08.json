@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3094598",
+      "name": "Adenostemma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3132228",
+      "name": "Adenostemma lavenia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 193292,
+  "right": 193303,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Kuntze",
+    "canonicalName": "Adenostemma lavenia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Adenostemma</i> <i>lavenia</i> (L.) Kuntze",
+    "genericName": "Adenostemma",
+    "key": "3132228",
+    "name": "Adenostemma lavenia (L.) Kuntze",
+    "rank": "SPECIES",
+    "specificEpithet": "lavenia",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

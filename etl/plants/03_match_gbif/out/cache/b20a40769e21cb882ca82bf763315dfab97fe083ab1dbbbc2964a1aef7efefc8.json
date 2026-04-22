@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "946",
+      "name": "Dipsacales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6710",
+      "name": "Caprifoliaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2888741",
+      "name": "Valeriana",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2888763",
+      "name": "Valeriana officinalis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 5
+    }
+  },
+  "left": 297955,
+  "right": 297961,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Valeriana officinalis",
+    "formattedName": "<i>Valeriana</i> <i>officinalis</i> L.",
+    "genericName": "Valeriana",
+    "key": "2888763",
+    "name": "Valeriana officinalis L.",
+    "rank": "SPECIES",
+    "specificEpithet": "officinalis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

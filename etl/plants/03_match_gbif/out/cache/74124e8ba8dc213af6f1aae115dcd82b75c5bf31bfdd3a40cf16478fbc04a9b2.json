@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7226464",
+      "name": "Boraginales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4930387",
+      "name": "Heliotropiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925766",
+      "name": "Heliotropium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2925788",
+      "name": "Heliotropium indicum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 252758,
+  "right": 252759,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Heliotropium indicum",
+    "formattedName": "<i>Heliotropium</i> <i>indicum</i> L.",
+    "genericName": "Heliotropium",
+    "key": "2925788",
+    "name": "Heliotropium indicum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "indicum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Juss.) D.J.Middleton & Livsh.",
+    "canonicalName": "Urceola laevigata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Urceola</i> <i>laevigata</i> (Juss.) D.J.Middleton & Livsh.",
+    "genericName": "Urceola",
+    "key": "9827170",
+    "name": "Urceola laevigata (Juss.) D.J.Middleton & Livsh.",
+    "rank": "SPECIES",
+    "specificEpithet": "laevigata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3229511",
+      "name": "Urceola",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9827170",
+      "name": "Urceola laevigata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 369162,
+  "right": 369162,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Juss.) Moldenke",
+    "canonicalName": "Parameria laevigata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Parameria</i> <i>laevigata</i> (Juss.) Moldenke",
+    "genericName": "Parameria",
+    "key": "5536603",
+    "name": "Parameria laevigata (Juss.) Moldenke",
+    "rank": "SPECIES",
+    "specificEpithet": "laevigata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

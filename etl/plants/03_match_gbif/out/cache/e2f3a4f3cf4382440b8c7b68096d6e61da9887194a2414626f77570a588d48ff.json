@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2947798",
+      "name": "Phaseolus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8305376",
+      "name": "Phaseolus mungo",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 19,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 348321,
+  "right": 348321,
+  "synonym": false,
+  "usage": {
+    "authorship": "Wall.",
+    "canonicalName": "Phaseolus mungo",
+    "formattedName": "<i>Phaseolus</i> <i>mungo</i> Wall.",
+    "genericName": "Phaseolus",
+    "key": "8305376",
+    "name": "Phaseolus mungo Wall.",
+    "rank": "SPECIES",
+    "specificEpithet": "mungo",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

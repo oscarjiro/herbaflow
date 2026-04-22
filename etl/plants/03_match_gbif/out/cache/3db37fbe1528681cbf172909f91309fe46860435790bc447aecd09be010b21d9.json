@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "200532776",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "554",
+      "name": "Pandanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3737",
+      "name": "Pandanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "8404076",
+      "name": "Pandanus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9296315",
+      "name": "Pandanus amaryllifolius",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 134491,
+  "right": 134491,
+  "synonym": false,
+  "usage": {
+    "authorship": "Roxb. ex Lindl.",
+    "canonicalName": "Pandanus amaryllifolius",
+    "formattedName": "<i>Pandanus</i> <i>amaryllifolius</i> Roxb. ex Lindl.",
+    "genericName": "Pandanus",
+    "key": "9296315",
+    "name": "Pandanus amaryllifolius Roxb. ex Lindl.",
+    "rank": "SPECIES",
+    "specificEpithet": "amaryllifolius",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

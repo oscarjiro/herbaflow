@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3138214",
+      "name": "Carthamus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3138327",
+      "name": "Carthamus tinctorius",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 200029,
+  "right": 200030,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Carthamus tinctorius",
+    "formattedName": "<i>Carthamus</i> <i>tinctorius</i> L.",
+    "genericName": "Carthamus",
+    "key": "3138327",
+    "name": "Carthamus tinctorius L.",
+    "rank": "SPECIES",
+    "specificEpithet": "tinctorius",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

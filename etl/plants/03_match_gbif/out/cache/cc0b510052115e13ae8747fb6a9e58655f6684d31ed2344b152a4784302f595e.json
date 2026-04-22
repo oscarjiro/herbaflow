@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "123707530",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152705",
+      "name": "Abelmoschus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8312665",
+      "name": "Abelmoschus moschatus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 474234,
+  "right": 474237,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Medik.",
+    "canonicalName": "Abelmoschus moschatus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Abelmoschus</i> <i>moschatus</i> (L.) Medik.",
+    "genericName": "Abelmoschus",
+    "key": "8312665",
+    "name": "Abelmoschus moschatus (L.) Medik.",
+    "rank": "SPECIES",
+    "specificEpithet": "moschatus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

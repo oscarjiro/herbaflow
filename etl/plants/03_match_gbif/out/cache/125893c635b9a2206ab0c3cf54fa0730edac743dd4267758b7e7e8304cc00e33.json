@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Burm.fil.) Moylan ex J.R.I.Wood",
+    "canonicalName": "Strobilanthes alternata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Strobilanthes</i> <i>alternata</i> (Burm.fil.) Moylan ex J.R.I.Wood",
+    "genericName": "Strobilanthes",
+    "key": "8297383",
+    "name": "Strobilanthes alternata (Burm.fil.) Moylan ex J.R.I.Wood",
+    "rank": "SPECIES",
+    "specificEpithet": "alternata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2393",
+      "name": "Acanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "6359394",
+      "name": "Strobilanthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8297383",
+      "name": "Strobilanthes alternata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 401860,
+  "right": 401860,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Blume) Hallier fil.",
+    "canonicalName": "Hemigraphis colorata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Hemigraphis</i> <i>colorata</i> (Blume) Hallier fil.",
+    "genericName": "Hemigraphis",
+    "key": "3769681",
+    "name": "Hemigraphis colorata (Blume) Hallier fil.",
+    "rank": "SPECIES",
+    "specificEpithet": "colorata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

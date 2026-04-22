@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "19891953",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2952935",
+      "name": "Bauhinia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2953871",
+      "name": "Bauhinia purpurea",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 7,
+    "timings": {
+      "luceneMatch": 7,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 8
+    }
+  },
+  "left": 329770,
+  "right": 329770,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Bauhinia purpurea",
+    "formattedName": "<i>Bauhinia</i> <i>purpurea</i> L.",
+    "genericName": "Bauhinia",
+    "key": "2953871",
+    "name": "Bauhinia purpurea L.",
+    "rank": "SPECIES",
+    "specificEpithet": "purpurea",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

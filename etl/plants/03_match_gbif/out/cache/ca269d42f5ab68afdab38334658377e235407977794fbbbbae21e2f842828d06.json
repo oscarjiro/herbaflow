@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(DC.) Stapf",
+    "canonicalName": "Cymbopogon citratus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cymbopogon</i> <i>citratus</i> (DC.) Stapf",
+    "genericName": "Cymbopogon",
+    "key": "2705275",
+    "name": "Cymbopogon citratus (DC.) Stapf",
+    "rank": "SPECIES",
+    "specificEpithet": "citratus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3073",
+      "name": "Poaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2705264",
+      "name": "Cymbopogon",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2705275",
+      "name": "Cymbopogon citratus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 157862,
+  "right": 157864,
+  "synonym": true,
+  "usage": {
+    "authorship": "DC.",
+    "canonicalName": "Andropogon citratus",
+    "formattedName": "<i>Andropogon</i> <i>citratus</i> DC.",
+    "genericName": "Andropogon",
+    "key": "2705276",
+    "name": "Andropogon citratus DC.",
+    "rank": "SPECIES",
+    "specificEpithet": "citratus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

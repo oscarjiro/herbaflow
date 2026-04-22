@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "399",
+      "name": "Ranunculales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2411",
+      "name": "Menispermaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7268743",
+      "name": "Arcangelisia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3830318",
+      "name": "Arcangelisia flava",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 517885,
+  "right": 517886,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Merr.",
+    "canonicalName": "Arcangelisia flava",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Arcangelisia</i> <i>flava</i> (L.) Merr.",
+    "genericName": "Arcangelisia",
+    "key": "3830318",
+    "name": "Arcangelisia flava (L.) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "flava",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "177276",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7708",
+      "name": "Cyperaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2713455",
+      "name": "Cyperus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2714453",
+      "name": "Cyperus cyperoides",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 145668,
+  "right": 145670,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Kuntze",
+    "canonicalName": "Cyperus cyperoides",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cyperus</i> <i>cyperoides</i> (L.) Kuntze",
+    "genericName": "Cyperus",
+    "key": "2714453",
+    "name": "Cyperus cyperoides (L.) Kuntze",
+    "rank": "SPECIES",
+    "specificEpithet": "cyperoides",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

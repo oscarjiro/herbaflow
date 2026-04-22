@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Roscoe",
+    "canonicalName": "Zingiber officinale",
+    "formattedName": "<i>Zingiber</i> <i>officinale</i> Roscoe",
+    "genericName": "Zingiber",
+    "key": "2757280",
+    "name": "Zingiber officinale Roscoe",
+    "rank": "SPECIES",
+    "specificEpithet": "officinale",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2756693",
+      "name": "Zingiber",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2757280",
+      "name": "Zingiber officinale",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 94,
+    "matchType": "VARIANT",
+    "timeTaken": 6,
+    "timings": {
+      "luceneMatch": 6,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 177581,
+  "right": 177607,
+  "synonym": true,
+  "usage": {
+    "authorship": "Theilade",
+    "canonicalName": "Zingiber officinale rubrum",
+    "formattedName": "<i>Zingiber</i> <i>officinale</i> var. <i>rubrum</i> Theilade",
+    "genericName": "Zingiber",
+    "infraspecificEpithet": "rubrum",
+    "key": "2757288",
+    "name": "Zingiber officinale var. rubrum Theilade",
+    "rank": "VARIETY",
+    "specificEpithet": "officinale",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

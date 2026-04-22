@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Cham. & Schltdl.",
+    "canonicalName": "Torenia crustacea",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Torenia</i> <i>crustacea</i> (L.) Cham. & Schltdl.",
+    "genericName": "Torenia",
+    "key": "3171892",
+    "name": "Torenia crustacea (L.) Cham. & Schltdl.",
+    "rank": "SPECIES",
+    "specificEpithet": "crustacea",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4160847",
+      "name": "Linderniaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3172202",
+      "name": "Torenia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3171892",
+      "name": "Torenia crustacea",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 423255,
+  "right": 423255,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) F.Muell.",
+    "canonicalName": "Lindernia crustacea",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Lindernia</i> <i>crustacea</i> (L.) F.Muell.",
+    "genericName": "Lindernia",
+    "key": "3171890",
+    "name": "Lindernia crustacea (L.) F.Muell.",
+    "rank": "SPECIES",
+    "specificEpithet": "crustacea",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

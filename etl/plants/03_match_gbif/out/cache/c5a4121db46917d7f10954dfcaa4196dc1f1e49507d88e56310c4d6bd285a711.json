@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(F.Muell.) Meisn.",
+    "canonicalName": "Muehlenbeckia platyclada",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Muehlenbeckia</i> <i>platyclada</i> (F.Muell.) Meisn.",
+    "genericName": "Muehlenbeckia",
+    "key": "8160440",
+    "name": "Muehlenbeckia platyclada (F.Muell.) Meisn.",
+    "rank": "SPECIES",
+    "specificEpithet": "platyclada",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2416",
+      "name": "Polygonaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2888858",
+      "name": "Muehlenbeckia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8160440",
+      "name": "Muehlenbeckia platyclada",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 284732,
+  "right": 284732,
+  "synonym": true,
+  "usage": {
+    "authorship": "(F.Muell.) L.H.Bailey",
+    "canonicalName": "Homalocladium platycladum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Homalocladium</i> <i>platycladum</i> (F.Muell.) L.H.Bailey",
+    "genericName": "Homalocladium",
+    "key": "2888873",
+    "name": "Homalocladium platycladum (F.Muell.) L.H.Bailey",
+    "rank": "SPECIES",
+    "specificEpithet": "platycladum",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Thunb.) Juel",
+    "canonicalName": "Gynura japonica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Gynura</i> <i>japonica</i> (Thunb.) Juel",
+    "genericName": "Gynura",
+    "key": "3139807",
+    "name": "Gynura japonica (Thunb.) Juel",
+    "rank": "SPECIES",
+    "specificEpithet": "japonica",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3139806",
+      "name": "Gynura",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3139807",
+      "name": "Gynura japonica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 211869,
+  "right": 211869,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lour.) Merr.",
+    "canonicalName": "Gynura segetum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Gynura</i> <i>segetum</i> (Lour.) Merr.",
+    "genericName": "Gynura",
+    "key": "3139809",
+    "name": "Gynura segetum (Lour.) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "segetum",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

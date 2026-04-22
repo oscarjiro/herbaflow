@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3063",
+      "name": "Basellaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3083506",
+      "name": "Anredera",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3083508",
+      "name": "Anredera cordifolia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 269881,
+  "right": 269882,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Ten.) Steenis",
+    "canonicalName": "Anredera cordifolia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Anredera</i> <i>cordifolia</i> (Ten.) Steenis",
+    "genericName": "Anredera",
+    "key": "3083508",
+    "name": "Anredera cordifolia (Ten.) Steenis",
+    "rank": "SPECIES",
+    "specificEpithet": "cordifolia",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

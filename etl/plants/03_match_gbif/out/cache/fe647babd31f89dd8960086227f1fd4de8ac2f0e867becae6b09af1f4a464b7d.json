@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3088468",
+      "name": "Tagetes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3088488",
+      "name": "Tagetes erecta",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 236559,
+  "right": 236564,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Tagetes erecta",
+    "formattedName": "<i>Tagetes</i> <i>erecta</i> L.",
+    "genericName": "Tagetes",
+    "key": "3088488",
+    "name": "Tagetes erecta L.",
+    "rank": "SPECIES",
+    "specificEpithet": "erecta",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

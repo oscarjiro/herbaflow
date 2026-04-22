@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Gaertn.",
+    "canonicalName": "Nelumbo nucifera",
+    "formattedName": "<i>Nelumbo</i> <i>nucifera</i> Gaertn.",
+    "genericName": "Nelumbo",
+    "key": "2882449",
+    "name": "Nelumbo nucifera Gaertn.",
+    "rank": "SPECIES",
+    "specificEpithet": "nucifera",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "400",
+      "name": "Proteales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2424",
+      "name": "Nelumbonaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2882448",
+      "name": "Nelumbo",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2882449",
+      "name": "Nelumbo nucifera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 513207,
+  "right": 513210,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Druce",
+    "canonicalName": "Nelumbium nelumbo",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Nelumbium</i> <i>nelumbo</i> (L.) Druce",
+    "genericName": "Nelumbium",
+    "key": "2882452",
+    "name": "Nelumbium nelumbo (L.) Druce",
+    "rank": "SPECIES",
+    "specificEpithet": "nelumbo",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

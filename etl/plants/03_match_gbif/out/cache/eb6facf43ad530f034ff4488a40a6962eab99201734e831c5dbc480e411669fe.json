@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "198590881",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984588",
+      "name": "Ficus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5571425",
+      "name": "Ficus ribes",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 21,
+    "timings": {
+      "luceneMatch": 21,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 22
+    }
+  },
+  "left": 529313,
+  "right": 529314,
+  "synonym": false,
+  "usage": {
+    "authorship": "Reinw. ex Blume",
+    "canonicalName": "Ficus ribes",
+    "formattedName": "<i>Ficus</i> <i>ribes</i> Reinw. ex Blume",
+    "genericName": "Ficus",
+    "key": "5571425",
+    "name": "Ficus ribes Reinw. ex Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "ribes",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

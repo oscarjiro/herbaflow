@@ -1,0 +1,65 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3140231",
+      "name": "Lactuca",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3140510",
+      "name": "Lactuca indica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 9
+    }
+  },
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Lactuca indica",
+    "formattedName": "<i>Lactuca</i> <i>indica</i> L.",
+    "genericName": "Lactuca",
+    "key": "3140510",
+    "name": "Lactuca indica L.",
+    "rank": "SPECIES",
+    "specificEpithet": "indica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

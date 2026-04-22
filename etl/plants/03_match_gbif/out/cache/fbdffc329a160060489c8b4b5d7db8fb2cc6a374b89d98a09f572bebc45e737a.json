@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "61987931",
+      "status": "VULNERABLE",
+      "statusCode": "VU"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4907584",
+      "name": "Calophyllaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7329993",
+      "name": "Mesua",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7330039",
+      "name": "Mesua ferrea",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 2,
+    "timings": {
+      "luceneMatch": 2,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 2
+    }
+  },
+  "left": 448223,
+  "right": 448229,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Mesua ferrea",
+    "formattedName": "<i>Mesua</i> <i>ferrea</i> L.",
+    "genericName": "Mesua",
+    "key": "7330039",
+    "name": "Mesua ferrea L.",
+    "rank": "SPECIES",
+    "specificEpithet": "ferrea",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

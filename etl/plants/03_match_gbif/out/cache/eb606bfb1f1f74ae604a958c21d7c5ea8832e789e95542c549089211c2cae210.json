@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2396",
+      "name": "Rutaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3190405",
+      "name": "Triphasia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3190406",
+      "name": "Triphasia trifolia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 555466,
+  "right": 555467,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Burm.fil.) P.Wilson",
+    "canonicalName": "Triphasia trifolia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Triphasia</i> <i>trifolia</i> (Burm.fil.) P.Wilson",
+    "genericName": "Triphasia",
+    "key": "3190406",
+    "name": "Triphasia trifolia (Burm.fil.) P.Wilson",
+    "rank": "SPECIES",
+    "specificEpithet": "trifolia",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

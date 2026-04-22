@@ -1,0 +1,65 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1351",
+      "name": "Apiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6720",
+      "name": "Apiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3034784",
+      "name": "Pimpinella",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8080300",
+      "name": "Pimpinella anisum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Pimpinella anisum",
+    "formattedName": "<i>Pimpinella</i> <i>anisum</i> L.",
+    "genericName": "Pimpinella",
+    "key": "8080300",
+    "name": "Pimpinella anisum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "anisum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

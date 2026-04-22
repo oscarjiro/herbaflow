@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "63531",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6684",
+      "name": "Lythraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3188663",
+      "name": "Punica",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5420901",
+      "name": "Punica granatum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 485195,
+  "right": 485197,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Punica granatum",
+    "formattedName": "<i>Punica</i> <i>granatum</i> L.",
+    "genericName": "Punica",
+    "key": "5420901",
+    "name": "Punica granatum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "granatum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

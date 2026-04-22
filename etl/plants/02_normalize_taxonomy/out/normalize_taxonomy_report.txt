@@ -1,0 +1,16 @@
+02_NORMALIZE_TAXONOMY REPORT
+============================
+input_rows=535
+output_rows=535
+invalid_rows_removed=0
+names_changed=0
+rows_with_authorship_extracted=320
+rows_with_whitespace_trimmed=0
+output_path=02_normalize_taxonomy\out\normalized_plants.csv
+report_path=02_normalize_taxonomy\out\normalize_taxonomy_report.txt
+status=success
+
+Notes:
+- No GBIF lookup was performed in this step.
+- Original scraped names are preserved in original_species_name.
+- canonical_candidate_name is a heuristic pre-GBIF candidate.

@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Jack) I.C.Nielsen",
+    "canonicalName": "Archidendron clypearia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Archidendron</i> <i>clypearia</i> (Jack) I.C.Nielsen",
+    "genericName": "Archidendron",
+    "key": "2941309",
+    "name": "Archidendron clypearia (Jack) I.C.Nielsen",
+    "rank": "SPECIES",
+    "specificEpithet": "clypearia",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2941201",
+      "name": "Archidendron",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2941309",
+      "name": "Archidendron clypearia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 324792,
+  "right": 324799,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Jack) Benth.",
+    "canonicalName": "Pithecellobium clypearia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Pithecellobium</i> <i>clypearia</i> (Jack) Benth.",
+    "genericName": "Pithecellobium",
+    "key": "2941357",
+    "name": "Pithecellobium clypearia (Jack) Benth.",
+    "rank": "SPECIES",
+    "specificEpithet": "clypearia",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

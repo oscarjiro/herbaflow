@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Blume",
+    "canonicalName": "Strobilanthes crispa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Strobilanthes</i> <i>crispa</i> (L.) Blume",
+    "genericName": "Strobilanthes",
+    "key": "3781433",
+    "name": "Strobilanthes crispa (L.) Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "crispa",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2393",
+      "name": "Acanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "6359394",
+      "name": "Strobilanthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3781433",
+      "name": "Strobilanthes crispa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 401869,
+  "right": 401869,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Bremek.",
+    "canonicalName": "Sericocalyx crispus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Sericocalyx</i> <i>crispus</i> (L.) Bremek.",
+    "genericName": "Sericocalyx",
+    "key": "3777015",
+    "name": "Sericocalyx crispus (L.) Bremek.",
+    "rank": "SPECIES",
+    "specificEpithet": "crispus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

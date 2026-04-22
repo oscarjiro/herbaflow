@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "160993469",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2507",
+      "name": "Styracaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3032925",
+      "name": "Styrax",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5371679",
+      "name": "Styrax benzoin",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 318702,
+  "right": 318703,
+  "synonym": false,
+  "usage": {
+    "authorship": "Dryand.",
+    "canonicalName": "Styrax benzoin",
+    "formattedName": "<i>Styrax</i> <i>benzoin</i> Dryand.",
+    "genericName": "Styrax",
+    "key": "5371679",
+    "name": "Styrax benzoin Dryand.",
+    "rank": "SPECIES",
+    "specificEpithet": "benzoin",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

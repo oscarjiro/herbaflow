@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3105646",
+      "name": "Sonchus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3105813",
+      "name": "Sonchus arvensis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 235287,
+  "right": 235292,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Sonchus arvensis",
+    "formattedName": "<i>Sonchus</i> <i>arvensis</i> L.",
+    "genericName": "Sonchus",
+    "key": "3105813",
+    "name": "Sonchus arvensis L.",
+    "rank": "SPECIES",
+    "specificEpithet": "arvensis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

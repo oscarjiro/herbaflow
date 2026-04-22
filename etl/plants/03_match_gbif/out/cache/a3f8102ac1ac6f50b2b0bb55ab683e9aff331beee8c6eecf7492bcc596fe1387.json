@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "172210",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1351",
+      "name": "Apiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6720",
+      "name": "Apiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3034740",
+      "name": "Daucus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3034742",
+      "name": "Daucus carota",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 6,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 182876,
+  "right": 182904,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Daucus carota",
+    "formattedName": "<i>Daucus</i> <i>carota</i> L.",
+    "genericName": "Daucus",
+    "key": "3034742",
+    "name": "Daucus carota L.",
+    "rank": "SPECIES",
+    "specificEpithet": "carota",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

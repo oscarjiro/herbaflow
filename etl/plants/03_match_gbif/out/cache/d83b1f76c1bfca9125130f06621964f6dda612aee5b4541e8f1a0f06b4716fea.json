@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3092842",
+      "name": "Spilanthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7367845",
+      "name": "Spilanthes acmella",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 235463,
+  "right": 235463,
+  "synonym": false,
+  "usage": {
+    "authorship": "A.Chev., 1920",
+    "canonicalName": "Spilanthes acmella",
+    "code": "ZOOLOGICAL",
+    "formattedName": "<i>Spilanthes</i> <i>acmella</i> A.Chev., 1920",
+    "genericName": "Spilanthes",
+    "key": "7367845",
+    "name": "Spilanthes acmella A.Chev., 1920",
+    "rank": "SPECIES",
+    "specificEpithet": "acmella",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

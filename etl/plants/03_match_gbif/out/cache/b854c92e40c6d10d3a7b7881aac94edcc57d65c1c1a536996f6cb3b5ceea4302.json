@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Reinw. ex Blume) Hassk.",
+    "canonicalName": "Claoxylon indicum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Claoxylon</i> <i>indicum</i> (Reinw. ex Blume) Hassk.",
+    "genericName": "Claoxylon",
+    "key": "3060538",
+    "name": "Claoxylon indicum (Reinw. ex Blume) Hassk.",
+    "rank": "SPECIES",
+    "specificEpithet": "indicum",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4691",
+      "name": "Euphorbiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3060484",
+      "name": "Claoxylon",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3060538",
+      "name": "Claoxylon indicum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 5
+    }
+  },
+  "left": 452512,
+  "right": 452514,
+  "synonym": true,
+  "usage": {
+    "authorship": "Merr.",
+    "canonicalName": "Claoxylon polot",
+    "formattedName": "<i>Claoxylon</i> <i>polot</i> Merr.",
+    "genericName": "Claoxylon",
+    "key": "3060547",
+    "name": "Claoxylon polot Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "polot",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

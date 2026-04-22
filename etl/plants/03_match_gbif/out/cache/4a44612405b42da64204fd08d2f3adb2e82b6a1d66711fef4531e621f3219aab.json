@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "61964765",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8802",
+      "name": "Sapotaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2883690",
+      "name": "Mimusops",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2883768",
+      "name": "Mimusops elengi",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 317277,
+  "right": 317278,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Mimusops elengi",
+    "formattedName": "<i>Mimusops</i> <i>elengi</i> L.",
+    "genericName": "Mimusops",
+    "key": "2883768",
+    "name": "Mimusops elengi L.",
+    "rank": "SPECIES",
+    "specificEpithet": "elengi",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

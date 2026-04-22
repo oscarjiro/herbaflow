@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2944679",
+      "name": "Psophocarpus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2944683",
+      "name": "Psophocarpus tetragonolobus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 7,
+    "timings": {
+      "luceneMatch": 7,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 349058,
+  "right": 349059,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) DC.",
+    "canonicalName": "Psophocarpus tetragonolobus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Psophocarpus</i> <i>tetragonolobus</i> (L.) DC.",
+    "genericName": "Psophocarpus",
+    "key": "2944683",
+    "name": "Psophocarpus tetragonolobus (L.) DC.",
+    "rank": "SPECIES",
+    "specificEpithet": "tetragonolobus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

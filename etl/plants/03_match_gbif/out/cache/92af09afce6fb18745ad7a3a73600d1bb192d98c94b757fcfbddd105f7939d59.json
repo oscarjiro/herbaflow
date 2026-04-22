@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7225535",
+      "name": "Brassicales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3112",
+      "name": "Brassicaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3040962",
+      "name": "Raphanus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7678610",
+      "name": "Raphanus sativus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 259699,
+  "right": 259706,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Raphanus sativus",
+    "formattedName": "<i>Raphanus</i> <i>sativus</i> L.",
+    "genericName": "Raphanus",
+    "key": "7678610",
+    "name": "Raphanus sativus L.",
+    "rank": "SPECIES",
+    "specificEpithet": "sativus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

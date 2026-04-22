@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3119250",
+      "name": "Blumea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5395639",
+      "name": "Blumea lacera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 198350,
+  "right": 198360,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Burm.fil.) DC.",
+    "canonicalName": "Blumea lacera",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Blumea</i> <i>lacera</i> (Burm.fil.) DC.",
+    "genericName": "Blumea",
+    "key": "5395639",
+    "name": "Blumea lacera (Burm.fil.) DC.",
+    "rank": "SPECIES",
+    "specificEpithet": "lacera",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

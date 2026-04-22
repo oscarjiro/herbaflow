@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "19073408",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3119134",
+      "name": "Helianthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9206251",
+      "name": "Helianthus annuus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 212337,
+  "right": 212346,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Helianthus annuus",
+    "formattedName": "<i>Helianthus</i> <i>annuus</i> L.",
+    "genericName": "Helianthus",
+    "key": "9206251",
+    "name": "Helianthus annuus L.",
+    "rank": "SPECIES",
+    "specificEpithet": "annuus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

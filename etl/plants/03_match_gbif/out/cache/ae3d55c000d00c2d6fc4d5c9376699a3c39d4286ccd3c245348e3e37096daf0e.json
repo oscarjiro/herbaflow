@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3064",
+      "name": "Amaranthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3085166",
+      "name": "Achyranthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3085168",
+      "name": "Achyranthes aspera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 265825,
+  "right": 265837,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Achyranthes aspera",
+    "formattedName": "<i>Achyranthes</i> <i>aspera</i> L.",
+    "genericName": "Achyranthes",
+    "key": "3085168",
+    "name": "Achyranthes aspera L.",
+    "rank": "SPECIES",
+    "specificEpithet": "aspera",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

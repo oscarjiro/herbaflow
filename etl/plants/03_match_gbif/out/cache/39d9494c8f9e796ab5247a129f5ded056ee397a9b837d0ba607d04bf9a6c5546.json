@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3086569",
+      "name": "Eclipta",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5384955",
+      "name": "Eclipta alba",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 207643,
+  "right": 207646,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Hassk.",
+    "canonicalName": "Eclipta alba",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Eclipta</i> <i>alba</i> (L.) Hassk.",
+    "genericName": "Eclipta",
+    "key": "5384955",
+    "name": "Eclipta alba (L.) Hassk.",
+    "rank": "SPECIES",
+    "specificEpithet": "alba",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

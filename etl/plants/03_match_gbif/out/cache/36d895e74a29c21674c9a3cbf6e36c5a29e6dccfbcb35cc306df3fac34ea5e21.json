@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) R.Br. ex Roem. & Schult.",
+    "canonicalName": "Tabernaemontana divaricata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Tabernaemontana</i> <i>divaricata</i> (L.) R.Br. ex Roem. & Schult.",
+    "genericName": "Tabernaemontana",
+    "key": "3169625",
+    "name": "Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.",
+    "rank": "SPECIES",
+    "specificEpithet": "divaricata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169624",
+      "name": "Tabernaemontana",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3169625",
+      "name": "Tabernaemontana divaricata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 368977,
+  "right": 368977,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Burkill",
+    "canonicalName": "Ervatamia divaricata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Ervatamia</i> <i>divaricata</i> (L.) Burkill",
+    "genericName": "Ervatamia",
+    "key": "7317152",
+    "name": "Ervatamia divaricata (L.) Burkill",
+    "rank": "SPECIES",
+    "specificEpithet": "divaricata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

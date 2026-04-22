@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "R.Br.",
+    "canonicalName": "Rafflesia horsfieldii",
+    "formattedName": "<i>Rafflesia</i> <i>horsfieldii</i> R.Br.",
+    "genericName": "Rafflesia",
+    "key": "3941206",
+    "name": "Rafflesia horsfieldii R.Br.",
+    "rank": "SPECIES",
+    "specificEpithet": "horsfieldii",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2413",
+      "name": "Rafflesiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "8124408",
+      "name": "Rafflesia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3941206",
+      "name": "Rafflesia horsfieldii",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 7,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 8
+    }
+  },
+  "left": 467051,
+  "right": 467051,
+  "synonym": true,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Rafflesia patma",
+    "formattedName": "<i>Rafflesia</i> <i>patma</i> Blume",
+    "genericName": "Rafflesia",
+    "key": "3941137",
+    "name": "Rafflesia patma Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "patma",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "198111336",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984588",
+      "name": "Ficus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7262678",
+      "name": "Ficus botryocarpa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 529087,
+  "right": 529090,
+  "synonym": false,
+  "usage": {
+    "authorship": "Miq.",
+    "canonicalName": "Ficus botryocarpa",
+    "formattedName": "<i>Ficus</i> <i>botryocarpa</i> Miq.",
+    "genericName": "Ficus",
+    "key": "7262678",
+    "name": "Ficus botryocarpa Miq.",
+    "rank": "SPECIES",
+    "specificEpithet": "botryocarpa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

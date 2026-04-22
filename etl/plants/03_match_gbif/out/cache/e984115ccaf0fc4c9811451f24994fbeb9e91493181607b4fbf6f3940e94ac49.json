@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Lam.) Pers.",
+    "canonicalName": "Kalanchoe pinnata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Kalanchoe</i> <i>pinnata</i> (Lam.) Pers.",
+    "genericName": "Kalanchoe",
+    "key": "2985930",
+    "name": "Kalanchoe pinnata (Lam.) Pers.",
+    "rank": "SPECIES",
+    "specificEpithet": "pinnata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7219248",
+      "name": "Saxifragales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2406",
+      "name": "Crassulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2985928",
+      "name": "Kalanchoe",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2985930",
+      "name": "Kalanchoe pinnata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "3 synonym homonyms",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 561457,
+  "right": 561457,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lam.) Oken",
+    "canonicalName": "Bryophyllum pinnatum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Bryophyllum</i> <i>pinnatum</i> (Lam.) Oken",
+    "genericName": "Bryophyllum",
+    "key": "5362077",
+    "name": "Bryophyllum pinnatum (Lam.) Oken",
+    "rank": "SPECIES",
+    "specificEpithet": "pinnatum",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

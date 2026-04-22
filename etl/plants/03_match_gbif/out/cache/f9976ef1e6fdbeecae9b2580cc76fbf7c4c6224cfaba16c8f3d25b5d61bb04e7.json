@@ -1,0 +1,69 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Loefl.",
+    "canonicalName": "Combretum",
+    "formattedName": "<i>Combretum</i> Loefl.",
+    "key": "2986357",
+    "name": "Combretum Loefl.",
+    "rank": "GENUS",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2431",
+      "name": "Combretaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2986357",
+      "name": "Combretum",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 26,
+    "timings": {
+      "luceneMatch": 26,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 26
+    }
+  },
+  "left": 483440,
+  "right": 483817,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Quisqualis",
+    "formattedName": "<i>Quisqualis</i> L.",
+    "key": "3189404",
+    "name": "Quisqualis L.",
+    "rank": "GENUS",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

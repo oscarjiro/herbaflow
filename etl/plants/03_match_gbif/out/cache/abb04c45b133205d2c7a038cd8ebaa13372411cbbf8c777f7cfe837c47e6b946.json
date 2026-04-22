@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "168960",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2420",
+      "name": "Plantaginaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3189695",
+      "name": "Plantago",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3189767",
+      "name": "Plantago major",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 95,
+    "matchType": "VARIANT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 431660,
+  "right": 431662,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Plantago major",
+    "formattedName": "<i>Plantago</i> <i>major</i> L.",
+    "genericName": "Plantago",
+    "key": "3189767",
+    "name": "Plantago major L.",
+    "rank": "SPECIES",
+    "specificEpithet": "major",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

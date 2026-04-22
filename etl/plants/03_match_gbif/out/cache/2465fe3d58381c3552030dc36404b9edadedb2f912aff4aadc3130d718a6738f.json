@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7708",
+      "name": "Cyperaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2713455",
+      "name": "Cyperus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2715148",
+      "name": "Cyperus malaccensis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 145772,
+  "right": 145774,
+  "synonym": false,
+  "usage": {
+    "authorship": "Lam.",
+    "canonicalName": "Cyperus malaccensis",
+    "formattedName": "<i>Cyperus</i> <i>malaccensis</i> Lam.",
+    "genericName": "Cyperus",
+    "key": "2715148",
+    "name": "Cyperus malaccensis Lam.",
+    "rank": "SPECIES",
+    "specificEpithet": "malaccensis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

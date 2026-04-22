@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Medik.) Roxb.",
+    "canonicalName": "Dracaena angustifolia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Dracaena</i> <i>angustifolia</i> (Medik.) Roxb.",
+    "genericName": "Dracaena",
+    "key": "5304502",
+    "name": "Dracaena angustifolia (Medik.) Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "angustifolia",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1169",
+      "name": "Asparagales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7683",
+      "name": "Asparagaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2752062",
+      "name": "Dracaena",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5304502",
+      "name": "Dracaena angustifolia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 78878,
+  "right": 78878,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Medik.) N.E.Br.",
+    "canonicalName": "Pleomele angustifolia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Pleomele</i> <i>angustifolia</i> (Medik.) N.E.Br.",
+    "genericName": "Pleomele",
+    "key": "2776140",
+    "name": "Pleomele angustifolia (Medik.) N.E.Br.",
+    "rank": "SPECIES",
+    "specificEpithet": "angustifolia",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

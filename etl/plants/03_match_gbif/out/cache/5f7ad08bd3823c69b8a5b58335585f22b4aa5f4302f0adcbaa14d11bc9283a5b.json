@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Lam.",
+    "canonicalName": "Aristolochia acuminata",
+    "formattedName": "<i>Aristolochia</i> <i>acuminata</i> Lam.",
+    "genericName": "Aristolochia",
+    "key": "8207569",
+    "name": "Aristolochia acuminata Lam.",
+    "rank": "SPECIES",
+    "specificEpithet": "acuminata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "404",
+      "name": "Piperales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3066",
+      "name": "Aristolochiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2873978",
+      "name": "Aristolochia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8207569",
+      "name": "Aristolochia acuminata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 507936,
+  "right": 507936,
+  "synonym": true,
+  "usage": {
+    "authorship": "Cham.",
+    "canonicalName": "Aristolochia tagala",
+    "formattedName": "<i>Aristolochia</i> <i>tagala</i> Cham.",
+    "genericName": "Aristolochia",
+    "key": "7313590",
+    "name": "Aristolochia tagala Cham.",
+    "rank": "SPECIES",
+    "specificEpithet": "tagala",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Haw.) D.R.Hunt",
+    "canonicalName": "Selenicereus undatus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Selenicereus</i> <i>undatus</i> (Haw.) D.R.Hunt",
+    "genericName": "Selenicereus",
+    "key": "10334868",
+    "name": "Selenicereus undatus (Haw.) D.R.Hunt",
+    "rank": "SPECIES",
+    "specificEpithet": "undatus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2519",
+      "name": "Cactaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3084461",
+      "name": "Selenicereus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "10334868",
+      "name": "Selenicereus undatus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 273326,
+  "right": 273326,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Haw.) Britton & Rose",
+    "canonicalName": "Hylocereus undatus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Hylocereus</i> <i>undatus</i> (Haw.) Britton & Rose",
+    "genericName": "Hylocereus",
+    "key": "3084394",
+    "name": "Hylocereus undatus (Haw.) Britton & Rose",
+    "rank": "SPECIES",
+    "specificEpithet": "undatus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

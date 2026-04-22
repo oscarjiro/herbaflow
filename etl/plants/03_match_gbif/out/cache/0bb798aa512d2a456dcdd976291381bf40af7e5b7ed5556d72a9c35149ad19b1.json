@@ -1,0 +1,49 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7225535",
+      "name": "Brassicales",
+      "rank": "ORDER"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 253474,
+  "right": 262430,
+  "synonym": false,
+  "usage": {
+    "canonicalName": "Brassicales",
+    "formattedName": "<i>Brassicales</i>",
+    "key": "7225535",
+    "name": "Brassicales",
+    "rank": "ORDER",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

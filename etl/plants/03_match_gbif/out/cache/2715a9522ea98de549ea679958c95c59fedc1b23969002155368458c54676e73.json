@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Lam.",
+    "canonicalName": "Moringa oleifera",
+    "formattedName": "<i>Moringa</i> <i>oleifera</i> Lam.",
+    "genericName": "Moringa",
+    "key": "3054181",
+    "name": "Moringa oleifera Lam.",
+    "rank": "SPECIES",
+    "specificEpithet": "oleifera",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7225535",
+      "name": "Brassicales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6753",
+      "name": "Moringaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3054180",
+      "name": "Moringa",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3054181",
+      "name": "Moringa oleifera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 261923,
+  "right": 261968,
+  "synonym": true,
+  "usage": {
+    "authorship": "Gaertn.",
+    "canonicalName": "Moringa pterygosperma",
+    "formattedName": "<i>Moringa</i> <i>pterygosperma</i> Gaertn.",
+    "genericName": "Moringa",
+    "key": "3054182",
+    "name": "Moringa pterygosperma Gaertn.",
+    "rank": "SPECIES",
+    "specificEpithet": "pterygosperma",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

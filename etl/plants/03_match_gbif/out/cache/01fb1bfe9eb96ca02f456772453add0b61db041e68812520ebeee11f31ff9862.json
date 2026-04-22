@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Lour.) A.R.Simões & Staples",
+    "canonicalName": "Decalobanthus mammosus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Decalobanthus</i> <i>mammosus</i> (Lour.) A.R.Simões & Staples",
+    "genericName": "Decalobanthus",
+    "key": "9504389",
+    "name": "Decalobanthus mammosus (Lour.) A.R.Simões & Staples",
+    "rank": "SPECIES",
+    "specificEpithet": "mammosus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2389",
+      "name": "Convolvulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7324437",
+      "name": "Decalobanthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9504389",
+      "name": "Decalobanthus mammosus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 567283,
+  "right": 567283,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lour.) Hallier fil.",
+    "canonicalName": "Merremia mammosa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Merremia</i> <i>mammosa</i> (Lour.) Hallier fil.",
+    "genericName": "Merremia",
+    "key": "5548972",
+    "name": "Merremia mammosa (Lour.) Hallier fil.",
+    "rank": "SPECIES",
+    "specificEpithet": "mammosa",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

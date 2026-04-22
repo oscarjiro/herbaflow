@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2393",
+      "name": "Acanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7740842",
+      "name": "Andrographis",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3173178",
+      "name": "Andrographis paniculata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 8
+    }
+  },
+  "left": 395562,
+  "right": 395562,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Burm.fil.) Nees",
+    "canonicalName": "Andrographis paniculata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Andrographis</i> <i>paniculata</i> (Burm.fil.) Nees",
+    "genericName": "Andrographis",
+    "key": "3173178",
+    "name": "Andrographis paniculata (Burm.fil.) Nees",
+    "rank": "SPECIES",
+    "specificEpithet": "paniculata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

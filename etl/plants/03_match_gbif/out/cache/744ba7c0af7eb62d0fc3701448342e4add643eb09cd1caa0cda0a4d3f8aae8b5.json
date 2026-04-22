@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "145371812",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925344",
+      "name": "Premna",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7657266",
+      "name": "Premna tomentosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 416877,
+  "right": 416877,
+  "synonym": false,
+  "usage": {
+    "authorship": "Willd.",
+    "canonicalName": "Premna tomentosa",
+    "formattedName": "<i>Premna</i> <i>tomentosa</i> Willd.",
+    "genericName": "Premna",
+    "key": "7657266",
+    "name": "Premna tomentosa Willd.",
+    "rank": "SPECIES",
+    "specificEpithet": "tomentosa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

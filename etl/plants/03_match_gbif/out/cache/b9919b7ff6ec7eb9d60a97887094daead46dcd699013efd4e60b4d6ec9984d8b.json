@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "32104",
+      "status": "ENDANGERED",
+      "statusCode": "EN"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "5349236",
+      "name": "Pterocarpus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5708628",
+      "name": "Pterocarpus santalinus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 95,
+    "matchType": "VARIANT",
+    "timeTaken": 17,
+    "timings": {
+      "luceneMatch": 17,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 349270,
+  "right": 349272,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.f.",
+    "canonicalName": "Pterocarpus santalinus",
+    "formattedName": "<i>Pterocarpus</i> <i>santalinus</i> L.f.",
+    "genericName": "Pterocarpus",
+    "key": "5708628",
+    "name": "Pterocarpus santalinus L.f.",
+    "rank": "SPECIES",
+    "specificEpithet": "santalinus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2393",
+      "name": "Acanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3233825",
+      "name": "Rhinacanthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7263230",
+      "name": "Rhinacanthus nasutus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 400241,
+  "right": 400245,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Kuntze",
+    "canonicalName": "Rhinacanthus nasutus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Rhinacanthus</i> <i>nasutus</i> (L.) Kuntze",
+    "genericName": "Rhinacanthus",
+    "key": "7263230",
+    "name": "Rhinacanthus nasutus (L.) Kuntze",
+    "rank": "SPECIES",
+    "specificEpithet": "nasutus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

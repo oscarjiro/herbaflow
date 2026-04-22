@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2393",
+      "name": "Acanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3173136",
+      "name": "Graptophyllum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3173137",
+      "name": "Graptophyllum pictum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 397492,
+  "right": 397493,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Griff.",
+    "canonicalName": "Graptophyllum pictum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Graptophyllum</i> <i>pictum</i> (L.) Griff.",
+    "genericName": "Graptophyllum",
+    "key": "3173137",
+    "name": "Graptophyllum pictum (L.) Griff.",
+    "rank": "SPECIES",
+    "specificEpithet": "pictum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

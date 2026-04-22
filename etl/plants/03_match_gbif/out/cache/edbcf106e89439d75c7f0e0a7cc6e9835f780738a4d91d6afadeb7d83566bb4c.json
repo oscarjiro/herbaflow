@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Kuntze",
+    "canonicalName": "Ouret lanata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Ouret</i> <i>lanata</i> (L.) Kuntze",
+    "genericName": "Ouret",
+    "key": "10974033",
+    "name": "Ouret lanata (L.) Kuntze",
+    "rank": "SPECIES",
+    "specificEpithet": "lanata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3064",
+      "name": "Amaranthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7323304",
+      "name": "Ouret",
+      "rank": "GENUS"
+    },
+    {
+      "key": "10974033",
+      "name": "Ouret lanata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 19,
+    "timings": {
+      "luceneMatch": 20,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 20
+    }
+  },
+  "left": 268657,
+  "right": 268657,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Juss. ex Schult.",
+    "canonicalName": "Aerva lanata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Aerva</i> <i>lanata</i> (L.) Juss. ex Schult.",
+    "genericName": "Aerva",
+    "key": "3085014",
+    "name": "Aerva lanata (L.) Juss. ex Schult.",
+    "rank": "SPECIES",
+    "specificEpithet": "lanata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

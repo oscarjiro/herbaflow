@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Benth.",
+    "canonicalName": "Coleus scutellarioides",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Coleus</i> <i>scutellarioides</i> (L.) Benth.",
+    "genericName": "Coleus",
+    "key": "5341492",
+    "name": "Coleus scutellarioides (L.) Benth.",
+    "rank": "SPECIES",
+    "specificEpithet": "scutellarioides",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2927310",
+      "name": "Coleus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5341492",
+      "name": "Coleus scutellarioides",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 27,
+    "timings": {
+      "luceneMatch": 27,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 28
+    }
+  },
+  "left": 411945,
+  "right": 411945,
+  "synonym": true,
+  "usage": {
+    "authorship": "Benth.",
+    "canonicalName": "Coleus atropurpureus",
+    "formattedName": "<i>Coleus</i> <i>atropurpureus</i> Benth.",
+    "genericName": "Coleus",
+    "key": "5605877",
+    "name": "Coleus atropurpureus Benth.",
+    "rank": "SPECIES",
+    "specificEpithet": "atropurpureus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "147651836",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152101",
+      "name": "Kleinhovia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3152102",
+      "name": "Kleinhovia hospita",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 95,
+    "matchType": "VARIANT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 478094,
+  "right": 478094,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Kleinhovia hospita",
+    "formattedName": "<i>Kleinhovia</i> <i>hospita</i> L.",
+    "genericName": "Kleinhovia",
+    "key": "3152102",
+    "name": "Kleinhovia hospita L.",
+    "rank": "SPECIES",
+    "specificEpithet": "hospita",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

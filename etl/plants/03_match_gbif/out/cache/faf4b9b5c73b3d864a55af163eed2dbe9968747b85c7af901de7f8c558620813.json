@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2396",
+      "name": "Rutaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3190155",
+      "name": "Citrus",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 553546,
+  "right": 553649,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Citrus",
+    "formattedName": "<i>Citrus</i> L.",
+    "key": "3190155",
+    "name": "Citrus L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

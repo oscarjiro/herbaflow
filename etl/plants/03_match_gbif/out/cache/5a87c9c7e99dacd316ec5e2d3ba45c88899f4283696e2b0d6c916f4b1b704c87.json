@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "404",
+      "name": "Piperales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6678",
+      "name": "Piperaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3086367",
+      "name": "Peperomia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3086412",
+      "name": "Peperomia pellucida",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 20,
+    "timings": {
+      "luceneMatch": 20,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 21
+    }
+  },
+  "left": 510133,
+  "right": 510137,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Kunth",
+    "canonicalName": "Peperomia pellucida",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Peperomia</i> <i>pellucida</i> (L.) Kunth",
+    "genericName": "Peperomia",
+    "key": "3086412",
+    "name": "Peperomia pellucida (L.) Kunth",
+    "rank": "SPECIES",
+    "specificEpithet": "pellucida",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

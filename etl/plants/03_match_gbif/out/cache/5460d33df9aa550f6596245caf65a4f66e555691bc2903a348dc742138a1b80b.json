@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "150224828",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6652",
+      "name": "Oleaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7325974",
+      "name": "Nyctanthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3683008",
+      "name": "Nyctanthes arbor-tristis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 424529,
+  "right": 424529,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Nyctanthes arbor-tristis",
+    "formattedName": "<i>Nyctanthes</i> <i>arbor-tristis</i> L.",
+    "genericName": "Nyctanthes",
+    "key": "3683008",
+    "name": "Nyctanthes arbor-tristis L.",
+    "rank": "SPECIES",
+    "specificEpithet": "arbor-tristis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

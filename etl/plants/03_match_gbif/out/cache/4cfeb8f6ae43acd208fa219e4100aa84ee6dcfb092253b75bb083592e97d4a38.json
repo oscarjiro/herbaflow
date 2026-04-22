@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "399",
+      "name": "Ranunculales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2411",
+      "name": "Menispermaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7268723",
+      "name": "Tinospora",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8298918",
+      "name": "Tinospora crispa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 518537,
+  "right": 518542,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Miers ex Hook.fil. & Thomson",
+    "canonicalName": "Tinospora crispa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Tinospora</i> <i>crispa</i> (L.) Miers ex Hook.fil. & Thomson",
+    "genericName": "Tinospora",
+    "key": "8298918",
+    "name": "Tinospora crispa (L.) Miers ex Hook.fil. & Thomson",
+    "rank": "SPECIES",
+    "specificEpithet": "crispa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

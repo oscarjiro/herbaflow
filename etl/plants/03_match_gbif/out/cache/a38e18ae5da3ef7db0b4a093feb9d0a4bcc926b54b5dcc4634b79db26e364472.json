@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Thunb.",
+    "canonicalName": "Ficus punctata",
+    "formattedName": "<i>Ficus</i> <i>punctata</i> Thunb.",
+    "genericName": "Ficus",
+    "key": "7673670",
+    "name": "Ficus punctata Thunb.",
+    "rank": "SPECIES",
+    "specificEpithet": "punctata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984588",
+      "name": "Ficus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7673670",
+      "name": "Ficus punctata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 529301,
+  "right": 529302,
+  "synonym": true,
+  "usage": {
+    "authorship": "Griff.",
+    "canonicalName": "Ficus aurantiacea",
+    "formattedName": "<i>Ficus</i> <i>aurantiacea</i> Griff.",
+    "genericName": "Ficus",
+    "key": "8422837",
+    "name": "Ficus aurantiacea Griff.",
+    "rank": "SPECIES",
+    "specificEpithet": "aurantiacea",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

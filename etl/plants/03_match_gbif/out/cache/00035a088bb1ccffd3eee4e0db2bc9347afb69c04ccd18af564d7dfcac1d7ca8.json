@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "136140927",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4691",
+      "name": "Euphorbiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3054277",
+      "name": "Excoecaria",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3071716",
+      "name": "Excoecaria cochinchinensis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 454791,
+  "right": 454791,
+  "synonym": false,
+  "usage": {
+    "authorship": "Lour.",
+    "canonicalName": "Excoecaria cochinchinensis",
+    "formattedName": "<i>Excoecaria</i> <i>cochinchinensis</i> Lour.",
+    "genericName": "Excoecaria",
+    "key": "3071716",
+    "name": "Excoecaria cochinchinensis Lour.",
+    "rank": "SPECIES",
+    "specificEpithet": "cochinchinensis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

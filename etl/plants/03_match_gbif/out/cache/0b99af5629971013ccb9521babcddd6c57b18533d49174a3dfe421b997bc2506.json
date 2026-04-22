@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "203348",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2926960",
+      "name": "Thymus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5341442",
+      "name": "Thymus vulgaris",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 421862,
+  "right": 421869,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Thymus vulgaris",
+    "formattedName": "<i>Thymus</i> <i>vulgaris</i> L.",
+    "genericName": "Thymus",
+    "key": "5341442",
+    "name": "Thymus vulgaris L.",
+    "rank": "SPECIES",
+    "specificEpithet": "vulgaris",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

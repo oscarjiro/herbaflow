@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7434655",
+      "name": "Amomum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8038080",
+      "name": "Amomum compactum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 175329,
+  "right": 175329,
+  "synonym": false,
+  "usage": {
+    "authorship": "Roem. & Schult., 1817",
+    "canonicalName": "Amomum compactum",
+    "code": "ZOOLOGICAL",
+    "formattedName": "<i>Amomum</i> <i>compactum</i> Roem. & Schult., 1817",
+    "genericName": "Amomum",
+    "key": "8038080",
+    "name": "Amomum compactum Roem. & Schult., 1817",
+    "rank": "SPECIES",
+    "specificEpithet": "compactum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "194754",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "551",
+      "name": "Alismatales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6979",
+      "name": "Araceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2869483",
+      "name": "Typhonium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2869538",
+      "name": "Typhonium flagelliforme",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 66883,
+  "right": 66884,
+  "synonym": false,
+  "usage": {
+    "authorship": "(G.Lodd.) Blume",
+    "canonicalName": "Typhonium flagelliforme",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Typhonium</i> <i>flagelliforme</i> (G.Lodd.) Blume",
+    "genericName": "Typhonium",
+    "key": "2869538",
+    "name": "Typhonium flagelliforme (G.Lodd.) Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "flagelliforme",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

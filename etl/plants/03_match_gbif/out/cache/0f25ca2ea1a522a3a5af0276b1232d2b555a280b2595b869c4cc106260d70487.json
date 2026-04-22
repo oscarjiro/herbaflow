@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1351",
+      "name": "Apiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6720",
+      "name": "Apiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3034870",
+      "name": "Coriandrum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3034871",
+      "name": "Coriandrum sativum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 5
+    }
+  },
+  "left": 182701,
+  "right": 182702,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Coriandrum sativum",
+    "formattedName": "<i>Coriandrum</i> <i>sativum</i> L.",
+    "genericName": "Coriandrum",
+    "key": "3034871",
+    "name": "Coriandrum sativum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "sativum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

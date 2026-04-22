@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6639",
+      "name": "Urticaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984382",
+      "name": "Pouzolzia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2984383",
+      "name": "Pouzolzia zeylanica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 544540,
+  "right": 544545,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Benn. & R.Br.",
+    "canonicalName": "Pouzolzia zeylanica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Pouzolzia</i> <i>zeylanica</i> (L.) Benn. & R.Br.",
+    "genericName": "Pouzolzia",
+    "key": "2984383",
+    "name": "Pouzolzia zeylanica (L.) Benn. & R.Br.",
+    "rank": "SPECIES",
+    "specificEpithet": "zeylanica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

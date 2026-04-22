@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "88507997",
+      "status": "ENDANGERED",
+      "statusCode": "EN"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7219248",
+      "name": "Saxifragales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2406",
+      "name": "Crassulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2985928",
+      "name": "Kalanchoe",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2985936",
+      "name": "Kalanchoe daigremontiana",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 561436,
+  "right": 561436,
+  "synonym": false,
+  "usage": {
+    "authorship": "Raym.-Hamet & H.Perrier",
+    "canonicalName": "Kalanchoe daigremontiana",
+    "formattedName": "<i>Kalanchoe</i> <i>daigremontiana</i> Raym.-Hamet & H.Perrier",
+    "genericName": "Kalanchoe",
+    "key": "2985936",
+    "name": "Kalanchoe daigremontiana Raym.-Hamet & H.Perrier",
+    "rank": "SPECIES",
+    "specificEpithet": "daigremontiana",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

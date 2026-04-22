@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "949",
+      "name": "Cornales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6667",
+      "name": "Hydrangeaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2985983",
+      "name": "Hydrangea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2985994",
+      "name": "Hydrangea macrophylla",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 289649,
+  "right": 289650,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Thunb.) Ser.",
+    "canonicalName": "Hydrangea macrophylla",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Hydrangea</i> <i>macrophylla</i> (Thunb.) Ser.",
+    "genericName": "Hydrangea",
+    "key": "2985994",
+    "name": "Hydrangea macrophylla (Thunb.) Ser.",
+    "rank": "SPECIES",
+    "specificEpithet": "macrophylla",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

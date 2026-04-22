@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6683",
+      "name": "Melastomataceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3188510",
+      "name": "Melastoma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8203135",
+      "name": "Melastoma polyanthum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 1,
+      "nameParse": 0,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 488186,
+  "right": 488186,
+  "synonym": false,
+  "usage": {
+    "authorship": "Burm.f.",
+    "canonicalName": "Melastoma polyanthum",
+    "formattedName": "<i>Melastoma</i> <i>polyanthum</i> Burm.f.",
+    "genericName": "Melastoma",
+    "key": "8203135",
+    "name": "Melastoma polyanthum Burm.f.",
+    "rank": "SPECIES",
+    "specificEpithet": "polyanthum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

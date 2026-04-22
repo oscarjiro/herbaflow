@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1169",
+      "name": "Asparagales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4259209",
+      "name": "Asphodelaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2770879",
+      "name": "Aloe",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2777724",
+      "name": "Aloe vera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 4,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 4
+    }
+  },
+  "left": 82158,
+  "right": 82158,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Burm.f.",
+    "canonicalName": "Aloe vera",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Aloe</i> <i>vera</i> (L.) Burm.f.",
+    "genericName": "Aloe",
+    "key": "2777724",
+    "name": "Aloe vera (L.) Burm.f.",
+    "rank": "SPECIES",
+    "specificEpithet": "vera",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

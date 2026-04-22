@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Chakrab. & N.P.Balakr.",
+    "canonicalName": "Breynia androgyna",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Breynia</i> <i>androgyna</i> (L.) Chakrab. & N.P.Balakr.",
+    "genericName": "Breynia",
+    "key": "9197670",
+    "name": "Breynia androgyna (L.) Chakrab. & N.P.Balakr.",
+    "rank": "SPECIES",
+    "specificEpithet": "androgyna",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8807",
+      "name": "Phyllanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3079696",
+      "name": "Breynia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9197670",
+      "name": "Breynia androgyna",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 463551,
+  "right": 463551,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Merr.",
+    "canonicalName": "Sauropus androgynus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Sauropus</i> <i>androgynus</i> (L.) Merr.",
+    "genericName": "Sauropus",
+    "key": "6109767",
+    "name": "Sauropus androgynus (L.) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "androgynus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

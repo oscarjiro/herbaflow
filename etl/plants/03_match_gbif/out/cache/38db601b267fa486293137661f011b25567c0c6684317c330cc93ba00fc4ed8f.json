@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "245",
+      "name": "Lycopodiopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "420",
+      "name": "Selaginellales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6724",
+      "name": "Selaginellaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2688177",
+      "name": "Selaginella",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3710337",
+      "name": "Selaginella arsenei",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 93,
+    "matchType": "VARIANT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 179978,
+  "right": 179979,
+  "synonym": false,
+  "usage": {
+    "authorship": "Weath.",
+    "canonicalName": "Selaginella arsenei",
+    "formattedName": "<i>Selaginella</i> <i>arsenei</i> Weath.",
+    "genericName": "Selaginella",
+    "key": "3710337",
+    "name": "Selaginella arsenei Weath.",
+    "rank": "SPECIES",
+    "specificEpithet": "arsenei",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(J.Koenig) S.R.Dutta",
+    "canonicalName": "Hellenia speciosa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Hellenia</i> <i>speciosa</i> (J.Koenig) S.R.Dutta",
+    "genericName": "Hellenia",
+    "key": "7584507",
+    "name": "Hellenia speciosa (J.Koenig) S.R.Dutta",
+    "rank": "SPECIES",
+    "specificEpithet": "speciosa",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4492",
+      "name": "Costaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "8189889",
+      "name": "Hellenia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7584507",
+      "name": "Hellenia speciosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 18
+    }
+  },
+  "left": 173125,
+  "right": 173127,
+  "synonym": true,
+  "usage": {
+    "authorship": "(J.Koenig) Sm.",
+    "canonicalName": "Costus speciosus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Costus</i> <i>speciosus</i> (J.Koenig) Sm.",
+    "genericName": "Costus",
+    "key": "2756724",
+    "name": "Costus speciosus (J.Koenig) Sm.",
+    "rank": "SPECIES",
+    "specificEpithet": "speciosus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

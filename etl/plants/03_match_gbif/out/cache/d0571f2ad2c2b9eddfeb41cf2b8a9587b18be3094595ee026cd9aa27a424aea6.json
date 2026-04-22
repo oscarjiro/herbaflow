@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Lem.) M.Á.Cruz & S.Arias",
+    "canonicalName": "Disocactus anguliger",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Disocactus</i> <i>anguliger</i> (Lem.) M.Á.Cruz & S.Arias",
+    "genericName": "Disocactus",
+    "key": "10771315",
+    "name": "Disocactus anguliger (Lem.) M.Á.Cruz & S.Arias",
+    "rank": "SPECIES",
+    "specificEpithet": "anguliger",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2519",
+      "name": "Cactaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7281686",
+      "name": "Disocactus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "10771315",
+      "name": "Disocactus anguliger",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "3 synonym homonyms",
+    "timeTaken": 17,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 270894,
+  "right": 270894,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lem.) H.P.Kelsey & Dayton, 1942",
+    "canonicalName": "Epiphyllum anguliger",
+    "code": "ZOOLOGICAL",
+    "formattedName": "<i>Epiphyllum</i> <i>anguliger</i> (Lem.) H.P.Kelsey & Dayton, 1942",
+    "genericName": "Epiphyllum",
+    "key": "5621317",
+    "name": "Epiphyllum anguliger (Lem.) H.P.Kelsey & Dayton, 1942",
+    "rank": "SPECIES",
+    "specificEpithet": "anguliger",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

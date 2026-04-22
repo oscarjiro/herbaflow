@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Urb.",
+    "canonicalName": "Pachyrhizus erosus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Pachyrhizus</i> <i>erosus</i> (L.) Urb.",
+    "genericName": "Pachyrhizus",
+    "key": "2974683",
+    "name": "Pachyrhizus erosus (L.) Urb.",
+    "rank": "SPECIES",
+    "specificEpithet": "erosus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2974664",
+      "name": "Pachyrhizus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2974683",
+      "name": "Pachyrhizus erosus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 347624,
+  "right": 347626,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Urb.",
+    "canonicalName": "Pachyrrhizus erosus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Pachyrrhizus</i> <i>erosus</i> (L.) Urb.",
+    "genericName": "Pachyrrhizus",
+    "key": "3963605",
+    "name": "Pachyrrhizus erosus (L.) Urb.",
+    "rank": "SPECIES",
+    "specificEpithet": "erosus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

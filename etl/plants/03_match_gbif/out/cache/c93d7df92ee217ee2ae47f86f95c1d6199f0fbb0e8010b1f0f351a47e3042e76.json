@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7225535",
+      "name": "Brassicales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3845332",
+      "name": "Cleomaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "6370688",
+      "name": "Gynandropsis",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3054227",
+      "name": "Gynandropsis gynandra",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 261645,
+  "right": 261647,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Briq.",
+    "canonicalName": "Gynandropsis gynandra",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Gynandropsis</i> <i>gynandra</i> (L.) Briq.",
+    "genericName": "Gynandropsis",
+    "key": "3054227",
+    "name": "Gynandropsis gynandra (L.) Briq.",
+    "rank": "SPECIES",
+    "specificEpithet": "gynandra",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

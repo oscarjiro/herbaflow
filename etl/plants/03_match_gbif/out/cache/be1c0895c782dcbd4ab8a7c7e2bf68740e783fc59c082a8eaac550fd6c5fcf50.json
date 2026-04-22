@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152542",
+      "name": "Hibiscus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3152582",
+      "name": "Hibiscus sabdariffa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 477958,
+  "right": 477961,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Hibiscus sabdariffa",
+    "formattedName": "<i>Hibiscus</i> <i>sabdariffa</i> L.",
+    "genericName": "Hibiscus",
+    "key": "3152582",
+    "name": "Hibiscus sabdariffa L.",
+    "rank": "SPECIES",
+    "specificEpithet": "sabdariffa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

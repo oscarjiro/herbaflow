@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "117894673",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6655",
+      "name": "Bignoniaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7298257",
+      "name": "Oroxylum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7414934",
+      "name": "Oroxylum indicum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 403187,
+  "right": 403188,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Kurz",
+    "canonicalName": "Oroxylum indicum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Oroxylum</i> <i>indicum</i> (L.) Kurz",
+    "genericName": "Oroxylum",
+    "key": "7414934",
+    "name": "Oroxylum indicum (L.) Kurz",
+    "rank": "SPECIES",
+    "specificEpithet": "indicum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

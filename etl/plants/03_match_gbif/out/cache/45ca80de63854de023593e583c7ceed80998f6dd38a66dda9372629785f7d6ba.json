@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "169017",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7708",
+      "name": "Cyperaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2713455",
+      "name": "Cyperus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2715729",
+      "name": "Cyperus iria",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 19,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 145746,
+  "right": 145748,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Cyperus iria",
+    "formattedName": "<i>Cyperus</i> <i>iria</i> L.",
+    "genericName": "Cyperus",
+    "key": "2715729",
+    "name": "Cyperus iria L.",
+    "rank": "SPECIES",
+    "specificEpithet": "iria",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

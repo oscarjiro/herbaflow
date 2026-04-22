@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2393",
+      "name": "Acanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3173125",
+      "name": "Barleria",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3173128",
+      "name": "Barleria cristata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 396345,
+  "right": 396347,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Barleria cristata",
+    "formattedName": "<i>Barleria</i> <i>cristata</i> L.",
+    "genericName": "Barleria",
+    "key": "3173128",
+    "name": "Barleria cristata L.",
+    "rank": "SPECIES",
+    "specificEpithet": "cristata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

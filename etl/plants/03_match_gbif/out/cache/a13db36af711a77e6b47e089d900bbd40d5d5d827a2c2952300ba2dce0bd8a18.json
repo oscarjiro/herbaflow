@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "6410205",
+      "name": "Orthosiphon",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7308026",
+      "name": "Orthosiphon aristatus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 20,
+    "timings": {
+      "luceneMatch": 19,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 20
+    }
+  },
+  "left": 415717,
+  "right": 415720,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Blume) Miq.",
+    "canonicalName": "Orthosiphon aristatus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Orthosiphon</i> <i>aristatus</i> (Blume) Miq.",
+    "genericName": "Orthosiphon",
+    "key": "7308026",
+    "name": "Orthosiphon aristatus (Blume) Miq.",
+    "rank": "SPECIES",
+    "specificEpithet": "aristatus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

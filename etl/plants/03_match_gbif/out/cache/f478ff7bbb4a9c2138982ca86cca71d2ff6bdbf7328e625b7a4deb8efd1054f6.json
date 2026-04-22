@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5015",
+      "name": "Rosaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2988638",
+      "name": "Rubus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8422178",
+      "name": "Rubus glomeratus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 540757,
+  "right": 540758,
+  "synonym": false,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Rubus glomeratus",
+    "formattedName": "<i>Rubus</i> <i>glomeratus</i> Blume",
+    "genericName": "Rubus",
+    "key": "8422178",
+    "name": "Rubus glomeratus Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "glomeratus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

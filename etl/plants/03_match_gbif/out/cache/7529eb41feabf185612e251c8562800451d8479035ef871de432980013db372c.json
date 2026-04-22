@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Willd.) H.Ohashi & K.Ohashi",
+    "canonicalName": "Grona heterophylla",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Grona</i> <i>heterophylla</i> (Willd.) H.Ohashi & K.Ohashi",
+    "genericName": "Grona",
+    "key": "10734509",
+    "name": "Grona heterophylla (Willd.) H.Ohashi & K.Ohashi",
+    "rank": "SPECIES",
+    "specificEpithet": "heterophylla",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9615544",
+      "name": "Grona",
+      "rank": "GENUS"
+    },
+    {
+      "key": "10734509",
+      "name": "Grona heterophylla",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 338271,
+  "right": 338271,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Willd.) DC.",
+    "canonicalName": "Desmodium heterophyllum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Desmodium</i> <i>heterophyllum</i> (Willd.) DC.",
+    "genericName": "Desmodium",
+    "key": "2967708",
+    "name": "Desmodium heterophyllum (Willd.) DC.",
+    "rank": "SPECIES",
+    "specificEpithet": "heterophyllum",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2502",
+      "name": "Loganiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169589",
+      "name": "Strychnos",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7289325",
+      "name": "Strychnos minor",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 373391,
+  "right": 373395,
+  "synonym": false,
+  "usage": {
+    "authorship": "Dennst.",
+    "canonicalName": "Strychnos minor",
+    "formattedName": "<i>Strychnos</i> <i>minor</i> Dennst.",
+    "genericName": "Strychnos",
+    "key": "7289325",
+    "name": "Strychnos minor Dennst.",
+    "rank": "SPECIES",
+    "specificEpithet": "minor",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

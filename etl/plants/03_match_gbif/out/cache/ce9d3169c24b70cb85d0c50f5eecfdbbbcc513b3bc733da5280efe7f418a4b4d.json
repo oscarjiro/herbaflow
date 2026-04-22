@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3064",
+      "name": "Amaranthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3085074",
+      "name": "Amaranthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5384364",
+      "name": "Amaranthus hybridus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 22,
+    "timings": {
+      "luceneMatch": 23,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 23
+    }
+  },
+  "left": 266249,
+  "right": 266253,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Amaranthus hybridus",
+    "formattedName": "<i>Amaranthus</i> <i>hybridus</i> L.",
+    "genericName": "Amaranthus",
+    "key": "5384364",
+    "name": "Amaranthus hybridus L.",
+    "rank": "SPECIES",
+    "specificEpithet": "hybridus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

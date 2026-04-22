@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Blume",
+    "canonicalName": "Sterculia cordata",
+    "formattedName": "<i>Sterculia</i> <i>cordata</i> Blume",
+    "genericName": "Sterculia",
+    "key": "7586943",
+    "name": "Sterculia cordata Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "cordata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152129",
+      "name": "Sterculia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7586943",
+      "name": "Sterculia cordata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 2,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 480916,
+  "right": 480918,
+  "synonym": true,
+  "usage": {
+    "authorship": "R.Br.",
+    "canonicalName": "Sterculia javanica",
+    "formattedName": "<i>Sterculia</i> <i>javanica</i> R.Br.",
+    "genericName": "Sterculia",
+    "key": "7484689",
+    "name": "Sterculia javanica R.Br.",
+    "rank": "SPECIES",
+    "specificEpithet": "javanica",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

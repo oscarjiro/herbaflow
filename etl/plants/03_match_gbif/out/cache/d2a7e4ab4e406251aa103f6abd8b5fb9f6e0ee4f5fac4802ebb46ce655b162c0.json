@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3125468",
+      "name": "Stevia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3125557",
+      "name": "Stevia rebaudiana",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 93,
+    "matchType": "VARIANT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 235922,
+  "right": 235923,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Bertoni) Bertoni",
+    "canonicalName": "Stevia rebaudiana",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Stevia</i> <i>rebaudiana</i> (Bertoni) Bertoni",
+    "genericName": "Stevia",
+    "key": "3125557",
+    "name": "Stevia rebaudiana (Bertoni) Bertoni",
+    "rank": "SPECIES",
+    "specificEpithet": "rebaudiana",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

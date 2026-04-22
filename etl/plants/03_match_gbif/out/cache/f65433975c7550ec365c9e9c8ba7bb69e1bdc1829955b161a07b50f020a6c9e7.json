@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2393",
+      "name": "Acanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3171840",
+      "name": "Ruellia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5415418",
+      "name": "Ruellia tuberosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 400792,
+  "right": 400793,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Ruellia tuberosa",
+    "formattedName": "<i>Ruellia</i> <i>tuberosa</i> L.",
+    "genericName": "Ruellia",
+    "key": "5415418",
+    "name": "Ruellia tuberosa L.",
+    "rank": "SPECIES",
+    "specificEpithet": "tuberosa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

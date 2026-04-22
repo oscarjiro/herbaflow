@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "194150",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "7228684",
+      "name": "Polypodiopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "392",
+      "name": "Polypodiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4922264",
+      "name": "Athyriaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2650853",
+      "name": "Diplazium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2650858",
+      "name": "Diplazium esculentum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 585337,
+  "right": 585339,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Retz.) Sw.",
+    "canonicalName": "Diplazium esculentum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Diplazium</i> <i>esculentum</i> (Retz.) Sw.",
+    "genericName": "Diplazium",
+    "key": "2650858",
+    "name": "Diplazium esculentum (Retz.) Sw.",
+    "rank": "SPECIES",
+    "specificEpithet": "esculentum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

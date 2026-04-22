@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7434655",
+      "name": "Amomum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5301634",
+      "name": "Amomum stenocarpum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 175341,
+  "right": 175341,
+  "synonym": false,
+  "usage": {
+    "authorship": "Valeton",
+    "canonicalName": "Amomum stenocarpum",
+    "formattedName": "<i>Amomum</i> <i>stenocarpum</i> Valeton",
+    "genericName": "Amomum",
+    "key": "5301634",
+    "name": "Amomum stenocarpum Valeton",
+    "rank": "SPECIES",
+    "specificEpithet": "stenocarpum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

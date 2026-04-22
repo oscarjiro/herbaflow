@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Benth.",
+    "canonicalName": "Coleus scutellarioides",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Coleus</i> <i>scutellarioides</i> (L.) Benth.",
+    "genericName": "Coleus",
+    "key": "5341492",
+    "name": "Coleus scutellarioides (L.) Benth.",
+    "rank": "SPECIES",
+    "specificEpithet": "scutellarioides",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2927310",
+      "name": "Coleus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5341492",
+      "name": "Coleus scutellarioides",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 24,
+    "timings": {
+      "luceneMatch": 24,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 25
+    }
+  },
+  "left": 411945,
+  "right": 411945,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) R.Br.",
+    "canonicalName": "Plectranthus scutellarioides",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Plectranthus</i> <i>scutellarioides</i> (L.) R.Br.",
+    "genericName": "Plectranthus",
+    "key": "2927315",
+    "name": "Plectranthus scutellarioides (L.) R.Br.",
+    "rank": "SPECIES",
+    "specificEpithet": "scutellarioides",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

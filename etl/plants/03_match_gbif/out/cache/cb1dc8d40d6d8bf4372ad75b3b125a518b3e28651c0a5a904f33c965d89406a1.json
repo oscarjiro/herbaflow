@@ -1,0 +1,66 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "5",
+      "name": "Fungi",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "95",
+      "name": "Ascomycota",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "180",
+      "name": "Lecanoromycetes",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1048",
+      "name": "Lecanorales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8305",
+      "name": "Parmeliaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2605982",
+      "name": "Usnea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7247607",
+      "name": "Usnea barbata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 8
+    }
+  },
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Weber ex F.H.Wigg",
+    "canonicalName": "Usnea barbata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Usnea</i> <i>barbata</i> (L.) Weber ex F.H.Wigg",
+    "genericName": "Usnea",
+    "key": "7247607",
+    "name": "Usnea barbata (L.) Weber ex F.H.Wigg",
+    "rank": "SPECIES",
+    "specificEpithet": "barbata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

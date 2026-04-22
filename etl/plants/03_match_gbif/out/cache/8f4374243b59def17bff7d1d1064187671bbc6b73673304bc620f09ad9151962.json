@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3119618",
+      "name": "Elephantopus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5395925",
+      "name": "Elephantopus scaber",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 207751,
+  "right": 207759,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Elephantopus scaber",
+    "formattedName": "<i>Elephantopus</i> <i>scaber</i> L.",
+    "genericName": "Elephantopus",
+    "key": "5395925",
+    "name": "Elephantopus scaber L.",
+    "rank": "SPECIES",
+    "specificEpithet": "scaber",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

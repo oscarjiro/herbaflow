@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "168997",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "551",
+      "name": "Alismatales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6979",
+      "name": "Araceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9789076",
+      "name": "Lasia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5330870",
+      "name": "Lasia spinosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 65082,
+  "right": 65082,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Thwaites",
+    "canonicalName": "Lasia spinosa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Lasia</i> <i>spinosa</i> (L.) Thwaites",
+    "genericName": "Lasia",
+    "key": "5330870",
+    "name": "Lasia spinosa (L.) Thwaites",
+    "rank": "SPECIES",
+    "specificEpithet": "spinosa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

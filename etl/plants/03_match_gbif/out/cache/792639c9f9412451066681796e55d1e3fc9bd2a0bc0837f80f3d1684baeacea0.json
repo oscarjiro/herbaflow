@@ -1,0 +1,83 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "canonicalName": "Orthosiphon aristatus aristatus",
+    "formattedName": "<i>Orthosiphon</i> <i>aristatus</i> var. <i>aristatus</i>",
+    "genericName": "Orthosiphon",
+    "infraspecificEpithet": "aristatus",
+    "key": "7308027",
+    "name": "Orthosiphon aristatus var. aristatus",
+    "rank": "VARIETY",
+    "specificEpithet": "aristatus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "6410205",
+      "name": "Orthosiphon",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7308026",
+      "name": "Orthosiphon aristatus",
+      "rank": "SPECIES"
+    },
+    {
+      "key": "7308027",
+      "name": "Orthosiphon aristatus aristatus",
+      "rank": "VARIETY"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 415720,
+  "right": 415720,
+  "synonym": true,
+  "usage": {
+    "authorship": "Benth.",
+    "canonicalName": "Orthosiphon stamineus",
+    "formattedName": "<i>Orthosiphon</i> <i>stamineus</i> Benth.",
+    "genericName": "Orthosiphon",
+    "key": "3891871",
+    "name": "Orthosiphon stamineus Benth.",
+    "rank": "SPECIES",
+    "specificEpithet": "stamineus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

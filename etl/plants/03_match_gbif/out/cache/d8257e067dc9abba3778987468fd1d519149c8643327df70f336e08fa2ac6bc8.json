@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6650",
+      "name": "Pedaliaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3172619",
+      "name": "Sesamum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3172622",
+      "name": "Sesamum indicum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 8
+    }
+  },
+  "left": 428716,
+  "right": 428719,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Sesamum indicum",
+    "formattedName": "<i>Sesamum</i> <i>indicum</i> L.",
+    "genericName": "Sesamum",
+    "key": "3172622",
+    "name": "Sesamum indicum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "indicum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

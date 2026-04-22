@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4691",
+      "name": "Euphorbiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3055964",
+      "name": "Acalypha",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3056259",
+      "name": "Acalypha indica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 451571,
+  "right": 451571,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Acalypha indica",
+    "formattedName": "<i>Acalypha</i> <i>indica</i> L.",
+    "genericName": "Acalypha",
+    "key": "3056259",
+    "name": "Acalypha indica L.",
+    "rank": "SPECIES",
+    "specificEpithet": "indica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

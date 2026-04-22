@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Thunb.) Matsum. & Nakai",
+    "canonicalName": "Citrullus lanatus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Citrullus</i> <i>lanatus</i> (Thunb.) Matsum. & Nakai",
+    "genericName": "Citrullus",
+    "key": "2874621",
+    "name": "Citrullus lanatus (Thunb.) Matsum. & Nakai",
+    "rank": "SPECIES",
+    "specificEpithet": "lanatus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7224005",
+      "name": "Cucurbitales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6634",
+      "name": "Cucurbitaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "8257011",
+      "name": "Citrullus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2874621",
+      "name": "Citrullus lanatus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 293889,
+  "right": 293897,
+  "synonym": true,
+  "usage": {
+    "authorship": "Schrad.",
+    "canonicalName": "Citrullus vulgaris",
+    "formattedName": "<i>Citrullus</i> <i>vulgaris</i> Schrad.",
+    "genericName": "Citrullus",
+    "key": "3625068",
+    "name": "Citrullus vulgaris Schrad.",
+    "rank": "SPECIES",
+    "specificEpithet": "vulgaris",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

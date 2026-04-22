@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "934",
+      "name": "Santalales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6663",
+      "name": "Loranthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3232644",
+      "name": "Macrosolen",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7287970",
+      "name": "Macrosolen cochinchinensis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 546046,
+  "right": 546046,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Lour.) Tiegh.",
+    "canonicalName": "Macrosolen cochinchinensis",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Macrosolen</i> <i>cochinchinensis</i> (Lour.) Tiegh.",
+    "genericName": "Macrosolen",
+    "key": "7287970",
+    "name": "Macrosolen cochinchinensis (Lour.) Tiegh.",
+    "rank": "SPECIES",
+    "specificEpithet": "cochinchinensis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

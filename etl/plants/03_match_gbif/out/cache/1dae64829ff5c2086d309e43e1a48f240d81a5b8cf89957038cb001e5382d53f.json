@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7316536",
+      "name": "Melodinus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3621351",
+      "name": "Melodinus orientalis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 366706,
+  "right": 366706,
+  "synonym": false,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Melodinus orientalis",
+    "formattedName": "<i>Melodinus</i> <i>orientalis</i> Blume",
+    "genericName": "Melodinus",
+    "key": "3621351",
+    "name": "Melodinus orientalis Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "orientalis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

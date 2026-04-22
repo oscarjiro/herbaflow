@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "199036481",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6708",
+      "name": "Symplocaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3032996",
+      "name": "Symplocos",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7318829",
+      "name": "Symplocos odoratissima",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 319335,
+  "right": 319338,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Blume) Choisy ex Zoll.",
+    "canonicalName": "Symplocos odoratissima",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Symplocos</i> <i>odoratissima</i> (Blume) Choisy ex Zoll.",
+    "genericName": "Symplocos",
+    "key": "7318829",
+    "name": "Symplocos odoratissima (Blume) Choisy ex Zoll.",
+    "rank": "SPECIES",
+    "specificEpithet": "odoratissima",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

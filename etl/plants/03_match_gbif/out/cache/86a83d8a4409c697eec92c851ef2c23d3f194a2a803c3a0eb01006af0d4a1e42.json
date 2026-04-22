@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "7228684",
+      "name": "Polypodiopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "392",
+      "name": "Polypodiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2368",
+      "name": "Polypodiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7126742",
+      "name": "Platycerium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "4024927",
+      "name": "Platycerium coronarium",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 3,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 590982,
+  "right": 590982,
+  "synonym": false,
+  "usage": {
+    "authorship": "(D.Koenig ex O.F.Müll.) Desv.",
+    "canonicalName": "Platycerium coronarium",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Platycerium</i> <i>coronarium</i> (D.Koenig ex O.F.Müll.) Desv.",
+    "genericName": "Platycerium",
+    "key": "4024927",
+    "name": "Platycerium coronarium (D.Koenig ex O.F.Müll.) Desv.",
+    "rank": "SPECIES",
+    "specificEpithet": "coronarium",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

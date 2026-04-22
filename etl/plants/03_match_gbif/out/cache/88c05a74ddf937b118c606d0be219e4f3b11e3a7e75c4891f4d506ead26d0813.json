@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Vahl) H.Ohashi & R.R.Mill",
+    "canonicalName": "Hylodesmum repandum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Hylodesmum</i> <i>repandum</i> (Vahl) H.Ohashi & R.R.Mill",
+    "genericName": "Hylodesmum",
+    "key": "2971234",
+    "name": "Hylodesmum repandum (Vahl) H.Ohashi & R.R.Mill",
+    "rank": "SPECIES",
+    "specificEpithet": "repandum",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9523730",
+      "name": "Hylodesmum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2971234",
+      "name": "Hylodesmum repandum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 339065,
+  "right": 339066,
+  "synonym": true,
+  "usage": {
+    "authorship": "DC.",
+    "canonicalName": "Desmodium scalpe",
+    "formattedName": "<i>Desmodium</i> <i>scalpe</i> DC.",
+    "genericName": "Desmodium",
+    "key": "2971240",
+    "name": "Desmodium scalpe DC.",
+    "rank": "SPECIES",
+    "specificEpithet": "scalpe",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

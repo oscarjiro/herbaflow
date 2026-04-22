@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2395",
+      "name": "Simaroubaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3190668",
+      "name": "Simarouba",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 94,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 30,
+    "timings": {
+      "luceneMatch": 30,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 31
+    }
+  },
+  "left": 559755,
+  "right": 559768,
+  "synonym": false,
+  "usage": {
+    "authorship": "Aubl.",
+    "canonicalName": "Simarouba",
+    "formattedName": "<i>Simarouba</i> Aubl.",
+    "key": "3190668",
+    "name": "Simarouba Aubl.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

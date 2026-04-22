@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3105856",
+      "name": "Bidens",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 41,
+    "timings": {
+      "luceneMatch": 41,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 41
+    }
+  },
+  "left": 197778,
+  "right": 198162,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Bidens",
+    "formattedName": "<i>Bidens</i> L.",
+    "key": "3105856",
+    "name": "Bidens L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

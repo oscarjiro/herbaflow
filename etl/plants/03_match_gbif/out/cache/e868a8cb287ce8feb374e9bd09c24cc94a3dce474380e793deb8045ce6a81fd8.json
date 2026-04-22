@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7224005",
+      "name": "Cucurbitales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6634",
+      "name": "Cucurbitaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874604",
+      "name": "Trichosanthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7317548",
+      "name": "Trichosanthes villosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 295231,
+  "right": 295233,
+  "synonym": false,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Trichosanthes villosa",
+    "formattedName": "<i>Trichosanthes</i> <i>villosa</i> Blume",
+    "genericName": "Trichosanthes",
+    "key": "7317548",
+    "name": "Trichosanthes villosa Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "villosa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

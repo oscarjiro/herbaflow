@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "L.",
+    "canonicalName": "Physalis angulata",
+    "formattedName": "<i>Physalis</i> <i>angulata</i> L.",
+    "genericName": "Physalis",
+    "key": "5341792",
+    "name": "Physalis angulata L.",
+    "rank": "SPECIES",
+    "specificEpithet": "angulata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7717",
+      "name": "Solanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928907",
+      "name": "Physalis",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5341792",
+      "name": "Physalis angulata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 571183,
+  "right": 571185,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Physalis minima",
+    "formattedName": "<i>Physalis</i> <i>minima</i> L.",
+    "genericName": "Physalis",
+    "key": "5341772",
+    "name": "Physalis minima L.",
+    "rank": "SPECIES",
+    "specificEpithet": "minima",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

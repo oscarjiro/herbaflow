@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2757518",
+      "name": "Curcuma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3990387",
+      "name": "Curcuma xanthorrhiza",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 175884,
+  "right": 175885,
+  "synonym": false,
+  "usage": {
+    "authorship": "D.Dietr.",
+    "canonicalName": "Curcuma xanthorrhiza",
+    "formattedName": "<i>Curcuma</i> <i>xanthorrhiza</i> D.Dietr.",
+    "genericName": "Curcuma",
+    "key": "3990387",
+    "name": "Curcuma xanthorrhiza D.Dietr.",
+    "rank": "SPECIES",
+    "specificEpithet": "xanthorrhiza",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

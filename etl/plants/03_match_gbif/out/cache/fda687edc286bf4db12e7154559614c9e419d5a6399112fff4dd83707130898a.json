@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Lam.) Hook.f. & Thomson",
+    "canonicalName": "Cananga odorata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cananga</i> <i>odorata</i> (Lam.) Hook.f. & Thomson",
+    "genericName": "Cananga",
+    "key": "5407583",
+    "name": "Cananga odorata (Lam.) Hook.f. & Thomson",
+    "rank": "SPECIES",
+    "specificEpithet": "odorata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "718",
+      "name": "Magnoliales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "9291",
+      "name": "Annonaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "5407582",
+      "name": "Cananga",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5407583",
+      "name": "Cananga odorata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 443180,
+  "right": 443182,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lam.) King",
+    "canonicalName": "Canangium odoratum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Canangium</i> <i>odoratum</i> (Lam.) King",
+    "genericName": "Canangium",
+    "key": "3158662",
+    "name": "Canangium odoratum (Lam.) King",
+    "rank": "SPECIES",
+    "specificEpithet": "odoratum",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

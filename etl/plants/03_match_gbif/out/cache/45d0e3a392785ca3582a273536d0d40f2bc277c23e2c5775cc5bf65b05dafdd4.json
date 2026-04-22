@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7224005",
+      "name": "Cucurbitales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6634",
+      "name": "Cucurbitaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874604",
+      "name": "Trichosanthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7317567",
+      "name": "Trichosanthes tricuspidata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 295218,
+  "right": 295230,
+  "synonym": false,
+  "usage": {
+    "authorship": "Lour.",
+    "canonicalName": "Trichosanthes tricuspidata",
+    "formattedName": "<i>Trichosanthes</i> <i>tricuspidata</i> Lour.",
+    "genericName": "Trichosanthes",
+    "key": "7317567",
+    "name": "Trichosanthes tricuspidata Lour.",
+    "rank": "SPECIES",
+    "specificEpithet": "tricuspidata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

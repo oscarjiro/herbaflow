@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "147635791",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2505",
+      "name": "Ericaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2882751",
+      "name": "Gaultheria",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7328504",
+      "name": "Gaultheria fragrantissima",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 95,
+    "matchType": "VARIANT",
+    "timeTaken": 6,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 305477,
+  "right": 305481,
+  "synonym": false,
+  "usage": {
+    "authorship": "Wall.",
+    "canonicalName": "Gaultheria fragrantissima",
+    "formattedName": "<i>Gaultheria</i> <i>fragrantissima</i> Wall.",
+    "genericName": "Gaultheria",
+    "key": "7328504",
+    "name": "Gaultheria fragrantissima Wall.",
+    "rank": "SPECIES",
+    "specificEpithet": "fragrantissima",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "7228684",
+      "name": "Polypodiopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "392",
+      "name": "Polypodiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2368",
+      "name": "Polypodiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7126742",
+      "name": "Platycerium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "4025107",
+      "name": "Platycerium andinum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 95,
+    "matchType": "VARIANT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 590980,
+  "right": 590980,
+  "synonym": false,
+  "usage": {
+    "authorship": "Baker",
+    "canonicalName": "Platycerium andinum",
+    "formattedName": "<i>Platycerium</i> <i>andinum</i> Baker",
+    "genericName": "Platycerium",
+    "key": "4025107",
+    "name": "Platycerium andinum Baker",
+    "rank": "SPECIES",
+    "specificEpithet": "andinum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(DC.) Merr.",
+    "canonicalName": "Parkia timoriana",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Parkia</i> <i>timoriana</i> (DC.) Merr.",
+    "genericName": "Parkia",
+    "key": "5348879",
+    "name": "Parkia timoriana (DC.) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "timoriana",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2943936",
+      "name": "Parkia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5348879",
+      "name": "Parkia timoriana",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 347769,
+  "right": 347770,
+  "synonym": true,
+  "usage": {
+    "authorship": "G.Don",
+    "canonicalName": "Parkia roxburghii",
+    "formattedName": "<i>Parkia</i> <i>roxburghii</i> G.Don",
+    "genericName": "Parkia",
+    "key": "5348883",
+    "name": "Parkia roxburghii G.Don",
+    "rank": "SPECIES",
+    "specificEpithet": "roxburghii",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

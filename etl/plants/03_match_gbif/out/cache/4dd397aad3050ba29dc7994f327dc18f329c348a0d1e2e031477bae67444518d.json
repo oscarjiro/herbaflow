@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Roxb.",
+    "canonicalName": "Senna alata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Senna</i> <i>alata</i> (L.) Roxb.",
+    "genericName": "Senna",
+    "key": "2956947",
+    "name": "Senna alata (L.) Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "alata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2956904",
+      "name": "Senna",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2956947",
+      "name": "Senna alata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 350770,
+  "right": 350771,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Cassia alata",
+    "formattedName": "<i>Cassia</i> <i>alata</i> L.",
+    "genericName": "Cassia",
+    "key": "5353900",
+    "name": "Cassia alata L.",
+    "rank": "SPECIES",
+    "specificEpithet": "alata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

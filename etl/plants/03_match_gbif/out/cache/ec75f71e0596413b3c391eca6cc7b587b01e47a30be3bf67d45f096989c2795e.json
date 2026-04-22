@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Lippold",
+    "canonicalName": "Cascabela thevetia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cascabela</i> <i>thevetia</i> (L.) Lippold",
+    "genericName": "Cascabela",
+    "key": "3169652",
+    "name": "Cascabela thevetia (L.) Lippold",
+    "rank": "SPECIES",
+    "specificEpithet": "thevetia",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7950372",
+      "name": "Cascabela",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3169652",
+      "name": "Cascabela thevetia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 362194,
+  "right": 362195,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Pers.) K.Schum.",
+    "canonicalName": "Thevetia peruviana",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Thevetia</i> <i>peruviana</i> (Pers.) K.Schum.",
+    "genericName": "Thevetia",
+    "key": "5414405",
+    "name": "Thevetia peruviana (Pers.) K.Schum.",
+    "rank": "SPECIES",
+    "specificEpithet": "peruviana",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

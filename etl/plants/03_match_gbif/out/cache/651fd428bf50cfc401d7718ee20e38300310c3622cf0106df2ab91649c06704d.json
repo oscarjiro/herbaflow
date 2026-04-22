@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "20681422",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7225535",
+      "name": "Brassicales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6636",
+      "name": "Caricaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874482",
+      "name": "Carica",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2874484",
+      "name": "Carica papaya",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 5
+    }
+  },
+  "left": 261340,
+  "right": 261341,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Carica papaya",
+    "formattedName": "<i>Carica</i> <i>papaya</i> L.",
+    "genericName": "Carica",
+    "key": "2874484",
+    "name": "Carica papaya L.",
+    "rank": "SPECIES",
+    "specificEpithet": "papaya",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

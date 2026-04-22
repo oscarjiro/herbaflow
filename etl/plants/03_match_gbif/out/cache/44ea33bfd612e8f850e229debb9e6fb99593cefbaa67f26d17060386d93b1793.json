@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "117308014",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2757518",
+      "name": "Curcuma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2757635",
+      "name": "Curcuma aeruginosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 175783,
+  "right": 175791,
+  "synonym": false,
+  "usage": {
+    "authorship": "Roxb.",
+    "canonicalName": "Curcuma aeruginosa",
+    "formattedName": "<i>Curcuma</i> <i>aeruginosa</i> Roxb.",
+    "genericName": "Curcuma",
+    "key": "2757635",
+    "name": "Curcuma aeruginosa Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "aeruginosa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

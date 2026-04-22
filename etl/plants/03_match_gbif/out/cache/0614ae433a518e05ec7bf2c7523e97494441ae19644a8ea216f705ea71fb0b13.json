@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "170110",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7225535",
+      "name": "Brassicales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3112",
+      "name": "Brassicaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3042506",
+      "name": "Brassica",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3042845",
+      "name": "Brassica oleracea",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 4,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 5
+    }
+  },
+  "left": 255132,
+  "right": 255141,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Brassica oleracea",
+    "formattedName": "<i>Brassica</i> <i>oleracea</i> L.",
+    "genericName": "Brassica",
+    "key": "3042845",
+    "name": "Brassica oleracea L.",
+    "rank": "SPECIES",
+    "specificEpithet": "oleracea",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

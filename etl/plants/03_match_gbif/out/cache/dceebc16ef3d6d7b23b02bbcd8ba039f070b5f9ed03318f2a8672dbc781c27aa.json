@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5015",
+      "name": "Rosaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3001068",
+      "name": "Malus",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 535055,
+  "right": 535163,
+  "synonym": false,
+  "usage": {
+    "authorship": "Mill.",
+    "canonicalName": "Malus",
+    "formattedName": "<i>Malus</i> Mill.",
+    "key": "3001068",
+    "name": "Malus Mill.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

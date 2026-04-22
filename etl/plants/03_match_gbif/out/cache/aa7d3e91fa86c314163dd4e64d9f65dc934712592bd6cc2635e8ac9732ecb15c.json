@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "198841662",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2428",
+      "name": "Thymelaeaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3233887",
+      "name": "Phaleria",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5524327",
+      "name": "Phaleria macrocarpa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 482697,
+  "right": 482697,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Scheff.) Boerl.",
+    "canonicalName": "Phaleria macrocarpa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Phaleria</i> <i>macrocarpa</i> (Scheff.) Boerl.",
+    "genericName": "Phaleria",
+    "key": "5524327",
+    "name": "Phaleria macrocarpa (Scheff.) Boerl.",
+    "rank": "SPECIES",
+    "specificEpithet": "macrocarpa",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

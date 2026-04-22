@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Miers ex Hook.fil. & Thomson",
+    "canonicalName": "Tinospora crispa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Tinospora</i> <i>crispa</i> (L.) Miers ex Hook.fil. & Thomson",
+    "genericName": "Tinospora",
+    "key": "8298918",
+    "name": "Tinospora crispa (L.) Miers ex Hook.fil. & Thomson",
+    "rank": "SPECIES",
+    "specificEpithet": "crispa",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "399",
+      "name": "Ranunculales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2411",
+      "name": "Menispermaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7268723",
+      "name": "Tinospora",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8298918",
+      "name": "Tinospora crispa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 1,
+      "nameParse": 0,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 518537,
+  "right": 518542,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lam.) Beumée ex K.Heyne",
+    "canonicalName": "Tinospora tuberculata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Tinospora</i> <i>tuberculata</i> (Lam.) Beumée ex K.Heyne",
+    "genericName": "Tinospora",
+    "key": "3830130",
+    "name": "Tinospora tuberculata (Lam.) Beumée ex K.Heyne",
+    "rank": "SPECIES",
+    "specificEpithet": "tuberculata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

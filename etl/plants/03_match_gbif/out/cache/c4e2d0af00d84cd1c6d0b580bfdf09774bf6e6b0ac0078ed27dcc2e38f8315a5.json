@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Burm.fil.) Moylan ex J.R.I.Wood",
+    "canonicalName": "Strobilanthes alternata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Strobilanthes</i> <i>alternata</i> (Burm.fil.) Moylan ex J.R.I.Wood",
+    "genericName": "Strobilanthes",
+    "key": "8297383",
+    "name": "Strobilanthes alternata (Burm.fil.) Moylan ex J.R.I.Wood",
+    "rank": "SPECIES",
+    "specificEpithet": "alternata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2393",
+      "name": "Acanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "6359394",
+      "name": "Strobilanthes",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8297383",
+      "name": "Strobilanthes alternata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 401860,
+  "right": 401860,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Burm.fil.) T.Anderson",
+    "canonicalName": "Hemigraphis alternata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Hemigraphis</i> <i>alternata</i> (Burm.fil.) T.Anderson",
+    "genericName": "Hemigraphis",
+    "key": "3173034",
+    "name": "Hemigraphis alternata (Burm.fil.) T.Anderson",
+    "rank": "SPECIES",
+    "specificEpithet": "alternata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

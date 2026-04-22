@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2396",
+      "name": "Rutaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3190155",
+      "name": "Citrus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8077391",
+      "name": "Citrus aurantium",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 553630,
+  "right": 553630,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Citrus aurantium",
+    "formattedName": "<i>Citrus</i> × <i>aurantium</i> L.",
+    "genericName": "Citrus",
+    "key": "8077391",
+    "name": "Citrus × aurantium L.",
+    "rank": "SPECIES",
+    "specificEpithet": "aurantium",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

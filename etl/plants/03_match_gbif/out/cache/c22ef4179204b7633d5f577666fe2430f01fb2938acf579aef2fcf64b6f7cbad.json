@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3146588",
+      "name": "Erigeron",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3146683",
+      "name": "Erigeron sumatrensis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 208989,
+  "right": 208989,
+  "synonym": false,
+  "usage": {
+    "authorship": "Retz.",
+    "canonicalName": "Erigeron sumatrensis",
+    "formattedName": "<i>Erigeron</i> <i>sumatrensis</i> Retz.",
+    "genericName": "Erigeron",
+    "key": "3146683",
+    "name": "Erigeron sumatrensis Retz.",
+    "rank": "SPECIES",
+    "specificEpithet": "sumatrensis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

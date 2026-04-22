@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "33241",
+      "status": "ENDANGERED",
+      "statusCode": "EN"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "5349236",
+      "name": "Pterocarpus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5349242",
+      "name": "Pterocarpus indicus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 349257,
+  "right": 349258,
+  "synonym": false,
+  "usage": {
+    "authorship": "Willd.",
+    "canonicalName": "Pterocarpus indicus",
+    "formattedName": "<i>Pterocarpus</i> <i>indicus</i> Willd.",
+    "genericName": "Pterocarpus",
+    "key": "5349242",
+    "name": "Pterocarpus indicus Willd.",
+    "rank": "SPECIES",
+    "specificEpithet": "indicus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Jacq.",
+    "canonicalName": "Annona mucosa",
+    "formattedName": "<i>Annona</i> <i>mucosa</i> Jacq.",
+    "genericName": "Annona",
+    "key": "5407571",
+    "name": "Annona mucosa Jacq.",
+    "rank": "SPECIES",
+    "specificEpithet": "mucosa",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "718",
+      "name": "Magnoliales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "9291",
+      "name": "Annonaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3155252",
+      "name": "Annona",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5407571",
+      "name": "Annona mucosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 442966,
+  "right": 442966,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Jacq.) Baill.",
+    "canonicalName": "Rollinia mucosa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Rollinia</i> <i>mucosa</i> (Jacq.) Baill.",
+    "genericName": "Rollinia",
+    "key": "3158590",
+    "name": "Rollinia mucosa (Jacq.) Baill.",
+    "rank": "SPECIES",
+    "specificEpithet": "mucosa",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

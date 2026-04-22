@@ -1,0 +1,85 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Torr.",
+    "canonicalName": "Datura stramonium tatula",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Datura</i> <i>stramonium</i> var. <i>tatula</i> (L.) Torr.",
+    "genericName": "Datura",
+    "infraspecificEpithet": "tatula",
+    "key": "2928753",
+    "name": "Datura stramonium var. tatula (L.) Torr.",
+    "rank": "VARIETY",
+    "specificEpithet": "stramonium",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7717",
+      "name": "Solanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928734",
+      "name": "Datura",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2928751",
+      "name": "Datura stramonium",
+      "rank": "SPECIES"
+    },
+    {
+      "key": "2928753",
+      "name": "Datura stramonium tatula",
+      "rank": "VARIETY"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 3,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 4
+    }
+  },
+  "left": 569915,
+  "right": 569915,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Datura tatula",
+    "formattedName": "<i>Datura</i> <i>tatula</i> L.",
+    "genericName": "Datura",
+    "key": "2928754",
+    "name": "Datura tatula L.",
+    "rank": "SPECIES",
+    "specificEpithet": "tatula",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

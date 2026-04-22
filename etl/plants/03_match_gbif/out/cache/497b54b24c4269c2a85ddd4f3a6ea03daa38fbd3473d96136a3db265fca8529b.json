@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "49485755",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5014",
+      "name": "Myrtaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3187232",
+      "name": "Psidium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5420380",
+      "name": "Psidium guajava",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 499757,
+  "right": 499759,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Psidium guajava",
+    "formattedName": "<i>Psidium</i> <i>guajava</i> L.",
+    "genericName": "Psidium",
+    "key": "5420380",
+    "name": "Psidium guajava L.",
+    "rank": "SPECIES",
+    "specificEpithet": "guajava",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

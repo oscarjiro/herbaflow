@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "31822",
+      "status": "VULNERABLE",
+      "statusCode": "VU"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925556",
+      "name": "Vitex",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8276186",
+      "name": "Vitex quinata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 422214,
+  "right": 422215,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Lour.) F.N.Williams",
+    "canonicalName": "Vitex quinata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Vitex</i> <i>quinata</i> (Lour.) F.N.Williams",
+    "genericName": "Vitex",
+    "key": "8276186",
+    "name": "Vitex quinata (Lour.) F.N.Williams",
+    "rank": "SPECIES",
+    "specificEpithet": "quinata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

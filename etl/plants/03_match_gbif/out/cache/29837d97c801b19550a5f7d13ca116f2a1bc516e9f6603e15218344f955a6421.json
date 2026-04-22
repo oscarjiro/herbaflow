@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "100895534",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7717",
+      "name": "Solanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2932937",
+      "name": "Capsicum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2932944",
+      "name": "Capsicum annuum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 4,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 4
+    }
+  },
+  "left": 569560,
+  "right": 569573,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Capsicum annuum",
+    "formattedName": "<i>Capsicum</i> <i>annuum</i> L.",
+    "genericName": "Capsicum",
+    "key": "2932944",
+    "name": "Capsicum annuum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "annuum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

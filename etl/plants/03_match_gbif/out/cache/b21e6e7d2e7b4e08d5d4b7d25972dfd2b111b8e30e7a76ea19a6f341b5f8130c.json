@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "404",
+      "name": "Piperales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6678",
+      "name": "Piperaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3075433",
+      "name": "Piper",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9161222",
+      "name": "Piper decumanum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 512874,
+  "right": 512874,
+  "synonym": false,
+  "usage": {
+    "authorship": "Linn.Diss.Herb.Amb.",
+    "canonicalName": "Piper decumanum",
+    "formattedName": "<i>Piper</i> <i>decumanum</i> Linn.Diss.Herb.Amb.",
+    "genericName": "Piper",
+    "key": "9161222",
+    "name": "Piper decumanum Linn.Diss.Herb.Amb.",
+    "rank": "SPECIES",
+    "specificEpithet": "decumanum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

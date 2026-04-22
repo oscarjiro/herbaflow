@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "J.Presl",
+    "canonicalName": "Cinnamomum verum",
+    "formattedName": "<i>Cinnamomum</i> <i>verum</i> J.Presl",
+    "genericName": "Cinnamomum",
+    "key": "3033987",
+    "name": "Cinnamomum verum J.Presl",
+    "rank": "SPECIES",
+    "specificEpithet": "verum",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "407",
+      "name": "Laurales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6688",
+      "name": "Lauraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3033980",
+      "name": "Cinnamomum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3033987",
+      "name": "Cinnamomum verum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "3 synonym homonyms",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 438951,
+  "right": 438955,
+  "synonym": true,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Cinnamomum zeylanicum",
+    "formattedName": "<i>Cinnamomum</i> <i>zeylanicum</i> Blume",
+    "genericName": "Cinnamomum",
+    "key": "3033988",
+    "name": "Cinnamomum zeylanicum Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "zeylanicum",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

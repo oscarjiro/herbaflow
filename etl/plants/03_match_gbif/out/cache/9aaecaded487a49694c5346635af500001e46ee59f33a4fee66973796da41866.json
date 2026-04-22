@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "131292920",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2377",
+      "name": "Turneraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874846",
+      "name": "Turnera",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2874852",
+      "name": "Turnera ulmifolia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 6,
+    "timings": {
+      "luceneMatch": 6,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 470612,
+  "right": 470615,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Turnera ulmifolia",
+    "formattedName": "<i>Turnera</i> <i>ulmifolia</i> L.",
+    "genericName": "Turnera",
+    "key": "2874852",
+    "name": "Turnera ulmifolia L.",
+    "rank": "SPECIES",
+    "specificEpithet": "ulmifolia",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

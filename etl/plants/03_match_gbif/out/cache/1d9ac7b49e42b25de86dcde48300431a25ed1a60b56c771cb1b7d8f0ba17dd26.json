@@ -1,0 +1,15 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "diagnostics": {
+    "confidence": 100,
+    "issues": [],
+    "matchType": "NONE",
+    "note": "No match because of too little confidence",
+    "timeTaken": 9,
+    "timings": {
+      "sciNameMatch": 9
+    }
+  },
+  "synonym": false
+}

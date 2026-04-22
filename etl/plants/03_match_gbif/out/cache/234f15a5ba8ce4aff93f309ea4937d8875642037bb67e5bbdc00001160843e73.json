@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) Baill. ex Pierre",
+    "canonicalName": "Magnolia champaca",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Magnolia</i> <i>champaca</i> (L.) Baill. ex Pierre",
+    "genericName": "Magnolia",
+    "key": "3153099",
+    "name": "Magnolia champaca (L.) Baill. ex Pierre",
+    "rank": "SPECIES",
+    "specificEpithet": "champaca",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "718",
+      "name": "Magnoliales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4690",
+      "name": "Magnoliaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2888195",
+      "name": "Magnolia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3153099",
+      "name": "Magnolia champaca",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 446404,
+  "right": 446407,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Michelia champaca",
+    "formattedName": "<i>Michelia</i> <i>champaca</i> L.",
+    "genericName": "Michelia",
+    "key": "5939079",
+    "name": "Michelia champaca L.",
+    "rank": "SPECIES",
+    "specificEpithet": "champaca",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

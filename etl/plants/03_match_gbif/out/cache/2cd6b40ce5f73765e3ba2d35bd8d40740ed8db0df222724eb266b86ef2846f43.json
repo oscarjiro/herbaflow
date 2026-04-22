@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "198829922",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6664",
+      "name": "Salicaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874157",
+      "name": "Flacourtia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5331166",
+      "name": "Flacourtia inermis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 467832,
+  "right": 467835,
+  "synonym": false,
+  "usage": {
+    "authorship": "Roxb.",
+    "canonicalName": "Flacourtia inermis",
+    "formattedName": "<i>Flacourtia</i> <i>inermis</i> Roxb.",
+    "genericName": "Flacourtia",
+    "key": "5331166",
+    "name": "Flacourtia inermis Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "inermis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

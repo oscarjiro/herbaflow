@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8807",
+      "name": "Phyllanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3061139",
+      "name": "Phyllanthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5381945",
+      "name": "Phyllanthus niruri",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 465596,
+  "right": 465609,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Phyllanthus niruri",
+    "formattedName": "<i>Phyllanthus</i> <i>niruri</i> L.",
+    "genericName": "Phyllanthus",
+    "key": "5381945",
+    "name": "Phyllanthus niruri L.",
+    "rank": "SPECIES",
+    "specificEpithet": "niruri",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

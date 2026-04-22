@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8807",
+      "name": "Phyllanthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3061139",
+      "name": "Phyllanthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5382589",
+      "name": "Phyllanthus amarus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 465379,
+  "right": 465380,
+  "synonym": false,
+  "usage": {
+    "authorship": "Schumach. & Thonn.",
+    "canonicalName": "Phyllanthus amarus",
+    "formattedName": "<i>Phyllanthus</i> <i>amarus</i> Schumach. & Thonn.",
+    "genericName": "Phyllanthus",
+    "key": "5382589",
+    "name": "Phyllanthus amarus Schumach. & Thonn.",
+    "rank": "SPECIES",
+    "specificEpithet": "amarus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

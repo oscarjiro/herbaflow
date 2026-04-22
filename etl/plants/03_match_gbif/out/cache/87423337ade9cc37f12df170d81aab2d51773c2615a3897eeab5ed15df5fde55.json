@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "L.",
+    "canonicalName": "Paederia foetida",
+    "formattedName": "<i>Paederia</i> <i>foetida</i> L.",
+    "genericName": "Paederia",
+    "key": "2909527",
+    "name": "Paederia foetida L.",
+    "rank": "SPECIES",
+    "specificEpithet": "foetida",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8798",
+      "name": "Rubiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2909469",
+      "name": "Paederia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2909527",
+      "name": "Paederia foetida",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 19,
+    "timings": {
+      "luceneMatch": 19,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 20
+    }
+  },
+  "left": 385139,
+  "right": 385142,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Lour.) Merr.",
+    "canonicalName": "Paederia scandens",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Paederia</i> <i>scandens</i> (Lour.) Merr.",
+    "genericName": "Paederia",
+    "key": "2909530",
+    "name": "Paederia scandens (Lour.) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "scandens",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

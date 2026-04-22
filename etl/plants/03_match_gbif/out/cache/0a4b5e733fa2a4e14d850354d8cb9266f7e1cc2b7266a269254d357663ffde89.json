@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2389",
+      "name": "Convolvulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928509",
+      "name": "Ipomoea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2928562",
+      "name": "Ipomoea quamoclit",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 568604,
+  "right": 568605,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Ipomoea quamoclit",
+    "formattedName": "<i>Ipomoea</i> <i>quamoclit</i> L.",
+    "genericName": "Ipomoea",
+    "key": "2928562",
+    "name": "Ipomoea quamoclit L.",
+    "rank": "SPECIES",
+    "specificEpithet": "quamoclit",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

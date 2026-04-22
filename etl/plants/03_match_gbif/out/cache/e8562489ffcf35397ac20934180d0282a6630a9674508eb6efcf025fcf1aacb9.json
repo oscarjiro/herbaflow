@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "32295",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "8412045",
+      "name": "Alstonia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5414410",
+      "name": "Alstonia scholaris",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 361247,
+  "right": 361249,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) R.Br.",
+    "canonicalName": "Alstonia scholaris",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Alstonia</i> <i>scholaris</i> (L.) R.Br.",
+    "genericName": "Alstonia",
+    "key": "5414410",
+    "name": "Alstonia scholaris (L.) R.Br.",
+    "rank": "SPECIES",
+    "specificEpithet": "scholaris",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

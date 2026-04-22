@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Roxb.",
+    "canonicalName": "Ficus racemifera",
+    "formattedName": "<i>Ficus</i> <i>racemifera</i> Roxb.",
+    "genericName": "Ficus",
+    "key": "5571764",
+    "name": "Ficus racemifera Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "racemifera",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6640",
+      "name": "Moraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984588",
+      "name": "Ficus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5571764",
+      "name": "Ficus racemifera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 529302,
+  "right": 529302,
+  "synonym": true,
+  "usage": {
+    "authorship": "Teijsm. & Binn.",
+    "canonicalName": "Ficus nodosa",
+    "formattedName": "<i>Ficus</i> <i>nodosa</i> Teijsm. & Binn.",
+    "genericName": "Ficus",
+    "key": "5570676",
+    "name": "Ficus nodosa Teijsm. & Binn.",
+    "rank": "SPECIES",
+    "specificEpithet": "nodosa",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

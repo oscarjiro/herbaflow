@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) A.R.Simões & Staples",
+    "canonicalName": "Decalobanthus peltatus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Decalobanthus</i> <i>peltatus</i> (L.) A.R.Simões & Staples",
+    "genericName": "Decalobanthus",
+    "key": "9413254",
+    "name": "Decalobanthus peltatus (L.) A.R.Simões & Staples",
+    "rank": "SPECIES",
+    "specificEpithet": "peltatus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2389",
+      "name": "Convolvulaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7324437",
+      "name": "Decalobanthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9413254",
+      "name": "Decalobanthus peltatus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 567283,
+  "right": 567283,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Merr.",
+    "canonicalName": "Merremia peltata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Merremia</i> <i>peltata</i> (L.) Merr.",
+    "genericName": "Merremia",
+    "key": "5548953",
+    "name": "Merremia peltata (L.) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "peltata",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

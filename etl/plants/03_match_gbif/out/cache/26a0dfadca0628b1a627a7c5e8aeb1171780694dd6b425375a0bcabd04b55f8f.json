@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "L.",
+    "canonicalName": "Duranta erecta",
+    "formattedName": "<i>Duranta</i> <i>erecta</i> L.",
+    "genericName": "Duranta",
+    "key": "2925655",
+    "name": "Duranta erecta L.",
+    "rank": "SPECIES",
+    "specificEpithet": "erecta",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6689",
+      "name": "Verbenaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925654",
+      "name": "Duranta",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2925655",
+      "name": "Duranta erecta",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 3,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 4
+    }
+  },
+  "left": 436370,
+  "right": 436372,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Duranta repens",
+    "formattedName": "<i>Duranta</i> <i>repens</i> L.",
+    "genericName": "Duranta",
+    "key": "2925656",
+    "name": "Duranta repens L.",
+    "rank": "SPECIES",
+    "specificEpithet": "repens",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

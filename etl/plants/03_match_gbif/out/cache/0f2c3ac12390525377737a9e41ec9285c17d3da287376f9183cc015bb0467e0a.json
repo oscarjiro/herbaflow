@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2756998",
+      "name": "Kaempferia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5301445",
+      "name": "Kaempferia rotunda",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 176683,
+  "right": 176692,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Kaempferia rotunda",
+    "formattedName": "<i>Kaempferia</i> <i>rotunda</i> L.",
+    "genericName": "Kaempferia",
+    "key": "5301445",
+    "name": "Kaempferia rotunda L.",
+    "rank": "SPECIES",
+    "specificEpithet": "rotunda",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

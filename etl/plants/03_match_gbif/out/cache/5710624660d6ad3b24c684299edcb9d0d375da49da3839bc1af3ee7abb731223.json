@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "194943",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "282",
+      "name": "Gnetopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "423",
+      "name": "Gnetales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6755",
+      "name": "Gnetaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2653091",
+      "name": "Gnetum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2653133",
+      "name": "Gnetum gnemon",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 3,
+    "timings": {
+      "luceneMatch": 3,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 3
+    }
+  },
+  "left": 60988,
+  "right": 60994,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Gnetum gnemon",
+    "formattedName": "<i>Gnetum</i> <i>gnemon</i> L.",
+    "genericName": "Gnetum",
+    "key": "2653133",
+    "name": "Gnetum gnemon L.",
+    "rank": "SPECIES",
+    "specificEpithet": "gnemon",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "5301253",
+      "name": "Alpinia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5302225",
+      "name": "Alpinia galanga",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 93,
+    "matchType": "VARIANT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 4,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 4
+    }
+  },
+  "left": 175141,
+  "right": 175143,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Willd.",
+    "canonicalName": "Alpinia galanga",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Alpinia</i> <i>galanga</i> (L.) Willd.",
+    "genericName": "Alpinia",
+    "key": "5302225",
+    "name": "Alpinia galanga (L.) Willd.",
+    "rank": "SPECIES",
+    "specificEpithet": "galanga",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169769",
+      "name": "Rauvolfia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3169787",
+      "name": "Rauvolfia serpentina",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 83,
+    "matchType": "VARIANT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 368098,
+  "right": 368099,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Benth. ex Kurz",
+    "canonicalName": "Rauvolfia serpentina",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Rauvolfia</i> <i>serpentina</i> (L.) Benth. ex Kurz",
+    "genericName": "Rauvolfia",
+    "key": "3169787",
+    "name": "Rauvolfia serpentina (L.) Benth. ex Kurz",
+    "rank": "SPECIES",
+    "specificEpithet": "serpentina",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

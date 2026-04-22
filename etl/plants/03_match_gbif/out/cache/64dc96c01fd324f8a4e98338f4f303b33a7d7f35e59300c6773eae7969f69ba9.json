@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "96816126",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6689",
+      "name": "Verbenaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925448",
+      "name": "Stachytarpheta",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2925463",
+      "name": "Stachytarpheta jamaicensis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 19,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 437172,
+  "right": 437174,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Vahl",
+    "canonicalName": "Stachytarpheta jamaicensis",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Stachytarpheta</i> <i>jamaicensis</i> (L.) Vahl",
+    "genericName": "Stachytarpheta",
+    "key": "2925463",
+    "name": "Stachytarpheta jamaicensis (L.) Vahl",
+    "rank": "SPECIES",
+    "specificEpithet": "jamaicensis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

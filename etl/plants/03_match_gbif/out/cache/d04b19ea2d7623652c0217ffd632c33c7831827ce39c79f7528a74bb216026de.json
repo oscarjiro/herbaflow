@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "33986",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "718",
+      "name": "Magnoliales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2439",
+      "name": "Myristicaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152840",
+      "name": "Myristica",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5406817",
+      "name": "Myristica fragrans",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 447116,
+  "right": 447116,
+  "synonym": false,
+  "usage": {
+    "authorship": "Houtt.",
+    "canonicalName": "Myristica fragrans",
+    "formattedName": "<i>Myristica</i> <i>fragrans</i> Houtt.",
+    "genericName": "Myristica",
+    "key": "5406817",
+    "name": "Myristica fragrans Houtt.",
+    "rank": "SPECIES",
+    "specificEpithet": "fragrans",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

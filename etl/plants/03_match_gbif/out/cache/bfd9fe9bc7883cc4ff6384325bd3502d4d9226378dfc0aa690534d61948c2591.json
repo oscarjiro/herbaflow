@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Mart.",
+    "canonicalName": "Pontederia crassipes",
+    "formattedName": "<i>Pontederia</i> <i>crassipes</i> Mart.",
+    "genericName": "Pontederia",
+    "key": "2765942",
+    "name": "Pontederia crassipes Mart.",
+    "rank": "SPECIES",
+    "specificEpithet": "crassipes",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "553",
+      "name": "Commelinales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3731",
+      "name": "Pontederiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2740415",
+      "name": "Pontederia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2765942",
+      "name": "Pontederia crassipes",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 128822,
+  "right": 128822,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Mart.) Solms",
+    "canonicalName": "Eichhornia crassipes",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Eichhornia</i> <i>crassipes</i> (Mart.) Solms",
+    "genericName": "Eichhornia",
+    "key": "2765940",
+    "name": "Eichhornia crassipes (Mart.) Solms",
+    "rank": "SPECIES",
+    "specificEpithet": "crassipes",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

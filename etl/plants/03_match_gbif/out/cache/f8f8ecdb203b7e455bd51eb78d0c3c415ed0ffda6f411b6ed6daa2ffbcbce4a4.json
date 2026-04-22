@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1169",
+      "name": "Asparagales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7683",
+      "name": "Asparagaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9560529",
+      "name": "Ophiopogon",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2774158",
+      "name": "Ophiopogon japonicus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 80276,
+  "right": 80282,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Thunb.) Ker Gawl.",
+    "canonicalName": "Ophiopogon japonicus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Ophiopogon</i> <i>japonicus</i> (Thunb.) Ker Gawl.",
+    "genericName": "Ophiopogon",
+    "key": "2774158",
+    "name": "Ophiopogon japonicus (Thunb.) Ker Gawl.",
+    "rank": "SPECIES",
+    "specificEpithet": "japonicus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

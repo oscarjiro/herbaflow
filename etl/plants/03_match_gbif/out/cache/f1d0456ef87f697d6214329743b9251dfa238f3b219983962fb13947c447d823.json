@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "177359",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3073",
+      "name": "Poaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2705952",
+      "name": "Eleusine",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2705953",
+      "name": "Eleusine indica",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 159241,
+  "right": 159243,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Gaertn.",
+    "canonicalName": "Eleusine indica",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Eleusine</i> <i>indica</i> (L.) Gaertn.",
+    "genericName": "Eleusine",
+    "key": "2705953",
+    "name": "Eleusine indica (L.) Gaertn.",
+    "rank": "SPECIES",
+    "specificEpithet": "indica",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7224005",
+      "name": "Cucurbitales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6638",
+      "name": "Begoniaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874710",
+      "name": "Begonia",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 94,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 29,
+    "timings": {
+      "luceneMatch": 29,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 29
+    }
+  },
+  "left": 290685,
+  "right": 293487,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Begonia",
+    "formattedName": "<i>Begonia</i> L.",
+    "key": "2874710",
+    "name": "Begonia L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7717",
+      "name": "Solanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928997",
+      "name": "Solanum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2930617",
+      "name": "Solanum melongena",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 573233,
+  "right": 573236,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Solanum melongena",
+    "formattedName": "<i>Solanum</i> <i>melongena</i> L.",
+    "genericName": "Solanum",
+    "key": "2930617",
+    "name": "Solanum melongena L.",
+    "rank": "SPECIES",
+    "specificEpithet": "melongena",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

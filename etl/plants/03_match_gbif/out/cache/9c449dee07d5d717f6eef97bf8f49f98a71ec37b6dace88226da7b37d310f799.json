@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(W.Hunter) Roxb.",
+    "canonicalName": "Uncaria gambir",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Uncaria</i> <i>gambir</i> (W.Hunter) Roxb.",
+    "genericName": "Uncaria",
+    "key": "5338190",
+    "name": "Uncaria gambir (W.Hunter) Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "gambir",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8798",
+      "name": "Rubiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2906635",
+      "name": "Uncaria",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5338190",
+      "name": "Uncaria gambir",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 95,
+    "matchType": "VARIANT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 392811,
+  "right": 392811,
+  "synonym": true,
+  "usage": {
+    "authorship": "Roxb.",
+    "canonicalName": "Uncaria gambier",
+    "formattedName": "<i>Uncaria</i> <i>gambier</i> Roxb.",
+    "genericName": "Uncaria",
+    "key": "8249783",
+    "name": "Uncaria gambier Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "gambier",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

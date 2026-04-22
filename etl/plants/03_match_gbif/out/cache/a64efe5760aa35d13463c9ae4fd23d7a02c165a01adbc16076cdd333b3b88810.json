@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7224005",
+      "name": "Cucurbitales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6634",
+      "name": "Cucurbitaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2874578",
+      "name": "Momordica",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2874581",
+      "name": "Momordica charantia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 294712,
+  "right": 294725,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Momordica charantia",
+    "formattedName": "<i>Momordica</i> <i>charantia</i> L.",
+    "genericName": "Momordica",
+    "key": "2874581",
+    "name": "Momordica charantia L.",
+    "rank": "SPECIES",
+    "specificEpithet": "charantia",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

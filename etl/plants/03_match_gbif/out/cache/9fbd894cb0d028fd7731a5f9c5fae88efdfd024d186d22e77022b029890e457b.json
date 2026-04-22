@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "400",
+      "name": "Proteales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2424",
+      "name": "Nelumbonaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2882448",
+      "name": "Nelumbo",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2882449",
+      "name": "Nelumbo nucifera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 513207,
+  "right": 513210,
+  "synonym": false,
+  "usage": {
+    "authorship": "Gaertn.",
+    "canonicalName": "Nelumbo nucifera",
+    "formattedName": "<i>Nelumbo</i> <i>nucifera</i> Gaertn.",
+    "genericName": "Nelumbo",
+    "key": "2882449",
+    "name": "Nelumbo nucifera Gaertn.",
+    "rank": "SPECIES",
+    "specificEpithet": "nucifera",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

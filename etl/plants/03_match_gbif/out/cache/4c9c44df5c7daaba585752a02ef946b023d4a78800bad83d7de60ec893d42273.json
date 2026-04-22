@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "44973",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2956904",
+      "name": "Senna",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2957379",
+      "name": "Senna sophera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 350986,
+  "right": 350988,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Roxb.",
+    "canonicalName": "Senna sophera",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Senna</i> <i>sophera</i> (L.) Roxb.",
+    "genericName": "Senna",
+    "key": "2957379",
+    "name": "Senna sophera (L.) Roxb.",
+    "rank": "SPECIES",
+    "specificEpithet": "sophera",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

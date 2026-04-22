@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2950827",
+      "name": "Tadehagi",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2950828",
+      "name": "Tadehagi triquetrum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 352155,
+  "right": 352156,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) H.Ohashi",
+    "canonicalName": "Tadehagi triquetrum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Tadehagi</i> <i>triquetrum</i> (L.) H.Ohashi",
+    "genericName": "Tadehagi",
+    "key": "2950828",
+    "name": "Tadehagi triquetrum (L.) H.Ohashi",
+    "rank": "SPECIES",
+    "specificEpithet": "triquetrum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

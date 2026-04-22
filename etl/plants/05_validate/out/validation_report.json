@@ -1,0 +1,28 @@
+{
+  "checks": {
+    "suspicious_canonical_name": {
+      "critical": 0,
+      "total": 7,
+      "warning": 7
+    }
+  },
+  "generated_at": "2026-04-22T21:33:33.734284+00:00",
+  "output_files": {
+    "report_csv": "05_validate\\out\\validation_report.csv",
+    "report_json": "05_validate\\out\\validation_report.json",
+    "validated_aliases": "05_validate\\out\\plant_aliases.csv",
+    "validated_plants": "05_validate\\out\\plants.csv"
+  },
+  "source_files": {
+    "aliases": "04_build_canonical\\out\\plant_aliases.csv",
+    "plants": "04_build_canonical\\out\\plants.csv"
+  },
+  "summary": {
+    "aliases_rows": 597,
+    "critical_issues": 0,
+    "plants_rows": 519,
+    "status": "pass",
+    "total_issues": 7,
+    "warning_issues": 7
+  }
+}

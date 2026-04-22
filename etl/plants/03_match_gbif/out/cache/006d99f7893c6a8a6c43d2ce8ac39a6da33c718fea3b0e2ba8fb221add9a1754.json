@@ -1,0 +1,85 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Roxb.) A.Chev.",
+    "canonicalName": "Madhuca longifolia latifolia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Madhuca</i> <i>longifolia</i> var. <i>latifolia</i> (Roxb.) A.Chev.",
+    "genericName": "Madhuca",
+    "infraspecificEpithet": "latifolia",
+    "key": "2883352",
+    "name": "Madhuca longifolia var. latifolia (Roxb.) A.Chev.",
+    "rank": "VARIETY",
+    "specificEpithet": "longifolia",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1353",
+      "name": "Ericales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8802",
+      "name": "Sapotaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2883218",
+      "name": "Madhuca",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2883346",
+      "name": "Madhuca longifolia",
+      "rank": "SPECIES"
+    },
+    {
+      "key": "2883352",
+      "name": "Madhuca longifolia latifolia",
+      "rank": "VARIETY"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 317003,
+  "right": 317003,
+  "synonym": true,
+  "usage": {
+    "authorship": "J.F.Gmel.",
+    "canonicalName": "Madhuca indica",
+    "formattedName": "<i>Madhuca</i> <i>indica</i> J.F.Gmel.",
+    "genericName": "Madhuca",
+    "key": "2883353",
+    "name": "Madhuca indica J.F.Gmel.",
+    "rank": "SPECIES",
+    "specificEpithet": "indica",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

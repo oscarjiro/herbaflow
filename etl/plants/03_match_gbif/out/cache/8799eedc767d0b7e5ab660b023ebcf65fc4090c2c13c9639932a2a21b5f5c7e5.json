@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "198378179",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6659",
+      "name": "Burseraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3190431",
+      "name": "Canarium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5635777",
+      "name": "Canarium vulgare",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 550588,
+  "right": 550588,
+  "synonym": false,
+  "usage": {
+    "authorship": "Leenh.",
+    "canonicalName": "Canarium vulgare",
+    "formattedName": "<i>Canarium</i> <i>vulgare</i> Leenh.",
+    "genericName": "Canarium",
+    "key": "5635777",
+    "name": "Canarium vulgare Leenh.",
+    "rank": "SPECIES",
+    "specificEpithet": "vulgare",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "146188276",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "934",
+      "name": "Santalales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4930777",
+      "name": "Ximeniaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2889810",
+      "name": "Ximenia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2889811",
+      "name": "Ximenia americana",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 548491,
+  "right": 548496,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Ximenia americana",
+    "formattedName": "<i>Ximenia</i> <i>americana</i> L.",
+    "genericName": "Ximenia",
+    "key": "2889811",
+    "name": "Ximenia americana L.",
+    "rank": "SPECIES",
+    "specificEpithet": "americana",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

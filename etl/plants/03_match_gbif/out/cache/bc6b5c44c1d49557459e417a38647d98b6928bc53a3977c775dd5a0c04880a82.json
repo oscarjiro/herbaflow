@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "145282078",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "407",
+      "name": "Laurales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6688",
+      "name": "Lauraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3034072",
+      "name": "Beilschmiedia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "4176422",
+      "name": "Beilschmiedia madang",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 438491,
+  "right": 438491,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Blume) Blume",
+    "canonicalName": "Beilschmiedia madang",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Beilschmiedia</i> <i>madang</i> (Blume) Blume",
+    "genericName": "Beilschmiedia",
+    "key": "4176422",
+    "name": "Beilschmiedia madang (Blume) Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "madang",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

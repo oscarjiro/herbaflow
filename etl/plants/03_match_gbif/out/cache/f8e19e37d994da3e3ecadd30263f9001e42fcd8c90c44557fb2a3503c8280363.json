@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) H.Rob.",
+    "canonicalName": "Cyanthillium cinereum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cyanthillium</i> <i>cinereum</i> (L.) H.Rob.",
+    "genericName": "Cyanthillium",
+    "key": "6445734",
+    "name": "Cyanthillium cinereum (L.) H.Rob.",
+    "rank": "SPECIES",
+    "specificEpithet": "cinereum",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3148294",
+      "name": "Cyanthillium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "6445734",
+      "name": "Cyanthillium cinereum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 206214,
+  "right": 206235,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Less.",
+    "canonicalName": "Vernonia cinerea",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Vernonia</i> <i>cinerea</i> (L.) Less.",
+    "genericName": "Vernonia",
+    "key": "6445389",
+    "name": "Vernonia cinerea (L.) Less.",
+    "rank": "SPECIES",
+    "specificEpithet": "cinerea",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

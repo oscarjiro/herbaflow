@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Schott",
+    "canonicalName": "Typhonium roxburghii",
+    "formattedName": "<i>Typhonium</i> <i>roxburghii</i> Schott",
+    "genericName": "Typhonium",
+    "key": "2869636",
+    "name": "Typhonium roxburghii Schott",
+    "rank": "SPECIES",
+    "specificEpithet": "roxburghii",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "551",
+      "name": "Alismatales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6979",
+      "name": "Araceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2869483",
+      "name": "Typhonium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2869636",
+      "name": "Typhonium roxburghii",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 6,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 66884,
+  "right": 66884,
+  "synonym": true,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Typhonium divaricatum",
+    "formattedName": "<i>Typhonium</i> <i>divaricatum</i> Blume",
+    "genericName": "Typhonium",
+    "key": "2869641",
+    "name": "Typhonium divaricatum Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "divaricatum",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

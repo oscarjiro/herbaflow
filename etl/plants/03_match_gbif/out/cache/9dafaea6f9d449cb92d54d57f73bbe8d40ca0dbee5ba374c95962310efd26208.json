@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "399",
+      "name": "Ranunculales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2422",
+      "name": "Papaveraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2888431",
+      "name": "Papaver",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2888439",
+      "name": "Papaver somniferum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 18
+    }
+  },
+  "left": 520280,
+  "right": 520287,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Papaver somniferum",
+    "formattedName": "<i>Papaver</i> <i>somniferum</i> L.",
+    "genericName": "Papaver",
+    "key": "2888439",
+    "name": "Papaver somniferum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "somniferum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

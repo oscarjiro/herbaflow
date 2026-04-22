@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6717",
+      "name": "Portulacaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3084696",
+      "name": "Portulaca",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3084699",
+      "name": "Portulaca quadrifida",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 286444,
+  "right": 286445,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Portulaca quadrifida",
+    "formattedName": "<i>Portulaca</i> <i>quadrifida</i> L.",
+    "genericName": "Portulaca",
+    "key": "3084699",
+    "name": "Portulaca quadrifida L.",
+    "rank": "SPECIES",
+    "specificEpithet": "quadrifida",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

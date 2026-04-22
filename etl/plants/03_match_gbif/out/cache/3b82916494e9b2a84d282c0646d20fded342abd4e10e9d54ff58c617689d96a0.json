@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "L.",
+    "canonicalName": "Curcuma longa",
+    "formattedName": "<i>Curcuma</i> <i>longa</i> L.",
+    "genericName": "Curcuma",
+    "key": "2757624",
+    "name": "Curcuma longa L.",
+    "rank": "SPECIES",
+    "specificEpithet": "longa",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "627",
+      "name": "Zingiberales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4687",
+      "name": "Zingiberaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2757518",
+      "name": "Curcuma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2757624",
+      "name": "Curcuma longa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 175835,
+  "right": 175848,
+  "synonym": true,
+  "usage": {
+    "authorship": "Valeton",
+    "canonicalName": "Curcuma soloensis",
+    "formattedName": "<i>Curcuma</i> <i>soloensis</i> Valeton",
+    "genericName": "Curcuma",
+    "key": "2757626",
+    "name": "Curcuma soloensis Valeton",
+    "rank": "SPECIES",
+    "specificEpithet": "soloensis",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

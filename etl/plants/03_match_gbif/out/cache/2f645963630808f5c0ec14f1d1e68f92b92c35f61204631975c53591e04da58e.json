@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "934",
+      "name": "Santalales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6663",
+      "name": "Loranthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7287875",
+      "name": "Scurrula",
+      "rank": "GENUS"
+    },
+    {
+      "key": "4001481",
+      "name": "Scurrula fusca",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 546445,
+  "right": 546445,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Blume) G.Don",
+    "canonicalName": "Scurrula fusca",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Scurrula</i> <i>fusca</i> (Blume) G.Don",
+    "genericName": "Scurrula",
+    "key": "4001481",
+    "name": "Scurrula fusca (Blume) G.Don",
+    "rank": "SPECIES",
+    "specificEpithet": "fusca",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

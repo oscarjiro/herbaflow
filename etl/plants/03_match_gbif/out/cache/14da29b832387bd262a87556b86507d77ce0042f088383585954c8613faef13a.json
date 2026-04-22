@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "33196",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1414",
+      "name": "Malpighiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "4907584",
+      "name": "Calophyllaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3189443",
+      "name": "Calophyllum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "9531830",
+      "name": "Calophyllum inophyllum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 14,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 15
+    }
+  },
+  "left": 447868,
+  "right": 447874,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Calophyllum inophyllum",
+    "formattedName": "<i>Calophyllum</i> <i>inophyllum</i> L.",
+    "genericName": "Calophyllum",
+    "key": "9531830",
+    "name": "Calophyllum inophyllum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "inophyllum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "404",
+      "name": "Piperales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3066",
+      "name": "Aristolochiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2873978",
+      "name": "Aristolochia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3589520",
+      "name": "Aristolochia rumphii",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 14,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 507960,
+  "right": 507960,
+  "synonym": false,
+  "usage": {
+    "authorship": "Kostel.",
+    "canonicalName": "Aristolochia rumphii",
+    "formattedName": "<i>Aristolochia</i> <i>rumphii</i> Kostel.",
+    "genericName": "Aristolochia",
+    "key": "3589520",
+    "name": "Aristolochia rumphii Kostel.",
+    "rank": "SPECIES",
+    "specificEpithet": "rumphii",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

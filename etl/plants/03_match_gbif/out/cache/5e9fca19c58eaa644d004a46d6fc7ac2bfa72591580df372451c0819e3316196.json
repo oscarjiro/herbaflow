@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) J.Presl",
+    "canonicalName": "Cinnamomum culitlawan",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cinnamomum</i> <i>culitlawan</i> (L.) J.Presl",
+    "genericName": "Cinnamomum",
+    "key": "7692124",
+    "name": "Cinnamomum culitlawan (L.) J.Presl",
+    "rank": "SPECIES",
+    "specificEpithet": "culitlawan",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "407",
+      "name": "Laurales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6688",
+      "name": "Lauraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3033980",
+      "name": "Cinnamomum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7692124",
+      "name": "Cinnamomum culitlawan",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 90,
+    "matchType": "VARIANT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 16,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 438921,
+  "right": 438921,
+  "synonym": true,
+  "usage": {
+    "authorship": "(L.) Blume",
+    "canonicalName": "Cinnamomum culilawan",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cinnamomum</i> <i>culilawan</i> (L.) Blume",
+    "genericName": "Cinnamomum",
+    "key": "4176454",
+    "name": "Cinnamomum culilawan (L.) Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "culilawan",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

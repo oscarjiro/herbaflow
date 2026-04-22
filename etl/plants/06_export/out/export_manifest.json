@@ -1,0 +1,56 @@
+{
+  "dry_run": false,
+  "emit_sql": false,
+  "generated_at": "2026-04-22T21:33:34.463469+00:00",
+  "input_dir": "05_validate\\out",
+  "outputs": {
+    "plant_aliases_csv": "06_export\\out\\plant_aliases.csv",
+    "plant_aliases_sql": "",
+    "plants_csv": "06_export\\out\\plants.csv",
+    "plants_sql": ""
+  },
+  "row_counts": {
+    "aliases_input_rows": 597,
+    "aliases_output_rows": 597,
+    "plants_input_rows": 519,
+    "plants_output_rows": 519
+  },
+  "schema": {
+    "plant_aliases_columns": [
+      "alias_id",
+      "plant_id",
+      "alias_name",
+      "alias_key",
+      "alias_type",
+      "source_name",
+      "source_url",
+      "source_batch_id",
+      "retrieved_at"
+    ],
+    "plants_columns": [
+      "plant_id",
+      "canonical_key",
+      "canonical_scientific_name",
+      "authorship",
+      "family_name",
+      "taxonomic_status",
+      "rank",
+      "gbif_usage_key",
+      "gbif_accepted_usage_key",
+      "gbif_species_key",
+      "gbif_genus_key",
+      "gbif_family_key",
+      "gbif_kingdom_key",
+      "source_name",
+      "source_url",
+      "source_batch_id",
+      "retrieved_at",
+      "confidence"
+    ]
+  },
+  "sources": {
+    "plant_aliases_input": "05_validate\\out\\plant_aliases.csv",
+    "plants_input": "05_validate\\out\\plants.csv"
+  },
+  "status": "written"
+}

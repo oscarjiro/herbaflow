@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "30753",
+      "status": "VULNERABLE",
+      "statusCode": "VU"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "407",
+      "name": "Laurales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6688",
+      "name": "Lauraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3034041",
+      "name": "Persea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3034046",
+      "name": "Persea americana",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 21,
+    "timings": {
+      "luceneMatch": 20,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 21
+    }
+  },
+  "left": 441799,
+  "right": 441807,
+  "synonym": false,
+  "usage": {
+    "authorship": "Mill.",
+    "canonicalName": "Persea americana",
+    "formattedName": "<i>Persea</i> <i>americana</i> Mill.",
+    "genericName": "Persea",
+    "key": "3034046",
+    "name": "Persea americana Mill.",
+    "rank": "SPECIES",
+    "specificEpithet": "americana",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

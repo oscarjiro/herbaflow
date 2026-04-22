@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169755",
+      "name": "Nerium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7317019",
+      "name": "Nerium indicum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 366954,
+  "right": 366956,
+  "synonym": false,
+  "usage": {
+    "authorship": "Mill.",
+    "canonicalName": "Nerium indicum",
+    "formattedName": "<i>Nerium</i> <i>indicum</i> Mill.",
+    "genericName": "Nerium",
+    "key": "7317019",
+    "name": "Nerium indicum Mill.",
+    "rank": "SPECIES",
+    "specificEpithet": "indicum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

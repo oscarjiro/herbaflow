@@ -1,0 +1,60 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2925556",
+      "name": "Vitex",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 28,
+    "timings": {
+      "luceneMatch": 28,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 28
+    }
+  },
+  "left": 421932,
+  "right": 422219,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Vitex",
+    "formattedName": "<i>Vitex</i> L.",
+    "key": "2925556",
+    "name": "Vitex L.",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

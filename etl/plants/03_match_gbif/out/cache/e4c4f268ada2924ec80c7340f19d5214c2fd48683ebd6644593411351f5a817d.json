@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "551",
+      "name": "Alismatales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6979",
+      "name": "Araceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2868531",
+      "name": "Homalomena",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2868654",
+      "name": "Homalomena cordata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 65036,
+  "right": 65036,
+  "synonym": false,
+  "usage": {
+    "authorship": "Schott",
+    "canonicalName": "Homalomena cordata",
+    "formattedName": "<i>Homalomena</i> <i>cordata</i> Schott",
+    "genericName": "Homalomena",
+    "key": "2868654",
+    "name": "Homalomena cordata Schott",
+    "rank": "SPECIES",
+    "specificEpithet": "cordata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

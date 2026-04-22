@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "552",
+      "name": "Arecales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7681",
+      "name": "Arecaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2735116",
+      "name": "Cocos",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2735117",
+      "name": "Cocos nucifera",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 4,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 5
+    }
+  },
+  "left": 70027,
+  "right": 70031,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Cocos nucifera",
+    "formattedName": "<i>Cocos</i> <i>nucifera</i> L.",
+    "genericName": "Cocos",
+    "key": "2735117",
+    "name": "Cocos nucifera L.",
+    "rank": "SPECIES",
+    "specificEpithet": "nucifera",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "145302576",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "407",
+      "name": "Laurales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6688",
+      "name": "Lauraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3033980",
+      "name": "Cinnamomum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3033985",
+      "name": "Cinnamomum burmanni",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 96,
+    "matchType": "VARIANT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 438911,
+  "right": 438916,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Nees & T.Nees) Blume",
+    "canonicalName": "Cinnamomum burmanni",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cinnamomum</i> <i>burmanni</i> (Nees & T.Nees) Blume",
+    "genericName": "Cinnamomum",
+    "key": "3033985",
+    "name": "Cinnamomum burmanni (Nees & T.Nees) Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "burmanni",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

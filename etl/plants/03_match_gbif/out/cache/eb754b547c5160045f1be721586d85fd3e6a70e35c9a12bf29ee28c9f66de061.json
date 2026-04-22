@@ -1,0 +1,80 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Osbeck) H.Ohashi & K.Ohashi",
+    "canonicalName": "Grona styracifolia",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Grona</i> <i>styracifolia</i> (Osbeck) H.Ohashi & K.Ohashi",
+    "genericName": "Grona",
+    "key": "10722283",
+    "name": "Grona styracifolia (Osbeck) H.Ohashi & K.Ohashi",
+    "rank": "SPECIES",
+    "specificEpithet": "styracifolia",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "9615544",
+      "name": "Grona",
+      "rank": "GENUS"
+    },
+    {
+      "key": "10722283",
+      "name": "Grona styracifolia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 16,
+    "timings": {
+      "luceneMatch": 17,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 17
+    }
+  },
+  "left": 338280,
+  "right": 338281,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Osbeck) Merr.",
+    "canonicalName": "Desmodium styracifolium",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Desmodium</i> <i>styracifolium</i> (Osbeck) Merr.",
+    "genericName": "Desmodium",
+    "key": "2967806",
+    "name": "Desmodium styracifolium (Osbeck) Merr.",
+    "rank": "SPECIES",
+    "specificEpithet": "styracifolium",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

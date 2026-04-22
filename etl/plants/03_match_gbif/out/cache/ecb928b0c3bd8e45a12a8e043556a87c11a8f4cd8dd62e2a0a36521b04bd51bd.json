@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "62038171",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2396",
+      "name": "Rutaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3190155",
+      "name": "Citrus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "6433679",
+      "name": "Citrus hystrix",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 8,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 9
+    }
+  },
+  "left": 553631,
+  "right": 553632,
+  "synonym": false,
+  "usage": {
+    "authorship": "DC.",
+    "canonicalName": "Citrus hystrix",
+    "formattedName": "<i>Citrus</i> <i>hystrix</i> DC.",
+    "genericName": "Citrus",
+    "key": "6433679",
+    "name": "Citrus hystrix DC.",
+    "rank": "SPECIES",
+    "specificEpithet": "hystrix",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2946499",
+      "name": "Clitoria",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2946519",
+      "name": "Clitoria ternatea",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 15,
+    "timings": {
+      "luceneMatch": 15,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 16
+    }
+  },
+  "left": 332467,
+  "right": 332468,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Clitoria ternatea",
+    "formattedName": "<i>Clitoria</i> <i>ternatea</i> L.",
+    "genericName": "Clitoria",
+    "key": "2946519",
+    "name": "Clitoria ternatea L.",
+    "rank": "SPECIES",
+    "specificEpithet": "ternatea",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

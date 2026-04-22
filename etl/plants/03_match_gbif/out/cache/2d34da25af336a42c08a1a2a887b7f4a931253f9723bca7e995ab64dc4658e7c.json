@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2927310",
+      "name": "Coleus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5341313",
+      "name": "Coleus amboinicus",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 5
+    }
+  },
+  "left": 411935,
+  "right": 411935,
+  "synonym": false,
+  "usage": {
+    "authorship": "Lour.",
+    "canonicalName": "Coleus amboinicus",
+    "formattedName": "<i>Coleus</i> <i>amboinicus</i> Lour.",
+    "genericName": "Coleus",
+    "key": "5341313",
+    "name": "Coleus amboinicus Lour.",
+    "rank": "SPECIES",
+    "specificEpithet": "amboinicus",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

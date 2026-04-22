@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "Span.",
+    "canonicalName": "Celtis timorensis",
+    "formattedName": "<i>Celtis</i> <i>timorensis</i> Span.",
+    "genericName": "Celtis",
+    "key": "4160107",
+    "name": "Celtis timorensis Span.",
+    "rank": "SPECIES",
+    "specificEpithet": "timorensis",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "691",
+      "name": "Rosales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2384",
+      "name": "Cannabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2984479",
+      "name": "Celtis",
+      "rank": "GENUS"
+    },
+    {
+      "key": "4160107",
+      "name": "Celtis timorensis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 526942,
+  "right": 526943,
+  "synonym": true,
+  "usage": {
+    "authorship": "Lindl.",
+    "canonicalName": "Celtis cinnamomea",
+    "formattedName": "<i>Celtis</i> <i>cinnamomea</i> Lindl.",
+    "genericName": "Celtis",
+    "key": "4159661",
+    "name": "Celtis cinnamomea Lindl.",
+    "rank": "SPECIES",
+    "specificEpithet": "cinnamomea",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

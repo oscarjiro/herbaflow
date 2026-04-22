@@ -1,0 +1,27 @@
+04_BUILD_CANONICAL (PART 2) REPORT
+=================================
+input_rows=529
+group_count=519
+plant_rows=519
+alias_rows=597
+
+Alias types used:
+author_variant, exact_scraped_spelling, normalized_variant, synonym_variant
+
+Notes:
+- plant_id is a stable hash derived from canonical_key
+- alias_id is a stable hash derived from plant_id, alias_key, and alias_type
+- source_name is treated as the source system name, not the plant name
+- alias_name preserves the exact original scraped spelling where available
+- GBIF identifier fields are normalized to plain string form
+
+plants_path=04_build_canonical\out\plants.csv
+aliases_path=04_build_canonical\out\plant_aliases.csv
+report_path=04_build_canonical\out\build_canonical_part2_report.txt
+status=success
+
+Plant columns written:
+plant_id, canonical_key, canonical_scientific_name, authorship, family_name, taxonomic_status, rank, gbif_usage_key, gbif_accepted_usage_key, gbif_species_key, gbif_genus_key, gbif_family_key, gbif_kingdom_key, source_name, source_url, source_batch_id, retrieved_at, confidence
+
+Alias columns written:
+alias_id, plant_id, alias_name, alias_key, alias_type, source_name, source_url, source_batch_id, retrieved_at

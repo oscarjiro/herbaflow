@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Blume) Blume",
+    "canonicalName": "Buchanania arborescens",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Buchanania</i> <i>arborescens</i> (Blume) Blume",
+    "genericName": "Buchanania",
+    "key": "5544059",
+    "name": "Buchanania arborescens (Blume) Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "arborescens",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2398",
+      "name": "Anacardiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3190571",
+      "name": "Buchanania",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5544059",
+      "name": "Buchanania arborescens",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 548780,
+  "right": 548780,
+  "synonym": true,
+  "usage": {
+    "authorship": "Blume",
+    "canonicalName": "Buchanania lucida",
+    "formattedName": "<i>Buchanania</i> <i>lucida</i> Blume",
+    "genericName": "Buchanania",
+    "key": "5544571",
+    "name": "Buchanania lucida Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "lucida",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

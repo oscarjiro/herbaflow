@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7150312",
+      "name": "Dischidia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7439694",
+      "name": "Dischidia nummularia",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 2,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 364068,
+  "right": 364069,
+  "synonym": false,
+  "usage": {
+    "authorship": "R.Br.",
+    "canonicalName": "Dischidia nummularia",
+    "formattedName": "<i>Dischidia</i> <i>nummularia</i> R.Br.",
+    "genericName": "Dischidia",
+    "key": "7439694",
+    "name": "Dischidia nummularia R.Br.",
+    "rank": "SPECIES",
+    "specificEpithet": "nummularia",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

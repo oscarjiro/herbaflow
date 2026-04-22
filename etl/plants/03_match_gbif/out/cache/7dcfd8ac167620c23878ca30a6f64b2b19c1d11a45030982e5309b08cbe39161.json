@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(L.) H.Pfeiff.",
+    "canonicalName": "Rhynchospora colorata",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Rhynchospora</i> <i>colorata</i> (L.) H.Pfeiff.",
+    "genericName": "Rhynchospora",
+    "key": "2721618",
+    "name": "Rhynchospora colorata (L.) H.Pfeiff.",
+    "rank": "SPECIES",
+    "specificEpithet": "colorata",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1369",
+      "name": "Poales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7708",
+      "name": "Cyperaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2701052",
+      "name": "Rhynchospora",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2721618",
+      "name": "Rhynchospora colorata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 10,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 148315,
+  "right": 148315,
+  "synonym": true,
+  "usage": {
+    "authorship": "Endl.",
+    "canonicalName": "Cyperus kyllingia",
+    "formattedName": "<i>Cyperus</i> <i>kyllingia</i> Endl.",
+    "genericName": "Cyperus",
+    "key": "2721633",
+    "name": "Cyperus kyllingia Endl.",
+    "rank": "SPECIES",
+    "specificEpithet": "kyllingia",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

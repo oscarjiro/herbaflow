@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "155290240",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "552",
+      "name": "Arecales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7681",
+      "name": "Arecaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2733775",
+      "name": "Metroxylon",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2733781",
+      "name": "Metroxylon sagu",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 71251,
+  "right": 71253,
+  "synonym": false,
+  "usage": {
+    "authorship": "Rottb.",
+    "canonicalName": "Metroxylon sagu",
+    "formattedName": "<i>Metroxylon</i> <i>sagu</i> Rottb.",
+    "genericName": "Metroxylon",
+    "key": "2733781",
+    "name": "Metroxylon sagu Rottb.",
+    "rank": "SPECIES",
+    "specificEpithet": "sagu",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

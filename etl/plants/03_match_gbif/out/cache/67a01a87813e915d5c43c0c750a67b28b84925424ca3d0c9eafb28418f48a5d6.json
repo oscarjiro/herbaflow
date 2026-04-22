@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6683",
+      "name": "Melastomataceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3188510",
+      "name": "Melastoma",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3188511",
+      "name": "Melastoma malabathricum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 488181,
+  "right": 488186,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Melastoma malabathricum",
+    "formattedName": "<i>Melastoma</i> <i>malabathricum</i> L.",
+    "genericName": "Melastoma",
+    "key": "3188511",
+    "name": "Melastoma malabathricum L.",
+    "rank": "SPECIES",
+    "specificEpithet": "malabathricum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "198840629",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "933",
+      "name": "Sapindales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2395",
+      "name": "Simaroubaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7329565",
+      "name": "Soulamea",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3708737",
+      "name": "Soulamea amara",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 4,
+    "timings": {
+      "luceneMatch": 3,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 4
+    }
+  },
+  "left": 559787,
+  "right": 559787,
+  "synonym": false,
+  "usage": {
+    "authorship": "Lam.",
+    "canonicalName": "Soulamea amara",
+    "formattedName": "<i>Soulamea</i> <i>amara</i> Lam.",
+    "genericName": "Soulamea",
+    "key": "3708737",
+    "name": "Soulamea amara Lam.",
+    "rank": "SPECIES",
+    "specificEpithet": "amara",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

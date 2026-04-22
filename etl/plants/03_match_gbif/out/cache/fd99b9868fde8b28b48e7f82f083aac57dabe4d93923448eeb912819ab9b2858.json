@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "136142327",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2963414",
+      "name": "Cassia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5357108",
+      "name": "Cassia fistula",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 93,
+    "matchType": "VARIANT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 331154,
+  "right": 331156,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Cassia fistula",
+    "formattedName": "<i>Cassia</i> <i>fistula</i> L.",
+    "genericName": "Cassia",
+    "key": "5357108",
+    "name": "Cassia fistula L.",
+    "rank": "SPECIES",
+    "specificEpithet": "fistula",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

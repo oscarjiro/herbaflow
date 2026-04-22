@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "690",
+      "name": "Myrtales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5014",
+      "name": "Myrtaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3029010",
+      "name": "Syzygium",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3183002",
+      "name": "Syzygium aromaticum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 501326,
+  "right": 501327,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Merr. & L.M.Perry",
+    "canonicalName": "Syzygium aromaticum",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Syzygium</i> <i>aromaticum</i> (L.) Merr. & L.M.Perry",
+    "genericName": "Syzygium",
+    "key": "3183002",
+    "name": "Syzygium aromaticum (L.) Merr. & L.M.Perry",
+    "rank": "SPECIES",
+    "specificEpithet": "aromaticum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

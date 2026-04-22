@@ -1,0 +1,84 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "canonicalName": "Abelmoschus moschatus moschatus",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Abelmoschus</i> <i>moschatus</i> subsp. <i>moschatus</i>",
+    "genericName": "Abelmoschus",
+    "infraspecificEpithet": "moschatus",
+    "key": "10045372",
+    "name": "Abelmoschus moschatus subsp. moschatus",
+    "rank": "SUBSPECIES",
+    "specificEpithet": "moschatus",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152705",
+      "name": "Abelmoschus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8312665",
+      "name": "Abelmoschus moschatus",
+      "rank": "SPECIES"
+    },
+    {
+      "key": "10045372",
+      "name": "Abelmoschus moschatus moschatus",
+      "rank": "SUBSPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 3,
+      "sciNameMatch": 14
+    }
+  },
+  "left": 474237,
+  "right": 474237,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Hibiscus abelmoschus",
+    "formattedName": "<i>Hibiscus</i> <i>abelmoschus</i> L.",
+    "genericName": "Hibiscus",
+    "key": "3152710",
+    "name": "Hibiscus abelmoschus L.",
+    "rank": "SPECIES",
+    "specificEpithet": "abelmoschus",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

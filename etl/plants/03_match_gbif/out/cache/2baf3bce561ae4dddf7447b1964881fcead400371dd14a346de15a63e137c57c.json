@@ -1,0 +1,79 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Lam.) H.S.Irwin & Barneby",
+    "canonicalName": "Senna siamea",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Senna</i> <i>siamea</i> (Lam.) H.S.Irwin & Barneby",
+    "genericName": "Senna",
+    "key": "2956905",
+    "name": "Senna siamea (Lam.) H.S.Irwin & Barneby",
+    "rank": "SPECIES",
+    "specificEpithet": "siamea",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2956904",
+      "name": "Senna",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2956905",
+      "name": "Senna siamea",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 8,
+    "timings": {
+      "luceneMatch": 7,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 8
+    }
+  },
+  "left": 350979,
+  "right": 350979,
+  "synonym": true,
+  "usage": {
+    "authorship": "Lam.",
+    "canonicalName": "Cassia siamea",
+    "formattedName": "<i>Cassia</i> <i>siamea</i> Lam.",
+    "genericName": "Cassia",
+    "key": "5353880",
+    "name": "Cassia siamea Lam.",
+    "rank": "SPECIES",
+    "specificEpithet": "siamea",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2497",
+      "name": "Lamiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2927173",
+      "name": "Mentha",
+      "rank": "GENUS"
+    },
+    {
+      "key": "8707933",
+      "name": "Mentha piperita",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 13,
+    "timings": {
+      "luceneMatch": 13,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 414514,
+  "right": 414517,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Mentha piperita",
+    "formattedName": "<i>Mentha</i> × <i>piperita</i> L.",
+    "genericName": "Mentha",
+    "key": "8707933",
+    "name": "Mentha × piperita L.",
+    "rank": "SPECIES",
+    "specificEpithet": "piperita",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

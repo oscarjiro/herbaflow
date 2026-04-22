@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2502",
+      "name": "Loganiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169589",
+      "name": "Strychnos",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5645763",
+      "name": "Strychnos ignatii",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 373381,
+  "right": 373383,
+  "synonym": false,
+  "usage": {
+    "authorship": "Bergius",
+    "canonicalName": "Strychnos ignatii",
+    "formattedName": "<i>Strychnos</i> <i>ignatii</i> Bergius",
+    "genericName": "Strychnos",
+    "key": "5645763",
+    "name": "Strychnos ignatii Bergius",
+    "rank": "SPECIES",
+    "specificEpithet": "ignatii",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

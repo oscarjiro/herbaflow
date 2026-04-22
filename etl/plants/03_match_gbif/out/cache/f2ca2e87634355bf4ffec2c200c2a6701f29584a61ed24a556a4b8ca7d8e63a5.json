@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "7226589",
+      "name": "Chloranthales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6679",
+      "name": "Chloranthaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7339050",
+      "name": "Chloranthus",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7469977",
+      "name": "Chloranthus elatior",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 288919,
+  "right": 288920,
+  "synonym": false,
+  "usage": {
+    "authorship": "Link",
+    "canonicalName": "Chloranthus elatior",
+    "formattedName": "<i>Chloranthus</i> <i>elatior</i> Link",
+    "genericName": "Chloranthus",
+    "key": "7469977",
+    "name": "Chloranthus elatior Link",
+    "rank": "SPECIES",
+    "specificEpithet": "elatior",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

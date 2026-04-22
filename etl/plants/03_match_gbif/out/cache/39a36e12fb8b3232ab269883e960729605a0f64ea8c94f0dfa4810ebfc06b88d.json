@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "125918206",
+      "status": "NEAR_THREATENED",
+      "statusCode": "NT"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "407",
+      "name": "Laurales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6688",
+      "name": "Lauraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3011993",
+      "name": "Cryptocarya",
+      "rank": "GENUS"
+    },
+    {
+      "key": "4183427",
+      "name": "Cryptocarya massoy",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 439339,
+  "right": 439339,
+  "synonym": false,
+  "usage": {
+    "authorship": "(Oken) Kosterm.",
+    "canonicalName": "Cryptocarya massoy",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Cryptocarya</i> <i>massoy</i> (Oken) Kosterm.",
+    "genericName": "Cryptocarya",
+    "key": "4183427",
+    "name": "Cryptocarya massoy (Oken) Kosterm.",
+    "rank": "SPECIES",
+    "specificEpithet": "massoy",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

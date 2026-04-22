@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "2516",
+      "name": "Phytolaccaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3084026",
+      "name": "Rivina",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3084027",
+      "name": "Rivina humilis",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 7,
+    "timings": {
+      "luceneMatch": 6,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 7
+    }
+  },
+  "left": 281711,
+  "right": 281713,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Rivina humilis",
+    "formattedName": "<i>Rivina</i> <i>humilis</i> L.",
+    "genericName": "Rivina",
+    "key": "3084027",
+    "name": "Rivina humilis L.",
+    "rank": "SPECIES",
+    "specificEpithet": "humilis",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

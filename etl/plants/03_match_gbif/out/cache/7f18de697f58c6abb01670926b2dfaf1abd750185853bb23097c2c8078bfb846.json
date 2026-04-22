@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1176",
+      "name": "Solanales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7717",
+      "name": "Solanaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2928997",
+      "name": "Solanum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3801770",
+      "name": "Lycopersicum esculentum",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 18,
+    "timings": {
+      "luceneMatch": 18,
+      "nameNRank": 0,
+      "nameParse": 0,
+      "sciNameMatch": 19
+    }
+  },
+  "left": 572869,
+  "right": 572869,
+  "synonym": false,
+  "usage": {
+    "authorship": "Mill",
+    "canonicalName": "Lycopersicum esculentum",
+    "formattedName": "<i>Lycopersicum</i> <i>esculentum</i> Mill",
+    "genericName": "Lycopersicum",
+    "key": "3801770",
+    "name": "Lycopersicum esculentum Mill",
+    "rank": "SPECIES",
+    "specificEpithet": "esculentum",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

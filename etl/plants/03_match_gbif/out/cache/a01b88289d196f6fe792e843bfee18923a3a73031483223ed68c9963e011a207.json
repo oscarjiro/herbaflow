@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "167851215",
+      "status": "DATA_DEFICIENT",
+      "statusCode": "DD"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "941",
+      "name": "Malvales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6685",
+      "name": "Malvaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3152078",
+      "name": "Grewia",
+      "rank": "GENUS"
+    },
+    {
+      "key": "4260487",
+      "name": "Grewia salutaris",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 99,
+    "matchType": "EXACT",
+    "timeTaken": 5,
+    "timings": {
+      "luceneMatch": 5,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 6
+    }
+  },
+  "left": 476910,
+  "right": 476910,
+  "synonym": false,
+  "usage": {
+    "authorship": "Span.",
+    "canonicalName": "Grewia salutaris",
+    "formattedName": "<i>Grewia</i> <i>salutaris</i> Span.",
+    "genericName": "Grewia",
+    "key": "4260487",
+    "name": "Grewia salutaris Span.",
+    "rank": "SPECIES",
+    "specificEpithet": "salutaris",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

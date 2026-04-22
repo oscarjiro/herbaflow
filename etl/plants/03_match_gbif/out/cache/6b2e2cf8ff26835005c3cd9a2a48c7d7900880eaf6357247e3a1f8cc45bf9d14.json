@@ -1,0 +1,77 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "additionalStatus": [
+    {
+      "clbDatasetKey": "53131",
+      "datasetAlias": "IUCN",
+      "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+      "sourceId": "217244739",
+      "status": "LEAST_CONCERN",
+      "statusCode": "LC"
+    }
+  ],
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "8798",
+      "name": "Rubiaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2919963",
+      "name": "Psychotria",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2921432",
+      "name": "Psychotria viridiflora",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 11,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 12
+    }
+  },
+  "left": 389352,
+  "right": 389352,
+  "synonym": false,
+  "usage": {
+    "authorship": "Reinw. ex Blume",
+    "canonicalName": "Psychotria viridiflora",
+    "formattedName": "<i>Psychotria</i> <i>viridiflora</i> Reinw. ex Blume",
+    "genericName": "Psychotria",
+    "key": "2921432",
+    "name": "Psychotria viridiflora Reinw. ex Blume",
+    "rank": "SPECIES",
+    "specificEpithet": "viridiflora",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

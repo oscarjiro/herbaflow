@@ -1,0 +1,86 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Siebold & Zucc.) H.Ohashi",
+    "canonicalName": "Glycine max soja",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Glycine</i> <i>max</i> subsp. <i>soja</i> (Siebold & Zucc.) H.Ohashi",
+    "genericName": "Glycine",
+    "infraspecificEpithet": "soja",
+    "key": "5359662",
+    "name": "Glycine max subsp. soja (Siebold & Zucc.) H.Ohashi",
+    "rank": "SUBSPECIES",
+    "specificEpithet": "max",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1370",
+      "name": "Fabales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "5386",
+      "name": "Fabaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "7968287",
+      "name": "Glycine",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5359660",
+      "name": "Glycine max",
+      "rank": "SPECIES"
+    },
+    {
+      "key": "5359662",
+      "name": "Glycine max soja",
+      "rank": "SUBSPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 11,
+    "timings": {
+      "luceneMatch": 10,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 11
+    }
+  },
+  "left": 338090,
+  "right": 338090,
+  "synonym": true,
+  "usage": {
+    "authorship": "Siebold & Zucc.",
+    "canonicalName": "Glycine soja",
+    "formattedName": "<i>Glycine</i> <i>soja</i> Siebold & Zucc.",
+    "genericName": "Glycine",
+    "key": "5359668",
+    "name": "Glycine soja Siebold & Zucc.",
+    "rank": "SPECIES",
+    "specificEpithet": "soja",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

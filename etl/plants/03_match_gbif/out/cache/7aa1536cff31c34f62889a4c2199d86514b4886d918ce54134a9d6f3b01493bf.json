@@ -1,0 +1,78 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "L.",
+    "canonicalName": "Basella alba",
+    "formattedName": "<i>Basella</i> <i>alba</i> L.",
+    "genericName": "Basella",
+    "key": "3083504",
+    "name": "Basella alba L.",
+    "rank": "SPECIES",
+    "specificEpithet": "alba",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "422",
+      "name": "Caryophyllales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3063",
+      "name": "Basellaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3083503",
+      "name": "Basella",
+      "rank": "GENUS"
+    },
+    {
+      "key": "3083504",
+      "name": "Basella alba",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 269891,
+  "right": 269892,
+  "synonym": true,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Basella rubra",
+    "formattedName": "<i>Basella</i> <i>rubra</i> L.",
+    "genericName": "Basella",
+    "key": "3083505",
+    "name": "Basella rubra L.",
+    "rank": "SPECIES",
+    "specificEpithet": "rubra",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

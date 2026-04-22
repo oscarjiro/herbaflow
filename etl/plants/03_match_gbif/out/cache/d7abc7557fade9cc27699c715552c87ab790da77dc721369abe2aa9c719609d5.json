@@ -1,0 +1,68 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "408",
+      "name": "Lamiales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6652",
+      "name": "Oleaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3172260",
+      "name": "Jasminum",
+      "rank": "GENUS"
+    },
+    {
+      "key": "7587215",
+      "name": "Jasminum sambac",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 98,
+    "matchType": "EXACT",
+    "timeTaken": 9,
+    "timings": {
+      "luceneMatch": 9,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 10
+    }
+  },
+  "left": 424241,
+  "right": 424243,
+  "synonym": false,
+  "usage": {
+    "authorship": "(L.) Aiton",
+    "canonicalName": "Jasminum sambac",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Jasminum</i> <i>sambac</i> (L.) Aiton",
+    "genericName": "Jasminum",
+    "key": "7587215",
+    "name": "Jasminum sambac (L.) Aiton",
+    "rank": "SPECIES",
+    "specificEpithet": "sambac",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

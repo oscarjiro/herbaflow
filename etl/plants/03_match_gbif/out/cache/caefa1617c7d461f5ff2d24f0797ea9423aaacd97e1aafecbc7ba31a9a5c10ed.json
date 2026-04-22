@@ -1,0 +1,81 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "(Mill.) Urb.",
+    "canonicalName": "Eleutherine bulbosa",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Eleutherine</i> <i>bulbosa</i> (Mill.) Urb.",
+    "genericName": "Eleutherine",
+    "key": "2749556",
+    "name": "Eleutherine bulbosa (Mill.) Urb.",
+    "rank": "SPECIES",
+    "specificEpithet": "bulbosa",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "196",
+      "name": "Liliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "1169",
+      "name": "Asparagales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "7698",
+      "name": "Iridaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "2749552",
+      "name": "Eleutherine",
+      "rank": "GENUS"
+    },
+    {
+      "key": "2749556",
+      "name": "Eleutherine bulbosa",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "note": "2 synonym homonyms",
+    "timeTaken": 17,
+    "timings": {
+      "luceneMatch": 17,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 18
+    }
+  },
+  "left": 84625,
+  "right": 84625,
+  "synonym": true,
+  "usage": {
+    "authorship": "(Aubl.) Merr. ex K.Heyne",
+    "canonicalName": "Eleutherine americana",
+    "code": "BOTANICAL",
+    "formattedName": "<i>Eleutherine</i> <i>americana</i> (Aubl.) Merr. ex K.Heyne",
+    "genericName": "Eleutherine",
+    "key": "2749558",
+    "name": "Eleutherine americana (Aubl.) Merr. ex K.Heyne",
+    "rank": "SPECIES",
+    "specificEpithet": "americana",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}

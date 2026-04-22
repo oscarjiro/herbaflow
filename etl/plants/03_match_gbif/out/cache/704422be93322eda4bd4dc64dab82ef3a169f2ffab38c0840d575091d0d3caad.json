@@ -1,0 +1,67 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "414",
+      "name": "Asterales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "3065",
+      "name": "Asteraceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3105856",
+      "name": "Bidens",
+      "rank": "GENUS"
+    },
+    {
+      "key": "5389402",
+      "name": "Bidens bipinnata",
+      "rank": "SPECIES"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 97,
+    "matchType": "EXACT",
+    "timeTaken": 12,
+    "timings": {
+      "luceneMatch": 12,
+      "nameNRank": 0,
+      "nameParse": 1,
+      "sciNameMatch": 13
+    }
+  },
+  "left": 198062,
+  "right": 198063,
+  "synonym": false,
+  "usage": {
+    "authorship": "L.",
+    "canonicalName": "Bidens bipinnata",
+    "formattedName": "<i>Bidens</i> <i>bipinnata</i> L.",
+    "genericName": "Bidens",
+    "key": "5389402",
+    "name": "Bidens bipinnata L.",
+    "rank": "SPECIES",
+    "specificEpithet": "bipinnata",
+    "status": "ACCEPTED",
+    "type": "SCIENTIFIC"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "_error_message": "",
+  "_http_status": 200,
+  "acceptedUsage": {
+    "authorship": "G.Don",
+    "canonicalName": "Catharanthus",
+    "formattedName": "<i>Catharanthus</i> G.Don",
+    "key": "3169829",
+    "name": "Catharanthus G.Don",
+    "rank": "GENUS",
+    "type": "SCIENTIFIC"
+  },
+  "classification": [
+    {
+      "key": "6",
+      "name": "Plantae",
+      "rank": "KINGDOM"
+    },
+    {
+      "key": "7707728",
+      "name": "Tracheophyta",
+      "rank": "PHYLUM"
+    },
+    {
+      "key": "220",
+      "name": "Magnoliopsida",
+      "rank": "CLASS"
+    },
+    {
+      "key": "412",
+      "name": "Gentianales",
+      "rank": "ORDER"
+    },
+    {
+      "key": "6701",
+      "name": "Apocynaceae",
+      "rank": "FAMILY"
+    },
+    {
+      "key": "3169829",
+      "name": "Catharanthus",
+      "rank": "GENUS"
+    }
+  ],
+  "diagnostics": {
+    "confidence": 93,
+    "matchType": "HIGHERRANK",
+    "timeTaken": 11,
+    "timings": {
+      "sciNameMatch": 12
+    }
+  },
+  "left": 362195,
+  "right": 362212,
+  "synonym": true,
+  "usage": {
+    "authorship": "Rchb. ex Endl.",
+    "canonicalName": "Lochnera",
+    "formattedName": "<i>Lochnera</i> Rchb. ex Endl.",
+    "key": "6421419",
+    "name": "Lochnera Rchb. ex Endl.",
+    "rank": "GENUS",
+    "status": "SYNONYM",
+    "type": "SCIENTIFIC"
+  }
+}
