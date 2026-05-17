@@ -22,6 +22,11 @@ relationships from the KNApSAcK database.
 - ETL outputs live in `out/` within each step directory — not edited directly
 - Module config lives in `settings.yml` at each module root
 
+## Git Workflow
+- Before any `git commit` or `git push`: confirm scope and commit message with the user first
+- Use Conventional Commits format: `type(scope): imperative summary`
+- Never commit without explicit user approval of the message
+
 ## Do Not Touch
 - Any `.env` or `.env.*` files
 - `etl/**/.venv/` virtual environments
