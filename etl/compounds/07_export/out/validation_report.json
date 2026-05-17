@@ -1,7 +1,7 @@
 {
   "critical_error_count": 0,
   "critical_errors": [],
-  "generated_at": "2026-05-16T21:03:56.503018+00:00",
+  "generated_at": "2026-05-17T11:15:03.366477+00:00",
   "inputs": {
     "build_canonical_summary.json": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\build_canonical_summary.json",
     "compound_aliases.csv": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compound_aliases.csv",
@@ -19,7 +19,7 @@
   },
   "module": "compounds",
   "pass": true,
-  "run_id": "compounds_20260516_210354",
+  "run_id": "compounds_20260517_111501",
   "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
   "severity_counts": {
     "warning": 17
@@ -28,7 +28,7 @@
   "summary_snapshot": {
     "accepted_candidate_count": 2013,
     "accepted_compounds": 1943,
-    "alias_row_count": 73469,
+    "alias_row_count": 73425,
     "candidate_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidates.csv",
     "candidate_map_row_count": 12593,
     "candidate_member_rows": 21922,
@@ -39,7 +39,7 @@
     "enrich_member_map_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_member_map.csv",
     "enrich_results_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_results.csv",
     "enrich_review_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_review.csv",
-    "generated_at": "2026-05-16T21:03:53.002681+00:00",
+    "generated_at": "2026-05-17T11:14:58.935065+00:00",
     "merged_group_count": 2990,
     "module": "compounds",
     "output_aliases_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compound_aliases.csv",
@@ -52,7 +52,7 @@
     "provisional_candidate_count": 10572,
     "provisional_compounds": 9362,
     "review_candidate_count": 0,
-    "run_id": "compounds_20260516_210352",
+    "run_id": "compounds_20260517_111458",
     "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
     "step": "05_build_canonical",
     "unmapped_plant_rows": 237,
@@ -62,10 +62,10 @@
     "compound_aliases.csv": {
       "critical_error_count": 0,
       "issue_count": 0,
-      "row_count": 73469,
+      "row_count": 73425,
       "table_name": "compound_aliases.csv",
-      "unique_id_count": 73469,
-      "unique_secondary_count": 73469,
+      "unique_id_count": 73425,
+      "unique_secondary_count": 73425,
       "warning_count": 0
     },
     "compound_candidate_map.csv": {
