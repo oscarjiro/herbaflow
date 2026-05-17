@@ -1,0 +1,34 @@
+module:
+  name: diseases
+
+source:
+  name: curated_disease_seed
+  url: ""
+  batch_id: D001
+
+paths:
+  normalize_input: diseases/01_normalize/in/disease_seed.csv
+  normalize_out: diseases/01_normalize/out
+  ontology_out: diseases/02_map_ontology/out
+  canonical_out: diseases/03_build_canonical/out
+  validate_out: diseases/04_validate/out
+  export_out: diseases/05_export/out
+
+validation:
+  fail_on: []
+  warn_on: []
+  strict_mode: true
+  allow_missing_ontology_id: true
+  near_duplicate_threshold: 0.92
+
+export:
+  format: csv
+
+ontology:
+  enable_mapping: true
+  online_lookup: true
+  preferred_sources:
+    - Disease Ontology
+    - MeSH
+  request_timeout: 10
+  max_results: 10

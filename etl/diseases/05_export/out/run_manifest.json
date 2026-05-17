@@ -1,0 +1,24 @@
+{
+  "module_name": "disease_etl",
+  "step": "05_export",
+  "batch_id": "",
+  "source_dir": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out",
+  "canonical_out": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out",
+  "validate_out": "C:\\code\\web\\herbaflow\\etl\\diseases\\04_validate\\out",
+  "export_out": "C:\\code\\web\\herbaflow\\etl\\diseases\\05_export\\out",
+  "validation_passed": true,
+  "exported_files": {
+    "diseases": "C:\\code\\web\\herbaflow\\etl\\diseases\\05_export\\out\\diseases.csv",
+    "disease_aliases": "C:\\code\\web\\herbaflow\\etl\\diseases\\05_export\\out\\disease_aliases.csv",
+    "disease_alias_map": "C:\\code\\web\\herbaflow\\etl\\diseases\\05_export\\out\\disease_alias_map.csv",
+    "disease_targets_template": "C:\\code\\web\\herbaflow\\etl\\diseases\\05_export\\out\\disease_targets_template.csv"
+  },
+  "row_counts": {
+    "diseases": 10,
+    "disease_aliases": 14,
+    "disease_alias_map": 24,
+    "disease_targets_template": 0
+  },
+  "missing_sources": [],
+  "timestamp": "2026-05-17T04:19:52+00:00"
+}

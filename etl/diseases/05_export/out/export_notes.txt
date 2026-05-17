@@ -1,0 +1,8 @@
+Export completed at 2026-05-17T04:19:52+00:00
+Source directory: C:\code\web\herbaflow\etl\diseases\03_build_canonical\out
+Validation passed: True
+Exported files:
+- diseases: C:\code\web\herbaflow\etl\diseases\05_export\out\diseases.csv
+- disease_aliases: C:\code\web\herbaflow\etl\diseases\05_export\out\disease_aliases.csv
+- disease_alias_map: C:\code\web\herbaflow\etl\diseases\05_export\out\disease_alias_map.csv
+- disease_targets_template: C:\code\web\herbaflow\etl\diseases\05_export\out\disease_targets_template.csv

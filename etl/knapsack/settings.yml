@@ -1,0 +1,24 @@
+module:
+  name: knapsack
+
+source:
+  name: KNApSAcK World
+  url: https://www.knapsackfamily.com/KNApSAcK_World/search.php?cn=IDN&wd=&flg=
+  batch_id: knapsack_world_id_2026_04_17
+
+paths:
+  output_dir: knapsack/out
+  plants_file: plants.csv
+  plants_compounds_file: plants_compounds.csv
+  failed_pages_log: failed_pages.txt
+  scraper_log: scraper.log
+
+export:
+  format: csv
+  encoding: utf-8
+
+scraper:
+  request_delay_seconds: 1.2
+  max_retries: 3
+  timeout_seconds: 30
+  user_agent: "indonesian-medicinal-plants-etl/1.0"

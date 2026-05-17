@@ -1,0 +1,19 @@
+{
+  "module_name": "disease_etl",
+  "step": "02_map_ontology",
+  "batch_id": "",
+  "input_path": "C:\\code\\web\\herbaflow\\etl\\diseases\\01_normalize\\out\\disease_seed.csv",
+  "output_path": "C:\\code\\web\\herbaflow\\etl\\diseases\\02_map_ontology\\out\\disease_seed.csv",
+  "mapping_path": "C:\\code\\web\\herbaflow\\etl\\diseases\\02_map_ontology\\out\\ontology_mapping.csv",
+  "cache_path": "C:\\code\\web\\herbaflow\\etl\\diseases\\02_map_ontology\\out\\ontology_cache.csv",
+  "row_count": 10,
+  "matched_count": 10,
+  "unmatched_count": 0,
+  "ambiguous_count": 0,
+  "preferred_sources": [
+    "Disease Ontology",
+    "MeSH"
+  ],
+  "online_lookup_enabled": true,
+  "timestamp": "2026-05-17T04:19:47+00:00"
+}

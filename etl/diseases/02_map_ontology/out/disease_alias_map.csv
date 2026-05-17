@@ -1,0 +1,25 @@
+alias,disease_key,type
+type 2 diabetes mellitus,type_2_diabetes_mellitus,primary
+t2dm,type_2_diabetes_mellitus,user_alias
+hypertension,hypertension,primary
+high blood pressure,hypertension,user_alias
+obesity,obesity,primary
+overweight and obesity,obesity,user_alias
+osteoarthritis,osteoarthritis,primary
+oa,osteoarthritis,user_alias
+rheumatoid arthritis,rheumatoid_arthritis,primary
+ra,rheumatoid_arthritis,user_alias
+asthma,asthma,primary
+bronchial asthma,asthma,user_alias
+copd,copd,primary
+chronic obstructive pulmonary disease,copd,user_alias
+masld,masld,primary
+metabolic dysfunction-associated steatotic liver disease,masld,user_alias
+nafld,masld,user_alias
+non-alcoholic fatty liver disease,masld,user_alias
+fatty liver,masld,user_alias
+breast cancer,breast_cancer,primary
+mammary carcinoma,breast_cancer,user_alias
+colorectal cancer,colorectal_cancer,primary
+colon cancer,colorectal_cancer,user_alias
+rectal cancer,colorectal_cancer,user_alias

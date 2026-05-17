@@ -1,0 +1,11 @@
+seed_id,disease_name,aliases,disease_group,role,priority,rationale,preferred_ontology_id,preferred_ontology_source,source_reference,notes
+D001,Type 2 Diabetes Mellitus,T2DM,metabolic,primary_case_study,1,High global burden and strong fit for multi-target medicinal-plant analysis,,,WHO / IDF,Main thesis case study
+D002,Hypertension,High blood pressure,cardiovascular,comparison,2,Major global comorbidity and target-rich disease,,,WHO fact sheet,
+D003,Obesity,Overweight and obesity,metabolic,comparison,3,Closely linked to diabetes and metabolic syndrome,,,WHO fact sheet,
+D004,Osteoarthritis,OA,inflammatory,comparison,4,Very common chronic pain/inflammation condition,,,WHO fact sheet,
+D005,Rheumatoid Arthritis,RA,inflammatory,comparison,5,Autoimmune inflammatory disease with multi-organ effects,,,WHO fact sheet,
+D006,Asthma,Bronchial asthma,respiratory,comparison,6,Common inflammatory respiratory disease,,,WHO / GINA,
+D007,COPD,Chronic Obstructive Pulmonary Disease,respiratory,comparison,7,High-burden chronic respiratory disease,,,WHO fact sheet,
+D008,MASLD,Metabolic Dysfunction-Associated Steatotic Liver Disease; NAFLD; Non-Alcoholic Fatty Liver Disease; Fatty Liver,liver/metabolic,comparison,8,Metabolic liver disease linked to obesity and diabetes,,,NIDDK,
+D009,Breast Cancer,Mammary carcinoma,cancer,comparison,9,Major oncology case with strong target literature,,,WHO fact sheet,
+D010,Colorectal Cancer,Colon cancer; Rectal cancer,cancer,comparison,10,High-burden cancer with rich mechanistic literature,,,IARC / WHO,

@@ -1,0 +1,115 @@
+module:
+    name: plants
+
+source:
+    name: KNApSAcK World
+    url: https://www.knapsackfamily.com
+    batch_id: knapsack_world_id_2026_04_17
+
+paths:
+    extract:
+        script: plants/01_extract/run.py
+        input: knapsack/out/plants.csv
+        output_dir: plants/01_extract/out
+        output_file: stg_plants.csv
+        log_file: extract_plants.log
+        source_batch_id: knapsack_world_id_2026_04_17
+    normalize_taxonomy:
+        script: plants/02_normalize_taxonomy/run.py
+        input: plants/01_extract/out/stg_plants.csv
+        output_dir: plants/02_normalize_taxonomy/out
+        output_file: normalized_plants.csv
+        report_file: normalize_taxonomy_report.txt
+        log_file: normalize_taxonomy.log
+    match_gbif:
+        script: plants/03_match_gbif/run.py
+        input: plants/02_normalize_taxonomy/out/normalized_plants.csv
+        output_dir: plants/03_match_gbif/out
+        cache_dir: plants/03_match_gbif/out/cache
+        output_file: gbif_matches.csv
+        log_file: match_gbif.log
+    build_canonical_part1:
+        script: plants/04_build_canonical/run_part1.py
+        input: plants/03_match_gbif/out/gbif_matches.csv
+        output_dir: plants/04_build_canonical/out
+        accepted_file: accepted_plants.csv
+        review_file: review_plants.csv
+        rejected_file: rejected_plants.csv
+        manually_accepted_review_file: manually_accepted_review_plants.csv
+        report_file: build_canonical_report.txt
+        log_file: build_canonical.log
+    build_canonical_part2:
+        script: plants/04_build_canonical/run_part2.py
+        input: plants/04_build_canonical/out/accepted_plants.csv
+        manually_accepted_review_input: plants/04_build_canonical/out/manually_accepted_review_plants.csv
+        output_dir: plants/04_build_canonical/out
+        plants_file: plants.csv
+        aliases_file: plant_aliases.csv
+        report_file: build_canonical_part2_report.txt
+        log_file: build_canonical_part2.log
+    validate:
+        script: plants/05_validate/run.py
+        plants: plants/04_build_canonical/out/plants.csv
+        aliases: plants/04_build_canonical/out/plant_aliases.csv
+        output_dir: plants/05_validate/out
+        report_csv: validation_report.csv
+        report_json: validation_report.json
+        validated_plants: plants.csv
+        validated_aliases: plant_aliases.csv
+        log_file: validate.log
+    export:
+        script: plants/06_export/run.py
+        input_dir: plants/05_validate/out
+        output_dir: plants/06_export/out
+        plants_file: plants.csv
+        aliases_file: plant_aliases.csv
+        manifest_file: export_manifest.json
+        log_file: export.log
+
+validation:
+    fail_on:
+        - duplicate_canonical_key
+        - orphan_alias
+        - missing_required_columns
+        - empty_canonical_scientific_name
+        - empty_source_name
+        - empty_source_url
+        - empty_source_batch_id
+    warn_on:
+        - missing_family_name
+        - suspicious_authorship_in_canonical_name
+        - float_like_gbif_ids
+
+export:
+    format: csv
+
+gbif:
+    enabled: true
+    base_url: https://api.gbif.org/v2
+    match_endpoint: /species/match
+    user_agent: indonesian-medicinal-plants-etl/1.0
+    cache_responses: true
+    cache_ttl_days: 3650
+    api:
+        timeout_seconds: 30
+        max_retries: 5
+        backoff_base_seconds: 1.5
+        backoff_max_seconds: 60.0
+    accept_rules:
+        exact_match_types:
+            - EXACT
+        accept_min_confidence: 90
+        review_min_confidence: 70
+        reject_below_confidence: 70
+        higherrank_review_min_confidence: 80
+
+taxonomy:
+    canonical_name_mode: accepted_name_without_authorship
+    keep_authorship_separate: true
+    normalization:
+        trim_whitespace: true
+        collapse_internal_spaces: true
+        normalize_unicode: true
+
+identifiers:
+    canonical_key_format: "gbif:{gbif_usage_key}"

@@ -1,0 +1,29 @@
+{
+  "ambiguous_rows": 194,
+  "cache_root": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\cache",
+  "candidate_cache_hits": 0,
+  "candidate_cache_misses": 12593,
+  "candidate_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidates.csv",
+  "candidates_processed": 12593,
+  "conflict_rows": 11591,
+  "generated_at": "2026-05-16T21:01:18.632133+00:00",
+  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\logs\\enrich_compounds_compounds_20260516_205403.log",
+  "matched_rows": 718,
+  "member_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidate_members.csv",
+  "member_map_rows": 21922,
+  "module": "compounds",
+  "output_cache_index_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_cache.csv",
+  "output_member_map_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_member_map.csv",
+  "output_results_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_results.csv",
+  "output_review_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_review.csv",
+  "review_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidate_review.csv",
+  "review_rows": 62,
+  "run_id": "compounds_20260516_205403",
+  "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
+  "source_usage": {
+    "chembl_requests": 437774,
+    "pubchem_requests": 437774
+  },
+  "step": "04_enrich",
+  "unresolved_rows": 28
+}

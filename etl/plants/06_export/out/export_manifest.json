@@ -1,7 +1,7 @@
 {
   "dry_run": false,
   "emit_sql": false,
-  "generated_at": "2026-04-22T21:33:34.463469+00:00",
+  "generated_at": "2026-04-22T23:13:16.993027+00:00",
   "input_dir": "05_validate\\out",
   "outputs": {
     "plant_aliases_csv": "06_export\\out\\plant_aliases.csv",
@@ -29,6 +29,7 @@
     ],
     "plants_columns": [
       "plant_id",
+      "raw_plant_id",
       "canonical_key",
       "canonical_scientific_name",
       "authorship",

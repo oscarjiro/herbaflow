@@ -8,7 +8,9 @@ Thumbs.db
 # EDITORS / IDEs
 # =========================
 .vscode/
+.trunk/
 .idea/
+.cursor/
 *.swp
 *.swo
 
@@ -88,3 +90,19 @@ temp/
 # MISC
 # =========================
 coverage/
+.temp-for-me/
+
+# =========================
+# CLAUDE CODE
+# =========================
+.claude/settings.local.json
+
+# =========================
+# ETL PIPELINE OUTPUTS
+# =========================
+etl/**/cache/
+
+# =========================
+# CRASH DUMPS
+# =========================
+*.stackdump

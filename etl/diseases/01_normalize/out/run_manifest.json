@@ -1,0 +1,33 @@
+{
+  "module_name": "diseases",
+  "step": "01_normalize",
+  "batch_id": "D001",
+  "input_path": "C:\\code\\web\\herbaflow\\etl\\diseases\\01_normalize\\in\\disease_seed.csv",
+  "output_path": "C:\\code\\web\\herbaflow\\etl\\diseases\\01_normalize\\out\\disease_seed.csv",
+  "row_count": 10,
+  "column_names": [
+    "seed_id",
+    "disease_name",
+    "aliases",
+    "disease_group",
+    "role",
+    "priority",
+    "rationale",
+    "preferred_ontology_id",
+    "preferred_ontology_source",
+    "source_reference",
+    "notes",
+    "disease_name_clean",
+    "disease_key",
+    "synonym_clean",
+    "source_reference_clean",
+    "batch_id",
+    "source_name",
+    "source_url",
+    "retrieved_at"
+  ],
+  "name_column": "disease_name",
+  "synonym_column": "aliases",
+  "reference_column": "source_reference",
+  "timestamp": "2026-05-17T04:19:45+00:00"
+}

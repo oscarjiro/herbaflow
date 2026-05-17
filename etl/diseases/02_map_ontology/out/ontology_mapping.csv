@@ -1,0 +1,11 @@
+disease_key,disease_name_clean,ontology_id,ontology_source,ontology_confidence,standardized_name,ontology_description,ontology_synonyms,ontology_status,ontology_match_method,ontology_query,ontology_cache_hit
+type_2_diabetes_mellitus,type 2 diabetes mellitus,DOID_9352,Disease Ontology,0.9,,,,matched,cache,type 2 diabetes mellitus,yes
+hypertension,hypertension,DOID_10763,Disease Ontology,0.9,,,,matched,cache,hypertension,yes
+obesity,obesity,DOID_9970,Disease Ontology,0.9,,,,matched,cache,obesity,yes
+osteoarthritis,osteoarthritis,DOID_8398,Disease Ontology,0.9,,,,matched,cache,osteoarthritis,yes
+rheumatoid_arthritis,rheumatoid arthritis,DOID_7148,Disease Ontology,0.9,,,,matched,cache,rheumatoid arthritis,yes
+asthma,asthma,DOID_2841,Disease Ontology,0.9,,,,matched,cache,asthma,yes
+copd,copd,DOID_3083,Disease Ontology,0.9,,,,matched,cache,copd,yes
+masld,masld,DOID_0080208,Disease Ontology,0.9,,,,matched,cache,masld,yes
+breast_cancer,breast cancer,DOID_1612,Disease Ontology,0.9,,,,matched,cache,breast cancer,yes
+colorectal_cancer,colorectal cancer,DOID_9256,Disease Ontology,0.9,,,,matched,cache,colorectal cancer,yes

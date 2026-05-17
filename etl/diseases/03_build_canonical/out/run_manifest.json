@@ -1,0 +1,16 @@
+{
+  "module_name": "disease_etl",
+  "step": "03_build_canonical",
+  "batch_id": "",
+  "input_path": "C:\\code\\web\\herbaflow\\etl\\diseases\\02_map_ontology\\out\\disease_seed.csv",
+  "output_dir": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out",
+  "diseases_output": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\diseases.csv",
+  "aliases_output": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_aliases.csv",
+  "alias_map_output": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_alias_map.csv",
+  "targets_template_output": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_targets_template.csv",
+  "disease_count": 10,
+  "alias_count": 14,
+  "alias_map_count": 24,
+  "confidence_threshold": 0.8,
+  "timestamp": "2026-05-17T04:19:49+00:00"
+}

@@ -1,6 +1,6 @@
 04_BUILD_CANONICAL (PART 2) REPORT
 =================================
-input_rows=529
+input_rows=528
 group_count=519
 plant_rows=519
 alias_rows=597
@@ -15,13 +15,28 @@ Notes:
 - alias_name preserves the exact original scraped spelling where available
 - GBIF identifier fields are normalized to plain string form
 
-plants_path=04_build_canonical\out\plants.csv
-aliases_path=04_build_canonical\out\plant_aliases.csv
-report_path=04_build_canonical\out\build_canonical_part2_report.txt
+input_rows_merged_into_shared_plant=9
+  (Each line below is an input row that did not add a plants.csv row because it
+   shares the same canonical group as the representative row on the right.)
+
+Merged input rows (omitted from plants.csv row count):
+  - raw_plant_id=134 | plant_name=Clerodendrum serratum  ->  group (representative): Clerodendrum serratum Spreng., 1825 | raw_plant_id=133
+  - raw_plant_id=143 | plant_name=Coleus amboinicus  ->  group (representative): Coleus amboinicus Lour. | raw_plant_id=144
+  - raw_plant_id=155 | plant_name=Curcuma domestica  ->  group (representative): Curcuma longa L. | raw_plant_id=159
+  - raw_plant_id=186 | plant_name=Duranta repens  ->  group (representative): Duranta erecta L. | raw_plant_id=185
+  - raw_plant_id=286 | plant_name=Jatropha gossypifolia  ->  group (representative): Jatropha gossypiifolia L. | raw_plant_id=287
+  - raw_plant_id=347 | plant_name=Musa sapientum  ->  group (representative): Musa × paradisiaca L. | raw_plant_id=346
+  - raw_plant_id=392 | plant_name=Physalis angulata  ->  group (representative): Physalis angulata L. | raw_plant_id=393
+  - raw_plant_id=429 | plant_name=Rauwolfia serpentina  ->  group (representative): Rauvolfia serpentina (L.) Benth. ex Kurz | raw_plant_id=426
+  - raw_plant_id=486 | plant_name=Syzygium aromatica  ->  group (representative): Syzygium aromaticum (L.) Merr. & L.M.Perry | raw_plant_id=487
+
+plants_path=out\plants.csv
+aliases_path=out\plant_aliases.csv
+report_path=out\build_canonical_part2_report.txt
 status=success
 
 Plant columns written:
-plant_id, canonical_key, canonical_scientific_name, authorship, family_name, taxonomic_status, rank, gbif_usage_key, gbif_accepted_usage_key, gbif_species_key, gbif_genus_key, gbif_family_key, gbif_kingdom_key, source_name, source_url, source_batch_id, retrieved_at, confidence
+plant_id, raw_plant_id, canonical_key, canonical_scientific_name, authorship, family_name, taxonomic_status, rank, gbif_usage_key, gbif_accepted_usage_key, gbif_species_key, gbif_genus_key, gbif_family_key, gbif_kingdom_key, source_name, source_url, source_batch_id, retrieved_at, confidence
 
 Alias columns written:
 alias_id, plant_id, alias_name, alias_key, alias_type, source_name, source_url, source_batch_id, retrieved_at

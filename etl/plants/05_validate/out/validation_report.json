@@ -6,7 +6,7 @@
       "warning": 7
     }
   },
-  "generated_at": "2026-04-22T21:33:33.734284+00:00",
+  "generated_at": "2026-04-22T23:13:16.257470+00:00",
   "output_files": {
     "report_csv": "05_validate\\out\\validation_report.csv",
     "report_json": "05_validate\\out\\validation_report.json",

@@ -1,0 +1,31 @@
+{
+  "module_name": "disease_etl",
+  "step": "04_validate",
+  "batch_id": "",
+  "input_dir": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out",
+  "validate_out": "C:\\code\\web\\herbaflow\\etl\\diseases\\04_validate\\out",
+  "canonical_file": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\diseases.csv",
+  "aliases_file": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_aliases.csv",
+  "alias_map_file": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_alias_map.csv",
+  "timestamp": "2026-05-17T04:19:50+00:00",
+  "canonical_row_count": 10,
+  "canonical_unique_disease_keys": 10,
+  "canonical_unique_disease_ids": 10,
+  "canonical_unmapped_count": 0,
+  "alias_row_count": 14,
+  "alias_orphan_count": 0,
+  "alias_empty_alias_key_count": 0,
+  "alias_map_row_count": 24,
+  "alias_map_orphan_count": 0,
+  "issue_count": 48,
+  "critical_issue_count": 0,
+  "warning_issue_count": 48,
+  "notice_issue_count": 0,
+  "severity_counts": {
+    "warning": 48
+  },
+  "issue_type_counts": {
+    "missing_provenance_value": 48
+  },
+  "passed": true
+}

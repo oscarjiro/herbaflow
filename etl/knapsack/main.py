@@ -1,10 +1,14 @@
 import argparse
-import os
 import csv
+import os
 import re
+import sys
 import time
-import logging
+from pathlib import Path
 from urllib.parse import urljoin
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
+from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir
 
 import requests
 import pandas as pd
@@ -18,32 +22,23 @@ from urllib3.util.retry import Retry
 URL = "https://www.knapsackfamily.com/KNApSAcK_World/search.php?cn=IDN&wd=&flg="
 BASE_URL = "https://www.knapsackfamily.com/KNApSAcK_World/"
 
-OUTPUT_DIR = "out"
-PLANTS_CSV = os.path.join(OUTPUT_DIR, "plants.csv")
-COMPOUNDS_CSV = os.path.join(OUTPUT_DIR, "plant_compounds.csv")
-FAILED_PAGES_LOG = os.path.join(OUTPUT_DIR, "failed_pages.txt")
+_cfg = load_settings("knapsack")
+OUTPUT_DIR = ETL_ROOT / _cfg["paths"]["output_dir"]
+PLANTS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_file"]
+COMPOUNDS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_compounds_file"]
+FAILED_PAGES_LOG = OUTPUT_DIR / _cfg["paths"]["failed_pages_log"]
+
+ensure_dir(OUTPUT_DIR)
+
+log = setup_logging("knapsack", _cfg)
+
+REQUEST_DELAY = _cfg["scraper"]["request_delay_seconds"]
+TIMEOUT = _cfg["scraper"]["timeout_seconds"]
+MAX_RETRIES = _cfg["scraper"]["max_retries"]
 
 HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/122.0.0.0 Safari/537.36"
-    )
+    "User-Agent": _cfg["scraper"]["user_agent"]
 }
-
-REQUEST_DELAY = 1.2
-TIMEOUT = 20
-
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-# =========================================================
-# LOGGING
-# =========================================================
-logging.basicConfig(
-    filename=os.path.join(OUTPUT_DIR, "scraper.log"),
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-)
 
 
 # ========================================================
@@ -54,7 +49,7 @@ def parse_args():
     parser.add_argument(
         "--resume",
         default=False,
-        help="Skip plants already found in plant_compounds.csv",
+        help="Skip plants already found in plants_compounds.csv",
     )
     parser.add_argument(
         "--require-detail-url",
@@ -73,7 +68,7 @@ def make_session() -> requests.Session:
     session.headers.update(HEADERS)
 
     retry = Retry(
-        total=4,
+        total=MAX_RETRIES,
         backoff_factor=1.0,
         status_forcelist=[429, 500, 502, 503, 504],
         allowed_methods=["GET"],
@@ -93,7 +88,7 @@ def fetch_soup(session: requests.Session, url: str):
         resp.raise_for_status()
         return BeautifulSoup(resp.text, "html.parser")
     except Exception as e:
-        logging.error(f"Failed to fetch {url}: {e}")
+        log.error("Failed to fetch %s: %s", url, e)
         return None
 
 
@@ -143,7 +138,7 @@ def write_failed(url: str):
         with open(FAILED_PAGES_LOG, "a", encoding="utf-8") as f:
             f.write(url + "\n")
     except Exception as e:
-        logging.error(f"Failed to write failed URL {url}: {e}")
+        log.error("Failed to write failed URL %s: %s", url, e)
 
 
 # =========================================================
@@ -220,7 +215,7 @@ def scrape_main_page(session: requests.Session, url: str, require_detail_url: bo
 
     plant_counter = 1
 
-    print(f"Scraping main page: {url}")
+    log.info("Scraping main page: %s", url)
 
     soup = fetch_soup(session, url)
     if not soup:
@@ -229,7 +224,7 @@ def scrape_main_page(session: requests.Session, url: str, require_detail_url: bo
 
     table = find_main_table(soup)
     if not table:
-        logging.error(f"Main table not found on {url}")
+        log.error("Main table not found on %s", url)
         write_failed(url)
         return plants
 
@@ -269,8 +264,9 @@ def scrape_main_page(session: requests.Session, url: str, require_detail_url: bo
         if not detail_url:
             # If detail URL is required, skip immediately
             if require_detail_url:
-                logging.warning(
-                    f"Skipping row {plant_counter}: No detail URL found for species '{species_name}'"
+                log.warning(
+                    "Skipping row %d: No detail URL found for species '%s'",
+                    plant_counter, species_name,
                 )
                 continue
 
@@ -284,16 +280,18 @@ def scrape_main_page(session: requests.Session, url: str, require_detail_url: bo
                 reference or "",
             )
             if fallback_key in seen_fallback_keys:
-                logging.warning(
-                    f"Skipping row {plant_counter}: Fallback key already seen for species '{species_name}'"
+                log.warning(
+                    "Skipping row %d: Fallback key already seen for species '%s'",
+                    plant_counter, species_name,
                 )
                 continue
             seen_fallback_keys.add(fallback_key)
 
         # Deduplicate by detail_url
         elif detail_url in seen_detail_urls:
-            logging.warning(
-                f"Skipping row {plant_counter}: Detail URL already seen for species '{species_name}'"
+            log.warning(
+                "Skipping row %d: Detail URL already seen for species '%s'",
+                plant_counter, species_name,
             )
             continue
         seen_detail_urls.add(detail_url)
@@ -337,7 +335,7 @@ def scrape_detail_page(session: requests.Session, detail_url: str, plant_id: int
 
     table = find_compound_table(soup)
     if not table:
-        logging.warning(f"Compound table not found: {detail_url}")
+        log.warning("Compound table not found: %s", detail_url)
         write_failed(detail_url)
         return compounds
 
@@ -392,15 +390,14 @@ def main():
     args = parse_args()
     session = make_session()
 
-    # Get the list of plants
-    print("Scraping medicinal plants from Indonesia filter page...")
+    log.info("Scraping medicinal plants from Indonesia filter page...")
     plants = scrape_main_page(session, URL, args.require_detail_url)
-    print(f"Found {len(plants)} unique medicinal plants")
+    log.info("Found %d unique medicinal plants", len(plants))
 
     # Save plant discovery results
     df_plants = pd.DataFrame(plants)
     df_plants.to_csv(PLANTS_CSV, index=False, encoding="utf-8-sig")
-    print(f"Saved plant list to {PLANTS_CSV}")
+    log.info("Saved plant list to %s", PLANTS_CSV)
 
     # Handle checkpoints
     processed_ids = set()
@@ -410,15 +407,13 @@ def main():
         try:
             existing_data = pd.read_csv(COMPOUNDS_CSV, usecols=["plant_id"])
             processed_ids = set(existing_data["plant_id"].astype(int).unique())
-            print(
-                f"🔄 Resuming: Skipping {len(processed_ids)} plants already processed."
-            )
+            log.info("[RESUME] Skipping %d plants already processed.", len(processed_ids))
         except Exception as e:
-            logging.warning(f"Could not read existing file, starting fresh: {e}")
-            print("🗑️ Fresh start: Starting a new compounds file.")
-            mode = "w"  # Override back
+            log.warning("Could not read existing file, starting fresh: %s", e)
+            log.info("[FRESH] Starting a new compounds file.")
+            mode = "w"
     else:
-        print("🗑️ Fresh start: Starting a new compounds file.")
+        log.info("[FRESH] Starting a new compounds file.")
 
     with open(COMPOUNDS_CSV, mode, encoding="utf-8-sig", newline="") as f:
         fields = [
@@ -450,18 +445,19 @@ def main():
                 for c in compounds:
                     writer.writerow(c)
 
-                print(
-                    f"[{idx}/{len(plants)}] {plant['species_name']}: {len(compounds)} compounds"
+                log.info(
+                    "[%d/%d] %s: %d compounds",
+                    idx, len(plants), plant["species_name"], len(compounds),
                 )
                 f.flush()
 
             except Exception as e:
-                logging.error(f"Error on {plant['detail_url']}: {e}")
+                log.error("Error on %s: %s", plant["detail_url"], e)
 
             time.sleep(REQUEST_DELAY)
 
-    print(f"\n✨ Done. Results saved to {COMPOUNDS_CSV}")
-    print(f"Failed pages log: {FAILED_PAGES_LOG}")
+    log.info("Done. Results saved to %s", COMPOUNDS_CSV)
+    log.info("Failed pages log: %s", FAILED_PAGES_LOG)
 
 
 if __name__ == "__main__":

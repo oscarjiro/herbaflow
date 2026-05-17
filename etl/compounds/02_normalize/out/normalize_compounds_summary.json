@@ -1,0 +1,20 @@
+{
+  "cas_invalid_count": 165,
+  "cas_valid_count": 21757,
+  "generated_at": "2026-04-26T12:07:56.715996+00:00",
+  "input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\01_extract\\out\\plants_compounds_staged.csv",
+  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\logs\\normalize_compounds_compounds_20260426_190755.log",
+  "mapping_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\plant_mapping_resolution.csv",
+  "module": "compounds",
+  "output_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\compounds_normalized.csv",
+  "review_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\compound_review.csv",
+  "review_row_count": 271,
+  "row_count": 21922,
+  "run_id": "compounds_20260426_190755",
+  "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
+  "status_counts": {
+    "ready": 21651,
+    "review": 271
+  },
+  "step": "02_normalize"
+}

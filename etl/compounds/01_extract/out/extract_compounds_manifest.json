@@ -1,0 +1,31 @@
+{
+  "expected_raw_columns": [
+    "plant_id",
+    "c_id",
+    "cas_id",
+    "metabolite",
+    "molecular_formula",
+    "mw",
+    "organism"
+  ],
+  "generated_at": "2026-04-23T09:14:04.432344+00:00",
+  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\01_extract\\out\\logs\\extract_compounds_compounds_20260423_161403.log",
+  "module": "compounds",
+  "output_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\01_extract\\out\\plants_compounds_staged.csv",
+  "plant_mapping": {
+    "canonical_id_column": "plant_id",
+    "loaded": true,
+    "mapped_rows": 519,
+    "mapping_file": "C:\\code\\web\\herbaflow\\etl\\plants\\06_export\\out\\plants.csv",
+    "raw_id_column": "raw_plant_id",
+    "row_count": 519
+  },
+  "raw_input_file": "C:\\code\\web\\herbaflow\\etl\\knapsack\\out\\plants_compounds.csv",
+  "row_count": 21922,
+  "run_id": "compounds_20260423_161403",
+  "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
+  "source_name": "KNApSAcK",
+  "source_row_count": 21922,
+  "source_url": "https://www.knapsackfamily.com/KNApSAcK/",
+  "step": "01_extract"
+}

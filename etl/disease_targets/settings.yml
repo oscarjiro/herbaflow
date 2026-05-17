@@ -1,0 +1,40 @@
+module:
+    name: disease_targets
+
+source:
+    name: OpenTargets
+    url: https://api.platform.opentargets.org/api/v4/graphql
+    batch_id: DT001
+
+paths:
+    diseases_input: diseases/05_export/out/diseases.csv
+    fetch_out: disease_targets/01_fetch/out
+    normalize_out: disease_targets/02_normalize/out
+    canonical_out: disease_targets/03_build_canonical/out
+    validate_out: disease_targets/04_validate/out
+    export_out: disease_targets/05_export/out
+    cache_dir: disease_targets/01_fetch/cache
+
+api:
+    endpoint: https://api.platform.opentargets.org/api/v4/graphql
+    page_size: 200
+    max_pages: 100
+    timeout_seconds: 30
+    retry_attempts: 3
+    retry_delay_seconds: 2
+
+filtering:
+    min_association_score: 0.10
+    organism_tax_id: 9606
+    require_uniprot: false
+    uniprot_coverage_warn_threshold: 0.60
+
+validation:
+    fail_on: []
+    warn_on:
+        - low_uniprot_coverage
+    strict_mode: true
+
+export:
+    format: csv
+    sql_schema: public
