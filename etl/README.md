@@ -72,6 +72,17 @@ Final outputs (Supabase import targets):
 | `disease_targets/05_export/out/target_aliases.csv` | Target gene symbol aliases |
 | `disease_targets/05_export/out/disease_targets.csv` | Disease-target association scores |
 
+## Loading into Supabase
+
+After all pipelines complete, load the CSVs into the database:
+
+```bash
+python etl/load/load.py                          # load all tables
+python etl/load/load.py --tables compounds compound_aliases plant_compounds  # selective
+```
+
+Requires `DATABASE_URL` in `.env`. Load order follows FK dependencies automatically.
+
 ## Development
 
 Run unit tests:

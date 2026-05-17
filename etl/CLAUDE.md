@@ -30,6 +30,8 @@ etl/
 ├── compounds/          # 7-stage compound canonicalization pipeline
 ├── diseases/           # 5-stage disease ontology pipeline
 ├── disease_targets/    # 5-stage target association pipeline (Open Targets API)
+├── load/
+│   └── load.py         # CSV → Supabase loader (run after all pipelines)
 └── tests/              # Unit tests for shared and pipeline utils
 ```
 

@@ -10,6 +10,7 @@ Load order (respects FK deps):
   targets -> target_aliases -> disease_targets
 """
 
+import argparse
 import csv
 import os
 import sys
@@ -48,11 +49,8 @@ def load_source_map(cur) -> dict:
 
 
 def resolve_src(row: dict, source_map: dict) -> str | None:
-    for col in ("source_name", "source_id"):
-        val = row.get(col, "")
-        if val and val in source_map:
-            return source_map[val]
-    return None
+    val = row.get("source_name", "")
+    return source_map[val] if val and val in source_map else None
 
 
 def create_batch(cur, step_name: str) -> str:
@@ -291,7 +289,23 @@ def load_disease_targets(cur, source_map, batch_id):
     print(len(data))
 
 
+ALL_TABLES = [
+    "plants", "plant_aliases",
+    "compounds", "compound_aliases", "plant_compounds",
+    "diseases", "disease_aliases",
+    "targets", "target_aliases", "disease_targets",
+]
+
+
 def main():
+    parser = argparse.ArgumentParser(description="Load ETL CSVs into Supabase")
+    parser.add_argument(
+        "--tables", nargs="+", choices=ALL_TABLES, metavar="TABLE",
+        help=f"Tables to load (default: all). Choices: {', '.join(ALL_TABLES)}",
+    )
+    args = parser.parse_args()
+    tables = set(args.tables) if args.tables else set(ALL_TABLES)
+
     conn = connect()
     conn.autocommit = False
     cur = conn.cursor()
@@ -299,21 +313,21 @@ def main():
         source_map = load_source_map(cur)
         print(f"source_systems: {len(source_map)} entries")
 
-        plants_batch    = create_batch(cur, "etl/plants/06_export")
-        compounds_batch = create_batch(cur, "etl/compounds/07_export")
-        diseases_batch  = create_batch(cur, "etl/diseases/05_export")
-        targets_batch   = create_batch(cur, "etl/disease_targets/05_export")
+        plants_batch    = create_batch(cur, "etl/plants/06_export")    if tables & {"plants", "plant_aliases"}                     else None
+        compounds_batch = create_batch(cur, "etl/compounds/07_export") if tables & {"compounds", "compound_aliases", "plant_compounds"} else None
+        diseases_batch  = create_batch(cur, "etl/diseases/05_export")  if tables & {"diseases", "disease_aliases"}                  else None
+        targets_batch   = create_batch(cur, "etl/disease_targets/05_export") if tables & {"targets", "target_aliases", "disease_targets"} else None
 
-        load_plants(cur, source_map, plants_batch)
-        load_plant_aliases(cur, source_map, plants_batch)
-        load_compounds(cur, source_map, compounds_batch)
-        load_compound_aliases(cur, source_map, compounds_batch)
-        load_plant_compounds(cur, source_map, compounds_batch)
-        load_diseases(cur, source_map, diseases_batch)
-        load_disease_aliases(cur, source_map, diseases_batch)
-        load_targets(cur, source_map, targets_batch)
-        load_target_aliases(cur, source_map, targets_batch)
-        load_disease_targets(cur, source_map, targets_batch)
+        if "plants"           in tables: load_plants(cur, source_map, plants_batch)
+        if "plant_aliases"    in tables: load_plant_aliases(cur, source_map, plants_batch)
+        if "compounds"        in tables: load_compounds(cur, source_map, compounds_batch)
+        if "compound_aliases" in tables: load_compound_aliases(cur, source_map, compounds_batch)
+        if "plant_compounds"  in tables: load_plant_compounds(cur, source_map, compounds_batch)
+        if "diseases"         in tables: load_diseases(cur, source_map, diseases_batch)
+        if "disease_aliases"  in tables: load_disease_aliases(cur, source_map, diseases_batch)
+        if "targets"          in tables: load_targets(cur, source_map, targets_batch)
+        if "target_aliases"   in tables: load_target_aliases(cur, source_map, targets_batch)
+        if "disease_targets"  in tables: load_disease_targets(cur, source_map, targets_batch)
 
         conn.commit()
         print("\nDone.")
