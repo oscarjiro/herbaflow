@@ -6,7 +6,7 @@ relationships from the KNApSAcK database.
 ## Stack
 - **Backend**: FastAPI (Python) — `/backend/`
 - **Frontend**: React — `/frontend/` (not yet implemented)
-- **Database**: PostgreSQL via Supabase
+- **Database**: PostgreSQL via Supabase — schema reference: @.claude/docs/database.md
 - **ETL**: Python pipelines — `/etl/`
 
 ## Directory Map

@@ -16,8 +16,6 @@ PostgreSQL. All tables use snake_case. All timestamps are `timestamptz`.
 | `retrieved_at`    | When the record was fetched from the source                        |
 | `source_batch_id` | Which ETL run produced it                                          |
 | `confidence`      | Numeric match quality (0–1 float)                                  |
-| `raw_*`           | Untouched staging input                                            |
-
 ---
 
 ## 1. Provenance
@@ -34,109 +32,19 @@ One row per external data source.
 | `base_url`    | text |                                                                           |
 | `notes`       | text |                                                                           |
 
-### `source_snapshots`
-
-One row per retrieval snapshot or versioned dataset.
-
-| Column               | Type                  | Notes |
-| -------------------- | --------------------- | ----- |
-| `source_snapshot_id` | PK                    |       |
-| `source_id`          | FK → `source_systems` |       |
-| `version_label`      | text                  |       |
-| `source_url`         | text                  |       |
-| `retrieved_at`       | timestamptz           |       |
-| `checksum`           | text                  |       |
-| `metadata`           | jsonb                 |       |
-
 ### `import_batches`
 
 One row per ETL run.
 
-| Column               | Type                    | Notes |
-| -------------------- | ----------------------- | ----- |
-| `batch_id`           | PK                      |       |
-| `step_name`          | text                    |       |
-| `source_snapshot_id` | FK → `source_snapshots` |       |
-| `status`             | text                    |       |
-| `started_at`         | timestamptz             |       |
-| `finished_at`        | timestamptz             |       |
-| `params`             | jsonb                   |       |
-| `log_path`           | text                    |       |
-
-### `api_cache`
-
-Cached API responses to avoid redundant calls.
-
-| Column          | Type        | Notes  |
-| --------------- | ----------- | ------ |
-| `cache_id`      | PK          |        |
-| `provider`      | text        |        |
-| `cache_key`     | text        | unique |
-| `request_json`  | jsonb       |        |
-| `response_json` | jsonb       |        |
-| `response_hash` | text        |        |
-| `fetched_at`    | timestamptz |        |
-| `expires_at`    | timestamptz |        |
-
-### `validation_reports`
-
-QA output per batch.
-
-| Column        | Type                  | Notes |
-| ------------- | --------------------- | ----- |
-| `report_id`   | PK                    |       |
-| `batch_id`    | FK → `import_batches` |       |
-| `report_type` | text                  |       |
-| `report_path` | text                  |       |
-| `summary`     | jsonb                 |       |
-| `created_at`  | timestamptz           |       |
+| Column        | Type        | Notes |
+| ------------- | ----------- | ----- |
+| `batch_id`    | PK          |       |
+| `step_name`   | text        |       |
+| `started_at`  | timestamptz |       |
 
 ---
 
-## 2. Staging (raw inputs, not app tables)
-
-### `stg_plants`
-
-Raw KNApSAcK scrape rows. Never modify after insert.
-
-| Column            | Type        | Notes                    |
-| ----------------- | ----------- | ------------------------ |
-| `raw_id`          | PK          |                          |
-| `source_batch_id` | text        |                          |
-| `plant_id`        | text        | raw scrape ID if present |
-| `species_name`    | text        |                          |
-| `family_name`     | text        |                          |
-| `common_name`     | text        |                          |
-| `classification`  | text        |                          |
-| `purpose`         | text        |                          |
-| `reference`       | text        |                          |
-| `detail_url`      | text        |                          |
-| `raw_row`         | jsonb       | full original row        |
-| `raw_hash`        | text        | dedup check              |
-| `imported_at`     | timestamptz |                          |
-
-### `stg_plant_compounds`
-
-Raw plant-compound scrape rows.
-
-| Column              | Type        | Notes               |
-| ------------------- | ----------- | ------------------- |
-| `raw_id`            | PK          |                     |
-| `source_batch_id`   | text        |                     |
-| `plant_id`          | text        | raw scrape plant ID |
-| `c_id`              | text        |                     |
-| `cas_id`            | text        |                     |
-| `metabolite`        | text        |                     |
-| `molecular_formula` | text        |                     |
-| `mw`                | float       | molecular weight    |
-| `organism`          | text        |                     |
-| `raw_row`           | jsonb       |                     |
-| `raw_hash`          | text        |                     |
-| `imported_at`       | timestamptz |                     |
-
----
-
-## 3. Plants
+## 2. Plants
 
 ### `plants`
 
@@ -181,7 +89,7 @@ All alternate names for a canonical plant. Each alias belongs to exactly one pla
 
 ---
 
-## 4. Compounds
+## 3. Compounds
 
 ### `compounds`
 
@@ -232,8 +140,8 @@ m:m join. Answers: which compounds were found in which plants?
 | `plant_compound_id`      | PK                                 |                       |
 | `plant_id`               | FK → `plants`                      |                       |
 | `compound_id`            | FK → `compounds`                   |                       |
-| `source_plant_raw_id`    | ref → `stg_plants.raw_id`          | optional traceability |
-| `source_compound_raw_id` | ref → `stg_plant_compounds.raw_id` | optional              |
+| `source_plant_raw_id`    | text                               | optional traceability |
+| `source_compound_raw_id` | text                               | optional              |
 | `source_id`              | FK → `source_systems`              |                       |
 | `evidence_type`          | text                               |                       |
 | `confidence`             | float                              |                       |
@@ -243,7 +151,7 @@ Unique constraint: `(plant_id, compound_id, source_id)`
 
 ---
 
-## 5. Targets
+## 4. Targets
 
 ### `targets`
 
@@ -297,7 +205,7 @@ Unique constraint: `(compound_id, target_id, source_id)`
 
 ---
 
-## 6. Diseases
+## 5. Diseases
 
 ### `diseases`
 
@@ -347,7 +255,7 @@ Unique constraint: `(disease_id, target_id, source_id)`
 
 ---
 
-## 7. PPI / network
+## 6. PPI / network
 
 ### `ppi_edges`
 
@@ -359,7 +267,6 @@ Protein-protein interaction edges. Nodes are in `targets` — no separate `ppi_n
 | `target_a_id`        | FK → `targets`          | always `target_a_id < target_b_id` to prevent duplicate pairs |
 | `target_b_id`        | FK → `targets`          |                                                               |
 | `source_id`          | FK → `source_systems`   |                                                               |
-| `source_snapshot_id` | FK → `source_snapshots` |                                                               |
 | `combined_score`     | float                   |                                                               |
 | `experimental_score` | float                   |                                                               |
 | `database_score`     | float                   |                                                               |
@@ -376,7 +283,7 @@ Unique constraint: `(target_a_id, target_b_id, source_id)`
 
 ---
 
-## 8. Analysis runs
+## 7. Analysis runs
 
 ### `analysis_runs`
 
@@ -414,7 +321,7 @@ Unique: `(analysis_id, ppi_edge_id)`
 
 ---
 
-## 9. Derived outputs
+## 8. Derived outputs
 
 ### `target_rankings`
 
@@ -479,12 +386,10 @@ The pipeline is: `plants → compounds → targets → diseases → PPI`
 
 ```
 Phase 1 (plants)
-  source_systems, source_snapshots, import_batches
-  stg_plants
+  source_systems, import_batches
   plants, plant_aliases
 
 Phase 2 (compounds)
-  stg_plant_compounds
   compounds, compound_aliases
   plant_compounds
 
