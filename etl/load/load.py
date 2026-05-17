@@ -43,6 +43,13 @@ def connect():
     return psycopg2.connect(DB_URL)
 
 
+def _conflict(pk: str, update_cols: list[str], upsert: bool) -> str:
+    if not upsert:
+        return f"on conflict ({pk}) do nothing"
+    sets = ", ".join(f"{c} = excluded.{c}" for c in update_cols)
+    return f"on conflict ({pk}) do update set {sets}"
+
+
 def load_source_map(cur) -> dict:
     cur.execute("select source_name, source_id from source_systems")
     return {row[0]: str(row[1]) for row in cur.fetchall()}
@@ -87,17 +94,24 @@ def _ts(val) -> str | None:
     return v if v else None
 
 
-def load_plants(cur, source_map, batch_id):
+def load_plants(cur, source_map, batch_id, upsert=False):
     print("Loading plants...", end=" ", flush=True)
     rows = read_csv(PLANTS_CSV)
-    sql = """
+    conflict = _conflict("plant_id", [
+        "canonical_key", "canonical_scientific_name", "authorship",
+        "family_name", "taxonomic_status", "rank",
+        "gbif_usage_key", "gbif_accepted_usage_key", "gbif_species_key",
+        "gbif_genus_key", "gbif_family_key", "gbif_kingdom_key",
+        "source_id", "source_url", "source_batch_id", "retrieved_at", "confidence",
+    ], upsert)
+    sql = f"""
         insert into plants (
             plant_id, canonical_key, canonical_scientific_name, authorship,
             family_name, taxonomic_status, rank,
             gbif_usage_key, gbif_accepted_usage_key, gbif_species_key,
             gbif_genus_key, gbif_family_key, gbif_kingdom_key,
             source_id, source_url, source_batch_id, retrieved_at, confidence
-        ) values %s on conflict (plant_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["plant_id"], r["canonical_key"], r.get("canonical_scientific_name"),
@@ -112,14 +126,18 @@ def load_plants(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_plant_aliases(cur, source_map, batch_id):
+def load_plant_aliases(cur, source_map, batch_id, upsert=False):
     print("Loading plant_aliases...", end=" ", flush=True)
     rows = read_csv(PLANT_ALIASES_CSV)
-    sql = """
+    conflict = _conflict("alias_id", [
+        "plant_id", "alias_name", "alias_key", "alias_type",
+        "source_id", "source_url", "source_batch_id", "retrieved_at",
+    ], upsert)
+    sql = f"""
         insert into plant_aliases (
             alias_id, plant_id, alias_name, alias_key, alias_type,
             source_id, source_url, source_batch_id, retrieved_at
-        ) values %s on conflict (alias_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["alias_id"], r["plant_id"], r.get("alias_name"), r.get("alias_key"),
@@ -130,17 +148,24 @@ def load_plant_aliases(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_compounds(cur, source_map, batch_id):
+def load_compounds(cur, source_map, batch_id, upsert=False):
     print("Loading compounds...", end=" ", flush=True)
     rows = read_csv(COMPOUNDS_CSV)
-    sql = """
+    conflict = _conflict("compound_id", [
+        "canonical_key", "canonical_name", "inchi_key", "smiles",
+        "cas_id", "pubchem_cid", "chembl_id", "molecular_formula", "molecular_weight",
+        "tpsa", "logp", "hbond_donors", "hbond_acceptors",
+        "rotatable_bonds", "qed_score", "np_likeness_score", "num_ro5_violations",
+        "source_id", "source_url", "source_batch_id", "retrieved_at", "confidence",
+    ], upsert)
+    sql = f"""
         insert into compounds (
             compound_id, canonical_key, canonical_name, inchi_key, smiles,
             cas_id, pubchem_cid, chembl_id, molecular_formula, molecular_weight,
             tpsa, logp, hbond_donors, hbond_acceptors,
             rotatable_bonds, qed_score, np_likeness_score, num_ro5_violations,
             source_id, source_url, source_batch_id, retrieved_at, confidence
-        ) values %s on conflict (compound_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["compound_id"], r["canonical_key"], r.get("canonical_name"),
@@ -158,14 +183,18 @@ def load_compounds(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_compound_aliases(cur, source_map, batch_id):
+def load_compound_aliases(cur, source_map, batch_id, upsert=False):
     print("Loading compound_aliases...", end=" ", flush=True)
     rows = read_csv(COMPOUND_ALIASES_CSV)
-    sql = """
+    conflict = _conflict("compound_alias_id", [
+        "compound_id", "alias_name", "alias_key", "alias_type",
+        "source_id", "source_url", "source_batch_id", "retrieved_at",
+    ], upsert)
+    sql = f"""
         insert into compound_aliases (
             compound_alias_id, compound_id, alias_name, alias_key, alias_type,
             source_id, source_url, source_batch_id, retrieved_at
-        ) values %s on conflict (compound_alias_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["compound_alias_id"], r["compound_id"], r.get("alias_name"), r.get("alias_key"),
@@ -176,15 +205,20 @@ def load_compound_aliases(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_plant_compounds(cur, source_map, batch_id):
+def load_plant_compounds(cur, source_map, batch_id, upsert=False):
     print("Loading plant_compounds...", end=" ", flush=True)
     rows = read_csv(PLANT_COMPOUNDS_CSV)
-    sql = """
+    conflict = _conflict("plant_compound_id", [
+        "plant_id", "compound_id",
+        "source_plant_raw_id", "source_compound_raw_id",
+        "source_id", "evidence_type", "confidence", "retrieved_at",
+    ], upsert)
+    sql = f"""
         insert into plant_compounds (
             plant_compound_id, plant_id, compound_id,
             source_plant_raw_id, source_compound_raw_id,
             source_id, evidence_type, confidence, retrieved_at
-        ) values %s on conflict (plant_compound_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["plant_compound_id"], r["plant_id"], r["compound_id"],
@@ -196,14 +230,18 @@ def load_plant_compounds(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_diseases(cur, source_map, batch_id):
+def load_diseases(cur, source_map, batch_id, upsert=False):
     print("Loading diseases...", end=" ", flush=True)
     rows = read_csv(DISEASES_CSV)
-    sql = """
+    conflict = _conflict("disease_id", [
+        "canonical_key", "disease_name", "ontology_id", "ontology_source",
+        "source_id", "source_url", "source_batch_id", "retrieved_at", "confidence",
+    ], upsert)
+    sql = f"""
         insert into diseases (
             disease_id, canonical_key, disease_name, ontology_id, ontology_source,
             source_id, source_url, source_batch_id, retrieved_at, confidence
-        ) values %s on conflict (disease_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["disease_id"], r.get("canonical_key"), r.get("disease_name"),
@@ -215,14 +253,18 @@ def load_diseases(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_disease_aliases(cur, source_map, batch_id):
+def load_disease_aliases(cur, source_map, batch_id, upsert=False):
     print("Loading disease_aliases...", end=" ", flush=True)
     rows = read_csv(DISEASE_ALIASES_CSV)
-    sql = """
+    conflict = _conflict("disease_alias_id", [
+        "disease_id", "alias_name", "alias_key", "alias_type",
+        "source_id", "source_url", "source_batch_id", "retrieved_at",
+    ], upsert)
+    sql = f"""
         insert into disease_aliases (
             disease_alias_id, disease_id, alias_name, alias_key, alias_type,
             source_id, source_url, source_batch_id, retrieved_at
-        ) values %s on conflict (disease_alias_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r.get("disease_alias_id") or r.get("alias_id"),
@@ -233,15 +275,20 @@ def load_disease_aliases(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_targets(cur, source_map, batch_id):
+def load_targets(cur, source_map, batch_id, upsert=False):
     print("Loading targets...", end=" ", flush=True)
     rows = read_csv(TARGETS_CSV)
-    sql = """
+    conflict = _conflict("target_id", [
+        "canonical_key", "gene_symbol", "protein_name",
+        "uniprot_accession", "organism_tax_id",
+        "source_id", "source_url", "source_batch_id", "retrieved_at", "confidence",
+    ], upsert)
+    sql = f"""
         insert into targets (
             target_id, canonical_key, gene_symbol, protein_name,
             uniprot_accession, organism_tax_id,
             source_id, source_url, source_batch_id, retrieved_at, confidence
-        ) values %s on conflict (target_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["target_id"], r.get("canonical_key"), r.get("gene_symbol"), r.get("protein_name"),
@@ -253,14 +300,18 @@ def load_targets(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_target_aliases(cur, source_map, batch_id):
+def load_target_aliases(cur, source_map, batch_id, upsert=False):
     print("Loading target_aliases...", end=" ", flush=True)
     rows = read_csv(TARGET_ALIASES_CSV)
-    sql = """
+    conflict = _conflict("target_alias_id", [
+        "target_id", "alias_name", "alias_key", "alias_type",
+        "source_id", "source_url", "source_batch_id", "retrieved_at",
+    ], upsert)
+    sql = f"""
         insert into target_aliases (
             target_alias_id, target_id, alias_name, alias_key, alias_type,
             source_id, source_url, source_batch_id, retrieved_at
-        ) values %s on conflict (target_alias_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["target_alias_id"], r["target_id"], r.get("alias_name"), r.get("alias_key"),
@@ -271,14 +322,18 @@ def load_target_aliases(cur, source_map, batch_id):
     print(len(data))
 
 
-def load_disease_targets(cur, source_map, batch_id):
+def load_disease_targets(cur, source_map, batch_id, upsert=False):
     print("Loading disease_targets...", end=" ", flush=True)
     rows = read_csv(DISEASE_TARGETS_CSV)
-    sql = """
+    conflict = _conflict("disease_target_id", [
+        "disease_id", "target_id",
+        "source_id", "association_type", "score", "confidence", "retrieved_at",
+    ], upsert)
+    sql = f"""
         insert into disease_targets (
             disease_target_id, disease_id, target_id,
             source_id, association_type, score, confidence, retrieved_at
-        ) values %s on conflict (disease_target_id) do nothing
+        ) values %s {conflict}
     """
     data = [(
         r["disease_target_id"], r["disease_id"], r["target_id"],
@@ -303,8 +358,13 @@ def main():
         "--tables", nargs="+", choices=ALL_TABLES, metavar="TABLE",
         help=f"Tables to load (default: all). Choices: {', '.join(ALL_TABLES)}",
     )
+    parser.add_argument(
+        "--upsert", action="store_true",
+        help="Replace existing rows on conflict instead of skipping",
+    )
     args = parser.parse_args()
     tables = set(args.tables) if args.tables else set(ALL_TABLES)
+    upsert = args.upsert
 
     conn = connect()
     conn.autocommit = False
@@ -318,16 +378,16 @@ def main():
         diseases_batch  = create_batch(cur, "etl/diseases/05_export")  if tables & {"diseases", "disease_aliases"}                  else None
         targets_batch   = create_batch(cur, "etl/disease_targets/05_export") if tables & {"targets", "target_aliases", "disease_targets"} else None
 
-        if "plants"           in tables: load_plants(cur, source_map, plants_batch)
-        if "plant_aliases"    in tables: load_plant_aliases(cur, source_map, plants_batch)
-        if "compounds"        in tables: load_compounds(cur, source_map, compounds_batch)
-        if "compound_aliases" in tables: load_compound_aliases(cur, source_map, compounds_batch)
-        if "plant_compounds"  in tables: load_plant_compounds(cur, source_map, compounds_batch)
-        if "diseases"         in tables: load_diseases(cur, source_map, diseases_batch)
-        if "disease_aliases"  in tables: load_disease_aliases(cur, source_map, diseases_batch)
-        if "targets"          in tables: load_targets(cur, source_map, targets_batch)
-        if "target_aliases"   in tables: load_target_aliases(cur, source_map, targets_batch)
-        if "disease_targets"  in tables: load_disease_targets(cur, source_map, targets_batch)
+        if "plants"           in tables: load_plants(cur, source_map, plants_batch, upsert)
+        if "plant_aliases"    in tables: load_plant_aliases(cur, source_map, plants_batch, upsert)
+        if "compounds"        in tables: load_compounds(cur, source_map, compounds_batch, upsert)
+        if "compound_aliases" in tables: load_compound_aliases(cur, source_map, compounds_batch, upsert)
+        if "plant_compounds"  in tables: load_plant_compounds(cur, source_map, compounds_batch, upsert)
+        if "diseases"         in tables: load_diseases(cur, source_map, diseases_batch, upsert)
+        if "disease_aliases"  in tables: load_disease_aliases(cur, source_map, diseases_batch, upsert)
+        if "targets"          in tables: load_targets(cur, source_map, targets_batch, upsert)
+        if "target_aliases"   in tables: load_target_aliases(cur, source_map, targets_batch, upsert)
+        if "disease_targets"  in tables: load_disease_targets(cur, source_map, targets_batch, upsert)
 
         conn.commit()
         print("\nDone.")
