@@ -83,6 +83,7 @@ COMPOUNDS_COLUMNS = [
     "qed_score",
     "np_likeness_score",
     "num_ro5_violations",
+    "lipinski_source",
     "source_name",
     "source_url",
     "source_batch_id",
