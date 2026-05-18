@@ -1,0 +1,38 @@
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+from app.models import Disease, DiseaseAlias
+
+
+async def get_disease_by_id(session: AsyncSession, disease_id: str) -> Disease | None:
+    result = await session.exec(select(Disease).where(Disease.disease_id == disease_id))
+    return result.first()
+
+
+async def list_diseases(session: AsyncSession) -> list[Disease]:
+    result = await session.exec(select(Disease).order_by(Disease.disease_name))
+    return list(result.all())
+
+
+async def get_disease_by_ontology_id(session: AsyncSession, ontology_id: str) -> Disease | None:
+    result = await session.exec(
+        select(Disease).where(Disease.ontology_id == ontology_id)
+    )
+    return result.first()
+
+
+async def get_targets_for_disease(
+    session: AsyncSession,
+    disease_id: str,
+    min_score: float = 0.3,
+) -> list[tuple]:
+    from app.models.target import DiseaseTarget
+    from app.models.target import Target
+    stmt = (
+        select(Target, DiseaseTarget.score)
+        .join(DiseaseTarget, DiseaseTarget.target_id == Target.target_id)
+        .where(DiseaseTarget.disease_id == disease_id)
+        .where(DiseaseTarget.score >= min_score)
+        .order_by(DiseaseTarget.score.desc())
+    )
+    result = await session.exec(stmt)
+    return list(result.all())

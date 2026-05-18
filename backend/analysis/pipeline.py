@@ -1,0 +1,130 @@
+import asyncio
+import traceback
+from uuid import UUID
+from sqlalchemy.orm import sessionmaker
+
+from app.repositories import analysis_repo
+from analysis.models import PipelineConfig
+from analysis.stages import (
+    stage1_selection,
+    stage2_adme,
+    stage3_targets,
+    stage4_disease_targets,
+    stage5_overlap,
+    stage6_ppi,
+    stage7_hub_genes,
+    stage8_enrichment,
+)
+
+STAGE_RUNNERS = {
+    1: stage1_selection.run,
+    2: stage2_adme.run,
+    3: stage3_targets.run,
+    4: stage4_disease_targets.run,
+    5: stage5_overlap.run,
+    6: stage6_ppi.run,
+    7: stage7_hub_genes.run,
+    8: stage8_enrichment.run,
+}
+
+
+async def run_stage(
+    analysis_id: UUID,
+    stage_num: int,
+    session_factory: sessionmaker,
+) -> None:
+    async with session_factory() as session:
+        run = await analysis_repo.get_run(session, analysis_id)
+        if run is None or run.status == "failed":
+            return
+
+        config = PipelineConfig.from_dict(run.parameters)
+        stage_fn = STAGE_RUNNERS.get(stage_num)
+        if stage_fn is None:
+            return
+
+        await analysis_repo.update_run_status(
+            session, analysis_id,
+            status=f"stage_{stage_num}_running",
+            current_stage=stage_num,
+        )
+
+    try:
+        async with session_factory() as session:
+            run = await analysis_repo.get_run(session, analysis_id)
+            stage_result = await stage_fn(run, config, session)
+
+        async with session_factory() as session:
+            run = await analysis_repo.get_run(session, analysis_id)
+            is_last = stage_num == 8
+            if is_last:
+                await analysis_repo.update_run_status(
+                    session, analysis_id,
+                    status="complete",
+                    stage_results={f"stage_{stage_num}": stage_result},
+                    completed=True,
+                )
+            elif run.mode == "guided":
+                await analysis_repo.update_run_status(
+                    session, analysis_id,
+                    status=f"stage_{stage_num}_awaiting_approval",
+                    stage_results={f"stage_{stage_num}": stage_result},
+                )
+            else:
+                await analysis_repo.update_run_status(
+                    session, analysis_id,
+                    status=f"stage_{stage_num}_complete",
+                    stage_results={f"stage_{stage_num}": stage_result},
+                )
+                asyncio.create_task(
+                    run_stage(analysis_id, stage_num + 1, session_factory)
+                )
+
+    except Exception:
+        async with session_factory() as session:
+            await analysis_repo.update_run_status(
+                session, analysis_id,
+                status="failed",
+                error_message=f"Stage {stage_num} failed: {traceback.format_exc()}",
+            )
+
+
+async def advance_pipeline(
+    analysis_id: UUID,
+    session_factory: sessionmaker,
+) -> None:
+    """Called by POST /analyses/{id}/approve to start the next stage."""
+    async with session_factory() as session:
+        run = await analysis_repo.get_run(session, analysis_id)
+        if run is None:
+            return
+        status = run.status
+        if not status.endswith("_awaiting_approval"):
+            return
+        try:
+            stage_num = int(status.split("_")[1])
+        except (IndexError, ValueError):
+            return
+        next_stage = stage_num + 1
+        if next_stage > 8:
+            return
+
+    await run_stage(analysis_id, next_stage, session_factory)
+
+
+async def start_pipeline(
+    analysis_id: UUID,
+    plant_ids: list[str],
+    disease_ids: list[str],
+    session_factory: sessionmaker,
+) -> None:
+    async with session_factory() as session:
+        run = await analysis_repo.get_run(session, analysis_id)
+        params = run.parameters or {}
+        params["_plant_ids"] = plant_ids
+        params["_disease_ids"] = disease_ids
+        run.parameters = params
+        session.add(run)
+        await session.commit()
+
+    await run_stage(analysis_id, 1, session_factory)

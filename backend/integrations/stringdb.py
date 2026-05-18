@@ -1,0 +1,68 @@
+import httpx
+from dataclasses import dataclass
+
+STRING_BASE = "https://string-db.org/api/json"
+SPECIES_HUMAN = 9606
+
+
+@dataclass
+class PpiEdgeData:
+    gene_a: str
+    gene_b: str
+    combined_score: float
+    experimental_score: float
+    textmining_score: float
+    coexpression_score: float
+
+
+async def get_ppi_network(
+    gene_symbols: list[str],
+    min_confidence: float = 0.4,
+) -> list[PpiEdgeData]:
+    """
+    Fetch PPI edges for gene symbols from STRING DB.
+    min_confidence: 0.15=low, 0.40=medium, 0.70=high, 0.90=highest
+    STRING uses 0-1000 scale internally; we convert.
+    """
+    if not gene_symbols:
+        return []
+
+    identifiers = "\r".join(gene_symbols)
+    params = {
+        "identifiers": identifiers,
+        "species": SPECIES_HUMAN,
+        "required_score": int(min_confidence * 1000),
+        "caller_identity": "herbaflow_thesis",
+        "format": "json",
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(
+                f"{STRING_BASE}/network",
+                data=params,
+                timeout=60,
+            )
+            resp.raise_for_status()
+        except httpx.HTTPError:
+            return []
+
+    edges = []
+    for row in resp.json():
+        gene_a = row.get("preferredName_A", "")
+        gene_b = row.get("preferredName_B", "")
+        if not gene_a or not gene_b or gene_a == gene_b:
+            continue
+        combined = float(row.get("score", 0))
+        if combined < min_confidence:
+            continue
+        edges.append(PpiEdgeData(
+            gene_a=gene_a.upper(),
+            gene_b=gene_b.upper(),
+            combined_score=combined,
+            experimental_score=float(row.get("escore", 0)),
+            textmining_score=float(row.get("tscore", 0)),
+            coexpression_score=float(row.get("coexpression_score", 0)),
+        ))
+
+    return edges
