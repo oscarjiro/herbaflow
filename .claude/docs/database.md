@@ -111,6 +111,11 @@ One canonical row per chemical entity.
 | `logp`              | float                 |        |
 | `hbond_donors`      | int                   |        |
 | `hbond_acceptors`   | int                   |        |
+| `rotatable_bonds`   | int                   |        |
+| `num_ro5_violations` | int                  | count of Lipinski Ro5 violations (0–4) |
+| `qed_score`         | float                 | quantitative estimate of drug-likeness (0–1) |
+| `np_likeness_score` | float                 | natural-product likeness score |
+| `lipinski_source`   | text                  | source that provided ADME properties |
 | `source_id`         | FK → `source_systems` |        |
 | `source_url`        | text                  |        |
 | `source_batch_id`   | FK → `import_batches` |        |
@@ -199,6 +204,7 @@ m:m join. Answers: which targets are linked to which compounds?
 | `evidence_type`      | text                  |       |
 | `score`              | float                 |       |
 | `confidence`         | float                 |       |
+| `pchembl_value`      | float                 | ChEMBL −log10(IC50); null for non-ChEMBL sources |
 | `retrieved_at`       | timestamptz           |       |
 
 Unique constraint: `(compound_id, target_id, source_id)`
@@ -294,9 +300,15 @@ Unique constraint: `(target_a_id, target_b_id, source_id)`
 | `disease_id`    | FK → `diseases` | optional |
 | `notes`         | text            |          |
 | `parameters`    | jsonb           |          |
-| `status`        | text            |          |
-| `created_at`    | timestamptz     |          |
-| `created_by`    | text            |          |
+| `status`          | text            |          |
+| `current_stage`   | int             | null = not started, 1–8 during pipeline |
+| `stage_results`   | jsonb           | per-stage intermediate results `{stage_1: {...}}` |
+| `mode`            | text            | `auto` (end-to-end) or `guided` (pauses for approval) |
+| `completed_at`    | timestamptz     |          |
+| `error_message`   | text            |          |
+| `updated_at`      | timestamptz     |          |
+| `created_at`      | timestamptz     |          |
+| `created_by`      | text            |          |
 
 ### `analysis_run_plants`
 

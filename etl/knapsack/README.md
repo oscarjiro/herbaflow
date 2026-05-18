@@ -19,6 +19,7 @@ It is the sole source of truth for which plant species are in scope and which KN
 KNApSAcK World was chosen because it is an evidence-based, curated database of plant-metabolite associations compiled from primary literature. Its Indonesian-origin filter (`cn=IDN`) restricts the discovery set to species recorded as growing or used medicinally in Indonesia, which is the geographic scope of this study. Unlike automated text-mining databases, KNApSAcK entries are manually curated with explicit literature references, making them appropriate as a primary source for a network pharmacology study.
 
 The outputs of this module feed two downstream pipelines directly:
+
 - `plants/` consumes `plants.csv` and canonicalizes species names against the GBIF backbone taxonomy
 - `compounds/` consumes `plants_compounds.csv` and enriches compound records via PubChem and ChEMBL
 
@@ -31,11 +32,11 @@ The outputs of this module feed two downstream pipelines directly:
 
 KNApSAcK World is a publicly accessible, freely available plant metabolite database maintained by the Nara Institute of Science and Technology (NAIST) and collaborators. It aggregates plant-compound associations from peer-reviewed literature with an emphasis on Asian plant species.
 
-| Evidence type | Description |
-|---|---|
-| Primary literature | Journal articles documenting metabolite isolation or detection |
-| Ethnobotanical records | Traditional use records documented in regional pharmacopoeia |
-| Reference books | Regional plant resource compendia (e.g., Plant Resources of South-East Asia) |
+| Evidence type          | Description                                                                  |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| Primary literature     | Journal articles documenting metabolite isolation or detection               |
+| Ethnobotanical records | Traditional use records documented in regional pharmacopoeia                 |
+| Reference books        | Regional plant resource compendia (e.g., Plant Resources of South-East Asia) |
 
 The database is free to access and does not require authentication. The scraper applies rate-limiting (see `scraper.request_delay_seconds` in settings) to respect the server. The `cn=IDN` filter returns only species with Indonesian geographic origin, and the scraper additionally filters for rows with `purpose = "medicinal"` to exclude food and non-medicinal entries.
 
@@ -119,16 +120,16 @@ This module is a single-file scraper (`main.py`) with no staged subdirectories. 
 
 One row per unique medicinal plant species found in KNApSAcK World for Indonesia. This file seeds `plants/01_extract/` for taxonomy canonicalization.
 
-| Column | Description |
-|---|---|
-| `plant_id` | Sequential integer assigned during this scrape run (1, 2, 3, …). Not a stable UUID — `plants/` assigns canonical UUIDs. |
-| `species_name` | Scientific species name extracted from the plain text of the species cell (excludes icon links) |
-| `family_name` | Botanical family name (e.g., `Malvaceae`, `Fabaceae`) |
-| `common_name` | Common/vernacular name(s), pipe-separated when multiple are listed |
-| `classification` | KNApSAcK classification string (e.g., `plants`, `plants(vegetables)`) |
-| `purpose` | Always `medicinal` — non-medicinal rows are filtered out during Phase 1 |
-| `reference` | Literature reference(s) supporting the entry, as formatted by KNApSAcK |
-| `detail_url` | Full URL to the KNApSAcK Core page listing this species' compounds |
+| Column           | Description                                                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `plant_id`       | Sequential integer assigned during this scrape run (1, 2, 3, …). Not a stable UUID — `plants/` assigns canonical UUIDs. |
+| `species_name`   | Scientific species name extracted from the plain text of the species cell (excludes icon links)                         |
+| `family_name`    | Botanical family name (e.g., `Malvaceae`, `Fabaceae`)                                                                   |
+| `common_name`    | Common/vernacular name(s), pipe-separated when multiple are listed                                                      |
+| `classification` | KNApSAcK classification string (e.g., `plants`, `plants(vegetables)`)                                                   |
+| `purpose`        | Always `medicinal` — non-medicinal rows are filtered out during Phase 1                                                 |
+| `reference`      | Literature reference(s) supporting the entry, as formatted by KNApSAcK                                                  |
+| `detail_url`     | Full URL to the KNApSAcK Core page listing this species' compounds                                                      |
 
 These outputs are **not** final database-ready records. They do not carry UUID primary keys and the `species_name` values are raw KNApSAcK strings that have not been validated against any taxonomy backbone. The `plants/` module handles taxonomy normalization and UUID assignment.
 
@@ -138,15 +139,15 @@ These outputs are **not** final database-ready records. They do not carry UUID p
 
 One row per unique plant-compound pair. Multiple rows share the same `plant_id` for plants with several compounds. This file seeds `compounds/01_extract/` for compound canonicalization.
 
-| Column | Description |
-|---|---|
-| `plant_id` | FK to `plants.csv` — matches the sequential integer assigned in this run |
-| `c_id` | KNApSAcK compound identifier (e.g., `C00001071`) — 8-digit zero-padded integer with `C` prefix |
-| `cas_id` | CAS Registry Number (e.g., `529-44-2`); may be empty for novel or unregistered compounds |
-| `metabolite` | Compound name as given by KNApSAcK (e.g., `Myricetin`, `Quercetin 3-O-alpha-L-rhamnoside`) |
-| `molecular_formula` | Molecular formula string (e.g., `C15H10O8`) |
-| `mw` | Molecular weight (monoisotopic mass as a float string) |
-| `organism` | Scientific species name as recorded on the KNApSAcK compound detail page; may differ slightly from `plants.csv.species_name` |
+| Column              | Description                                                                                                                  |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `plant_id`          | FK to `plants.csv` — matches the sequential integer assigned in this run                                                     |
+| `c_id`              | KNApSAcK compound identifier (e.g., `C00001071`) — 8-digit zero-padded integer with `C` prefix                               |
+| `cas_id`            | CAS Registry Number (e.g., `529-44-2`); may be empty for novel or unregistered compounds                                     |
+| `metabolite`        | Compound name as given by KNApSAcK (e.g., `Myricetin`, `Quercetin 3-O-alpha-L-rhamnoside`)                                   |
+| `molecular_formula` | Molecular formula string (e.g., `C15H10O8`)                                                                                  |
+| `mw`                | Molecular weight (monoisotopic mass as a float string)                                                                       |
+| `organism`          | Scientific species name as recorded on the KNApSAcK compound detail page; may differ slightly from `plants.csv.species_name` |
 
 These outputs are also **not** final database-ready records. The `compounds/` module enriches them via PubChem and ChEMBL lookups, deduplicates across plants, and assigns canonical UUIDs.
 
@@ -156,23 +157,23 @@ These outputs are also **not** final database-ready records. The `compounds/` mo
 
 All settings live in `etl/knapsack/settings.yml`. After the settings-wiring fix, every `scraper.*` key is read at startup and used by the scraper at runtime.
 
-| Key | Default | Description |
-|---|---|---|
-| `module.name` | `knapsack` | Module identifier used in logging |
-| `source.name` | `KNApSAcK World` | Display name propagated to downstream records |
-| `source.url` | *(index URL)* | Full URL of the Indonesia-filtered index page |
-| `source.batch_id` | `knapsack_world_id_2026_04_17` | Batch identifier for provenance tracking |
-| `paths.output_dir` | `knapsack/out` | Output directory, relative to `etl/` |
-| `paths.plants_file` | `plants.csv` | Filename for the plant list output |
-| `paths.plants_compounds_file` | `plants_compounds.csv` | Filename for the plant-compound pairs output |
-| `paths.failed_pages_log` | `failed_pages.txt` | Log file for URLs that failed all retries |
-| `paths.scraper_log` | `scraper.log` | Log file name (used by `setup_logging`) |
-| `export.format` | `csv` | Output format |
-| `export.encoding` | `utf-8` | File encoding (written as `utf-8-sig` for Excel BOM compatibility) |
-| `scraper.request_delay_seconds` | `1.2` | Seconds to sleep between plant detail page requests |
-| `scraper.max_retries` | `3` | Maximum retry attempts for failed HTTP requests |
-| `scraper.timeout_seconds` | `30` | Per-request HTTP timeout in seconds |
-| `scraper.user_agent` | `indonesian-medicinal-plants-etl/1.0` | `User-Agent` header sent with every request |
+| Key                             | Default                               | Description                                                        |
+| ------------------------------- | ------------------------------------- | ------------------------------------------------------------------ |
+| `module.name`                   | `knapsack`                            | Module identifier used in logging                                  |
+| `source.name`                   | `KNApSAcK World`                      | Display name propagated to downstream records                      |
+| `source.url`                    | _(index URL)_                         | Full URL of the Indonesia-filtered index page                      |
+| `source.batch_id`               | `knapsack_world_id_2026_04_17`        | Batch identifier for provenance tracking                           |
+| `paths.output_dir`              | `knapsack/out`                        | Output directory, relative to `etl/`                               |
+| `paths.plants_file`             | `plants.csv`                          | Filename for the plant list output                                 |
+| `paths.plants_compounds_file`   | `plants_compounds.csv`                | Filename for the plant-compound pairs output                       |
+| `paths.failed_pages_log`        | `failed_pages.txt`                    | Log file for URLs that failed all retries                          |
+| `paths.scraper_log`             | `scraper.log`                         | Log file name (used by `setup_logging`)                            |
+| `export.format`                 | `csv`                                 | Output format                                                      |
+| `export.encoding`               | `utf-8`                               | File encoding (written as `utf-8-sig` for Excel BOM compatibility) |
+| `scraper.request_delay_seconds` | `1.2`                                 | Seconds to sleep between plant detail page requests                |
+| `scraper.max_retries`           | `3`                                   | Maximum retry attempts for failed HTTP requests                    |
+| `scraper.timeout_seconds`       | `30`                                  | Per-request HTTP timeout in seconds                                |
+| `scraper.user_agent`            | `indonesian-medicinal-plants-etl/1.0` | `User-Agent` header sent with every request                        |
 
 ---
 
@@ -228,10 +229,12 @@ The scrape takes several minutes depending on plant count and network latency (a
 **`plants_compounds.csv`** contains one row per unique plant-compound pair. A single plant may have zero to several hundred compound rows depending on how thoroughly it has been studied. Compounds are identified by KNApSAcK `c_id` at this stage — PubChem InChIKey and canonical identifiers are assigned by the `compounds/` pipeline.
 
 **Expected row counts** (based on a full Indonesia-filtered medicinal scrape):
+
 - `plants.csv`: ~400 rows (depends on current KNApSAcK World content)
-- `plants_compounds.csv`: several thousand rows (varies; well-studied plants such as *Curcuma longa* contribute dozens of compounds)
+- `plants_compounds.csv`: several thousand rows (varies; well-studied plants such as _Curcuma longa_ contribute dozens of compounds)
 
 **What to verify after a run:**
+
 - `failed_pages.txt` should be empty or contain only a small number of transient failures — rerun with `--resume True` to retry them
 - Row count in `plants_compounds.csv` should be substantially larger than `plants.csv` (typically 5–20× more)
 - Spot-check: `plant_id = 1` in both files should correspond to the same species name

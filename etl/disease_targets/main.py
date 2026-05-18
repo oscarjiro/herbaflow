@@ -27,11 +27,11 @@ STAGE_KEYS = [
 NUM_STAGES = len(STAGE_KEYS)
 
 STAGE_SCRIPTS = {
-    "fetch":           "disease_targets/01_fetch/run.py",
-    "normalize":       "disease_targets/02_normalize/run.py",
+    "fetch": "disease_targets/01_fetch/run.py",
+    "normalize": "disease_targets/02_normalize/run.py",
     "build_canonical": "disease_targets/03_build_canonical/run.py",
-    "validate":        "disease_targets/04_validate/run.py",
-    "export":          "disease_targets/05_export/run.py",
+    "validate": "disease_targets/04_validate/run.py",
+    "export": "disease_targets/05_export/run.py",
 }
 
 
@@ -42,31 +42,44 @@ def build_cmd(step_key: str, cfg: dict) -> list[str]:
 
     if step_key == "fetch":
         cmd += [
-            "--input-diseases", str(ETL_ROOT / paths["diseases_input"]),
-            "--output-dir",     str(ETL_ROOT / paths["fetch_out"]),
-            "--cache-dir",      str(ETL_ROOT / paths["cache_dir"]),
+            "--input-diseases",
+            str(ETL_ROOT / paths["diseases_input"]),
+            "--output-dir",
+            str(ETL_ROOT / paths["fetch_out"]),
+            "--cache-dir",
+            str(ETL_ROOT / paths["cache_dir"]),
         ]
     elif step_key == "normalize":
         cmd += [
-            "--input-dir",  str(ETL_ROOT / paths["fetch_out"]),
-            "--output-dir", str(ETL_ROOT / paths["normalize_out"]),
+            "--input-dir",
+            str(ETL_ROOT / paths["fetch_out"]),
+            "--output-dir",
+            str(ETL_ROOT / paths["normalize_out"]),
         ]
     elif step_key == "build_canonical":
         cmd += [
-            "--input-normalize", str(ETL_ROOT / paths["normalize_out"]),
-            "--input-diseases",  str(ETL_ROOT / paths["diseases_input"]),
-            "--output-dir",      str(ETL_ROOT / paths["canonical_out"]),
+            "--input-normalize",
+            str(ETL_ROOT / paths["normalize_out"]),
+            "--input-diseases",
+            str(ETL_ROOT / paths["diseases_input"]),
+            "--output-dir",
+            str(ETL_ROOT / paths["canonical_out"]),
         ]
     elif step_key == "validate":
         cmd += [
-            "--canonical-dir", str(ETL_ROOT / paths["canonical_out"]),
-            "--diseases-csv",  str(ETL_ROOT / paths["diseases_input"]),
-            "--output-dir",    str(ETL_ROOT / paths["validate_out"]),
+            "--canonical-dir",
+            str(ETL_ROOT / paths["canonical_out"]),
+            "--diseases-csv",
+            str(ETL_ROOT / paths["diseases_input"]),
+            "--output-dir",
+            str(ETL_ROOT / paths["validate_out"]),
         ]
     elif step_key == "export":
         cmd += [
-            "--canonical-dir", str(ETL_ROOT / paths["canonical_out"]),
-            "--output-dir",    str(ETL_ROOT / paths["export_out"]),
+            "--canonical-dir",
+            str(ETL_ROOT / paths["canonical_out"]),
+            "--output-dir",
+            str(ETL_ROOT / paths["export_out"]),
         ]
 
     return cmd
@@ -76,14 +89,22 @@ def main() -> int:
     cfg = load_settings("disease_targets")
     log = setup_logging("disease_targets.main", cfg)
 
-    parser = argparse.ArgumentParser(description="Herbaflow Disease-Targets ETL Pipeline")
-    parser.add_argument(
-        "--start", type=int, default=1,
-        choices=range(1, NUM_STAGES + 1), metavar=f"N (1-{NUM_STAGES})",
+    parser = argparse.ArgumentParser(
+        description="Herbaflow Disease-Targets ETL Pipeline"
     )
     parser.add_argument(
-        "--end", type=int, default=NUM_STAGES,
-        choices=range(1, NUM_STAGES + 1), metavar=f"N (1-{NUM_STAGES})",
+        "--start",
+        type=int,
+        default=1,
+        choices=range(1, NUM_STAGES + 1),
+        metavar=f"N (1-{NUM_STAGES})",
+    )
+    parser.add_argument(
+        "--end",
+        type=int,
+        default=NUM_STAGES,
+        choices=range(1, NUM_STAGES + 1),
+        metavar=f"N (1-{NUM_STAGES})",
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

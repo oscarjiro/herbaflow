@@ -12,12 +12,15 @@ Each Herbaflow ETL module needs a README that serves dual purpose: operational r
 ## Required Sections (in order)
 
 ### 1. Module Title + One-liner
+
 Name + single sentence: what the module fetches and what tables it produces.
 
 ### 2. Purpose in the NP Workflow
+
 2–3 paragraphs. Explain where this module sits in the pipeline chain (`knapsack/ → plants/ → compounds/ → diseases/ → disease_targets/`), what biological question it answers, and how its outputs feed the downstream overlap/PPI analysis. This is the academic framing — cite the data source type (curated DB, API, scrape), evidence categories, and why the source is appropriate for NP.
 
 ### 3. Data Source
+
 Name, URL, description of what it aggregates, evidence types as a markdown table. For APIs: authentication requirements, rate limits, free-vs-paid status. This section makes the methodology reproducible.
 
 ### 4. Pipeline Steps (one subsection per step)
@@ -47,10 +50,10 @@ Include caching behavior if the step uses a cache.
 One subsection per final output table. Header: `### \`tablename.csv\``. Subtext: "Matches the `{tablename}` database table." Then:
 
 ```markdown
-| Column | Type | Description |
-|---|---|---|
-| pk_column | UUID v5 | Primary key — deterministic from {input_key} |
-| canonical_key | text | {source}:{id} format — unique lookup key |
+| Column        | Type    | Description                                  |
+| ------------- | ------- | -------------------------------------------- |
+| pk_column     | UUID v5 | Primary key — deterministic from {input_key} |
+| canonical_key | text    | {source}:{id} format — unique lookup key     |
 ```
 
 Always explain the UUID v5 derivation logic and the `{source}:{id}` canonical_key convention.
@@ -60,14 +63,15 @@ Always explain the UUID v5 derivation logic and the `{source}:{id}` canonical_ke
 Full table of every key in the module's settings.yml:
 
 ```markdown
-| Key | Default | Description |
-|---|---|---|
+| Key           | Default | Description      |
+| ------------- | ------- | ---------------- |
 | `section.key` | `value` | what it controls |
 ```
 
 ### 7. How to Run
 
 Subsections:
+
 - **Prerequisites** — activate venv: `etl\.venv\Scripts\Activate.ps1`
 - **Full pipeline** — `python etl/{module}/main.py`
 - **Single stage** — `python etl/{module}/main.py --start N --end N`
@@ -92,7 +96,7 @@ Explain what makes the pipeline safe to re-run: cache hits, deterministic UUIDs,
 - **Academic framing**: In the Purpose and Data Source sections, use language suitable for Methods sections of a research paper (cite what the source aggregates, how it's curated, why it's authoritative).
 - **Operational framing**: In Steps and How to Run, write as a runbook — exact commands, expected output counts, what to do when something fails.
 - **Schema tables**: Always note UUID v5 determinism and the `{source}:{id}` canonical_key convention. These are the FK guarantees that make DB import safe.
-- **Column descriptions**: Explain the *meaning*, not just the type. "NCBI taxonomy ID — always 9606 (Homo sapiens)" is better than "int".
+- **Column descriptions**: Explain the _meaning_, not just the type. "NCBI taxonomy ID — always 9606 (Homo sapiens)" is better than "int".
 - **Known biological ground truths**: Always include at least one spot-check example. These let a reader verify the data is biologically sane without querying the DB.
 
 ## What NOT to Include

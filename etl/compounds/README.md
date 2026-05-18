@@ -28,11 +28,11 @@ Downstream, `disease_targets/` intersects compound targets (fetched via ChEMBL t
 
 ## Data Sources
 
-| Source | URL | Evidence provided | Authentication |
-|---|---|---|---|
-| KNApSAcK Indonesia | https://www.knapsackfamily.com/KNApSAcK/ | Plant-compound occurrence, CAS ID, molecular formula, MW | None — scraped by `knapsack/` module |
-| PubChem REST API | https://pubchem.ncbi.nlm.nih.gov/rest/pug | Canonical name, InChIKey, SMILES, CID, Lipinski descriptors (TPSA, logP, HBD, HBA, rotatable bonds, QED) | None — public API |
-| ChEMBL REST API | https://www.ebi.ac.uk/chembl/api/data | ChEMBL ID, synonyms, additional structure data | None — public API |
+| Source             | URL                                       | Evidence provided                                                                                        | Authentication                       |
+| ------------------ | ----------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| KNApSAcK Indonesia | https://www.knapsackfamily.com/KNApSAcK/  | Plant-compound occurrence, CAS ID, molecular formula, MW                                                 | None — scraped by `knapsack/` module |
+| PubChem REST API   | https://pubchem.ncbi.nlm.nih.gov/rest/pug | Canonical name, InChIKey, SMILES, CID, Lipinski descriptors (TPSA, logP, HBD, HBA, rotatable bonds, QED) | None — public API                    |
+| ChEMBL REST API    | https://www.ebi.ac.uk/chembl/api/data     | ChEMBL ID, synonyms, additional structure data                                                           | None — public API                    |
 
 PubChem is the primary structure authority. ChEMBL supplements identity resolution and provides ChEMBL IDs used for downstream target lookups. All API responses are cached to disk — subsequent runs skip the network entirely.
 
@@ -57,17 +57,17 @@ PubChem is the primary structure authority. ChEMBL supplements identity resoluti
 
 **Key columns in plants_compounds_staged.csv:**
 
-| Column | Description |
-|---|---|
-| `plant_id` | Raw KNApSAcK plant identifier |
-| `c_id` | Raw KNApSAcK compound identifier |
-| `cas_id` | CAS registry number as scraped (may contain formatting errors) |
-| `metabolite` | Raw metabolite name from KNApSAcK |
-| `molecular_formula` | Molecular formula string |
-| `mw` | Molecular weight string |
-| `canonical_plant_id` | UUID from plants ETL (empty if unresolved) |
-| `plant_mapping_status` | `mapped` or `unmapped` |
-| `raw_row_hash` | SHA-256 of the full raw evidence payload — stable dedup fingerprint |
+| Column                 | Description                                                         |
+| ---------------------- | ------------------------------------------------------------------- |
+| `plant_id`             | Raw KNApSAcK plant identifier                                       |
+| `c_id`                 | Raw KNApSAcK compound identifier                                    |
+| `cas_id`               | CAS registry number as scraped (may contain formatting errors)      |
+| `metabolite`           | Raw metabolite name from KNApSAcK                                   |
+| `molecular_formula`    | Molecular formula string                                            |
+| `mw`                   | Molecular weight string                                             |
+| `canonical_plant_id`   | UUID from plants ETL (empty if unresolved)                          |
+| `plant_mapping_status` | `mapped` or `unmapped`                                              |
+| `raw_row_hash`         | SHA-256 of the full raw evidence payload — stable dedup fingerprint |
 
 ---
 
@@ -89,15 +89,15 @@ PubChem is the primary structure authority. ChEMBL supplements identity resoluti
 
 **Key columns added by normalization:**
 
-| Column | Description |
-|---|---|
-| `normalized_metabolite_name` | Whitespace-normalized metabolite name |
-| `normalized_metabolite_key` | Lowercased, punctuation-stripped lookup key |
-| `normalized_cas_id` | Validated and reformatted CAS string |
-| `cas_is_valid` | `true`/`false` — checksum validation result |
-| `source_compound_key` | SHA-256 of raw evidence fields — row fingerprint for dedup |
-| `normalization_status` | `ready` or `review` |
-| `review_reason` | Semicolon-delimited list of review flags |
+| Column                       | Description                                                |
+| ---------------------------- | ---------------------------------------------------------- |
+| `normalized_metabolite_name` | Whitespace-normalized metabolite name                      |
+| `normalized_metabolite_key`  | Lowercased, punctuation-stripped lookup key                |
+| `normalized_cas_id`          | Validated and reformatted CAS string                       |
+| `cas_is_valid`               | `true`/`false` — checksum validation result                |
+| `source_compound_key`        | SHA-256 of raw evidence fields — row fingerprint for dedup |
+| `normalization_status`       | `ready` or `review`                                        |
+| `review_reason`              | Semicolon-delimited list of review flags                   |
 
 ---
 
@@ -110,10 +110,10 @@ PubChem is the primary structure authority. ChEMBL supplements identity resoluti
 1. Merges normalized rows and review rows using `raw_row_hash` as a stable dedup key (review CSV is an overlay, not a duplicate source)
 2. Re-resolves plant mappings from the resolution CSV as a second-pass improvement
 3. Clusters evidence rows into unique compound candidates using a tiered signature strategy:
-   - Tier 1 (confidence 0.985–0.99): valid CAS + name + formula
-   - Tier 2 (confidence 0.80–0.88): name + formula + MW, or name + CAS
-   - Tier 3 (confidence 0.50–0.78): formula + MW, name only, unverified CAS, formula only
-   - Tier 4 (confidence 0.40): source row fingerprint (last resort)
+    - Tier 1 (confidence 0.985–0.99): valid CAS + name + formula
+    - Tier 2 (confidence 0.80–0.88): name + formula + MW, or name + CAS
+    - Tier 3 (confidence 0.50–0.78): formula + MW, name only, unverified CAS, formula only
+    - Tier 4 (confidence 0.40): source row fingerprint (last resort)
 4. Adjusts confidence based on evidence consistency (multi-member support, review penalties, inter-member conflicts)
 5. Assigns `candidate_status`: `ready`, `review`, or `ambiguous`
 6. Builds `compound_candidate_members.csv` linking each raw evidence row to its parent candidate
@@ -122,17 +122,17 @@ PubChem is the primary structure authority. ChEMBL supplements identity resoluti
 
 **Key columns in compound_candidates.csv:**
 
-| Column | Description |
-|---|---|
-| `compound_candidate_id` | SHA-256-derived hex ID (`cmpcand_{16 hex chars}`) |
-| `candidate_key` | Deterministic signature string encoding the clustering strategy |
+| Column                   | Description                                                              |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `compound_candidate_id`  | SHA-256-derived hex ID (`cmpcand_{16 hex chars}`)                        |
+| `candidate_key`          | Deterministic signature string encoding the clustering strategy          |
 | `candidate_key_strategy` | Strategy name: `cas_exact_name_formula_support`, `name_formula_mw`, etc. |
-| `representative_name` | Most frequent name across member evidence rows |
-| `representative_cas_id` | Most frequent CAS across member evidence rows |
-| `candidate_status` | `ready`, `review`, or `ambiguous` |
-| `candidate_confidence` | 0.0–1.0 adjusted confidence score |
-| `member_count` | Number of raw evidence rows supporting this candidate |
-| `search_terms_json` | JSON array of all terms to submit to PubChem/ChEMBL |
+| `representative_name`    | Most frequent name across member evidence rows                           |
+| `representative_cas_id`  | Most frequent CAS across member evidence rows                            |
+| `candidate_status`       | `ready`, `review`, or `ambiguous`                                        |
+| `candidate_confidence`   | 0.0–1.0 adjusted confidence score                                        |
+| `member_count`           | Number of raw evidence rows supporting this candidate                    |
+| `search_terms_json`      | JSON array of all terms to submit to PubChem/ChEMBL                      |
 
 ---
 
@@ -154,24 +154,24 @@ PubChem is the primary structure authority. ChEMBL supplements identity resoluti
 
 **Key columns in compound_enrichment_results.csv:**
 
-| Column | Description |
-|---|---|
-| `compound_candidate_id` | FK → compound_candidates |
-| `inchi_key` | Standard InChIKey from PubChem (27-char hash) |
-| `smiles` | Canonical SMILES string |
-| `pubchem_cid` | PubChem Compound ID integer |
-| `chembl_id` | ChEMBL accession (e.g. `CHEMBL446858`) |
-| `molecular_weight` | Exact molecular weight (g/mol) |
-| `tpsa` | Topological polar surface area (A^2) |
-| `logp` | Octanol-water partition coefficient (XLogP3) |
-| `hbond_donors` | Lipinski H-bond donor count |
-| `hbond_acceptors` | Lipinski H-bond acceptor count |
-| `rotatable_bonds` | Number of rotatable bonds |
-| `qed_score` | Quantitative estimate of drug-likeness (0–1) |
-| `np_likeness_score` | Natural product likeness score |
-| `num_ro5_violations` | Number of Lipinski Rule of Five violations |
-| `match_confidence` | Final hit confidence score (0.0–1.0) |
-| `cache_key` | Lookup key into `compound_enrichment_cache.csv` |
+| Column                  | Description                                     |
+| ----------------------- | ----------------------------------------------- |
+| `compound_candidate_id` | FK → compound_candidates                        |
+| `inchi_key`             | Standard InChIKey from PubChem (27-char hash)   |
+| `smiles`                | Canonical SMILES string                         |
+| `pubchem_cid`           | PubChem Compound ID integer                     |
+| `chembl_id`             | ChEMBL accession (e.g. `CHEMBL446858`)          |
+| `molecular_weight`      | Exact molecular weight (g/mol)                  |
+| `tpsa`                  | Topological polar surface area (A^2)            |
+| `logp`                  | Octanol-water partition coefficient (XLogP3)    |
+| `hbond_donors`          | Lipinski H-bond donor count                     |
+| `hbond_acceptors`       | Lipinski H-bond acceptor count                  |
+| `rotatable_bonds`       | Number of rotatable bonds                       |
+| `qed_score`             | Quantitative estimate of drug-likeness (0–1)    |
+| `np_likeness_score`     | Natural product likeness score                  |
+| `num_ro5_violations`    | Number of Lipinski Rule of Five violations      |
+| `match_confidence`      | Final hit confidence score (0.0–1.0)            |
+| `cache_key`             | Lookup key into `compound_enrichment_cache.csv` |
 
 **Caching behavior:** Each candidate produces a JSON file under `out/cache/`. On re-run, if the cache file exists the API is skipped. Delete individual cache files or the entire `out/cache/` directory to force re-enrichment. The `compound_enrichment_cache.csv` index maps `cache_key` to the file path.
 
@@ -253,15 +253,15 @@ python etl/compounds/04_enrich/patch_missing_lipinski.py --no-rdkit
 
 **Checks performed:**
 
-| Check type | Description |
-|---|---|
-| Required columns present | All schema columns in each output file |
+| Check type                | Description                                                        |
+| ------------------------- | ------------------------------------------------------------------ |
+| Required columns present  | All schema columns in each output file                             |
 | No duplicate primary keys | `compound_id`, `compound_alias_id`, `plant_compound_id` all unique |
-| No orphan plant links | All `plant_id` in `plant_compounds` exist in the plants ETL export |
-| No orphan compound links | All `compound_id` in `plant_compounds` exist in `compounds.csv` |
-| CAS format validity | Flags malformed CAS strings as `invalid_cas_format` warnings |
-| Unresolved candidates | Warns if any candidates could not be resolved |
-| High provisional ratio | Warns if provisional compounds are an unusually large fraction |
+| No orphan plant links     | All `plant_id` in `plant_compounds` exist in the plants ETL export |
+| No orphan compound links  | All `compound_id` in `plant_compounds` exist in `compounds.csv`    |
+| CAS format validity       | Flags malformed CAS strings as `invalid_cas_format` warnings       |
+| Unresolved candidates     | Warns if any candidates could not be resolved                      |
+| High provisional ratio    | Warns if provisional compounds are an unusually large fraction     |
 
 All check failures that are structural (missing columns, duplicate PKs, orphan FKs) exit with code 1. CAS format issues and provisional ratio are warnings only and do not halt the pipeline.
 
@@ -287,37 +287,37 @@ These are the files used for PostgreSQL import.
 
 Matches the `compounds` database table.
 
-| Column | Type | Description |
-|---|---|---|
-| `compound_id` | UUID v5 | Primary key — deterministic from the compound's InChIKey or best canonical key, using namespace `herbaflow.compounds` |
-| `canonical_key` | text | `inchi::{InChIKey}` — unique chemical identity key used to derive the UUID |
-| `canonical_name` | text | Preferred IUPAC or common name (PubChem preferred over ChEMBL over KNApSAcK) |
-| `inchi_key` | text | Standard 27-character InChIKey (e.g., `VHBFFQKBGNRLFZ-UHFFFAOYSA-N`) |
-| `smiles` | text | Canonical SMILES string from PubChem |
-| `cas_id` | text | Best available CAS registry number; may be empty if not resolved |
-| `pubchem_cid` | text | PubChem Compound ID integer |
-| `chembl_id` | text | ChEMBL accession (e.g., `CHEMBL446858`); empty if not found in ChEMBL |
-| `molecular_formula` | text | Hill-notation molecular formula (e.g., `C21H20O12`) |
-| `molecular_weight` | float | Exact molecular weight in g/mol |
-| `tpsa` | float | Topological polar surface area (A^2) — proxy for membrane permeability; <140 A^2 indicates oral bioavailability potential |
-| `logp` | float | XLogP3 octanol-water partition coefficient — lipophilicity; Lipinski limit: ≤5 |
-| `hbond_donors` | int | Lipinski H-bond donor count (NH + OH groups); limit: ≤5 |
-| `hbond_acceptors` | int | Lipinski H-bond acceptor count (N + O atoms); limit: ≤10 |
-| `rotatable_bonds` | int | Number of rotatable single bonds — flexibility proxy |
-| `qed_score` | float | Quantitative estimate of drug-likeness (0–1); >0.6 considered drug-like |
-| `np_likeness_score` | float | Natural product likeness score (negative = less NP-like, positive = more NP-like) |
-| `num_ro5_violations` | int | Number of Lipinski Rule of Five violations (0 = fully compliant) |
-| `lipinski_source` | text | How ADME descriptors were obtained: `chembl_api`, `rdkit_computed`, or empty (unresolved) |
-| `source_name` | text | `PubChem` (primary enrichment source) |
-| `source_url` | text | PubChem compound page URL |
-| `source_batch_id` | text | Run ID timestamp of the enrichment run |
-| `retrieved_at` | ISO 8601 | UTC timestamp of enrichment |
-| `confidence` | float | Final match confidence (0.0–1.0) |
-| `canonical_status` | text | `accepted`, `provisional`, `review`, or `unresolved` |
-| `canonical_strategy` | text | Matching strategy used: `inchi_key`, `pubchem_cid_only`, `chembl_id_only`, etc. |
-| `canonical_reason` | text | Pipe-delimited evidence chain explaining the canonical decision |
-| `evidence_count` | int | Number of raw KNApSAcK evidence rows supporting this compound |
-| `plant_count` | int | Number of distinct canonical plants this compound is linked to |
+| Column               | Type     | Description                                                                                                               |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `compound_id`        | UUID v5  | Primary key — deterministic from the compound's InChIKey or best canonical key, using namespace `herbaflow.compounds`     |
+| `canonical_key`      | text     | `inchi::{InChIKey}` — unique chemical identity key used to derive the UUID                                                |
+| `canonical_name`     | text     | Preferred IUPAC or common name (PubChem preferred over ChEMBL over KNApSAcK)                                              |
+| `inchi_key`          | text     | Standard 27-character InChIKey (e.g., `VHBFFQKBGNRLFZ-UHFFFAOYSA-N`)                                                      |
+| `smiles`             | text     | Canonical SMILES string from PubChem                                                                                      |
+| `cas_id`             | text     | Best available CAS registry number; may be empty if not resolved                                                          |
+| `pubchem_cid`        | text     | PubChem Compound ID integer                                                                                               |
+| `chembl_id`          | text     | ChEMBL accession (e.g., `CHEMBL446858`); empty if not found in ChEMBL                                                     |
+| `molecular_formula`  | text     | Hill-notation molecular formula (e.g., `C21H20O12`)                                                                       |
+| `molecular_weight`   | float    | Exact molecular weight in g/mol                                                                                           |
+| `tpsa`               | float    | Topological polar surface area (A^2) — proxy for membrane permeability; <140 A^2 indicates oral bioavailability potential |
+| `logp`               | float    | XLogP3 octanol-water partition coefficient — lipophilicity; Lipinski limit: ≤5                                            |
+| `hbond_donors`       | int      | Lipinski H-bond donor count (NH + OH groups); limit: ≤5                                                                   |
+| `hbond_acceptors`    | int      | Lipinski H-bond acceptor count (N + O atoms); limit: ≤10                                                                  |
+| `rotatable_bonds`    | int      | Number of rotatable single bonds — flexibility proxy                                                                      |
+| `qed_score`          | float    | Quantitative estimate of drug-likeness (0–1); >0.6 considered drug-like                                                   |
+| `np_likeness_score`  | float    | Natural product likeness score (negative = less NP-like, positive = more NP-like)                                         |
+| `num_ro5_violations` | int      | Number of Lipinski Rule of Five violations (0 = fully compliant)                                                          |
+| `lipinski_source`    | text     | How ADME descriptors were obtained: `chembl_api`, `rdkit_computed`, or empty (unresolved)                                 |
+| `source_name`        | text     | `PubChem` (primary enrichment source)                                                                                     |
+| `source_url`         | text     | PubChem compound page URL                                                                                                 |
+| `source_batch_id`    | text     | Run ID timestamp of the enrichment run                                                                                    |
+| `retrieved_at`       | ISO 8601 | UTC timestamp of enrichment                                                                                               |
+| `confidence`         | float    | Final match confidence (0.0–1.0)                                                                                          |
+| `canonical_status`   | text     | `accepted`, `provisional`, `review`, or `unresolved`                                                                      |
+| `canonical_strategy` | text     | Matching strategy used: `inchi_key`, `pubchem_cid_only`, `chembl_id_only`, etc.                                           |
+| `canonical_reason`   | text     | Pipe-delimited evidence chain explaining the canonical decision                                                           |
+| `evidence_count`     | int      | Number of raw KNApSAcK evidence rows supporting this compound                                                             |
+| `plant_count`        | int      | Number of distinct canonical plants this compound is linked to                                                            |
 
 **UUID derivation:** `compound_id = uuid5(uuid5(DNS, "herbaflow.compounds"), canonical_key)`. For compounds with an InChIKey, `canonical_key = "inchi::{InChIKey}"`. Given the same InChIKey, the same UUID is always produced — re-running the pipeline never changes existing IDs.
 
@@ -327,33 +327,33 @@ Matches the `compounds` database table.
 
 Matches the `compound_aliases` database table.
 
-| Column | Type | Description |
-|---|---|---|
-| `compound_alias_id` | UUID v5 | Deterministic from `(compound_id, alias_name)`, namespace `herbaflow.compound_aliases` |
-| `compound_id` | UUID v5 | FK → compounds |
-| `alias_name` | text | The alias string (name, synonym, CAS, InChIKey, etc.) |
-| `alias_key` | text | Lowercased, whitespace-collapsed lookup key |
-| `alias_type` | text | `iupac_name`, `common_name`, `cas_id`, `inchi_key`, `smiles`, `pubchem_synonym`, etc. |
-| `source_name` | text | Source that provided this alias |
-| `source_url` | text | PubChem or ChEMBL URL |
-| `source_batch_id` | text | Run ID |
-| `retrieved_at` | ISO 8601 | UTC timestamp |
+| Column              | Type     | Description                                                                            |
+| ------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `compound_alias_id` | UUID v5  | Deterministic from `(compound_id, alias_name)`, namespace `herbaflow.compound_aliases` |
+| `compound_id`       | UUID v5  | FK → compounds                                                                         |
+| `alias_name`        | text     | The alias string (name, synonym, CAS, InChIKey, etc.)                                  |
+| `alias_key`         | text     | Lowercased, whitespace-collapsed lookup key                                            |
+| `alias_type`        | text     | `iupac_name`, `common_name`, `cas_id`, `inchi_key`, `smiles`, `pubchem_synonym`, etc.  |
+| `source_name`       | text     | Source that provided this alias                                                        |
+| `source_url`        | text     | PubChem or ChEMBL URL                                                                  |
+| `source_batch_id`   | text     | Run ID                                                                                 |
+| `retrieved_at`      | ISO 8601 | UTC timestamp                                                                          |
 
 ### `plant_compounds.csv` (20,891 rows)
 
 Matches the `plant_compounds` database table. One row per canonical plant-compound occurrence.
 
-| Column | Type | Description |
-|---|---|---|
-| `plant_compound_id` | UUID v5 | Deterministic from `(plant_id, compound_id, source_compound_raw_id)` |
-| `plant_id` | UUID v5 | FK → plants |
-| `compound_id` | UUID v5 | FK → compounds |
-| `source_plant_raw_id` | text | Original KNApSAcK plant identifier |
-| `source_compound_raw_id` | text | Original KNApSAcK compound identifier (`c_id`) |
-| `source_name` | text | `KNApSAcK` |
-| `evidence_type` | text | `metabolite_occurrence` |
-| `confidence` | float | Compound match confidence propagated from `05_build_canonical` |
-| `retrieved_at` | ISO 8601 | UTC timestamp |
+| Column                   | Type     | Description                                                          |
+| ------------------------ | -------- | -------------------------------------------------------------------- |
+| `plant_compound_id`      | UUID v5  | Deterministic from `(plant_id, compound_id, source_compound_raw_id)` |
+| `plant_id`               | UUID v5  | FK → plants                                                          |
+| `compound_id`            | UUID v5  | FK → compounds                                                       |
+| `source_plant_raw_id`    | text     | Original KNApSAcK plant identifier                                   |
+| `source_compound_raw_id` | text     | Original KNApSAcK compound identifier (`c_id`)                       |
+| `source_name`            | text     | `KNApSAcK`                                                           |
+| `evidence_type`          | text     | `metabolite_occurrence`                                              |
+| `confidence`             | float    | Compound match confidence propagated from `05_build_canonical`       |
+| `retrieved_at`           | ISO 8601 | UTC timestamp                                                        |
 
 ### `compound_candidate_map.csv` (12,593 rows)
 
@@ -367,39 +367,39 @@ Candidates that could not be resolved to a canonical compound identity. Each row
 
 ## Configuration (`settings.yml`)
 
-| Key | Default | Description |
-|---|---|---|
-| `source.name` | `KNApSAcK` | Display name written to all output records |
-| `source.url` | `https://www.knapsackfamily.com/KNApSAcK/` | Source URL written to output records |
-| `source.batch_id` | `auto` | Run ID; `auto` generates a timestamp-based ID at runtime |
-| `paths.raw.plants_compounds_csv` | `knapsack/out/plants_compounds.csv` | Raw KNApSAcK input (relative to `etl/`) |
-| `paths.plant_etl.canonical_plants_csv` | `plants/06_export/out/plants.csv` | Upstream plants ETL output used for plant ID resolution |
-| `paths.plant_etl.plant_aliases_csv` | `plants/06_export/out/plant_aliases.csv` | Plant alias table (supplementary resolution) |
-| `enrichment.pubchem.base_url` | `https://pubchem.ncbi.nlm.nih.gov/rest/pug` | PubChem REST API base URL |
-| `enrichment.pubchem.timeout_seconds` | `30` | Per-request timeout |
-| `enrichment.pubchem.max_retries` | `4` | Retries on network error |
-| `enrichment.pubchem.request_delay_seconds` | `0.3` | Delay between requests (rate limiting) |
-| `enrichment.pubchem.cache_responses` | `true` | Cache API responses to disk |
-| `enrichment.chembl.base_url` | `https://www.ebi.ac.uk/chembl/api/data` | ChEMBL REST API base URL |
-| `enrichment.chembl.timeout_seconds` | `30` | Per-request timeout |
-| `enrichment.chembl.max_retries` | `4` | Retries on network error |
-| `enrichment.chembl.request_delay_seconds` | `0.3` | Delay between requests |
-| `enrichment.chembl.cache_responses` | `true` | Cache API responses to disk |
-| `matching.high_confidence_threshold` | `0.90` | Confidence at or above which a candidate is auto-accepted |
-| `matching.medium_confidence_threshold` | `0.70` | Confidence at or above which a candidate proceeds without review |
-| `matching.review_confidence_threshold` | `0.50` | Below this, candidate goes to review queue |
-| `matching.pubchem_cid_exact_match_weight` | `1.0` | Confidence weight for exact PubChem CID match |
-| `matching.inchikey_exact_match_weight` | `1.0` | Confidence weight for exact InChIKey match |
-| `matching.chembl_id_exact_match_weight` | `0.95` | Confidence weight for exact ChEMBL ID match |
-| `matching.cas_exact_match_weight` | `0.85` | Confidence weight for exact CAS match |
-| `matching.name_only_match_weight` | `0.60` | Confidence weight for name-only match |
-| `matching.deduplicate_by` | `[inchikey, pubchem_cid, chembl_id, canonical_name]` | Deduplication priority order |
-| `validation.thresholds.min_compound_confidence_to_auto_accept` | `0.70` | Minimum confidence for automatic canonical acceptance |
-| `validation.thresholds.max_orphan_plant_join_ratio` | `0.00` | Fail if any plant-compound rows reference non-existent plants |
-| `validation.thresholds.max_missing_identifier_ratio` | `0.20` | Warn if >20% of compounds have no chemical identifier |
-| `validation.checks.allow_review_queue` | `true` | Whether unresolved candidates may exist without failing validation |
-| `export.format` | `csv` | Output format (CSV only currently) |
-| `sql_export.enabled` | `false` | SQL INSERT/UPSERT export (disabled by default) |
+| Key                                                            | Default                                              | Description                                                        |
+| -------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------ |
+| `source.name`                                                  | `KNApSAcK`                                           | Display name written to all output records                         |
+| `source.url`                                                   | `https://www.knapsackfamily.com/KNApSAcK/`           | Source URL written to output records                               |
+| `source.batch_id`                                              | `auto`                                               | Run ID; `auto` generates a timestamp-based ID at runtime           |
+| `paths.raw.plants_compounds_csv`                               | `knapsack/out/plants_compounds.csv`                  | Raw KNApSAcK input (relative to `etl/`)                            |
+| `paths.plant_etl.canonical_plants_csv`                         | `plants/06_export/out/plants.csv`                    | Upstream plants ETL output used for plant ID resolution            |
+| `paths.plant_etl.plant_aliases_csv`                            | `plants/06_export/out/plant_aliases.csv`             | Plant alias table (supplementary resolution)                       |
+| `enrichment.pubchem.base_url`                                  | `https://pubchem.ncbi.nlm.nih.gov/rest/pug`          | PubChem REST API base URL                                          |
+| `enrichment.pubchem.timeout_seconds`                           | `30`                                                 | Per-request timeout                                                |
+| `enrichment.pubchem.max_retries`                               | `4`                                                  | Retries on network error                                           |
+| `enrichment.pubchem.request_delay_seconds`                     | `0.3`                                                | Delay between requests (rate limiting)                             |
+| `enrichment.pubchem.cache_responses`                           | `true`                                               | Cache API responses to disk                                        |
+| `enrichment.chembl.base_url`                                   | `https://www.ebi.ac.uk/chembl/api/data`              | ChEMBL REST API base URL                                           |
+| `enrichment.chembl.timeout_seconds`                            | `30`                                                 | Per-request timeout                                                |
+| `enrichment.chembl.max_retries`                                | `4`                                                  | Retries on network error                                           |
+| `enrichment.chembl.request_delay_seconds`                      | `0.3`                                                | Delay between requests                                             |
+| `enrichment.chembl.cache_responses`                            | `true`                                               | Cache API responses to disk                                        |
+| `matching.high_confidence_threshold`                           | `0.90`                                               | Confidence at or above which a candidate is auto-accepted          |
+| `matching.medium_confidence_threshold`                         | `0.70`                                               | Confidence at or above which a candidate proceeds without review   |
+| `matching.review_confidence_threshold`                         | `0.50`                                               | Below this, candidate goes to review queue                         |
+| `matching.pubchem_cid_exact_match_weight`                      | `1.0`                                                | Confidence weight for exact PubChem CID match                      |
+| `matching.inchikey_exact_match_weight`                         | `1.0`                                                | Confidence weight for exact InChIKey match                         |
+| `matching.chembl_id_exact_match_weight`                        | `0.95`                                               | Confidence weight for exact ChEMBL ID match                        |
+| `matching.cas_exact_match_weight`                              | `0.85`                                               | Confidence weight for exact CAS match                              |
+| `matching.name_only_match_weight`                              | `0.60`                                               | Confidence weight for name-only match                              |
+| `matching.deduplicate_by`                                      | `[inchikey, pubchem_cid, chembl_id, canonical_name]` | Deduplication priority order                                       |
+| `validation.thresholds.min_compound_confidence_to_auto_accept` | `0.70`                                               | Minimum confidence for automatic canonical acceptance              |
+| `validation.thresholds.max_orphan_plant_join_ratio`            | `0.00`                                               | Fail if any plant-compound rows reference non-existent plants      |
+| `validation.thresholds.max_missing_identifier_ratio`           | `0.20`                                               | Warn if >20% of compounds have no chemical identifier              |
+| `validation.checks.allow_review_queue`                         | `true`                                               | Whether unresolved candidates may exist without failing validation |
+| `export.format`                                                | `csv`                                                | Output format (CSV only currently)                                 |
+| `sql_export.enabled`                                           | `false`                                              | SQL INSERT/UPSERT export (disabled by default)                     |
 
 ---
 
@@ -472,21 +472,22 @@ python -m pytest etl/tests/ -v
 
 ```json
 {
-  "module": "compounds",
-  "run_id": "compounds_20260516_210359",
-  "summary": {
-    "compounds_row_count": 11305,
-    "compound_aliases_row_count": 73469,
-    "plant_compounds_row_count": 20891,
-    "compound_candidate_map_row_count": 12593,
-    "compound_review_row_count": 8,
-    "plant_compound_review_row_count": 237
-  },
-  "generated_at": "2026-05-16T21:03:59.767526+00:00"
+    "module": "compounds",
+    "run_id": "compounds_20260516_210359",
+    "summary": {
+        "compounds_row_count": 11305,
+        "compound_aliases_row_count": 73469,
+        "plant_compounds_row_count": 20891,
+        "compound_candidate_map_row_count": 12593,
+        "compound_review_row_count": 8,
+        "plant_compound_review_row_count": 237
+    },
+    "generated_at": "2026-05-16T21:03:59.767526+00:00"
 }
 ```
 
 Expected ranges for a full KNApSAcK Indonesia dataset:
+
 - **compounds**: 10,000–14,000 (unique canonical compounds after deduplication)
 - **compound_aliases**: 60,000–90,000 (several aliases per compound on average)
 - **plant_compounds**: 18,000–25,000 (many-to-many bridge; one row per occurrence)
@@ -496,24 +497,24 @@ Expected ranges for a full KNApSAcK Indonesia dataset:
 
 Top-level fields:
 
-| Field | Description |
-|---|---|
-| `pass` | `true` if no critical errors; pipeline may continue |
-| `critical_error_count` | Count of FAIL-level checks; must be 0 for export to proceed |
-| `warning_count` | Count of WARN-level issues; non-blocking |
-| `issue_type_counts` | Breakdown by issue type |
-| `table_counts` | Per-file row count, unique ID count, issue count |
-| `warnings` | Array of individual warning objects with `issue_type`, `issue_reason`, and `row_identifier` |
+| Field                  | Description                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| `pass`                 | `true` if no critical errors; pipeline may continue                                         |
+| `critical_error_count` | Count of FAIL-level checks; must be 0 for export to proceed                                 |
+| `warning_count`        | Count of WARN-level issues; non-blocking                                                    |
+| `issue_type_counts`    | Breakdown by issue type                                                                     |
+| `table_counts`         | Per-file row count, unique ID count, issue count                                            |
+| `warnings`             | Array of individual warning objects with `issue_type`, `issue_reason`, and `row_identifier` |
 
 Current run (2026-05-16): `pass: true`, 0 critical errors, 17 warnings (15 `invalid_cas_format`, 1 `unresolved_candidates_present`, 1 `high_provisional_ratio`). All warnings are non-blocking.
 
 **Warning types explained:**
 
-| Warning type | Meaning | Action |
-|---|---|---|
-| `invalid_cas_format` | CAS string does not match the standard `NNNNNNN-NN-N` format with valid checksum | Low priority; CAS from KNApSAcK is often poorly formatted; compound is still resolved via InChIKey/name |
-| `unresolved_candidates_present` | N candidates could not be matched to any chemical identity | Review `compound_review.csv` to decide if manual resolution is needed |
-| `high_provisional_ratio` | Provisional compounds (identity resolved but with caveats) are an unusually large fraction | Expected for natural product databases with sparse structural data; not an error |
+| Warning type                    | Meaning                                                                                    | Action                                                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `invalid_cas_format`            | CAS string does not match the standard `NNNNNNN-NN-N` format with valid checksum           | Low priority; CAS from KNApSAcK is often poorly formatted; compound is still resolved via InChIKey/name |
+| `unresolved_candidates_present` | N candidates could not be matched to any chemical identity                                 | Review `compound_review.csv` to decide if manual resolution is needed                                   |
+| `high_provisional_ratio`        | Provisional compounds (identity resolved but with caveats) are an unusually large fraction | Expected for natural product databases with sparse structural data; not an error                        |
 
 ### Spot-checking known compounds
 

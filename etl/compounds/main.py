@@ -48,19 +48,26 @@ def build_cmd(step_key: str, cfg: dict) -> list[str]:
 
     if step_key == "extract":
         cmd += [
-            "--input", str(ETL_ROOT / cfg["paths"]["raw"]["plants_compounds_csv"]),
-            "--plants-csv", str(ETL_ROOT / cfg["paths"]["plant_etl"]["canonical_plants_csv"]),
-            "--output-dir", str(ETL_ROOT / step_dirs["extract_out"]),
+            "--input",
+            str(ETL_ROOT / cfg["paths"]["raw"]["plants_compounds_csv"]),
+            "--plants-csv",
+            str(ETL_ROOT / cfg["paths"]["plant_etl"]["canonical_plants_csv"]),
+            "--output-dir",
+            str(ETL_ROOT / step_dirs["extract_out"]),
         ]
     elif step_key == "normalize":
         cmd += [
-            "--input-dir", str(ETL_ROOT / step_dirs["extract_out"]),
-            "--output-dir", str(ETL_ROOT / step_dirs["normalize_out"]),
+            "--input-dir",
+            str(ETL_ROOT / step_dirs["extract_out"]),
+            "--output-dir",
+            str(ETL_ROOT / step_dirs["normalize_out"]),
         ]
     elif step_key == "dedupe_candidates":
         cmd += [
-            "--input-dir", str(ETL_ROOT / step_dirs["normalize_out"]),
-            "--output-dir", str(ETL_ROOT / step_dirs["dedupe_candidates_out"]),
+            "--input-dir",
+            str(ETL_ROOT / step_dirs["normalize_out"]),
+            "--output-dir",
+            str(ETL_ROOT / step_dirs["dedupe_candidates_out"]),
         ]
     elif step_key == "enrich":
         pass  # enrich reads paths from settings.yml; no extra args needed
@@ -79,10 +86,20 @@ def main() -> int:
     log = setup_logging("compounds.main", cfg)
 
     parser = argparse.ArgumentParser(description="Herbaflow Compounds ETL Pipeline")
-    parser.add_argument("--start", type=int, default=1, choices=range(1, NUM_STAGES + 1),
-                        metavar=f"N (1-{NUM_STAGES})")
-    parser.add_argument("--end", type=int, default=NUM_STAGES, choices=range(1, NUM_STAGES + 1),
-                        metavar=f"N (1-{NUM_STAGES})")
+    parser.add_argument(
+        "--start",
+        type=int,
+        default=1,
+        choices=range(1, NUM_STAGES + 1),
+        metavar=f"N (1-{NUM_STAGES})",
+    )
+    parser.add_argument(
+        "--end",
+        type=int,
+        default=NUM_STAGES,
+        choices=range(1, NUM_STAGES + 1),
+        metavar=f"N (1-{NUM_STAGES})",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 

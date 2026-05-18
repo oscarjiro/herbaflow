@@ -46,10 +46,20 @@ def main() -> int:
     log = setup_logging("diseases.main", cfg)
 
     parser = argparse.ArgumentParser(description="Herbaflow Diseases ETL Pipeline")
-    parser.add_argument("--start", type=int, default=1, choices=range(1, NUM_STAGES + 1),
-                        metavar=f"N (1-{NUM_STAGES})")
-    parser.add_argument("--end", type=int, default=NUM_STAGES, choices=range(1, NUM_STAGES + 1),
-                        metavar=f"N (1-{NUM_STAGES})")
+    parser.add_argument(
+        "--start",
+        type=int,
+        default=1,
+        choices=range(1, NUM_STAGES + 1),
+        metavar=f"N (1-{NUM_STAGES})",
+    )
+    parser.add_argument(
+        "--end",
+        type=int,
+        default=NUM_STAGES,
+        choices=range(1, NUM_STAGES + 1),
+        metavar=f"N (1-{NUM_STAGES})",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 

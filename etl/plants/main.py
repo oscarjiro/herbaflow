@@ -40,72 +40,118 @@ def build_cmd(step_key: str, cfg: dict) -> list[str]:
 
     if step_key == "extract":
         cmd += [
-            "--input", str(ETL_ROOT / step["input"]),
-            "--output-dir", str(ETL_ROOT / step["output_dir"]),
-            "--output-file", step["output_file"],
-            "--source-batch-id", step.get("source_batch_id", src["batch_id"]),
-            "--log-file", step["log_file"],
+            "--input",
+            str(ETL_ROOT / step["input"]),
+            "--output-dir",
+            str(ETL_ROOT / step["output_dir"]),
+            "--output-file",
+            step["output_file"],
+            "--source-batch-id",
+            step.get("source_batch_id", src["batch_id"]),
+            "--log-file",
+            step["log_file"],
         ]
     elif step_key == "normalize_taxonomy":
         cmd += [
-            "--input", str(ETL_ROOT / step["input"]),
-            "--output-dir", str(ETL_ROOT / step["output_dir"]),
-            "--output-file", step["output_file"],
-            "--report-file", step["report_file"],
-            "--log-file", step["log_file"],
+            "--input",
+            str(ETL_ROOT / step["input"]),
+            "--output-dir",
+            str(ETL_ROOT / step["output_dir"]),
+            "--output-file",
+            step["output_file"],
+            "--report-file",
+            step["report_file"],
+            "--log-file",
+            step["log_file"],
         ]
     elif step_key == "match_gbif":
         out_path = ETL_ROOT / step["output_dir"] / step["output_file"]
         ua = cfg.get("gbif", {}).get("user_agent", "herbaflow/1.0")
         cmd += [
-            "--input", str(ETL_ROOT / step["input"]),
-            "--output", str(out_path),
-            "--cache-dir", str(ETL_ROOT / step["cache_dir"]),
-            "--user-agent", ua,
-            "--log-file", step["log_file"],
+            "--input",
+            str(ETL_ROOT / step["input"]),
+            "--output",
+            str(out_path),
+            "--cache-dir",
+            str(ETL_ROOT / step["cache_dir"]),
+            "--user-agent",
+            ua,
+            "--log-file",
+            step["log_file"],
         ]
     elif step_key == "build_canonical_part1":
         cmd += [
-            "--input", str(ETL_ROOT / step["input"]),
-            "--output-dir", str(ETL_ROOT / step["output_dir"]),
-            "--accepted-file", step["accepted_file"],
-            "--review-file", step["review_file"],
-            "--rejected-file", step["rejected_file"],
-            "--manually-accepted-review-file", step["manually_accepted_review_file"],
-            "--report-file", step["report_file"],
-            "--log-file", step["log_file"],
-            "--source-name", src["name"],
+            "--input",
+            str(ETL_ROOT / step["input"]),
+            "--output-dir",
+            str(ETL_ROOT / step["output_dir"]),
+            "--accepted-file",
+            step["accepted_file"],
+            "--review-file",
+            step["review_file"],
+            "--rejected-file",
+            step["rejected_file"],
+            "--manually-accepted-review-file",
+            step["manually_accepted_review_file"],
+            "--report-file",
+            step["report_file"],
+            "--log-file",
+            step["log_file"],
+            "--source-name",
+            src["name"],
         ]
     elif step_key == "build_canonical_part2":
         cmd += [
-            "--input", str(ETL_ROOT / step["input"]),
-            "--manually-accepted-review-input", str(ETL_ROOT / step["manually_accepted_review_input"]),
-            "--output-dir", str(ETL_ROOT / step["output_dir"]),
-            "--plants-file", step["plants_file"],
-            "--aliases-file", step["aliases_file"],
-            "--report-file", step["report_file"],
-            "--log-file", step["log_file"],
-            "--source-name", src["name"],
+            "--input",
+            str(ETL_ROOT / step["input"]),
+            "--manually-accepted-review-input",
+            str(ETL_ROOT / step["manually_accepted_review_input"]),
+            "--output-dir",
+            str(ETL_ROOT / step["output_dir"]),
+            "--plants-file",
+            step["plants_file"],
+            "--aliases-file",
+            step["aliases_file"],
+            "--report-file",
+            step["report_file"],
+            "--log-file",
+            step["log_file"],
+            "--source-name",
+            src["name"],
         ]
     elif step_key == "validate":
         cmd += [
-            "--plants", str(ETL_ROOT / step["plants"]),
-            "--aliases", str(ETL_ROOT / step["aliases"]),
-            "--output-dir", str(ETL_ROOT / step["output_dir"]),
-            "--report-csv", step["report_csv"],
-            "--report-json", step["report_json"],
-            "--validated-plants", step["validated_plants"],
-            "--validated-aliases", step["validated_aliases"],
-            "--log-file", step["log_file"],
+            "--plants",
+            str(ETL_ROOT / step["plants"]),
+            "--aliases",
+            str(ETL_ROOT / step["aliases"]),
+            "--output-dir",
+            str(ETL_ROOT / step["output_dir"]),
+            "--report-csv",
+            step["report_csv"],
+            "--report-json",
+            step["report_json"],
+            "--validated-plants",
+            step["validated_plants"],
+            "--validated-aliases",
+            step["validated_aliases"],
+            "--log-file",
+            step["log_file"],
         ]
     elif step_key == "export":
         cmd += [
-            "--input-dir", str(ETL_ROOT / step["input_dir"]),
-            "--output-dir", str(ETL_ROOT / step["output_dir"]),
-            "--plants-file", step["plants_file"],
-            "--aliases-file", step["aliases_file"],
-            "--manifest-file", step["manifest_file"],
-            "--log-file", step["log_file"],
+            "--input-dir",
+            str(ETL_ROOT / step["input_dir"]),
+            "--output-dir",
+            str(ETL_ROOT / step["output_dir"]),
+            "--plants-file",
+            step["plants_file"],
+            "--aliases-file",
+            step["aliases_file"],
+            "--manifest-file",
+            step["manifest_file"],
+            "--log-file",
+            step["log_file"],
         ]
         if cfg.get("export", {}).get("include_sql", False):
             cmd.append("--emit-sql")
@@ -118,10 +164,20 @@ def main() -> int:
     log = setup_logging("plants.main", cfg)
 
     parser = argparse.ArgumentParser(description="Herbaflow Plants ETL Pipeline")
-    parser.add_argument("--start", type=int, default=1, choices=range(1, NUM_STAGES + 1),
-                        metavar=f"N (1-{NUM_STAGES})")
-    parser.add_argument("--end", type=int, default=NUM_STAGES, choices=range(1, NUM_STAGES + 1),
-                        metavar=f"N (1-{NUM_STAGES})")
+    parser.add_argument(
+        "--start",
+        type=int,
+        default=1,
+        choices=range(1, NUM_STAGES + 1),
+        metavar=f"N (1-{NUM_STAGES})",
+    )
+    parser.add_argument(
+        "--end",
+        type=int,
+        default=NUM_STAGES,
+        choices=range(1, NUM_STAGES + 1),
+        metavar=f"N (1-{NUM_STAGES})",
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
