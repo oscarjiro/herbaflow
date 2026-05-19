@@ -68,6 +68,23 @@ uv run pytest tests/integration/
 | STRING-DB    | Protein-protein interactions | `integrations/stringdb.py`     |
 | g:Profiler   | Pathway enrichment           | `integrations/gprofiler.py`    |
 
+## Export Endpoint
+
+`GET /analyses/{id}/export/{stage}?format=csv|json`
+
+CSV export works for **all stages 1–8**. Each stage produces a sensible flat CSV:
+
+| Stage | Filename pattern              | Rows                                          |
+| ----- | ----------------------------- | --------------------------------------------- |
+| 1     | `*_stage1_compounds.csv`      | One row per compound_id                       |
+| 2     | `*_stage2_adme.csv`           | One row per compound with ADME status         |
+| 3     | `*_stage3_targets.csv`        | One row per target gene                       |
+| 4     | `*_stage4_disease_targets.csv`| One row per disease-associated target         |
+| 5     | `*_stage5_overlap.csv`        | Summary stats + one row per overlap gene      |
+| 6     | `*_stage6_ppi_edges.csv`      | One row per PPI edge                          |
+| 7     | `*_stage7_hub_genes.csv`      | One row per ranked hub gene (centrality scores)|
+| 8     | `*_stage8_enrichment.csv`     | One row per pathway term across GO/KEGG       |
+
 ## Tests
 
 60 tests: 22 unit + 38 integration. All must pass before commit.
