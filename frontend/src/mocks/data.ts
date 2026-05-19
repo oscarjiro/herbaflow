@@ -1,50 +1,33 @@
-// Fixture data matching the backend API schemas.
-// Inline types used here since @/types/api does not exist yet (Task 5).
+// Fixture data matching the backend API schemas exactly.
+import type { PlantResponse, DiseaseResponse } from '@/types/api'
 
-interface PlantFixture {
-  id: string
-  scientific_name: string
-  common_names: string[]
-  family: string
-  compound_count: number
-}
-
-interface DiseaseFixture {
-  id: string
-  name: string
-  ontology_id: string
-  source: string
-}
-
-export const plantsFixture: PlantFixture[] = [
+export const plantsFixture: PlantResponse[] = [
   {
-    id: 'pl_knapsack_C00001234',
-    scientific_name: 'Andrographis paniculata',
-    common_names: ['King of Bitters', 'Kalmegh'],
-    family: 'Acanthaceae',
+    plant_id: 'pl_knapsack_C00001234',
+    canonical_scientific_name: 'Andrographis paniculata',
+    family_name: 'Acanthaceae',
     compound_count: 42,
   },
   {
-    id: 'pl_knapsack_C00005678',
-    scientific_name: 'Curcuma longa',
-    common_names: ['Turmeric'],
-    family: 'Zingiberaceae',
+    plant_id: 'pl_knapsack_C00005678',
+    canonical_scientific_name: 'Curcuma longa',
+    family_name: 'Zingiberaceae',
     compound_count: 87,
   },
 ]
 
-export const diseasesFixture: DiseaseFixture[] = [
+export const diseasesFixture: DiseaseResponse[] = [
   {
-    id: 'dtg_mondo_0005148',
-    name: 'type 2 diabetes mellitus',
+    disease_id: 'dtg_mondo_0005148',
+    disease_name: 'type 2 diabetes mellitus',
     ontology_id: 'MONDO:0005148',
-    source: 'mondo',
+    ontology_source: 'mondo',
   },
   {
-    id: 'dtg_mondo_0004981',
-    name: 'atrial fibrillation',
+    disease_id: 'dtg_mondo_0004981',
+    disease_name: 'atrial fibrillation',
     ontology_id: 'MONDO:0004981',
-    source: 'mondo',
+    ontology_source: 'mondo',
   },
 ]
 
