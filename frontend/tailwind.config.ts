@@ -1,0 +1,58 @@
+import type { Config } from 'tailwindcss'
+
+export default {
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        hf: {
+          bg:                'var(--hf-bg)',
+          surface:           'var(--hf-surface)',
+          'surface-2':       'var(--hf-surface-2)',
+          border:            'var(--hf-border)',
+          'border-strong':   'var(--hf-border-strong)',
+          fg1:               'var(--hf-fg-1)',
+          fg2:               'var(--hf-fg-2)',
+          fg3:               'var(--hf-fg-3)',
+          fg4:               'var(--hf-fg-4)',
+          sage:              'var(--hf-sage)',
+          'sage-deep':       'var(--hf-sage-deep)',
+          'sage-soft':       'var(--hf-sage-soft)',
+          'sage-faint':      'var(--hf-sage-faint)',
+          terracotta:        'var(--hf-terracotta)',
+          'terracotta-soft': 'var(--hf-terracotta-soft)',
+          success:           'var(--hf-success)',
+          'success-soft':    'var(--hf-success-soft)',
+          warning:           'var(--hf-warning)',
+          'warning-soft':    'var(--hf-warning-soft)',
+          danger:            'var(--hf-danger)',
+          'danger-soft':     'var(--hf-danger-soft)',
+          info:              'var(--hf-info)',
+          'info-soft':       'var(--hf-info-soft)',
+          n50:  '#F7F5F2',
+          n100: '#EFEBE4',
+          n200: '#E5E0D8',
+          n300: '#D4CEC4',
+          n500: '#9A958C',
+          n600: '#6E6A62',
+          n700: '#4A463F',
+          n900: '#1A1A1A',
+        },
+      },
+      fontFamily: {
+        display: ['Instrument Serif', 'Georgia', 'serif'],
+        sans:    ['Be Vietnam Pro', 'sans-serif'],
+        mono:    ['Space Mono', 'monospace'],
+      },
+      borderRadius: {
+        none:    '0',
+        sm:      '2px',
+        DEFAULT: '4px',
+        md:      '4px',
+        lg:      '8px',
+        full:    '9999px',
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config
