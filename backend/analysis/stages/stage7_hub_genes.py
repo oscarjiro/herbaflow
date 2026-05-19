@@ -49,7 +49,10 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
         bet = betweenness[node]
         is_hub = deg > hub_degree_threshold
         is_hub_bottleneck = is_hub and bet >= hub_bet_threshold
-        ranked.append({
+        # Only include keys with non-None values so stage_results JSONB stays clean.
+        # disease_association_score / compound_support_score / final_score are future
+        # enrichment fields and must NOT appear as null keys in the stored dict.
+        entry = {
             "gene_symbol": node,
             "degree": deg,
             "betweenness": round(bet, 6),
@@ -57,7 +60,8 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
             "eigenvector": round(eigenvector[node], 6),
             "is_hub": is_hub,
             "is_hub_bottleneck": is_hub_bottleneck,
-        })
+        }
+        ranked.append({k: v for k, v in entry.items() if v is not None})
 
     ranked.sort(key=lambda x: x["degree"], reverse=True)
     ranked = ranked[:top_n]

@@ -172,22 +172,142 @@ async def export_stage_results(
             headers={"Content-Disposition": f"attachment; filename={run.analysis_name}_{stage_key}.json"},
         )
 
-    # CSV: flatten for tabular stages (stage 7 hub genes is the most useful)
-    if stage_key == "stage_7":
-        rows = stage_data.get("ranked", [])
-        if rows:
-            output = io.StringIO()
-            writer = csv.DictWriter(output, fieldnames=rows[0].keys())
+    # CSV: flatten stage data into a tabular representation
+    if format == "csv":
+        output = io.StringIO()
+
+        if stage_key == "stage_1":
+            # One row per compound_id
+            compound_ids = stage_data.get("compound_ids", [])
+            writer = csv.DictWriter(output, fieldnames=["compound_id"])
             writer.writeheader()
-            writer.writerows(rows)
-            output.seek(0)
+            for cid in compound_ids:
+                writer.writerow({"compound_id": cid})
+            filename = f"{run.analysis_name}_stage1_compounds.csv"
+
+        elif stage_key == "stage_2":
+            # One row per group showing compound IDs and their ADME status
+            fieldnames = ["status", "compound_id"]
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+            for cid in stage_data.get("passed_compound_ids", []):
+                writer.writerow({"status": "passed", "compound_id": cid})
+            for cid in stage_data.get("np_exception_compound_ids", []):
+                writer.writerow({"status": "np_exception", "compound_id": cid})
+            filename = f"{run.analysis_name}_stage2_adme.csv"
+
+        elif stage_key == "stage_3":
+            # One row per target — gene_symbol, compound_count, compound_ids (joined)
+            target_compound_map = stage_data.get("target_compound_map", {})
+            fieldnames = ["gene_symbol", "compound_count", "compound_ids"]
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+            for gene, cids in target_compound_map.items():
+                writer.writerow({
+                    "gene_symbol": gene,
+                    "compound_count": len(cids),
+                    "compound_ids": "|".join(cids),
+                })
+            filename = f"{run.analysis_name}_stage3_targets.csv"
+
+        elif stage_key == "stage_4":
+            # One row per disease target
+            targets = stage_data.get("targets", [])
+            if targets:
+                fieldnames = ["gene_symbol", "uniprot_accession", "score", "disease_name", "source"]
+                writer = csv.DictWriter(output, fieldnames=fieldnames)
+                writer.writeheader()
+                for t in targets:
+                    writer.writerow({
+                        "gene_symbol": t.get("gene_symbol", ""),
+                        "uniprot_accession": t.get("uniprot_accession", ""),
+                        "score": t.get("score", ""),
+                        "disease_name": t.get("disease_name", ""),
+                        "source": t.get("source", ""),
+                    })
+            else:
+                writer = csv.DictWriter(output, fieldnames=["gene_symbol", "uniprot_accession", "score", "disease_name", "source"])
+                writer.writeheader()
+            filename = f"{run.analysis_name}_stage4_disease_targets.csv"
+
+        elif stage_key == "stage_5":
+            # Overlap gene list rows plus a summary stats block
+            overlap_genes = stage_data.get("overlap", [])
+            fieldnames = ["type", "value"]
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerow({"type": "overlap_count", "value": stage_data.get("overlap_count", 0)})
+            writer.writerow({"type": "compound_only_count", "value": stage_data.get("compound_only_count", 0)})
+            writer.writerow({"type": "disease_only_count", "value": stage_data.get("disease_only_count", 0)})
+            writer.writerow({"type": "jaccard", "value": stage_data.get("jaccard", 0)})
+            writer.writerow({"type": "p_value", "value": stage_data.get("p_value", "")})
+            writer.writerow({"type": "significant", "value": stage_data.get("significant", "")})
+            for gene in overlap_genes:
+                writer.writerow({"type": "overlap_gene", "value": gene})
+            filename = f"{run.analysis_name}_stage5_overlap.csv"
+
+        elif stage_key == "stage_6":
+            # One row per edge (most useful for network analysis)
+            edges = stage_data.get("edges", [])
+            fieldnames = ["source", "target", "combined_score", "experimental_score"]
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+            for e in edges:
+                writer.writerow({
+                    "source": e.get("source", ""),
+                    "target": e.get("target", ""),
+                    "combined_score": e.get("combined_score", ""),
+                    "experimental_score": e.get("experimental_score", ""),
+                })
+            filename = f"{run.analysis_name}_stage6_ppi_edges.csv"
+
+        elif stage_key == "stage_7":
+            rows = stage_data.get("ranked", [])
+            if rows:
+                writer = csv.DictWriter(output, fieldnames=rows[0].keys())
+                writer.writeheader()
+                writer.writerows(rows)
+            else:
+                writer = csv.DictWriter(output, fieldnames=["gene_symbol", "degree", "betweenness", "closeness", "eigenvector", "is_hub", "is_hub_bottleneck", "rank"])
+                writer.writeheader()
+            filename = f"{run.analysis_name}_stage7_hub_genes.csv"
+
+        elif stage_key == "stage_8":
+            # One row per pathway term across all sources
+            fieldnames = ["source", "term_id", "term_name", "p_value", "fdr", "intersection_size", "term_size", "genes"]
+            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            writer.writeheader()
+            for source_key, source_label in [("go_bp", "GO:BP"), ("go_mf", "GO:MF"), ("go_cc", "GO:CC"), ("kegg", "KEGG")]:
+                for term in stage_data.get(source_key, []):
+                    writer.writerow({
+                        "source": source_label,
+                        "term_id": term.get("term_id", ""),
+                        "term_name": term.get("term_name", ""),
+                        "p_value": term.get("p_value", ""),
+                        "fdr": term.get("fdr", ""),
+                        "intersection_size": term.get("intersection_size", ""),
+                        "term_size": term.get("term_size", ""),
+                        "genes": "|".join(term.get("genes", [])),
+                    })
+            filename = f"{run.analysis_name}_stage8_enrichment.csv"
+
+        else:
+            # Unknown stage — fall back to JSON with a comment header
+            content = f"# CSV not available for {stage_key}; returning JSON\n" + json.dumps(stage_data, indent=2)
             return StreamingResponse(
-                output,
-                media_type="text/csv",
-                headers={"Content-Disposition": f"attachment; filename={run.analysis_name}_hub_genes.csv"},
+                io.StringIO(content),
+                media_type="application/json",
+                headers={"Content-Disposition": f"attachment; filename={run.analysis_name}_{stage_key}.json"},
             )
 
-    # Default: return JSON even when csv requested
+        output.seek(0)
+        return StreamingResponse(
+            output,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    # Default: return JSON
     content = json.dumps(stage_data, indent=2)
     return StreamingResponse(
         io.StringIO(content),

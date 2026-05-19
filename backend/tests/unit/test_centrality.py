@@ -46,6 +46,21 @@ def test_empty_graph():
     assert result["ranked"] == []
 
 
+def test_no_null_score_fields_in_ranked():
+    """disease_association_score / compound_support_score / final_score must never
+    appear as null keys in the ranked dicts stored inside stage_results JSONB."""
+    G = make_star_graph()
+    result = compute_hub_genes(G, top_n=5)
+    forbidden = {"disease_association_score", "compound_support_score", "final_score"}
+    for entry in result["ranked"]:
+        assert not forbidden.intersection(entry.keys()), (
+            f"Null score fields found in ranked entry: {entry}"
+        )
+        assert {"gene_symbol", "degree", "betweenness", "closeness", "eigenvector", "is_hub"}.issubset(entry.keys()), (
+            f"Expected core fields missing from ranked entry: {entry}"
+        )
+
+
 # ── Stage 7 run() wrapper ──────────────────────────────────────────────────────
 
 from unittest.mock import AsyncMock, MagicMock

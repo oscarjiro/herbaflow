@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from sqlalchemy import Column, JSON
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from pydantic import ConfigDict
 from sqlmodel import Field, SQLModel
 
 
@@ -31,6 +32,7 @@ class AnalysisRun(SQLModel, table=True):
 
 class TargetRanking(SQLModel, table=True):
     __tablename__ = "target_rankings"
+    model_config = ConfigDict(exclude_none=True)
 
     ranking_id: UUID = Field(
         default_factory=uuid4,
