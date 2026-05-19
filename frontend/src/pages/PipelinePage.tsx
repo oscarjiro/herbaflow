@@ -8,6 +8,10 @@ import { PipelineSidebar } from '@/components/pipeline/PipelineSidebar'
 import { ApprovalBar } from '@/components/shared/ApprovalBar'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { Stage1Panel } from '@/components/stages/Stage1Panel'
+import { Stage2Panel } from '@/components/stages/Stage2Panel'
+import { Stage3Panel } from '@/components/stages/Stage3Panel'
+import { Stage4Panel } from '@/components/stages/Stage4Panel'
 import type { AnalysisStatusResponse, AnalysisRunResponse } from '@/types/api'
 
 // ============================================================================
@@ -21,18 +25,6 @@ interface StageStubProps {
   analysisId: string
 }
 
-function Stage1Stub({ }: StageStubProps) {
-  return <div className="text-hf-fg3 text-sm p-4">Stage 1 — Compound Selection (loading...)</div>
-}
-function Stage2Stub({ }: StageStubProps) {
-  return <div className="text-hf-fg3 text-sm p-4">Stage 2 — ADME Screening (loading...)</div>
-}
-function Stage3Stub({ }: StageStubProps) {
-  return <div className="text-hf-fg3 text-sm p-4">Stage 3 — Target Identification (loading...)</div>
-}
-function Stage4Stub({ }: StageStubProps) {
-  return <div className="text-hf-fg3 text-sm p-4">Stage 4 — Disease Targets (loading...)</div>
-}
 function Stage5Stub({ }: StageStubProps) {
   return <div className="text-hf-fg3 text-sm p-4">Stage 5 — Target Overlap (loading...)</div>
 }
@@ -47,10 +39,10 @@ function Stage8Stub({ }: StageStubProps) {
 }
 
 const STAGE_COMPONENTS: Record<number, React.ComponentType<StageStubProps>> = {
-  1: Stage1Stub,
-  2: Stage2Stub,
-  3: Stage3Stub,
-  4: Stage4Stub,
+  1: Stage1Panel,
+  2: Stage2Panel,
+  3: Stage3Panel,
+  4: Stage4Panel,
   5: Stage5Stub,
   6: Stage6Stub,
   7: Stage7Stub,
