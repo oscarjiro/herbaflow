@@ -41,7 +41,7 @@ function PathwayChart({ terms }: { terms: PathwayTerm[] }) {
     .slice(0, 20)
     .map((t) => ({
       name: t.term_name.length > 40 ? t.term_name.slice(0, 40) + '…' : t.term_name,
-      value: t.fdr > 0 ? -Math.log10(t.fdr) : 300,
+      value: t.fdr > 0 ? Math.max(1, -Math.log10(t.fdr)) : 1,
       fdr: t.fdr,
       term_name: t.term_name,
       intersection_size: t.intersection_size,

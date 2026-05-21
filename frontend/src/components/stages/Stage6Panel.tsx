@@ -37,11 +37,11 @@ const styleSheet = [
   },
   {
     selector: 'node[type="hub"]',
-    style: { 'background-color': 'var(--hf-sage)', color: 'var(--primary-foreground)', width: 40, height: 40 },
+    style: { 'background-color': 'var(--hf-sage)', color: 'var(--hf-fg-1)', width: 40, height: 40 },
   },
   {
     selector: 'node[type="overlap"]',
-    style: { 'background-color': 'var(--hf-fg-1)', color: 'var(--primary-foreground)' },
+    style: { 'background-color': 'var(--hf-ink)', color: 'var(--hf-bg)' },
   },
   {
     selector: 'node.dimmed',
@@ -174,7 +174,7 @@ export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
       {/* Tooltip */}
       {tooltip && (
         <div className="text-xs text-hf-fg2 bg-hf-surface border border-hf-border rounded px-2 py-1 w-fit">
-          {tooltip.gene} — degree: {tooltip.degree}
+          {tooltip.gene} — degree: {tooltip.degree ?? 'N/A'}
         </div>
       )}
 

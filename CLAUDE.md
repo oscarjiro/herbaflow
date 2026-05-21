@@ -17,6 +17,7 @@ relationships from the KNApSAcK database.
 | `/etl/`      | Active      | Data ingestion and canonicalization pipelines |
 | `/backend/`  | Early stage | FastAPI REST API                              |
 | `/frontend/` | Not started | React UI (placeholder only)                   |
+| `/supabase/migrations/` | Active | All Supabase SQL migrations (single source of truth) |
 
 ## Key Conventions
 
@@ -24,6 +25,7 @@ relationships from the KNApSAcK database.
 - Canonical keys use `{source}:{id}` format: `gbif:12345`, `pubchem:678`
 - ETL outputs live in `out/` within each step directory — not edited directly
 - Module config lives in `settings.yml` at each module root
+- After any migration (ADD COLUMN, DROP COLUMN, ALTER TYPE, new table, drop table) — update `.claude/docs/database.md` to reflect the final schema state
 
 ## Git Workflow
 

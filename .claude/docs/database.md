@@ -40,7 +40,11 @@ One row per ETL run.
 | ------------- | ----------- | ----- |
 | `batch_id`    | PK          |       |
 | `step_name`   | text        |       |
+| `status`      | text        |       |
 | `started_at`  | timestamptz |       |
+| `finished_at` | timestamptz |       |
+| `params`      | jsonb       | pipeline parameters passed to this run |
+| `log_path`    | text        | filesystem path to the ETL log file |
 
 ---
 
@@ -112,10 +116,10 @@ One canonical row per chemical entity.
 | `hbond_donors`      | int                   |        |
 | `hbond_acceptors`   | int                   |        |
 | `rotatable_bonds`   | int                   |        |
-| `num_ro5_violations` | int                  | count of Lipinski Ro5 violations (0–4) |
-| `qed_score`         | float                 | quantitative estimate of drug-likeness (0–1) |
-| `np_likeness_score` | float                 | natural-product likeness score |
-| `lipinski_source`   | text                  | source that provided ADME properties |
+| `num_ro5_violations` | int                  | count of Lipinski Rule of Five violations (0–4); 0 = fully drug-like |
+| `qed_score`         | float                 | Quantitative Estimate of Drug-likeness (0–1, higher = more drug-like); computed by RDKit |
+| `np_likeness_score` | float                 | Natural product-likeness score (RDKit); ≥ 0.5 triggers NP exception in ADME filtering |
+| `lipinski_source`   | text                  | `chembl_api` = from ChEMBL molecule_properties; `rdkit_computed` = computed from SMILES; null = unresolved |
 | `source_id`         | FK → `source_systems` |        |
 | `source_url`        | text                  |        |
 | `source_batch_id`   | FK → `import_batches` |        |
@@ -204,7 +208,7 @@ m:m join. Answers: which targets are linked to which compounds?
 | `evidence_type`      | text                  |       |
 | `score`              | float                 |       |
 | `confidence`         | float                 |       |
-| `pchembl_value`      | float                 | ChEMBL −log10(IC50); null for non-ChEMBL sources |
+| `pchembl_value`      | float                 | −log₁₀(IC50 in molar) from ChEMBL; ≥ 5.0 means IC50 ≤ 10µM (active binder); null for STITCH-sourced or unassayed interactions |
 | `retrieved_at`       | timestamptz           |       |
 
 Unique constraint: `(compound_id, target_id, source_id)`
@@ -302,11 +306,11 @@ Unique constraint: `(target_a_id, target_b_id, source_id)`
 | `parameters`    | jsonb           |          |
 | `status`          | text            |          |
 | `current_stage`   | int             | null = not started, 1–8 during pipeline |
-| `stage_results`   | jsonb           | per-stage intermediate results `{stage_1: {...}}` |
-| `mode`            | text            | `auto` (end-to-end) or `guided` (pauses for approval) |
+| `stage_results`   | jsonb NOT NULL  | per-stage intermediate results `{stage_1: {...}}`; default `{}` |
+| `mode`            | text NOT NULL   | `auto` (end-to-end) or `guided` (pauses for approval per stage); default `auto` |
 | `completed_at`    | timestamptz     |          |
 | `error_message`   | text            |          |
-| `updated_at`      | timestamptz     |          |
+| `updated_at`      | timestamptz NOT NULL | last write timestamp; default `now()` |
 | `created_at`      | timestamptz     |          |
 | `created_by`      | text            |          |
 
