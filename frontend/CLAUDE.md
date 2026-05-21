@@ -106,7 +106,7 @@ Do not poll manually. TanStack Query handles cache invalidation, race conditions
 
 ```bash
 cd frontend
-npx shadcn@latest add <component-name>
+pnpm dlx shadcn@latest add <component-name>
 ```
 
 This scaffolds the component into `src/components/ui/` with Radix primitives and Tailwind styling.
@@ -123,25 +123,25 @@ This scaffolds the component into `src/components/ui/` with Radix primitives and
    }
    ```
 4. **Add fixture data** to `src/mocks/data.ts` for `stage_results['N']`
-5. **Verify TypeScript build**: `npm run build`
+5. **Verify TypeScript build**: `pnpm build`
 
 ## Test Commands
 
 ```bash
 # Unit + integration tests (Vitest)
-npm run test
+pnpm test
 
 # Unit tests only
-npm run test -- tests/unit
+pnpm test -- tests/unit
 
 # Integration tests only
-npm run test -- tests/integration
+pnpm test -- tests/integration
 
 # E2E tests (requires backend + frontend running)
-npx playwright test
+pnpm exec playwright test
 
 # Production build (TypeScript + Vite)
-npm run build
+pnpm build
 ```
 
 ## Environment Variables
