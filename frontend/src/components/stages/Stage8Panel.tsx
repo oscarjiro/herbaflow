@@ -1,0 +1,140 @@
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { StageHeader } from '@/components/shared/StageHeader'
+import { StatCard } from '@/components/shared/StatCard'
+import { EmptyState } from '@/components/shared/EmptyState'
+import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, PathwayTerm, PathwaySource } from '@/types/api'
+
+interface Stage8PanelProps {
+  stage: number
+  analysis: AnalysisRunResponse | undefined
+  status: AnalysisStatusResponse | undefined
+  analysisId: string
+}
+
+const SOURCES: PathwaySource[] = ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG']
+
+const SOURCE_LABELS: Record<PathwaySource, string> = {
+  'GO:BP': 'GO: Biological Process',
+  'GO:MF': 'GO: Molecular Function',
+  'GO:CC': 'GO: Cellular Component',
+  'KEGG': 'KEGG Pathways',
+}
+
+interface ChartEntry {
+  name: string
+  value: number
+  fdr: number
+  term_name: string
+  intersection_size: number
+}
+
+function PathwayChart({ terms }: { terms: PathwayTerm[] }) {
+  if (terms.length === 0) {
+    return <EmptyState message="No significant pathways found for this category" />
+  }
+
+  const safeTerms = terms.filter((t) => t.fdr != null && t.fdr >= 0 && t.fdr <= 1)
+
+  const chartData: ChartEntry[] = safeTerms
+    .sort((a, b) => a.fdr - b.fdr)
+    .slice(0, 20)
+    .map((t) => ({
+      name: t.term_name.length > 40 ? t.term_name.slice(0, 40) + '…' : t.term_name,
+      value: t.fdr > 0 ? -Math.log10(t.fdr) : 300,
+      fdr: t.fdr,
+      term_name: t.term_name,
+      intersection_size: t.intersection_size,
+    }))
+
+  return (
+    <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 24)}>
+      <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 60, bottom: 24, left: 8 }}>
+        <XAxis
+          type="number"
+          label={{ value: '-log₁₀(FDR)', position: 'insideBottom', offset: -12, fontSize: 11 }}
+          tick={{ fontSize: 10 }}
+        />
+        <YAxis
+          type="category"
+          dataKey="name"
+          width={200}
+          tick={{ fontSize: 10 }}
+        />
+        <Bar dataKey="value" fill="var(--hf-sage)" radius={[0, 2, 2, 0]} />
+        <Tooltip
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          formatter={(_value: unknown, _name: unknown, props: any) => {
+            const entry = props.payload as ChartEntry | undefined
+            return [
+              `FDR: ${entry?.fdr?.toExponential(2) ?? '—'}  |  genes: ${entry?.intersection_size ?? '—'}`,
+              entry?.term_name ?? '',
+            ]
+          }}
+          contentStyle={{
+            fontSize: '11px',
+            background: 'var(--hf-surface)',
+            border: '1px solid var(--hf-border)',
+            borderRadius: '4px',
+          }}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
+
+export function Stage8Panel({ stage, analysis, status }: Stage8PanelProps) {
+  const result = analysis?.stage_results[String(stage)] as Stage8Result | null | undefined
+
+  if (!result) {
+    return (
+      <div className="space-y-6">
+        <StageHeader stage={stage} name="Pathway Enrichment" status={status?.status ?? 'pending'} elapsedSeconds={null} />
+        <EmptyState message="Stage 8 results not yet available" />
+      </div>
+    )
+  }
+
+  const termsBySource = Object.fromEntries(
+    SOURCES.map((src) => [src, result.terms.filter((t) => t.source === src)])
+  ) as Record<PathwaySource, PathwayTerm[]>
+
+  return (
+    <div className="space-y-6">
+      <StageHeader stage={stage} name="Pathway Enrichment" status={status?.status ?? 'complete'} elapsedSeconds={null} />
+
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard label="Significant Pathways" value={result.significant_count} />
+        <StatCard label="Total Terms" value={result.terms.length} />
+      </div>
+
+      <Tabs defaultValue="GO:BP">
+        <TabsList>
+          {SOURCES.map((src) => (
+            <TabsTrigger key={src} value={src}>
+              {src}
+              {termsBySource[src].length > 0 && (
+                <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                  {termsBySource[src].length}
+                </span>
+              )}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {SOURCES.map((src) => (
+          <TabsContent key={src} value={src}>
+            <div className="mt-4">
+              <h3 className="text-sm font-medium text-hf-fg2 mb-3">{SOURCE_LABELS[src]}</h3>
+              <PathwayChart terms={termsBySource[src]} />
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
+
+      <p className="text-xs text-hf-fg4">
+        Showing top 20 terms per category by -log₁₀(FDR). Significance threshold: FDR &lt; 0.05.
+      </p>
+    </div>
+  )
+}

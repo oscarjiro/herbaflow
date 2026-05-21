@@ -12,10 +12,14 @@ import { Stage1Panel } from '@/components/stages/Stage1Panel'
 import { Stage2Panel } from '@/components/stages/Stage2Panel'
 import { Stage3Panel } from '@/components/stages/Stage3Panel'
 import { Stage4Panel } from '@/components/stages/Stage4Panel'
+import { Stage5Panel } from '@/components/stages/Stage5Panel'
+import { Stage6Panel } from '@/components/stages/Stage6Panel'
+import { Stage7Panel } from '@/components/stages/Stage7Panel'
+import { Stage8Panel } from '@/components/stages/Stage8Panel'
 import type { AnalysisStatusResponse, AnalysisRunResponse } from '@/types/api'
 
 // ============================================================================
-// Stage stub components — replaced in Tasks 16–20
+// Stage panel registry
 // ============================================================================
 
 interface StageStubProps {
@@ -25,28 +29,15 @@ interface StageStubProps {
   analysisId: string
 }
 
-function Stage5Stub({ }: StageStubProps) {
-  return <div className="text-hf-fg3 text-sm p-4">Stage 5 — Target Overlap (loading...)</div>
-}
-function Stage6Stub({ }: StageStubProps) {
-  return <div className="text-hf-fg3 text-sm p-4">Stage 6 — PPI Network (loading...)</div>
-}
-function Stage7Stub({ }: StageStubProps) {
-  return <div className="text-hf-fg3 text-sm p-4">Stage 7 — Hub Gene Analysis (loading...)</div>
-}
-function Stage8Stub({ }: StageStubProps) {
-  return <div className="text-hf-fg3 text-sm p-4">Stage 8 — Pathway Enrichment (loading...)</div>
-}
-
 const STAGE_COMPONENTS: Record<number, React.ComponentType<StageStubProps>> = {
   1: Stage1Panel,
   2: Stage2Panel,
   3: Stage3Panel,
   4: Stage4Panel,
-  5: Stage5Stub,
-  6: Stage6Stub,
-  7: Stage7Stub,
-  8: Stage8Stub,
+  5: Stage5Panel,
+  6: Stage6Panel,
+  7: Stage7Panel,
+  8: Stage8Panel,
 }
 
 // ============================================================================
