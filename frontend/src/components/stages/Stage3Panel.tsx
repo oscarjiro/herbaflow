@@ -37,7 +37,7 @@ const columns: ColumnDef<TargetRow>[] = [
 ]
 
 export function Stage3Panel({ stage, analysis, status }: Stage3PanelProps) {
-  const result = analysis?.stage_results[String(stage)] as Stage3Result | null | undefined
+  const result = analysis?.stage_results[`stage_${stage}`] as Stage3Result | null | undefined
   const [showAllGenes, setShowAllGenes] = useState(false)
 
   const genes = result?.targets.map(t => t.gene_symbol) ?? []

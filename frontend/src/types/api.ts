@@ -51,6 +51,7 @@ export type AnalysisStatus =
   | 'stage_1_running'
   | 'stage_1_complete'
   | 'stage_1_failed'
+  | 'stage_1_awaiting_approval'
   | 'stage_2_running'
   | 'stage_2_complete'
   | 'stage_2_failed'

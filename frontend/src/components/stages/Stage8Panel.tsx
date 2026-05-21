@@ -84,7 +84,7 @@ function PathwayChart({ terms }: { terms: PathwayTerm[] }) {
 }
 
 export function Stage8Panel({ stage, analysis, status }: Stage8PanelProps) {
-  const result = analysis?.stage_results[String(stage)] as Stage8Result | null | undefined
+  const result = analysis?.stage_results[`stage_${stage}`] as Stage8Result | null | undefined
 
   if (!result) {
     return (

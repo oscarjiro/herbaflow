@@ -29,7 +29,7 @@ const columns: ColumnDef<CompoundRow>[] = [
 ]
 
 export function Stage1Panel({ stage, analysis, status }: Stage1PanelProps) {
-  const result = analysis?.stage_results[String(stage)] as Stage1Result | null | undefined
+  const result = analysis?.stage_results[`stage_${stage}`] as Stage1Result | null | undefined
 
   return (
     <div className="space-y-6">

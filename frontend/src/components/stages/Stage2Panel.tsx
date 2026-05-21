@@ -47,7 +47,7 @@ const columns: ColumnDef<AdmeRow>[] = [
 ]
 
 export function Stage2Panel({ stage, analysis, status }: Stage2PanelProps) {
-  const result = analysis?.stage_results[String(stage)] as Stage2Result | null | undefined
+  const result = analysis?.stage_results[`stage_${stage}`] as Stage2Result | null | undefined
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
 
   const total = result ? result.passed + result.failed : 0

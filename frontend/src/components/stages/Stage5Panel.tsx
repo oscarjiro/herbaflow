@@ -40,7 +40,7 @@ function VennDiagram({ compoundOnly, overlap, diseaseOnly }: VennProps) {
 }
 
 export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
-  const result = analysis?.stage_results[String(stage)] as Stage5Result | null | undefined
+  const result = analysis?.stage_results[`stage_${stage}`] as Stage5Result | null | undefined
 
   if (!result) {
     return (

@@ -73,7 +73,7 @@ export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
   const [layout, setLayout] = useState<LayoutName>('fcose')
   const [tooltip, setTooltip] = useState<{ gene: string; degree: number } | null>(null)
 
-  const result = analysis?.stage_results[String(stage)] as Stage6Result | null | undefined
+  const result = analysis?.stage_results[`stage_${stage}`] as Stage6Result | null | undefined
 
   // Combine nodes and edges for Cytoscape — must be before any conditional return
   const elements = useMemo(

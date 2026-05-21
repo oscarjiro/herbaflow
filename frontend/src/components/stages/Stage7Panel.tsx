@@ -63,7 +63,7 @@ const columns: ColumnDef<HubGeneRow>[] = [
 ]
 
 export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7PanelProps) {
-  const result = analysis?.stage_results[String(stage)] as Stage7Result | null | undefined
+  const result = analysis?.stage_results[`stage_${stage}`] as Stage7Result | null | undefined
 
   if (!result) {
     return (

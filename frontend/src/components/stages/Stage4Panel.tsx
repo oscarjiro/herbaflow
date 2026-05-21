@@ -47,7 +47,7 @@ const columns: ColumnDef<DiseaseRow>[] = [
 ]
 
 export function Stage4Panel({ stage, analysis, status }: Stage4PanelProps) {
-  const result = analysis?.stage_results[String(stage)] as Stage4Result | null | undefined
+  const result = analysis?.stage_results[`stage_${stage}`] as Stage4Result | null | undefined
 
   return (
     <div className="space-y-6">
