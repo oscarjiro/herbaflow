@@ -51,8 +51,8 @@ export function Stage2Panel({ stage, analysis, status }: Stage2PanelProps) {
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
 
   const total = result ? result.passed + result.failed : 0
-  const passedPct = total > 0 ? ((result!.passed / total) * 100).toFixed(1) : '0.0'
-  const failedPct = total > 0 ? ((result!.failed / total) * 100).toFixed(1) : '0.0'
+  const passedPct = total > 0 ? (((result?.passed ?? 0) / total) * 100).toFixed(1) : '0.0'
+  const failedPct = total > 0 ? (((result?.failed ?? 0) / total) * 100).toFixed(1) : '0.0'
 
   const filteredCompounds: AdmeRow[] = result
     ? (filterMode === 'passed'
