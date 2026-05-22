@@ -140,4 +140,33 @@ Analysis: `b65ac7a4-0ea2-4dc5-b40d-cd088b3fc2c5` · Zingiber officinale (571 cpd
 
 ## Task 2.4 — Auto Pipeline
 
-_(pending)_
+**Analysis:** ebbc6f19-293c-4e0f-92fb-6f9282e30618 · 1 plant (asthma disease) · Auto mode
+
+### ApprovalBar
+PASS: No Approve/Reject buttons appeared at any stage during auto pipeline execution. `isAwaitingApproval` guard correctly requires `status?.mode === 'guided'`, which is never true in auto mode.
+
+### Sidebar Auto-Advance
+PASS: Sidebar showed all 8 stage buttons (1 Compound Selection → 8 Pathway Enrichment). Pipeline auto-advanced through all stages without user interaction. Sidebar labels confirmed as "NStage Name" format (e.g. "1Compound Selection"), not "Stage N" — test selectors updated accordingly.
+
+### Pipeline Completion
+PASS: All 8 stages reached `complete` at ~21:34 GMT+7. Final status: `complete`, `current_stage: 8`. Pipeline took ~5 minutes due to external API calls (ChEMBL, Open Targets, STRING-DB, g:Profiler).
+
+### Stage Spot-Checks
+- Stage 1: PASS — compound table renders, 5 compounds listed (HYPEROSIDE, MYRICETIN, ISOQUERCETIN, QUERCITRIN, beta-D-Glucopyranuronosyl...), table rows visible
+- Stage 5: PASS — Venn SVG renders (10 SVG elements), overlap data visible (2 overlap genes: ALOX15, MAPT; 64 compound-only, 386 disease-only targets), Jaccard index and Fisher p-value shown
+- Stage 8: PASS — Pathway enrichment panel renders without crash; 0 significant pathways found (g:Profiler returned no results for this gene set / disease pairing — empty state displayed correctly with GO:BP/MF/CC/KEGG tabs all visible)
+
+### Console Errors
+0 — no console errors across any stage spot-check
+
+### Polling Behavior
+PASS: After `complete` status, 0 new requests to `/analyses/:id/status` observed in 10-second window. Both `useAnalysis` and `useAnalysisStatus` correctly return `false` from `refetchInterval` when `isTerminalStatus(status)` is true.
+
+### Bugs Fixed
+1. **Stage2Panel.tsx TS error** — `render: (v) => v ?? '—'` returned inferred type `{}` (not assignable to `ReactNode`). Fixed: changed to `v != null ? String(v) : '—'` for HBD and HBA columns. Build was failing with TS2322; now clean.
+
+### Adjacent Issues
+- Pipeline test timeout: `pollUntilComplete` defaulted to 5 minutes — insufficient for real external API calls (pipeline took ~5 min). Updated Playwright spec timeout to 11 minutes. Not a product bug — performance characteristic.
+- Probe/temp spec files (`probe-buttons.spec.ts`, `probe-after-select.spec.ts`, `probe-pipeline-complete.spec.ts`, `probe-setup.js/.cjs`) created during QA — should be cleaned up before merge.
+
+**Status:** PASS

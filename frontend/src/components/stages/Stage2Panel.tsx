@@ -46,13 +46,13 @@ const columns: ColumnDef<AdmeRow>[] = [
     key: 'hbond_donors',
     header: 'HBD',
     sortable: true,
-    render: (v) => v ?? '—',
+    render: (v) => v != null ? String(v) : '—',
   },
   {
     key: 'hbond_acceptors',
     header: 'HBA',
     sortable: true,
-    render: (v) => v ?? '—',
+    render: (v) => v != null ? String(v) : '—',
   },
   {
     key: 'np_likeness_score',
