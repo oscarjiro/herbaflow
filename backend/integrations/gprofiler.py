@@ -35,7 +35,6 @@ async def run_enrichment(
         "query": gene_symbols,
         "sources": sources,
         "user_threshold": fdr_threshold,
-        "correction_method": "fdr_bh",
         "domain_scope": "annotated",
         "no_evidences": False,
     }
