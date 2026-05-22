@@ -76,7 +76,8 @@ export function PipelineSidebar({
           const isClickable =
             stageStatus === 'completed' ||
             stageStatus === 'running' ||
-            stageStatus === 'awaiting_approval'
+            stageStatus === 'awaiting_approval' ||
+            stageStatus === 'failed'
 
           return (
             <StageNavItem

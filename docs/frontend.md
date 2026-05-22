@@ -52,7 +52,7 @@ The Herbaflow pipeline comprises 8 sequential stages, each producing a distinct 
 4. **Stage 4: Disease Target Mapping** — Maps predicted targets to disease associations (Open Targets database or ETL-cached DisGeNET)
 5. **Stage 5: Target Overlap Analysis** — Venn diagram of targets shared across input diseases; identifies candidate therapeutic targets
 6. **Stage 6: PPI Network Construction** — Builds protein-protein interaction network around candidate targets (STRING database)
-7. **Stage 7: Hub Gene Analysis** — Computes network centrality metrics (degree, betweenness, eigenvector); ranks targets by biological importance
+7. **Stage 7: Hub Gene Analysis** — Computes network centrality metrics (degree, betweenness, closeness, eigenvector); hub+bottleneck criterion ranks targets by biological importance
 8. **Stage 8: Pathway Enrichment** — Statistical enrichment of KEGG/Reactome pathways (hypergeometric test with FDR correction)
 
 The UI implements two execution modes:
@@ -136,14 +136,10 @@ frontend/
 │   │   │   ├── ModeToggle.tsx
 │   │   │   └── AdvancedParameters.tsx
 │   │   ├── pipeline/
-│   │   │   ├── PipelineView.tsx
 │   │   │   ├── PipelineSidebar.tsx
 │   │   │   └── StageNavItem.tsx
 │   │   ├── stages/
-│   │   │   ├── Stage1Panel.tsx
-│   │   │   ├── Stage2Panel.tsx
-│   │   │   ├── ... Stage8Panel.tsx
-│   │   │   └── StagePanel.tsx (wrapper)
+│   │   │   ├── Stage1Panel.tsx – Stage8Panel.tsx
 │   │   ├── shared/
 │   │   │   ├── StatCard.tsx
 │   │   │   ├── DataTable.tsx
@@ -171,10 +167,6 @@ frontend/
 │   ├── mocks/
 │   │   ├── handlers.ts (MSW request handlers)
 │   │   └── data.ts (fixture data for all stages)
-│   ├── tests/
-│   │   ├── unit/
-│   │   ├── integration/
-│   │   └── e2e/
 │   ├── pages/
 │   │   ├── SetupPage.tsx
 │   │   ├── PipelinePage.tsx
@@ -182,6 +174,10 @@ frontend/
 │   ├── App.tsx
 │   ├── main.tsx
 │   └── index.css
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/ (Playwright — requires backend at localhost:8000)
 ├── public/
 ├── tailwind.config.ts
 ├── vite.config.ts

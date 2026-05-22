@@ -64,6 +64,19 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
     return <EmptyState message={`Stage ${stage} is not available`} />
   }
 
+  const isStageFailed =
+    status?.current_stage === stage &&
+    status?.status?.includes('failed') &&
+    status?.status !== 'failed'
+
+  if (isStageFailed) {
+    return (
+      <div className="p-8">
+        <ErrorState message={status?.error_message ?? `Stage ${stage} failed. Check backend logs for details.`} />
+      </div>
+    )
+  }
+
   const isAwaitingApproval =
     status?.mode === 'guided' &&
     status?.status === `stage_${stage}_awaiting_approval`
