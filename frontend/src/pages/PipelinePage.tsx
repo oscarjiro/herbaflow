@@ -96,7 +96,7 @@ export default function PipelinePage() {
   const navigate = useNavigate()
   const [activeStage, setActiveStage] = useState<number | null>(null)
 
-  const { data: status } = useAnalysisStatus(id!)
+  const { data: status, isError: statusError } = useAnalysisStatus(id!)
   const { data: analysis } = useAnalysis(id!)
 
   // Auto-focus current stage when status advances
@@ -112,6 +112,45 @@ export default function PipelinePage() {
       <div className="p-8">
         <ErrorState
           message={status.error_message}
+          onNewAnalysis={() => {
+            localStorage.removeItem('hf_last_analysis_id')
+            navigate('/analysis')
+          }}
+        />
+      </div>
+    )
+  }
+
+  // Terminal rejection — show rejected state
+  if (status?.status && /^stage_\d+_rejected$/.test(status.status)) {
+    const match = status.status.match(/stage_(\d+)_rejected/)
+    const stageLabel = match ? `Stage ${match[1]}` : 'a stage'
+    return (
+      <div className="p-8">
+        <div className="rounded-lg border border-hf-border bg-hf-surface p-8 text-center">
+          <h2 className="mb-2 text-xl font-semibold text-hf-fg1">Analysis Rejected</h2>
+          <p className="mb-6 text-hf-fg2">{stageLabel} was rejected. Start a new analysis to try again.</p>
+          <button
+            type="button"
+            className="rounded-md border border-hf-border bg-hf-surface px-4 py-2 text-sm text-hf-fg1 hover:text-hf-fg2"
+            onClick={() => {
+              localStorage.removeItem('hf_last_analysis_id')
+              navigate('/analysis')
+            }}
+          >
+            Start New Analysis
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Backend unreachable or persistent API error
+  if (statusError) {
+    return (
+      <div className="p-8">
+        <ErrorState
+          message="Unable to reach the server. Check that the backend is running."
           onNewAnalysis={() => {
             localStorage.removeItem('hf_last_analysis_id')
             navigate('/analysis')

@@ -42,7 +42,8 @@ export default function SetupPage() {
     api
       .getAnalysisStatus(lastId)
       .then((status) => {
-        if (!isTerminalStatus(status.status)) {
+        // Redirect for in-progress OR completed analyses; leave failed/rejected on setup page
+        if (!isTerminalStatus(status.status) || status.status === 'complete') {
           navigate(`/analysis/${lastId}`, { replace: true })
         }
       })
