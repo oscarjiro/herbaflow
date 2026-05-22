@@ -52,8 +52,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     compound_ids = stage1.get("compound_ids", [])
 
     if not compound_ids:
-        return {"passed_count": 0, "failed_count": 0, "np_exception_count": 0,
-                "passed_compound_ids": [], "np_exception_compound_ids": [], "all_active_compound_ids": []}
+        return {"passed": 0, "failed": 0, "np_exceptions": 0,
+                "passed_compound_ids": [], "np_exception_compound_ids": [],
+                "all_active_compound_ids": [], "compounds": []}
 
     fetched = await compound_repo.get_compounds_by_ids(session, compound_ids)
     db_compounds = []
@@ -76,14 +77,34 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
 
     result = filter_compounds(db_compounds, config.adme)
 
+    # Build plant_ids lookup from Stage 1 enriched compounds
+    stage1_compounds = stage1.get("compounds", [])
+    plant_ids_map = {c["compound_id"]: c.get("plant_ids", []) for c in stage1_compounds}
+
+    passed_set = {str(c.compound_id) for c in result["passed"]}
+    np_set = {str(c.compound_id) for c in result["np_exceptions"]}
+    enriched = [
+        {
+            "compound_id": str(c.compound_id),
+            "canonical_name": c.canonical_name or str(c.compound_id),
+            "plant_ids": plant_ids_map.get(str(c.compound_id), []),
+            "adme_pass": str(c.compound_id) in passed_set,
+            "is_np_exception": str(c.compound_id) in np_set,
+        }
+        for c in result["passed"] + result["np_exceptions"] + result["failed"]
+    ]
+
     return {
-        "passed_count": result["passed_count"],
-        "failed_count": result["failed_count"],
-        "np_exception_count": result["np_exception_count"],
+        # Frontend display keys
+        "passed": result["passed_count"],
+        "failed": result["failed_count"],
+        "np_exceptions": result["np_exception_count"],
+        # Pipeline chain compatibility (Stage 3 reads these)
         "passed_compound_ids": [c.compound_id for c in result["passed"]],
         "np_exception_compound_ids": [c.compound_id for c in result["np_exceptions"]],
         "all_active_compound_ids": [
             c.compound_id
             for c in result["passed"] + result["np_exceptions"]
         ],
+        "compounds": enriched,
     }

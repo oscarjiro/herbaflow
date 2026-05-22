@@ -56,9 +56,7 @@ async def update_run_status(
     if current_stage is not None:
         run.current_stage = current_stage
     if stage_results is not None:
-        existing = run.stage_results or {}
-        existing.update(stage_results)
-        run.stage_results = existing
+        run.stage_results = {**(run.stage_results or {}), **stage_results}
     if error_message is not None:
         run.error_message = error_message
     if completed:

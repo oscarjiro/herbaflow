@@ -4,6 +4,7 @@ from .compound import Compound, CompoundAlias, PlantCompound
 from .disease import Disease, DiseaseAlias
 from .target import Target, CompoundTarget, DiseaseTarget, PpiEdge
 from .analysis import AnalysisRun, TargetRanking, Pathway, TargetPathway
+from .import_batch import ImportBatch
 
 __all__ = [
     "Plant", "PlantAlias",
@@ -11,4 +12,5 @@ __all__ = [
     "Disease", "DiseaseAlias",
     "Target", "CompoundTarget", "DiseaseTarget", "PpiEdge",
     "AnalysisRun", "TargetRanking", "Pathway", "TargetPathway",
+    "ImportBatch",
 ]

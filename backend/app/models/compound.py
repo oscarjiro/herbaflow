@@ -28,9 +28,9 @@ class Compound(SQLModel, table=True):
     qed_score: Optional[float] = None
     np_likeness_score: Optional[float] = None
     lipinski_source: Optional[str] = None
-    source_id: Optional[UUID] = Field(default=None, foreign_key="source_systems.source_id", sa_type=PGUUID(as_uuid=True))
+    source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
-    source_batch_id: Optional[UUID] = Field(default=None, foreign_key="import_batches.batch_id", sa_type=PGUUID(as_uuid=True))
+    source_batch_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     retrieved_at: Optional[datetime] = None
     confidence: Optional[float] = None
 
@@ -43,9 +43,9 @@ class CompoundAlias(SQLModel, table=True):
     alias_name: str
     alias_key: Optional[str] = None
     alias_type: Optional[str] = None
-    source_id: Optional[UUID] = Field(default=None, foreign_key="source_systems.source_id", sa_type=PGUUID(as_uuid=True))
+    source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
-    source_batch_id: Optional[UUID] = Field(default=None, foreign_key="import_batches.batch_id", sa_type=PGUUID(as_uuid=True))
+    source_batch_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     retrieved_at: Optional[datetime] = None
 
 
@@ -57,7 +57,7 @@ class PlantCompound(SQLModel, table=True):
     compound_id: str = Field(foreign_key="compounds.compound_id")
     source_plant_raw_id: Optional[str] = None
     source_compound_raw_id: Optional[str] = None
-    source_id: Optional[UUID] = Field(default=None, foreign_key="source_systems.source_id", sa_type=PGUUID(as_uuid=True))
+    source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     evidence_type: Optional[str] = None
     confidence: Optional[float] = None
     retrieved_at: Optional[datetime] = None

@@ -40,6 +40,7 @@ dist/
 # Testing / coverage
 .pytest_cache/
 .coverage
+.playwright-mcp/
 htmlcov/
 
 # Type checking / linting
@@ -116,3 +117,22 @@ etl/**/cache/
 # CRASH DUMPS
 # =========================
 *.stackdump
+
+# =========================
+# PLAYWRIGHT / E2E TEST ARTIFACTS
+# =========================
+frontend/test-results/
+frontend/playwright-report/
+
+# =========================
+# AUDIT SESSION ARTIFACTS
+# =========================
+docs/audit-session/screenshots/
+*.png
+
+# =========================
+# AI TOOLING (internal, not project code)
+# =========================
+.superpowers/
+GEMINI.md
+nul

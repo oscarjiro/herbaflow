@@ -13,12 +13,13 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
 
     if len(G.nodes) == 1:
         node = list(G.nodes)[0]
+        hub_genes_list = [{"gene_symbol": node, "degree": 0, "betweenness_centrality": 0.0,
+                            "closeness_centrality": 0.0, "eigenvector_centrality": 0.0,
+                            "is_hub": False, "is_bottleneck": False, "rank": 1}]
         return {
-            "ranked": [{"gene_symbol": node, "degree": 0, "betweenness": 0.0,
-                        "closeness": 0.0, "eigenvector": 0.0,
-                        "is_hub": False, "is_hub_bottleneck": False, "rank": 1}],
-            "hub_degree_threshold": 0,
-            "hub_betweenness_threshold": 0,
+            "ranked": hub_genes_list, "hub_genes": hub_genes_list,
+            "hub_degree_threshold": 0, "threshold_degree": 0,
+            "hub_betweenness_threshold": 0, "threshold_betweenness": 0,
         }
 
     betweenness = nx.betweenness_centrality(G, normalized=True)
@@ -55,11 +56,11 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
         entry = {
             "gene_symbol": node,
             "degree": deg,
-            "betweenness": round(bet, 6),
-            "closeness": round(closeness[node], 6),
-            "eigenvector": round(eigenvector[node], 6),
+            "betweenness_centrality": round(bet, 6),
+            "closeness_centrality": round(closeness[node], 6),
+            "eigenvector_centrality": round(eigenvector[node], 6),
             "is_hub": is_hub,
-            "is_hub_bottleneck": is_hub_bottleneck,
+            "is_bottleneck": is_hub_bottleneck,
         }
         ranked.append({k: v for k, v in entry.items() if v is not None})
 
@@ -72,16 +73,25 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
         "ranked": ranked,
         "hub_degree_threshold": round(hub_degree_threshold, 2),
         "hub_betweenness_threshold": round(hub_bet_threshold, 6) if isinstance(hub_bet_threshold, float) else 0,
+        # Frontend display keys
+        "hub_genes": ranked,
+        "threshold_degree": round(hub_degree_threshold, 2),
+        "threshold_betweenness": round(hub_bet_threshold, 6) if isinstance(hub_bet_threshold, float) else 0,
     }
 
 
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:
     stage6 = (run.stage_results or {}).get("stage_6", {})
-    edges = stage6.get("edges", [])
+    # Use raw_edges (flat dicts) if available; edges may be Cytoscape-wrapped {data:{...}}
+    raw_edges = stage6.get("raw_edges") or stage6.get("edges", [])
 
     G = nx.Graph()
-    for edge in edges:
-        G.add_edge(edge["source"], edge["target"], weight=edge.get("combined_score", 1.0))
+    for edge in raw_edges:
+        src = edge.get("source") or edge.get("data", {}).get("source", "")
+        tgt = edge.get("target") or edge.get("data", {}).get("target", "")
+        wt = edge.get("combined_score") or edge.get("data", {}).get("weight", 1.0)
+        if src and tgt:
+            G.add_edge(src, tgt, weight=wt)
 
     result = compute_hub_genes(G, top_n=config.hub_genes.top_n)
 
@@ -103,9 +113,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             analysis_id=run.analysis_id,
             target_id=target.target_id,
             degree_centrality=float(entry["degree"]),
-            betweenness_centrality=entry["betweenness"],
-            closeness_centrality=entry["closeness"],
-            eigenvector_centrality=entry["eigenvector"],
+            betweenness_centrality=entry["betweenness_centrality"],
+            closeness_centrality=entry["closeness_centrality"],
+            eigenvector_centrality=entry["eigenvector_centrality"],
             rank_position=entry["rank"],
             created_at=datetime.utcnow(),
         )

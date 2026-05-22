@@ -73,7 +73,7 @@ class TargetPathway(SQLModel, table=True):
     )
     target_id: str = Field(foreign_key="targets.target_id")
     pathway_id: UUID = Field(foreign_key="pathways.pathway_id", sa_type=PGUUID(as_uuid=True))
-    source_id: Optional[UUID] = Field(default=None, foreign_key="source_systems.source_id", sa_type=PGUUID(as_uuid=True))
+    source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     p_value: Optional[float] = None
     fdr: Optional[float] = None
     confidence: Optional[float] = None

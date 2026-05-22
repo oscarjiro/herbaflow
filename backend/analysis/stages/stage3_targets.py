@@ -100,14 +100,27 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     no_data = len(compound_ids) - covered
     coverage_pct = round(covered / len(compound_ids) * 100, 1) if compound_ids else 0.0
 
+    enriched_targets = [
+        {
+            "gene_symbol": gene,
+            "uniprot_id": target_info[gene].uniprot_accession or "",
+            "compound_count": len(set(cids)),
+            "compound_ids": list(set(cids)),
+        }
+        for gene, cids in target_compound_map.items()
+    ]
+
     return {
+        # Pipeline chain keys (Stage 4 reads these)
         "covered": covered,
         "no_data": no_data,
-        "coverage_pct": coverage_pct,
         "target_count": len(target_compound_map),
         "target_gene_symbols": list(target_compound_map.keys()),
         "target_compound_map": {
             gene: list(cids)
             for gene, cids in target_compound_map.items()
         },
+        # Frontend display keys
+        "coverage_percent": coverage_pct,
+        "targets": enriched_targets,
     }

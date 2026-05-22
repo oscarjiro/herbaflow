@@ -25,8 +25,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 if gene and gene not in all_targets:
                     all_targets[gene] = {
                         "gene_symbol": gene,
-                        "uniprot_accession": target.uniprot_accession,
-                        "score": score,
+                        "uniprot_id": target.uniprot_accession or "",
+                        "association_score": score,
                         "disease_name": disease.disease_name,
                         "source": "db_cache",
                     }
@@ -42,8 +42,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 if gene not in all_targets:
                     all_targets[gene] = {
                         "gene_symbol": gene,
-                        "uniprot_accession": None,
-                        "score": t.score,
+                        "uniprot_id": "",
+                        "association_score": t.score,
                         "disease_name": disease.disease_name,
                         "source": "open_targets_api",
                     }
