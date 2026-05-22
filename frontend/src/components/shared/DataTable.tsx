@@ -38,19 +38,20 @@ export function DataTable<T extends Record<string, unknown>>({
   const [sortDir, setSortDir] = useState<SortDir>(null)
   const [showAll, setShowAll] = useState(false)
 
+  const safeData = data ?? []
   const searchKeys = filterKeys ?? columns.map(c => c.key)
 
   const filtered = useMemo(() => {
-    if (!filter.trim()) return data
+    if (!filter.trim()) return safeData
     const q = filter.toLowerCase()
-    return data.filter(row =>
+    return safeData.filter(row =>
       searchKeys.some(k => String(row[k] ?? '').toLowerCase().includes(q))
     )
-  }, [data, filter, searchKeys])
+  }, [safeData, filter, searchKeys])
 
   const sorted = useMemo(() => {
-    if (!sortKey || !sortDir) return filtered
-    return [...filtered].sort((a, b) => {
+    if (!sortKey || !sortDir) return filtered ?? []
+    return [...(filtered ?? [])].sort((a, b) => {
       const av = a[sortKey]
       const bv = b[sortKey]
       const cmp = typeof av === 'number' && typeof bv === 'number'
