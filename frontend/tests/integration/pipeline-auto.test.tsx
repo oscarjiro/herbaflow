@@ -58,7 +58,7 @@ describe('PipelinePage — auto mode, complete status', () => {
 
     // Wait for data to load (stage 8 panel should appear)
     await waitFor(() => {
-      expect(screen.getByText(/stage 8/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/stage 8/i)[0]).toBeInTheDocument()
     })
 
     // ApprovalBar must not be present

@@ -25,12 +25,12 @@ export default function AboutPage() {
           <ol className="font-sans text-sm text-hf-fg2 leading-relaxed list-none flex flex-col gap-2">
             {[
               ['1', 'Compound Selection', 'Retrieve active compounds for selected medicinal plants from KNApSAcK.'],
-              ['2', 'ADME Screening', 'Filter compounds by drug-likeness criteria using Lipinski and ADME parameters.'],
-              ['3', 'Target Identification', 'Predict protein targets for screened compounds via reverse docking or target databases.'],
+              ['2', 'ADME Screening', 'Filter compounds by drug-likeness using Lipinski RO5 + Veber rules (TPSA ≤ 140, rotatable bonds ≤ 10); natural-product exceptions apply.'],
+              ['3', 'Target Identification', 'Retrieve protein targets for screened compounds from ChEMBL (pChEMBL ≥ 5.0, human targets only).'],
               ['4', 'Disease Target Mapping', 'Cross-reference compound targets with known disease-associated targets.'],
               ['5', 'Target Overlap', 'Compute intersections between plant-derived compound targets and disease targets.'],
               ['6', 'PPI Network Construction', 'Build protein-protein interaction networks from overlapping targets.'],
-              ['7', 'Hub Gene Analysis', 'Identify hub genes by topological metrics (degree, betweenness, closeness centrality).'],
+              ['7', 'Hub Gene Analysis', 'Identify hub genes by topological metrics (degree, betweenness, closeness, eigenvector centrality); hub+bottleneck criterion highlights key network bridges.'],
               ['8', 'Pathway Enrichment', 'Perform GO and KEGG pathway enrichment on hub genes to interpret biological significance.'],
             ].map(([num, title, desc]) => (
               <li key={num} className="flex gap-3">

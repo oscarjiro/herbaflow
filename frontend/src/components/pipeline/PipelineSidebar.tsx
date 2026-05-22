@@ -29,7 +29,7 @@ function getStageStatus(
     if (s.includes('awaiting_approval')) return 'awaiting_approval'
     if (s.includes('running')) return 'running'
     if (s.includes('complete')) return 'completed'
-    if (s.includes('failed')) return 'future'
+    if (s.includes('failed')) return 'failed'
   }
   return 'future'
 }

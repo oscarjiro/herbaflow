@@ -1,10 +1,10 @@
-import { Check } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export interface StageNavItemProps {
   stageNumber: number
   name: string
-  status: 'completed' | 'running' | 'awaiting_approval' | 'future' | 'pending'
+  status: 'completed' | 'running' | 'awaiting_approval' | 'future' | 'pending' | 'failed'
   isActive: boolean
   onClick?: () => void
 }
@@ -17,7 +17,7 @@ export function StageNavItem({
   onClick,
 }: StageNavItemProps) {
   const isClickable =
-    status === 'completed' || status === 'running' || status === 'awaiting_approval'
+    status === 'completed' || status === 'running' || status === 'awaiting_approval' || status === 'failed'
 
   function handleClick() {
     if (isClickable && onClick) onClick()
@@ -35,6 +35,7 @@ export function StageNavItem({
         // Left border highlight
         status === 'running' && 'border-l-2 border-hf-sage',
         status === 'awaiting_approval' && 'border-l-2 border-hf-warning',
+        status === 'failed' && 'border-l-2 border-hf-danger',
         // Cursor
         isClickable ? 'cursor-pointer hover:bg-hf-surface-2' : 'cursor-default',
       )}
@@ -52,6 +53,9 @@ export function StageNavItem({
       {status === 'awaiting_approval' && (
         <div className="w-2.5 h-2.5 rounded-full bg-hf-warning animate-pulse shrink-0" />
       )}
+      {status === 'failed' && (
+        <X className="w-3.5 h-3.5 text-hf-danger shrink-0" />
+      )}
       {(status === 'future' || status === 'pending') && (
         <div className="w-3.5 h-3.5 shrink-0" />
       )}
@@ -63,7 +67,8 @@ export function StageNavItem({
           status === 'completed' && 'text-hf-fg3',
           status === 'running' && 'font-medium text-hf-fg1',
           status === 'awaiting_approval' && 'font-medium text-hf-fg1',
-          (status === 'future' || status === 'pending') && 'text-hf-fg4',
+          status === 'failed' && 'text-hf-danger',
+        (status === 'future' || status === 'pending') && 'text-hf-fg4',
         )}
       >
         {name}
