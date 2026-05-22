@@ -15,32 +15,53 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         overlapping_genes, min_confidence=config.ppi.min_confidence
     )
 
-    all_genes = set()
-    edge_list = []
+    overlap_set = set(g.upper() for g in overlapping_genes)
+    all_genes: set[str] = set()
     for e in edges:
         all_genes.add(e.gene_a)
         all_genes.add(e.gene_b)
-        edge_list.append({
+
+    # Compute node degree for tooltip
+    degree_map: dict[str, int] = {}
+    raw_edges = []
+    for e in edges:
+        degree_map[e.gene_a] = degree_map.get(e.gene_a, 0) + 1
+        degree_map[e.gene_b] = degree_map.get(e.gene_b, 0) + 1
+        raw_edges.append({
             "source": e.gene_a,
             "target": e.gene_b,
             "combined_score": e.combined_score,
-            "experimental_score": e.experimental_score,
         })
 
-    nodes = [{"id": g, "label": g} for g in sorted(all_genes)]
+    # Cytoscape element format: {data: {...}}
+    nodes = [
+        {
+            "data": {
+                "id": g,
+                "label": g,
+                "type": "overlap" if g in overlap_set else "other",
+                "degree": degree_map.get(g, 0),
+            }
+        }
+        for g in sorted(all_genes)
+    ]
+    edge_list = [
+        {
+            "data": {
+                "source": e["source"],
+                "target": e["target"],
+                "weight": e["combined_score"],
+            }
+        }
+        for e in raw_edges
+    ]
 
     return {
         "node_count": len(nodes),
         "edge_count": len(edge_list),
         "nodes": nodes,
         "edges": edge_list,
-        "cytoscape": {
-            "elements": {
-                "nodes": [{"data": n} for n in nodes],
-                "edges": [
-                    {"data": {"source": e["source"], "target": e["target"], "weight": e["combined_score"]}}
-                    for e in edge_list
-                ],
-            }
-        },
+        "min_confidence": config.ppi.min_confidence,
+        # raw_edges preserved for Stage 7 (NetworkX needs flat dicts)
+        "raw_edges": raw_edges,
     }

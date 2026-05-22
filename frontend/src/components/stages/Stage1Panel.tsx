@@ -63,6 +63,10 @@ export function Stage1Panel({ stage, analysis, status }: Stage1PanelProps) {
             filterPlaceholder="Filter compounds..."
             filterKeys={['canonical_name']}
           />
+
+          <p className="text-xs text-hf-fg3 font-sans">
+            <span className="font-medium text-hf-fg2">Source:</span> KNApSAcK Core — metabolite–species database mapping compounds to plant species.
+          </p>
         </>
       )}
     </div>

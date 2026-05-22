@@ -218,7 +218,7 @@ export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
       <div className="space-y-1 text-xs text-hf-fg3 font-sans">
         <p>Click a node to highlight its neighbourhood. Click background to reset.</p>
         <p>
-          <span className="font-medium text-hf-fg2">Source:</span> STRING-DB protein–protein interactions (combined score 0–1, filtered by min. confidence set in analysis parameters) ·{' '}
+          <span className="font-medium text-hf-fg2">Source:</span> STRING-DB protein–protein interactions (combined score 0–1, min. confidence threshold: {result.min_confidence}) ·{' '}
           <span className="font-medium text-hf-fg2">Edge weight:</span> score × 5 + 1 (range 1–6, thicker = higher confidence)
         </p>
         <p>

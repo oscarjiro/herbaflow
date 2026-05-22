@@ -240,6 +240,7 @@ export interface Stage6Result {
   edge_count: number
   nodes: CytoscapeNode[]
   edges: CytoscapeEdge[]
+  min_confidence: number
 }
 
 // Stage 7: Hub Gene Analysis

@@ -108,6 +108,13 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
         <p>
           <span className="font-medium text-hf-fg2">Hub + Bottleneck:</span> gene exceeding BOTH degree and betweenness thresholds — a critical bridge/hub in the network, highest priority for drug target consideration.
         </p>
+        <p>
+          <span className="font-medium text-hf-fg2">Centrality definitions:</span>{' '}
+          <span className="font-medium text-hf-fg2">Degree</span> — number of direct neighbours ·{' '}
+          <span className="font-medium text-hf-fg2">Betweenness</span> — fraction of shortest paths passing through the node ·{' '}
+          <span className="font-medium text-hf-fg2">Closeness</span> — inverse mean distance to all other nodes ·{' '}
+          <span className="font-medium text-hf-fg2">Eigenvector</span> — influence weighted by neighbour influence (analogous to PageRank).
+        </p>
       </div>
     </div>
   )
