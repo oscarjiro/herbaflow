@@ -41,13 +41,12 @@ async function pollUntilComplete(
   return { finalStatus, stagesReached: [...stagesReached].sort((a, b) => a - b) }
 }
 
-test.describe('Phase 2.4 — Auto Pipeline QA', () => {
-  test.setTimeout(660000) // 11 minutes — external APIs (ChEMBL, Open Targets, STRING, g:Profiler) can be slow
-
+test.describe.serial('Phase 2.4 — Auto Pipeline QA', () => {
   let analysisId: string
   let consoleErrors: string[] = []
 
   test('auto mode runs all 8 stages without ApprovalBar', async ({ page }) => {
+    test.setTimeout(660000) // 11 minutes — external APIs (ChEMBL, Open Targets, STRING, g:Profiler) can be slow
     // Capture console errors
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
@@ -65,23 +64,23 @@ test.describe('Phase 2.4 — Auto Pipeline QA', () => {
     // ── Step 2: Select plants ───────────────────────────────────────────────
     // Click the plant combobox button (role="combobox")
     await page.locator('button[role="combobox"]').first().click()
-    await page.waitForTimeout(600)
+    // Wait for dropdown options to appear
+    await expect(page.getByRole('option').first()).toBeVisible({ timeout: 10000 })
     // Pick first available option (popover closes after first selection)
     const firstOption = page.getByRole('option').first()
-    await expect(firstOption).toBeVisible({ timeout: 10000 })
     await firstOption.click()
-    await page.waitForTimeout(400)
 
     // Open combobox again for second plant
     await page.locator('button[role="combobox"]').first().click()
-    await page.waitForTimeout(600)
+    // Wait for dropdown options to appear
+    await expect(page.getByRole('option').first()).toBeVisible({ timeout: 10000 })
     const secondOption = page.getByRole('option').nth(1)
     if (await secondOption.isVisible({ timeout: 3000 }).catch(() => false)) {
       await secondOption.click()
     }
     // Close popover
     await page.keyboard.press('Escape')
-    await page.waitForTimeout(400)
+    await expect(page.getByRole('listbox')).not.toBeVisible()
 
     // ── Step 3: Select disease ──────────────────────────────────────────────
     // Disease selector: second combobox (role="combobox")
@@ -89,12 +88,11 @@ test.describe('Phase 2.4 — Auto Pipeline QA', () => {
     const diseaseCombobox = page.locator('button[role="combobox"]').nth(1)
     await expect(diseaseCombobox).toBeVisible({ timeout: 5000 })
     await diseaseCombobox.click()
-    await page.waitForTimeout(500)
     const firstDisease = page.getByRole('option').first()
     await expect(firstDisease).toBeVisible({ timeout: 8000 })
     await firstDisease.click()
     await page.keyboard.press('Escape')
-    await page.waitForTimeout(300)
+    await expect(page.getByRole('listbox')).not.toBeVisible()
 
     // ── Step 4: Switch to Auto mode ────────────────────────────────────────
     // ModeToggle buttons include description text in their accessible name:
@@ -103,7 +101,6 @@ test.describe('Phase 2.4 — Auto Pipeline QA', () => {
     const autoButton = page.locator('button', { hasText: /^Auto/ }).filter({ hasText: /fully automatic/i })
     await expect(autoButton).toBeVisible({ timeout: 5000 })
     await autoButton.click()
-    await page.waitForTimeout(200)
 
     // ── Step 5: Submit form ────────────────────────────────────────────────
     // Start Analysis button has type="submit" with text "Start Analysis"
@@ -159,18 +156,23 @@ test.describe('Phase 2.4 — Auto Pipeline QA', () => {
   })
 
   test('stage spot-checks after completion', async ({ page }) => {
+    test.setTimeout(660000) // 11 minutes — same budget as test 1 in case pipeline is still finishing
     // Re-navigate to pipeline page (analysis ID set from previous test)
     // This test depends on the first test's analysisId — skip if not set
     test.skip(!analysisId, 'Requires analysisId from first test')
 
     await page.goto(`/analysis/${analysisId}`)
-    await page.waitForTimeout(1000)
+    await page.waitForLoadState('networkidle')
 
     // ── Stage 1 spot-check: compound table renders ─────────────────────────
     // Click Stage 1 in sidebar
     const stage1Nav = page.getByText(/stage\s*1/i).first()
     await stage1Nav.click()
-    await page.waitForTimeout(500)
+    // Wait for stage content to settle after navigation
+    await expect(page.locator('table, [data-testid="stage1"], .stage-1-panel, [class*="compound"], [class*="molecule"]').first()).toBeVisible({ timeout: 8000 }).catch(async () => {
+      // Fallback: any text indicating compound data
+      await expect(page.getByText(/compound|molecule|lipinski/i).first()).toBeVisible({ timeout: 5000 })
+    })
 
     // Should show compound table (DataTable or similar)
     const tableOrContent = page.locator('table, [data-testid="stage1"], .stage-1-panel')
@@ -183,16 +185,18 @@ test.describe('Phase 2.4 — Auto Pipeline QA', () => {
     // ── Stage 5 spot-check: Venn SVG renders ───────────────────────────────
     const stage5Nav = page.getByText(/stage\s*5/i).first()
     await stage5Nav.click()
-    await page.waitForTimeout(500)
+    // Wait for stage panel to render after navigation
+    await expect(page.locator('.stage-panel, [class*="stage5"], [class*="Stage5"], svg').first()).toBeVisible({ timeout: 8000 }).catch(() => {/* panel may be empty state */})
 
     const vennSvg = page.locator('svg')
     const svgCount = await vennSvg.count()
-    expect(svgCount).toBeGreaterThanOrEqual(0) // SVG may not appear if no overlap — that's OK
+    expect(svgCount).toBeGreaterThanOrEqual(1) // Stage 5 Venn diagram must render at least one SVG
 
     // ── Stage 8 spot-check: enrichment panel renders ───────────────────────
     const stage8Nav = page.getByText(/stage\s*8/i).first()
     await stage8Nav.click()
-    await page.waitForTimeout(500)
+    // Wait for stage panel content or empty state to appear
+    await expect(page.locator('.stage-panel, [class*="stage8"], [class*="Stage8"]').first().or(page.getByText(/pathway|enrichment|kegg|go|profiler|no results|empty/i).first())).toBeVisible({ timeout: 8000 }).catch(() => {/* acceptable if panel is still rendering */})
 
     // Stage 8 should render without crash — either data tabs or empty state
     const stage8Content = page.locator('.stage-panel, [class*="stage8"], [class*="Stage8"]').first()
