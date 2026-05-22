@@ -29,7 +29,7 @@ const columns: ColumnDef<DiseaseRow>[] = [
   },
   {
     key: 'association_score',
-    header: 'Association Score',
+    header: 'Open Targets Score',
     sortable: true,
     render: (value) =>
       value != null ? (value as number).toFixed(3) : '—',
@@ -72,6 +72,15 @@ export function Stage4Panel({ stage, analysis, status }: Stage4PanelProps) {
             filterPlaceholder="Filter targets..."
             filterKeys={['gene_symbol', 'disease_name']}
           />
+
+          <div className="space-y-1 text-xs text-hf-fg3 font-sans">
+            <p>
+              <span className="font-medium text-hf-fg2">Open Targets score</span> (0–1): overall disease–gene association strength integrating genetic, genomic, and literature evidence.
+            </p>
+            <p>
+              <span className="font-medium text-hf-fg2">Source:</span> <code className="text-hf-fg2">DB cache</code> = pre-fetched Open Targets data (ensures reproducibility); <code className="text-hf-fg2">API</code> = live Open Targets query at analysis time.
+            </p>
+          </div>
         </>
       )}
     </div>

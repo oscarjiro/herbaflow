@@ -25,8 +25,44 @@ const columns: ColumnDef<AdmeRow>[] = [
     sortable: true,
   },
   {
+    key: 'molecular_weight',
+    header: 'MW (Da)',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(1) : '—',
+  },
+  {
+    key: 'logp',
+    header: 'LogP',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(2) : '—',
+  },
+  {
+    key: 'tpsa',
+    header: 'TPSA (Å²)',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(1) : '—',
+  },
+  {
+    key: 'hbond_donors',
+    header: 'HBD',
+    sortable: true,
+    render: (v) => v ?? '—',
+  },
+  {
+    key: 'hbond_acceptors',
+    header: 'HBA',
+    sortable: true,
+    render: (v) => v ?? '—',
+  },
+  {
+    key: 'np_likeness_score',
+    header: 'NP-likeness',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(3) : '—',
+  },
+  {
     key: 'adme_pass',
-    header: 'ADME Result',
+    header: 'Result',
     render: (value) => (
       <StatusBadge
         status={value ? 'complete' : 'failed'}
@@ -119,6 +155,15 @@ export function Stage2Panel({ stage, analysis, status }: Stage2PanelProps) {
             filterPlaceholder="Filter compounds..."
             filterKeys={['canonical_name']}
           />
+
+          <div className="space-y-1 text-xs text-hf-fg3 font-sans">
+            <p>
+              <span className="font-medium text-hf-fg2">Filter criteria:</span> Lipinski RO5 (MW ≤ 500 Da, LogP ≤ 5, HBD ≤ 5, HBA ≤ 10) + Veber rules (TPSA ≤ 140 Å², rotatable bonds ≤ 10).
+            </p>
+            <p>
+              <span className="font-medium text-hf-fg2">NP Exception:</span> Compounds failing Lipinski/Veber rules but with NP-likeness score ≥ threshold are passed through as natural product exceptions — natural products often violate Lipinski due to their structural complexity while retaining oral bioavailability.
+            </p>
+          </div>
         </>
       )}
     </div>

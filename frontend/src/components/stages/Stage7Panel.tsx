@@ -18,22 +18,22 @@ type HubGeneRow = HubGeneResult & Record<string, unknown>
 const columns: ColumnDef<HubGeneRow>[] = [
   { key: 'rank', header: 'Rank', sortable: true },
   { key: 'gene_symbol', header: 'Gene', sortable: true },
-  { key: 'degree', header: 'Degree', sortable: true },
+  { key: 'degree', header: 'Degree Centrality', sortable: true },
   {
     key: 'betweenness_centrality',
-    header: 'Betweenness',
+    header: 'Betweenness Centrality',
     sortable: true,
     render: (v) => v != null ? (v as number).toFixed(4) : '—',
   },
   {
     key: 'closeness_centrality',
-    header: 'Closeness',
+    header: 'Closeness Centrality',
     sortable: true,
     render: (v) => v != null ? (v as number).toFixed(4) : '—',
   },
   {
     key: 'eigenvector_centrality',
-    header: 'Eigenvector',
+    header: 'Eigenvector Centrality',
     sortable: true,
     render: (v) => v != null ? (v as number).toFixed(4) : '—',
   },
@@ -100,9 +100,15 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
         }
       />
 
-      <p className="text-xs text-hf-fg4">
-        Hub threshold: degree ≥ {result.threshold_degree} · betweenness ≥ {result.threshold_betweenness?.toFixed(4) ?? '—'}
-      </p>
+      <div className="space-y-1 text-xs text-hf-fg3 font-sans">
+        <p>
+          <span className="font-medium text-hf-fg2">Hub threshold:</span> degree ≥ {result.threshold_degree} (= µ + σ of degree distribution) ·{' '}
+          betweenness ≥ {result.threshold_betweenness?.toFixed(4) ?? '—'} (= µ + σ of betweenness distribution)
+        </p>
+        <p>
+          <span className="font-medium text-hf-fg2">Hub + Bottleneck:</span> gene exceeding BOTH degree and betweenness thresholds — a critical bridge/hub in the network, highest priority for drug target consideration.
+        </p>
+      </div>
     </div>
   )
 }

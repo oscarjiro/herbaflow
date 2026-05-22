@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
@@ -61,6 +61,12 @@ function PathwayChart({ terms }: { terms: PathwayTerm[] }) {
           width={200}
           tick={{ fontSize: 10 }}
         />
+        <ReferenceLine
+          x={1.301}
+          stroke="var(--hf-danger)"
+          strokeDasharray="4 2"
+          label={{ value: 'FDR=0.05', position: 'top', fontSize: 9, fill: 'var(--hf-danger)' }}
+        />
         <Bar dataKey="value" fill="var(--hf-sage)" radius={[0, 2, 2, 0]} />
         <Tooltip
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,17 +101,21 @@ export function Stage8Panel({ stage, analysis, status }: Stage8PanelProps) {
     )
   }
 
-  const termsBySource = Object.fromEntries(
-    SOURCES.map((src) => [src, result.terms.filter((t) => t.source === src)])
-  ) as Record<PathwaySource, PathwayTerm[]>
+  const termsBySource: Record<PathwaySource, PathwayTerm[]> = {
+    'GO:BP': result.go_bp ?? [],
+    'GO:MF': result.go_mf ?? [],
+    'GO:CC': result.go_cc ?? [],
+    'KEGG': result.kegg ?? [],
+  }
+  const totalTerms = Object.values(termsBySource).reduce((s, a) => s + a.length, 0)
 
   return (
     <div className="space-y-6">
       <StageHeader stage={stage} name="Pathway Enrichment" status={status?.status ?? 'complete'} elapsedSeconds={null} />
 
       <div className="grid grid-cols-2 gap-4">
-        <StatCard label="Significant Pathways" value={result.significant_count} />
-        <StatCard label="Total Terms" value={result.terms.length} />
+        <StatCard label="Significant Pathways" value={result.total_significant} />
+        <StatCard label="Total Terms" value={totalTerms} />
       </div>
 
       <Tabs defaultValue="GO:BP">
@@ -132,9 +142,14 @@ export function Stage8Panel({ stage, analysis, status }: Stage8PanelProps) {
         ))}
       </Tabs>
 
-      <p className="text-xs text-hf-fg4">
-        Showing top 20 terms per category by -log₁₀(FDR). Significance threshold: FDR &lt; 0.05.
-      </p>
+      <div className="space-y-1 text-xs text-hf-fg3 font-sans">
+        <p>Showing top 20 terms per category by -log₁₀(FDR). Dashed line = FDR 0.05 significance threshold.</p>
+        <p>
+          <span className="font-medium text-hf-fg2">Method:</span> g:Profiler ORA (over-representation analysis) ·{' '}
+          <span className="font-medium text-hf-fg2">Background:</span> human proteome ·{' '}
+          <span className="font-medium text-hf-fg2">Correction:</span> Benjamini–Hochberg FDR
+        </p>
+      </div>
     </div>
   )
 }

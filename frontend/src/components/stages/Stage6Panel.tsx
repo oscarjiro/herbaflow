@@ -21,6 +21,9 @@ type LayoutName = 'fcose' | 'grid' | 'circle'
 
 // Stylesheet uses `as any` on the ref and stylesheet prop to avoid conflicts
 // between @types/cytoscape and react-cytoscapejs typings.
+// Cytoscape renders to canvas — CSS custom properties do not resolve there.
+// Use raw hex values derived from the design system tokens.
+// --hf-fg-4 (#9A958C), --hf-sage (#8FA084), --hf-fg-1 (#1A1A1A), --hf-bg (#F7F5F2)
 const styleSheet = [
   {
     selector: 'node',
@@ -31,17 +34,17 @@ const styleSheet = [
       'text-halign': 'center',
       width: 30,
       height: 30,
-      'background-color': 'var(--hf-fg-4)',
-      color: 'var(--hf-fg-1)',
+      'background-color': '#9A958C',
+      color: '#1A1A1A',
     },
   },
   {
     selector: 'node[type="hub"]',
-    style: { 'background-color': 'var(--hf-sage)', color: 'var(--hf-fg-1)', width: 40, height: 40 },
+    style: { 'background-color': '#8FA084', color: '#1A1A1A', width: 40, height: 40 },
   },
   {
     selector: 'node[type="overlap"]',
-    style: { 'background-color': 'var(--hf-ink)', color: 'var(--hf-bg)' },
+    style: { 'background-color': '#1A1A1A', color: '#F7F5F2' },
   },
   {
     selector: 'node.dimmed',
@@ -51,7 +54,7 @@ const styleSheet = [
     selector: 'edge',
     style: {
       width: 'data(weight)',
-      'line-color': 'var(--hf-border-strong)',
+      'line-color': '#C8C4BC',
       opacity: 0.6,
     },
   },
@@ -62,9 +65,9 @@ const styleSheet = [
 ]
 
 const LAYOUTS: Record<LayoutName, cytoscape.LayoutOptions> = {
-  fcose: { name: 'fcose', animate: true, randomize: false } as cytoscape.LayoutOptions,
-  grid: { name: 'grid', animate: true } as cytoscape.LayoutOptions,
-  circle: { name: 'circle', animate: true } as cytoscape.LayoutOptions,
+  fcose: { name: 'fcose', animate: true, randomize: true, fit: true } as cytoscape.LayoutOptions,
+  grid: { name: 'grid', animate: true, fit: true } as cytoscape.LayoutOptions,
+  circle: { name: 'circle', animate: true, fit: true } as cytoscape.LayoutOptions,
 }
 
 export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
@@ -162,7 +165,7 @@ export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
           Hub gene
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block w-3 h-3 rounded-full bg-hf-fg1" />
+          <span className="inline-block w-3 h-3 rounded-full" style={{ background: 'var(--hf-fg-1)' }} />
           Overlap target
         </span>
         <span className="flex items-center gap-1">
@@ -212,9 +215,16 @@ export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
       </div>
 
       {/* Node type legend note */}
-      <p className="text-xs text-hf-fg4">
-        Click a node to highlight its neighbourhood. Click background to reset.
-      </p>
+      <div className="space-y-1 text-xs text-hf-fg3 font-sans">
+        <p>Click a node to highlight its neighbourhood. Click background to reset.</p>
+        <p>
+          <span className="font-medium text-hf-fg2">Source:</span> STRING-DB protein–protein interactions (combined score 0–1, filtered by min. confidence set in analysis parameters) ·{' '}
+          <span className="font-medium text-hf-fg2">Edge weight:</span> score × 5 + 1 (range 1–6, thicker = higher confidence)
+        </p>
+        <p>
+          <span className="font-medium text-hf-fg2">Hub criterion:</span> overlap gene with degree &gt; µ + σ (mean + 1 SD of degree distribution). Hub+Bottleneck additionally requires betweenness &gt; µ + σ.
+        </p>
+      </div>
     </div>
   )
 }

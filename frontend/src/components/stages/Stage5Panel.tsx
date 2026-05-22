@@ -23,6 +23,10 @@ function VennDiagram({ compoundOnly, overlap, diseaseOnly }: VennProps) {
   const cy  = H / 2
   return (
     <div className="flex flex-col items-center gap-2">
+      <div className="flex justify-between text-xs font-medium text-hf-fg2" style={{ width: W }}>
+        <span style={{ marginLeft: 8 }}>Compound Targets</span>
+        <span style={{ marginRight: 8 }}>Disease Targets</span>
+      </div>
       <svg width={W} height={H} className="mx-auto" role="img" aria-label="Venn diagram showing target overlap">
         <circle cx={cx1} cy={cy} r={r} fill="var(--hf-sage-soft)" opacity={0.7} />
         <circle cx={cx2} cy={cy} r={r} fill="var(--hf-info-soft)" opacity={0.7} />
@@ -31,9 +35,9 @@ function VennDiagram({ compoundOnly, overlap, diseaseOnly }: VennProps) {
         <text x={cx2 + offset} y={cy} textAnchor="middle" fontSize={12} dominantBaseline="middle">{diseaseOnly}</text>
       </svg>
       <div className="flex gap-16 text-xs text-hf-fg3">
-        <span>Compound targets only</span>
+        <span>Compound only</span>
         <span>Overlap</span>
-        <span>Disease targets only</span>
+        <span>Disease only</span>
       </div>
     </div>
   )
@@ -53,7 +57,7 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
 
   const significanceState: 'significant' | 'not_significant' | 'na' =
     result.p_value == null ? 'na'
-    : result.p_value < 0.05 ? 'significant'
+    : (result.significant ?? result.p_value < 0.05) ? 'significant'
     : 'not_significant'
 
   return (
@@ -69,8 +73,8 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <StatCard label="Jaccard Index" value={result.jaccard_index != null && !Number.isNaN(result.jaccard_index) ? result.jaccard_index.toFixed(3) : 'N/A'} />
-        <StatCard label="P-value" value={result.p_value != null ? result.p_value.toExponential(2) : 'N/A'} />
+        <StatCard label="Jaccard Index" value={result.jaccard != null && !Number.isNaN(result.jaccard) ? result.jaccard.toFixed(3) : 'N/A'} />
+        <StatCard label="Fisher's Exact p-value" value={result.p_value != null ? result.p_value.toExponential(2) : 'N/A'} />
         <div className="rounded-lg bg-hf-surface border border-hf-border p-4 flex flex-col gap-1">
           <span className="text-xs text-hf-fg3">Significance</span>
           <span
@@ -89,15 +93,29 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
         </div>
       </div>
 
+      {result.overlap_count === 0 && (
+        <div className="rounded-lg bg-hf-warning-soft border border-hf-warning px-4 py-3">
+          <p className="text-sm font-medium text-hf-warning">No pharmacological overlap detected</p>
+          <p className="text-xs text-hf-fg2 mt-1">
+            No compound targets overlap with disease targets. Downstream network analysis (Stages 6–8) has limited pharmacological validity.
+            Consider lowering the pChEMBL threshold or selecting plants with known activity against this disease.
+          </p>
+        </div>
+      )}
+
+      <p className="text-xs text-hf-fg3 font-sans">
+        Jaccard index = overlap / (compound-only + overlap + disease-only). Statistical significance by Fisher's exact test (hypergeometric model, background = human proteome).
+      </p>
+
       <div>
         <h3 className="text-sm font-medium text-hf-fg1 mb-3">
-          Overlap Genes ({result.overlap_genes.length})
+          Overlap Genes ({(result.overlap ?? []).length})
         </h3>
-        {result.overlap_genes.length === 0 ? (
+        {(result.overlap ?? []).length === 0 ? (
           <EmptyState message="No overlapping targets found" />
         ) : (
           <div className="flex flex-wrap gap-2">
-            {result.overlap_genes.map((gene) => (
+            {(result.overlap ?? []).map((gene) => (
               <span
                 key={gene}
                 className="px-2 py-0.5 rounded text-xs font-mono bg-hf-surface-2 text-hf-fg2 border border-hf-border"

@@ -58,7 +58,7 @@ export function Stage3Panel({ stage, analysis, status }: Stage3PanelProps) {
         <>
           <div className="grid grid-cols-2 gap-4">
             <StatCard label="Targets Found" value={result.target_count} />
-            <StatCard label="Coverage" value={`${result.coverage_percent.toFixed(1)}%`} />
+            <StatCard label="Coverage" value={`${(result.coverage_percent ?? 0).toFixed(1)}%`} />
           </div>
 
           <div>
@@ -91,6 +91,11 @@ export function Stage3Panel({ stage, analysis, status }: Stage3PanelProps) {
             filterPlaceholder="Filter targets..."
             filterKeys={['gene_symbol']}
           />
+
+          <p className="text-xs text-hf-fg3 font-sans">
+            <span className="font-medium text-hf-fg2">Source:</span> ChEMBL (human protein targets only) ·{' '}
+            <span className="font-medium text-hf-fg2">Threshold:</span> pChEMBL ≥ 5.0 (equivalent to IC₅₀ ≤ 10µM — standard active binder cutoff).
+          </p>
         </>
       )}
     </div>

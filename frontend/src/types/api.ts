@@ -141,6 +141,13 @@ export interface Stage1Result {
 export interface AdmeCompoundResult extends CompoundResult {
   adme_pass: boolean
   is_np_exception: boolean
+  molecular_weight: number | null
+  logp: number | null
+  tpsa: number | null
+  hbond_donors: number | null
+  hbond_acceptors: number | null
+  np_likeness_score: number | null
+  rotatable_bonds: number | null
 }
 
 export interface Stage2Result {
@@ -183,9 +190,17 @@ export interface Stage5Result {
   compound_only_count: number
   overlap_count: number
   disease_only_count: number
-  jaccard_index: number
+  /** Backend field name: jaccard (not jaccard_index) */
+  jaccard: number
   p_value: number | null
-  overlap_genes: string[]
+  significant: boolean
+  /** Backend field name: overlap (not overlap_genes) */
+  overlap: string[]
+  venn?: {
+    overlap: number
+    disease_only: number
+    compound_only: number
+  }
 }
 
 // Stage 6: PPI Network (Cytoscape.js format)
@@ -243,16 +258,20 @@ export type PathwaySource = 'GO:BP' | 'GO:MF' | 'GO:CC' | 'KEGG'
 export interface PathwayTerm {
   term_id: string
   term_name: string
-  source: PathwaySource
   p_value: number
   fdr: number
   intersection_size: number
-  gene_list: string[]
+  term_size: number
+  genes: string[]
 }
 
 export interface Stage8Result {
-  significant_count: number
-  terms: PathwayTerm[]
+  total_significant: number
+  go_bp: PathwayTerm[]
+  go_mf: PathwayTerm[]
+  go_cc: PathwayTerm[]
+  kegg: PathwayTerm[]
+  hub_genes_queried: string[]
 }
 
 // ============================================================================
