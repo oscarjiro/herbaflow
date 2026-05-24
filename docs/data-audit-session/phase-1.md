@@ -206,3 +206,53 @@ work["__canonical_key_preview"] = work.apply(
 - `plant_id` for each species will be derived from `gbif_accepted_usage_key`, making it stable regardless of whether the KNApSAcK input spelled the accepted name or a synonym.
 - Synonym names are preserved as `alias_type=synonym_variant` entries in `plant_aliases.csv`.
 - ETL re-run is deferred — code-only fix.
+
+---
+
+## P1-C: Fix Applied
+
+> Applied: 2026-05-24
+
+### Root Cause
+
+**File:** `etl/plants/03_match_gbif/run.py`
+
+The GBIF `/v2/species/match` response does not return `family` as a top-level field. The family name is embedded inside the `classification` array as a node with `rank=FAMILY` and a `name` field (e.g. `{"rank": "FAMILY", "key": 4691, "name": "Euphorbiaceae"}`).
+
+The existing `get_rank_key()` helper correctly extracted the numeric GBIF family key from that node and wrote it to `gbif_family_key` in `gbif_matches.csv`. However, no corresponding helper extracted the human-readable family **name** string. As a result:
+
+- `gbif_matches.csv` had no `family_name` column.
+- `04_build_canonical/run_part2.py`'s `clean_family_name()` reads `row.get("family_name", "")`, which always returned `""`.
+- All 519 plants were written to the DB with `family_name = ''`.
+
+### What Was Changed
+
+**File:** `etl/plants/03_match_gbif/run.py` only. No changes to `run_part1.py` or `run_part2.py` — the downstream files already pass all columns through transparently, and `clean_family_name()` already reads `family_name` correctly.
+
+1. **Added `get_rank_name()` helper** (parallel to the existing `get_rank_key()`):
+   ```python
+   def get_rank_name(classification, target_rank):
+       for node in classification:
+           if normalize_text(node.get("rank", "")).upper() == target_rank.upper():
+               name = node.get("name", "")
+               return "" if name is None else normalize_text(name)
+       return ""
+   ```
+
+2. **Extracted `family_name` in `parse_match_record` (success path):**
+   ```python
+   family_name = get_rank_name(classification, "FAMILY")
+   ```
+   Added `"family_name": family_name` to the returned dict.
+
+3. **Added `"family_name": ""` to the error-path return dict** for consistent schema.
+
+4. **Added `"family_name"` to `preferred_order`** in `write_output()` so it appears after `gbif_kingdom_key` in `gbif_matches.csv`.
+
+### Impact
+
+After ETL re-run from step 03 onward:
+- `gbif_matches.csv` will contain a `family_name` column populated from the GBIF classification array (e.g. `"Zingiberaceae"`, `"Euphorbiaceae"`).
+- `accepted_plants.csv` will carry `family_name` through unchanged (run_part1.py preserves all input columns).
+- `plants.csv` (the DB seed) will have `family_name` populated for all successfully matched plants (~519 rows).
+- ETL re-run is deferred — code-only fix.

@@ -374,6 +374,16 @@ def get_rank_key(classification: Sequence[Dict[str, Any]], target_rank: str) -> 
     return ""
 
 
+def get_rank_name(classification: Sequence[Dict[str, Any]], target_rank: str) -> str:
+    target_rank = target_rank.upper()
+    for node in classification:
+        node_rank = normalize_text(node.get("rank", "")).upper()
+        if node_rank == target_rank:
+            name = node.get("name", "")
+            return "" if name is None else normalize_text(name)
+    return ""
+
+
 def first_non_empty(*values: Any) -> str:
     for value in values:
         text = normalize_text(value)
@@ -420,6 +430,7 @@ def parse_match_record(
             "gbif_genus_key": "",
             "gbif_family_key": "",
             "gbif_kingdom_key": "",
+            "family_name": "",
         }
 
     usage = response_json.get("usage") or {}
@@ -476,6 +487,7 @@ def parse_match_record(
     gbif_genus_key = get_rank_key(classification, "GENUS")
     gbif_family_key = get_rank_key(classification, "FAMILY")
     gbif_kingdom_key = get_rank_key(classification, "KINGDOM")
+    family_name = get_rank_name(classification, "FAMILY")
 
     return {
         "input_name": input_name,
@@ -500,6 +512,7 @@ def parse_match_record(
         "gbif_genus_key": gbif_genus_key,
         "gbif_family_key": gbif_family_key,
         "gbif_kingdom_key": gbif_kingdom_key,
+        "family_name": family_name,
     }
 
 
@@ -643,6 +656,7 @@ def write_output(rows: List[Dict[str, Any]], output_path: Path) -> None:
         "gbif_genus_key",
         "gbif_family_key",
         "gbif_kingdom_key",
+        "family_name",
         "cache_key",
         "cache_path",
     ]
