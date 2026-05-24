@@ -56,7 +56,7 @@ export const DEFAULT_PARAMS: AdvancedParams = {
   min_score: 0.3,
   min_confidence: 0.4,
   top_n: 20,
-  use_hub_bottleneck: false,
+  use_hub_bottleneck: true,
   fdr_threshold: 0.05,
   sources: ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG'],
 }
