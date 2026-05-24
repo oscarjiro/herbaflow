@@ -200,6 +200,8 @@ Canonical protein/gene entities.
 | `retrieved_at`      | timestamptz           |        |
 | `confidence`        | float                 |        |
 
+Indexes: `idx_targets_uniprot_accession` on `uniprot_accession`; `idx_targets_gene_symbol` on `gene_symbol`.
+
 ### `target_aliases`
 
 | Column            | Type                  | Notes |
@@ -283,6 +285,8 @@ m:m join. Answers: which targets are implicated in which diseases?
 
 Unique constraint: `(disease_id, target_id, source_id)`
 
+Index: `idx_disease_targets_score` on `score`.
+
 ---
 
 ## 6. PPI / network
@@ -333,6 +337,8 @@ Unique constraint: `(target_a_id, target_b_id, source_id)`
 | `updated_at`      | timestamptz NOT NULL | last write timestamp; default `now()` |
 | `created_at`      | timestamptz     |          |
 | `created_by`      | text            |          |
+
+Index: `idx_analysis_runs_status` on `status`.
 
 ### `analysis_run_plants`
 
