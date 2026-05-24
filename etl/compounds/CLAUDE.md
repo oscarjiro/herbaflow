@@ -42,9 +42,10 @@ Run after `patch_missing_smiles.py` when any `logp` fields are empty.
 
 RDKit is installed in the ETL venv (`rdkit==2026.3.2`). No new dependencies needed.
 
-Note: `qed_score` and `np_likeness_score` are only populated from ChEMBL (Pass 1).
-RDKit pass leaves them blank. Compounds with neither a `chembl_id` nor a usable
-`smiles` remain unresolved.
+Note: `qed_score` is only populated from ChEMBL (Pass 1); RDKit does not compute it.
+`np_likeness_score` is populated from ChEMBL (Pass 1) or via RDKit NP scorer (Pass 2b,
+using RDKit Contrib NP_Score/npscorer.py) for any row where it is still null but smiles
+is present. Compounds with neither a `chembl_id` nor a usable `smiles` remain unresolved.
 
 ## Lipinski Coverage Baseline (as of May 2026)
 

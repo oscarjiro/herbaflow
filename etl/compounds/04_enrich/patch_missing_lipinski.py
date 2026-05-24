@@ -10,13 +10,22 @@ Two-pass Lipinski/ADME descriptor recovery for compounds where `logp` is empty:
                          zero API calls.
   Pass 2 (RDKit)      — rows still missing after Pass 1 that have a non-empty `smiles`:
                          computes MolLogP, NumHBD, NumHBA, TPSA, NumRotatableBonds
-                         locally from the SMILES string. qed_score and np_likeness_score
-                         are not computed by this pass (require additional RDKit modules).
+                         locally from the SMILES string. qed_score is not computed
+                         (requires QED module); np_likeness_score handled in Pass 2b.
+
+  Pass 2b (RDKit NP)  — all rows where np_likeness_score is still null but smiles is
+                         present (covers both rdkit_computed and any chembl_api rows that
+                         returned an empty np_likeness_score). Uses the RDKit NP scorer
+                         from RDKit Contrib (NP_Score/npscorer.py). Degrades gracefully
+                         if the NP scorer module is unavailable.
 
 Sets `lipinski_source` on each patched row:
-  chembl_api     — properties from ChEMBL molecule_properties
-  rdkit_computed — properties computed from SMILES via RDKit
-  (empty string) — compound remains unresolved (no chembl_id, no usable SMILES)
+  chembl_api           — properties from ChEMBL molecule_properties
+  rdkit_computed       — Lipinski properties computed from SMILES via RDKit
+  rdkit_computed+rdkit_np — Lipinski + NP-likeness both computed via RDKit
+  chembl_api+rdkit_np  — ChEMBL Lipinski + RDKit NP-likeness (ChEMBL returned empty NP)
+  rdkit_np             — only NP-likeness added (Lipinski already present from elsewhere)
+  (empty string)       — compound remains unresolved (no chembl_id, no usable SMILES)
 
 Usage:
     python patch_missing_lipinski.py [--enrich-out PATH] [--dry-run] [--no-rdkit]
@@ -145,6 +154,22 @@ def fetch_chembl_molecule(
 # ---------------------------------------------------------------------------
 
 
+def _load_np_scorer():
+    """Load the RDKit NP scorer model. Returns the fscore object or None if unavailable."""
+    try:
+        from rdkit.Chem import RDConfig
+        import os
+        import sys
+        sys.path.append(os.path.join(RDConfig.RDContribDir, "NP_Score"))
+        import npscorer  # type: ignore[import]
+        fscore = npscorer.readNPModel()
+        log.info("RDKit NP scorer loaded from %s", os.path.join(RDConfig.RDContribDir, "NP_Score"))
+        return npscorer, fscore
+    except Exception as exc:
+        log.warning("RDKit NP scorer not available (%s); np_likeness_score will be left blank for rdkit_computed compounds.", exc)
+        return None, None
+
+
 def rdkit_properties(smiles: str) -> Optional[Dict[str, str]]:
     """Compute Lipinski descriptors from SMILES using RDKit. Returns None on failure."""
     try:
@@ -164,11 +189,24 @@ def rdkit_properties(smiles: str) -> Optional[Dict[str, str]]:
         "hbond_acceptors": _s(rdMolDescriptors.CalcNumHBA(mol)),
         "tpsa": _s(round(Descriptors.TPSA(mol), 4)),
         "rotatable_bonds": _s(rdMolDescriptors.CalcNumRotatableBonds(mol)),
-        # qed_score and np_likeness_score require additional modules; leave blank
+        # qed_score and np_likeness_score handled separately; leave blank here
         "qed_score": "",
         "np_likeness_score": "",
         "num_ro5_violations": "",
     }
+
+
+def compute_np_score(smiles: str, npscorer_mod: Any, fscore: Any) -> str:
+    """Compute RDKit NP-likeness score for a SMILES string. Returns empty string on failure."""
+    try:
+        from rdkit import Chem
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            return ""
+        score = npscorer_mod.scoreMol(mol, fscore)
+        return _s(round(score, 4))
+    except Exception:
+        return ""
 
 
 # ---------------------------------------------------------------------------
@@ -269,9 +307,14 @@ def main() -> int:
 
         still_missing.append(row)
 
-    # --- Pass 2: RDKit ---
+    # --- Pass 2: RDKit (Lipinski descriptors) ---
     rdkit_patched = 0
     unresolved = 0
+
+    # Load NP scorer once before the loop (may be None if unavailable)
+    np_scorer_mod, np_fscore = (None, None)
+    if not args.no_rdkit:
+        np_scorer_mod, np_fscore = _load_np_scorer()
 
     if not args.no_rdkit:
         for row in still_missing:
@@ -296,8 +339,35 @@ def main() -> int:
     else:
         unresolved = len(still_missing)
 
+    # --- Pass 2b: RDKit NP-likeness score ---
+    # Applied to all rows where np_likeness_score is still null but smiles is present,
+    # including both rdkit_computed rows from Pass 2 and any chembl_api rows that came
+    # back with an empty np_likeness_score.
+    np_patched = 0
+    if not args.no_rdkit and np_scorer_mod is not None and np_fscore is not None:
+        for row in results:
+            if (row.get("np_likeness_score") or "").strip():
+                continue  # already has a value
+            smiles = (row.get("smiles") or "").strip()
+            if not smiles:
+                continue
+            score = compute_np_score(smiles, np_scorer_mod, np_fscore)
+            if score:
+                if not args.dry_run:
+                    row["np_likeness_score"] = score
+                    # Append +rdkit_np to lipinski_source to indicate provenance
+                    existing_source = (row.get("lipinski_source") or "").strip()
+                    if existing_source and "+rdkit_np" not in existing_source:
+                        row["lipinski_source"] = existing_source + "+rdkit_np"
+                    elif not existing_source:
+                        row["lipinski_source"] = "rdkit_np"
+                np_patched += 1
+        log.info("NP-likeness (RDKit NP scorer)  : %d computed", np_patched)
+    elif not args.no_rdkit:
+        log.warning("[patch] NP scorer unavailable; np_likeness_score left null for rdkit_computed compounds")
+
     # --- Write ---
-    if not args.dry_run and (chembl_patched + rdkit_patched) > 0:
+    if not args.dry_run and (chembl_patched + rdkit_patched + np_patched) > 0:
         ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         backup_dir = enrich_out / f"backup_pre_patch_lipinski_{ts}"
         backup_dir.mkdir(parents=True, exist_ok=True)
@@ -313,6 +383,7 @@ def main() -> int:
     log.info("Patched via ChEMBL API        : %d", chembl_patched)
     log.info("Patched via RDKit             : %d", rdkit_patched)
     log.info("Unresolved (no hit / SMILES)  : %d", unresolved)
+    log.info("NP-likeness computed (RDKit)  : %d", np_patched)
     log.info("─" * 60)
 
     if args.dry_run:
