@@ -4,6 +4,25 @@ from typing import Any
 
 @dataclass
 class AdmeParams:
+    """
+    ADME screening parameters for compound filtering.
+
+    Lipinski RO5 (Lipinski et al., Adv. Drug Deliv. Rev. 23:3-25, 1997):
+      Empirical thresholds for oral bioavailability of drug-like molecules.
+      Note: designed for synthetic compounds; many natural products violate RO5.
+      NP exception (np_exception_threshold) compensates for this limitation.
+
+    Veber rules (Veber et al., J. Med. Chem. 45:2615-2623, 2002):
+      Additional oral permeability criteria based on TPSA and rotatable bonds.
+
+    NP exception (Ertl & Schuffenhauer, J. Nat. Prod. 71:951-959, 2008):
+      Compounds with NP-likeness score >= threshold bypass RO5/Veber filters.
+      Threshold 0.5 captures compounds with strong natural-product character.
+
+    PAINS (Baell & Holloway, J. Med. Chem. 53:2719-2740, 2010):
+      Not applied as a hard filter (apply_pains=False); NP pipeline targets
+      computational target prediction, not biochemical assay screening.
+    """
     max_mw: float = 500.0
     max_logp: float = 5.0
     max_hbd: int = 5
@@ -79,6 +98,7 @@ class CompoundRecord:
     tpsa: float | None
     rotatable_bonds: int | None
     np_likeness_score: float | None
+    is_pains_positive: bool = False
     num_ro5_violations: int | None
 
 

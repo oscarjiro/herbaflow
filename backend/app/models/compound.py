@@ -27,6 +27,7 @@ class Compound(SQLModel, table=True):
     num_ro5_violations: Optional[int] = None
     qed_score: Optional[float] = None
     np_likeness_score: Optional[float] = None
+    is_pains_positive: bool = False
     lipinski_source: Optional[str] = None
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None

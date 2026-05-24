@@ -138,6 +138,7 @@ One canonical row per chemical entity.
 | `num_ro5_violations` | int                  | count of Lipinski Rule of Five violations (0–4); 0 = fully drug-like |
 | `qed_score`         | float                 | Quantitative Estimate of Drug-likeness (0–1, higher = more drug-like); computed by RDKit |
 | `np_likeness_score` | float                 | Natural product-likeness score (RDKit); ≥ 0.5 triggers NP exception in ADME filtering |
+| `is_pains_positive` | boolean NOT NULL DEFAULT false | PAINS flag (Baell & Holloway 2010); true = matches pan-assay interference pattern. Reporting only — not a filter. Populated by ETL `patch_missing_lipinski.py` Pass 3. |
 | `lipinski_source`   | text                  | `chembl_api` = from ChEMBL molecule_properties; `rdkit_computed` = computed from SMILES; null = unresolved |
 | `source_id`         | FK → `source_systems` |        |
 | `source_url`        | text                  |        |

@@ -72,6 +72,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 tpsa=c.tpsa,
                 rotatable_bonds=c.rotatable_bonds,
                 np_likeness_score=c.np_likeness_score,
+                is_pains_positive=c.is_pains_positive,
                 num_ro5_violations=c.num_ro5_violations,
             ))
 
@@ -90,6 +91,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "plant_ids": plant_ids_map.get(str(c.compound_id), []),
             "adme_pass": str(c.compound_id) in passed_set,
             "is_np_exception": str(c.compound_id) in np_set,
+            "is_pains_positive": c.is_pains_positive,
         }
         for c in result["passed"] + result["np_exceptions"] + result["failed"]
     ]
