@@ -7,7 +7,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
     if len(G.nodes) == 0:
-        return {"ranked": [], "hub_degree_threshold": 0, "hub_betweenness_threshold": 0}
+        return {"hub_genes": [], "threshold_degree": 0, "hub_betweenness_threshold": 0}
 
     degrees = dict(G.degree())
 
@@ -17,8 +17,8 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
                             "closeness_centrality": 0.0, "eigenvector_centrality": 0.0,
                             "is_hub": False, "is_bottleneck": False, "rank": 1}]
         return {
-            "ranked": hub_genes_list, "hub_genes": hub_genes_list,
-            "hub_degree_threshold": 0, "threshold_degree": 0,
+            "hub_genes": hub_genes_list,
+            "threshold_degree": 0,
             "hub_betweenness_threshold": 0, "threshold_betweenness": 0,
         }
 
@@ -44,7 +44,7 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
         hub_degree_threshold = 0
         hub_bet_threshold = 0
 
-    ranked = []
+    hub_genes = []
     for node in G.nodes:
         deg = degrees[node]
         bet = betweenness[node]
@@ -62,20 +62,17 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
             "is_hub": is_hub,
             "is_bottleneck": is_hub_bottleneck,
         }
-        ranked.append({k: v for k, v in entry.items() if v is not None})
+        hub_genes.append({k: v for k, v in entry.items() if v is not None})
 
-    ranked.sort(key=lambda x: x["degree"], reverse=True)
-    ranked = ranked[:top_n]
-    for i, r in enumerate(ranked):
+    hub_genes.sort(key=lambda x: x["degree"], reverse=True)
+    hub_genes = hub_genes[:top_n]
+    for i, r in enumerate(hub_genes):
         r["rank"] = i + 1
 
     return {
-        "ranked": ranked,
-        "hub_degree_threshold": round(hub_degree_threshold, 2),
-        "hub_betweenness_threshold": round(hub_bet_threshold, 6) if isinstance(hub_bet_threshold, float) else 0,
-        # Frontend display keys
-        "hub_genes": ranked,
+        "hub_genes": hub_genes,
         "threshold_degree": round(hub_degree_threshold, 2),
+        "hub_betweenness_threshold": round(hub_bet_threshold, 6) if isinstance(hub_bet_threshold, float) else 0,
         "threshold_betweenness": round(hub_bet_threshold, 6) if isinstance(hub_bet_threshold, float) else 0,
     }
 
@@ -102,7 +99,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     from app.models.target import Target
     from sqlmodel import select
 
-    for entry in result["ranked"]:
+    for entry in result["hub_genes"]:
         gene = entry["gene_symbol"]
         target_result = await session.exec(select(Target).where(Target.gene_symbol == gene))
         target = target_result.first()
