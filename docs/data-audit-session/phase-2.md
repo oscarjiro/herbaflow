@@ -7,7 +7,45 @@
 
 ## P2-A: Compound Name Canonicality
 
-<!-- TO BE FILLED BY P2-A SUBAGENT -->
+### canonical_name Field Source
+
+The `canonical_name` stored in the database maps to the `preferred_name` field produced by
+`04_enrich/run.py`. The field is populated by source priority:
+
+1. **ChEMBL** (`preferred_name`): reads `mol["pref_name"]` verbatim via `chembl_pref_name()`
+   (line 959–965). No case transformation applied.
+2. **PubChem** (`preferred_name`): reads `prop["Title"] or prop["IUPACName"]` verbatim
+   (lines 1168–1172). No case transformation applied.
+
+When both sources return a hit, the highest-scoring hit wins (`choose_best_hit()`). For the
+5 sample compounds, all have a non-null `chembl_id` and empty `pubchem_cid`, confirming
+ChEMBL was the winning source in every case.
+
+### Normalization Step — No Uppercasing
+
+`02_normalize/run.py` `normalize_name()` (line 144–147) calls only `normalize_whitespace()`,
+which collapses runs of whitespace. No `.upper()`, `.lower()`, or any other case transform is
+applied at any point in the normalize step.
+
+### Sample Compound Spot-Check
+
+All 5 compounds confirmed to have non-null `chembl_id` and empty `pubchem_cid`:
+
+| canonical_name | chembl_id | name case origin |
+|---|---|---|
+| BUTANOL | CHEMBL45462 | ChEMBL `pref_name` |
+| EUROSTOSIDE | CHEMBL1080020 | ChEMBL `pref_name` |
+| DENTATIN | CHEMBL552132 | ChEMBL `pref_name` |
+| GUANOSINE | CHEMBL375655 | ChEMBL `pref_name` |
+| CAMPHENE | CHEMBL2268550 | ChEMBL `pref_name` |
+
+ChEMBL stores its `pref_name` values in all-caps for many small molecules and natural
+products — this is ChEMBL's own naming convention, not a Herbaflow normalization artifact.
+
+### Verdict
+
+All-caps compound names are ChEMBL `pref_name` convention — **NOT a bug**.
+No code fix is needed.
 
 ---
 
