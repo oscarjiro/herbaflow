@@ -147,6 +147,6 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             for gene, cids in target_compound_map.items()
         },
         # Frontend display keys
-        "coverage_percent": coverage_pct,
+        "coverage_pct": coverage_pct,
         "targets": enriched_targets,
     }

@@ -26,7 +26,7 @@ def _group_by_source(results) -> dict:
 
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:
     stage7 = (run.stage_results or {}).get("stage_7", {})
-    hub_genes = [r["gene_symbol"] for r in stage7.get("hub_genes", [])]
+    hub_genes = [r["gene_symbol"] for r in stage7.get("ranked", [])]
 
     if not hub_genes:
         return {"total_significant": 0, "go_bp": [], "go_mf": [], "go_cc": [], "kegg": []}

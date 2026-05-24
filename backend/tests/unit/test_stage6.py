@@ -48,7 +48,7 @@ async def test_stage6_builds_network_from_string_edges():
 
     assert result["node_count"] == 3
     assert result["edge_count"] == 2
-    node_ids = [n["id"] for n in result["nodes"]]
+    node_ids = [n["data"]["id"] for n in result["nodes"]]
     assert "AKT1" in node_ids
     assert "TNF" in node_ids
     assert "TP53" in node_ids
@@ -70,9 +70,9 @@ async def test_stage6_returns_cytoscape_format():
     with patch("analysis.stages.stage6_ppi.get_ppi_network", return_value=fake_edges):
         result = await stage6_ppi.run(run, config, session)
 
-    assert "cytoscape" in result
-    cyto = result["cytoscape"]["elements"]
-    assert "nodes" in cyto
-    assert "edges" in cyto
-    assert cyto["edges"][0]["data"]["source"] in {"EGFR", "BRCA1"}
-    assert "weight" in cyto["edges"][0]["data"]
+    # Impl returns nodes/edges in Cytoscape.js element format (no wrapper key)
+    assert "nodes" in result
+    assert "edges" in result
+    assert result["edges"][0]["data"]["source"] in {"EGFR", "BRCA1"}
+    assert "weight" in result["edges"][0]["data"]
+    assert result["nodes"][0]["data"]["id"] in {"EGFR", "BRCA1"}

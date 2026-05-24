@@ -98,4 +98,5 @@ async def test_stage8_passes_config_params_to_enrichment():
         gene_symbols=["EGFR"],
         sources=["GO:BP", "KEGG"],
         fdr_threshold=0.01,
+        background=None,
     )

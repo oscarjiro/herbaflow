@@ -21,6 +21,11 @@ async def test_stage1_returns_compounds_for_plant_ids():
     run = make_run(plant_ids=["pl_1", "pl_2"])
     config = PipelineConfig()
     session = AsyncMock()
+    # session.execute.return_value is AsyncMock by default (child of AsyncMock),
+    # so .scalars() would return a coroutine. Override with a plain MagicMock.
+    mock_execute_result = MagicMock()
+    mock_execute_result.scalars.return_value.all.return_value = []
+    session.execute.return_value = mock_execute_result
     fake_compounds = [make_fake_compound("c1"), make_fake_compound("c2"), make_fake_compound("c3")]
 
     with patch(
@@ -51,6 +56,9 @@ async def test_stage1_no_compounds_found():
     run = make_run(plant_ids=["pl_ghost"])
     config = PipelineConfig()
     session = AsyncMock()
+    mock_execute_result = MagicMock()
+    mock_execute_result.scalars.return_value.all.return_value = []
+    session.execute.return_value = mock_execute_result
 
     with patch(
         "analysis.stages.stage1_selection.get_compounds_for_plants",
