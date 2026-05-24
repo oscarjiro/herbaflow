@@ -385,7 +385,11 @@ def canonicalize_group(
     canonical_name = canonical_scientific_name_from_row(rep)
     authorship = authorship_from_row(rep)
     canonical_key = build_canonical_key(canonical_name, authorship)
-    gbif_key = normalize_id_like(rep.get("gbif_usage_key", "")) or normalize_id_like(rep.get("gbif_accepted_usage_key", "")) or canonical_key
+    gbif_key = (
+        normalize_id_like(rep.get("gbif_accepted_usage_key", ""))
+        or normalize_id_like(rep.get("gbif_usage_key", ""))
+        or canonical_key
+    )
     plant_id = build_plant_id(gbif_key)
 
     source_name = coalesce_source_name(rep, source_name_fallback)
@@ -547,10 +551,13 @@ def build_seed_files(
         raise ValueError("Input is missing required column: canonical_scientific_name")
 
     work = df.copy()
+    # Use accepted name WITHOUT authorship for grouping so that all synonym rows
+    # that GBIF resolves to the same accepted species land in the same group.
+    # Authorship is preserved in the output canonical_key via canonicalize_group().
     work["__canonical_key_preview"] = work.apply(
         lambda r: build_canonical_key(
             canonical_scientific_name_from_row(r),
-            authorship_from_row(r),
+            "",
         ),
         axis=1,
     )
