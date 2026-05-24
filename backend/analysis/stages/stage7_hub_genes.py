@@ -5,7 +5,7 @@ from app.models.analysis import AnalysisRun
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 
-def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
+def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = True) -> dict:
     if len(G.nodes) == 0:
         return {"hub_genes": [], "threshold_degree": 0, "hub_betweenness_threshold": 0}
 
@@ -56,6 +56,7 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
         entry = {
             "gene_symbol": node,
             "degree": deg,
+            "degree_centrality": float(deg),
             "betweenness_centrality": round(bet, 6),
             "closeness_centrality": round(closeness[node], 6),
             "eigenvector_centrality": round(eigenvector[node], 6),
@@ -64,7 +65,22 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20) -> dict:
         }
         hub_genes.append({k: v for k, v in entry.items() if v is not None})
 
-    hub_genes.sort(key=lambda x: x["degree"], reverse=True)
+    if use_hub_bottleneck:
+        # Hub+bottleneck composite score: Jeong et al., Nature 411:41-42, 2001.
+        # Identifies nodes with both high degree (connectivity) and high betweenness
+        # (information flow). Score = 0.5 * norm_degree + 0.5 * norm_betweenness.
+        max_deg = max((e["degree_centrality"] for e in hub_genes), default=1) or 1
+        max_bet = max((e["betweenness_centrality"] for e in hub_genes), default=1) or 1
+        for e in hub_genes:
+            e["hub_score"] = round(
+                0.5 * (e["degree_centrality"] / max_deg) +
+                0.5 * (e["betweenness_centrality"] / max_bet),
+                6,
+            )
+        hub_genes.sort(key=lambda x: x["hub_score"], reverse=True)
+    else:
+        hub_genes.sort(key=lambda x: x["degree"], reverse=True)
+
     hub_genes = hub_genes[:top_n]
     for i, r in enumerate(hub_genes):
         r["rank"] = i + 1
@@ -90,7 +106,11 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         if src and tgt:
             G.add_edge(src, tgt, weight=wt)
 
-    result = compute_hub_genes(G, top_n=config.hub_genes.top_n)
+    result = compute_hub_genes(
+        G,
+        top_n=config.hub_genes.top_n,
+        use_hub_bottleneck=config.hub_genes.use_hub_bottleneck,
+    )
 
     # Write to target_rankings table
     from uuid import uuid4
