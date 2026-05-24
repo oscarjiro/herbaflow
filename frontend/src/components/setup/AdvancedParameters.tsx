@@ -24,6 +24,7 @@ export interface AdvancedParams {
   // Targets (Stage 3)
   min_pchembl: number
   human_only: boolean
+  min_assay_confidence: number
 
   // Disease Targets (Stage 4)
   min_score: number
@@ -33,6 +34,7 @@ export interface AdvancedParams {
 
   // Hub Genes (Stage 7)
   top_n: number
+  use_hub_bottleneck: boolean
 
   // Enrichment (Stage 8)
   fdr_threshold: number
@@ -50,9 +52,11 @@ export const DEFAULT_PARAMS: AdvancedParams = {
   np_exception_threshold: 0.5,
   min_pchembl: 5.0,
   human_only: true,
+  min_assay_confidence: 0,
   min_score: 0.3,
   min_confidence: 0.4,
   top_n: 20,
+  use_hub_bottleneck: false,
   fdr_threshold: 0.05,
   sources: ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG'],
 }
@@ -220,6 +224,13 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
                 value={value.human_only}
                 onChange={(v) => set('human_only', v)}
               />
+              <NumberField
+                label="Min assay confidence (0–9)"
+                value={value.min_assay_confidence}
+                onChange={(v) => set('min_assay_confidence', Math.round(v))}
+                step={1}
+                min={0}
+              />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -272,6 +283,11 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
                 value={value.top_n}
                 onChange={(v) => set('top_n', Math.round(v))}
                 min={1}
+              />
+              <CheckboxField
+                label="Use hub+bottleneck composite scoring"
+                value={value.use_hub_bottleneck}
+                onChange={(v) => set('use_hub_bottleneck', v)}
               />
             </div>
           </AccordionContent>

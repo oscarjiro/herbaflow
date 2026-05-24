@@ -20,19 +20,19 @@ const columns: ColumnDef<HubGeneRow>[] = [
   { key: 'gene_symbol', header: 'Gene', sortable: true },
   { key: 'degree', header: 'Degree Centrality', sortable: true },
   {
-    key: 'betweenness_centrality',
+    key: 'betweenness',
     header: 'Betweenness Centrality',
     sortable: true,
     render: (v) => v != null ? (v as number).toFixed(4) : '—',
   },
   {
-    key: 'closeness_centrality',
+    key: 'closeness',
     header: 'Closeness Centrality',
     sortable: true,
     render: (v) => v != null ? (v as number).toFixed(4) : '—',
   },
   {
-    key: 'eigenvector_centrality',
+    key: 'eigenvector',
     header: 'Eigenvector Centrality',
     sortable: true,
     render: (v) => v != null ? (v as number).toFixed(4) : '—',
@@ -42,7 +42,7 @@ const columns: ColumnDef<HubGeneRow>[] = [
     header: 'Hub',
     render: (v, row) => {
       const isHub = v as boolean
-      const isBottleneck = (row as HubGeneResult).is_bottleneck
+      const isBottleneck = (row as HubGeneResult).is_hub_bottleneck
       if (isHub && isBottleneck) {
         return (
           <span className="px-1.5 py-0.5 rounded text-xs bg-hf-sage text-hf-bg font-medium">
@@ -74,14 +74,14 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
     )
   }
 
-  const hubCount = result.hub_genes.filter((g) => g.is_hub).length
+  const hubCount = result.ranked.filter((g) => g.is_hub).length
 
   return (
     <div className="space-y-6">
       <StageHeader stage={7} name="Hub Gene Analysis" status={status?.status ?? 'complete'} elapsedSeconds={null} />
 
       <div className="grid grid-cols-3 gap-4">
-        <StatCard label="Total Genes" value={result.hub_genes.length} />
+        <StatCard label="Total Genes" value={result.ranked.length} />
         <StatCard label="Hub Genes" value={hubCount} />
         <StatCard label="Degree Threshold" value={result.threshold_degree} />
       </div>
@@ -91,7 +91,7 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
       </div>
 
       <DataTable
-        data={result.hub_genes as HubGeneRow[]}
+        data={result.ranked as HubGeneRow[]}
         columns={columns}
         filterPlaceholder="Filter genes..."
         filterKeys={['gene_symbol']}

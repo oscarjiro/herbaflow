@@ -80,6 +80,16 @@ const columns: ColumnDef<AdmeRow>[] = [
       />
     ),
   },
+  {
+    key: 'is_pains_positive',
+    header: 'PAINS',
+    render: (value) => (
+      <StatusBadge
+        status={value ? 'failed' : 'neutral'}
+        label={value ? 'PAINS' : 'Clean'}
+      />
+    ),
+  },
 ]
 
 export function Stage2Panel({ stage, analysis, status }: Stage2PanelProps) {
@@ -162,6 +172,9 @@ export function Stage2Panel({ stage, analysis, status }: Stage2PanelProps) {
             </p>
             <p>
               <span className="font-medium text-hf-fg2">NP Exception:</span> Compounds failing Lipinski/Veber rules but with NP-likeness score ≥ threshold are passed through as natural product exceptions — natural products often violate Lipinski due to their structural complexity while retaining oral bioavailability.
+            </p>
+            <p>
+              <span className="font-medium text-hf-fg2">PAINS:</span> Pan-Assay INterference compoundS — structural motifs known to produce false positives in biochemical assays. Flagged for awareness; not excluded from the pipeline.
             </p>
           </div>
         </>

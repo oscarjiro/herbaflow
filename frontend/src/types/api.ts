@@ -157,6 +157,7 @@ export interface AdmeCompoundResult extends CompoundResult {
   hbond_acceptors: number | null
   np_likeness_score: number | null
   rotatable_bonds: number | null
+  is_pains_positive: boolean
 }
 
 export interface Stage2Result {
@@ -249,15 +250,15 @@ export interface HubGeneResult {
   rank: number
   gene_symbol: string
   degree: number
-  betweenness_centrality: number
-  closeness_centrality: number
-  eigenvector_centrality: number
+  betweenness: number
+  closeness: number
+  eigenvector: number
   is_hub: boolean
-  is_bottleneck: boolean
+  is_hub_bottleneck: boolean
 }
 
 export interface Stage7Result {
-  hub_genes: HubGeneResult[]
+  ranked: HubGeneResult[]
   threshold_degree: number
   threshold_betweenness: number
 }
