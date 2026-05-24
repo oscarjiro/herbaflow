@@ -209,6 +209,37 @@ def compute_np_score(smiles: str, npscorer_mod: Any, fscore: Any) -> str:
         return ""
 
 
+def _load_pains_catalog() -> Optional[Any]:
+    """Load the RDKit PAINS filter catalog. Returns catalog or None if unavailable."""
+    try:
+        from rdkit.Chem.FilterCatalog import FilterCatalog, FilterCatalogParams
+        params = FilterCatalogParams()
+        params.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS)
+        catalog = FilterCatalog(params)
+        log.info("RDKit PAINS catalog loaded (%d entries)", catalog.GetNumEntries())
+        return catalog
+    except Exception as exc:
+        log.warning("PAINS catalog unavailable (%s); is_pains_positive will be left empty.", exc)
+        return None
+
+
+def check_pains(smiles: str, catalog: Any) -> str:
+    """Check if SMILES matches a PAINS pattern.
+
+    Returns 'true' (PAINS-positive), 'false' (clean), or '' on parse failure.
+    Note: PAINS flags assay interference compounds (Baell & Holloway, J. Med. Chem. 2010).
+    Used for reporting only — not a hard filter in this computational pipeline.
+    """
+    try:
+        from rdkit import Chem
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            return ""
+        return "true" if catalog.HasMatch(mol) else "false"
+    except Exception:
+        return ""
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -265,9 +296,12 @@ def main() -> int:
     result_fields = list(results[0].keys())
     if "lipinski_source" not in result_fields:
         result_fields.append("lipinski_source")
+    if "is_pains_positive" not in result_fields:
+        result_fields.append("is_pains_positive")
 
     for row in results:
         row.setdefault("lipinski_source", "")
+        row.setdefault("is_pains_positive", "")
 
     missing = [r for r in results if is_missing(r)]
     log.info("Rows missing logp : %d / %d", len(missing), len(results))
@@ -366,8 +400,30 @@ def main() -> int:
     elif not args.no_rdkit:
         log.warning("[patch] NP scorer unavailable; np_likeness_score left null for rdkit_computed compounds")
 
+    # --- Pass 3: PAINS flag ---
+    # Flags compounds matching PAINS patterns (Baell & Holloway, J. Med. Chem. 53:2719-2740, 2010).
+    # Reporting only — not a filter. Compounds with no SMILES get an empty string (unknown).
+    pains_catalog = None
+    if not args.no_rdkit:
+        pains_catalog = _load_pains_catalog()
+
+    pains_positive = 0
+    pains_computed = 0
+    if pains_catalog is not None:
+        for row in results:
+            smiles = (row.get("smiles") or "").strip()
+            if not smiles:
+                continue
+            flag = check_pains(smiles, pains_catalog)
+            row["is_pains_positive"] = flag
+            if flag:
+                pains_computed += 1
+            if flag == "true":
+                pains_positive += 1
+        log.info("PAINS flags computed          : %d positive / %d total", pains_positive, pains_computed)
+
     # --- Write ---
-    if not args.dry_run and (chembl_patched + rdkit_patched + np_patched) > 0:
+    if not args.dry_run and (chembl_patched + rdkit_patched + np_patched + pains_computed) > 0:
         ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         backup_dir = enrich_out / f"backup_pre_patch_lipinski_{ts}"
         backup_dir.mkdir(parents=True, exist_ok=True)
@@ -384,6 +440,7 @@ def main() -> int:
     log.info("Patched via RDKit             : %d", rdkit_patched)
     log.info("Unresolved (no hit / SMILES)  : %d", unresolved)
     log.info("NP-likeness computed (RDKit)  : %d", np_patched)
+    log.info("PAINS positive (flagged)      : %d / %d", pains_positive, pains_computed)
     log.info("─" * 60)
 
     if args.dry_run:

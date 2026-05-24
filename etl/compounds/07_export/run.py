@@ -94,6 +94,7 @@ COMPOUNDS_COLUMNS = [
     "canonical_reason",
     "evidence_count",
     "plant_count",
+    "is_pains_positive",
 ]
 
 ALIASES_COLUMNS = [
