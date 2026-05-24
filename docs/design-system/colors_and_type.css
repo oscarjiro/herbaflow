@@ -1,0 +1,252 @@
+/* =====================================================================
+   Herbaflow — Color & Type Foundations
+   ---------------------------------------------------------------------
+   Editorial scientific. Warm paper neutrals. The main design is
+   monochromatic ink; sage is reserved for data-visualization meaning
+   only (cluster fills, chart series, validation status).
+   ===================================================================== */
+
+/* ---------- Webfont stacks --------------------------------------------
+   Originals (from the brand sheet) are Canela (display) + Suisse Int'l (UI).
+   We use Google Fonts only. Stacks fall back through similar metrics.
+   --------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  /* ========= COLORS ========= */
+
+  /* Neutrals — warm, paper-tinted */
+  --hf-neutral-50:  #F7F5F2;  /* page background, lightest paper */
+  --hf-neutral-100: #EFEBE4;  /* card surface tinted, subtle fill */
+  --hf-neutral-200: #E5E0D8;  /* dividers, glass borders */
+  --hf-neutral-300: #D4CEC4;  /* heavier divider, disabled bg */
+  --hf-neutral-500: #9A958C;  /* tertiary text */
+  --hf-neutral-600: #6E6A62;  /* metadata, eyebrow text */
+  --hf-neutral-700: #4A463F;  /* body paragraph */
+  --hf-neutral-900: #1A1A1A;  /* primary ink */
+
+  /* Accents — used ONLY in data-viz contexts (cluster fills, chart series,
+     validated badges). NOT used in main UI — the brand reads monochrome. */
+  --hf-sage:           #8FA084;  /* data-viz accent */
+  --hf-sage-deep:      #6B7E62;  /* data-viz accent, deeper */
+  --hf-sage-soft:      #D6DCD1;  /* tinted bg for selected viz rows */
+  --hf-sage-faint:     #EBEEE6;  /* faintest viz wash, table selected state */
+
+  /* Optional secondary (data-viz only, never branding) */
+  --hf-terracotta:      #B8755C;
+  --hf-terracotta-soft: #E9D2C7;
+
+  /* Semantic surfaces */
+  --hf-bg:            var(--hf-neutral-50);
+  --hf-surface:       #FFFFFF;
+  --hf-surface-2:     var(--hf-neutral-100);
+  --hf-border:        rgba(26, 26, 26, 0.08);
+  --hf-border-strong: rgba(26, 26, 26, 0.18);
+  --hf-border-focus:  var(--hf-fg-1);
+
+  /* Foreground */
+  --hf-fg-1: var(--hf-neutral-900);
+  --hf-fg-2: var(--hf-neutral-700);
+  --hf-fg-3: var(--hf-neutral-600);
+  --hf-fg-4: var(--hf-neutral-500);
+
+  /* Status — muted earth tones, never saturated */
+  --hf-success:      #6F8B6A;
+  --hf-success-soft: #DCE5D6;
+  --hf-warning:      #B58A3A;
+  --hf-warning-soft: #EFE2C2;
+  --hf-danger:       #A85A4E;
+  --hf-danger-soft:  #ECCDC6;
+  --hf-info:         #5C7A8F;
+  --hf-info-soft:    #D2DDE5;
+
+  /* Glass (used SPARINGLY for floating overlays on viz) */
+  --hf-glass-bg:        rgba(255, 255, 255, 0.62);
+  --hf-glass-bg-strong: rgba(255, 255, 255, 0.82);
+  --hf-glass-border:    rgba(255, 255, 255, 0.7);
+  --hf-glass-shadow:    0 1px 1px rgba(26, 26, 26, 0.04),
+                        0 12px 32px -8px rgba(26, 26, 26, 0.10);
+
+  /* ========= TYPOGRAPHY ========= */
+
+  /* Stacks — all Google Fonts. Order: primary → fallbacks → system. */
+  --font-display: 'Instrument Serif', 'Caudex', 'Playfair Display', 'Times New Roman', Georgia, serif;
+  --font-sans:    'Be Vietnam Pro', 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Modular scale, 4pt base, ratio ~1.25 — fluid display sizes */
+  --text-xs:     0.75rem;   /* 12px — caption, badge */
+  --text-sm:     0.8125rem; /* 13px — secondary UI */
+  --text-base:   0.9375rem; /* 15px — body UI */
+  --text-md:     1rem;      /* 16px — body prose */
+  --text-lg:     1.25rem;   /* 20px — large body / lead */
+  --text-xl:     1.625rem;  /* 26px — small headline */
+  --text-2xl:    2.125rem;  /* 34px — section title */
+  --text-3xl:    3rem;      /* 48px — page title */
+  --text-display: clamp(3.5rem, 7vw, 5.5rem); /* 56-88px — hero serif */
+
+  /* Line heights */
+  --lh-tight:   1.05;
+  --lh-snug:    1.2;
+  --lh-normal:  1.45;
+  --lh-prose:   1.6;
+
+  /* Letter spacing */
+  --tracking-display: -0.02em;
+  --tracking-tight:   -0.01em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.04em;
+  --tracking-eyebrow: 0.14em;  /* uppercase eyebrows */
+
+  /* Weights — keep flat */
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+
+  /* ========= SPACING ========= */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+  --space-11: 192px;
+  --space-12: 256px;
+
+  /* ========= RADII ========= */
+  --radius-0: 0;
+  --radius-1: 2px;   /* buttons, inputs */
+  --radius-2: 4px;   /* small chips */
+  --radius-3: 8px;   /* cards, modals */
+  --radius-pill: 999px;
+
+  /* ========= SHADOWS (rare) ========= */
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(26, 26, 26, 0.04);
+  --shadow-2: 0 4px 16px -4px rgba(26, 26, 26, 0.08);
+  --shadow-3: 0 18px 48px -16px rgba(26, 26, 26, 0.18);
+
+  /* ========= MOTION ========= */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-1: 120ms;
+  --duration-2: 220ms;
+  --duration-3: 380ms;
+}
+
+/* ---------- Type pairing: Clinical (Fraunces + IBM Plex) ------------ */
+[data-type-pair="clinical"] {
+  --font-display: 'Fraunces', 'Caudex', 'Times New Roman', serif;
+  --font-sans:    'IBM Plex Sans', 'DM Sans', -apple-system, system-ui, sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, monospace;
+}
+
+/* =====================================================================
+   Base element styles
+   ===================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--hf-bg);
+  color: var(--hf-fg-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: var(--hf-sage-soft); color: var(--hf-fg-1); }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--lh-tight);
+  color: var(--hf-fg-1);
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-3xl); letter-spacing: var(--tracking-display); }
+h2 { font-size: var(--text-2xl); letter-spacing: var(--tracking-tight); }
+h3 { font-size: var(--text-xl);  letter-spacing: var(--tracking-tight); }
+h4 { font-size: var(--text-lg);  font-family: var(--font-sans); font-weight: var(--fw-medium); letter-spacing: var(--tracking-normal); }
+
+p { margin: 0; color: var(--hf-fg-2); }
+
+a { color: inherit; text-decoration: none; }
+a.hf-link {
+  text-decoration: underline;
+  text-decoration-color: var(--hf-border-strong);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--duration-1) var(--ease-out);
+}
+a.hf-link:hover { text-decoration-color: var(--hf-fg-1); }
+
+code, pre, .hf-mono { font-family: var(--font-mono); }
+
+/* Tabular numerals for any numeric column */
+.hf-num,
+.hf-table td.hf-num,
+.hf-table th.hf-num { font-variant-numeric: tabular-nums; }
+
+em, i, .hf-italic { font-style: italic; }
+.hf-binomial { font-family: var(--font-display); font-style: italic; }
+
+/* =====================================================================
+   Editorial primitives (only ornament we allow)
+   ===================================================================== */
+
+/* Eyebrow — uppercase, tracked, mono-ish */
+.hf-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  font-weight: var(--fw-medium);
+  color: var(--hf-fg-3);
+}
+
+/* ASCII rule line — em-dash row */
+.hf-rule {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--hf-fg-4);
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+}
+.hf-rule::before {
+  content: '———————————————————————————————————————————————————————————————————————————————————————————';
+}
+
+/* Bracket framing for inline metadata */
+.hf-bracket {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--hf-fg-3);
+  letter-spacing: 0.04em;
+}
+.hf-bracket::before { content: '[ '; }
+.hf-bracket::after  { content: ' ]'; }
+
+/* Focus ring — used by all interactive primitives */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--hf-fg-1);
+  outline-offset: 2px;
+  border-radius: var(--radius-1);
+}

@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About — Herbaflow</title>
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <style>
+    body { background: var(--hf-bg); }
+
+    .about-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-5) var(--space-6);
+    }
+    .about-nav__links { display: flex; gap: var(--space-6); align-items: center; }
+    .about-nav__links a {
+      font-size: var(--text-sm); color: var(--hf-fg-3);
+      transition: color var(--duration-1) var(--ease-out);
+    }
+    .about-nav__links a:hover { color: var(--hf-fg-1); }
+    .about-nav__links a[aria-current="page"] { color: var(--hf-fg-1); }
+
+    /* Article header */
+    .article-header {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-7) var(--space-6) var(--space-6);
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--space-7);
+      align-items: end;
+    }
+    .article-header__eyebrow {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-5);
+    }
+    .article-title {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6.5vw, 5.5rem);
+      line-height: 0.96;
+      letter-spacing: var(--tracking-display);
+      max-width: 14ch;
+    }
+    .article-title em { font-style: italic; color: inherit; }
+    .article-deck {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      line-height: var(--lh-snug);
+      color: var(--hf-fg-2);
+      max-width: 38ch;
+      padding-bottom: var(--space-4);
+    }
+
+    /* Byline strip */
+    .byline {
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 var(--space-6);
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-6);
+      border-top: 1px solid var(--hf-fg-1);
+      border-bottom: 1px solid var(--hf-border);
+    }
+    .byline-cell {
+      padding: var(--space-4) 0;
+      display: flex; flex-direction: column; gap: var(--space-1);
+    }
+    .byline-cell__label {
+      font-family: var(--font-sans);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-eyebrow);
+      color: var(--hf-fg-3);
+    }
+    .byline-cell__value { font-size: var(--text-sm); color: var(--hf-fg-1); }
+    .byline-cell__value em { font-style: italic; }
+
+    /* Body */
+    .article-body {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-7) var(--space-6) var(--space-8);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 220px);
+      gap: var(--space-7);
+    }
+    .prose {
+      font-family: var(--font-sans);
+      font-size: var(--text-md);
+      color: var(--hf-fg-2);
+      line-height: var(--lh-prose);
+      max-width: 64ch;
+    }
+    .prose > * + * { margin-top: var(--space-4); }
+
+    /* Drop cap on first paragraph */
+    .prose > p:first-of-type::first-letter {
+      font-family: var(--font-display);
+      font-size: 4.5em;
+      line-height: 0.86;
+      float: left;
+      padding: 4px 12px 0 0;
+      color: var(--hf-fg-1);
+    }
+
+    .prose h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      letter-spacing: var(--tracking-tight);
+      color: var(--hf-fg-1);
+      margin-top: var(--space-6);
+      max-width: 22ch;
+    }
+    .prose h2::before {
+      content: '§ ';
+      font-family: var(--font-mono);
+      font-size: 0.6em;
+      color: var(--hf-fg-3);
+      letter-spacing: 0;
+      vertical-align: 0.3em;
+      margin-right: 0.2em;
+    }
+    .prose h3 {
+      font-family: var(--font-sans);
+      font-size: var(--text-md);
+      font-weight: var(--fw-semibold);
+      color: var(--hf-fg-1);
+      margin-top: var(--space-5);
+    }
+
+    .prose blockquote {
+      margin: var(--space-6) 0;
+      padding-left: var(--space-5);
+      border-left: 1px solid var(--hf-border-strong);
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-style: italic;
+      line-height: var(--lh-snug);
+      color: var(--hf-fg-1);
+      max-width: 40ch;
+    }
+    .prose blockquote cite {
+      display: block;
+      margin-top: var(--space-3);
+      font-family: var(--font-sans);
+      font-size: var(--text-xs);
+      font-style: normal;
+      letter-spacing: var(--tracking-eyebrow);
+      text-transform: uppercase;
+      color: var(--hf-fg-3);
+    }
+
+    .prose ul {
+      list-style: none;
+      padding: 0;
+      margin: var(--space-4) 0;
+      border-top: 1px solid var(--hf-border);
+    }
+    .prose ul li {
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--hf-border);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-3);
+    }
+    .prose ul li::before {
+      content: '—';
+      font-family: var(--font-mono);
+      color: var(--hf-fg-4);
+    }
+
+    /* Sidenotes */
+    .sidenotes {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+      font-size: var(--text-xs);
+      line-height: var(--lh-prose);
+      color: var(--hf-fg-3);
+      padding-top: var(--space-3);
+    }
+    .sidenote {
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--hf-border);
+    }
+    .sidenote__num {
+      font-family: var(--font-mono);
+      color: var(--hf-fg-1);
+      font-size: var(--text-xs);
+      margin-bottom: var(--space-2);
+      display: block;
+    }
+    .sidenote__title {
+      font-family: var(--font-sans);
+      font-weight: var(--fw-medium);
+      color: var(--hf-fg-1);
+      font-size: var(--text-sm);
+      display: block;
+      margin-bottom: var(--space-1);
+    }
+
+    /* Pull quote */
+    .pullquote {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-7) var(--space-6);
+      border-top: 1px solid var(--hf-border);
+      border-bottom: 1px solid var(--hf-border);
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--space-7);
+      align-items: center;
+    }
+    .pullquote__text {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: var(--tracking-display);
+      line-height: 1.05;
+      color: var(--hf-fg-1);
+    }
+    .pullquote__text em { font-style: italic; color: inherit; }
+    .pullquote__caption {
+      font-size: var(--text-sm);
+      color: var(--hf-fg-3);
+      line-height: var(--lh-prose);
+      max-width: 36ch;
+    }
+
+    /* Limitations grid */
+    .limits {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-8) var(--space-6);
+    }
+    .limits__head {
+      display: grid; grid-template-columns: 1fr 2fr;
+      gap: var(--space-6);
+      margin-bottom: var(--space-6);
+      align-items: end;
+    }
+    .limits-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--hf-fg-1);
+    }
+    .limit {
+      padding: var(--space-5) var(--space-5) var(--space-5) 0;
+      border-bottom: 1px solid var(--hf-border);
+      display: flex; flex-direction: column; gap: var(--space-3);
+      min-height: 220px;
+    }
+    .limit + .limit { padding-left: var(--space-5); border-left: 1px solid var(--hf-border); }
+    .limit__num {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+    }
+    .limit__title {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      letter-spacing: var(--tracking-tight);
+      line-height: 1.2;
+    }
+    .limit__body { font-size: var(--text-sm); color: var(--hf-fg-2); line-height: var(--lh-prose); }
+    .limit__status {
+      margin-top: auto;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+    }
+
+    /* CTA */
+    .end-cta {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-7) var(--space-6) var(--space-8);
+      text-align: center;
+      border-top: 1px solid var(--hf-border);
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-5);
+    }
+    .end-cta__title {
+      font-family: var(--font-display);
+      font-size: clamp(2.25rem, 5vw, 4rem);
+      letter-spacing: var(--tracking-display);
+      line-height: 1.02;
+      max-width: 20ch;
+    }
+    .end-cta__title em { font-style: italic; color: inherit; }
+
+    /* Footer */
+    .about-footer {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-5) var(--space-6);
+      border-top: 1px solid var(--hf-border);
+      display: flex; justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-4);
+    }
+
+    @media (max-width: 900px) {
+      .article-header { grid-template-columns: 1fr; }
+      .article-body { grid-template-columns: 1fr; }
+      .byline { grid-template-columns: 1fr 1fr; }
+      .pullquote { grid-template-columns: 1fr; }
+      .limits__head { grid-template-columns: 1fr; }
+      .limits-grid { grid-template-columns: 1fr; }
+      .limit + .limit { padding-left: 0; border-left: 0; }
+    }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../assets/herbaflow-glyph.svg" />
+  <link rel="alternate icon" type="image/png" href="../assets/herbaflow-glyph.png" />
+</head>
+<body data-screen-label="About">
+
+  <!-- Nav -->
+  <nav class="about-nav">
+    <a href="Landing.html" class="hf-brand" aria-label="Herbaflow home">
+      <img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt="Herbaflow" />
+      <span class="hf-brand__tag">Integrated network pharmacology platform</span>
+    </a>
+    <div class="about-nav__links">
+      <a href="Landing.html#workflow">Workflow</a>
+      <a href="Landing.html#principles">Principles</a>
+      <a href="About.html" aria-current="page">About</a>
+      <a href="Analysis.html" class="hf-btn hf-btn--secondary hf-btn--sm">Open analysis →</a>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="article-header">
+    <div>
+      <div class="article-header__eyebrow">
+        <span class="hf-eyebrow">A thesis</span>
+        <span class="hf-rule" style="flex:1; max-width:80px;"></span>
+        <span class="hf-bracket">5 min read</span>
+      </div>
+      <h1 class="article-title">A pipeline you can <em>argue with.</em></h1>
+    </div>
+    <div class="article-deck">
+      Herbaflow began as a thesis project, frustrated by the dozen browser tabs it
+      took to trace a single herbal compound back to the diseases it might treat. This is
+      a note about why it exists, and what it cannot yet do.
+    </div>
+  </header>
+
+  <!-- Byline -->
+  <div class="byline">
+    <div class="byline-cell">
+      <span class="byline-cell__label">Author</span>
+      <span class="byline-cell__value">A solo computational biology thesis</span>
+    </div>
+    <div class="byline-cell">
+      <span class="byline-cell__label">Field</span>
+      <span class="byline-cell__value">Network pharmacology · <em>in silico</em> screening</span>
+    </div>
+    <div class="byline-cell">
+      <span class="byline-cell__label">Status</span>
+      <span class="byline-cell__value">v1.0 · undergraduate thesis</span>
+    </div>
+    <div class="byline-cell">
+      <span class="byline-cell__label">Last revised</span>
+      <span class="byline-cell__value">14 March 2026</span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <article class="article-body">
+
+    <div class="prose">
+      <p>
+        Network pharmacology is, depending on who you ask, either a beautifully integrative
+        view of how a plant's many small molecules act on many protein targets at once,
+        or a sprawl of unrelated databases held together by spreadsheets. Both are true.
+        The work of getting from a herbal source — <span class="hf-binomial">Curcuma longa</span>,
+        say, or <span class="hf-binomial">Salvia miltiorrhiza</span> — to a defensible
+        hypothesis about which diseases it might treat is mostly a matter of stitching
+        these databases together, by hand, while keeping track of which assumptions
+        you made along the way.
+      </p>
+
+      <p>
+        Herbaflow tries to do that stitching for you. But not invisibly. The product
+        sits on a single principle: <strong>reviewability beats automation</strong>.
+        Every association — every edge in the eventual compound‑target‑disease graph —
+        is annotated with its source database, the parameters used, and the cut‑offs
+        applied. You can override any of them, and the system will tell you what your
+        override changed downstream.
+      </p>
+
+      <h2>Why this, why now</h2>
+      <p>
+        The conventional pipeline looks like this: pull metabolite lists from TCMSP,
+        filter by oral bioavailability and drug‑likeness, query STITCH or SwissTargetPrediction
+        for protein targets, cluster the result, look up disease associations in DisGeNET, draw
+        a network. Every step has a tool. None of them talk to each other. Most of the
+        published work is a brief paragraph in the methods section that says, in effect,
+        <em>we did the thing</em>.
+      </p>
+
+      <p>
+        For wet‑lab researchers — the people best placed to validate any in‑silico
+        hypothesis — this is a wall. Not a technical one exactly: it is a coordination
+        problem. The cost of doing network pharmacology correctly is the cost of running
+        the analysis <strong>and</strong> writing the code to keep its provenance straight.
+        Herbaflow folds the second cost into the first.
+      </p>
+
+      <h2>What it is not</h2>
+      <p>
+        This is a thesis project, not a platform. The database snapshots are static —
+        I cannot afford to keep them live — and refreshing them costs the indexing
+        time we surface on every screen. There is no molecular docking automation;
+        for now the docking step exposes a deliberate empty state with manual export
+        instructions and a note about why automation is out of scope.
+      </p>
+
+      <blockquote>
+        “A pipeline that hides its assumptions is not faster than one that shows them.
+        It is only quieter.”
+        <cite>— from the thesis introduction</cite>
+      </blockquote>
+
+      <h2>What we built instead</h2>
+      <p>
+        The product is organised as a sequence of inspectable steps. Each one produces
+        an intermediate set — metabolites, then targets, then clusters, then diseases —
+        and each set is rendered as both a table you can edit and a visualisation you
+        can read. You can leave reviewer notes on any node or edge, and they travel
+        with the final export.
+      </p>
+
+      <p>
+        We also kept the interface deliberately quiet. There are no streaks,
+        no celebratory toasts, no progress gamification. The product treats its
+        users as researchers who will judge it by the quality of its citations,
+        not the cleverness of its UI.
+      </p>
+
+      <h3>A note on coverage</h3>
+      <p>
+        At the time of writing, the database includes 1,247 plants, ~38k metabolites,
+        ~14k human protein targets, and 12k disease associations. The plants come
+        primarily from East Asian and South Asian materia medica; coverage of African
+        and South American traditions is, frankly, poor. Expanding this is part of
+        the open work.
+      </p>
+    </div>
+
+    <!-- Sidenotes -->
+    <aside class="sidenotes" aria-label="Sidenotes">
+      <div class="sidenote">
+        <span class="sidenote__num">¹</span>
+        <span class="sidenote__title">On reviewability.</span>
+        Every screen shows the parameters that produced what you see, and lets you
+        revert, replay, or fork them.
+      </div>
+
+      <div class="sidenote">
+        <span class="sidenote__num">²</span>
+        <span class="sidenote__title">Sources used.</span>
+        TCMSP, BATMAN-TCM, TCMID, STITCH, SwissTargetPrediction, DisGeNET, OMIM, TTD.
+        Versions and indexing dates are stamped on every export.
+      </div>
+
+      <div class="sidenote">
+        <span class="sidenote__num">³</span>
+        <span class="sidenote__title">Not yet automated.</span>
+        Molecular docking, structural validation, and pharmacokinetic modelling.
+        These require licensed tooling beyond the scope of a thesis.
+      </div>
+
+      <div class="sidenote">
+        <span class="sidenote__num">⁴</span>
+        <span class="sidenote__title">Cite as.</span>
+        <span class="hf-mono">Herbaflow v1.0 (2026). Solo thesis project,
+        Dept. of Computational Biology.</span>
+      </div>
+    </aside>
+
+  </article>
+
+  <!-- Pull quote -->
+  <section class="pullquote">
+    <p class="pullquote__text">
+      The goal was never to <em>replace</em> the researcher.<br>
+      It was to make sure the pipeline could be read aloud.
+    </p>
+    <p class="pullquote__caption">
+      Most network‑pharmacology figures in the literature come with a one‑sentence
+      methods note. Herbaflow's exports come with the parameters, the database
+      versions, and the manual overrides — a full audit trail for the methods section.
+    </p>
+  </section>
+
+  <!-- Limitations -->
+  <section class="limits">
+    <div class="limits__head">
+      <div>
+        <div class="hf-eyebrow" style="margin-bottom:var(--space-3);">Known limitations</div>
+        <h2 style="font-family:var(--font-display); font-size: clamp(2rem, 4vw, 3rem); letter-spacing: var(--tracking-display); line-height:1.02; max-width:18ch;">What we ship, what we don't.</h2>
+      </div>
+      <p style="font-size:var(--text-md); color:var(--hf-fg-2); line-height: var(--lh-prose); max-width:52ch;">
+        The limits below are the honest perimeter of a thesis project. They are
+        surfaced in the product itself — not buried in release notes.
+      </p>
+    </div>
+
+    <div class="limits-grid">
+      <article class="limit">
+        <span class="limit__num">L · 01</span>
+        <h3 class="limit__title">Static reference databases</h3>
+        <p class="limit__body">
+          Plants, metabolites, targets, and diseases are pinned to dated snapshots.
+          The UI shows the index date on every result so you can judge coverage.
+        </p>
+        <span class="limit__status">indexed · 14 mar 2026</span>
+      </article>
+      <article class="limit">
+        <span class="limit__num">L · 02</span>
+        <h3 class="limit__title">No automated docking</h3>
+        <p class="limit__body">
+          The docking step exports the candidate set to a format ready for AutoDock
+          Vina. We do not run docking ourselves yet — pretending to would be worse
+          than admitting we don't.
+        </p>
+        <span class="limit__status">manual export only</span>
+      </article>
+      <article class="limit">
+        <span class="limit__num">L · 03</span>
+        <h3 class="limit__title">Coverage skews regional</h3>
+        <p class="limit__body">
+          Source databases over‑represent East and South Asian traditional medicine.
+          African and South American materia medica are sparsely covered. Expansion
+          is open work.
+        </p>
+        <span class="limit__status">37% non-Asian sources</span>
+      </article>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="end-cta">
+    <h2 class="end-cta__title">Read a pipeline you can <em>argue with.</em></h2>
+    <div style="display:flex; gap:var(--space-3);">
+      <a href="Analysis.html" class="hf-btn hf-btn--primary hf-btn--lg">Open the workspace</a>
+      <a href="Landing.html#workflow" class="hf-btn hf-btn--ghost hf-btn--lg">See the workflow →</a>
+    </div>
+    <span class="hf-rule" style="max-width:300px; margin-top: var(--space-3);"></span>
+  </section>
+
+  <footer class="about-footer">
+    <span>© 2026 · Herbaflow · solo thesis project</span>
+    <span>v1.0.0 · indexed 14·03·2026</span>
+  </footer>
+
+</body>
+</html>

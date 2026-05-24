@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Herbaflow — Network pharmacology for Indonesian herbal medicine</title>
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <script src="../assets/ascii-dna.js" defer></script>
+  <style>
+    body {
+      /* Warm paper base with subtle multi-stop gradient so glass surfaces have
+         tonal variation to refract — even without animated content behind. */
+      background:
+        radial-gradient(ellipse 80% 50% at 80% 8%, rgba(216,201,182,0.35) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 10% 35%, rgba(195,206,189,0.30) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 40% at 90% 70%, rgba(214,196,180,0.25) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 20% 95%, rgba(195,206,189,0.20) 0%, transparent 60%),
+        var(--hf-bg);
+      background-attachment: fixed, fixed, fixed, fixed, scroll;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(26,26,26,0.035) 1px, transparent 0);
+      background-size: 7px 7px;
+    }
+
+    /* Page-wide ASCII DNA atmospheric sweep — fixed but rendered ONCE,
+       not animated (animated version locks the browser due to backdrop-filter
+       on multiple glass cards constantly re-rasterising). */
+    .page-dna {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 40%, transparent 75%);
+              mask-image: linear-gradient(180deg, #000 0%, #000 40%, transparent 75%);
+      --hf-dna-front: rgba(26, 26, 26, 0.32);
+      --hf-dna-back: rgba(26, 26, 26, 0.12);
+    }
+    .page-dna__inner {
+      position: absolute;
+      inset: -8% -5%;
+      transform: rotate(-8deg);
+      transform-origin: 60% 35%;
+      -webkit-mask-image: radial-gradient(ellipse 70% 65% at 60% 30%, #000 25%, transparent 75%);
+              mask-image: radial-gradient(ellipse 70% 65% at 60% 30%, #000 25%, transparent 75%);
+    }
+    .page-dna ascii-dna {
+      font-size: clamp(8px, 0.95vw, 11px);
+      line-height: 1.0;
+      width: 100%;
+      display: block;
+    }
+
+    /* All page content sits above the fixed DNA + noise layer */
+    .landing-nav, .hero, .stats, .workflow, .principles, .closing, footer { position: relative; z-index: 1; }
+
+    /* ============= NAV ============= */
+    .landing-nav {
+      max-width: 1320px; margin: 0 auto;
+      padding: var(--space-5) var(--space-6);
+      display: grid; grid-template-columns: auto 1fr auto;
+      gap: var(--space-6);
+      align-items: center;
+      position: relative; z-index: 20;
+    }
+    .landing-nav__links {
+      justify-self: center;
+      display: flex; gap: var(--space-6); align-items: center;
+    }
+    .landing-nav__links a {
+      font-size: var(--text-sm); color: var(--hf-fg-2);
+      transition: color var(--duration-1) var(--ease-out);
+    }
+    .landing-nav__links a:hover { color: var(--hf-fg-1); }
+    .landing-nav__right { display: flex; gap: var(--space-3); align-items: center; }
+
+    /* Theme toggle (visual only — glass pill) */
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.42) 100%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.04);
+              backdrop-filter: blur(24px) saturate(180%) brightness(1.04);
+      border: 1px solid rgba(255,255,255,0.55);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.85),
+        inset 0 -1px 0 rgba(0,0,0,0.04),
+        0 1px 2px rgba(26,26,26,0.04),
+        0 12px 28px -10px rgba(26,26,26,0.18);
+    }
+    .theme-toggle button {
+      width: 28px; height: 28px;
+      display: grid; place-items: center;
+      border: 0; background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--hf-fg-3);
+      transition: background var(--duration-1) var(--ease-out), color var(--duration-1) var(--ease-out);
+    }
+    .theme-toggle button[aria-pressed="true"] {
+      background: var(--hf-fg-1);
+      color: var(--hf-neutral-50);
+    }
+    .theme-toggle svg { width: 14px; height: 14px; stroke-width: 1.5; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ============= HERO ============= */
+    .hero {
+      position: relative;
+      max-width: 1320px; margin: 0 auto;
+      padding: var(--space-7) var(--space-6) var(--space-8);
+    }
+
+    /* The local hero DNA is now part of the page-wide sweep — keep only
+       for the inline label/caption. The .dna-bg block in the hero is
+       removed; the page-wide .page-dna handles atmosphere. */
+
+    .hero__content {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: var(--space-7);
+      align-items: end;
+      min-height: 520px;
+    }
+    .hero__eyebrow {
+      display: flex; align-items: center; gap: var(--space-3);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--hf-fg-3);
+      margin-bottom: var(--space-6);
+    }
+    .hero__eyebrow::after {
+      content: '';
+      flex: 1; max-width: 80px;
+      height: 1px;
+      background: var(--hf-border-strong);
+    }
+    .hero__title {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 8.5vw, 6.75rem);
+      letter-spacing: -0.025em;
+      line-height: 0.94;
+      color: var(--hf-fg-1);
+      margin-bottom: var(--space-5);
+    }
+    .hero__title em {
+      font-style: italic;
+      color: inherit;
+    }
+    .hero__title .period {
+      color: var(--hf-fg-1);
+    }
+    .hero__lede {
+      font-family: var(--font-sans);
+      font-size: var(--text-md);
+      line-height: var(--lh-prose);
+      color: var(--hf-fg-2);
+      max-width: 46ch;
+      margin-bottom: var(--space-6);
+    }
+    .hero__lede em { font-style: italic; }
+
+    /* Glass CTA pill — Apple-style liquid glass */
+    .hero__cta-row { display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; }
+    .cta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: 18px var(--space-5) 18px var(--space-6);
+      min-width: 280px;
+      justify-content: space-between;
+      background: linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.42) 100%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.05);
+              backdrop-filter: blur(30px) saturate(180%) brightness(1.05);
+      border: 1px solid rgba(255,255,255,0.55);
+      border-radius: var(--radius-pill);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        inset 0 -1px 0 rgba(0,0,0,0.05),
+        0 1px 2px rgba(26,26,26,0.04),
+        0 24px 56px -16px rgba(26,26,26,0.22);
+      font-family: var(--font-sans);
+      font-size: var(--text-md);
+      color: var(--hf-fg-1);
+      cursor: pointer;
+      transition: transform var(--duration-1) var(--ease-out),
+                  box-shadow var(--duration-1) var(--ease-out);
+    }
+    .cta-pill:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.95),
+        inset 0 -1px 0 rgba(0,0,0,0.05),
+        0 1px 2px rgba(26,26,26,0.05),
+        0 28px 64px -16px rgba(26,26,26,0.28);
+    }
+    .cta-pill__arrow {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: var(--hf-fg-1);
+      color: var(--hf-neutral-50);
+      flex: none;
+    }
+    .cta-pill__arrow svg { width: 14px; height: 14px; }
+    .cta-secondary {
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      color: var(--hf-fg-3);
+      padding: var(--space-3) var(--space-4);
+    }
+    .cta-secondary:hover { color: var(--hf-fg-1); }
+
+    .hero__side {
+      display: flex; flex-direction: column;
+      gap: var(--space-4);
+      align-self: end;
+    }
+    .hero__quote {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-style: italic;
+      color: var(--hf-fg-1);
+      line-height: 1.35;
+      padding-left: var(--space-4);
+      border-left: 1px solid var(--hf-border-strong);
+      max-width: 32ch;
+    }
+    .hero__quote-cite {
+      font-family: var(--font-sans);
+      font-size: var(--text-xs);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--hf-fg-3);
+      margin-top: var(--space-2);
+      padding-left: var(--space-4);
+    }
+
+    /* ============= STAT CARDS ============= */
+    .stats {
+      position: relative; z-index: 2;
+      max-width: 1320px; margin: 0 auto;
+      padding: 0 var(--space-6);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+    }
+    .stat-card {
+      padding: var(--space-5);
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: var(--space-4);
+      align-items: center;
+    }
+    .stat-card__glyph {
+      width: 56px; height: 56px;
+      display: grid; place-items: center;
+      border-radius: var(--radius-3);
+      background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        inset 0 -1px 0 rgba(0,0,0,0.04);
+      color: var(--hf-fg-1);
+    }
+    .stat-card__glyph svg { width: 24px; height: 24px; stroke-width: 1.25; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+    .stat-card__num {
+      font-family: var(--font-display);
+      font-size: clamp(2.25rem, 3.5vw, 2.75rem);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--hf-fg-1);
+    }
+    .stat-card__num em { font-style: italic; color: var(--hf-fg-3); font-size: 0.6em; vertical-align: 0.4em; margin-left: 2px; }
+    .stat-card__label {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      color: var(--hf-fg-1);
+      margin-top: 2px;
+    }
+    .stat-card__sub {
+      font-family: var(--font-sans);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+      letter-spacing: 0.02em;
+      margin-top: 2px;
+    }
+
+    /* ============= WORKFLOW ============= */
+    .workflow {
+      max-width: 1320px; margin: 0 auto;
+      padding: var(--space-9) var(--space-6) var(--space-8);
+    }
+    .workflow__head {
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-7);
+    }
+    .workflow__eyebrow {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.32em;
+      color: var(--hf-fg-3);
+    }
+    .workflow__title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: -0.02em;
+      max-width: 22ch;
+      line-height: 1.05;
+    }
+    .workflow__title em { font-style: italic; color: inherit; }
+    .workflow__deck {
+      font-size: var(--text-md);
+      color: var(--hf-fg-2);
+      max-width: 56ch;
+      line-height: var(--lh-prose);
+    }
+
+    .workflow__rail {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: var(--space-3);
+      align-items: stretch;
+      position: relative;
+    }
+    .step-card {
+      padding: var(--space-5) var(--space-4);
+      display: flex; flex-direction: column; gap: var(--space-3);
+      min-height: 220px;
+      text-align: center;
+      align-items: center;
+      position: relative;
+    }
+    .step-card__glyph {
+      width: 56px; height: 56px;
+      display: grid; place-items: center;
+      border-radius: var(--radius-3);
+      background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        inset 0 -1px 0 rgba(0,0,0,0.04);
+      color: var(--hf-fg-1);
+      margin-bottom: var(--space-2);
+    }
+    .step-card__glyph svg { width: 26px; height: 26px; stroke-width: 1.25; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+    .step-card__num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--hf-fg-3);
+      letter-spacing: 0.08em;
+    }
+    .step-card__title {
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      font-weight: var(--fw-medium);
+      color: var(--hf-fg-1);
+      line-height: 1.35;
+      max-width: 16ch;
+    }
+    .step-card__sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--hf-fg-3);
+      line-height: 1.5;
+      margin-top: auto;
+    }
+    .step-arrow {
+      position: absolute;
+      right: -16px;
+      top: 64px;
+      width: 24px; height: 24px;
+      display: grid; place-items: center;
+      color: var(--hf-fg-4);
+      z-index: 1;
+    }
+    .step-arrow svg { width: 20px; height: 20px; stroke-width: 1; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+
+    .workflow__sig {
+      margin-top: var(--space-6);
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      color: var(--hf-fg-3);
+      font-style: italic;
+    }
+    .workflow__sig em { font-style: italic; color: var(--hf-fg-1); }
+
+    /* ============= PRINCIPLES ============= */
+    .principles {
+      max-width: 1320px; margin: 0 auto;
+      padding: var(--space-8) var(--space-6);
+      border-top: 1px solid var(--hf-border);
+    }
+    .principles__head {
+      display: grid; grid-template-columns: 1fr 2fr;
+      gap: var(--space-6);
+      align-items: end;
+      margin-bottom: var(--space-7);
+    }
+    .principles__title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      max-width: 16ch;
+    }
+    .principles__title em { font-style: italic; color: inherit; }
+    .principles__lede {
+      font-size: var(--text-md);
+      line-height: var(--lh-prose);
+      color: var(--hf-fg-2);
+      max-width: 56ch;
+    }
+    .principles__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+    }
+    .principle-card {
+      padding: var(--space-5);
+      display: flex; flex-direction: column; gap: var(--space-3);
+      min-height: 220px;
+    }
+    .principle-card__num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--hf-fg-3);
+      letter-spacing: 0.06em;
+    }
+    .principle-card__title {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .principle-card__body {
+      font-size: var(--text-sm);
+      color: var(--hf-fg-2);
+      line-height: var(--lh-prose);
+    }
+
+    /* ============= CLOSING ============= */
+    .closing {
+      max-width: 1320px; margin: 0 auto;
+      padding: var(--space-8) var(--space-6) var(--space-7);
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-5);
+    }
+    .closing__line {
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      color: var(--hf-fg-3);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .closing__title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+      letter-spacing: -0.025em;
+      line-height: 1.02;
+      max-width: 22ch;
+    }
+    .closing__title em { font-style: italic; color: inherit; }
+
+    /* ============= FOOTER ============= */
+    .landing-footer {
+      max-width: 1320px; margin: 0 auto;
+      padding: var(--space-6) var(--space-6) var(--space-5);
+      border-top: 1px solid var(--hf-border);
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+    .footer-col h4 {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--hf-fg-3);
+      font-weight: var(--fw-medium);
+      margin-bottom: var(--space-3);
+    }
+    .footer-col a {
+      display: block;
+      font-size: var(--text-sm);
+      color: var(--hf-fg-2);
+      padding: 4px 0;
+      transition: color var(--duration-1) var(--ease-out);
+    }
+    .footer-col a:hover { color: var(--hf-fg-1); }
+    .footer-bottom {
+      max-width: 1320px; margin: 0 auto;
+      padding: var(--space-3) var(--space-6) var(--space-6);
+      display: flex; justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--hf-fg-4);
+    }
+
+    @media (max-width: 1100px) {
+      .workflow__rail { grid-template-columns: repeat(3, 1fr); }
+      .step-arrow { display: none; }
+    }
+    @media (max-width: 900px) {
+      .hero__content { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .workflow__rail { grid-template-columns: repeat(2, 1fr); }
+      .principles__head, .principles__grid { grid-template-columns: 1fr; }
+      .landing-footer { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../assets/herbaflow-glyph.svg" />
+  <link rel="alternate icon" type="image/png" href="../assets/herbaflow-glyph.png" />
+</head>
+<body data-screen-label="Landing">
+
+  <!-- Page-wide ASCII DNA atmospheric sweep — STATIC (animation off for perf:
+       backdrop-filter on multiple glass cards over animated content thrashes paint). -->
+  <div class="page-dna" aria-hidden="true">
+    <div class="page-dna__inner">
+      <ascii-dna cols="140" rows="36" speed="0" cycles="3.0" chars="dots"></ascii-dna>
+    </div>
+  </div>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="landing-nav">
+    <a href="Landing.html" class="hf-brand" aria-label="Herbaflow home">
+      <img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt="Herbaflow" />
+      <span class="hf-brand__tag">Integrated network pharmacology platform</span>
+    </a>
+    <div class="landing-nav__links">
+      <a href="Analysis.html">Analysis</a>
+      <a href="#workflow">Workflow</a>
+      <a href="About.html">About</a>
+    </div>
+    <div class="landing-nav__right">
+      <div class="theme-toggle" role="group" aria-label="Theme">
+        <button aria-pressed="true" aria-label="Light theme">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+        <button aria-pressed="false" aria-label="Dark theme">
+          <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+    <div class="hero__content">
+      <div>
+        <div class="hero__eyebrow">
+          <span>Integrated network pharmacology platform</span>
+        </div>
+
+        <h1 class="hero__title">
+          Automate. <em>Integrate.</em><br>
+          Accelerate<span class="period">.</span>
+        </h1>
+
+        <p class="hero__lede">
+          Herbaflow unifies the fragmented workflow used to discover the medicinal
+          potential of herbal plants — from <em>Curcuma xanthorrhiza</em> to
+          protein targets to candidate diseases — into one continuous, reviewable
+          pipeline. Every step is configurable. Every association is traceable.
+        </p>
+
+        <div class="hero__cta-row">
+          <a href="Analysis.html" class="cta-pill" style="color: rgba(247, 245, 242, 0)">
+            Start analysis
+            <span class="cta-pill__arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </a>
+          <a href="About.html" class="cta-secondary">Read the thesis →</a>
+        </div>
+      </div>
+
+      <aside class="hero__side">
+        <blockquote class="hero__quote">
+          “A pipeline that hides its assumptions is not faster than one that shows them. It is only quieter.”
+        </blockquote>
+        <span class="hero__quote-cite">From the thesis introduction</span>
+      </aside>
+    </div>
+  </header>
+
+  <!-- ===================== STATS ===================== -->
+  <section class="stats">
+    <article class="hf-card hf-card--glass stat-card">
+      <span class="stat-card__glyph" aria-hidden="true">
+        <!-- Leaf -->
+        <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-5 5-9 11-9 0 6-4 11-9 11"/><path d="M2 22c1-5 4-9 9-11"/></svg>
+      </span>
+      <div>
+        <div class="stat-card__num">500<em>+</em></div>
+        <div class="stat-card__label">Indonesian plants</div>
+        <div class="stat-card__sub">Ethnobotanical + literature‑curated</div>
+      </div>
+    </article>
+
+    <article class="hf-card hf-card--glass stat-card">
+      <span class="stat-card__glyph" aria-hidden="true">
+        <!-- Hex / molecule -->
+        <svg viewBox="0 0 24 24"><polygon points="12 3 21 8 21 16 12 21 3 16 3 8 12 3"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="8" x2="21" y2="16"/><line x1="21" y1="8" x2="3" y2="16"/></svg>
+      </span>
+      <div>
+        <div class="stat-card__num">11,000<em>+</em></div>
+        <div class="stat-card__label">Metabolites</div>
+        <div class="stat-card__sub">Bioactive compounds &amp; metabolites</div>
+      </div>
+    </article>
+
+    <article class="hf-card hf-card--glass stat-card">
+      <span class="stat-card__glyph" aria-hidden="true">
+        <!-- Plus / cross -->
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </span>
+      <div>
+        <div class="stat-card__num">10<em>+</em></div>
+        <div class="stat-card__label">Curated diseases</div>
+        <div class="stat-card__sub">Well‑studied and clinically relevant</div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ===================== WORKFLOW ===================== -->
+  <section class="workflow" id="workflow">
+    <div class="workflow__head">
+      <span class="workflow__eyebrow">Workflow system</span>
+      <h2 class="workflow__title">Six steps. <em>Every one inspectable.</em></h2>
+      <p class="workflow__deck">
+        Most pipelines turn a plant name into a network diagram and call it a day.
+        Herbaflow keeps you in the loop — at each step you can review, reject, or
+        augment the intermediate set before moving on. The provenance follows the data.
+      </p>
+    </div>
+
+    <div class="workflow__rail">
+      <article class="hf-card hf-card--glass step-card">
+        <span class="step-card__glyph">
+          <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-5 5-9 11-9 0 6-4 11-9 11"/></svg>
+        </span>
+        <span class="step-card__num">01</span>
+        <span class="step-card__title">Plant &amp; disease selection</span>
+        <span class="step-card__sub">Choose herbal sources<br>and target indication</span>
+        <span class="step-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </article>
+
+      <article class="hf-card hf-card--glass step-card">
+        <span class="step-card__glyph">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="4"/><circle cx="16" cy="14" r="4"/></svg>
+        </span>
+        <span class="step-card__num">02</span>
+        <span class="step-card__title">Compound screening &amp; target prediction</span>
+        <span class="step-card__sub">OB / DL filters<br>STITCH · SwissTP</span>
+        <span class="step-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </article>
+
+      <article class="hf-card hf-card--glass step-card">
+        <span class="step-card__glyph">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg>
+        </span>
+        <span class="step-card__num">03</span>
+        <span class="step-card__title">Targets overlap</span>
+        <span class="step-card__sub">Diseases ∩ Compounds<br>Venn intersection</span>
+        <span class="step-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </article>
+
+      <article class="hf-card hf-card--glass step-card">
+        <span class="step-card__glyph">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><line x1="12" y1="8" x2="6.7" y2="16.4"/><line x1="12" y1="8" x2="17.3" y2="16.4"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+        </span>
+        <span class="step-card__num">04</span>
+        <span class="step-card__title">PPI network construction</span>
+        <span class="step-card__sub">STRING database<br>confidence ≥ 0.7</span>
+        <span class="step-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </article>
+
+      <article class="hf-card hf-card--glass step-card">
+        <span class="step-card__glyph">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><circle cx="4" cy="6" r="1.5"/><circle cx="20" cy="6" r="1.5"/><circle cx="4" cy="18" r="1.5"/><circle cx="20" cy="18" r="1.5"/><line x1="5.3" y1="6.7" x2="10.7" y2="11"/><line x1="18.7" y1="6.7" x2="13.3" y2="11"/><line x1="5.3" y1="17.3" x2="10.7" y2="13"/><line x1="18.7" y1="17.3" x2="13.3" y2="13"/></svg>
+        </span>
+        <span class="step-card__num">05</span>
+        <span class="step-card__title">Hub analysis</span>
+        <span class="step-card__sub">Degree · betweenness<br>cluster identification</span>
+        <span class="step-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </article>
+
+      <article class="hf-card hf-card--glass step-card">
+        <span class="step-card__glyph">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="14"/><line x1="11" y1="20" x2="11" y2="10"/><line x1="17" y1="20" x2="17" y2="6"/></svg>
+        </span>
+        <span class="step-card__num">06</span>
+        <span class="step-card__title">Enrichment analysis</span>
+        <span class="step-card__sub">GO · KEGG pathways<br>publishable figure</span>
+      </article>
+    </div>
+
+    <p class="workflow__sig">
+      One integrated platform · end‑to‑end automation · <em>faster discoveries</em>
+    </p>
+  </section>
+
+  <!-- ===================== PRINCIPLES ===================== -->
+  <section class="principles" id="principles">
+    <div class="principles__head">
+      <div>
+        <span class="workflow__eyebrow">Principles</span>
+        <h2 class="principles__title" style="margin-top: var(--space-3);">Reviewable, <em>not black‑boxed.</em></h2>
+      </div>
+      <p class="principles__lede" style="font-family: &quot;Be Vietnam Pro&quot;; font-weight: 400">
+        Three commitments the product holds itself to — surfaced in the UI,
+        not buried in release notes.
+      </p>
+    </div>
+
+    <div class="principles__grid">
+      <article class="hf-card hf-card--glass principle-card">
+        <span class="principle-card__num">01 / 03</span>
+        <h3 class="principle-card__title">Every association is traceable.</h3>
+        <p class="principle-card__body" style="font-family: &quot;Be Vietnam Pro&quot;">
+          Each edge in the final network carries its source database, the parameters
+          you used, and the cut‑offs that produced it. Click to expand the provenance trail.
+        </p>
+      </article>
+
+      <article class="hf-card hf-card--glass principle-card">
+        <span class="principle-card__num">02 / 03</span>
+        <h3 class="principle-card__title">Surface the limits.</h3>
+        <p class="principle-card__body">
+          Database freshness, coverage gaps, and unautomated steps (looking at you,
+          molecular docking) are shown plainly — not hidden behind a confidence number.
+        </p>
+      </article>
+
+      <article class="hf-card hf-card--glass principle-card">
+        <span class="principle-card__num">03 / 03</span>
+        <h3 class="principle-card__title">Built for the methods section.</h3>
+        <p class="principle-card__body">
+          The output is a publishable figure plus a structured log of every decision
+          you made. Reproducibility is a feature, not a checkbox.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ===================== CLOSING ===================== -->
+  <section class="closing">
+    <span class="closing__line">— one integrated platform —</span>
+    <h2 class="closing__title">A pipeline you can <em>argue with.</em></h2>
+    <a href="Analysis.html" class="cta-pill" style="margin-top: var(--space-3);">
+      Start analysis
+      <span class="cta-pill__arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </span>
+    </a>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="landing-footer">
+      <div class="footer-col">
+        <a href="Landing.html" class="hf-brand">
+          <img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt="Herbaflow" />
+        </a>
+        <p style="font-size:var(--text-sm); color:var(--hf-fg-3); margin-top:var(--space-3); max-width:34ch; line-height:var(--lh-prose);">
+          A solo thesis project in computational biology. Built to make network
+          pharmacology legible to researchers and students alike.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="Analysis.html">Analysis workspace</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#principles">Principles</a>
+      </div>
+      <div class="footer-col">
+        <h4>Sources</h4>
+        <a href="#">Database index</a>
+        <a href="#">Release notes</a>
+        <a href="#">Methods</a>
+      </div>
+      <div class="footer-col">
+        <h4>Thesis</h4>
+        <a href="About.html">About</a>
+        <a href="#">Citation</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 · Herbaflow · solo thesis project</span>
+      <span>v1.0.0 · indexed 14·03·2026</span>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle — visual only for now (toggles aria-pressed)
+    const toggleBtns = document.querySelectorAll('.theme-toggle button');
+    toggleBtns.forEach((b, i) => b.addEventListener('click', () => {
+      toggleBtns.forEach((x, j) => x.setAttribute('aria-pressed', String(i === j)));
+    }));
+  </script>
+</body>
+</html>

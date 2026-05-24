@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <style>
+    body {
+      background: var(--hf-bg);
+      padding: 40px;
+      background-image: radial-gradient(circle at 1px 1px, rgba(26,26,26,0.04) 1px, transparent 0);
+      background-size: 4px 4px;
+    }
+    .card {
+      max-width: 920px;
+      background: var(--hf-surface);
+      border: 1px solid var(--hf-border);
+      border-radius: var(--radius-3);
+      padding: 40px;
+    }
+    .head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--hf-fg-1);
+      margin-bottom: 24px;
+    }
+    .head__num { font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); letter-spacing: 0.08em; }
+    .head__title { font-family: var(--font-display); font-size: 32px; letter-spacing: -0.02em; }
+    .head__sub { font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); }
+
+    .pair { padding: 20px 0; border-bottom: 1px dashed var(--hf-border); }
+    .pair:last-child { border-bottom: 0; }
+    .pair__label { font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; display: block; }
+
+    .row { display: grid; grid-template-columns: 80px 1fr 80px; gap: 24px; align-items: baseline; padding: 6px 0; }
+    .row__lab { font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); }
+    .row__samp { color: var(--hf-fg-1); }
+    .row__size { font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); text-align: right; }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../assets/herbaflow-glyph.svg" />
+  <link rel="alternate icon" type="image/png" href="../assets/herbaflow-glyph.png" />
+</head>
+<body>
+  <div class="card">
+    <div class="head">
+      <div>
+        <div class="head__num">02 · TYPOGRAPHY</div>
+        <div class="head__title" style="margin-top: 4px;">Two pairings, one scale</div>
+      </div>
+      <div class="head__sub">var(--font-display) · var(--font-sans) · var(--font-mono)</div>
+    </div>
+
+    <div class="pair">
+      <span class="pair__label">— Editorial (default) · Instrument Serif → Caudex → Playfair Display · Be Vietnam Pro → DM Sans → Inter · Space Mono</span>
+      <div class="row"><span class="row__lab">display</span><span class="row__samp" style="font-family: var(--font-display); font-size: 56px; line-height: 1;">Curcuma <em style="font-style:italic;">longa</em></span><span class="row__size">56 / 0.96</span></div>
+      <div class="row"><span class="row__lab">h1</span><span class="row__samp" style="font-family: var(--font-display); font-size: 40px;">Cluster analysis</span><span class="row__size">40</span></div>
+      <div class="row"><span class="row__lab">h2</span><span class="row__samp" style="font-family: var(--font-display); font-size: 28px;">Targets by pathway</span><span class="row__size">28</span></div>
+      <div class="row"><span class="row__lab">body</span><span class="row__samp" style="font-size: 16px; color: var(--hf-fg-2);">Filter by oral bioavailability and drug-likeness thresholds.</span><span class="row__size">16 / 1.6</span></div>
+      <div class="row"><span class="row__lab">caption</span><span class="row__samp hf-eyebrow">STEP 03 · CLUSTER ANALYSIS</span><span class="row__size">12</span></div>
+      <div class="row"><span class="row__lab">mono</span><span class="row__samp hf-mono" style="font-size: 13px; color: var(--hf-fg-2);">n_neighbors = 15 · seed = 42</span><span class="row__size">13</span></div>
+    </div>
+
+    <div class="pair" data-type-pair="clinical">
+      <span class="pair__label">— Clinical (alt) · Fraunces → Caudex · IBM Plex Sans → DM Sans · Space Mono</span>
+      <div class="row"><span class="row__lab">display</span><span class="row__samp" style="font-family: var(--font-display); font-size: 48px; line-height: 1;">Curcuma <em style="font-style:italic;">longa</em></span><span class="row__size">48</span></div>
+      <div class="row"><span class="row__lab">h2</span><span class="row__samp" style="font-family: var(--font-display); font-size: 26px;">Targets by pathway</span><span class="row__size">26</span></div>
+      <div class="row"><span class="row__lab">body</span><span class="row__samp" style="font-size: 15px; color: var(--hf-fg-2);">Filter by oral bioavailability and drug-likeness thresholds.</span><span class="row__size">15</span></div>
+    </div>
+  </div>
+</body>
+</html>

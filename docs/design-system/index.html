@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Herbaflow Design System</title>
+  <link rel="stylesheet" href="colors_and_type.css" />
+  <link rel="stylesheet" href="components.css" />
+  <script src="assets/ascii-dna.js" defer></script>
+  <style>
+    body {
+      background: var(--hf-bg);
+      background-image: radial-gradient(circle at 1px 1px, rgba(26,26,26,0.03) 1px, transparent 0);
+      background-size: 7px 7px;
+      min-height: 100vh;
+    }
+
+    .index-nav {
+      max-width: 1200px; margin: 0 auto;
+      padding: var(--space-5) var(--space-6);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .index-nav__meta {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+      letter-spacing: 0.06em;
+    }
+
+    .index-header {
+      position: relative;
+      max-width: 1200px; margin: 0 auto;
+      padding: var(--space-7) var(--space-6) var(--space-6);
+      overflow: hidden;
+    }
+    .index-header__dna {
+      position: absolute;
+      inset: -10% -5%;
+      pointer-events: none;
+      z-index: 0;
+      transform: rotate(-6deg);
+      -webkit-mask-image: radial-gradient(ellipse 65% 55% at 60% 50%, #000 30%, transparent 75%);
+              mask-image: radial-gradient(ellipse 65% 55% at 60% 50%, #000 30%, transparent 75%);
+      --hf-dna-front: rgba(26, 26, 26, 0.35);
+      --hf-dna-back: rgba(26, 26, 26, 0.12);
+    }
+    .index-header__dna ascii-dna {
+      font-size: clamp(8px, 1vw, 11px);
+      line-height: 1.0;
+      width: 100%;
+      display: block;
+    }
+    .index-header__content {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: var(--space-7);
+      align-items: end;
+      min-height: 220px;
+    }
+    .index-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 6vw, 5rem);
+      line-height: 0.96;
+      letter-spacing: -0.025em;
+      max-width: 14ch;
+    }
+    .index-header h1 em { font-style: italic; color: inherit; }
+    .index-header__deck {
+      font-size: var(--text-md);
+      line-height: var(--lh-prose);
+      color: var(--hf-fg-2);
+      max-width: 44ch;
+      padding-bottom: var(--space-3);
+    }
+
+    .index-sections {
+      max-width: 1200px; margin: 0 auto;
+      padding: var(--space-6) var(--space-6) var(--space-8);
+      display: flex; flex-direction: column;
+      gap: var(--space-8);
+    }
+    .index-section {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: var(--space-6);
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--hf-fg-1);
+    }
+    .index-section__head {
+      display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .index-section__num {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+    }
+    .index-section__title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+    }
+    .index-section__title em { font-style: italic; color: inherit; }
+    .index-section__sub {
+      font-size: var(--text-sm);
+      color: var(--hf-fg-3);
+      line-height: var(--lh-prose);
+      max-width: 26ch;
+    }
+
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-4);
+    }
+    .page-card {
+      display: flex; flex-direction: column; gap: var(--space-3);
+      padding: var(--space-5);
+      text-decoration: none;
+      color: inherit;
+      transition: transform var(--duration-2) var(--ease-out), box-shadow var(--duration-2) var(--ease-out);
+    }
+    .page-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 1px 1px rgba(26,26,26,0.04), 0 22px 48px -16px rgba(26,26,26,0.22);
+    }
+    .page-card__num {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+      letter-spacing: 0.06em;
+    }
+    .page-card__title {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      color: var(--hf-fg-1);
+    }
+    .page-card__body {
+      font-size: var(--text-sm);
+      color: var(--hf-fg-2);
+      line-height: var(--lh-prose);
+      max-width: 38ch;
+    }
+    .page-card__cta {
+      margin-top: var(--space-3);
+      font-size: var(--text-sm);
+      color: var(--hf-fg-1);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .page-card__cta svg { width: 14px; height: 14px; stroke-width: 1.25; }
+
+    .resource-list {
+      display: grid; gap: var(--space-2);
+    }
+    .resource-row {
+      display: grid;
+      grid-template-columns: 200px 1fr auto;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px dashed var(--hf-border);
+      font-size: var(--text-sm);
+      align-items: center;
+    }
+    .resource-row:last-child { border-bottom: 0; }
+    .resource-row__file {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-1);
+    }
+    .resource-row__desc { color: var(--hf-fg-2); }
+    .resource-row a {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+    }
+    .resource-row a:hover { color: var(--hf-fg-1); }
+
+    .footer {
+      max-width: 1200px; margin: 0 auto;
+      padding: var(--space-5) var(--space-6);
+      border-top: 1px solid var(--hf-border);
+      display: flex; justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-4);
+    }
+
+    @media (max-width: 900px) {
+      .index-header__content { grid-template-columns: 1fr; }
+      .index-section { grid-template-columns: 1fr; }
+      .pages-grid { grid-template-columns: 1fr; }
+      .resource-row { grid-template-columns: 1fr; gap: var(--space-1); }
+    }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="assets/herbaflow-glyph.svg" />
+  <link rel="alternate icon" type="image/png" href="assets/herbaflow-glyph.png" />
+</head>
+<body data-screen-label="Index">
+
+  <nav class="index-nav">
+    <a href="index.html" class="hf-brand" aria-label="Herbaflow Design System">
+      <img class="hf-brand__mark" src="assets/herbaflow-logo.png" alt="Herbaflow" />
+      <span class="hf-brand__tag">Design system · v1.0</span>
+    </a>
+    <span class="index-nav__meta">indexed · 14·03·2026</span>
+  </nav>
+
+  <header class="index-header">
+    <div class="index-header__dna" aria-hidden="true">
+      <ascii-dna cols="140" rows="22" speed="0.05" cycles="3" chars="dots"></ascii-dna>
+    </div>
+    <div class="index-header__content">
+      <h1>A pipeline you can <em>read aloud.</em></h1>
+      <p class="index-header__deck">
+        The Herbaflow design system, in one place. Editorial scientific. Warm paper
+        neutrals + a single sage accent. Glass as paper. ASCII as ornament.
+      </p>
+    </div>
+  </header>
+
+  <main class="index-sections">
+
+    <!-- ============= PAGES ============= -->
+    <section class="index-section">
+      <div class="index-section__head">
+        <span class="index-section__num">01 / 03</span>
+        <h2 class="index-section__title">Pages <em>in use</em></h2>
+        <p class="index-section__sub">
+          Four full‑page mockups showing the system in context — marketing,
+          in‑product, editorial, and a full primitives reference.
+        </p>
+      </div>
+
+      <div class="pages-grid">
+        <a href="pages/Landing.html" class="hf-card hf-card--glass page-card">
+          <span class="page-card__num">PAGE · 01</span>
+          <h3 class="page-card__title">Landing</h3>
+          <p class="page-card__body">
+            "Automate. Integrate. Accelerate." Atmospheric ASCII DNA, glass stat
+            cards, the six‑step workflow, editorial pull‑quote.
+          </p>
+          <span class="page-card__cta">View landing
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </a>
+
+        <a href="pages/Analysis.html" class="hf-card hf-card--glass page-card">
+          <span class="page-card__num">PAGE · 02</span>
+          <h3 class="page-card__title">Analysis workspace</h3>
+          <p class="page-card__body">
+            Step 03 of the pipeline. Sidebar workflow, cluster scatterplot,
+            glass overlay legend &amp; parameters, right‑rail target inspector.
+          </p>
+          <span class="page-card__cta">Open workspace
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </a>
+
+        <a href="pages/About.html" class="hf-card hf-card--glass page-card">
+          <span class="page-card__num">PAGE · 03</span>
+          <h3 class="page-card__title">About / thesis</h3>
+          <p class="page-card__body">
+            Editorial article: drop cap, sidenotes, pull quote, limitations grid.
+            "A pipeline you can argue with."
+          </p>
+          <span class="page-card__cta">Read the thesis
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </a>
+
+        <a href="pages/Components.html" class="hf-card hf-card--glass page-card">
+          <span class="page-card__num">PAGE · 04</span>
+          <h3 class="page-card__title">Components reference</h3>
+          <p class="page-card__body">
+            Every primitive, in context: colors, type, spacing, buttons, forms,
+            cards, glass, badges, tables, nav, modals, viz, icons, logo lockups.
+          </p>
+          <span class="page-card__cta">Open reference
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============= FOUNDATIONS ============= -->
+    <section class="index-section">
+      <div class="index-section__head">
+        <span class="index-section__num">02 / 03</span>
+        <h2 class="index-section__title">Foundations <em>at a glance</em></h2>
+        <p class="index-section__sub">
+          The system in three numbers. See the Design System tab for full cards.
+        </p>
+      </div>
+
+      <div class="pages-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <article class="hf-card hf-card--flat" style="padding: var(--space-5);">
+          <span class="hf-eyebrow">Color</span>
+          <div style="font-family: var(--font-display); font-size: var(--text-3xl); letter-spacing: -0.02em; margin-top: var(--space-2); line-height: 1;">12</div>
+          <div style="font-size: var(--text-sm); color: var(--hf-fg-2); margin-top: var(--space-2); line-height: var(--lh-prose);">
+            Tokens · warm neutrals + sage + earth status
+          </div>
+          <div style="display:flex; gap: 2px; margin-top: var(--space-4);">
+            <div style="flex:1; height: 24px; background: var(--hf-neutral-50);"></div>
+            <div style="flex:1; height: 24px; background: var(--hf-neutral-200);"></div>
+            <div style="flex:1; height: 24px; background: var(--hf-neutral-500);"></div>
+            <div style="flex:1; height: 24px; background: var(--hf-neutral-900);"></div>
+            <div style="flex:1; height: 24px; background: var(--hf-sage-soft);"></div>
+            <div style="flex:1; height: 24px; background: var(--hf-sage);"></div>
+            <div style="flex:1; height: 24px; background: var(--hf-sage-deep);"></div>
+          </div>
+        </article>
+
+        <article class="hf-card hf-card--flat" style="padding: var(--space-5);">
+          <span class="hf-eyebrow">Type</span>
+          <div style="font-family: var(--font-display); font-size: var(--text-3xl); letter-spacing: -0.02em; margin-top: var(--space-2); line-height: 1;">2 × 3</div>
+          <div style="font-size: var(--text-sm); color: var(--hf-fg-2); margin-top: var(--space-2); line-height: var(--lh-prose);">
+            Pairings × stacks · Editorial &amp; Clinical
+          </div>
+          <div style="display:flex; gap: var(--space-4); margin-top: var(--space-4); align-items: baseline;">
+            <span style="font-family: var(--font-display); font-size: 32px; line-height: 1;">Aa</span>
+            <span style="font-family: var(--font-sans); font-size: 18px; color: var(--hf-fg-2);">Aa</span>
+            <span style="font-family: var(--font-mono); font-size: 13px; color: var(--hf-fg-3);">Aa</span>
+          </div>
+        </article>
+
+        <article class="hf-card hf-card--flat" style="padding: var(--space-5);">
+          <span class="hf-eyebrow">Components</span>
+          <div style="font-family: var(--font-display); font-size: var(--text-3xl); letter-spacing: -0.02em; margin-top: var(--space-2); line-height: 1;">14</div>
+          <div style="font-size: var(--text-sm); color: var(--hf-fg-2); margin-top: var(--space-2); line-height: var(--lh-prose);">
+            Primitives · buttons, forms, cards, glass, viz, …
+          </div>
+          <div style="display:flex; gap: var(--space-2); margin-top: var(--space-4); flex-wrap: wrap;">
+            <button class="hf-btn hf-btn--primary hf-btn--sm">primary</button>
+            <button class="hf-btn hf-btn--secondary hf-btn--sm">secondary</button>
+            <button class="hf-btn hf-btn--ghost hf-btn--sm">ghost</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============= RESOURCES ============= -->
+    <section class="index-section">
+      <div class="index-section__head">
+        <span class="index-section__num">03 / 03</span>
+        <h2 class="index-section__title">Files <em>&amp; docs</em></h2>
+        <p class="index-section__sub">
+          The full file map. Read README first; SKILL.md is the quick reference.
+        </p>
+      </div>
+
+      <div class="hf-card hf-card--flat" style="padding: var(--space-2) var(--space-2);">
+        <div class="resource-list">
+          <div class="resource-row">
+            <span class="resource-row__file">README.md</span>
+            <span class="resource-row__desc">Full system rationale, principles, voice, ASCII rules.</span>
+            <a href="README.md">open →</a>
+          </div>
+          <div class="resource-row">
+            <span class="resource-row__file">SKILL.md</span>
+            <span class="resource-row__desc">Quick‑reference cheat sheet for building with the system.</span>
+            <a href="SKILL.md">open →</a>
+          </div>
+          <div class="resource-row">
+            <span class="resource-row__file">colors_and_type.css</span>
+            <span class="resource-row__desc">All tokens (CSS variables) + font imports + base element styles.</span>
+            <a href="colors_and_type.css">open →</a>
+          </div>
+          <div class="resource-row">
+            <span class="resource-row__file">components.css</span>
+            <span class="resource-row__desc">Reusable primitives — buttons, inputs, cards, glass, tables, nav.</span>
+            <a href="components.css">open →</a>
+          </div>
+          <div class="resource-row">
+            <span class="resource-row__file">assets/ascii-dna.js</span>
+            <span class="resource-row__desc">&lt;ascii-dna&gt; web component. <code class="hf-mono">chars="dots"</code> for atmospheric backgrounds.</span>
+            <a href="assets/ascii-dna.js">open →</a>
+          </div>
+          <div class="resource-row">
+            <span class="resource-row__file">assets/herbaflow-logo.svg</span>
+            <span class="resource-row__desc">Primary lockup (mark + wordmark). PNG fallback at same path.</span>
+            <a href="assets/herbaflow-logo.svg">open →</a>
+          </div>
+          <div class="resource-row">
+            <span class="resource-row__file">assets/herbaflow-glyph.svg</span>
+            <span class="resource-row__desc">Glyph-only mark. Favicons, avatars, app icons. Use via <code class="hf-mono">.hf-glyph</code>.</span>
+            <a href="assets/herbaflow-glyph.svg">open →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>Herbaflow Design System · v1.0 · solo thesis project</span>
+    <span>tokens · type · glass · ASCII</span>
+  </footer>
+
+</body>
+</html>

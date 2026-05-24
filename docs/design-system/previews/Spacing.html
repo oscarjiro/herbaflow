@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <style>
+    body {
+      background: var(--hf-bg);
+      padding: 40px;
+      background-image: radial-gradient(circle at 1px 1px, rgba(26,26,26,0.04) 1px, transparent 0);
+      background-size: 4px 4px;
+    }
+    .card {
+      max-width: 920px;
+      background: var(--hf-surface);
+      border: 1px solid var(--hf-border);
+      border-radius: var(--radius-3);
+      padding: 40px;
+    }
+    .head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--hf-fg-1);
+      margin-bottom: 24px;
+    }
+    .head__num { font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); letter-spacing: 0.08em; }
+    .head__title { font-family: var(--font-display); font-size: 32px; letter-spacing: -0.02em; }
+    .head__sub { font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); }
+
+    .group { padding: 20px 0; border-bottom: 1px dashed var(--hf-border); }
+    .group:last-child { border-bottom: 0; }
+    .group__label { font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; display: block; }
+
+    .ruler { display: flex; flex-direction: column; gap: 6px; }
+    .bar { display: grid; grid-template-columns: 80px 1fr 60px; gap: 12px; align-items: center; font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); }
+    .bar__fill { height: 8px; background: var(--hf-fg-1); }
+    .bar__val { color: var(--hf-fg-1); text-align: right; }
+
+    .radii { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+    .radii__cell { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+    .radii__box { width: 80px; height: 80px; background: var(--hf-neutral-100); border: 1px solid var(--hf-border); }
+    .radii__lab { font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-3); text-align: center; }
+
+    .shadows { display: flex; gap: 24px; padding: 16px 0; flex-wrap: wrap; }
+    .shadows__cell { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+    .shadows__box { width: 100px; height: 64px; background: var(--hf-surface); border-radius: 8px; }
+    .shadows__lab { font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-3); text-align: center; }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../assets/herbaflow-glyph.svg" />
+  <link rel="alternate icon" type="image/png" href="../assets/herbaflow-glyph.png" />
+</head>
+<body>
+  <div class="card">
+    <div class="head">
+      <div>
+        <div class="head__num">03 · SPACE, RADII, SHADOW</div>
+        <div class="head__title" style="margin-top: 4px;">4-pt base · conservative radii</div>
+      </div>
+      <div class="head__sub">--space-* · --radius-* · --shadow-*</div>
+    </div>
+
+    <div class="group">
+      <span class="group__label">— Space scale (4pt base)</span>
+      <div class="ruler">
+        <div class="bar"><span>space-1</span><span class="bar__fill" style="width:4px;"></span><span class="bar__val">4</span></div>
+        <div class="bar"><span>space-2</span><span class="bar__fill" style="width:8px;"></span><span class="bar__val">8</span></div>
+        <div class="bar"><span>space-3</span><span class="bar__fill" style="width:12px;"></span><span class="bar__val">12</span></div>
+        <div class="bar"><span>space-4</span><span class="bar__fill" style="width:16px;"></span><span class="bar__val">16</span></div>
+        <div class="bar"><span>space-5</span><span class="bar__fill" style="width:24px;"></span><span class="bar__val">24</span></div>
+        <div class="bar"><span>space-6</span><span class="bar__fill" style="width:32px;"></span><span class="bar__val">32</span></div>
+        <div class="bar"><span>space-7</span><span class="bar__fill" style="width:48px;"></span><span class="bar__val">48</span></div>
+        <div class="bar"><span>space-8</span><span class="bar__fill" style="width:64px;"></span><span class="bar__val">64</span></div>
+        <div class="bar"><span>space-9</span><span class="bar__fill" style="width:96px;"></span><span class="bar__val">96</span></div>
+        <div class="bar"><span>space-10</span><span class="bar__fill" style="width:128px;"></span><span class="bar__val">128</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="group__label">— Radii</span>
+      <div class="radii">
+        <div class="radii__cell"><div class="radii__box" style="border-radius:0;"></div><span class="radii__lab">radius-0 · 0</span></div>
+        <div class="radii__cell"><div class="radii__box" style="border-radius:2px;"></div><span class="radii__lab">radius-1 · 2 · buttons</span></div>
+        <div class="radii__cell"><div class="radii__box" style="border-radius:4px;"></div><span class="radii__lab">radius-2 · 4 · chips</span></div>
+        <div class="radii__cell"><div class="radii__box" style="border-radius:8px;"></div><span class="radii__lab">radius-3 · 8 · cards</span></div>
+        <div class="radii__cell"><div class="radii__box" style="border-radius:999px;"></div><span class="radii__lab">pill · 999 · badges</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="group__label">— Shadows (use sparingly · floating layers only)</span>
+      <div class="shadows" style="background: var(--hf-surface-2); padding: 24px; border-radius: 8px;">
+        <div class="shadows__cell"><div class="shadows__box"></div><span class="shadows__lab">0 · none</span></div>
+        <div class="shadows__cell"><div class="shadows__box" style="box-shadow: var(--shadow-1);"></div><span class="shadows__lab">1 · hairline</span></div>
+        <div class="shadows__cell"><div class="shadows__box" style="box-shadow: var(--shadow-2);"></div><span class="shadows__lab">2 · popover</span></div>
+        <div class="shadows__cell"><div class="shadows__box" style="box-shadow: var(--shadow-3);"></div><span class="shadows__lab">3 · modal</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

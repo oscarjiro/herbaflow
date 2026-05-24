@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cluster analysis — Herbaflow</title>
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <style>
+    body { background: var(--hf-bg); }
+
+    .app {
+      display: grid;
+      grid-template-columns: 280px 1fr 360px;
+      min-height: 100vh;
+    }
+
+    /* Sidebar (workflow steps) */
+    .app__sidebar {
+      border-right: 1px solid var(--hf-border);
+      background: var(--hf-bg);
+      padding: var(--space-5);
+      display: flex; flex-direction: column;
+      gap: var(--space-5);
+    }
+    .sidebar__brand {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--hf-border);
+    }
+    .sidebar__project {
+      display: flex; flex-direction: column; gap: var(--space-1);
+    }
+    .sidebar__project-meta {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+    }
+    .sidebar__project-title {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      letter-spacing: var(--tracking-tight);
+    }
+    .sidebar__project-title em { font-style: italic; color: inherit; }
+
+    /* Main canvas */
+    .app__canvas {
+      display: flex; flex-direction: column;
+      background: var(--hf-bg);
+      position: relative;
+      overflow: hidden;
+    }
+    .canvas__toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-4) var(--space-6);
+      border-bottom: 1px solid var(--hf-border);
+      background: var(--hf-bg);
+      gap: var(--space-4);
+    }
+    .canvas__title {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .canvas__title-eyebrow {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+      letter-spacing: 0.06em;
+    }
+    .canvas__title h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      letter-spacing: var(--tracking-tight);
+    }
+    .canvas__toolbar-actions { display: flex; gap: var(--space-2); align-items: center; }
+
+    .canvas__stage {
+      flex: 1;
+      position: relative;
+      background:
+        radial-gradient(ellipse 800px 600px at 60% 40%, var(--hf-sage-faint) 0%, transparent 60%),
+        var(--hf-bg);
+      overflow: hidden;
+    }
+    .canvas__chart {
+      position: absolute; inset: 0;
+      padding: var(--space-6);
+    }
+
+    /* Cluster scatter — SVG plotted nodes */
+    .cluster-viz { width: 100%; height: 100%; display: block; }
+    .cluster-node { cursor: pointer; transition: r var(--duration-1) var(--ease-out); }
+    .cluster-node:hover { r: 12; }
+    .cluster-label {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: var(--tracking-tight);
+      fill: var(--hf-fg-1);
+      pointer-events: none;
+    }
+    .cluster-label__count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      fill: var(--hf-fg-3);
+    }
+
+    /* Floating glass legend */
+    .viz-legend {
+      position: absolute;
+      top: var(--space-5);
+      left: var(--space-5);
+      padding: var(--space-4) var(--space-5);
+      max-width: 260px;
+      z-index: 4;
+    }
+    .viz-legend__title {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      margin-bottom: var(--space-3);
+    }
+    .viz-legend__row {
+      display: grid; grid-template-columns: 16px 1fr auto;
+      gap: var(--space-3);
+      align-items: center;
+      padding: var(--space-2) 0;
+      font-size: var(--text-sm);
+      color: var(--hf-fg-2);
+      border-top: 1px solid var(--hf-border);
+    }
+    .viz-legend__row:first-of-type { border-top: 0; }
+    .viz-legend__swatch {
+      width: 12px; height: 12px; border-radius: 2px;
+    }
+    .viz-legend__count {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+    }
+
+    /* Floating glass parameter card */
+    .viz-params {
+      position: absolute;
+      bottom: var(--space-5);
+      left: var(--space-5);
+      padding: var(--space-4) var(--space-5);
+      max-width: 320px;
+      z-index: 4;
+    }
+    .viz-params__head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: var(--space-3);
+    }
+    .viz-params__title {
+      font-family: var(--font-display);
+      font-size: var(--text-md);
+    }
+    .viz-params__list {
+      display: grid; grid-template-columns: auto 1fr;
+      column-gap: var(--space-4); row-gap: var(--space-2);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+    }
+    .viz-params__list dt { color: var(--hf-fg-3); }
+    .viz-params__list dd { color: var(--hf-fg-1); margin: 0; }
+
+    /* Right inspector */
+    .app__inspector {
+      border-left: 1px solid var(--hf-border);
+      background: var(--hf-bg);
+      padding: var(--space-5);
+      display: flex; flex-direction: column;
+      gap: var(--space-5);
+      overflow-y: auto;
+    }
+    .inspector__head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--hf-border);
+    }
+    .inspector__title {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      letter-spacing: var(--tracking-tight);
+    }
+    .inspector__title em { font-style: italic; color: inherit; }
+    .inspector-section {
+      display: flex; flex-direction: column; gap: var(--space-3);
+    }
+    .inspector-section__title {
+      display: flex; align-items: baseline; justify-content: space-between;
+    }
+    .inspector-section__title h4 {
+      font-family: var(--font-sans);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-eyebrow);
+      color: var(--hf-fg-3);
+      font-weight: var(--fw-medium);
+    }
+    .inspector-section__title button {
+      font-size: var(--text-xs);
+      background: none; border: 0;
+      color: var(--hf-fg-3);
+      cursor: pointer;
+      padding: 0;
+    }
+    .inspector-section__title button:hover { color: var(--hf-fg-1); }
+
+    .target-row {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: var(--space-3);
+      padding: var(--space-2) 0;
+      border-bottom: 1px dashed var(--hf-border);
+      font-size: var(--text-sm);
+    }
+    .target-row:last-child { border-bottom: 0; }
+    .target-row__name { color: var(--hf-fg-1); }
+    .target-row__sub {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+      margin-top: 2px;
+    }
+    .target-row__score {
+      font-variant-numeric: tabular-nums;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--hf-fg-2);
+      align-self: center;
+    }
+
+    /* Sparkline */
+    .sparkline { width: 100%; height: 60px; display: block; }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../assets/herbaflow-glyph.svg" />
+  <link rel="alternate icon" type="image/png" href="../assets/herbaflow-glyph.png" />
+</head>
+<body data-screen-label="Analysis">
+
+  <div class="app">
+
+    <!-- ============= LEFT SIDEBAR ============= -->
+    <aside class="app__sidebar">
+      <div class="sidebar__brand">
+        <a href="Landing.html" class="hf-brand" aria-label="Herbaflow">
+          <img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt="Herbaflow" style="height: 24px;" />
+        </a>
+        <span class="hf-bracket">v1.0</span>
+      </div>
+
+      <div class="sidebar__project">
+        <span class="sidebar__project-meta">PROJECT · 2026-03-14</span>
+        <span class="sidebar__project-title"><em>Curcuma longa</em> → inflammation</span>
+      </div>
+
+      <ul class="hf-steps" aria-label="Analysis pipeline">
+        <li class="hf-step" data-status="done">
+          <span class="hf-step__num">01</span>
+          <div>
+            <span class="hf-step__title">Plant → metabolites</span>
+            <span class="hf-step__meta">47 compounds · TCMSP</span>
+          </div>
+        </li>
+        <li class="hf-step" data-status="done">
+          <span class="hf-step__num">02</span>
+          <div>
+            <span class="hf-step__title">Metabolites → targets</span>
+            <span class="hf-step__meta">312 targets · STITCH + SwissTP</span>
+          </div>
+        </li>
+        <li class="hf-step" aria-current="step">
+          <span class="hf-step__num">03</span>
+          <div>
+            <span class="hf-step__title">Cluster analysis</span>
+            <span class="hf-step__meta">k = 5 · UMAP · running</span>
+          </div>
+        </li>
+        <li class="hf-step">
+          <span class="hf-step__num">04</span>
+          <div>
+            <span class="hf-step__title">Targets → diseases</span>
+            <span class="hf-step__meta">pending</span>
+          </div>
+        </li>
+        <li class="hf-step">
+          <span class="hf-step__num">05</span>
+          <div>
+            <span class="hf-step__title">Network review</span>
+            <span class="hf-step__meta">pending</span>
+          </div>
+        </li>
+        <li class="hf-step">
+          <span class="hf-step__num">06</span>
+          <div>
+            <span class="hf-step__title">Molecular docking</span>
+            <span class="hf-step__meta hf-italic">manual export</span>
+          </div>
+        </li>
+      </ul>
+
+      <div style="margin-top:auto; padding-top:var(--space-4); border-top:1px solid var(--hf-border); display:flex; flex-direction:column; gap:var(--space-3);">
+        <span class="hf-eyebrow">Provenance</span>
+        <div style="font-family:var(--font-mono); font-size:var(--text-xs); color:var(--hf-fg-3); line-height:1.6;">
+          02 sources<br>
+          14 parameters set<br>
+          0 manual overrides
+        </div>
+        <a href="#" class="hf-link" style="font-size:var(--text-xs);">View provenance log →</a>
+      </div>
+    </aside>
+
+    <!-- ============= MAIN CANVAS ============= -->
+    <main class="app__canvas">
+      <div class="canvas__toolbar">
+        <div class="canvas__title">
+          <span class="canvas__title-eyebrow">STEP 03 · CLUSTER ANALYSIS</span>
+          <h1>Target clusters by pathway co-occurrence</h1>
+        </div>
+        <div class="canvas__toolbar-actions">
+          <button class="hf-btn hf-btn--ghost hf-btn--sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Parameters
+          </button>
+          <button class="hf-btn hf-btn--ghost hf-btn--sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+          <button class="hf-btn hf-btn--primary hf-btn--sm">Continue → Diseases</button>
+        </div>
+      </div>
+
+      <div class="canvas__stage">
+        <div class="canvas__chart">
+          <!-- Cluster scatterplot. Five clusters of variable size. -->
+          <svg class="cluster-viz" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Cluster scatterplot of 312 targets in five clusters">
+            <!-- Grid -->
+            <g class="hf-grid">
+              <line class="hf-grid-line" x1="0"   y1="155" x2="1000" y2="155"/>
+              <line class="hf-grid-line" x1="0"   y1="310" x2="1000" y2="310"/>
+              <line class="hf-grid-line" x1="0"   y1="465" x2="1000" y2="465"/>
+              <line class="hf-grid-line" x1="250" y1="0"   x2="250"  y2="620"/>
+              <line class="hf-grid-line" x1="500" y1="0"   x2="500"  y2="620"/>
+              <line class="hf-grid-line" x1="750" y1="0"   x2="750"  y2="620"/>
+            </g>
+
+            <!-- Axis labels (UMAP-1, UMAP-2) -->
+            <text class="hf-axis-tick" x="980" y="615" text-anchor="end">umap-1 →</text>
+            <text class="hf-axis-tick" x="8"   y="14"  transform="rotate(0)">umap-2 ↑</text>
+
+            <!-- Cluster regions (soft) -->
+            <g opacity="0.5">
+              <ellipse cx="270" cy="220" rx="190" ry="140" fill="var(--hf-sage-faint)"/>
+              <ellipse cx="640" cy="180" rx="160" ry="120" fill="var(--hf-sage-faint)"/>
+              <ellipse cx="820" cy="380" rx="130" ry="100" fill="var(--hf-sage-faint)"/>
+              <ellipse cx="430" cy="450" rx="170" ry="120" fill="var(--hf-sage-faint)"/>
+              <ellipse cx="150" cy="490" rx="120" ry="80"  fill="var(--hf-sage-faint)"/>
+            </g>
+
+            <!-- Cluster A — inflammation (top-left, 87 nodes) -->
+            <g fill="var(--hf-fg-1)">
+              <!-- generated points -->
+              <circle class="cluster-node" cx="180" cy="190" r="4"/>
+              <circle class="cluster-node" cx="220" cy="170" r="5"/>
+              <circle class="cluster-node" cx="260" cy="200" r="6"/>
+              <circle class="cluster-node" cx="300" cy="185" r="4"/>
+              <circle class="cluster-node" cx="240" cy="240" r="5"/>
+              <circle class="cluster-node" cx="200" cy="260" r="4"/>
+              <circle class="cluster-node" cx="280" cy="250" r="7"/>
+              <circle class="cluster-node" cx="320" cy="220" r="4"/>
+              <circle class="cluster-node" cx="160" cy="220" r="3"/>
+              <circle class="cluster-node" cx="350" cy="260" r="5"/>
+              <circle class="cluster-node" cx="310" cy="290" r="4"/>
+              <circle class="cluster-node" cx="270" cy="300" r="5"/>
+              <circle class="cluster-node" cx="230" cy="290" r="4"/>
+              <circle class="cluster-node" cx="190" cy="290" r="3"/>
+              <circle class="cluster-node" cx="380" cy="200" r="4"/>
+              <circle class="cluster-node" cx="400" cy="240" r="5"/>
+              <circle class="cluster-node" cx="180" cy="150" r="3"/>
+              <circle class="cluster-node" cx="220" cy="130" r="4"/>
+              <circle class="cluster-node" cx="290" cy="160" r="5"/>
+              <circle class="cluster-node" cx="340" cy="180" r="6"/>
+              <circle class="cluster-node" cx="250" cy="285" r="3"/>
+              <circle class="cluster-node" cx="365" cy="295" r="4"/>
+            </g>
+
+            <!-- Cluster B — oxidative stress (top-right, 64) -->
+            <g fill="var(--hf-sage-deep)">
+              <circle class="cluster-node" cx="560" cy="160" r="4"/>
+              <circle class="cluster-node" cx="600" cy="140" r="5"/>
+              <circle class="cluster-node" cx="640" cy="160" r="6"/>
+              <circle class="cluster-node" cx="680" cy="180" r="5"/>
+              <circle class="cluster-node" cx="720" cy="170" r="4"/>
+              <circle class="cluster-node" cx="600" cy="200" r="4"/>
+              <circle class="cluster-node" cx="660" cy="220" r="6"/>
+              <circle class="cluster-node" cx="700" cy="220" r="5"/>
+              <circle class="cluster-node" cx="620" cy="240" r="4"/>
+              <circle class="cluster-node" cx="580" cy="220" r="3"/>
+              <circle class="cluster-node" cx="540" cy="200" r="3"/>
+              <circle class="cluster-node" cx="730" cy="240" r="4"/>
+              <circle class="cluster-node" cx="650" cy="120" r="3"/>
+              <circle class="cluster-node" cx="690" cy="140" r="4"/>
+              <circle class="cluster-node" cx="610" cy="270" r="3"/>
+              <circle class="cluster-node" cx="670" cy="265" r="4"/>
+            </g>
+
+            <!-- Cluster C — apoptosis (right, 38) -->
+            <g fill="var(--hf-terracotta)">
+              <circle class="cluster-node" cx="780" cy="360" r="4"/>
+              <circle class="cluster-node" cx="820" cy="350" r="6"/>
+              <circle class="cluster-node" cx="860" cy="370" r="5"/>
+              <circle class="cluster-node" cx="800" cy="390" r="5"/>
+              <circle class="cluster-node" cx="840" cy="400" r="4"/>
+              <circle class="cluster-node" cx="880" cy="390" r="4"/>
+              <circle class="cluster-node" cx="820" cy="420" r="5"/>
+              <circle class="cluster-node" cx="790" cy="420" r="3"/>
+              <circle class="cluster-node" cx="860" cy="430" r="4"/>
+              <circle class="cluster-node" cx="900" cy="410" r="3"/>
+              <circle class="cluster-node" cx="780" cy="400" r="3"/>
+              <circle class="cluster-node" cx="830" cy="320" r="3"/>
+            </g>
+
+            <!-- Cluster D — immune signalling (bottom-mid, 73) -->
+            <g fill="var(--hf-info)">
+              <circle class="cluster-node" cx="380" cy="430" r="4"/>
+              <circle class="cluster-node" cx="420" cy="420" r="5"/>
+              <circle class="cluster-node" cx="460" cy="440" r="6"/>
+              <circle class="cluster-node" cx="500" cy="430" r="4"/>
+              <circle class="cluster-node" cx="540" cy="450" r="5"/>
+              <circle class="cluster-node" cx="400" cy="470" r="4"/>
+              <circle class="cluster-node" cx="440" cy="490" r="5"/>
+              <circle class="cluster-node" cx="480" cy="480" r="4"/>
+              <circle class="cluster-node" cx="520" cy="470" r="3"/>
+              <circle class="cluster-node" cx="450" cy="510" r="3"/>
+              <circle class="cluster-node" cx="490" cy="520" r="4"/>
+              <circle class="cluster-node" cx="410" cy="380" r="4"/>
+              <circle class="cluster-node" cx="450" cy="400" r="3"/>
+              <circle class="cluster-node" cx="370" cy="490" r="3"/>
+              <circle class="cluster-node" cx="350" cy="450" r="4"/>
+              <circle class="cluster-node" cx="560" cy="490" r="4"/>
+            </g>
+
+            <!-- Cluster E — metabolic (bottom-left, 50) -->
+            <g fill="var(--hf-warning)">
+              <circle class="cluster-node" cx="110" cy="490" r="4"/>
+              <circle class="cluster-node" cx="140" cy="470" r="5"/>
+              <circle class="cluster-node" cx="180" cy="500" r="6"/>
+              <circle class="cluster-node" cx="220" cy="490" r="4"/>
+              <circle class="cluster-node" cx="160" cy="530" r="5"/>
+              <circle class="cluster-node" cx="120" cy="520" r="3"/>
+              <circle class="cluster-node" cx="200" cy="530" r="4"/>
+              <circle class="cluster-node" cx="240" cy="510" r="3"/>
+              <circle class="cluster-node" cx="90"  cy="460" r="3"/>
+              <circle class="cluster-node" cx="150" cy="450" r="4"/>
+            </g>
+
+            <!-- Cluster labels -->
+            <text class="cluster-label" x="265" y="100">Inflammation</text>
+            <text class="cluster-label__count" x="265" y="118">87 targets · NF-κB · TNF</text>
+
+            <text class="cluster-label" x="630" y="80">Oxidative stress</text>
+            <text class="cluster-label__count" x="630" y="98">64 targets · NRF2 · SOD</text>
+
+            <text class="cluster-label" x="780" y="300">Apoptosis</text>
+            <text class="cluster-label__count" x="780" y="318">38 targets · BCL-2 · CASP</text>
+
+            <text class="cluster-label" x="395" y="370">Immune signalling</text>
+            <text class="cluster-label__count" x="395" y="388">73 targets · JAK/STAT · IL-6</text>
+
+            <text class="cluster-label" x="115" y="430">Metabolic</text>
+            <text class="cluster-label__count" x="115" y="448">50 targets · AMPK · PPAR</text>
+          </svg>
+        </div>
+
+        <!-- Floating glass: legend -->
+        <aside class="hf-card hf-card--glass viz-legend">
+          <h3 class="viz-legend__title">Clusters</h3>
+          <div class="viz-legend__row">
+            <span class="viz-legend__swatch" style="background:var(--hf-fg-1);"></span>
+            <span>Inflammation</span>
+            <span class="viz-legend__count">87</span>
+          </div>
+          <div class="viz-legend__row">
+            <span class="viz-legend__swatch" style="background:var(--hf-sage-deep);"></span>
+            <span>Oxidative stress</span>
+            <span class="viz-legend__count">64</span>
+          </div>
+          <div class="viz-legend__row">
+            <span class="viz-legend__swatch" style="background:var(--hf-terracotta);"></span>
+            <span>Apoptosis</span>
+            <span class="viz-legend__count">38</span>
+          </div>
+          <div class="viz-legend__row">
+            <span class="viz-legend__swatch" style="background:var(--hf-info);"></span>
+            <span>Immune signalling</span>
+            <span class="viz-legend__count">73</span>
+          </div>
+          <div class="viz-legend__row">
+            <span class="viz-legend__swatch" style="background:var(--hf-warning);"></span>
+            <span>Metabolic</span>
+            <span class="viz-legend__count">50</span>
+          </div>
+        </aside>
+
+        <!-- Floating glass: parameters -->
+        <aside class="hf-card hf-card--glass viz-params">
+          <div class="viz-params__head">
+            <h3 class="viz-params__title">Parameters</h3>
+            <a href="#" class="hf-link" style="font-size:var(--text-xs);">Edit →</a>
+          </div>
+          <dl class="viz-params__list">
+            <dt>algorithm</dt><dd>UMAP + Leiden</dd>
+            <dt>n_neighbors</dt><dd>15</dd>
+            <dt>min_dist</dt><dd>0.10</dd>
+            <dt>resolution</dt><dd>0.85</dd>
+            <dt>distance</dt><dd>cosine</dd>
+            <dt>seed</dt><dd>42</dd>
+          </dl>
+        </aside>
+      </div>
+    </main>
+
+    <!-- ============= RIGHT INSPECTOR ============= -->
+    <aside class="app__inspector">
+      <div class="inspector__head">
+        <h2 class="inspector__title">Cluster <em>A</em> · Inflammation</h2>
+        <span class="hf-bracket">87 targets</span>
+      </div>
+
+      <!-- Coverage sparkline -->
+      <section class="inspector-section">
+        <div class="inspector-section__title">
+          <h4>Cluster connectivity (over iterations)</h4>
+          <button>Reset</button>
+        </div>
+        <svg class="sparkline" viewBox="0 0 320 60" preserveAspectRatio="none" role="img">
+          <polyline fill="none" stroke="var(--hf-fg-1)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"
+            points="0,42 16,40 32,38 48,36 64,32 80,28 96,30 112,24 128,22 144,18 160,20 176,16 192,12 208,14 224,10 240,8 256,9 272,7 288,6 304,5 320,4"/>
+          <line x1="0" y1="59" x2="320" y2="59" class="hf-axis-line"/>
+        </svg>
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:var(--text-xs); color:var(--hf-fg-3);">
+          <span>iter 1</span>
+          <span style="color:var(--hf-fg-1);">stable @ iter 18</span>
+        </div>
+      </section>
+
+      <!-- Top targets -->
+      <section class="inspector-section">
+        <div class="inspector-section__title">
+          <h4>Top targets by degree</h4>
+          <button>See all 87</button>
+        </div>
+        <div>
+          <div class="target-row">
+            <div>
+              <span class="target-row__name">TNF</span>
+              <span class="target-row__sub">Tumor necrosis factor · UniProt P01375</span>
+            </div>
+            <span class="target-row__score">0.94</span>
+          </div>
+          <div class="target-row">
+            <div>
+              <span class="target-row__name">NFKB1</span>
+              <span class="target-row__sub">NF-κB subunit p105 · UniProt P19838</span>
+            </div>
+            <span class="target-row__score">0.89</span>
+          </div>
+          <div class="target-row">
+            <div>
+              <span class="target-row__name">PTGS2</span>
+              <span class="target-row__sub">Cyclooxygenase-2 · UniProt P35354</span>
+            </div>
+            <span class="target-row__score">0.81</span>
+          </div>
+          <div class="target-row">
+            <div>
+              <span class="target-row__name">IL6</span>
+              <span class="target-row__sub">Interleukin-6 · UniProt P05231</span>
+            </div>
+            <span class="target-row__score">0.76</span>
+          </div>
+          <div class="target-row">
+            <div>
+              <span class="target-row__name">IKBKB</span>
+              <span class="target-row__sub">IκB kinase β · UniProt O14920</span>
+            </div>
+            <span class="target-row__score">0.71</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="inspector-section">
+        <div class="inspector-section__title"><h4>Filter cluster</h4></div>
+        <div class="hf-field">
+          <label class="hf-field__label" for="conf">min confidence</label>
+          <input type="range" id="conf" class="hf-slider" min="0" max="100" value="65">
+          <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:var(--text-xs); color:var(--hf-fg-3);">
+            <span>0.00</span><span style="color:var(--hf-fg-1);">0.65</span><span>1.00</span>
+          </div>
+        </div>
+
+        <label class="hf-checkbox"><input type="checkbox" checked> Show only experimentally validated</label>
+        <label class="hf-checkbox"><input type="checkbox" checked> Exclude predicted-only targets</label>
+        <label class="hf-checkbox"><input type="checkbox"> Hide singletons (degree = 1)</label>
+      </section>
+
+      <!-- Notes -->
+      <section class="inspector-section">
+        <div class="inspector-section__title"><h4>Reviewer notes</h4></div>
+        <textarea class="hf-textarea" placeholder="Add a note for the methods section…">Inflammation cluster is dominated by the NF-κB axis. Consider down-weighting predicted-only edges before disease mapping.</textarea>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="hf-bracket">auto-saved · 12:42</span>
+          <button class="hf-btn hf-btn--sage hf-btn--sm">Save to provenance</button>
+        </div>
+      </section>
+    </aside>
+
+  </div>
+
+</body>
+</html>

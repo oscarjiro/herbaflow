@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <style>
+    body {
+      background: var(--hf-bg);
+      padding: 40px;
+      background-image: radial-gradient(circle at 1px 1px, rgba(26,26,26,0.04) 1px, transparent 0);
+      background-size: 4px 4px;
+    }
+    .card {
+      max-width: 920px;
+      background: var(--hf-surface);
+      border: 1px solid var(--hf-border);
+      border-radius: var(--radius-3);
+      padding: 40px;
+    }
+    .head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--hf-fg-1);
+      margin-bottom: 24px;
+    }
+    .head__num { font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); letter-spacing: 0.08em; }
+    .head__title { font-family: var(--font-display); font-size: 32px; letter-spacing: -0.02em; }
+    .head__sub { font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); }
+
+    .group { padding: 20px 0; border-bottom: 1px dashed var(--hf-border); }
+    .group:last-child { border-bottom: 0; }
+    .group__label { font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; display: block; }
+
+    .swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+    .swatch { display: flex; flex-direction: column; gap: 6px; }
+    .swatch__chip { height: 56px; border-radius: 4px; border: 1px solid var(--hf-border); }
+    .swatch__name { font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-1); }
+    .swatch__val { font-family: var(--font-mono); font-size: 9px; color: var(--hf-fg-3); }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../assets/herbaflow-glyph.svg" />
+  <link rel="alternate icon" type="image/png" href="../assets/herbaflow-glyph.png" />
+</head>
+<body>
+  <div class="card">
+    <div class="head">
+      <div>
+        <div class="head__num">01 · COLOR SYSTEM</div>
+        <div class="head__title" style="margin-top: 4px;">Warm paper · ink-led, sage for viz</div>
+      </div>
+      <div class="head__sub">--hf-* tokens · oklch-tuned</div>
+    </div>
+
+    <div class="group">
+      <span class="group__label">— Neutrals (warm, paper-tinted)</span>
+      <div class="swatches">
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-50);"></div><span class="swatch__name">50</span><span class="swatch__val">F7F5F2</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-100);"></div><span class="swatch__name">100</span><span class="swatch__val">EFEBE4</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-200);"></div><span class="swatch__name">200</span><span class="swatch__val">E5E0D8</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-300);"></div><span class="swatch__name">300</span><span class="swatch__val">D4CEC4</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-500);"></div><span class="swatch__name">500</span><span class="swatch__val">9A958C</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-600);"></div><span class="swatch__name">600</span><span class="swatch__val">6E6A62</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-700);"></div><span class="swatch__name">700</span><span class="swatch__val">4A463F</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-900);"></div><span class="swatch__name">900</span><span class="swatch__val">1A1A1A</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="group__label">— Sage · data-viz only (cluster fills, charts, validation)</span>
+      <div class="swatches" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-sage-faint);"></div><span class="swatch__name">sage-faint</span><span class="swatch__val">EBEEE6</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-sage-soft);"></div><span class="swatch__name">sage-soft</span><span class="swatch__val">D6DCD1</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-sage);"></div><span class="swatch__name">sage</span><span class="swatch__val">8FA084</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-sage-deep);"></div><span class="swatch__name">sage-deep</span><span class="swatch__val">6B7E62</span></div>
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="group__label">— Earth status (muted, never saturated) + opt-in terracotta</span>
+      <div class="swatches" style="grid-template-columns: repeat(5, 1fr);">
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-success);"></div><span class="swatch__name">success</span><span class="swatch__val">6F8B6A</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-warning);"></div><span class="swatch__name">warning</span><span class="swatch__val">B58A3A</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-danger);"></div><span class="swatch__name">danger</span><span class="swatch__val">A85A4E</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-info);"></div><span class="swatch__name">info</span><span class="swatch__val">5C7A8F</span></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--hf-terracotta);"></div><span class="swatch__name">terracotta</span><span class="swatch__val">B8755C</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

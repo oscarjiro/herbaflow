@@ -6,26 +6,26 @@ relationships from the KNApSAcK database.
 ## Stack
 
 - **Backend**: FastAPI (Python) — `/backend/`
-- **Frontend**: React — `/frontend/` (not yet implemented)
-- **Database**: PostgreSQL via Supabase — schema reference: @.claude/docs/database.md, always update everytime a schema change is done
+- **Frontend**: React 18 + TypeScript + Vite — `/frontend/`
+- **Database**: PostgreSQL via Supabase — schema reference: `docs/database.md`, always update everytime a schema change is done
 - **ETL**: Python pipelines — `/etl/`
 
 ## Directory Map
 
-| Path         | Status      | Purpose                                       |
-| ------------ | ----------- | --------------------------------------------- |
-| `/etl/`      | Active      | Data ingestion and canonicalization pipelines |
-| `/backend/`  | Early stage | FastAPI REST API                              |
-| `/frontend/` | Not started | React UI (placeholder only)                   |
-| `/supabase/migrations/` | Active | All Supabase SQL migrations (single source of truth) |
+| Path                    | Status      | Purpose                                              |
+| ----------------------- | ----------- | ---------------------------------------------------- |
+| `/etl/`                 | Active      | Data ingestion and canonicalization pipelines        |
+| `/backend/`             | Active      | FastAPI REST API — 8-stage pipeline, 60 tests        |
+| `/frontend/`            | Active      | React 18 + TS SPA — 8-stage pipeline UI              |
+| `/supabase/migrations/` | Active      | All Supabase SQL migrations (single source of truth) |
 
 ## Key Conventions
 
-- All data identifiers are domain-prefixed strings: `pl_`, `al_`, `tgt_`, `dtg_`, etc.
+- All entity primary keys are bare UUID v5 strings (no type prefixes); column names (`plant_id`, `target_id`) provide type context — see `docs/database.md`
 - Canonical keys use `{source}:{id}` format: `gbif:12345`, `pubchem:678`
 - ETL outputs live in `out/` within each step directory — not edited directly
 - Module config lives in `settings.yml` at each module root
-- After any migration (ADD COLUMN, DROP COLUMN, ALTER TYPE, new table, drop table) — update `.claude/docs/database.md` to reflect the final schema state
+- After any migration (ADD COLUMN, DROP COLUMN, ALTER TYPE, new table, drop table) — update `docs/database.md` to reflect the final schema state
 
 ## Git Workflow
 

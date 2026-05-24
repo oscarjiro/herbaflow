@@ -1,0 +1,1281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Components — Herbaflow Design System</title>
+  <link rel="stylesheet" href="../colors_and_type.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <style>
+    body { background: var(--hf-bg); }
+
+    .doc-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-5) var(--space-6);
+    }
+    .doc-nav__links { display: flex; gap: var(--space-5); align-items: center; }
+    .doc-nav__links a { font-size: var(--text-sm); color: var(--hf-fg-3); }
+    .doc-nav__links a:hover { color: var(--hf-fg-1); }
+
+    .doc-header {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-6) var(--space-6) var(--space-5);
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);
+      align-items: end;
+      border-bottom: 1px solid var(--hf-fg-1);
+    }
+    .doc-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      letter-spacing: var(--tracking-display);
+      line-height: 1.02;
+      max-width: 14ch;
+    }
+    .doc-header h1 em { font-style: italic; color: inherit; }
+    .doc-header__deck {
+      font-size: var(--text-md);
+      color: var(--hf-fg-2);
+      line-height: var(--lh-prose);
+      max-width: 48ch;
+      padding-bottom: var(--space-2);
+    }
+
+    .doc-toc {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-5) var(--space-6);
+      display: flex; gap: var(--space-5); flex-wrap: wrap;
+      border-bottom: 1px solid var(--hf-border);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+    }
+    .doc-toc a { color: var(--hf-fg-2); }
+    .doc-toc a:hover { color: var(--hf-fg-1); }
+
+    .doc {
+      max-width: 1280px; margin: 0 auto;
+      padding: var(--space-6) var(--space-6);
+      display: flex; flex-direction: column; gap: var(--space-8);
+    }
+
+    .doc-section {
+      display: grid; grid-template-columns: 240px 1fr; gap: var(--space-6);
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--hf-border);
+    }
+    .doc-section:first-child { border-top: 0; padding-top: 0; }
+    .doc-section__head {
+      position: sticky; top: var(--space-5);
+      align-self: start;
+      display: flex; flex-direction: column; gap: var(--space-3);
+    }
+    .doc-section__num {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+    }
+    .doc-section__title {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      letter-spacing: var(--tracking-tight);
+      line-height: 1.05;
+    }
+    .doc-section__body { font-size: var(--text-sm); color: var(--hf-fg-3); line-height: var(--lh-prose); max-width: 28ch; }
+
+    /* Demo blocks */
+    .demo {
+      background: var(--hf-surface);
+      border: 1px solid var(--hf-border);
+      border-radius: var(--radius-3);
+      padding: var(--space-5);
+      display: flex; flex-direction: column; gap: var(--space-4);
+    }
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--hf-fg-3);
+      letter-spacing: 0.04em;
+    }
+    .demo-row {
+      display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center;
+    }
+    .demo-row--col {
+      flex-direction: column; align-items: stretch;
+    }
+
+    .demos-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);
+    }
+    @media (max-width: 900px) {
+      .doc-section { grid-template-columns: 1fr; }
+      .doc-section__head { position: static; }
+      .demos-grid { grid-template-columns: 1fr; }
+    }
+
+    .swatch {
+      display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .swatch__chip {
+      height: 56px;
+      border-radius: var(--radius-2);
+      border: 1px solid var(--hf-border);
+    }
+    .swatch__name { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--hf-fg-1); }
+    .swatch__val { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--hf-fg-3); }
+
+    /* Type specimen */
+    .type-row { display: grid; grid-template-columns: 80px 1fr 80px; gap: var(--space-5); align-items: baseline; padding: var(--space-3) 0; border-bottom: 1px dashed var(--hf-border); }
+    .type-row:last-child { border-bottom: 0; }
+    .type-row__label { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--hf-fg-3); }
+    .type-row__sample { color: var(--hf-fg-1); }
+    .type-row__size { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--hf-fg-3); text-align: right; }
+
+    /* Space ruler */
+    .space-ruler { display: flex; flex-direction: column; gap: var(--space-2); }
+    .space-bar {
+      display: grid; grid-template-columns: 80px 1fr 60px; gap: var(--space-3); align-items: center;
+      font-family: var(--font-mono); font-size: var(--text-xs); color: var(--hf-fg-3);
+    }
+    .space-bar__fill { height: 8px; background: var(--hf-fg-1); }
+    .space-bar__val { color: var(--hf-fg-1); text-align: right; }
+
+    /* Iconography */
+    .icon-grid {
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-3);
+    }
+    .icon-cell {
+      aspect-ratio: 1;
+      display: grid; place-items: center;
+      background: var(--hf-surface);
+      border: 1px solid var(--hf-border);
+      border-radius: var(--radius-1);
+      color: var(--hf-fg-1);
+    }
+    .icon-cell svg { width: 22px; height: 22px; stroke-width: 1.25; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+    .icon-name { font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-3); text-align: center; margin-top: 4px; }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../assets/herbaflow-glyph.svg" />
+  <link rel="alternate icon" type="image/png" href="../assets/herbaflow-glyph.png" />
+</head>
+<body data-screen-label="Components">
+
+  <nav class="doc-nav">
+    <a href="../index.html" class="hf-brand" aria-label="Herbaflow">
+      <img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt="Herbaflow" />
+    </a>
+    <div class="doc-nav__links">
+      <a href="Landing.html">Landing</a>
+      <a href="Analysis.html">Analysis</a>
+      <a href="About.html">About</a>
+      <a href="Components.html" aria-current="page" style="color:var(--hf-fg-1);">Components</a>
+    </div>
+  </nav>
+
+  <header class="doc-header">
+    <h1>The system, <em>open on a desk.</em></h1>
+    <p class="doc-header__deck">
+      Every primitive Herbaflow ships, in context. Each section pairs the rule
+      with a working example. Tokens are CSS custom properties on
+      <code class="hf-mono">:root</code> — never inline a hex or px that exists
+      as a token.
+    </p>
+  </header>
+
+  <nav class="doc-toc" aria-label="Sections">
+    <a href="#colors">01 · Colors</a>
+    <a href="#type">02 · Typography</a>
+    <a href="#space">03 · Spacing &amp; radii</a>
+    <a href="#buttons">04 · Buttons</a>
+    <a href="#forms">05 · Form controls</a>
+    <a href="#cards">06 · Cards &amp; glass</a>
+    <a href="#badges">07 · Badges &amp; status</a>
+    <a href="#tables">08 · Tables</a>
+    <a href="#nav">09 · Navigation</a>
+    <a href="#modals">10 · Modals &amp; toasts</a>
+    <a href="#states">11 · Empty &amp; loading</a>
+    <a href="#viz">12 · Data‑viz primitives</a>
+    <a href="#icons">13 · Iconography</a>
+    <a href="#logo">14 · Logo lockups</a>
+  </nav>
+
+  <main class="doc">
+
+    <!-- ============== COLORS ============== -->
+    <section class="doc-section" id="colors">
+      <div class="doc-section__head">
+        <span class="doc-section__num">01</span>
+        <h2 class="doc-section__title">Colors</h2>
+        <p class="doc-section__body">
+          Warm paper neutrals + ink. The main design is monochromatic;
+          sage and terracotta are <em>data-viz only</em>. Status colors are
+          muted earth tones, never saturated.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demo">
+          <span class="demo__label">— Neutrals (warm, paper)</span>
+          <div class="demos-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-50);"></div><span class="swatch__name">neutral-50</span><span class="swatch__val">#F7F5F2</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-100);"></div><span class="swatch__name">neutral-100</span><span class="swatch__val">#EFEBE4</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-200);"></div><span class="swatch__name">neutral-200</span><span class="swatch__val">#E5E0D8</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-300);"></div><span class="swatch__name">neutral-300</span><span class="swatch__val">#D4CEC4</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-500);"></div><span class="swatch__name">neutral-500</span><span class="swatch__val">#9A958C</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-600);"></div><span class="swatch__name">neutral-600</span><span class="swatch__val">#6E6A62</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-700);"></div><span class="swatch__name">neutral-700</span><span class="swatch__val">#4A463F</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-neutral-900);"></div><span class="swatch__name">neutral-900</span><span class="swatch__val">#1A1A1A</span></div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Accent · sage (data-viz only — not a brand accent)</span>
+          <div class="demos-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-sage-faint);"></div><span class="swatch__name">sage-faint</span><span class="swatch__val">#EBEEE6</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-sage-soft);"></div><span class="swatch__name">sage-soft</span><span class="swatch__val">#D6DCD1</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-sage);"></div><span class="swatch__name">sage</span><span class="swatch__val">#8FA084</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-sage-deep);"></div><span class="swatch__name">sage-deep</span><span class="swatch__val">#6B7E62</span></div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Terracotta (opt-in · data-viz only)</span>
+          <div class="demos-grid" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-terracotta-soft);"></div><span class="swatch__name">terracotta-soft</span><span class="swatch__val">#E9D2C7</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-terracotta);"></div><span class="swatch__name">terracotta</span><span class="swatch__val">#B8755C</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-info);"></div><span class="swatch__name">info</span><span class="swatch__val">#5C7A8F</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-warning);"></div><span class="swatch__name">warning</span><span class="swatch__val">#B58A3A</span></div>
+          </div>
+          <p style="font-size:var(--text-xs); color:var(--hf-fg-3); margin-top: var(--space-2);">
+            Use only as data‑viz overlays paired with sage. Never on its own as brand color.
+          </p>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Status</span>
+          <div class="demos-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-success); border:0;"></div><span class="swatch__name">success</span><span class="swatch__val">#6F8B6A · muted moss</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-warning); border:0;"></div><span class="swatch__name">warning</span><span class="swatch__val">#B58A3A · ochre</span></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--hf-danger); border:0;"></div><span class="swatch__name">danger</span><span class="swatch__val">#A85A4E · clay</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== TYPE ============== -->
+    <section class="doc-section" id="type">
+      <div class="doc-section__head">
+        <span class="doc-section__num">02</span>
+        <h2 class="doc-section__title">Typography</h2>
+        <p class="doc-section__body">
+          Two pairings ship with the system: <strong>Editorial</strong> (Instrument Serif
+          + Inter, default) and <strong>Clinical</strong> (Fraunces + IBM Plex Sans).
+          Toggle on any element by setting <code class="hf-mono">data-type-pair="clinical"</code>.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+
+        <div class="demo">
+          <span class="demo__label">— Editorial pairing (default) · Instrument Serif → Caudex → Playfair Display · Be Vietnam Pro → DM Sans → Inter · Space Mono</span>
+          <div>
+            <div class="type-row">
+              <span class="type-row__label">display</span>
+              <span class="type-row__sample" style="font-family: var(--font-display); font-size: 64px; line-height: 1;">Curcuma <em style="font-style:italic;">longa</em></span>
+              <span class="type-row__size">64 / 1.0</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">h1 · 3xl</span>
+              <span class="type-row__sample" style="font-family: var(--font-display); font-size: 48px; line-height: 1.02;">Cluster analysis</span>
+              <span class="type-row__size">48 / 1.02</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">h2 · 2xl</span>
+              <span class="type-row__sample" style="font-family: var(--font-display); font-size: 34px;">Targets by pathway</span>
+              <span class="type-row__size">34 / 1.05</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">h3 · xl</span>
+              <span class="type-row__sample" style="font-family: var(--font-display); font-size: 26px;">87 inflammation targets</span>
+              <span class="type-row__size">26 / 1.2</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">lead · lg</span>
+              <span class="type-row__sample" style="font-size: 20px; color: var(--hf-fg-2);">Each association carries its source database and the parameters that produced it.</span>
+              <span class="type-row__size">20 / 1.45</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">body · md</span>
+              <span class="type-row__sample" style="font-size: 16px; color: var(--hf-fg-2);">Filter by oral bioavailability and drug‑likeness thresholds; review or override before continuing.</span>
+              <span class="type-row__size">16 / 1.6</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">UI · base</span>
+              <span class="type-row__sample" style="font-size: 15px;">Continue → Diseases</span>
+              <span class="type-row__size">15 / 1.45</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">caption</span>
+              <span class="type-row__sample hf-eyebrow">STEP 03 · CLUSTER ANALYSIS</span>
+              <span class="type-row__size">12 / 1.0</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">mono</span>
+              <span class="type-row__sample hf-mono" style="font-size: 13px; color: var(--hf-fg-2);">n_neighbors = 15 · seed = 42</span>
+              <span class="type-row__size">13 / 1.45</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo" data-type-pair="clinical">
+          <span class="demo__label">— Clinical pairing (alt, data-type-pair="clinical") · Fraunces → Caudex · IBM Plex Sans → DM Sans · Space Mono</span>
+          <div>
+            <div class="type-row">
+              <span class="type-row__label">display</span>
+              <span class="type-row__sample" style="font-family: var(--font-display); font-size: 56px; line-height: 1;">Curcuma <em style="font-style:italic;">longa</em></span>
+              <span class="type-row__size">56</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">h2</span>
+              <span class="type-row__sample" style="font-family: var(--font-display); font-size: 28px;">Targets by pathway</span>
+              <span class="type-row__size">28</span>
+            </div>
+            <div class="type-row">
+              <span class="type-row__label">body</span>
+              <span class="type-row__sample" style="font-size: 15px; color: var(--hf-fg-2);">Filter by oral bioavailability and drug-likeness thresholds.</span>
+              <span class="type-row__size">15</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== SPACING / RADII ============== -->
+    <section class="doc-section" id="space">
+      <div class="doc-section__head">
+        <span class="doc-section__num">03</span>
+        <h2 class="doc-section__title">Spacing &amp; radii</h2>
+        <p class="doc-section__body">
+          4‑pt base scale. Radii are conservative — 2/4/8 only. No fully‑rounded
+          pills outside of badges. Shadow is rare; we use 1‑px borders for
+          separation.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demo">
+          <span class="demo__label">— Space scale</span>
+          <div class="space-ruler">
+            <div class="space-bar"><span>space-1</span><span class="space-bar__fill" style="width:4px;"></span><span class="space-bar__val">4px</span></div>
+            <div class="space-bar"><span>space-2</span><span class="space-bar__fill" style="width:8px;"></span><span class="space-bar__val">8px</span></div>
+            <div class="space-bar"><span>space-3</span><span class="space-bar__fill" style="width:12px;"></span><span class="space-bar__val">12px</span></div>
+            <div class="space-bar"><span>space-4</span><span class="space-bar__fill" style="width:16px;"></span><span class="space-bar__val">16px</span></div>
+            <div class="space-bar"><span>space-5</span><span class="space-bar__fill" style="width:24px;"></span><span class="space-bar__val">24px</span></div>
+            <div class="space-bar"><span>space-6</span><span class="space-bar__fill" style="width:32px;"></span><span class="space-bar__val">32px</span></div>
+            <div class="space-bar"><span>space-7</span><span class="space-bar__fill" style="width:48px;"></span><span class="space-bar__val">48px</span></div>
+            <div class="space-bar"><span>space-8</span><span class="space-bar__fill" style="width:64px;"></span><span class="space-bar__val">64px</span></div>
+            <div class="space-bar"><span>space-9</span><span class="space-bar__fill" style="width:96px;"></span><span class="space-bar__val">96px</span></div>
+            <div class="space-bar"><span>space-10</span><span class="space-bar__fill" style="width:128px;"></span><span class="space-bar__val">128px</span></div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Radii</span>
+          <div class="demo-row">
+            <div style="display:flex; flex-direction:column; gap:var(--space-2); align-items:center;">
+              <div style="width:80px; height:80px; background:var(--hf-neutral-100); border:1px solid var(--hf-border); border-radius: var(--radius-0);"></div>
+              <span class="hf-mono" style="font-size: var(--text-xs);">radius-0 · 0</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:var(--space-2); align-items:center;">
+              <div style="width:80px; height:80px; background:var(--hf-neutral-100); border:1px solid var(--hf-border); border-radius: var(--radius-1);"></div>
+              <span class="hf-mono" style="font-size: var(--text-xs);">radius-1 · 2 · buttons</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:var(--space-2); align-items:center;">
+              <div style="width:80px; height:80px; background:var(--hf-neutral-100); border:1px solid var(--hf-border); border-radius: var(--radius-2);"></div>
+              <span class="hf-mono" style="font-size: var(--text-xs);">radius-2 · 4 · chips</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:var(--space-2); align-items:center;">
+              <div style="width:80px; height:80px; background:var(--hf-neutral-100); border:1px solid var(--hf-border); border-radius: var(--radius-3);"></div>
+              <span class="hf-mono" style="font-size: var(--text-xs);">radius-3 · 8 · cards</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Shadows (use sparingly)</span>
+          <div class="demo-row" style="gap: var(--space-5);">
+            <div style="display:flex; flex-direction:column; gap:var(--space-2); align-items:center;">
+              <div style="width:100px; height:64px; background:var(--hf-surface); border-radius: var(--radius-3);"></div>
+              <span class="hf-mono" style="font-size: var(--text-xs);">shadow-0 · none</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:var(--space-2); align-items:center;">
+              <div style="width:100px; height:64px; background:var(--hf-surface); box-shadow: var(--shadow-1); border-radius: var(--radius-3);"></div>
+              <span class="hf-mono" style="font-size: var(--text-xs);">shadow-1 · hairline</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:var(--space-2); align-items:center;">
+              <div style="width:100px; height:64px; background:var(--hf-surface); box-shadow: var(--shadow-2); border-radius: var(--radius-3);"></div>
+              <span class="hf-mono" style="font-size: var(--text-xs);">shadow-2 · popover</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:var(--space-2); align-items:center;">
+              <div style="width:100px; height:64px; background:var(--hf-surface); box-shadow: var(--shadow-3); border-radius: var(--radius-3);"></div>
+              <span class="hf-mono" style="font-size: var(--text-xs);">shadow-3 · modal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== BUTTONS ============== -->
+    <section class="doc-section" id="buttons">
+      <div class="doc-section__head">
+        <span class="doc-section__num">04</span>
+        <h2 class="doc-section__title">Buttons</h2>
+        <p class="doc-section__body">
+          One primary action per screen. Primary is ink-filled; hover
+          deepens to black. The sage variant is reserved for
+          provenance/data-viz actions (e.g. "Save to provenance").
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+
+        <div class="demo">
+          <span class="demo__label">— Variants</span>
+          <div class="demo-row">
+            <button class="hf-btn hf-btn--primary">Run analysis</button>
+            <button class="hf-btn hf-btn--secondary">Cancel</button>
+            <button class="hf-btn hf-btn--ghost">View details</button>
+            <button class="hf-btn hf-btn--sage">Save to provenance</button>
+            <button class="hf-btn hf-btn--danger">Delete analysis</button>
+            <button class="hf-btn hf-btn--primary" disabled>Disabled</button>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Sizes</span>
+          <div class="demo-row">
+            <button class="hf-btn hf-btn--primary hf-btn--sm">Small · 28</button>
+            <button class="hf-btn hf-btn--primary">Default · 36</button>
+            <button class="hf-btn hf-btn--primary hf-btn--lg">Large · 48</button>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— With icon · icon-only</span>
+          <div class="demo-row">
+            <button class="hf-btn hf-btn--primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run
+            </button>
+            <button class="hf-btn hf-btn--secondary">
+              Export
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+            <button class="hf-btn hf-btn--ghost hf-btn--icon" aria-label="More">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+            <button class="hf-btn hf-btn--secondary hf-btn--icon" aria-label="Settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10M4.22 4.22l4.24 4.24m7.08 7.08l4.24 4.24M1 12h6m6 0h10M4.22 19.78l4.24-4.24m7.08-7.08l4.24-4.24"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== FORMS ============== -->
+    <section class="doc-section" id="forms">
+      <div class="doc-section__head">
+        <span class="doc-section__num">05</span>
+        <h2 class="doc-section__title">Form controls</h2>
+        <p class="doc-section__body">
+          Labels are uppercase eyebrows. Hairline borders thicken to ink on
+          hover and gain a soft ink halo on focus. Numbers in inputs are tabular.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demos-grid">
+          <div class="demo">
+            <span class="demo__label">— Text input</span>
+            <div class="hf-field">
+              <label class="hf-field__label" for="d-plant">Plant name</label>
+              <input class="hf-input" id="d-plant" value="Curcuma longa" />
+              <span class="hf-field__hint">Use the Latin binomial when possible.</span>
+            </div>
+          </div>
+          <div class="demo">
+            <span class="demo__label">— With leading icon</span>
+            <div class="hf-field">
+              <label class="hf-field__label" for="d-search">Search targets</label>
+              <div class="hf-input-group">
+                <span class="hf-input-group__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input class="hf-input" id="d-search" placeholder="UniProt ID or gene symbol" />
+              </div>
+            </div>
+          </div>
+          <div class="demo">
+            <span class="demo__label">— Select</span>
+            <div class="hf-field">
+              <label class="hf-field__label" for="d-db">Source database</label>
+              <select class="hf-select" id="d-db">
+                <option>STITCH 5.0</option>
+                <option>SwissTargetPrediction 2024</option>
+                <option>BATMAN-TCM 2.0</option>
+              </select>
+            </div>
+          </div>
+          <div class="demo">
+            <span class="demo__label">— Invalid state</span>
+            <div class="hf-field">
+              <label class="hf-field__label" for="d-conf">Min confidence</label>
+              <input class="hf-input" id="d-conf" value="1.4" aria-invalid="true" />
+              <span class="hf-field__hint hf-field__hint--error">Must be between 0.00 and 1.00.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Textarea</span>
+          <div class="hf-field">
+            <label class="hf-field__label" for="d-notes">Reviewer notes</label>
+            <textarea class="hf-textarea" id="d-notes" placeholder="Add a note for the methods section…">Inflammation cluster is dominated by the NF-κB axis. Consider down-weighting predicted-only edges before disease mapping.</textarea>
+          </div>
+        </div>
+
+        <div class="demos-grid">
+          <div class="demo">
+            <span class="demo__label">— Checkbox</span>
+            <div class="hf-stack">
+              <label class="hf-checkbox"><input type="checkbox" checked> Show only experimentally validated</label>
+              <label class="hf-checkbox"><input type="checkbox" checked> Exclude predicted-only targets</label>
+              <label class="hf-checkbox"><input type="checkbox"> Hide singletons (degree = 1)</label>
+            </div>
+          </div>
+          <div class="demo">
+            <span class="demo__label">— Radio</span>
+            <div class="hf-stack">
+              <label class="hf-radio"><input type="radio" name="d-r" checked> UMAP + Leiden</label>
+              <label class="hf-radio"><input type="radio" name="d-r"> t-SNE + DBSCAN</label>
+              <label class="hf-radio"><input type="radio" name="d-r"> PCA + k-means</label>
+            </div>
+          </div>
+          <div class="demo">
+            <span class="demo__label">— Toggle</span>
+            <div class="hf-stack">
+              <label class="hf-toggle"><input type="checkbox" checked> Auto-save reviewer notes</label>
+              <label class="hf-toggle"><input type="checkbox"> Include predicted edges in export</label>
+              <label class="hf-toggle"><input type="checkbox" checked> Show provenance on hover</label>
+            </div>
+          </div>
+          <div class="demo">
+            <span class="demo__label">— Slider</span>
+            <div class="hf-field">
+              <label class="hf-field__label" for="d-s">Min confidence · <span class="hf-mono">0.65</span></label>
+              <input type="range" id="d-s" class="hf-slider" min="0" max="100" value="65">
+              <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:var(--text-xs); color:var(--hf-fg-3);">
+                <span>0.00</span><span>1.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== CARDS ============== -->
+    <section class="doc-section" id="cards">
+      <div class="doc-section__head">
+        <span class="doc-section__num">06</span>
+        <h2 class="doc-section__title">Cards &amp; glass</h2>
+        <p class="doc-section__body">
+          Three flavours. The glass variant is reserved for floating overlays
+          on data viz — it should feel like vellum laid on a chart, not a
+          chrome widget.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demos-grid">
+          <div class="hf-card">
+            <span class="hf-eyebrow">Standard · .hf-card</span>
+            <h3 class="hf-card__title" style="margin-top: var(--space-2);">Inflammation cluster</h3>
+            <p style="font-size: var(--text-sm); color: var(--hf-fg-2); margin-bottom: var(--space-3);">
+              87 targets across the NF-κB axis. Reviewed on 14 March.
+            </p>
+            <button class="hf-btn hf-btn--secondary hf-btn--sm">Open cluster</button>
+          </div>
+
+          <div class="hf-card hf-card--flat">
+            <span class="hf-eyebrow">Flat · .hf-card--flat</span>
+            <h3 class="hf-card__title" style="margin-top: var(--space-2);">Provenance log</h3>
+            <p style="font-size: var(--text-sm); color: var(--hf-fg-2); margin-bottom: var(--space-3);">
+              14 parameters set · 2 manual overrides · last exported 12:42.
+            </p>
+            <button class="hf-btn hf-btn--ghost hf-btn--sm">View log →</button>
+          </div>
+        </div>
+
+        <!-- Glass surfaces — the brand's primary container pattern -->
+        <div class="demo" style="background: radial-gradient(ellipse at 40% 30%, var(--hf-sage-faint) 0%, var(--hf-surface-2) 60%); padding: var(--space-6);">
+          <span class="demo__label">— Glass surfaces · .hf-card--glass (primary container pattern)</span>
+
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-top: var(--space-4);">
+
+            <!-- Glass stat card -->
+            <div class="hf-card hf-card--glass" style="padding: var(--space-5); display:grid; grid-template-columns: 48px 1fr; gap: var(--space-3); align-items:center;">
+              <span style="width:48px; height:48px; display:grid; place-items:center; border-radius: var(--radius-2); background: rgba(255,255,255,0.5); border: 1px solid var(--hf-glass-border); color: var(--hf-fg-1);">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 5-9 11-9 0 6-4 11-9 11"/></svg>
+              </span>
+              <div>
+                <div style="font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1;">500<span style="font-style: italic; color: var(--hf-fg-3); font-size: 0.6em; vertical-align: 0.4em;">+</span></div>
+                <div style="font-family: var(--font-display); font-size: var(--text-base); margin-top: 2px;">Indonesian plants</div>
+                <div style="font-family: var(--font-sans); font-size: 11px; color: var(--hf-fg-3); margin-top: 2px;">Ethnobotanical + literature‑curated</div>
+              </div>
+            </div>
+
+            <!-- Glass selection summary (from brand sheet) -->
+            <div class="hf-card hf-card--glass" style="padding: var(--space-5);">
+              <span class="hf-eyebrow" style="font-size: 11px;">SELECTION SUMMARY</span>
+              <p style="font-size: var(--text-xs); color: var(--hf-fg-3); margin: var(--space-1) 0 var(--space-3); line-height: var(--lh-prose);">Overview of your current selection.</p>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px dashed var(--hf-border);">
+                <div>
+                  <div style="display:flex; align-items:center; gap: var(--space-2); font-size: var(--text-xs); color: var(--hf-fg-3);">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 5-9 11-9 0 6-4 11-9 11"/></svg>
+                    2 plants selected
+                  </div>
+                  <div style="font-family: var(--font-display); font-size: var(--text-xl); margin-top: var(--space-1); line-height: 1;">342</div>
+                  <div style="font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-3); margin-top: 2px;">total compounds retrieved</div>
+                </div>
+                <div>
+                  <div style="display:flex; align-items:center; gap: var(--space-2); font-size: var(--text-xs); color: var(--hf-fg-3);">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    1 disease selected
+                  </div>
+                  <div style="font-family: var(--font-display); font-size: var(--text-xl); margin-top: var(--space-1); line-height: 1;">1,248</div>
+                  <div style="font-family: var(--font-mono); font-size: 10px; color: var(--hf-fg-3); margin-top: 2px;">known disease targets</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Glass tooltip -->
+            <div class="hf-card hf-card--glass" style="padding: var(--space-4); align-self: start;">
+              <span class="hf-eyebrow" style="font-size: 10px;">TOOLTIP</span>
+              <p style="font-family: var(--font-sans); font-size: var(--text-md); color: var(--hf-fg-1); margin: var(--space-2) 0 var(--space-1); font-weight: var(--fw-medium);">TNF · degree 0.94</p>
+              <p style="font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); margin: 0;">P01375 · validated</p>
+              <p style="font-family: var(--font-mono); font-size: 11px; color: var(--hf-fg-3); margin: 0;">via STITCH 5.0</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Glass interactive components -->
+        <div class="demo" style="background: radial-gradient(ellipse at 70% 40%, var(--hf-sage-faint) 0%, var(--hf-surface-2) 60%); padding: var(--space-6);">
+          <span class="demo__label">— Glass controls · search · CTA pill · toggle</span>
+
+          <div style="display:flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-4); align-items: center;">
+
+            <!-- Glass search -->
+            <div style="position: relative; width: 100%; max-width: 420px;">
+              <span style="position:absolute; left: var(--space-4); top: 50%; transform: translateY(-50%); color: var(--hf-fg-3);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </span>
+              <input class="hf-input" placeholder="Search plants…" style="background: var(--hf-glass-bg-strong); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-color: var(--hf-glass-border); padding-left: 44px; height: 48px; border-radius: var(--radius-pill);" />
+            </div>
+
+            <!-- Glass selected item chip -->
+            <div style="display:flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); background: var(--hf-glass-bg-strong); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%); border: 1px solid var(--hf-glass-border); border-radius: var(--radius-pill); box-shadow: var(--hf-glass-shadow); width: 100%; max-width: 420px; justify-content: space-between;">
+              <div style="display:flex; align-items: center; gap: var(--space-3);">
+                <span style="width: 24px; height: 24px; border-radius: 4px; background: var(--hf-neutral-100); display:grid; place-items:center;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--hf-fg-1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 5-9 11-9 0 6-4 11-9 11"/></svg>
+                </span>
+                <span style="font-size: var(--text-sm); color: var(--hf-fg-1);">Temulawak <em style="font-style: italic; color: var(--hf-fg-3);">(Curcuma xanthorrhiza)</em></span>
+              </div>
+              <button aria-label="Remove" style="width: 24px; height: 24px; border: 0; background: transparent; cursor: pointer; color: var(--hf-fg-3); display:grid; place-items:center;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
+            <!-- Glass CTA pill -->
+            <button style="display:inline-flex; align-items:center; gap: var(--space-4); padding: 14px var(--space-5); min-width: 260px; justify-content: space-between; background: var(--hf-glass-bg-strong); -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%); border: 1px solid var(--hf-glass-border); border-radius: var(--radius-pill); box-shadow: 0 1px 1px rgba(26,26,26,0.04), 0 18px 40px -16px rgba(26,26,26,0.20); font-family: var(--font-sans); font-size: var(--text-md); color: var(--hf-fg-1); cursor: pointer;">
+              Start analysis
+              <span style="width: 28px; height: 28px; border-radius: 50%; display:grid; place-items:center; background: var(--hf-fg-1); color: var(--hf-neutral-50);">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </button>
+
+            <!-- Glass theme toggle -->
+            <div style="display:inline-flex; align-items:center; gap: 2px; padding: 4px; border-radius: var(--radius-pill); background: var(--hf-glass-bg-strong); -webkit-backdrop-filter: blur(14px) saturate(140%); backdrop-filter: blur(14px) saturate(140%); border: 1px solid var(--hf-glass-border); box-shadow: var(--hf-glass-shadow);">
+              <button aria-pressed="true" style="width: 28px; height: 28px; display:grid; place-items:center; border: 0; background: var(--hf-fg-1); color: var(--hf-neutral-50); border-radius: 50%; cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              </button>
+              <button aria-pressed="false" style="width: 28px; height: 28px; display:grid; place-items:center; border: 0; background: transparent; color: var(--hf-fg-3); border-radius: 50%; cursor: pointer;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recipe / when to use -->
+        <div class="hf-card hf-card--flat">
+          <span class="hf-eyebrow">When to use glass</span>
+          <ul style="list-style: none; padding: 0; margin: var(--space-3) 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); font-size: var(--text-sm); color: var(--hf-fg-2); line-height: var(--lh-prose);">
+            <li>✓ Stat cards on the landing hero</li>
+            <li>✗ Inside dense table rows</li>
+            <li>✓ Floating overlays on data viz</li>
+            <li>✗ As a button background in dense UIs</li>
+            <li>✓ CTAs over busy backgrounds</li>
+            <li>✗ Layered on top of another glass surface</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== BADGES ============== -->
+    <section class="doc-section" id="badges">
+      <div class="doc-section__head">
+        <span class="doc-section__num">07</span>
+        <h2 class="doc-section__title">Badges &amp; status</h2>
+        <p class="doc-section__body">
+          Carry meaning, never mood. Use the dot variant for compact list rows.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demo">
+          <span class="demo__label">— Standard</span>
+          <div class="demo-row">
+            <span class="hf-badge">default</span>
+            <span class="hf-badge hf-badge--sage">sage · selected</span>
+            <span class="hf-badge hf-badge--terra">terracotta</span>
+            <span class="hf-badge hf-badge--success">✓ validated</span>
+            <span class="hf-badge hf-badge--warning">! low coverage</span>
+            <span class="hf-badge hf-badge--danger">deprecated</span>
+            <span class="hf-badge hf-badge--info">predicted</span>
+            <span class="hf-badge hf-badge--outline">outline</span>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="demo__label">— Pill</span>
+          <div class="demo-row">
+            <span class="hf-badge hf-badge--pill"><span class="hf-dot hf-dot--sage"></span>cluster A</span>
+            <span class="hf-badge hf-badge--pill hf-badge--sage"><span class="hf-dot" style="background:#3D4B36"></span>87 targets</span>
+            <span class="hf-badge hf-badge--pill hf-badge--info">P05231</span>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="demo__label">— Inline dots</span>
+          <div class="demo-row" style="gap: var(--space-5); font-size: var(--text-sm);">
+            <span><span class="hf-dot hf-dot--success"></span>Completed</span>
+            <span><span class="hf-dot hf-dot--sage"></span>Running</span>
+            <span><span class="hf-dot hf-dot--warning"></span>Stale (3 days)</span>
+            <span><span class="hf-dot hf-dot--danger"></span>Failed</span>
+            <span><span class="hf-dot"></span>Pending</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== TABLES ============== -->
+    <section class="doc-section" id="tables">
+      <div class="doc-section__head">
+        <span class="doc-section__num">08</span>
+        <h2 class="doc-section__title">Tables</h2>
+        <p class="doc-section__body">
+          Headers are tracked uppercase. Numeric columns use tabular‑nums and
+          right‑align. Selected rows tint sage‑faint.
+        </p>
+      </div>
+      <div>
+        <div class="hf-card" style="padding:0; overflow:hidden;">
+          <table class="hf-table">
+            <thead>
+              <tr>
+                <th>Target</th>
+                <th>Gene</th>
+                <th>UniProt</th>
+                <th class="hf-num">Confidence</th>
+                <th class="hf-num">Degree</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr aria-selected="true">
+                <td>Tumor necrosis factor</td>
+                <td><span class="hf-mono">TNF</span></td>
+                <td><span class="hf-mono">P01375</span></td>
+                <td class="hf-num">0.94</td>
+                <td class="hf-num">128</td>
+                <td><span class="hf-badge hf-badge--success">validated</span></td>
+              </tr>
+              <tr>
+                <td>NF-κB subunit p105</td>
+                <td><span class="hf-mono">NFKB1</span></td>
+                <td><span class="hf-mono">P19838</span></td>
+                <td class="hf-num">0.89</td>
+                <td class="hf-num">114</td>
+                <td><span class="hf-badge hf-badge--success">validated</span></td>
+              </tr>
+              <tr>
+                <td>Cyclooxygenase-2</td>
+                <td><span class="hf-mono">PTGS2</span></td>
+                <td><span class="hf-mono">P35354</span></td>
+                <td class="hf-num">0.81</td>
+                <td class="hf-num">96</td>
+                <td><span class="hf-badge hf-badge--info">predicted</span></td>
+              </tr>
+              <tr>
+                <td>Interleukin-6</td>
+                <td><span class="hf-mono">IL6</span></td>
+                <td><span class="hf-mono">P05231</span></td>
+                <td class="hf-num">0.76</td>
+                <td class="hf-num">88</td>
+                <td><span class="hf-badge hf-badge--success">validated</span></td>
+              </tr>
+              <tr>
+                <td>IκB kinase β</td>
+                <td><span class="hf-mono">IKBKB</span></td>
+                <td><span class="hf-mono">O14920</span></td>
+                <td class="hf-num">0.71</td>
+                <td class="hf-num">72</td>
+                <td><span class="hf-badge hf-badge--warning">stale · 2024</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== NAV ============== -->
+    <section class="doc-section" id="nav">
+      <div class="doc-section__head">
+        <span class="doc-section__num">09</span>
+        <h2 class="doc-section__title">Navigation</h2>
+        <p class="doc-section__body">
+          Top nav for marketing pages; left sidebar for the analysis workspace.
+          Steps in the sidebar render as a list with done / current / pending states.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+
+        <div class="demo" style="padding:0; overflow:hidden;">
+          <span class="demo__label" style="padding: var(--space-4) var(--space-4) 0;">— Top nav</span>
+          <nav class="hf-nav" style="border-bottom: 0;">
+            <a class="hf-nav__brand">herbaflow</a>
+            <div class="hf-nav__items">
+              <a class="hf-nav__item">Workflow</a>
+              <a class="hf-nav__item" aria-current="page">Principles</a>
+              <a class="hf-nav__item">About</a>
+              <button class="hf-btn hf-btn--secondary hf-btn--sm">Open analysis →</button>
+            </div>
+          </nav>
+        </div>
+
+        <div class="demo" style="padding: 0;">
+          <span class="demo__label" style="padding: var(--space-4) var(--space-4) 0;">— Sidebar (workspace)</span>
+          <div style="display:grid; grid-template-columns: 240px 1fr; min-height: 320px;">
+            <aside class="hf-sidebar" style="border-radius: 0 0 0 var(--radius-3);">
+              <span class="hf-eyebrow">Pipeline</span>
+              <ul class="hf-steps" style="margin-top:var(--space-3);">
+                <li class="hf-step" data-status="done"><span class="hf-step__num">01</span><div><span class="hf-step__title">Metabolites</span><span class="hf-step__meta">47 compounds</span></div></li>
+                <li class="hf-step" data-status="done"><span class="hf-step__num">02</span><div><span class="hf-step__title">Targets</span><span class="hf-step__meta">312 targets</span></div></li>
+                <li class="hf-step" aria-current="step"><span class="hf-step__num">03</span><div><span class="hf-step__title">Clusters</span><span class="hf-step__meta">running</span></div></li>
+                <li class="hf-step"><span class="hf-step__num">04</span><div><span class="hf-step__title">Diseases</span><span class="hf-step__meta">pending</span></div></li>
+                <li class="hf-step"><span class="hf-step__num">05</span><div><span class="hf-step__title">Review</span><span class="hf-step__meta">pending</span></div></li>
+              </ul>
+            </aside>
+            <div style="padding: var(--space-5); color: var(--hf-fg-3); font-size: var(--text-sm); display:grid; place-items:center;">
+              <span class="hf-bracket">workspace</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== MODAL / TOAST ============== -->
+    <section class="doc-section" id="modals">
+      <div class="doc-section__head">
+        <span class="doc-section__num">10</span>
+        <h2 class="doc-section__title">Modals &amp; toasts</h2>
+        <p class="doc-section__body">
+          Destructive confirms name the consequence. Toasts are dark
+          ink — they don't compete with the page.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demo" style="background: var(--hf-neutral-100);">
+          <span class="demo__label">— Confirm dialog</span>
+          <div style="display: grid; place-items: center; min-height: 280px;">
+            <div class="hf-modal" style="box-shadow: var(--shadow-3);">
+              <h3 class="hf-modal__title">Delete this analysis?</h3>
+              <p class="hf-modal__body">
+                You'll lose this analysis and its 14 saved steps. The provenance
+                log will be archived for 30 days.
+              </p>
+              <div class="hf-modal__actions">
+                <button class="hf-btn hf-btn--ghost">Cancel</button>
+                <button class="hf-btn hf-btn--danger">Delete &amp; archive log</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Toasts</span>
+          <div class="hf-stack">
+            <div class="hf-toast"><span class="hf-dot"></span>Saved to provenance · 12:42</div>
+            <div class="hf-toast"><span class="hf-dot" style="background:var(--hf-warning);"></span>Targets database is 3 days stale.</div>
+            <div class="hf-toast"><span class="hf-dot" style="background:var(--hf-danger);"></span>STITCH lookup failed — using cached set.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== EMPTY / LOADING ============== -->
+    <section class="doc-section" id="states">
+      <div class="doc-section__head">
+        <span class="doc-section__num">11</span>
+        <h2 class="doc-section__title">Empty &amp; loading</h2>
+        <p class="doc-section__body">
+          Empty states name the filter that emptied the view. Loading states
+          name what's being fetched.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demos-grid">
+          <div class="demo">
+            <span class="demo__label">— Empty</span>
+            <div class="hf-empty">
+              <span class="hf-empty__glyph">[ · · · ]</span>
+              <h3 class="hf-empty__title">No metabolites match these filters</h3>
+              <p class="hf-empty__body">
+                The current oral-bioavailability cut-off excludes every compound in
+                <span class="hf-binomial">Curcuma longa</span>'s profile.
+              </p>
+              <button class="hf-btn hf-btn--secondary hf-btn--sm">Reset filters</button>
+            </div>
+          </div>
+          <div class="demo">
+            <span class="demo__label">— Loading (named)</span>
+            <div class="hf-empty">
+              <span class="hf-empty__glyph">— — —</span>
+              <h3 class="hf-empty__title">Fetching targets…</h3>
+              <p class="hf-empty__body">
+                Querying STITCH 5.0 and SwissTargetPrediction for 47 metabolites.
+                This usually takes 8–12 seconds.
+              </p>
+              <div class="hf-loading">
+                <span class="hf-loading__bar"></span>
+                <span class="hf-loading__bar"></span>
+                <span class="hf-loading__bar"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Progress bar</span>
+          <div class="hf-stack">
+            <div style="display:flex; align-items:center; gap: var(--space-3);">
+              <div class="hf-progress" style="flex:1;"><div class="hf-progress__fill" style="width: 32%;"></div></div>
+              <span class="hf-mono" style="font-size: var(--text-xs); color: var(--hf-fg-3);">32% · 47 / 147 metabolites</span>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--space-3);">
+              <div class="hf-progress hf-progress--indeterminate" style="flex:1;"><div class="hf-progress__fill"></div></div>
+              <span class="hf-mono" style="font-size: var(--text-xs); color: var(--hf-fg-3);">clustering…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== DATA VIZ ============== -->
+    <section class="doc-section" id="viz">
+      <div class="doc-section__head">
+        <span class="doc-section__num">12</span>
+        <h2 class="doc-section__title">Data‑viz primitives</h2>
+        <p class="doc-section__body">
+          Axis labels use mono at 10–11px. Grid lines are dashed border tokens.
+          Categorical scale uses ink → sage → info → warning → terracotta.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+
+        <div class="hf-chart">
+          <div class="hf-chart__header">
+            <h3 class="hf-chart__title">Targets per cluster</h3>
+            <div class="hf-legend">
+              <div class="hf-legend__item"><span class="hf-legend__swatch" style="background:var(--hf-fg-1);"></span>Inflammation</div>
+              <div class="hf-legend__item"><span class="hf-legend__swatch" style="background:var(--hf-sage-deep);"></span>Oxidative</div>
+              <div class="hf-legend__item"><span class="hf-legend__swatch" style="background:var(--hf-terracotta);"></span>Apoptosis</div>
+              <div class="hf-legend__item"><span class="hf-legend__swatch" style="background:var(--hf-info);"></span>Immune</div>
+              <div class="hf-legend__item"><span class="hf-legend__swatch" style="background:var(--hf-warning);"></span>Metabolic</div>
+            </div>
+          </div>
+
+          <svg viewBox="0 0 800 220" preserveAspectRatio="none" style="display:block; width:100%; height:220px;">
+            <!-- grid -->
+            <line class="hf-grid-line" x1="0" y1="50"  x2="800" y2="50"/>
+            <line class="hf-grid-line" x1="0" y1="100" x2="800" y2="100"/>
+            <line class="hf-grid-line" x1="0" y1="150" x2="800" y2="150"/>
+            <line class="hf-axis-line" x1="0" y1="200" x2="800" y2="200"/>
+
+            <!-- bars -->
+            <g>
+              <rect x="60"  y="40"  width="80" height="160" fill="var(--hf-fg-1)"/>
+              <rect x="200" y="80"  width="80" height="120" fill="var(--hf-sage-deep)"/>
+              <rect x="340" y="130" width="80" height="70"  fill="var(--hf-terracotta)"/>
+              <rect x="480" y="60"  width="80" height="140" fill="var(--hf-info)"/>
+              <rect x="620" y="105" width="80" height="95"  fill="var(--hf-warning)"/>
+            </g>
+
+            <!-- value labels -->
+            <text class="hf-axis-tick" x="100" y="32" text-anchor="middle">87</text>
+            <text class="hf-axis-tick" x="240" y="72" text-anchor="middle">64</text>
+            <text class="hf-axis-tick" x="380" y="122" text-anchor="middle">38</text>
+            <text class="hf-axis-tick" x="520" y="52" text-anchor="middle">73</text>
+            <text class="hf-axis-tick" x="660" y="97" text-anchor="middle">50</text>
+
+            <!-- x-labels -->
+            <text class="hf-axis-tick" x="100" y="215" text-anchor="middle">inflammation</text>
+            <text class="hf-axis-tick" x="240" y="215" text-anchor="middle">oxidative</text>
+            <text class="hf-axis-tick" x="380" y="215" text-anchor="middle">apoptosis</text>
+            <text class="hf-axis-tick" x="520" y="215" text-anchor="middle">immune</text>
+            <text class="hf-axis-tick" x="660" y="215" text-anchor="middle">metabolic</text>
+          </svg>
+        </div>
+
+        <div class="hf-chart">
+          <div class="hf-chart__header">
+            <h3 class="hf-chart__title">Cluster connectivity (over iterations)</h3>
+            <span class="hf-bracket">stable @ iter 18</span>
+          </div>
+
+          <svg viewBox="0 0 800 200" preserveAspectRatio="none" style="display:block; width:100%; height:200px;">
+            <line class="hf-grid-line" x1="0" y1="50"  x2="800" y2="50"/>
+            <line class="hf-grid-line" x1="0" y1="100" x2="800" y2="100"/>
+            <line class="hf-grid-line" x1="0" y1="150" x2="800" y2="150"/>
+            <line class="hf-axis-line" x1="0" y1="190" x2="800" y2="190"/>
+            <!-- line -->
+            <polyline fill="none" stroke="var(--hf-fg-1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+              points="0,170 40,165 80,155 120,150 160,140 200,130 240,120 280,110 320,100 360,80 400,72 440,60 480,55 520,40 560,38 600,30 640,24 680,18 720,15 760,13 800,12"/>
+            <!-- secondary -->
+            <polyline fill="none" stroke="var(--hf-terracotta)" stroke-width="1.25" stroke-dasharray="4 3"
+              points="0,180 40,178 80,170 120,168 160,160 200,150 240,142 280,138 320,128 360,120 400,108 440,98 480,90 520,82 560,76 600,68 640,60 680,54 720,48 760,44 800,40"/>
+
+            <text class="hf-axis-tick" x="0"   y="195">iter 0</text>
+            <text class="hf-axis-tick" x="395" y="195" text-anchor="middle">iter 10</text>
+            <text class="hf-axis-tick" x="795" y="195" text-anchor="end">iter 20</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== ICONOGRAPHY ============== -->
+    <section class="doc-section" id="icons">
+      <div class="doc-section__head">
+        <span class="doc-section__num">13</span>
+        <h2 class="doc-section__title">Iconography</h2>
+        <p class="doc-section__body">
+          Hairline 1.25px stroke, 24px box, rounded caps. Lucide outline is
+          the source set; custom science glyphs are drawn to match.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demo">
+          <span class="demo__label">— Sample set</span>
+          <div class="icon-grid">
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <div class="icon-name">search</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="icon-name">check</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+              <div class="icon-name">play</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+              <div class="icon-name">settings</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+              <div class="icon-name">download</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+              <div class="icon-name">flask</div>
+            </div>
+            <div>
+              <div class="icon-cell">
+                <svg viewBox="0 0 24 24">
+                  <!-- DNA glyph -->
+                  <path d="M4 4c4 0 4 4 8 4s4-4 8-4"/>
+                  <path d="M4 12c4 0 4 4 8 4s4-4 8-4"/>
+                  <path d="M4 20c4 0 4-4 8-4s4 4 8 4"/>
+                  <path d="M4 12c4 0 4-4 8-4s4 4 8 4"/>
+                </svg>
+              </div>
+              <div class="icon-name">dna</div>
+            </div>
+            <div>
+              <div class="icon-cell">
+                <svg viewBox="0 0 24 24">
+                  <!-- Network -->
+                  <circle cx="6" cy="6" r="2"/>
+                  <circle cx="18" cy="6" r="2"/>
+                  <circle cx="12" cy="14" r="2"/>
+                  <circle cx="6" cy="20" r="2"/>
+                  <circle cx="18" cy="20" r="2"/>
+                  <line x1="7.5" y1="7.5" x2="10.5" y2="12.5"/>
+                  <line x1="16.5" y1="7.5" x2="13.5" y2="12.5"/>
+                  <line x1="7.5" y1="18.5" x2="10.5" y2="15.5"/>
+                  <line x1="16.5" y1="18.5" x2="13.5" y2="15.5"/>
+                </svg>
+              </div>
+              <div class="icon-name">network</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div>
+              <div class="icon-name">save</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+              <div class="icon-name">info</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+              <div class="icon-name">warning</div>
+            </div>
+            <div>
+              <div class="icon-cell"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div class="icon-name">verified</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <span class="demo__label">— Pixel grid · 24px, 1.25 stroke, round caps</span>
+          <div style="display:flex; gap: var(--space-5); align-items:center;">
+            <div style="position:relative; width:120px; height:120px; background: var(--hf-surface-2); border: 1px solid var(--hf-border); border-radius: var(--radius-2);">
+              <svg viewBox="0 0 24 24" style="position:absolute; inset:0; margin: auto; width:60px; height:60px; stroke: var(--hf-fg-1); stroke-width: 1.25; fill: none; stroke-linecap: round; stroke-linejoin: round;">
+                <circle cx="12" cy="12" r="9"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="12" y1="3" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <p style="font-size: var(--text-sm); color: var(--hf-fg-3); line-height: var(--lh-prose); max-width: 36ch;">
+              Draw icons on a 24‑px grid with 1‑px optical margin. Stroke 1.25 px,
+              round caps, round joins. No fills, no gradients, no two‑weight mixes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== LOGO ============== -->
+    <section class="doc-section" id="logo">
+      <div class="doc-section__head">
+        <span class="doc-section__num">14</span>
+        <h2 class="doc-section__title">Logo lockups</h2>
+        <p class="doc-section__body">
+          The wordmark <em>is</em> the mark. Lowercase, no italics, no recolour.
+          Always shipped as <code class="hf-mono">assets/herbaflow-logo.png</code>
+          via the <code class="hf-mono">.hf-brand</code> lockup — never re-typeset.
+        </p>
+      </div>
+      <div class="hf-stack hf-stack--lg">
+        <div class="demo">
+          <span class="demo__label">— Primary lockup (mark + wordmark + tagline)</span>
+          <div style="padding: var(--space-6) 0; display:flex; justify-content:center;">
+            <div class="hf-brand hf-brand--xl">
+              <img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt="Herbaflow" />
+              <span class="hf-brand__tag">Integrated network pharmacology platform</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Sizes</span>
+          <div class="demo-row" style="gap: var(--space-7); align-items: baseline; padding: var(--space-4) 0;">
+            <div class="hf-brand hf-brand--xl"><img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt=""/></div>
+            <div class="hf-brand hf-brand--lg"><img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt=""/></div>
+            <div class="hf-brand"><img class="hf-brand__mark" src="../assets/herbaflow-logo.png" alt=""/></div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Glyph-only · .hf-glyph · favicons, avatars, dense UI</span>
+          <div class="demo-row" style="gap: var(--space-7); align-items: end; padding: var(--space-4) 0; justify-content: center;">
+            <div style="display:flex; flex-direction:column; gap: var(--space-2); align-items:center;">
+              <img class="hf-glyph hf-glyph--xl" src="../assets/herbaflow-glyph.png" alt="Herbaflow" />
+              <span class="hf-mono" style="font-size: var(--text-xs); color: var(--hf-fg-3);">.hf-glyph--xl · 96</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: var(--space-2); align-items:center;">
+              <img class="hf-glyph hf-glyph--lg" src="../assets/herbaflow-glyph.png" alt="" />
+              <span class="hf-mono" style="font-size: var(--text-xs); color: var(--hf-fg-3);">.hf-glyph--lg · 56</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: var(--space-2); align-items:center;">
+              <img class="hf-glyph" src="../assets/herbaflow-glyph.png" alt="" />
+              <span class="hf-mono" style="font-size: var(--text-xs); color: var(--hf-fg-3);">.hf-glyph · 32</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: var(--space-2); align-items:center;">
+              <img class="hf-glyph hf-glyph--sm" src="../assets/herbaflow-glyph.png" alt="" />
+              <span class="hf-mono" style="font-size: var(--text-xs); color: var(--hf-fg-3);">.hf-glyph--sm · 20 (favicon)</span>
+            </div>
+          </div>
+          <p style="font-size: var(--text-sm); color: var(--hf-fg-3); line-height: var(--lh-prose); margin-top: var(--space-3); max-width: 60ch;">
+            The wordmark is the brand; the glyph is a sigil. Use the glyph only where the full
+            lockup can't fit — favicons, social/OG avatars, app icons, chat avatars, dense lists.
+          </p>
+        </div>
+
+        <div class="demos-grid">
+          <div class="demo" style="background: var(--hf-neutral-50);">
+            <span class="demo__label">— On paper</span>
+            <div style="padding: var(--space-7) 0; display:grid; place-items:center;">
+              <img src="../assets/herbaflow-logo.png" alt="Herbaflow" style="height: 56px;" />
+            </div>
+          </div>
+          <div class="demo" style="background: var(--hf-fg-1);">
+            <span class="demo__label" style="color: var(--hf-fg-4);">— On ink</span>
+            <div style="padding: var(--space-7) 0; display:grid; place-items:center;">
+              <img src="../assets/herbaflow-logo.png" alt="Herbaflow" style="height: 56px; filter: invert(1);" />
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Clear space</span>
+          <div style="padding: var(--space-6); background: var(--hf-surface-2); border-radius: var(--radius-3); display:grid; place-items:center; position: relative;">
+            <div style="position:absolute; inset: var(--space-5); border: 1px dashed var(--hf-border-strong);"></div>
+            <img src="../assets/herbaflow-logo.png" alt="Herbaflow" style="height: 64px; position: relative; z-index: 2; padding: var(--space-6) var(--space-7); background: var(--hf-surface-2);" />
+            <span class="hf-bracket" style="position:absolute; top: var(--space-3); left: var(--space-4);">clear space = h-height</span>
+          </div>
+        </div>
+
+        <div class="demo">
+          <span class="demo__label">— Don't</span>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); align-items: center;">
+            <div style="display:flex; flex-direction:column; gap: var(--space-3); align-items:center; padding: var(--space-4); position: relative;">
+              <img src="../assets/herbaflow-logo.png" alt="" style="height: 36px; filter: sepia(1) hue-rotate(330deg) saturate(3);" />
+              <svg viewBox="0 0 100 60" style="position: absolute; top:0; left:0; width: 100%; height: 100%; pointer-events:none;"><line x1="5" y1="50" x2="95" y2="10" stroke="var(--hf-danger)" stroke-width="1.5"/></svg>
+              <span class="hf-bracket">no recolour</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: var(--space-3); align-items:center; padding: var(--space-4); position: relative;">
+              <img src="../assets/herbaflow-logo.png" alt="" style="height: 36px; transform: skewX(-12deg);" />
+              <svg viewBox="0 0 100 60" style="position: absolute; top:0; left:0; width: 100%; height: 100%; pointer-events:none;"><line x1="5" y1="50" x2="95" y2="10" stroke="var(--hf-danger)" stroke-width="1.5"/></svg>
+              <span class="hf-bracket">no distort</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: var(--space-3); align-items:center; padding: var(--space-4); position: relative; background: url('../assets/source-brand-style.png') center/cover;">
+              <img src="../assets/herbaflow-logo.png" alt="" style="height: 36px;" />
+              <svg viewBox="0 0 100 60" style="position: absolute; top:0; left:0; width: 100%; height: 100%; pointer-events:none;"><line x1="5" y1="50" x2="95" y2="10" stroke="var(--hf-danger)" stroke-width="1.5"/></svg>
+              <span class="hf-bracket" style="background: var(--hf-surface); padding: 2px 6px;">no busy bg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer style="max-width:1280px; margin: 0 auto; padding: var(--space-5) var(--space-6); border-top: 1px solid var(--hf-border); display:flex; justify-content:space-between; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--hf-fg-4);">
+    <span>Herbaflow Design System · v1.0</span>
+    <span><a href="../index.html" class="hf-link">↑ Index</a></span>
+  </footer>
+
+</body>
+</html>

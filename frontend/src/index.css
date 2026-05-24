@@ -1,40 +1,42 @@
 /* All @import statements must precede @tailwind directives */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
-@import '../../design-system/colors_and_type.css';
-@import '../../design-system/components.css';
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+@import "styles/colors_and_types.css";
+@import "styles/components.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* Map shadcn/ui CSS vars → hf tokens */
-    --background:    var(--hf-bg);
-    --foreground:    var(--hf-fg-1);
-    --card:          var(--hf-surface);
-    --card-foreground: var(--hf-fg-1);
-    --popover:       var(--hf-surface);
-    --popover-foreground: var(--hf-fg-1);
-    --primary:       var(--hf-neutral-900);
-    --primary-foreground: #ffffff;
-    --secondary:     var(--hf-neutral-100);
-    --secondary-foreground: var(--hf-fg-1);
-    --muted:         var(--hf-neutral-100);
-    --muted-foreground: var(--hf-fg-3);
-    --accent:        var(--hf-neutral-100);
-    --accent-foreground: var(--hf-fg-1);
-    --destructive:   var(--hf-danger);
-    --destructive-foreground: #ffffff;
-    --border:        var(--hf-border);
-    --input:         var(--hf-border);
-    --ring:          var(--hf-fg-1);
-    --radius:        4px;
-  }
+    :root {
+        /* Map shadcn/ui CSS vars → hf tokens */
+        --background: var(--hf-bg);
+        --foreground: var(--hf-fg-1);
+        --card: var(--hf-surface);
+        --card-foreground: var(--hf-fg-1);
+        --popover: var(--hf-surface);
+        --popover-foreground: var(--hf-fg-1);
+        --primary: var(--hf-neutral-900);
+        --primary-foreground: #ffffff;
+        --secondary: var(--hf-neutral-100);
+        --secondary-foreground: var(--hf-fg-1);
+        --muted: var(--hf-neutral-100);
+        --muted-foreground: var(--hf-fg-3);
+        --accent: var(--hf-neutral-100);
+        --accent-foreground: var(--hf-fg-1);
+        --destructive: var(--hf-danger);
+        --destructive-foreground: #ffffff;
+        --border: var(--hf-border);
+        --input: var(--hf-border);
+        --ring: var(--hf-fg-1);
+        --radius: 4px;
+    }
 
-  * { @apply border-border; }
-  body {
-    @apply bg-hf-bg text-hf-fg1 font-sans;
-    font-size: var(--text-base);
-  }
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-hf-bg text-hf-fg1 font-sans;
+        font-size: var(--text-base);
+    }
 }

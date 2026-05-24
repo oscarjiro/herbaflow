@@ -1,73 +1,65 @@
-# React + TypeScript + Vite
+# Herbaflow Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 18 + TypeScript SPA for the Herbaflow network pharmacology platform. Provides a
+UI for the 8-stage drug-discovery pipeline — compound selection, ADME screening, target
+identification, disease association, PPI network visualization, hub gene ranking, and
+pathway enrichment.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Layer | Library |
+|---|---|
+| UI framework | React 18 + TypeScript 5 + Vite 6 |
+| Routing | React Router v7 |
+| Server state | TanStack Query v5 (polling, cache invalidation) |
+| Styling | Tailwind CSS v3 — `hf-*` design tokens only |
+| Components | shadcn/ui (Radix primitives) |
+| Network viz | Cytoscape.js + cytoscape-fcose |
+| Charts | Recharts |
+| Unit / integration tests | Vitest + React Testing Library + MSW v2 |
+| E2E tests | Playwright |
 
-## React Compiler
+## Dev Commands
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm dev                        # Start dev server at http://localhost:5173
+pnpm build                      # TypeScript check + Vite production build
+pnpm test                       # Vitest unit + integration tests (watch mode)
+pnpm test:run                   # Vitest run (CI)
+pnpm test:coverage              # Coverage report
+pnpm exec playwright install    # First-time browser install (run once)
+pnpm exec playwright test       # E2E tests (requires backend at localhost:8000)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Architecture
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Path | Contents |
+|---|---|
+| `src/pages/` | `LandingPage`, `AboutPage`, `SetupPage`, `PipelinePage` |
+| `src/components/shared/` | `StatCard`, `DataTable`, `StatusBadge`, `ExportButton`, `StageHeader`, `ApprovalBar`, `EmptyState`, `ErrorState` |
+| `src/components/stages/` | `Stage1Panel` – `Stage8Panel` |
+| `src/components/setup/` | `PlantSelector`, `DiseaseSelector`, `ModeToggle`, `AdvancedParameters` |
+| `src/components/pipeline/` | `PipelineSidebar`, `StageNavItem` |
+| `src/hooks/` | TanStack Query hooks (`useAnalysisStatus`, `usePlants`, `useDiseases`, etc.) |
+| `src/types/api.ts` | TypeScript types matching all backend schemas |
+| `src/lib/api.ts` | Typed fetch wrappers; base URL from `VITE_API_URL` |
+| `src/mocks/` | MSW handlers and fixtures for Vitest |
+| `tests/unit/` | Unit tests for shared components and hooks |
+| `tests/integration/` | Integration tests for setup and pipeline flows |
+| `e2e/` | Playwright end-to-end specs |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Environment
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:8000` | Backend API base URL |
+
+## Key Notes
+
+- Design tokens: use `hf-*` Tailwind classes only — never raw hex or Tailwind defaults (`gray-*`, `white`)
+- `hf-sage` and `hf-terracotta` are data-visualization tokens — not for buttons or nav
+- Stage panel data must always be null-guarded: `const result = analysis?.stage_results[String(n)] as StageNResult | null | undefined`
+- Polling uses TanStack Query `refetchInterval` + `enabled: !isTerminalStatus(...)` — never poll manually
+- E2E tests require the backend server running at `localhost:8000` and Playwright browsers installed
+
+See `CLAUDE.md` for the full developer reference (conventions, constraints, adding a stage panel).
