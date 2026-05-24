@@ -90,6 +90,7 @@ COMPOUNDS_COLUMNS = [
     "np_likeness_score",
     "num_ro5_violations",
     "lipinski_source",
+    "is_pains_positive",
     "source_name",
     "source_url",
     "source_batch_id",

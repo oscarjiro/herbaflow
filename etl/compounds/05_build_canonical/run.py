@@ -148,6 +148,8 @@ ENRICH_RESULT_COLUMNS = [
     "cache_hit",
     "cache_key",
     "review_reason",
+    "lipinski_source",
+    "is_pains_positive",
 ]
 
 ENRICH_MEMBER_MAP_COLUMNS = [
@@ -216,6 +218,7 @@ COMPOUNDS_COLUMNS = [
     "np_likeness_score",
     "num_ro5_violations",
     "lipinski_source",
+    "is_pains_positive",
     "source_name",
     "source_url",
     "source_batch_id",
@@ -1462,6 +1465,7 @@ def build_canonical_tables(
         np_likeness_score = normalize_whitespace(best_candidate.get("np_likeness_score", ""))
         num_ro5_violations = normalize_whitespace(best_candidate.get("num_ro5_violations", ""))
         lipinski_source = normalize_whitespace(best_candidate.get("lipinski_source", ""))
+        is_pains_positive = normalize_whitespace(best_candidate.get("is_pains_positive", ""))
         inchi_key = candidate_inchi(best_candidate)
         smiles = candidate_smiles(best_candidate)
         pubchem_cid = candidate_pubchem(best_candidate)
@@ -1531,6 +1535,7 @@ def build_canonical_tables(
                 "np_likeness_score": np_likeness_score,
                 "num_ro5_violations": num_ro5_violations,
                 "lipinski_source": lipinski_source,
+                "is_pains_positive": is_pains_positive,
                 "source_name": source_name,
                 "source_url": source_url,
                 "source_batch_id": source_batch_id,

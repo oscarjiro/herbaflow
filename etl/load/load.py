@@ -165,7 +165,7 @@ def load_compounds(cur, source_map, batch_id, upsert=False):
             cas_id, pubchem_cid, chembl_id, molecular_formula, molecular_weight,
             tpsa, logp, hbond_donors, hbond_acceptors,
             rotatable_bonds, qed_score, np_likeness_score, num_ro5_violations,
-            lipinski_source,
+            lipinski_source, is_pains_positive,
             source_id, source_url, source_batch_id, retrieved_at, confidence
         ) values %s {conflict}
     """
@@ -179,6 +179,7 @@ def load_compounds(cur, source_map, batch_id, upsert=False):
         _i(r.get("rotatable_bonds")), _f(r.get("qed_score")),
         _f(r.get("np_likeness_score")), _i(r.get("num_ro5_violations")),
         r.get("lipinski_source") or None,
+        str(r.get("is_pains_positive", "")).lower() == "true",
         resolve_src(r, source_map), r.get("source_url"), batch_id,
         _ts(r.get("retrieved_at")), _f(r.get("confidence")),
     ) for r in rows]
