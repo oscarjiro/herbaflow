@@ -1,9 +1,9 @@
 04_BUILD_CANONICAL (PART 2) REPORT
 =================================
-input_rows=528
-group_count=519
-plant_rows=519
-alias_rows=597
+input_rows=503
+group_count=478
+plant_rows=478
+alias_rows=556
 
 Alias types used:
 author_variant, exact_scraped_spelling, normalized_variant, synonym_variant
@@ -15,24 +15,40 @@ Notes:
 - alias_name preserves the exact original scraped spelling where available
 - GBIF identifier fields are normalized to plain string form
 
-input_rows_merged_into_shared_plant=9
+input_rows_merged_into_shared_plant=25
   (Each line below is an input row that did not add a plants.csv row because it
    shares the same canonical group as the representative row on the right.)
 
 Merged input rows (omitted from plants.csv row count):
-  - raw_plant_id=134 | plant_name=Clerodendrum serratum  ->  group (representative): Clerodendrum serratum Spreng., 1825 | raw_plant_id=133
-  - raw_plant_id=143 | plant_name=Coleus amboinicus  ->  group (representative): Coleus amboinicus Lour. | raw_plant_id=144
-  - raw_plant_id=155 | plant_name=Curcuma domestica  ->  group (representative): Curcuma longa L. | raw_plant_id=159
+  - raw_plant_id=52 | plant_name=Artocarpus altilis  ->  group (representative): Artocarpus altilis (Parkinson) Fosberg | raw_plant_id=53
+  - raw_plant_id=76 | plant_name=Boesenbergia pandurata  ->  group (representative): Boesenbergia rotunda (L.) Mansf. | raw_plant_id=77
+  - raw_plant_id=502 | plant_name=Thea sinensis  ->  group (representative): Camellia sinensis (L.) Kuntze | raw_plant_id=91
+  - raw_plant_id=522 | plant_name=Vinca rosea  ->  group (representative): Catharanthus roseus (L.) G.Don | raw_plant_id=110
+  - raw_plant_id=122 | plant_name=Cinnamomum zeylanicum  ->  group (representative): Cinnamomum verum J.Presl | raw_plant_id=121
+  - raw_plant_id=139 | plant_name=Coffea canephora  ->  group (representative): Coffea canephora Pierre ex A.Froehner | raw_plant_id=140
+  - raw_plant_id=155 | plant_name=Curcuma domestica  ->  group (representative): Curcuma longa L. | raw_plant_id=157
+  - raw_plant_id=159 | plant_name=Curcuma soloensis  ->  group (representative): Curcuma longa L. | raw_plant_id=157
   - raw_plant_id=186 | plant_name=Duranta repens  ->  group (representative): Duranta erecta L. | raw_plant_id=185
+  - raw_plant_id=207 | plant_name=Erythrina lithosperma  ->  group (representative): Erythrina subumbrans (Hassk.) Merr. | raw_plant_id=208
   - raw_plant_id=286 | plant_name=Jatropha gossypifolia  ->  group (representative): Jatropha gossypiifolia L. | raw_plant_id=287
+  - raw_plant_id=82 | plant_name=Bryophyllum pinnatum  ->  group (representative): Kalanchoe pinnata (Lam.) Pers. | raw_plant_id=294
+  - raw_plant_id=319 | plant_name=Manihot utilissima  ->  group (representative): Manihot esculenta Crantz | raw_plant_id=318
+  - raw_plant_id=341 | plant_name=Moringa oleifera  ->  group (representative): Moringa oleifera Lam. | raw_plant_id=342
   - raw_plant_id=347 | plant_name=Musa sapientum  ->  group (representative): Musa × paradisiaca L. | raw_plant_id=346
+  - raw_plant_id=369 | plant_name=Paederia scandens  ->  group (representative): Paederia foetida L. | raw_plant_id=368
+  - raw_plant_id=381 | plant_name=Persea gratissima  ->  group (representative): Persea americana Mill. | raw_plant_id=380
   - raw_plant_id=392 | plant_name=Physalis angulata  ->  group (representative): Physalis angulata L. | raw_plant_id=393
-  - raw_plant_id=429 | plant_name=Rauwolfia serpentina  ->  group (representative): Rauvolfia serpentina (L.) Benth. ex Kurz | raw_plant_id=426
+  - raw_plant_id=407 | plant_name=Plumeria acutifolia  ->  group (representative): Plumeria rubra L. | raw_plant_id=408
+  - raw_plant_id=100 | plant_name=Cassia alata  ->  group (representative): Senna alata (L.) Roxb. | raw_plant_id=453
+  - raw_plant_id=107 | plant_name=Cassia tora  ->  group (representative): Senna tora (L.) Roxb. | raw_plant_id=455
+  - raw_plant_id=213 | plant_name=Eugenia caryophyllata  ->  group (representative): Syzygium aromaticum (L.) Merr. & L.M.Perry | raw_plant_id=487
   - raw_plant_id=486 | plant_name=Syzygium aromatica  ->  group (representative): Syzygium aromaticum (L.) Merr. & L.M.Perry | raw_plant_id=487
+  - raw_plant_id=490 | plant_name=Tabernaemontana divaricata  ->  group (representative): Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult. | raw_plant_id=205
+  - raw_plant_id=507 | plant_name=Tinospora tuberculata  ->  group (representative): Tinospora crispa (L.) Miers ex Hook.fil. & Thomson | raw_plant_id=505
 
-plants_path=out\plants.csv
-aliases_path=out\plant_aliases.csv
-report_path=out\build_canonical_part2_report.txt
+plants_path=C:\code\web\herbaflow\etl\plants\04_build_canonical\out\plants.csv
+aliases_path=C:\code\web\herbaflow\etl\plants\04_build_canonical\out\plant_aliases.csv
+report_path=C:\code\web\herbaflow\etl\plants\04_build_canonical\out\build_canonical_part2_report.txt
 status=success
 
 Plant columns written:

@@ -1,520 +1,479 @@
 plant_id,raw_plant_id,canonical_key,canonical_scientific_name,authorship,family_name,taxonomic_status,rank,gbif_usage_key,gbif_accepted_usage_key,gbif_species_key,gbif_genus_key,gbif_family_key,gbif_kingdom_key,source_name,source_url,source_batch_id,retrieved_at,confidence
-pl_9c6a391ec298dd0dee69a29c,1,abelmoschus manihot l medik|l medik,Abelmoschus manihot (L.) Medik.,(L.) Medik.,,ACCEPTED,SPECIES,3152706,3152706,3152706,3152705,6685,6,KNApSAcK World,,,,99
-pl_cf6d1daf2404cb318bf952c2,2,abelmoschus moschatus l medik|l medik,Abelmoschus moschatus (L.) Medik.,(L.) Medik.,,ACCEPTED,SPECIES,8312665,8312665,8312665,3152705,6685,6,KNApSAcK World,,,,99
-pl_dd9f360f62639977932c5769,258,abelmoschus moschatus subsp moschatus|l,Abelmoschus moschatus subsp. moschatus,L.,,SYNONYM,SPECIES,3152710,10045372,8312665,3152705,6685,6,KNApSAcK World,,,,98
-pl_6f668d0fccf500480c167eab,3,abrus fruticulosus wall ex wight arn|wall ex wight arn,Abrus fruticulosus Wall. ex Wight & Arn.,Wall. ex Wight & Arn.,,ACCEPTED,SPECIES,5348700,5348700,5348700,2943776,5386,6,KNApSAcK World,,,,97
-pl_13b9cbaef9514c1b102698a5,4,abrus precatorius l|l,Abrus precatorius L.,L.,,ACCEPTED,SPECIES,5348711,5348711,5348711,2943776,5386,6,KNApSAcK World,,,,97
-pl_c31db5c702d401ac522c3daa,5,abutilon indicum l sweet|l sweet,Abutilon indicum (L.) Sweet,(L.) Sweet,,ACCEPTED,SPECIES,3152634,3152634,3152634,3152599,6685,6,KNApSAcK World,,,,97
-pl_f2c552150432b47945798e8d,308,acaciella glauca l l rico|l benth,Acaciella glauca (L.) L.Rico,(L.) Benth.,,SYNONYM,SPECIES,2970419,3794870,3794870,6627713,5386,6,KNApSAcK World,,,,98
-pl_104a4eee1cd8c776d9715f61,6,acalypha hispida burm f|burm f,Acalypha hispida Burm.f.,Burm.f.,,ACCEPTED,SPECIES,3056375,3056375,3056375,3055964,4691,6,KNApSAcK World,,,,97
-pl_ba14d4f21d6b472af88f77fa,7,acalypha indica l|l,Acalypha indica L.,L.,,ACCEPTED,SPECIES,3056259,3056259,3056259,3055964,4691,6,KNApSAcK World,,,,97
-pl_963bc16ae3d2b489ed2ee26c,8,acanthus ilicifolius l|l,Acanthus ilicifolius L.,L.,,ACCEPTED,SPECIES,6359819,6359819,6359819,3173198,2393,6,KNApSAcK World,,,,97
-pl_121259b0e4e7a7e45a5a532a,9,achyranthes aspera l|l,Achyranthes aspera L.,L.,,ACCEPTED,SPECIES,3085168,3085168,3085168,3085166,3064,6,KNApSAcK World,,,,98
-pl_24f9266dbef2e9634008b1e2,10,acorus calamus l|l,Acorus calamus L.,L.,,ACCEPTED,SPECIES,2873769,2873769,2873769,2730063,3719,6,KNApSAcK World,,,,99
-pl_60b852f61cbb6bd5899c655c,11,aegle marmelos l correa|l correa,Aegle marmelos (L.) Corrêa,(L.) Corrêa,,ACCEPTED,SPECIES,5421195,5421195,5421195,8397331,2396,6,KNApSAcK World,,,,97
-pl_9162e2d58889086e9a77bf35,13,agathis dammara lamb rich a rich|lamb rich a rich,Agathis dammara (Lamb.) Rich. & A.Rich.,(Lamb.) Rich. & A.Rich.,,ACCEPTED,SPECIES,5284442,5284442,5284442,2685008,3924,6,KNApSAcK World,,,,97
-pl_2c6940a127dfc9f59dbe2412,14,ageratum conyzoides l|l,Ageratum conyzoides L.,L.,,ACCEPTED,SPECIES,5401673,5401673,5401673,3138550,3065,6,KNApSAcK World,,,,97
-pl_88da37e7df66c2ebc2cb4a12,15,ageratum houstonianum mill|mill,Ageratum houstonianum Mill.,Mill.,,ACCEPTED,SPECIES,5401760,5401760,5401760,3138550,3065,6,KNApSAcK World,,,,99
-pl_d2dcf02aa491d1cb52fad1c3,16,aglaia odorata lour|lour,Aglaia odorata Lour.,Lour.,,ACCEPTED,SPECIES,5597349,5597349,5597349,3190479,2397,6,KNApSAcK World,,,,99
-pl_6ce1a7fb827ae4ce7c1fabb8,17,albizia chinensis osbeck merr|osbeck merr,Albizia chinensis (Osbeck) Merr.,(Osbeck) Merr.,,ACCEPTED,SPECIES,2973197,2973197,2973197,2972897,5386,6,KNApSAcK World,,,,99
-pl_88673f7fb5bc12573398224f,18,aleurites moluccanus l willd|l willd,Aleurites moluccanus (L.) Willd.,(L.) Willd.,,ACCEPTED,SPECIES,4930679,4930679,4930679,3072436,4691,6,KNApSAcK World,,,,96
-pl_69caf1c7d629f28a2a804c04,19,allamanda cathartica l|l,Allamanda cathartica L.,L.,,ACCEPTED,SPECIES,3169836,3169836,3169836,3169834,6701,6,KNApSAcK World,,,,97
-pl_3aeb121db97425208fa101de,20,allium cepa l|l,Allium cepa L.,L.,,ACCEPTED,SPECIES,2857697,2857697,2857697,9624496,7682,6,KNApSAcK World,,,,99
-pl_1e2d4c2409da3d12bd617f90,21,allium chinense g don|g don,Allium chinense G.Don,G.Don,,ACCEPTED,SPECIES,2856307,2856307,2856307,9624496,7682,6,KNApSAcK World,,,,97
-pl_d0ef71b75e02f1db87a475d0,22,allium fistulosum l|l,Allium fistulosum L.,L.,,ACCEPTED,SPECIES,2856504,2856504,2856504,9624496,7682,6,KNApSAcK World,,,,99
-pl_eb82a73e746b8cb331e66f1c,23,allium sativum l|l,Allium sativum L.,L.,,ACCEPTED,SPECIES,2856681,2856681,2856681,9624496,7682,6,KNApSAcK World,,,,99
-pl_df1ba4e44cadeac25516776d,24,allium tuberosum rottler ex spreng|rottler ex spreng,Allium tuberosum Rottler ex Spreng.,Rottler ex Spreng.,,ACCEPTED,SPECIES,2856297,2856297,2856297,9624496,7682,6,KNApSAcK World,,,,97
-pl_87662cf93475228c71e3f8f8,25,alocasia macrorrhizos l g don|l schott,Alocasia macrorrhizos (L.) G.Don,(L.) Schott,,SYNONYM,SPECIES,5708184,5329904,5329904,5329822,6979,6,KNApSAcK World,,,,98
-pl_e820a8105c3a442e29cb1d54,26,aloe vera l burm f|l burm f,Aloe vera (L.) Burm.f.,(L.) Burm.f.,,ACCEPTED,SPECIES,2777724,2777724,2777724,2770879,4259209,6,KNApSAcK World,,,,97
-pl_3b5efaf4aa724057e4877108,27,alpinia galanga l willd|l willd,Alpinia galanga (L.) Willd.,(L.) Willd.,,ACCEPTED,SPECIES,5302225,5302225,5302225,5301253,4687,6,KNApSAcK World,,,,99
-pl_7afe8472ff94139dc997f141,28,alpinia officinarum hance|hance,Alpinia officinarum Hance,Hance,,ACCEPTED,SPECIES,5302199,5302199,5302199,5301253,4687,6,KNApSAcK World,,,,99
-pl_e825b13cb4a901206a9b615a,29,alstonia scholaris l r br|l r br,Alstonia scholaris (L.) R.Br.,(L.) R.Br.,,ACCEPTED,SPECIES,5414410,5414410,5414410,8412045,6701,6,KNApSAcK World,,,,99
-pl_693d89d9ed30b6488e616507,30,alternanthera philoxeroides mart griseb|mart griseb,Alternanthera philoxeroides (Mart.) Griseb.,(Mart.) Griseb.,,ACCEPTED,SPECIES,3084923,3084923,3084923,3084921,3064,6,KNApSAcK World,,,,99
-pl_de8361430e8c1d837e24cfaf,31,alternanthera sessilis l r br ex dc|l r br ex dc,Alternanthera sessilis (L.) R.Br. ex DC.,(L.) R.Br. ex DC.,,ACCEPTED,SPECIES,3084939,3084939,3084939,3084921,3064,6,KNApSAcK World,,,,97
-pl_8d0f9bc1a269d5e0bee112c0,32,amaranthus spinosus l|l,Amaranthus spinosus L.,L.,,ACCEPTED,SPECIES,5384401,5384401,5384401,3085074,3064,6,KNApSAcK World,,,,99
-pl_8b6dd00e71eecfd1b9995ad0,33,amaranthus tricolor l|l,Amaranthus tricolor L.,L.,,ACCEPTED,SPECIES,5384397,5384397,5384397,3085074,3064,6,KNApSAcK World,,,,99
-pl_892e2b2ab569b73465eabe4d,35,anacardium occidentale l|l,Anacardium occidentale L.,L.,,ACCEPTED,SPECIES,5421368,5421368,5421368,5421367,2398,6,KNApSAcK World,,,,98
-pl_218e4eb23bf19c9994a74a41,36,ananas comosus l merr|l merr,Ananas comosus (L.) Merr.,(L.) Merr.,,ACCEPTED,SPECIES,5288819,5288819,5288819,2699430,3740,6,KNApSAcK World,,,,98
-pl_1e2d8fcabc6868edd6454cf7,37,andrographis paniculata burm fil nees|burm fil nees,Andrographis paniculata (Burm.fil.) Nees,(Burm.fil.) Nees,,ACCEPTED,SPECIES,3173178,3173178,3173178,7740842,2393,6,KNApSAcK World,,,,98
-pl_b5da35a94e04c1ebf2d1496e,38,angelica keiskei miq koidz|miq koidz,Angelica keiskei (Miq.) Koidz.,(Miq.) Koidz.,,ACCEPTED,SPECIES,6026372,6026372,6026372,3034560,6720,6,KNApSAcK World,,,,99
-pl_9139624bbb5b54739311c1cf,435,annona mucosa jacq|jacq baill,Annona mucosa Jacq.,(Jacq.) Baill.,,SYNONYM,SPECIES,3158590,5407571,5407571,3155252,9291,6,KNApSAcK World,,,,98
-pl_489d455cbddec280a5d5b833,39,annona muricata l|l,Annona muricata L.,L.,,ACCEPTED,SPECIES,5407273,5407273,5407273,3155252,9291,6,KNApSAcK World,,,,97
-pl_0f13dc2eb10f23f93ace228f,40,annona reticulata l|l,Annona reticulata L.,L.,,ACCEPTED,SPECIES,5407123,5407123,5407123,3155252,9291,6,KNApSAcK World,,,,97
-pl_b4cfb75bfbc335b2841c7c84,41,annona squamosa l|l,Annona squamosa L.,L.,,ACCEPTED,SPECIES,5407099,5407099,5407099,3155252,9291,6,KNApSAcK World,,,,97
-pl_783789f39cbbb89d77af60f8,42,anredera cordifolia ten steenis|ten steenis,Anredera cordifolia (Ten.) Steenis,(Ten.) Steenis,,ACCEPTED,SPECIES,3083508,3083508,3083508,3083506,3063,6,KNApSAcK World,,,,99
-pl_1a0cbbc18c39f9ad12e16401,43,antiaris toxicaria pers lesch|pers lesch,Antiaris toxicaria (Pers.) Lesch.,(Pers.) Lesch.,,ACCEPTED,SPECIES,7262663,7262663,7262663,7262656,6640,6,KNApSAcK World,,,,99
-pl_40cc4d474d76b4a17de6e7f8,44,apium graveolens l|l,Apium graveolens L.,L.,,ACCEPTED,SPECIES,5371879,5371879,5371879,3034812,6720,6,KNApSAcK World,,,,97
-pl_ecfcec487e528792618d176a,45,arachis hypogaea l|l,Arachis hypogaea L.,L.,,ACCEPTED,SPECIES,5353770,5353770,5353770,2956684,5386,6,KNApSAcK World,,,,99
-pl_b65f58f8dc26a7e0488803a4,46,arcangelisia flava l merr|l merr,Arcangelisia flava (L.) Merr.,(L.) Merr.,,ACCEPTED,SPECIES,3830318,3830318,3830318,7268743,2411,6,KNApSAcK World,,,,99
-pl_08c9c7f6e7a0c5fc670432d2,47,areca catechu l|l,Areca catechu L.,L.,,ACCEPTED,SPECIES,2736531,2736531,2736531,2736518,7681,6,KNApSAcK World,,,,99
-pl_890b171b88f7036048c0cbd9,48,artemisia abrotanum l|l,Artemisia abrotanum L.,L.,,ACCEPTED,SPECIES,8042568,8042568,8042568,3120641,3065,6,KNApSAcK World,,,,97
-pl_abe6ce2ac05fd71ed2e44d7a,49,artemisia cina o c berg schmidt|o c berg schmidt,Artemisia cina O.C.Berg & Schmidt,O.C.Berg & Schmidt,,ACCEPTED,SPECIES,3120942,3120942,3120942,3120641,3065,6,KNApSAcK World,,,,97
-pl_ec71a0ce68473cc35f566e54,50,artemisia lactiflora wall ex dc|wall ex dc,Artemisia lactiflora Wall. ex DC.,Wall. ex DC.,,ACCEPTED,SPECIES,3121137,3121137,3121137,3120641,3065,6,KNApSAcK World,,,,97
-pl_84765aac3c26b00cd4acf2f6,51,artemisia vulgaris l|l,Artemisia vulgaris L.,L.,,ACCEPTED,SPECIES,3120946,3120946,3120946,3120641,3065,6,KNApSAcK World,,,,97
-pl_1a841323e84137590ede81ae,53,artocarpus altilis parkinson fosberg|j r forst g forst,Artocarpus altilis (Parkinson) Fosberg,J.R.Forst. & G.Forst.,,SYNONYM,SPECIES,2984574,2984573,2984573,2984563,6640,6,KNApSAcK World,,,,98
-pl_bf6472e791546886c0ef8098,52,artocarpus altilis parkinson fosberg|parkinson fosberg,Artocarpus altilis (Parkinson) Fosberg,(Parkinson) Fosberg,,ACCEPTED,SPECIES,2984573,2984573,2984573,2984563,6640,6,KNApSAcK World,,,,97
-pl_a6809729d1011630c01f2e41,54,artocarpus heterophyllus lam|lam,Artocarpus heterophyllus Lam.,Lam.,,ACCEPTED,SPECIES,2984565,2984565,2984565,2984563,6640,6,KNApSAcK World,,,,99
-pl_be8627242c62d56dbbad526e,55,asclepias curassavica l|l,Asclepias curassavica L.,L.,,ACCEPTED,SPECIES,3170241,3170241,3170241,3170229,6701,6,KNApSAcK World,,,,97
-pl_2fdce27e991759b79e85c40a,56,asparagus cochinchinensis lour merr|lour merr,Asparagus cochinchinensis (Lour.) Merr.,(Lour.) Merr.,,ACCEPTED,SPECIES,2768772,2768772,2768772,9527393,7683,6,KNApSAcK World,,,,99
-pl_8208581b8bef355357b8a743,57,atropa belladonna l|l,Atropa belladonna L.,L.,,ACCEPTED,SPECIES,3802655,3802655,3802655,2928892,7717,6,KNApSAcK World,,,,99
-pl_0abb90585404efc249de7127,58,aucuba japonica thunb|thunb,Aucuba japonica Thunb.,Thunb.,,ACCEPTED,SPECIES,3033077,3033077,3033077,9578104,8805,6,KNApSAcK World,,,,99
-pl_1bc29756a614ae50889def8e,59,averrhoa bilimbi l|l,Averrhoa bilimbi L.,L.,,ACCEPTED,SPECIES,2891640,2891640,2891640,9407103,6697,6,KNApSAcK World,,,,99
-pl_f0f0f0dd7c82bcd765bde1ae,60,averrhoa carambola l|l,Averrhoa carambola L.,L.,,ACCEPTED,SPECIES,2891641,2891641,2891641,9407103,6697,6,KNApSAcK World,,,,99
-pl_cc122d9b4404c14b80ec0b5b,215,ayapana triplinervis vahl r m king h rob|vahl,Ayapana triplinervis (Vahl) R.M.King & H.Rob.,Vahl,,SYNONYM,SPECIES,5402967,3142644,3142644,3126519,3065,6,KNApSAcK World,,,,97
-pl_d96fa84561d483a8a7094b71,61,azadirachta indica a juss|a juss,Azadirachta indica A.Juss.,A.Juss.,,ACCEPTED,SPECIES,3190474,3190474,3190474,3190473,2397,6,KNApSAcK World,,,,99
-pl_5f7e478d1f3d656783411fd8,62,baeckea frutescens l|l,Baeckea frutescens L.,L.,,ACCEPTED,SPECIES,3187799,3187799,3187799,3187737,5014,6,KNApSAcK World,,,,99
-pl_89255e91bd02bee21018ed93,63,barleria lupulina lindl|lindl,Barleria lupulina Lindl.,Lindl.,,ACCEPTED,SPECIES,3173126,3173126,3173126,3173125,2393,6,KNApSAcK World,,,,99
-pl_1a82f58bb2d39177c86da314,64,barleria prionitis l|l,Barleria prionitis L.,L.,,ACCEPTED,SPECIES,3173129,3173129,3173129,3173125,2393,6,KNApSAcK World,,,,99
-pl_5a38d68eb7ede853d29b7ed5,65,basella alba l|l,Basella alba L.,L.,,SYNONYM,SPECIES,3083505,3083504,3083504,3083503,3063,6,KNApSAcK World,,,,98
-pl_c9085e675f24f39cfd0147fa,66,bauhinia purpurea l|l,Bauhinia purpurea L.,L.,,ACCEPTED,SPECIES,2953871,2953871,2953871,2952935,5386,6,KNApSAcK World,,,,97
-pl_fca3bc9783d323d3d41e6532,68,beilschmiedia madang blume blume|blume blume,Beilschmiedia madang (Blume) Blume,(Blume) Blume,,ACCEPTED,SPECIES,4176422,4176422,4176422,3034072,6688,6,KNApSAcK World,,,,99
-pl_97950c0dd97e962c8047d93d,70,benincasa hispida thunb cogn|thunb cogn,Benincasa hispida (Thunb.) Cogn.,(Thunb.) Cogn.,,ACCEPTED,SPECIES,2874524,2874524,2874524,2874523,6634,6,KNApSAcK World,,,,99
-pl_e65191ce1309767105a2098d,86,biancaea sappan l tod|l,Biancaea sappan (L.) Tod.,L.,,SYNONYM,SPECIES,2958870,2958871,2958871,7302381,5386,6,KNApSAcK World,,,,98
-pl_44cc2b396f550f42e332ab8f,71,bidens bipinnata l|l,Bidens bipinnata L.,L.,,ACCEPTED,SPECIES,5389402,5389402,5389402,3105856,3065,6,KNApSAcK World,,,,97
-pl_46b7bcff1287e45cc8ce2101,72,bidens pilosa l|l,Bidens pilosa L.,L.,,ACCEPTED,SPECIES,5391845,5391845,5391845,3105856,3065,6,KNApSAcK World,,,,99
-pl_024974665a061393511447e4,73,bixa orellana l|l,Bixa orellana L.,L.,,ACCEPTED,SPECIES,2874863,2874863,2874863,2874862,6637,6,KNApSAcK World,,,,99
-pl_c4ebe8676ce6ca4b4ce2da29,74,blumea balsamifera l dc|l dc,Blumea balsamifera (L.) DC.,(L.) DC.,,ACCEPTED,SPECIES,5395786,5395786,5395786,3119250,3065,6,KNApSAcK World,,,,99
-pl_60299ff4d78206adf476fb65,75,blumea lacera burm fil dc|burm fil dc,Blumea lacera (Burm.fil.) DC.,(Burm.fil.) DC.,,ACCEPTED,SPECIES,5395639,5395639,5395639,3119250,3065,6,KNApSAcK World,,,,97
-pl_5a150d5101e616a7d1472c24,77,boesenbergia rotunda l mansf|l mansf,Boesenbergia rotunda (L.) Mansf.,(L.) Mansf.,,ACCEPTED,SPECIES,2758480,2758480,2758480,2758458,4687,6,KNApSAcK World,,,,99
-pl_5a5e0988d3bb57e310f717ef,76,boesenbergia rotunda l mansf|roxb schltr,Boesenbergia rotunda (L.) Mansf.,(Roxb.) Schltr.,,SYNONYM,SPECIES,2758487,2758480,2758480,2758458,4687,6,KNApSAcK World,,,,98
-pl_f881886182d1b995104acbea,78,borassus flabellifer l|l,Borassus flabellifer L.,L.,,ACCEPTED,SPECIES,2733934,2733934,2733934,2733922,7681,6,KNApSAcK World,,,,99
-pl_6431b375eed58927a648a67d,79,bougainvillea glabra choisy|choisy,Bougainvillea glabra Choisy,Choisy,,ACCEPTED,SPECIES,5384862,5384862,5384862,3086089,6718,6,KNApSAcK World,,,,98
-pl_90833138cca6636a0c9a6d86,174,brachypterum robustum roxb ex dc dalzell a gibson|roxb ex dc benth,Brachypterum robustum (Roxb. ex DC.) Dalzell & A.Gibson,(Roxb. ex DC.) Benth.,,SYNONYM,SPECIES,5350230,2947483,2947483,2952879,5386,6,KNApSAcK World,,,,98
-pl_8dc0ac41429f9edade790c74,80,brassica oleracea l|l,Brassica oleracea L.,L.,,ACCEPTED,SPECIES,3042845,3042845,3042845,3042506,3112,6,KNApSAcK World,,,,98
-pl_0a72052bc76baea2a9131b8d,446,breynia androgyna l chakrab n p balakr|l merr,Breynia androgyna (L.) Chakrab. & N.P.Balakr.,(L.) Merr.,,SYNONYM,SPECIES,6109767,9197670,9197670,3079696,8807,6,KNApSAcK World,,,,98
-pl_a01f09fdabbf66a0a28ae7b4,344,broussonetia papyrifera l l her ex vent|poir,Broussonetia papyrifera (L.) L'Hér. ex Vent.,Poir.,,SYNONYM,SPECIES,7262450,5361944,5361944,2984643,6640,6,KNApSAcK World,,,,98
-pl_8edfbcc4c28882b6897f4040,81,brucea javanica l merr|l merr,Brucea javanica (L.) Merr.,(L.) Merr.,,ACCEPTED,SPECIES,5555210,5555210,5555210,3233020,2395,6,KNApSAcK World,,,,99
-pl_b0ee93392caacb20d0d0d126,83,caesalpinia crista l|l,Caesalpinia crista L.,L.,,SYNONYM,SPECIES,8179846,8179846,11973078,2958443,5386,6,KNApSAcK World,,,,100
-pl_b9779a1f47de09367643c06a,84,caesalpinia major brenan|brenan,Caesalpinia major Brenan,Brenan,,ACCEPTED,SPECIES,11131378,11131378,11131378,2958443,5386,6,KNApSAcK World,,,,97
-pl_0833bfd335f69f7449859eff,85,caesalpinia pulcherrima l sw|l sw,Caesalpinia pulcherrima (L.) Sw.,(L.) Sw.,,ACCEPTED,SPECIES,2958715,2958715,2958715,2958443,5386,6,KNApSAcK World,,,,98
-pl_02f9503734f203df4fa0447f,87,cajanus cajan l huth|l huth,Cajanus cajan (L.) Huth,(L.) Huth,,ACCEPTED,SPECIES,7587087,7587087,7587087,2960263,5386,6,KNApSAcK World,,,,97
-pl_8ef0c3added927801a11de9a,88,callicarpa candicans burm f hochr|burm f hochr,Callicarpa candicans (Burm.f.) Hochr.,(Burm.f.) Hochr.,,ACCEPTED,SPECIES,6412107,6412107,6412107,2925549,2497,6,KNApSAcK World,,,,97
-pl_07b5f56bdb9671aa21d30b18,89,calophyllum inophyllum l|l,Calophyllum inophyllum L.,L.,,ACCEPTED,SPECIES,9531830,9531830,9531830,3189443,4907584,6,KNApSAcK World,,,,97
-pl_21f5ac6e4271ec4a2079102d,90,calotropis gigantea l w t aiton|l w t aiton,Calotropis gigantea (L.) W.T.Aiton,(L.) W.T.Aiton,,ACCEPTED,SPECIES,3579089,3579089,3579089,3170557,6701,6,KNApSAcK World,,,,97
-pl_ec1aa109d494c443e0bb71e5,502,camellia sinensis l kuntze|l,Camellia sinensis (L.) Kuntze,L.,,SYNONYM,SPECIES,5528442,3189635,3189635,3189634,3189597,6,KNApSAcK World,,,,98
-pl_eee0a97cde599d9f0524fd7d,91,camellia sinensis l kuntze|l kuntze,Camellia sinensis (L.) Kuntze,(L.) Kuntze,,ACCEPTED,SPECIES,3189635,3189635,3189635,3189634,3189597,6,KNApSAcK World,,,,99
-pl_8b6924fd1370eb95d0fe515f,92,cananga odorata lam hook f thomson|lam hook f thomson,Cananga odorata (Lam.) Hook.f. & Thomson,(Lam.) Hook.f. & Thomson,,ACCEPTED,SPECIES,5407583,5407583,5407583,5407582,9291,6,KNApSAcK World,,,,99
-pl_fb0b948b635a657b836f858e,93,canarium commune l|l,Canarium commune L.,L.,,HETEROTYPIC_SYNONYM,SPECIES,5421346,5421346,5421345,3190431,6659,6,KNApSAcK World,,,,100
-pl_bfb5fd9b7b3f34fdf17c8bd4,95,canna indica l|ker gawl,Canna indica L.,Ker Gawl.,,SYNONYM,SPECIES,5303275,8034409,8034409,2762470,8497,6,KNApSAcK World,,,,97
-pl_7bc088918ae011d542ce6dd1,94,cannabis sativa l|l,Cannabis sativa L.,L.,,ACCEPTED,SPECIES,5361880,5361880,5361880,2984538,2384,6,KNApSAcK World,,,,99
-pl_58c73f4e104a300e1a6461d5,96,capsicum annuum l|l,Capsicum annuum L.,L.,,ACCEPTED,SPECIES,2932944,2932944,2932944,2932937,7717,6,KNApSAcK World,,,,99
-pl_7805e27f722a8eb95b4a35e3,97,capsicum frutescens l|l,Capsicum frutescens L.,L.,,ACCEPTED,SPECIES,8403992,8403992,8403992,2932937,7717,6,KNApSAcK World,,,,97
-pl_c55d8fffe4dd4a618de24f42,115,carapichea ipecacuanha brot l andersson|brot a rich,Carapichea ipecacuanha (Brot.) L.Andersson,(Brot.) A.Rich.,,SYNONYM,SPECIES,2921353,2921359,2921359,2898583,8798,6,KNApSAcK World,,,,97
-pl_8e6530577f520da9a813be53,98,carica papaya l|l,Carica papaya L.,L.,,ACCEPTED,SPECIES,2874484,2874484,2874484,2874482,6636,6,KNApSAcK World,,,,99
-pl_c616ec70612294980f7b6a68,99,carthamus tinctorius l|l,Carthamus tinctorius L.,L.,,ACCEPTED,SPECIES,3138327,3138327,3138327,3138214,3065,6,KNApSAcK World,,,,99
-pl_3ddee030d70760613022882d,503,cascabela thevetia l lippold|pers k schum,Cascabela thevetia (L.) Lippold,(Pers.) K.Schum.,,SYNONYM,SPECIES,5414405,3169652,3169652,7950372,6701,6,KNApSAcK World,,,,97
-pl_b5f86d49115ab4f066db8d30,102,cassia fistula l|l,Cassia fistula L.,L.,,ACCEPTED,SPECIES,5357108,5357108,5357108,2963414,5386,6,KNApSAcK World,,,,97
-pl_24588626fe1874c962937a87,103,cassia javanica l|l,Cassia javanica L.,L.,,ACCEPTED,SPECIES,5357125,5357125,5357125,2963414,5386,6,KNApSAcK World,,,,97
-pl_cb5357ec08e368c6712eec32,108,cassytha filiformis l|l,Cassytha filiformis L.,L.,,ACCEPTED,SPECIES,3033999,3033999,3033999,3033998,6688,6,KNApSAcK World,,,,97
-pl_e54d7a4bd5870011910fd582,109,casuarina equisetifolia l|l,Casuarina equisetifolia L.,L.,,ACCEPTED,SPECIES,2891930,2891930,2891930,2891925,5352,6,KNApSAcK World,,,,97
-pl_33e4e311bf15742d56e9ad6e,522,catharanthus roseus l g don|l,Catharanthus roseus (L.) G.Don,L.,,SYNONYM,SPECIES,3169831,3169830,3169830,3169829,6701,6,KNApSAcK World,,,,98
-pl_6ed4db2843f3f96702444a07,110,catharanthus roseus l g don|l g don,Catharanthus roseus (L.) G.Don,(L.) G.Don,,ACCEPTED,SPECIES,3169830,3169830,3169830,3169829,6701,6,KNApSAcK World,,,,99
-pl_e947623f7ea41971b88ca74b,111,ceiba pentandra l gaertn|l gaertn,Ceiba pentandra (L.) Gaertn.,(L.) Gaertn.,,ACCEPTED,SPECIES,5406697,5406697,5406697,3152218,6685,6,KNApSAcK World,,,,98
-pl_849901b794e0adba639b6676,113,celosia argentea f cristata l schinz|l,Celosia argentea f. cristata (L.) Schinz,L.,,SYNONYM,SPECIES,3085196,6429520,3085191,3085190,3064,6,KNApSAcK World,,,,98
-pl_46eb11c119e6e6679620f7d6,112,celosia argentea l|l,Celosia argentea L.,L.,,ACCEPTED,SPECIES,3085191,3085191,3085191,3085190,3064,6,KNApSAcK World,,,,99
-pl_4eafc2e2dbaf3e5579f8109b,114,centella asiatica l urb|l urb,Centella asiatica (L.) Urb.,(L.) Urb.,,ACCEPTED,SPECIES,3034128,3034128,3034128,3034124,6720,6,KNApSAcK World,,,,99
-pl_202f67142ff4e6264adb4112,116,cerbera manghas l|l,Cerbera manghas L.,L.,,ACCEPTED,SPECIES,7155766,7155766,7155766,3169757,6701,6,KNApSAcK World,,,,99
-pl_ae6157943a8763f2138c901a,117,cibotium barometz l j sm|l j sm,Cibotium barometz (L.) J.Sm.,(L.) J.Sm.,,ACCEPTED,SPECIES,4195539,4195539,4195539,2650328,4262049,6,KNApSAcK World,,,,99
-pl_80e84744bf504bfbe6c7ff46,118,cinnamomum burmanni nees t nees blume|nees t nees blume,Cinnamomum burmanni (Nees & T.Nees) Blume,(Nees & T.Nees) Blume,,ACCEPTED,SPECIES,3033985,3033985,3033985,3033980,6688,6,KNApSAcK World,,,,96
-pl_082d08fcb39a42e66c37567b,119,cinnamomum camphora l j presl|l j presl,Cinnamomum camphora (L.) J.Presl,(L.) J.Presl,,ACCEPTED,SPECIES,3033991,3033991,3033991,3033980,6688,6,KNApSAcK World,,,,97
-pl_d8a4c8336d8a0522ab1d32e3,120,cinnamomum cassia l j presl|l j presl,Cinnamomum cassia (L.) J.Presl,(L.) J.Presl,,HETEROTYPIC_SYNONYM,SPECIES,7512166,7512166,4180148,7304368,6688,6,KNApSAcK World,,,,100
-pl_3cf1c4051ae0c4fc8a40fc60,122,cinnamomum verum j presl|blume,Cinnamomum verum J.Presl,Blume,,SYNONYM,SPECIES,3033988,3033987,3033987,3033980,6688,6,KNApSAcK World,,,,97
-pl_df29b054fa3762ed9e5d3da3,121,cinnamomum verum j presl|j presl,Cinnamomum verum J.Presl,J.Presl,,ACCEPTED,SPECIES,3033987,3033987,3033987,3033980,6688,6,KNApSAcK World,,,,99
-pl_5a9c8b35d40e3306710072ea,123,cissampelos pareira l|l,Cissampelos pareira L.,L.,,ACCEPTED,SPECIES,3033937,3033937,3033937,3033936,2411,6,KNApSAcK World,,,,99
-pl_9aaada071e10418f0d1a4739,124,citrullus lanatus thunb matsum nakai|schrad,Citrullus lanatus (Thunb.) Matsum. & Nakai,Schrad.,,SYNONYM,SPECIES,3625068,2874621,2874621,8257011,6634,6,KNApSAcK World,,,,97
-pl_1eb7b93b5b040860d4a6fb90,125,citrus aurantiifolia christm swingle|christm swingle,Citrus × aurantiifolia (Christm.) Swingle,(Christm.) Swingle,,ACCEPTED,SPECIES,3190164,3190164,3190164,3190155,2396,6,KNApSAcK World,,,,96
-pl_c7bec6ecdf945e5d57fff28c,126,citrus aurantium l|l,Citrus × aurantium L.,L.,,ACCEPTED,SPECIES,8077391,8077391,8077391,3190155,2396,6,KNApSAcK World,,,,97
-pl_2c0612697c1dc630af9f1560,127,citrus hystrix dc|dc,Citrus hystrix DC.,DC.,,ACCEPTED,SPECIES,6433679,6433679,6433679,3190155,2396,6,KNApSAcK World,,,,99
-pl_ebc7fa55cdc0d3a52204e9fb,128,citrus maxima burm merr|burm merr,Citrus maxima (Burm.) Merr.,(Burm.) Merr.,,ACCEPTED,SPECIES,3190160,3190160,3190160,3190155,2396,6,KNApSAcK World,,,,97
-pl_7b72ec1fa77bdb61525fcc88,129,citrus medica l|l,Citrus medica L.,L.,,ACCEPTED,SPECIES,3190157,3190157,3190157,3190155,2396,6,KNApSAcK World,,,,97
-pl_d8f10a645e348c2d3ca1dfc6,130,citrus nobilis lour|lour,Citrus ×nobilis Lour.,Lour.,,SYNONYM,SPECIES,3190173,3190173,8077391,3190155,2396,6,KNApSAcK World,,,,100
-pl_8b9429be09d7aa4ed90c0b33,131,clausena excavata burm fil|burm fil,Clausena excavata Burm.fil.,Burm.fil.,,ACCEPTED,SPECIES,5834596,5834596,5834596,3190412,2396,6,KNApSAcK World,,,,99
-pl_aed02fefb43a5f0225a3aaa5,132,cleome spinosa l|l,Cleome spinosa L.,L.,,SYNONYM,SPECIES,8860549,8860549,12187916,6370691,3845332,6,KNApSAcK World,,,,100
-pl_4f1a087e41ef14961edfce43,133,clerodendrum serratum spreng 1825|spreng 1825,"Clerodendrum serratum Spreng., 1825","Spreng., 1825",,ACCEPTED,SPECIES,8355397,8355397,8355397,2925347,2497,6,KNApSAcK World,,,,100
-pl_934b6607b60d8526cd786ca8,135,clinacanthus nutans burm fil lindau|burm fil lindau,Clinacanthus nutans (Burm.fil.) Lindau,(Burm.fil.) Lindau,,ACCEPTED,SPECIES,3774284,3774284,3774284,7263674,2393,6,KNApSAcK World,,,,99
-pl_6eba2075ecdb668334702610,136,clitoria ternatea l|l,Clitoria ternatea L.,L.,,ACCEPTED,SPECIES,2946519,2946519,2946519,2946499,5386,6,KNApSAcK World,,,,99
-pl_4027d6efa9f5571b649df2e0,137,cocos nucifera l|l,Cocos nucifera L.,L.,,ACCEPTED,SPECIES,2735117,2735117,2735117,2735116,7681,6,KNApSAcK World,,,,99
-pl_99ff8f13e6aa92b50f96538f,138,coffea arabica l|l,Coffea arabica L.,L.,,ACCEPTED,SPECIES,2895345,2895345,2895345,2895315,8798,6,KNApSAcK World,,,,98
-pl_23ace3f2e43f02aa03634218,140,coffea canephora pierre ex a froehner|l linden,Coffea canephora Pierre ex A.Froehner,L.Linden,,SYNONYM,SPECIES,2895553,2895528,2895528,2895315,8798,6,KNApSAcK World,,,,98
-pl_3e6804ae375bc1a789dc5764,139,coffea canephora pierre ex a froehner|pierre ex a froehner,Coffea canephora Pierre ex A.Froehner,Pierre ex A.Froehner,,ACCEPTED,SPECIES,2895528,2895528,2895528,2895315,8798,6,KNApSAcK World,,,,97
-pl_fd6b7b7e1abcf03eb881cbde,141,coix lacryma jobi l|l,Coix lacryma-jobi L.,L.,,ACCEPTED,SPECIES,2706301,2706301,2706301,2706300,3073,6,KNApSAcK World,,,,99
-pl_b337ad597b2ded45b30e44ad,142,cola acuminata p beauv schott endl|p beauv schott endl,Cola acuminata (P.Beauv.) Schott & Endl.,(P.Beauv.) Schott & Endl.,,ACCEPTED,SPECIES,5406685,5406685,5406685,3152143,6685,6,KNApSAcK World,,,,99
-pl_77b85f88d6ea468c02637f4a,144,coleus amboinicus lour|lour,Coleus amboinicus Lour.,Lour.,,ACCEPTED,SPECIES,5341313,5341313,5341313,2927310,2497,6,KNApSAcK World,,,,100
-pl_9ef871127c42ba3b48448bb0,145,colocasia esculenta l schott|l schott,Colocasia esculenta (L.) Schott,(L.) Schott,,ACCEPTED,SPECIES,5330776,5330776,5330776,5330758,6979,6,KNApSAcK World,,,,99
-pl_4102687b073bd0f77047e0c7,146,coriandrum sativum l|l,Coriandrum sativum L.,L.,,ACCEPTED,SPECIES,3034871,3034871,3034871,3034870,6720,6,KNApSAcK World,,,,99
-pl_bd01a011b5ff54eaa4a591ee,148,crinum asiaticum l|l,Crinum asiaticum L.,L.,,ACCEPTED,SPECIES,2853796,2853796,2853796,2773870,7682,6,KNApSAcK World,,,,98
-pl_6bb11ae257e4e040e46a57a1,149,crocus sativus l|l,Crocus sativus L.,L.,,ACCEPTED,SPECIES,2747430,2747430,2747430,2747303,7698,6,KNApSAcK World,,,,97
-pl_56956dacf14c9a441eba27fe,150,croton tiglium l|l,Croton tiglium L.,L.,,ACCEPTED,SPECIES,3057656,3057656,3057656,3057454,4691,6,KNApSAcK World,,,,99
-pl_3606e594fde475f6da9827fe,151,cucumis sativus l|l,Cucumis sativus L.,L.,,ACCEPTED,SPECIES,2874569,2874569,2874569,2874568,6634,6,KNApSAcK World,,,,99
-pl_274eee3c7eb76507bd339309,152,cucurbita moschata duchesne duchesne ex poir|duchesne duchesne ex poir,Cucurbita moschata (Duchesne) Duchesne ex Poir.,(Duchesne) Duchesne ex Poir.,,ACCEPTED,SPECIES,7393329,7393329,7393329,2874506,6634,6,KNApSAcK World,,,,97
-pl_c17a12d48b78908ea2278af4,153,cuminum cyminum l|l,Cuminum cyminum L.,L.,,ACCEPTED,SPECIES,3034775,3034775,3034775,3034774,6720,6,KNApSAcK World,,,,97
-pl_ce4e3d01a65bdaa0227884b4,154,curcuma aeruginosa roxb|roxb,Curcuma aeruginosa Roxb.,Roxb.,,ACCEPTED,SPECIES,2757635,2757635,2757635,2757518,4687,6,KNApSAcK World,,,,99
-pl_863b88ade32f0a0e5f7142d1,156,curcuma heyneana valeton zijp|valeton zijp,Curcuma heyneana Valeton & Zijp,Valeton & Zijp,,ACCEPTED,SPECIES,2757572,2757572,2757572,2757518,4687,6,KNApSAcK World,,,,99
-pl_b0133f9d541a67e77134345d,157,curcuma longa l|l,Curcuma longa L.,L.,,ACCEPTED,SPECIES,2757624,2757624,2757624,2757518,4687,6,KNApSAcK World,,,,99
-pl_bf36045f554639d9e1a91fda,159,curcuma longa l|valeton,Curcuma longa L.,Valeton,,SYNONYM,SPECIES,2757626,2757624,2757624,2757518,4687,6,KNApSAcK World,,,,98
-pl_0e77f5779a87feddaa3e76e8,158,curcuma mangga valeton zijp|valeton zijp,Curcuma mangga Valeton & Zijp,Valeton & Zijp,,ACCEPTED,SPECIES,2757639,2757639,2757639,2757518,4687,6,KNApSAcK World,,,,99
-pl_b4ad89cc4f32c33c40713d06,160,curcuma xanthorrhiza d dietr|d dietr,Curcuma xanthorrhiza D.Dietr.,D.Dietr.,,ACCEPTED,SPECIES,3990387,3990387,3990387,2757518,4687,6,KNApSAcK World,,,,99
-pl_117eb28392516a38300606a1,161,curcuma zanthorrhiza roxb|roxb,Curcuma zanthorrhiza Roxb.,Roxb.,,ACCEPTED,SPECIES,2757547,2757547,2757547,2757518,4687,6,KNApSAcK World,,,,99
-pl_e7c4b9604c5683712288bed4,162,curcuma zedoaria christm roscoe|christm roscoe,Curcuma zedoaria (Christm.) Roscoe,(Christm.) Roscoe,,ACCEPTED,SPECIES,2757545,2757545,2757545,2757518,4687,6,KNApSAcK World,,,,97
-pl_8677f03cac29dac836cd091e,519,cyanthillium cinereum l h rob|l less,Cyanthillium cinereum (L.) H.Rob.,(L.) Less.,,SYNONYM,SPECIES,6445389,6445734,6445734,3148294,3065,6,KNApSAcK World,,,,98
-pl_657fe868b8d5ec232f56ab58,163,cycas revoluta thunb|thunb,Cycas revoluta Thunb.,Thunb.,,ACCEPTED,SPECIES,2683217,2683217,2683217,2683206,6168,6,KNApSAcK World,,,,98
-pl_913fa3cbc7a89bad547bfe35,164,cyclea barbata miers|miers,Cyclea barbata Miers,Miers,,ACCEPTED,SPECIES,3830078,3830078,3830078,7268667,2411,6,KNApSAcK World,,,,99
-pl_849c64062ac8e4ca1483a1ed,165,cymbopogon citratus dc stapf|dc stapf,Cymbopogon citratus (DC.) Stapf,(DC.) Stapf,,ACCEPTED,SPECIES,2705275,2705275,2705275,2705264,3073,6,KNApSAcK World,,,,99
-pl_099de07006f592dd72fe87e5,166,cymbopogon nardus l rendle|l rendle,Cymbopogon nardus (L.) Rendle,(L.) Rendle,,ACCEPTED,SPECIES,2705267,2705267,2705267,2705264,3073,6,KNApSAcK World,,,,99
-pl_8af32a4a718e49325dbc4249,167,cyperus iria l|l,Cyperus iria L.,L.,,ACCEPTED,SPECIES,2715729,2715729,2715729,2713455,7708,6,KNApSAcK World,,,,99
-pl_3d77715a6540b3a0639f7fca,168,cyperus rotundus l|l,Cyperus rotundus L.,L.,,ACCEPTED,SPECIES,2714818,2714818,2714818,2713455,7708,6,KNApSAcK World,,,,98
-pl_c85fefd21b04077e38557546,169,datura metel l|l,Datura metel L.,L.,,ACCEPTED,SPECIES,2928747,2928747,2928747,2928734,7717,6,KNApSAcK World,,,,97
-pl_8dcb42de627594ce59b1cdec,170,datura stramonium l|l,Datura stramonium L.,L.,,ACCEPTED,SPECIES,2928751,2928751,2928751,2928734,7717,6,KNApSAcK World,,,,98
-pl_9d37727b0d29dfe3869aeb25,171,datura stramonium var tatula l torr|l,Datura stramonium var. tatula (L.) Torr.,L.,,SYNONYM,SPECIES,2928754,2928753,2928751,2928734,7717,6,KNApSAcK World,,,,98
-pl_7ce739c1593db4206a509e5a,172,daucus carota l|l,Daucus carota L.,L.,,ACCEPTED,SPECIES,3034742,3034742,3034742,3034740,6720,6,KNApSAcK World,,,,97
-pl_5194bf3532612a00c43953ad,173,derris elliptica wall benth|wall benth,Derris elliptica (Wall.) Benth.,(Wall.) Benth.,,ACCEPTED,SPECIES,5350305,5350305,5350305,2947465,5386,6,KNApSAcK World,,,,97
-pl_6c0ee9824243d8efd7e0f533,175,derris scandens roxb benth|roxb benth,Derris scandens (Roxb.) Benth.,(Roxb.) Benth.,,HETEROTYPIC_SYNONYM,SPECIES,5350316,5350316,10779326,2952879,5386,6,KNApSAcK World,,,,100
-pl_ac9dc0ad209bdd58a7ae6ce8,176,derris trifoliata lour|lour,Derris trifoliata Lour.,Lour.,,ACCEPTED,SPECIES,5350336,5350336,5350336,2947465,5386,6,KNApSAcK World,,,,99
-pl_cc051b38d6ad21ab37b447fb,177,desmodium gangeticum puri 1951|puri 1951,"Desmodium gangeticum Puri, 1951","Puri, 1951",,ACCEPTED,SPECIES,11440699,11440699,11440699,2967050,5386,6,KNApSAcK World,,,,97
-pl_60f2129c73ff69efe732ed59,180,desmodium triflorum l dc|l dc,Desmodium triflorum (L.) DC.,(L.) DC.,,HETEROTYPIC_SYNONYM,SPECIES,2967163,2967163,10833216,9615544,5386,6,KNApSAcK World,,,,100
-pl_3261fb45fc6a3ea80b6fb8ad,181,digitalis purpurea l|l,Digitalis purpurea L.,L.,,ACCEPTED,SPECIES,5414995,5414995,5414995,3172032,2420,6,KNApSAcK World,,,,99
-pl_d0666106e296083354abc115,182,dioscorea hispida dennst|dennst,Dioscorea hispida Dennst.,Dennst.,,ACCEPTED,SPECIES,2755784,2755784,2755784,2754367,7694,6,KNApSAcK World,,,,99
-pl_edcb7550263a3f95df24c6a5,183,drymaria cordata l willd ex schult|l willd ex schult,Drymaria cordata (L.) Willd. ex Schult.,(L.) Willd. ex Schult.,,ACCEPTED,SPECIES,5384509,5384509,5384509,3085329,2518,6,KNApSAcK World,,,,97
-pl_5ae1dc783b3c5803d9d3292e,184,dryobalanops aromatica c f gaertn|c f gaertn,Dryobalanops aromatica C.F.Gaertn.,C.F.Gaertn.,,ACCEPTED,SPECIES,3189690,3189690,3189690,3189689,6645,6,KNApSAcK World,,,,99
-pl_bece0903080e1a6ceaa09878,185,duranta erecta l|l,Duranta erecta L.,L.,,ACCEPTED,SPECIES,2925655,2925655,2925655,2925654,6689,6,KNApSAcK World,,,,99
-pl_9c7b7cbed00d03974ce6535d,187,durio zibethinus murray|murray,Durio zibethinus Murray,Murray,,ACCEPTED,SPECIES,3152230,3152230,3152230,3152229,6685,6,KNApSAcK World,,,,97
-pl_be0622f6cb35259c927b9e04,188,dysoxylum acutangulum miq|miq,Dysoxylum acutangulum Miq.,Miq.,,ACCEPTED,SPECIES,7271367,7271367,7271367,3190481,2397,6,KNApSAcK World,,,,99
-pl_9110a3884af61aeb1c3b57ca,189,echinacea purpurea l moench|l moench,Echinacea purpurea (L.) Moench,(L.) Moench,,ACCEPTED,SPECIES,3150935,3150935,3150935,3150914,3065,6,KNApSAcK World,,,,99
-pl_6e1f5e4374db1bcd4740c580,191,eclipta alba l hassk|l hassk,Eclipta alba (L.) Hassk.,(L.) Hassk.,,ACCEPTED,SPECIES,5384955,5384955,5384955,3086569,3065,6,KNApSAcK World,,,,97
-pl_077bf9cb5a65f855fa7e7b51,192,eclipta prostrata l l|l l,Eclipta prostrata (L.) L.,(L.) L.,,ACCEPTED,SPECIES,5384950,5384950,5384950,3086569,3065,6,KNApSAcK World,,,,97
-pl_d63cb2b820ab40a3c9196370,194,elaeocarpus ganitrus roxb|roxb,Elaeocarpus ganitrus Roxb.,Roxb.,,SYNONYM,SPECIES,4031193,4031193,10988361,3152094,2435,6,KNApSAcK World,,,,100
-pl_20a9fe7e729b46358023ebdc,195,elaeocarpus grandiflorus sm|sm,Elaeocarpus grandiflorus Sm.,Sm.,,ACCEPTED,SPECIES,8368501,8368501,8368501,3152094,2435,6,KNApSAcK World,,,,97
-pl_8deb09eade3395feea7630df,196,elateriospermum tapos blume|blume,Elateriospermum tapos Blume,Blume,,ACCEPTED,SPECIES,3071462,3071462,3071462,3071461,4691,6,KNApSAcK World,,,,99
-pl_5a0ebb93b405a5ba873b27c2,197,elephantopus scaber l|l,Elephantopus scaber L.,L.,,ACCEPTED,SPECIES,5395925,5395925,5395925,3119618,3065,6,KNApSAcK World,,,,99
-pl_2ff52618badc8932338680fd,198,elettaria cardamomum l maton|l maton,Elettaria cardamomum (L.) Maton,(L.) Maton,,ACCEPTED,SPECIES,2759871,2759871,2759871,2759853,4687,6,KNApSAcK World,,,,99
-pl_b2df03dc98458cf9646f5e47,199,eleutherine bulbosa mill urb|aubl merr ex k heyne,Eleutherine bulbosa (Mill.) Urb.,(Aubl.) Merr. ex K.Heyne,,SYNONYM,SPECIES,2749558,2749556,2749556,2749552,7698,6,KNApSAcK World,,,,97
-pl_d4d065613f31a28e92cd7ae9,200,embelia ribes burm fil|burm fil,Embelia ribes Burm.fil.,Burm.fil.,,ACCEPTED,SPECIES,7330952,7330952,7330952,2984886,6674,6,KNApSAcK World,,,,99
-pl_594184fb9067812c3cb248e4,201,emilia sonchifolia l dc ex wight|l dc ex wight,Emilia sonchifolia (L.) DC. ex Wight,(L.) DC. ex Wight,,ACCEPTED,SPECIES,7376217,7376217,7376217,3137995,3065,6,KNApSAcK World,,,,97
-pl_59410b0e2eed0a9f7786a4dd,202,entada phaseoloides l merr|l benth,Entada phaseoloides (L.) Merr.,(L.) Benth.,,SYNONYM,SPECIES,8436855,2976244,2976244,2976182,5386,6,KNApSAcK World,,,,98
-pl_56df9876789161d3b94df9a2,203,equisetum debile roxb ex wall 1829|roxb ex wall 1829,"Equisetum debile Roxb. ex Wall., 1829","Roxb. ex Wall., 1829",,ACCEPTED,SPECIES,10769463,10769463,10769463,2687913,3105,6,KNApSAcK World,,,,97
-pl_9660d5de1c581e9c3e947173,204,erigeron sumatrensis retz|retz,Erigeron sumatrensis Retz.,Retz.,,ACCEPTED,SPECIES,3146683,3146683,3146683,3146588,3065,6,KNApSAcK World,,,,99
-pl_84303dab876e2207c83da9f7,206,eryngium foetidum l|l,Eryngium foetidum L.,L.,,ACCEPTED,SPECIES,3034425,3034425,3034425,3034387,6720,6,KNApSAcK World,,,,97
-pl_a74879b11a5e62496774c41c,207,erythrina subumbrans hassk merr|blume ex miq,Erythrina subumbrans (Hassk.) Merr.,Blume ex Miq.,,SYNONYM,SPECIES,5349591,5349636,5349636,2945830,5386,6,KNApSAcK World,,,,97
-pl_87a57915dea120d915edda1c,208,erythrina subumbrans hassk merr|hassk merr,Erythrina subumbrans (Hassk.) Merr.,(Hassk.) Merr.,,ACCEPTED,SPECIES,5349636,5349636,5349636,2945830,5386,6,KNApSAcK World,,,,99
-pl_255fb55a52bd7098fdff7de2,209,erythrina variegata l|l,Erythrina variegata L.,L.,,ACCEPTED,SPECIES,5349581,5349581,5349581,2945830,5386,6,KNApSAcK World,,,,99
-pl_38b6ee1bd3a6ca370f22a7e3,210,eucalyptus globulus labill|labill,Eucalyptus globulus Labill.,Labill.,,ACCEPTED,SPECIES,3176787,3176787,3176787,7493935,5014,6,KNApSAcK World,,,,99
-pl_fa4e73cdcfd96f22ff1d782b,211,euchresta horsfieldii lesch benn|lesch benn,Euchresta horsfieldii (Lesch.) Benn.,(Lesch.) Benn.,,ACCEPTED,SPECIES,2951871,2951871,2951871,2951865,5386,6,KNApSAcK World,,,,99
-pl_bec6269da8ada12262c4a91f,212,eugenia aromatica kuntze 1891|kuntze 1891,"Eugenia aromatica Kuntze, 1891","Kuntze, 1891",,ACCEPTED,SPECIES,8052532,8052532,8052532,3177662,5014,6,KNApSAcK World,,,,97
-pl_8d34012799093b9d833d7276,214,eupatorium riparium sch bip ex schnittsp|sch bip ex schnittsp,Eupatorium riparium Sch.Bip. ex Schnittsp.,Sch.Bip. ex Schnittsp.,,ACCEPTED,SPECIES,7694888,7694888,7694888,3142374,3065,6,KNApSAcK World,,,,97
-pl_f5e261a1703e8e0228dc7ea9,216,euphorbia antiquorum l|l,Euphorbia antiquorum L.,L.,,ACCEPTED,SPECIES,3069535,3069535,3069535,11397237,4691,6,KNApSAcK World,,,,98
-pl_de8deabde24d5b5bf9cbf05c,217,euphorbia heterophylla l|l,Euphorbia heterophylla L.,L.,,ACCEPTED,SPECIES,3064495,3064495,3064495,11397237,4691,6,KNApSAcK World,,,,97
-pl_f9fa48479e406520fa38f33a,218,euphorbia hirta l|l,Euphorbia hirta L.,L.,,ACCEPTED,SPECIES,3068937,3068937,3068937,11397237,4691,6,KNApSAcK World,,,,99
-pl_c2567949872dfe5b5c1e7ffc,219,euphorbia milii des moul|des moul,Euphorbia milii Des Moul.,Des Moul.,,ACCEPTED,SPECIES,3067157,3067157,3067157,11397237,4691,6,KNApSAcK World,,,,98
-pl_9000521be29ca63d72d98264,220,euphorbia neriifolia l|l,Euphorbia neriifolia L.,L.,,ACCEPTED,SPECIES,3064865,3064865,3064865,11397237,4691,6,KNApSAcK World,,,,97
-pl_c2ba1b8f867456321ab75d99,221,euphorbia prostrata aiton|aiton,Euphorbia prostrata Aiton,Aiton,,ACCEPTED,SPECIES,3067891,3067891,3067891,11397237,4691,6,KNApSAcK World,,,,97
-pl_e366558514d795facee1bc3a,222,euphorbia pulcherrima willd ex klotzsch|willd ex klotzsch,Euphorbia pulcherrima Willd. ex Klotzsch,Willd. ex Klotzsch,,ACCEPTED,SPECIES,3066465,3066465,3066465,11397237,4691,6,KNApSAcK World,,,,97
-pl_b4350d549439304f41ab39ab,223,euphorbia tirucalli l|l,Euphorbia tirucalli L.,L.,,ACCEPTED,SPECIES,3069353,3069353,3069353,11397237,4691,6,KNApSAcK World,,,,98
-pl_9f69c7f299aeabcd3a0224e5,377,euphorbia tithymaloides l|l poit,Euphorbia tithymaloides L.,(L.) Poit.,,SYNONYM,SPECIES,3069185,3069168,3069168,11397237,4691,6,KNApSAcK World,,,,98
-pl_e13c7ad3dbbaa10c431238ab,224,eurycoma longifolia jack|jack,Eurycoma longifolia Jack,Jack,,ACCEPTED,SPECIES,3709190,3709190,3709190,7329629,2395,6,KNApSAcK World,,,,99
-pl_410cbf14ef9cb5a78ad7018b,225,excoecaria agallocha l|l,Excoecaria agallocha L.,L.,,ACCEPTED,SPECIES,3071702,3071702,3071702,3054277,4691,6,KNApSAcK World,,,,99
-pl_de19cea722a83709552020d4,226,excoecaria cochinchinensis lour|lour,Excoecaria cochinchinensis Lour.,Lour.,,ACCEPTED,SPECIES,3071716,3071716,3071716,3054277,4691,6,KNApSAcK World,,,,98
-pl_b7163225491b453c3af1d0a5,419,fabisporus sanguineus l zmitr|l murrill,Fabisporus sanguineus (L.) Zmitr.,(L.) Murrill,,SYNONYM,SPECIES,5246472,2546050,2546050,2545921,3286,5,KNApSAcK World,,,,98
-pl_73299e658fb79639c0db2bf1,228,ficus carica l|l,Ficus carica L.,L.,,ACCEPTED,SPECIES,5361909,5361909,5361909,2984588,6640,6,KNApSAcK World,,,,99
-pl_abb79f8c026b29348a5c896f,229,ficus microcarpa l fil|l fil,Ficus microcarpa L.fil.,L.fil.,,ACCEPTED,SPECIES,7467639,7467639,7467639,2984588,6640,6,KNApSAcK World,,,,97
-pl_04b3c27321a262278557c801,230,ficus pumila l|l,Ficus pumila L.,L.,,ACCEPTED,SPECIES,5361930,5361930,5361930,2984588,6640,6,KNApSAcK World,,,,97
-pl_fe388c6645d5b9ded7c7197b,231,ficus septica burm fil|burm fil,Ficus septica Burm.fil.,Burm.fil.,,ACCEPTED,SPECIES,7852448,7852448,7852448,2984588,6640,6,KNApSAcK World,,,,97
-pl_f9e3f7b4c662ac0dfd714b89,233,foeniculum vulgare mill|mill,Foeniculum vulgare Mill.,Mill.,,ACCEPTED,SPECIES,3034922,3034922,3034922,10704390,6720,6,KNApSAcK World,,,,98
-pl_3be74ad9f1540488afc9e794,234,ganoderma lucidum curtis p karst|curtis p karst,Ganoderma lucidum (Curtis) P.Karst.,(Curtis) P.Karst.,,ACCEPTED,SPECIES,2549730,2549730,2549730,2519220,3286,5,KNApSAcK World,,,,99
-pl_f9c2b750d396a352681f2464,235,garcinia dulcis roxb kurz|roxb kurz,Garcinia dulcis (Roxb.) Kurz,(Roxb.) Kurz,,ACCEPTED,SPECIES,3189565,3189565,3189565,3189556,6646,6,KNApSAcK World,,,,97
-pl_5f78c1138e669bc8cf51c1d4,236,garcinia mangostana l|l,Garcinia mangostana L.,L.,,ACCEPTED,SPECIES,3189571,3189571,3189571,3189556,6646,6,KNApSAcK World,,,,99
-pl_66efc15a54fbf2ac521ec183,237,gardenia jasminoides j ellis|j ellis,Gardenia jasminoides J.Ellis,J.Ellis,,ACCEPTED,SPECIES,5335125,5335125,5335125,2894320,8798,6,KNApSAcK World,,,,98
-pl_81724b2d85973d2cba333b3e,238,gaultheria procumbens l|l,Gaultheria procumbens L.,L.,,ACCEPTED,SPECIES,2882753,2882753,2882753,2882751,2505,6,KNApSAcK World,,,,99
-pl_c6626827fdf1ef9cea78a3c7,239,ginkgo biloba l|l,Ginkgo biloba L.,L.,,ACCEPTED,SPECIES,2687885,2687885,2687885,2687884,3070,6,KNApSAcK World,,,,99
-pl_8c2c0f3e10c7a3ebf5cc94fe,240,glochidion rubrum blume|blume,Glochidion rubrum Blume,Blume,,ACCEPTED,SPECIES,3080882,3080882,3080882,3080069,8807,6,KNApSAcK World,,,,99
-pl_02977494d53920e6b3919a23,241,gloriosa superba l|l,Gloriosa superba L.,L.,,ACCEPTED,SPECIES,2740024,2740024,2740024,2740022,7697,6,KNApSAcK World,,,,99
-pl_dab5caf2de51d2e1129475de,242,glycine max l merr|l merr,Glycine max (L.) Merr.,(L.) Merr.,,ACCEPTED,SPECIES,5359660,5359660,5359660,7968287,5386,6,KNApSAcK World,,,,99
-pl_e7a150d76275d2d6616731d3,243,glycine max subsp soja siebold zucc h ohashi|siebold zucc,Glycine max subsp. soja (Siebold & Zucc.) H.Ohashi,Siebold & Zucc.,,SYNONYM,SPECIES,5359668,5359662,5359660,7968287,5386,6,KNApSAcK World,,,,97
-pl_ee3d5e31981aa01aa4a3d4ac,244,glycyrrhiza glabra l|l,Glycyrrhiza glabra L.,L.,,ACCEPTED,SPECIES,2965732,2965732,2965732,2965731,5386,6,KNApSAcK World,,,,98
-pl_ec498351163fc687d8f28e85,245,gnetum gnemon l|l,Gnetum gnemon L.,L.,,ACCEPTED,SPECIES,2653133,2653133,2653133,2653091,6755,6,KNApSAcK World,,,,99
-pl_6675a728f19a8f870e2800cb,246,gomphrena globosa l|l,Gomphrena globosa L.,L.,,ACCEPTED,SPECIES,3084908,3084908,3084908,3084899,3064,6,KNApSAcK World,,,,99
-pl_569764d8ad1ca0a939ee5794,247,goniothalamus macrophyllus blume hook f thomson|blume hook f thomson,Goniothalamus macrophyllus (Blume) Hook.f. & Thomson,(Blume) Hook.f. & Thomson,,ACCEPTED,SPECIES,3154616,3154616,3154616,3154482,9291,6,KNApSAcK World,,,,97
-pl_4d49c8717990a95953536f3b,248,gossypium herbaceum l|l,Gossypium herbaceum L.,L.,,ACCEPTED,SPECIES,3152658,3152658,3152658,3152652,6685,6,KNApSAcK World,,,,99
-pl_d7bd56129d5b8fadf0e5fbaf,179,grona styracifolia osbeck h ohashi k ohashi|osbeck merr,Grona styracifolia (Osbeck) H.Ohashi & K.Ohashi,(Osbeck) Merr.,,SYNONYM,SPECIES,2967806,10722283,10722283,9615544,5386,6,KNApSAcK World,,,,98
-pl_389aa02f4896c03a986b5600,249,guazuma ulmifolia lam|lam,Guazuma ulmifolia Lam.,Lam.,,ACCEPTED,SPECIES,3152195,3152195,3152195,3152194,6685,6,KNApSAcK World,,,,98
-pl_d68d1a06bad47e2f28932f53,250,gynandropsis gynandra l briq|l briq,Gynandropsis gynandra (L.) Briq.,(L.) Briq.,,ACCEPTED,SPECIES,3054227,3054227,3054227,6370688,3845332,6,KNApSAcK World,,,,97
-pl_456dc1bf90376280ac9c6bc2,251,gynura japonica thunb juel|lour merr,Gynura japonica (Thunb.) Juel,(Lour.) Merr.,,SYNONYM,SPECIES,3139809,3139807,3139807,3139806,3065,6,KNApSAcK World,,,,98
-pl_5de3b54b7a647c5b526e5c77,252,hedychium coronarium j koenig|j koenig,Hedychium coronarium J.Koenig,J.Koenig,,ACCEPTED,SPECIES,7883492,7883492,7883492,2758595,4687,6,KNApSAcK World,,,,99
-pl_f5a31b92897e22f9a05e7522,253,hedyotis corymbosa l lam|l lam,Hedyotis corymbosa (L.) Lam.,(L.) Lam.,,HETEROTYPIC_SYNONYM,SPECIES,2912014,2912014,2911970,2915706,8798,6,KNApSAcK World,,,,100
-pl_a91d44e588322a1045e7396e,254,helianthus annuus l|l,Helianthus annuus L.,L.,,ACCEPTED,SPECIES,9206251,9206251,9206251,3119134,3065,6,KNApSAcK World,,,,99
-pl_c7b03cb5665c8cb28e3cd2ce,255,helicteres isora l|l,Helicteres isora L.,L.,,ACCEPTED,SPECIES,5546922,5546922,5546922,3152154,6685,6,KNApSAcK World,,,,97
-pl_9a7ad6d6e47ba4718b7b4845,256,heliotropium indicum l|l,Heliotropium indicum L.,L.,,ACCEPTED,SPECIES,2925788,2925788,2925788,2925766,4930387,6,KNApSAcK World,,,,99
-pl_81d3886d81a684ad383798a8,147,hellenia speciosa j koenig s r dutta|j koenig sm,Hellenia speciosa (J.Koenig) S.R.Dutta,(J.Koenig) Sm.,,SYNONYM,SPECIES,2756724,7584507,7584507,8189889,4492,6,KNApSAcK World,,,,98
-pl_a9bd015cdecc1174b9c3ddd7,257,hevea brasiliensis willd ex a juss mull arg|willd ex a juss mull arg,Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg.,(Willd. ex A.Juss.) Müll.Arg.,,ACCEPTED,SPECIES,3071171,3071171,3071171,3071157,4691,6,KNApSAcK World,,,,99
-pl_866f2b49a0f4a5cef401e242,259,hibiscus mutabilis l|l,Hibiscus mutabilis L.,L.,,ACCEPTED,SPECIES,3152555,3152555,3152555,3152542,6685,6,KNApSAcK World,,,,99
-pl_deb4a9280e620b0a814d8912,260,hibiscus rosa sinensis l|l,Hibiscus rosa-sinensis L.,L.,,ACCEPTED,SPECIES,3152559,3152559,3152559,3152542,6685,6,KNApSAcK World,,,,99
-pl_32398998f0ceffb07ef81a78,261,hibiscus sabdariffa l|l,Hibiscus sabdariffa L.,L.,,ACCEPTED,SPECIES,3152582,3152582,3152582,3152542,6685,6,KNApSAcK World,,,,97
-pl_dfa397db93e9f6f9d80ae412,281,hippobroma longiflora l g don|l c presl,Hippobroma longiflora (L.) G.Don,(L.) C.Presl,,SYNONYM,SPECIES,5414194,3168943,3168943,3168942,8801,6,KNApSAcK World,,,,97
-pl_3676ab5429ac8921b588c029,263,homalomena occulta lour schott|lour schott,Homalomena occulta (Lour.) Schott,(Lour.) Schott,,ACCEPTED,SPECIES,2868708,2868708,2868708,2868531,6979,6,KNApSAcK World,,,,99
-pl_525331a1365e9c14353fef37,264,hura crepitans l|l,Hura crepitans L.,L.,,ACCEPTED,SPECIES,5380015,5380015,5380015,3071143,4691,6,KNApSAcK World,,,,99
-pl_f80dec8dd1a3f4a0685640d8,265,hydrangea macrophylla thunb ser|thunb ser,Hydrangea macrophylla (Thunb.) Ser.,(Thunb.) Ser.,,ACCEPTED,SPECIES,2985994,2985994,2985994,2985983,6667,6,KNApSAcK World,,,,99
-pl_aa9ee13020cd1db39bd6a44e,266,hydrocotyle sibthorpioides lam|lam,Hydrocotyle sibthorpioides Lam.,Lam.,,ACCEPTED,SPECIES,8418338,8418338,8418338,3034601,8800,6,KNApSAcK World,,,,97
-pl_86581436997d0398765e0054,268,hyptis brevipes poit|poit,Hyptis brevipes Poit.,Poit.,,ACCEPTED,SPECIES,7306536,7306536,7306536,2926807,2497,6,KNApSAcK World,,,,97
-pl_ec7d2ca7432a82b7cd78dc67,271,impatiens balsamina l|l,Impatiens balsamina L.,L.,,ACCEPTED,SPECIES,2891773,2891773,2891773,2891766,6699,6,KNApSAcK World,,,,99
-pl_47ab24eb2755ca8c6aabfc4e,272,imperata cylindrica l raeusch|l raeusch,Imperata cylindrica (L.) Raeusch.,(L.) Raeusch.,,ACCEPTED,SPECIES,8424006,8424006,8424006,7627509,3073,6,KNApSAcK World,,,,97
-pl_4026427748b4ebe726402bc9,273,indigofera tinctoria l|l,Indigofera tinctoria L.,L.,,ACCEPTED,SPECIES,2972043,2972043,2972043,2971355,5386,6,KNApSAcK World,,,,97
-pl_079ee6dd545cb7010ad4f261,274,intsia bijuga colebr kuntze|colebr kuntze,Intsia bijuga (Colebr.) Kuntze,(Colebr.) Kuntze,,ACCEPTED,SPECIES,2963211,2963211,2963211,2963210,5386,6,KNApSAcK World,,,,98
-pl_ebad29126083f69060b53e16,275,ipomoea aquatica forssk|forssk,Ipomoea aquatica Forssk.,Forssk.,,ACCEPTED,SPECIES,2928525,2928525,2928525,2928509,2389,6,KNApSAcK World,,,,99
-pl_4527453435483a7939cc8739,276,ipomoea batatas l lam|l lam,Ipomoea batatas (L.) Lam.,(L.) Lam.,,ACCEPTED,SPECIES,2928551,2928551,2928551,2928509,2389,6,KNApSAcK World,,,,97
-pl_ec9b18dc63bda70a503533c5,277,ipomoea cairica l sweet|l sweet,Ipomoea cairica (L.) Sweet,(L.) Sweet,,ACCEPTED,SPECIES,2928531,2928531,2928531,2928509,2389,6,KNApSAcK World,,,,99
-pl_5946cdeedd2e724ad969de92,278,ipomoea pes caprae l r br|l r br,Ipomoea pes-caprae (L.) R.Br.,(L.) R.Br.,,ACCEPTED,SPECIES,7999386,7999386,7999386,2928509,2389,6,KNApSAcK World,,,,97
-pl_a4bda7b81a8fd93e090cd685,421,ipomoea quamoclit l|bojer,Ipomoea quamoclit L.,Bojer,,SYNONYM,SPECIES,5549024,2928562,2928562,2928509,2389,6,KNApSAcK World,,,,98
-pl_318d5df03d0811ca6ce1a2fe,279,ipomoea reptans poir|poir,Ipomoea reptans Poir.,Poir.,,HETEROTYPIC_SYNONYM,SPECIES,4925685,4925685,2928525,2928509,2389,6,KNApSAcK World,,,,100
-pl_4d49b5cbd94dee8f59d3d67f,69,iris domestica l goldblatt mabb|l dc,Iris domestica (L.) Goldblatt & Mabb.,(L.) DC.,,SYNONYM,SPECIES,2748796,5298546,5298546,2748017,7698,6,KNApSAcK World,,,,97
-pl_5163509315c58d617ada75ad,282,ixora chinensis lam|lam,Ixora chinensis Lam.,Lam.,,ACCEPTED,SPECIES,2905600,2905600,2905600,2905224,8798,6,KNApSAcK World,,,,99
-pl_6ac82556910d089cb5d9ec44,283,jasminum officinale l|l,Jasminum officinale L.,L.,,ACCEPTED,SPECIES,3172261,3172261,3172261,3172260,6652,6,KNApSAcK World,,,,99
-pl_2fb4d537bb4c39aa6f0d747e,284,jasminum sambac l aiton|l aiton,Jasminum sambac (L.) Aiton,(L.) Aiton,,ACCEPTED,SPECIES,7587215,7587215,7587215,3172260,6652,6,KNApSAcK World,,,,98
-pl_1144702ce6950150d2573b5a,285,jatropha curcas l|l,Jatropha curcas L.,L.,,ACCEPTED,SPECIES,3072953,3072953,3072953,3072692,4691,6,KNApSAcK World,,,,98
-pl_9a48a90b143e880ace5a3e9a,287,jatropha gossypiifolia l|l,Jatropha gossypiifolia L.,L.,,ACCEPTED,SPECIES,3072900,3072900,3072900,3072692,4691,6,KNApSAcK World,,,,99
-pl_f29ca818de39ea69173d3899,288,jatropha multifida l|l,Jatropha multifida L.,L.,,ACCEPTED,SPECIES,3072985,3072985,3072985,3072692,4691,6,KNApSAcK World,,,,99
-pl_de50c4a0231041332ff33de9,289,jatropha podagrica hook|hook,Jatropha podagrica Hook.,Hook.,,ACCEPTED,SPECIES,3073016,3073016,3073016,3072692,4691,6,KNApSAcK World,,,,99
-pl_a2250fae95228872428ad45d,291,kaempferia galanga l|l,Kaempferia galanga L.,L.,,ACCEPTED,SPECIES,5301451,5301451,5301451,2756998,4687,6,KNApSAcK World,,,,99
-pl_02adc04e9237ebf125a97c1e,292,kaempferia rotunda l|l,Kaempferia rotunda L.,L.,,ACCEPTED,SPECIES,5301445,5301445,5301445,2756998,4687,6,KNApSAcK World,,,,97
-pl_492ddd508a0e1617b87ad31b,293,kalanchoe daigremontiana raym hamet h perrier|raym hamet h perrier,Kalanchoe daigremontiana Raym.-Hamet & H.Perrier,Raym.-Hamet & H.Perrier,,ACCEPTED,SPECIES,2985936,2985936,2985936,2985928,2406,6,KNApSAcK World,,,,99
-pl_ddce83666af561e7b0146e59,82,kalanchoe pinnata lam pers|lam oken,Kalanchoe pinnata (Lam.) Pers.,(Lam.) Oken,,SYNONYM,SPECIES,5362077,2985930,2985930,2985928,2406,6,KNApSAcK World,,,,97
-pl_0337cd5a4ce935b4ff75805e,294,kalanchoe pinnata lam pers|lam pers,Kalanchoe pinnata (Lam.) Pers.,(Lam.) Pers.,,ACCEPTED,SPECIES,2985930,2985930,2985930,2985928,2406,6,KNApSAcK World,,,,99
-pl_15520520705fc1ad9867c23d,295,kyllinga brevifolia rottb|rottb,Kyllinga brevifolia Rottb.,Rottb.,,HETEROTYPIC_SYNONYM,SPECIES,2718737,2718737,2718767,2713455,7708,6,KNApSAcK World,,,,100
-pl_80f7fee2911c53c82bc3f607,296,lactuca indica l|l,Lactuca indica L.,L.,,ACCEPTED,SPECIES,3140510,3140510,3140510,3140231,3065,6,KNApSAcK World,,,,99
-pl_a70154744e69a4839b409d6a,297,lagerstroemia indica l|l,Lagerstroemia indica L.,L.,,ACCEPTED,SPECIES,3188725,3188725,3188725,3188723,6684,6,KNApSAcK World,,,,99
-pl_5e67ada87380b30390fa7577,298,lagerstroemia speciosa l pers|l pers,Lagerstroemia speciosa (L.) Pers.,(L.) Pers.,,ACCEPTED,SPECIES,3188724,3188724,3188724,3188723,6684,6,KNApSAcK World,,,,97
-pl_7d50dcb3278e40f50171cb63,299,lansium domesticum correa|correa,Lansium domesticum Corrêa,Corrêa,,ACCEPTED,SPECIES,3190478,3190478,3190478,3190477,2397,6,KNApSAcK World,,,,97
-pl_327a1cdf73bd7e536eb8c0b4,300,lantana camara l|l,Lantana camara L.,L.,,ACCEPTED,SPECIES,2925303,2925303,2925303,2925302,6689,6,KNApSAcK World,,,,99
-pl_4b4a1d0f582c74525c0f2723,301,lantana trifolia l|l,Lantana trifolia L.,L.,,ACCEPTED,SPECIES,2925321,2925321,2925321,2925302,6689,6,KNApSAcK World,,,,98
-pl_89d22fbdf380e916c0e5e40d,302,laurentia longiflora l peterm|l peterm,Laurentia longiflora (L.) Peterm.,(L.) Peterm.,,HETEROTYPIC_SYNONYM,SPECIES,5414185,5414185,3168943,3168942,8801,6,KNApSAcK World,,,,100
-pl_1f3f770ee284cb1161104d07,303,lawsonia inermis l|l,Lawsonia inermis L.,L.,,ACCEPTED,SPECIES,5420912,5420912,5420912,3188701,6684,6,KNApSAcK World,,,,99
-pl_9e041dc56eedbc723f1deb57,304,leonurus japonicus houtt|sweet,Leonurus japonicus Houtt.,Sweet,,SYNONYM,SPECIES,5607368,6410563,6410563,7492548,2497,6,KNApSAcK World,,,,98
-pl_260ae919a413d1efb53427c0,305,leonurus sibiricus l|l,Leonurus sibiricus L.,L.,,ACCEPTED,SPECIES,5341392,5341392,5341392,7492548,2497,6,KNApSAcK World,,,,97
-pl_2827ce08c068e47881483c3e,306,lepidium sativum l|l,Lepidium sativum L.,L.,,ACCEPTED,SPECIES,5376565,5376565,5376565,3051713,3112,6,KNApSAcK World,,,,98
-pl_9740bc5a9387f32f089804e0,307,leptospermum polygalifolium subsp polygalifolium|j e sm,Leptospermum polygalifolium subsp. polygalifolium,J.E.Sm.,,SYNONYM,SPECIES,3181797,7223950,3181788,3181696,5014,6,KNApSAcK World,,,,98
-pl_7c0657d68ae65e920f709129,309,leucaena leucocephala lam de wit|lam de wit,Leucaena leucocephala (Lam.) de Wit,(Lam.) de Wit,,ACCEPTED,SPECIES,2970418,2970418,2970418,2970337,5386,6,KNApSAcK World,,,,97
-pl_7da2899ca46b9010e3e22ab9,310,litsea cubeba lour pers|lour pers,Litsea cubeba (Lour.) Pers.,(Lour.) Pers.,,ACCEPTED,SPECIES,3033977,3033977,3033977,3033976,6688,6,KNApSAcK World,,,,98
-pl_171512acfb6bbb3c3833be45,311,litsea glutinosa lour c b rob|lour c b rob,Litsea glutinosa (Lour.) C.B.Rob.,(Lour.) C.B.Rob.,,ACCEPTED,SPECIES,7304140,7304140,7304140,3033976,6688,6,KNApSAcK World,,,,99
-pl_093c883862341b51d8ccaf65,312,ludwigia octovalvis jacq p h raven|jacq p h raven,Ludwigia octovalvis (Jacq.) P.H.Raven,(Jacq.) P.H.Raven,,ACCEPTED,SPECIES,5420987,5420987,5420987,3189286,2430,6,KNApSAcK World,,,,99
-pl_3b309059ae2a8c398f10ea02,313,luffa cylindrica l m roem|l m roem,Luffa cylindrica (L.) M.Roem.,(L.) M.Roem.,,PROPARTE_SYNONYM,SPECIES,12387721,12387721,2874599,2874598,6634,6,KNApSAcK World,,,,100
-pl_8f23d1af0cc4e386e0fc4727,314,luvunga sarmentosa blume kurz|blume kurz,Luvunga sarmentosa (Blume) Kurz,(Blume) Kurz,,ACCEPTED,SPECIES,3834748,3834748,3834748,8176821,2396,6,KNApSAcK World,,,,99
-pl_c3f4f91925e37a3f209eac82,315,madhuca longifolia var latifolia roxb a chev|j f gmel,Madhuca longifolia var. latifolia (Roxb.) A.Chev.,J.F.Gmel.,,SYNONYM,SPECIES,2883353,2883352,2883346,2883218,8802,6,KNApSAcK World,,,,98
-pl_65277045f455922f387dc788,330,magnolia alba dc figlar|dc,Magnolia × alba (DC.) Figlar,DC.,,SYNONYM,SPECIES,5635329,3987892,3987892,2888195,4690,6,KNApSAcK World,,,,98
-pl_d893f615345b613ffbf06aed,331,magnolia champaca l baill ex pierre|l,Magnolia champaca (L.) Baill. ex Pierre,L.,,SYNONYM,SPECIES,5939079,3153099,3153099,2888195,4690,6,KNApSAcK World,,,,98
-pl_b55495fa02d0c0a939d5e09c,316,mallotus philippensis lam mull arg|lam mull arg,Mallotus philippensis (Lam.) Müll.Arg.,(Lam.) Müll.Arg.,,ACCEPTED,SPECIES,5378605,5378605,5378605,3062330,4691,6,KNApSAcK World,,,,98
-pl_877a574b07a13af32bb07c2f,317,malus sylvestris mill|mill,Malus sylvestris Mill.,Mill.,,ACCEPTED,SPECIES,3001509,3001509,3001509,3001068,5015,6,KNApSAcK World,,,,97
-pl_a8a25b144229a02b83b69c9a,318,manihot esculenta crantz|crantz,Manihot esculenta Crantz,Crantz,,ACCEPTED,SPECIES,3060998,3060998,3060998,3060685,4691,6,KNApSAcK World,,,,99
-pl_ee394b71fefbc560c10a460f,319,manihot esculenta crantz|pohl,Manihot esculenta Crantz,Pohl,,SYNONYM,SPECIES,3061039,3060998,3060998,3060685,4691,6,KNApSAcK World,,,,98
-pl_2872663bde9672703e63c09f,320,manilkara zapota l p royen|l p royen,Manilkara zapota (L.) P.Royen,(L.) P.Royen,,ACCEPTED,SPECIES,2885158,2885158,2885158,2885024,8802,6,KNApSAcK World,,,,99
-pl_7c9ac2958197507a726ddbf3,34,meistera aculeata roxb skornick m f newman|roxb,Meistera aculeata (Roxb.) Škorničk. & M.F.Newman,Roxb.,,SYNONYM,SPECIES,5301584,11037528,11037528,2758958,4687,6,KNApSAcK World,,,,98
-pl_f81cafdc27c2216296537302,321,melaleuca leucadendra l l|l l,Melaleuca leucadendra (L.) L.,(L.) L.,,ACCEPTED,SPECIES,5415976,5415976,5415976,3175449,5014,6,KNApSAcK World,,,,99
-pl_0e14843747a59f8a62d3ae3a,323,melastoma malabathricum l|l,Melastoma malabathricum L.,L.,,ACCEPTED,SPECIES,3188511,3188511,3188511,3188510,6683,6,KNApSAcK World,,,,99
-pl_279c5264982d6af0cde472c1,324,melia azedarach l|l,Melia azedarach L.,L.,,ACCEPTED,SPECIES,5914287,5914287,5914287,3190496,2397,6,KNApSAcK World,,,,98
-pl_4e27ea7da6f493da1c52cbe4,325,melochia corchorifolia l|l,Melochia corchorifolia L.,L.,,ACCEPTED,SPECIES,3152125,3152125,3152125,3152114,6685,6,KNApSAcK World,,,,97
-pl_8e9164f90dcca6c7f975357b,326,mentha arvensis l|l,Mentha arvensis L.,L.,,ACCEPTED,SPECIES,2927192,2927192,2927192,2927173,2497,6,KNApSAcK World,,,,99
-pl_fc352678d4cd8b7c80771f89,327,mentha piperita l|l,Mentha × piperita L.,L.,,ACCEPTED,SPECIES,8707933,8707933,8707933,2927173,2497,6,KNApSAcK World,,,,99
-pl_bd5b8063de478a82191b3239,269,mesosphaerum pectinatum l kuntze|l poit,Mesosphaerum pectinatum (L.) Kuntze,(L.) Poit.,,SYNONYM,SPECIES,2926820,3889976,3889976,7307350,2497,6,KNApSAcK World,,,,98
-pl_d93c2eed945c0be04bc466a7,270,mesosphaerum suaveolens l kuntze|l poit,Mesosphaerum suaveolens (L.) Kuntze,(L.) Poit.,,SYNONYM,SPECIES,2926823,3889017,3889017,7307350,2497,6,KNApSAcK World,,,,98
-pl_3df15bb6f1da1f849d08ada9,328,mesua ferrea l|l,Mesua ferrea L.,L.,,ACCEPTED,SPECIES,7330039,7330039,7330039,7329993,4907584,6,KNApSAcK World,,,,99
-pl_e07bc835cb4f2acdf7de5144,329,metroxylon sagu rottb|rottb,Metroxylon sagu Rottb.,Rottb.,,ACCEPTED,SPECIES,2733781,2733781,2733781,2733775,7681,6,KNApSAcK World,,,,99
-pl_b5a5f791c747de44862a8b90,332,mikania micrantha kunth|kunth,Mikania micrantha Kunth,Kunth,,ACCEPTED,SPECIES,5398421,5398421,5398421,7722389,3065,6,KNApSAcK World,,,,97
-pl_9a492b2802b778c93fe6b1c1,333,millingtonia hortensis l fil|l fil,Millingtonia hortensis L.fil.,L.fil.,,ACCEPTED,SPECIES,7629955,7629955,7629955,8217499,6655,6,KNApSAcK World,,,,99
-pl_d8966e23e45a01107882e3be,334,mimosa pudica l|l,Mimosa pudica L.,L.,,ACCEPTED,SPECIES,2969284,2969284,2969284,2969235,5386,6,KNApSAcK World,,,,98
-pl_7d6aefb01e9e1ab8c5d7e5da,335,mimusops elengi l|l,Mimusops elengi L.,L.,,ACCEPTED,SPECIES,2883768,2883768,2883768,2883690,8802,6,KNApSAcK World,,,,97
-pl_e3bd88cf5b5cb7157dd0c6e8,336,mirabilis jalapa l|l,Mirabilis jalapa L.,L.,,ACCEPTED,SPECIES,3086240,3086240,3086240,3086140,6718,6,KNApSAcK World,,,,99
-pl_c4f64d659045302053b0d2e5,338,momordica charantia l|l,Momordica charantia L.,L.,,ACCEPTED,SPECIES,2874581,2874581,2874581,2874578,6634,6,KNApSAcK World,,,,97
-pl_d7e0e8fc020c595fd671eeb8,339,momordica cochinchinensis lour spreng|lour spreng,Momordica cochinchinensis (Lour.) Spreng.,(Lour.) Spreng.,,ACCEPTED,SPECIES,2874580,2874580,2874580,2874578,6634,6,KNApSAcK World,,,,98
-pl_0be1519825fda637e0dfd982,340,morinda citrifolia l|l,Morinda citrifolia L.,L.,,ACCEPTED,SPECIES,5339879,5339879,5339879,2915429,8798,6,KNApSAcK World,,,,99
-pl_2c562a36935b239b3e679cd0,342,moringa oleifera lam|gaertn,Moringa oleifera Lam.,Gaertn.,,SYNONYM,SPECIES,3054182,3054181,3054181,3054180,6753,6,KNApSAcK World,,,,98
-pl_d27eabd32bf2b94c9e5bffec,341,moringa oleifera lam|lam,Moringa oleifera Lam.,Lam.,,ACCEPTED,SPECIES,3054181,3054181,3054181,3054180,6753,6,KNApSAcK World,,,,97
-pl_3b2ea503efa7c25943deede8,343,morus alba l|l,Morus alba L.,L.,,ACCEPTED,SPECIES,5361889,5361889,5361889,2984545,6640,6,KNApSAcK World,,,,97
-pl_099e4c9611485ca8553e19b9,345,murraya paniculata l jacq|l jacq,Murraya paniculata (L.) Jacq.,(L.) Jacq.,,ACCEPTED,SPECIES,8190743,8190743,8190743,3190383,2396,6,KNApSAcK World,,,,97
-pl_5b3b4d3b1fbaaf637d8c9ad1,346,musa paradisiaca l|l,Musa × paradisiaca L.,L.,,ACCEPTED,SPECIES,2762752,2762752,2762752,2760990,4686,6,KNApSAcK World,,,,99
-pl_b15f24cd09ea0872ba543fa7,348,mussaenda pubescens dryand|dryand,Mussaenda pubescens Dryand.,Dryand.,,ACCEPTED,SPECIES,2892558,2892558,2892558,2892394,8798,6,KNApSAcK World,,,,97
-pl_26a92bbd35a672e9d9dd01c1,349,myristica fragrans houtt|houtt,Myristica fragrans Houtt.,Houtt.,,ACCEPTED,SPECIES,5406817,5406817,5406817,3152840,2439,6,KNApSAcK World,,,,98
-pl_2ee389e66eedf9c4a80e81eb,350,nelumbo nucifera gaertn|gaertn,Nelumbo nucifera Gaertn.,Gaertn.,,ACCEPTED,SPECIES,2882449,2882449,2882449,2882448,2424,6,KNApSAcK World,,,,99
-pl_895eb3d7f7a68bc8461971bb,351,nephelium lappaceum l|l,Nephelium lappaceum L.,L.,,ACCEPTED,SPECIES,5421126,5421126,5421126,3189978,6657,6,KNApSAcK World,,,,97
-pl_063ee4dfca28c8b3f8b2ae6f,352,nerium oleander l|l,Nerium oleander L.,L.,,ACCEPTED,SPECIES,3169756,3169756,3169756,3169755,6701,6,KNApSAcK World,,,,99
-pl_539bc4b74fa9e0df05326b3a,353,nicotiana tabacum l|l,Nicotiana tabacum L.,L.,,ACCEPTED,SPECIES,2928774,2928774,2928774,2928756,7717,6,KNApSAcK World,,,,99
-pl_4fe5557be96cfcb90be927df,354,nigella sativa l|l,Nigella sativa L.,L.,,ACCEPTED,SPECIES,5371700,5371700,5371700,3033657,2410,6,KNApSAcK World,,,,99
-pl_f80f471bbfaa6aece25e68e2,355,nyctanthes arbor tristis l|l,Nyctanthes arbor-tristis L.,L.,,ACCEPTED,SPECIES,3683008,3683008,3683008,7325974,6652,6,KNApSAcK World,,,,99
-pl_f06de6b3364daef74b7f1367,356,nymphaea lotus l|l,Nymphaea lotus L.,L.,,ACCEPTED,SPECIES,2882429,2882429,2882429,2882411,2423,6,KNApSAcK World,,,,97
-pl_aa514719b6ba446dd83e82d9,357,ocimum basilicum l|l,Ocimum basilicum L.,L.,,ACCEPTED,SPECIES,2927096,2927096,2927096,2874693,2497,6,KNApSAcK World,,,,99
-pl_f8e5d4cbde3dad69d251356e,358,ocimum tenuiflorum l|l,Ocimum tenuiflorum L.,L.,,SYNONYM,SPECIES,2927101,2927100,2927100,2874693,2497,6,KNApSAcK World,,,,98
-pl_c4ac04c59e6b4600d38a7a50,359,oldenlandia corymbosa l|l,Oldenlandia corymbosa L.,L.,,ACCEPTED,SPECIES,2911970,2911970,2911970,2915706,8798,6,KNApSAcK World,,,,97
-pl_e4d242dab42012572da07325,360,ophiopogon japonicus thunb ker gawl|thunb ker gawl,Ophiopogon japonicus (Thunb.) Ker Gawl.,(Thunb.) Ker Gawl.,,ACCEPTED,SPECIES,2774158,2774158,2774158,9560529,7683,6,KNApSAcK World,,,,98
-pl_305c5c71fb6e7caa9770e361,361,oroxylum indicum l kurz|l kurz,Oroxylum indicum (L.) Kurz,(L.) Kurz,,ACCEPTED,SPECIES,7414934,7414934,7414934,7298257,6655,6,KNApSAcK World,,,,97
-pl_ab797335b2379dbf2f966523,362,orthosiphon aristatus blume miq|blume miq,Orthosiphon aristatus (Blume) Miq.,(Blume) Miq.,,ACCEPTED,SPECIES,7308026,7308026,7308026,6410205,2497,6,KNApSAcK World,,,,99
-pl_711c6916e169dc1f9e46b292,364,orthosiphon aristatus var aristatus|benth,Orthosiphon aristatus var. aristatus,Benth.,,SYNONYM,SPECIES,3891871,7308027,7308026,6410205,2497,6,KNApSAcK World,,,,98
-pl_1916be9b3a3d13f7db27e348,363,orthosiphon spicatus thunb backer bakh f steenis|thunb backer bakh f steenis,"Orthosiphon spicatus (Thunb.) Backer, Bakh.f. & Steenis","(Thunb.) Backer, Bakh.f. & Steenis",,HETEROTYPIC_SYNONYM,SPECIES,3891892,3891892,7308026,6410205,2497,6,KNApSAcK World,,,,100
-pl_a0b1da152a310eb5320d8652,365,oryza sativa l|l,Oryza sativa L.,L.,,ACCEPTED,SPECIES,2703459,2703459,2703459,2703455,3073,6,KNApSAcK World,,,,97
-pl_e22426258e2dd5a195c75ecd,12,ouret lanata l kuntze|l juss ex schult,Ouret lanata (L.) Kuntze,(L.) Juss. ex Schult.,,SYNONYM,SPECIES,3085014,10974033,10974033,7323304,3064,6,KNApSAcK World,,,,97
-pl_b54f22cbd75a79c18d2827a9,366,oxalis corniculata l|l,Oxalis corniculata L.,L.,,ACCEPTED,SPECIES,8427624,8427624,8427624,2891642,6697,6,KNApSAcK World,,,,99
-pl_6ba25400e8819ac16768a21a,367,pachyrhizus erosus l urb|l urb,Pachyrhizus erosus (L.) Urb.,(L.) Urb.,,SYNONYM,SPECIES,3963605,2974683,2974683,2974664,5386,6,KNApSAcK World,,,,98
-pl_90fb795b5e9ad16eed2731ce,368,paederia foetida l|l,Paederia foetida L.,L.,,ACCEPTED,SPECIES,2909527,2909527,2909527,2909469,8798,6,KNApSAcK World,,,,98
-pl_5a86c707c7a02bb972e96808,369,paederia foetida l|lour merr,Paederia foetida L.,(Lour.) Merr.,,SYNONYM,SPECIES,2909530,2909527,2909527,2909469,8798,6,KNApSAcK World,,,,98
-pl_96c6e22d265a50adaf93c0b8,370,pandanus amaryllifolius roxb ex lindl|roxb ex lindl,Pandanus amaryllifolius Roxb. ex Lindl.,Roxb. ex Lindl.,,ACCEPTED,SPECIES,9296315,9296315,9296315,8404076,3737,6,KNApSAcK World,,,,98
-pl_bcae263bad1b90cf4cb0cd3a,371,pandanus conoideus lam|lam,Pandanus conoideus Lam.,Lam.,,ACCEPTED,SPECIES,5328074,5328074,5328074,8404076,3737,6,KNApSAcK World,,,,97
-pl_9a4311093c22ee0c5e9b2a80,372,pangium edule reinw|reinw,Pangium edule Reinw.,Reinw.,,ACCEPTED,SPECIES,9796769,9796769,9796769,7110797,3231308,6,KNApSAcK World,,,,99
-pl_bbadc4b81d50648d6b77dd64,373,papaver somniferum l|l,Papaver somniferum L.,L.,,ACCEPTED,SPECIES,2888439,2888439,2888439,2888431,2422,6,KNApSAcK World,,,,99
-pl_d580445e3b33a86a38f693fd,375,parkia speciosa hassk|hassk,Parkia speciosa Hassk.,Hassk.,,ACCEPTED,SPECIES,5348811,5348811,5348811,2943936,5386,6,KNApSAcK World,,,,99
-pl_bb3c626b01c40da7938c2542,376,passiflora foetida l|l,Passiflora foetida L.,L.,,ACCEPTED,SPECIES,2874211,2874211,2874211,2874172,2378,6,KNApSAcK World,,,,97
-pl_2a4d9bf46274221e02b8605a,378,peltophorum pterocarpum dc backer ex k heyne|dc backer ex k heyne,Peltophorum pterocarpum (DC.) Backer ex K.Heyne,(DC.) Backer ex K.Heyne,,ACCEPTED,SPECIES,2952775,2952775,2952775,2952763,5386,6,KNApSAcK World,,,,97
-pl_cc01f3f628288e62ad1f41f3,379,peperomia pellucida l kunth|l kunth,Peperomia pellucida (L.) Kunth,(L.) Kunth,,ACCEPTED,SPECIES,3086412,3086412,3086412,3086367,6678,6,KNApSAcK World,,,,99
-pl_96dbe0d2cbd244a86b7765ea,381,persea americana mill|c f gaertn,Persea americana Mill.,C.F.Gaertn.,,SYNONYM,SPECIES,6407390,3034046,3034046,3034041,6688,6,KNApSAcK World,,,,97
-pl_be44ada82df1b41ddc7aa1fe,380,persea americana mill|mill,Persea americana Mill.,Mill.,,ACCEPTED,SPECIES,3034046,3034046,3034046,3034041,6688,6,KNApSAcK World,,,,97
-pl_adcf8ce46717055c6936dc05,382,phaleria macrocarpa scheff boerl|scheff boerl,Phaleria macrocarpa (Scheff.) Boerl.,(Scheff.) Boerl.,,ACCEPTED,SPECIES,5524327,5524327,5524327,3233887,2428,6,KNApSAcK World,,,,99
-pl_44cdf043f59413deeed75bed,383,phaseolus mungo wall|wall,Phaseolus mungo Wall.,Wall.,,ACCEPTED,SPECIES,8305376,8305376,8305376,2947798,5386,6,KNApSAcK World,,,,97
-pl_adbc8e38ff489953dfae889b,384,phaseolus radiatus l|l,Phaseolus radiatus L.,L.,,SYNONYM,SPECIES,7895892,7895892,2982380,2982372,5386,6,KNApSAcK World,,,,100
-pl_00c373a30e9e6440ecc47eae,385,phaseolus vulgaris l|l,Phaseolus vulgaris L.,L.,,ACCEPTED,SPECIES,5350452,5350452,5350452,2947798,5386,6,KNApSAcK World,,,,97
-pl_c0405ce47863173c0bfbbd0e,386,phyllanthus acidus l skeels|l skeels,Phyllanthus acidus (L.) Skeels,(L.) Skeels,,ACCEPTED,SPECIES,5381567,5381567,5381567,3061139,8807,6,KNApSAcK World,,,,99
-pl_f70d6de145b984951d843882,387,phyllanthus amarus schumach thonn|schumach thonn,Phyllanthus amarus Schumach. & Thonn.,Schumach. & Thonn.,,ACCEPTED,SPECIES,5382589,5382589,5382589,3061139,8807,6,KNApSAcK World,,,,99
-pl_aa07cc7bc472925e3e15db11,388,phyllanthus emblica l|l,Phyllanthus emblica L.,L.,,ACCEPTED,SPECIES,5381660,5381660,5381660,3061139,8807,6,KNApSAcK World,,,,99
-pl_8a828c23d8a09c4a225c55ab,389,phyllanthus niruri l|l,Phyllanthus niruri L.,L.,,ACCEPTED,SPECIES,5381945,5381945,5381945,3061139,8807,6,KNApSAcK World,,,,97
-pl_c0341187da62aacd80f293d0,390,phyllanthus reticulatus poir|poir,Phyllanthus reticulatus Poir.,Poir.,,ACCEPTED,SPECIES,5382478,5382478,5382478,3061139,8807,6,KNApSAcK World,,,,98
-pl_3d68d4fc8f6fd7840683b49e,391,phyllanthus urinaria l|l,Phyllanthus urinaria L.,L.,,ACCEPTED,SPECIES,5382780,5382780,5382780,3061139,8807,6,KNApSAcK World,,,,98
-pl_d1626f302a8e59c9bfb09fc7,178,phyllodium pulchellum l desv|l desv,Phyllodium pulchellum (L.) Desv.,(L.) Desv.,,ACCEPTED,SPECIES,2948568,2948568,2948568,2948556,5386,6,KNApSAcK World,,,,100
-pl_47a2413f6382829f1fd8b5e8,393,physalis angulata l|l,Physalis angulata L.,L.,,SYNONYM,SPECIES,5341772,5341792,5341792,2928907,7717,6,KNApSAcK World,,,,98
-pl_0ea07ec9b771067329e9c14b,394,physalis peruviana l|l,Physalis peruviana L.,L.,,ACCEPTED,SPECIES,5341784,5341784,5341784,2928907,7717,6,KNApSAcK World,,,,97
-pl_1d4ba795ee537b0068a02d9a,395,pimpinella anisum l|l,Pimpinella anisum L.,L.,,ACCEPTED,SPECIES,8080300,8080300,8080300,3034784,6720,6,KNApSAcK World,,,,97
-pl_96df99d77b04406f38ecc86d,396,piper betle l|l,Piper betle L.,L.,,ACCEPTED,SPECIES,4187904,4187904,4187904,3075433,6678,6,KNApSAcK World,,,,99
-pl_1fbeb6955966dafdc9da216e,397,piper cubeba l fil|l fil,Piper cubeba L.fil.,L.fil.,,ACCEPTED,SPECIES,7606629,7606629,7606629,3075433,6678,6,KNApSAcK World,,,,97
-pl_f6d7b37aa7fbe126f7473c63,398,piper methysticum g forst|g forst,Piper methysticum G.Forst.,G.Forst.,,HETEROTYPIC_SYNONYM,SPECIES,3086358,3086358,4186474,7305061,6678,6,KNApSAcK World,,,,100
-pl_307df971b463d592e40f98e2,399,piper nigrum l|l,Piper nigrum L.,L.,,ACCEPTED,SPECIES,3086357,3086357,3086357,3075433,6678,6,KNApSAcK World,,,,97
-pl_3df823c0e83bbd4c75cd7859,400,piper retrofractum vahl|vahl,Piper retrofractum Vahl,Vahl,,ACCEPTED,SPECIES,3086342,3086342,3086342,3075433,6678,6,KNApSAcK World,,,,99
-pl_68ef41afe2dec9009224c21d,401,plantago major l|l,Plantago major L.,L.,,ACCEPTED,SPECIES,3189767,3189767,3189767,3189695,2420,6,KNApSAcK World,,,,97
-pl_93abc35ddadb6a1bb33d770b,402,platycladus orientalis l franco|l franco,Platycladus orientalis (L.) Franco,(L.) Franco,,ACCEPTED,SPECIES,2684855,2684855,2684855,2684854,8144,6,KNApSAcK World,,,,99
-pl_5db2d6b92f2a68d607f69fdd,403,platycodon grandiflorus jacq a dc|jacq a dc,Platycodon grandiflorus (Jacq.) A.DC.,(Jacq.) A.DC.,,ACCEPTED,SPECIES,3164340,3164340,3164340,3164339,8801,6,KNApSAcK World,,,,93
-pl_c71ab4756a601473f90f24c2,404,pluchea indica l less|l less,Pluchea indica (L.) Less.,(L.) Less.,,ACCEPTED,SPECIES,3132728,3132728,3132728,3132596,3065,6,KNApSAcK World,,,,99
-pl_58205c2606e285a04667c1e3,405,plumbago indica l|l,Plumbago indica L.,L.,,ACCEPTED,SPECIES,3082286,3082286,3082286,3082281,2419,6,KNApSAcK World,,,,99
-pl_9117311f26b64f487b9a6e13,406,plumbago zeylanica l|l,Plumbago zeylanica L.,L.,,ACCEPTED,SPECIES,3082282,3082282,3082282,3082281,2419,6,KNApSAcK World,,,,99
-pl_566ae7dc8f109681a8106f3c,408,plumeria rubra l|l,Plumeria rubra L.,L.,,ACCEPTED,SPECIES,3169674,3169674,3169674,3169672,6701,6,KNApSAcK World,,,,99
-pl_eb005473a598408ac2ba0d7e,407,plumeria rubra l|poir,Plumeria rubra L.,Poir.,,SYNONYM,SPECIES,3169676,3169674,3169674,3169672,6701,6,KNApSAcK World,,,,98
-pl_28978b26f5753fa270e8120a,409,pogostemon cablin blanco benth|blanco benth,Pogostemon cablin (Blanco) Benth.,(Blanco) Benth.,,ACCEPTED,SPECIES,2926672,2926672,2926672,2926671,2497,6,KNApSAcK World,,,,99
-pl_5a76b48313031c48b3e647dc,410,pongamia pinnata l pierre|l pierre,Pongamia pinnata (L.) Pierre,(L.) Pierre,,ACCEPTED,SPECIES,2965911,2965911,2965911,7953486,5386,6,KNApSAcK World,,,,97
-pl_5fe14f2bbacadd1e99c5aae7,193,pontederia crassipes mart|mart solms,Pontederia crassipes Mart.,(Mart.) Solms,,SYNONYM,SPECIES,2765940,2765942,2765942,2740415,3731,6,KNApSAcK World,,,,98
-pl_0fa943a42b5086182619b948,411,portulaca grandiflora hook|hook,Portulaca grandiflora Hook.,Hook.,,ACCEPTED,SPECIES,3084700,3084700,3084700,3084696,6717,6,KNApSAcK World,,,,99
-pl_a4a671e90a1ecf0ee77c643a,412,portulaca oleracea l|l,Portulaca oleracea L.,L.,,ACCEPTED,SPECIES,3084719,3084719,3084719,3084696,6717,6,KNApSAcK World,,,,99
-pl_ce585943e5703086ea9112e4,413,premna corymbosa rottler|rottler,Premna corymbosa Rottler,Rottler,,ACCEPTED,SPECIES,7713954,7713954,7713954,2925344,2497,6,KNApSAcK World,,,,97
-pl_2997f6998970f72e01ecb4bf,414,psidium guajava l|l,Psidium guajava L.,L.,,ACCEPTED,SPECIES,5420380,5420380,5420380,3187232,5014,6,KNApSAcK World,,,,99
-pl_3331f488867ea24553fd7a33,415,psophocarpus tetragonolobus l dc|l dc,Psophocarpus tetragonolobus (L.) DC.,(L.) DC.,,ACCEPTED,SPECIES,2944683,2944683,2944683,2944679,5386,6,KNApSAcK World,,,,99
-pl_1ff05893ca54ab4bce4a268d,416,pterocarpus indicus willd|willd,Pterocarpus indicus Willd.,Willd.,,ACCEPTED,SPECIES,5349242,5349242,5349242,5349236,5386,6,KNApSAcK World,,,,97
-pl_03ae3d27b72db01e88b2d108,417,pueraria montana lour merr|lour merr,Pueraria montana (Lour.) Merr.,(Lour.) Merr.,,ACCEPTED,SPECIES,2977636,2977636,2977636,2977604,5386,6,KNApSAcK World,,,,99
-pl_b224bb8b903beb3814485d1f,418,punica granatum l|l,Punica granatum L.,L.,,ACCEPTED,SPECIES,5420901,5420901,5420901,3188663,6684,6,KNApSAcK World,,,,99
-pl_4b2c832eb53705c14a0f576b,420,pyrus malus l|l,Pyrus malus L.,L.,,HETEROTYPIC_SYNONYM,SPECIES,5362336,5362336,3001244,3001068,5015,6,KNApSAcK World,,,,100
-pl_fe512f5368e596dc3615a207,422,quassia amara l|l,Quassia amara L.,L.,,ACCEPTED,SPECIES,3190647,3190647,3190647,3190646,2395,6,KNApSAcK World,,,,99
-pl_9212f9fa515ab4a24d6cbee6,423,quisqualis indica l|l,Quisqualis indica L.,L.,,SYNONYM,SPECIES,5421048,5421048,12203608,2986357,2431,6,KNApSAcK World,,,,100
-pl_c4e823a94dc8eb0568f15550,424,raphanus sativus l|l,Raphanus sativus L.,L.,,ACCEPTED,SPECIES,7678610,7678610,7678610,3040962,3112,6,KNApSAcK World,,,,99
-pl_0d2e580dd9b5768bfab7a9ca,425,rauvolfia reflexa koord valeton|koord valeton,Rauvolfia reflexa Koord. & Valeton,Koord. & Valeton,,ACCEPTED,SPECIES,3616839,3616839,3616839,3169769,6701,6,KNApSAcK World,,,,97
-pl_0c8b9db9d2901062ee936f66,426,rauvolfia serpentina l benth ex kurz|l benth ex kurz,Rauvolfia serpentina (L.) Benth. ex Kurz,(L.) Benth. ex Kurz,,ACCEPTED,SPECIES,3169787,3169787,3169787,3169769,6701,6,KNApSAcK World,,,,98
-pl_d73841d2a834440ed1b7eb22,427,rauvolfia sumatrana jack|jack,Rauvolfia sumatrana Jack,Jack,,ACCEPTED,SPECIES,3616339,3616339,3616339,3169769,6701,6,KNApSAcK World,,,,99
-pl_535e091d9e2c7bac6449325d,428,rauvolfia verticillata lour baill|lour baill,Rauvolfia verticillata (Lour.) Baill.,(Lour.) Baill.,,ACCEPTED,SPECIES,3616228,3616228,3616228,3169769,6701,6,KNApSAcK World,,,,97
-pl_5843a4d4f9a22007cc1524c7,430,rheum palmatum l|l,Rheum palmatum L.,L.,,ACCEPTED,SPECIES,2888864,2888864,2888864,2888863,2416,6,KNApSAcK World,,,,99
-pl_c64b2b43a35fefd2d38a5fbc,431,rhinacanthus nasutus l kuntze|l kuntze,Rhinacanthus nasutus (L.) Kuntze,(L.) Kuntze,,ACCEPTED,SPECIES,7263230,7263230,7263230,3233825,2393,6,KNApSAcK World,,,,97
-pl_10cb88f89504841f9b519042,432,rhodomyrtus tomentosa aiton hassk|aiton hassk,Rhodomyrtus tomentosa (Aiton) Hassk.,(Aiton) Hassk.,,ACCEPTED,SPECIES,3179997,3179997,3179997,3179966,5014,6,KNApSAcK World,,,,97
-pl_af05af259c8b2ed92454a55f,433,ricinus communis l|l,Ricinus communis L.,L.,,ACCEPTED,SPECIES,5380041,5380041,5380041,9188216,4691,6,KNApSAcK World,,,,99
-pl_17e58837eebb9c0a8a8ce9bd,434,rivina humilis l|l,Rivina humilis L.,L.,,ACCEPTED,SPECIES,3084027,3084027,3084027,3084026,2516,6,KNApSAcK World,,,,99
-pl_9ed1d1c3a02553529b3c900f,436,rosa chinensis jacq|jacq,Rosa chinensis Jacq.,Jacq.,,ACCEPTED,SPECIES,3005039,3005039,3005039,8395064,5015,6,KNApSAcK World,,,,98
-pl_5fc4e4de88a607cff83a2b80,437,rosa damascena mill|mill,Rosa × damascena Mill.,Mill.,,ACCEPTED,SPECIES,7390572,7390572,7390572,8395064,5015,6,KNApSAcK World,,,,97
-pl_0f6a3694394d75e1ff7f818d,438,ruellia tuberosa l|l,Ruellia tuberosa L.,L.,,ACCEPTED,SPECIES,5415418,5415418,5415418,3171840,2393,6,KNApSAcK World,,,,99
-pl_29a7e8834c711a8aaa0c45b7,439,rumex nepalensis spreng|spreng,Rumex nepalensis Spreng.,Spreng.,,ACCEPTED,SPECIES,7291884,7291884,7291884,2888942,2416,6,KNApSAcK World,,,,97
-pl_2ae5f37484d8513be1233e5a,440,ruta angustifolia pers|pers,Ruta angustifolia Pers.,Pers.,,ACCEPTED,SPECIES,3832875,3832875,3832875,3190380,2396,6,KNApSAcK World,,,,99
-pl_1c3c17d7ce670f7966576dc0,441,saccharum officinarum l|l,Saccharum officinarum L.,L.,,ACCEPTED,SPECIES,2703912,2703912,2703912,2703910,3073,6,KNApSAcK World,,,,99
-pl_9e5c0b8b7ee89e7b815a0f56,442,salvia splendens sellow ex nees|sellow ex nees,Salvia splendens Sellow ex Nees,Sellow ex Nees,,ACCEPTED,SPECIES,8249932,8249932,8249932,2926981,2497,6,KNApSAcK World,,,,97
-pl_5705e33a748fa17d7f9049be,443,sandoricum koetjape burm fil merr|burm fil merr,Sandoricum koetjape (Burm.fil.) Merr.,(Burm.fil.) Merr.,,ACCEPTED,SPECIES,3850843,3850843,3850843,7107971,2397,6,KNApSAcK World,,,,99
-pl_5388097959a348f053235750,444,santalum album l|l,Santalum album L.,L.,,ACCEPTED,SPECIES,2889785,2889785,2889785,2889778,6661,6,KNApSAcK World,,,,99
-pl_da015c0c85b33f2832d9bcd2,445,sapindus rarak dc|dc,Sapindus rarak DC.,DC.,,ACCEPTED,SPECIES,7264721,7264721,7264721,3189983,6657,6,KNApSAcK World,,,,99
-pl_ff438b98df4db6ed95292477,447,scaevola taccada gaertn roxb|k krause,Scaevola taccada (Gaertn.) Roxb.,K.Krause,,SYNONYM,SPECIES,7099691,6358362,6358362,3158673,3113,6,KNApSAcK World,,,,98
-pl_72d182f2fba1743d2bec3716,448,scurrula fusca blume g don|blume g don,Scurrula fusca (Blume) G.Don,(Blume) G.Don,,ACCEPTED,SPECIES,4001481,4001481,4001481,7287875,6663,6,KNApSAcK World,,,,99
-pl_1b134d0e66794d3a55d9e92f,449,scutellaria discolor wall ex benth|wall ex benth,Scutellaria discolor Wall. ex Benth.,Wall. ex Benth.,,ACCEPTED,SPECIES,7996273,7996273,7996273,2926730,2497,6,KNApSAcK World,,,,97
-pl_4513f5bbdeea24d2c95df86f,450,scutellaria indica l|l,Scutellaria indica L.,L.,,ACCEPTED,SPECIES,7308714,7308714,7308714,2926730,2497,6,KNApSAcK World,,,,97
-pl_9d9995926d0a2a46f676fdc6,451,sechium edule jacq sw|jacq sw,Sechium edule (Jacq.) Sw.,(Jacq.) Sw.,,ACCEPTED,SPECIES,2874612,2874612,2874612,2874611,6634,6,KNApSAcK World,,,,99
-pl_02dad7cf6f0ba0d5aabc63e5,452,selaginella doederleinii hieron|hieron,Selaginella doederleinii Hieron.,Hieron.,,ACCEPTED,SPECIES,7329850,7329850,7329850,2688177,6724,6,KNApSAcK World,,,,99
-pl_0c5ed9aba104db1f27c85e21,267,selenicereus undatus haw d r hunt|haw britton rose,Selenicereus undatus (Haw.) D.R.Hunt,(Haw.) Britton & Rose,,SYNONYM,SPECIES,3084394,10334868,10334868,3084461,2519,6,KNApSAcK World,,,,98
-pl_8fcb47efc2eab10931302558,100,senna alata l roxb|l,Senna alata (L.) Roxb.,L.,,SYNONYM,SPECIES,5353900,2956947,2956947,2956904,5386,6,KNApSAcK World,,,,98
-pl_3d4592bb14d3338d2d60e494,453,senna alata l roxb|l roxb,Senna alata (L.) Roxb.,(L.) Roxb.,,ACCEPTED,SPECIES,2956947,2956947,2956947,2956904,5386,6,KNApSAcK World,,,,99
-pl_fc161e463bf3f5c1ef71cbc5,105,senna alexandrina mill|l,Senna alexandrina Mill.,L.,,SYNONYM,SPECIES,5354411,2958032,2958032,2956904,5386,6,KNApSAcK World,,,,98
-pl_695ac73e10112b41da4fdbdb,101,senna alexandrina var alexandrina|vahl,Senna alexandrina var. alexandrina,Vahl,,SYNONYM,SPECIES,5354413,7302622,2958032,2956904,5386,6,KNApSAcK World,,,,98
-pl_173ff06bf6c2aadcded7775c,104,senna occidentalis l link|l,Senna occidentalis (L.) Link,L.,,SYNONYM,SPECIES,5354381,2957966,2957966,2956904,5386,6,KNApSAcK World,,,,97
-pl_5f2b1ca8df8cdbb523696d0c,106,senna siamea lam h s irwin barneby|lam,Senna siamea (Lam.) H.S.Irwin & Barneby,Lam.,,SYNONYM,SPECIES,5353880,2956905,2956905,2956904,5386,6,KNApSAcK World,,,,98
-pl_8bcea5a3582e7c7ea784a0ce,454,senna sophera l roxb|l roxb,Senna sophera (L.) Roxb.,(L.) Roxb.,,ACCEPTED,SPECIES,2957379,2957379,2957379,2956904,5386,6,KNApSAcK World,,,,99
-pl_7222db2fb4ec1d7c0b2b4a45,107,senna tora l roxb|l,Senna tora (L.) Roxb.,L.,,SYNONYM,SPECIES,5354127,2957728,2957728,2956904,5386,6,KNApSAcK World,,,,98
-pl_c405a8c77c5b418e6762fc3c,455,senna tora l roxb|l roxb,Senna tora (L.) Roxb.,(L.) Roxb.,,ACCEPTED,SPECIES,2957728,2957728,2957728,2956904,5386,6,KNApSAcK World,,,,99
-pl_506973418649a7f54876b299,456,sesamum indicum l|l,Sesamum indicum L.,L.,,ACCEPTED,SPECIES,3172622,3172622,3172622,3172619,6650,6,KNApSAcK World,,,,99
-pl_4112f74ce346d9d5b2c321c6,457,sesbania grandiflora l poir|l poir,Sesbania grandiflora (L.) Poir.,(L.) Poir.,,ACCEPTED,SPECIES,8281950,8281950,8281950,7854649,5386,6,KNApSAcK World,,,,97
-pl_b6e07477374b5a542098d2e6,458,sesbania sesban l merr|l merr,Sesbania sesban (L.) Merr.,(L.) Merr.,,ACCEPTED,SPECIES,2970648,2970648,2970648,7854649,5386,6,KNApSAcK World,,,,97
-pl_3bb879e7d2e9e0057570707e,459,sida rhombifolia l|l,Sida rhombifolia L.,L.,,ACCEPTED,SPECIES,5406735,5406735,5406735,3152100,6685,6,KNApSAcK World,,,,99
-pl_22934e9ceb3de5c3ee456612,460,smilax china l|l,Smilax china L.,L.,,ACCEPTED,SPECIES,5295472,5295472,5295472,2740627,7702,6,KNApSAcK World,,,,97
-pl_2780b3a0cd55111b5352485a,461,smilax zeylanica l|l,Smilax zeylanica L.,L.,,ACCEPTED,SPECIES,5295128,5295128,5295128,2740627,7702,6,KNApSAcK World,,,,98
-pl_120bdaab39bcfaec71adfb3d,462,solanum indicum l|l,Solanum indicum L.,L.,,SYNONYM,SPECIES,2930111,2930111,2929848,2928997,7717,6,KNApSAcK World,,,,100
-pl_f73cd3a80ba4da44a75c15f6,463,solanum lycopersicum l|l,Solanum lycopersicum L.,L.,,ACCEPTED,SPECIES,2930137,2930137,2930137,2928997,7717,6,KNApSAcK World,,,,98
-pl_d101bf550a4f326a2adfc463,464,solanum melongena l|l,Solanum melongena L.,L.,,ACCEPTED,SPECIES,2930617,2930617,2930617,2928997,7717,6,KNApSAcK World,,,,97
-pl_a327025dbe199366b0083b29,465,solanum nigrum l|l,Solanum nigrum L.,L.,,ACCEPTED,SPECIES,9150405,9150405,9150405,2928997,7717,6,KNApSAcK World,,,,97
-pl_e398a2d579532251b1ba5922,466,solanum torvum sw|sw,Solanum torvum Sw.,Sw.,,ACCEPTED,SPECIES,2932389,2932389,2932389,2928997,7717,6,KNApSAcK World,,,,97
-pl_90a84ce3e7e4e7ecc86d789f,467,solanum tuberosum l|l,Solanum tuberosum L.,L.,,ACCEPTED,SPECIES,2930262,2930262,2930262,2928997,7717,6,KNApSAcK World,,,,97
-pl_f62ea76ce304d542add21df9,468,solidago virgaurea l|l,Solidago virgaurea L.,L.,,ACCEPTED,SPECIES,6446462,6446462,6446462,5388868,3065,6,KNApSAcK World,,,,98
-pl_5d88d255b62ab36c75b6dc6e,469,sonchus arvensis l|l,Sonchus arvensis L.,L.,,ACCEPTED,SPECIES,3105813,3105813,3105813,3105646,3065,6,KNApSAcK World,,,,99
-pl_f69d432ff77c45aefede97c5,470,sophora tomentosa l|l,Sophora tomentosa L.,L.,,ACCEPTED,SPECIES,2958970,2958970,2958970,2958901,5386,6,KNApSAcK World,,,,97
-pl_e1a062a18bffa0a01a640888,471,spilanthes acmella a chev 1920|a chev 1920,"Spilanthes acmella A.Chev., 1920","A.Chev., 1920",,ACCEPTED,SPECIES,7367845,7367845,7367845,3092842,3065,6,KNApSAcK World,,,,97
-pl_a80a0ee5b504f0d43146cecd,472,stachytarpheta jamaicensis l vahl|l vahl,Stachytarpheta jamaicensis (L.) Vahl,(L.) Vahl,,ACCEPTED,SPECIES,2925463,2925463,2925463,2925448,6689,6,KNApSAcK World,,,,98
-pl_82530258c7c5115a711ca515,473,stachytarpheta mutabilis jacq vahl|jacq vahl,Stachytarpheta mutabilis (Jacq.) Vahl,(Jacq.) Vahl,,ACCEPTED,SPECIES,2925462,2925462,2925462,2925448,6689,6,KNApSAcK World,,,,99
-pl_64749126c521a0366844e038,474,stephania japonica thunb miers|thunb miers,Stephania japonica (Thunb.) Miers,(Thunb.) Miers,,ACCEPTED,SPECIES,7268792,7268792,7268792,3234321,2411,6,KNApSAcK World,,,,99
-pl_25adb186d6737e1c5245bb30,475,stephania venosa blume spreng|blume spreng,Stephania venosa (Blume) Spreng.,(Blume) Spreng.,,ACCEPTED,SPECIES,5592725,5592725,5592725,3234321,2411,6,KNApSAcK World,,,,99
-pl_d590bffb39a5ddfd821942c0,476,sterculia foetida l|l,Sterculia foetida L.,L.,,ACCEPTED,SPECIES,5406675,5406675,5406675,3152129,6685,6,KNApSAcK World,,,,99
-pl_c36862b33ce4049fb8191d96,477,strobilanthes crispa l blume|l blume,Strobilanthes crispa (L.) Blume,(L.) Blume,,ACCEPTED,SPECIES,3781433,3781433,3781433,6359394,2393,6,KNApSAcK World,,,,95
-pl_0f01e001e22e27b63cb4a3b7,478,strychnos ignatii bergius|bergius,Strychnos ignatii Bergius,Bergius,,ACCEPTED,SPECIES,5645763,5645763,5645763,3169589,2502,6,KNApSAcK World,,,,99
-pl_17a0ab2803fdd601bdcbd4ac,479,strychnos ligustrina blume|blume,Strychnos ligustrina Blume,Blume,,HETEROTYPIC_SYNONYM,SPECIES,8381474,8381474,5645531,3169589,2502,6,KNApSAcK World,,,,100
-pl_51273cdce6960bc2858d86b0,480,strychnos lucida r br|r br,Strychnos lucida R.Br.,R.Br.,,ACCEPTED,SPECIES,5645531,5645531,5645531,3169589,2502,6,KNApSAcK World,,,,97
-pl_fce044a9101aa54d9d4b8b50,481,strychnos nux vomica l|l,Strychnos nux-vomica L.,L.,,ACCEPTED,SPECIES,5414399,5414399,5414399,3169589,2502,6,KNApSAcK World,,,,99
-pl_043078badd5d33b0d2919e51,482,styphnolobium japonicum l schott|l schott,Styphnolobium japonicum (L.) Schott,(L.) Schott,,ACCEPTED,SPECIES,2963569,2963569,2963569,2963568,5386,6,KNApSAcK World,,,,99
-pl_c42cc1f693d759b3ffd07dbd,483,styrax benzoin dryand|dryand,Styrax benzoin Dryand.,Dryand.,,ACCEPTED,SPECIES,5371679,5371679,5371679,3032925,2507,6,KNApSAcK World,,,,99
-pl_e433c86e075771c0f9318cdf,484,swietenia mahagoni l jacq|l jacq,Swietenia mahagoni (L.) Jacq.,(L.) Jacq.,,ACCEPTED,SPECIES,3190485,3190485,3190485,3190483,2397,6,KNApSAcK World,,,,97
-pl_28ca11b98e1c0f64cdb77f03,485,symphytum officinale l|l,Symphytum officinale L.,L.,,ACCEPTED,SPECIES,7558421,7558421,7558421,2926061,2498,6,KNApSAcK World,,,,99
-pl_f6161e3ded0d4120defd97a8,487,syzygium aromaticum l merr l m perry|l merr l m perry,Syzygium aromaticum (L.) Merr. & L.M.Perry,(L.) Merr. & L.M.Perry,,ACCEPTED,SPECIES,3183002,3183002,3183002,3029010,5014,6,KNApSAcK World,,,,99
-pl_aaf5d8b7147623edafbe2fbf,213,syzygium aromaticum l merr l m perry|thunb,Syzygium aromaticum (L.) Merr. & L.M.Perry,Thunb.,,SYNONYM,SPECIES,5418972,3183002,3183002,3029010,5014,6,KNApSAcK World,,,,98
-pl_0b7e510b54ff7d2ac78c465d,488,syzygium cumini l skeels|l skeels,Syzygium cumini (L.) Skeels,(L.) Skeels,,ACCEPTED,SPECIES,3183840,3183840,3183840,3029010,5014,6,KNApSAcK World,,,,99
-pl_82d649665da887a7719c63ab,489,tabernaemontana corymbosa roxb ex wall|roxb ex wall,Tabernaemontana corymbosa Roxb. ex Wall.,Roxb. ex Wall.,,ACCEPTED,SPECIES,8172343,8172343,8172343,3169624,6701,6,KNApSAcK World,,,,98
-pl_40f5af994a602d97e7f578f2,205,tabernaemontana divaricata l r br ex roem schult|l burkill,Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.,(L.) Burkill,,SYNONYM,SPECIES,7317152,3169625,3169625,3169624,6701,6,KNApSAcK World,,,,98
-pl_9fc5169633139fa684a29790,490,tabernaemontana divaricata l r br ex roem schult|l r br ex roem schult,Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.,(L.) R.Br. ex Roem. & Schult.,,ACCEPTED,SPECIES,3169625,3169625,3169625,3169624,6701,6,KNApSAcK World,,,,97
-pl_3a544db8646bf1ac1243d57e,491,tabernaemontana sphaerocarpa blume|blume,Tabernaemontana sphaerocarpa Blume,Blume,,ACCEPTED,SPECIES,3621871,3621871,3621871,3169624,6701,6,KNApSAcK World,,,,99
-pl_47e62909fd3f88302046864b,492,tagetes erecta l|l,Tagetes erecta L.,L.,,ACCEPTED,SPECIES,3088488,3088488,3088488,3088468,3065,6,KNApSAcK World,,,,99
-pl_36a9df67bc9356b596ae321c,494,talinum fruticosum l juss|jacq willd,Talinum fruticosum (L.) Juss.,(Jacq.) Willd.,,SYNONYM,SPECIES,3084671,3084670,3084670,3084663,4055896,6,KNApSAcK World,,,,98
-pl_608bec1a73b31295052e785f,493,talinum paniculatum jacq gaertn|jacq gaertn,Talinum paniculatum (Jacq.) Gaertn.,(Jacq.) Gaertn.,,ACCEPTED,SPECIES,3084672,3084672,3084672,3084663,4055896,6,KNApSAcK World,,,,97
-pl_33bb185ded5ad92fb2fbbf89,262,talipariti tiliaceum l fryxell|l,Talipariti tiliaceum (L.) Fryxell,L.,,SYNONYM,SPECIES,3152584,7115794,7115794,7115793,6685,6,KNApSAcK World,,,,98
-pl_ca4aa4b76b180ba7ea05a2eb,495,tamarindus indica l|l,Tamarindus indica L.,L.,,ACCEPTED,SPECIES,2975768,2975768,2975768,2975767,5386,6,KNApSAcK World,,,,99
-pl_88445ce1b559618b2e13de24,496,taraxacum mongolicum hand mazz|hand mazz,Taraxacum mongolicum Hand.-Mazz.,Hand.-Mazz.,,ACCEPTED,SPECIES,5394645,5394645,5394645,7787708,3065,6,KNApSAcK World,,,,99
-pl_2e076615dea70ccacbaedd08,497,taraxacum officinale weber ex f h wigg|weber ex f h wigg,Taraxacum officinale Weber ex F.H.Wigg.,Weber ex F.H.Wigg.,,ACCEPTED,SPECIES,5394163,5394163,5394163,7787708,3065,6,KNApSAcK World,,,,98
-pl_80a332d69171da37cc7eb0e2,498,taxus wallichiana zucc|miq de laub,Taxus wallichiana Zucc.,(Miq.) de Laub.,,SYNONYM,SPECIES,5284551,5284540,5284540,2684902,4863,6,KNApSAcK World,,,,97
-pl_5f97ba25f4fa11235def69ff,499,tectona grandis l f|l f,Tectona grandis L.f.,L.f.,,ACCEPTED,SPECIES,2925649,2925649,2925649,2925648,2497,6,KNApSAcK World,,,,98
-pl_9b4f61a620920de041a7580b,500,terminalia bellirica gaertn roxb|gaertn roxb,Terminalia bellirica (Gaertn.) Roxb.,(Gaertn.) Roxb.,,ACCEPTED,SPECIES,3189390,3189390,3189390,3189387,2431,6,KNApSAcK World,,,,99
-pl_89de919aa752b007fd48b746,501,terminalia catappa l|l,Terminalia catappa L.,L.,,ACCEPTED,SPECIES,3189394,3189394,3189394,3189387,2431,6,KNApSAcK World,,,,99
-pl_a3019c402f3e5f38ae8f186d,504,thymus vulgaris l|l,Thymus vulgaris L.,L.,,ACCEPTED,SPECIES,5341442,5341442,5341442,2926960,2497,6,KNApSAcK World,,,,98
-pl_e01a90aa183d69deb2d79963,505,tinospora crispa l miers ex hook fil thomson|l miers ex hook fil thomson,Tinospora crispa (L.) Miers ex Hook.fil. & Thomson,(L.) Miers ex Hook.fil. & Thomson,,ACCEPTED,SPECIES,8298918,8298918,8298918,7268723,2411,6,KNApSAcK World,,,,97
-pl_a7f3312c85ad1a8079e66057,507,tinospora crispa l miers ex hook fil thomson|lam beumee ex k heyne,Tinospora crispa (L.) Miers ex Hook.fil. & Thomson,(Lam.) Beumée ex K.Heyne,,SYNONYM,SPECIES,3830130,8298918,8298918,7268723,2411,6,KNApSAcK World,,,,97
-pl_8d51a2c818104911e8b233c6,506,tinospora glabra burm fil merr|burm fil merr,Tinospora glabra (Burm.fil.) Merr.,(Burm.fil.) Merr.,,ACCEPTED,SPECIES,3830649,3830649,3830649,7268723,2411,6,KNApSAcK World,,,,99
-pl_3497647f662749668fcdfa0f,508,trema orientale l blume|l blume,Trema orientale (L.) Blume,(L.) Blume,,SYNONYM,SPECIES,7141659,2984508,2984508,2984500,2384,6,KNApSAcK World,,,,98
-pl_451b7a0d395a048b8d4dad28,509,trichosanthes tricuspidata lour|lour,Trichosanthes tricuspidata Lour.,Lour.,,ACCEPTED,SPECIES,7317567,7317567,7317567,2874604,6634,6,KNApSAcK World,,,,99
-pl_d6ba4d50d24ffeb345af18b9,510,tridax procumbens l|l,Tridax procumbens L.,L.,,ACCEPTED,SPECIES,3149462,3149462,3149462,3149429,3065,6,KNApSAcK World,,,,99
-pl_23a82e29f8c1ac8881de8763,337,trigastrotheca pentaphylla l thulin|l,Trigastrotheca pentaphylla (L.) Thulin,L.,,SYNONYM,SPECIES,3084608,9381433,9381433,3231669,2517,6,KNApSAcK World,,,,98
-pl_5cbfc09a992e9c5daa336247,511,trigonella foenum graecum l|l,Trigonella foenum-graecum L.,L.,,ACCEPTED,SPECIES,5360475,5360475,5360475,2981525,5386,6,KNApSAcK World,,,,98
-pl_7ee231e502f780ffb4acf132,512,triphasia trifolia burm fil p wilson|burm fil p wilson,Triphasia trifolia (Burm.fil.) P.Wilson,(Burm.fil.) P.Wilson,,ACCEPTED,SPECIES,3190406,3190406,3190406,3190405,2396,6,KNApSAcK World,,,,99
-pl_f745a36db834c041ca1a0350,513,turnera ulmifolia l|l,Turnera ulmifolia L.,L.,,ACCEPTED,SPECIES,2874852,2874852,2874852,2874846,2377,6,KNApSAcK World,,,,98
-pl_89e1a7a46f292614eabcd362,515,uncaria gambir w hunter roxb|w hunter roxb,Uncaria gambir (W.Hunter) Roxb.,(W.Hunter) Roxb.,,ACCEPTED,SPECIES,5338190,5338190,5338190,2906635,8798,6,KNApSAcK World,,,,99
-pl_ba7311e97732daee110adf21,374,urceola laevigata juss d j middleton livsh|juss moldenke,Urceola laevigata (Juss.) D.J.Middleton & Livsh.,(Juss.) Moldenke,,SYNONYM,SPECIES,5536603,9827170,9827170,3229511,6701,6,KNApSAcK World,,,,98
-pl_f1d90768bdb54ba4f0582a47,516,urena lobata l|l,Urena lobata L.,L.,,ACCEPTED,SPECIES,3152253,3152253,3152253,3152250,6685,6,KNApSAcK World,,,,99
-pl_157e830607c4c9ea9d93f9c2,517,valeriana officinalis l|l,Valeriana officinalis L.,L.,,ACCEPTED,SPECIES,2888763,2888763,2888763,2888741,6710,6,KNApSAcK World,,,,99
-pl_5b4eacf3f6041d6a869eb636,518,vanilla planifolia andrews|andrews,Vanilla planifolia Andrews,Andrews,,ACCEPTED,SPECIES,2803398,2803398,2803398,2743233,7689,6,KNApSAcK World,,,,97
-pl_e46d82a45832069aa8da1a23,520,vetiveria zizanioides stapf 1906|stapf 1906,"Vetiveria zizanioides Stapf, 1906","Stapf, 1906",,ACCEPTED,SPECIES,7352653,7352653,7352653,8289208,3073,6,KNApSAcK World,,,,97
-pl_164e41e41a7eaeb3bd76d977,521,vigna radiata l r wilczek|l r wilczek,Vigna radiata (L.) R.Wilczek,(L.) R.Wilczek,,ACCEPTED,SPECIES,2982380,2982380,2982380,2982372,5386,6,KNApSAcK World,,,,99
-pl_0475390c46b94ba33f9b5f35,523,viola odorata l|l,Viola odorata L.,L.,,ACCEPTED,SPECIES,5331181,5331181,5331181,2874237,6631,6,KNApSAcK World,,,,97
-pl_80657b1276cc789a06f86286,524,vitex negundo l|l,Vitex negundo L.,L.,,ACCEPTED,SPECIES,2925564,2925564,2925564,2925556,2497,6,KNApSAcK World,,,,98
-pl_31c9cdaa62277f7a45fd5aa5,525,vitex trifolia l|l,Vitex trifolia L.,L.,,ACCEPTED,SPECIES,2925561,2925561,2925561,2925556,2497,6,KNApSAcK World,,,,99
-pl_23b514bc71ba077af4c2eb7c,526,volvariella volvacea bull singer|bull singer,Volvariella volvacea (Bull.) Singer,(Bull.) Singer,,ACCEPTED,SPECIES,5241445,5241445,5241445,2530192,8447,5,KNApSAcK World,,,,99
-pl_1c24aa7b1a190739dce6ea78,527,woodfordia fruticosa l kurz|l kurz,Woodfordia fruticosa (L.) Kurz,(L.) Kurz,,ACCEPTED,SPECIES,5635525,5635525,5635525,3231604,6684,6,KNApSAcK World,,,,98
-pl_64d358fe8ef81dcaab7910c7,528,ximenia americana l|l,Ximenia americana L.,L.,,ACCEPTED,SPECIES,2889811,2889811,2889811,2889810,4930777,6,KNApSAcK World,,,,99
-pl_27aa64f5284a9745255f0093,227,zanthoxylum rhetsa roxb dc|roxb,Zanthoxylum rhetsa (Roxb.) DC.,Roxb.,,SYNONYM,SPECIES,5594688,3834800,3834800,3190076,2396,6,KNApSAcK World,,,,93
-pl_9dc185a6c44f3d7fef159d3a,529,zea mays l|l,Zea mays L.,L.,,ACCEPTED,SPECIES,5290052,5290052,5290052,2705049,3073,6,KNApSAcK World,,,,99
-pl_977ed947f077aad57ca5164f,530,zephyranthes candida herb|herb,Zephyranthes candida Herb.,Herb.,,ACCEPTED,SPECIES,2859976,2859976,2859976,2859808,7682,6,KNApSAcK World,,,,99
-pl_006213f3117f1898c2875760,531,zingiber aromaticum valeton|valeton,Zingiber aromaticum Valeton,Valeton,,HETEROTYPIC_SYNONYM,SPECIES,2757132,2757132,2757108,2756693,4687,6,KNApSAcK World,,,,100
-pl_0b973d9f9c348f24594093ef,533,zingiber officinale roscoe|roscoe,Zingiber officinale Roscoe,Roscoe,,ACCEPTED,SPECIES,2757280,2757280,2757280,2756693,4687,6,KNApSAcK World,,,,99
-pl_8ba84a7dc4d44523b044f48c,532,zingiber purpureum roscoe|roxb,Zingiber purpureum Roscoe,Roxb.,,SYNONYM,SPECIES,2757208,2757204,2757204,2756693,4687,6,KNApSAcK World,,,,98
-pl_40194810c1a9fb7d60f332ba,534,zingiber zerumbet l roscoe ex sm|l roscoe ex sm,Zingiber zerumbet (L.) Roscoe ex Sm.,(L.) Roscoe ex Sm.,,ACCEPTED,SPECIES,2757108,2757108,2757108,2756693,4687,6,KNApSAcK World,,,,97
-pl_87ff5f5218e677404dff17ff,535,zinnia elegans jacq|jacq,Zinnia elegans Jacq.,Jacq.,,ACCEPTED,SPECIES,3111754,3111754,3111754,3111750,3065,6,KNApSAcK World,,,,98
+96fbe484-ac75-5146-9245-e3f1397f325c,1,abelmoschus manihot l medik|l medik,Abelmoschus manihot (L.) Medik.,(L.) Medik.,Malvaceae,ACCEPTED,SPECIES,3152706,3152706,3152706,3152705,6685,6,KNApSAcK World,,,,99
+ce61411f-ca34-5bd2-b908-c9a56969f905,2,abelmoschus moschatus l medik|l medik,Abelmoschus moschatus (L.) Medik.,(L.) Medik.,Malvaceae,ACCEPTED,SPECIES,8312665,8312665,8312665,3152705,6685,6,KNApSAcK World,,,,99
+16960f71-2f60-5668-9011-885d9e4a8202,258,abelmoschus moschatus subsp moschatus|l,Abelmoschus moschatus subsp. moschatus,L.,Malvaceae,SYNONYM,SPECIES,3152710,10045372,8312665,3152705,6685,6,KNApSAcK World,,,,98
+d060b1fa-7945-5923-b9da-eadc3b4befe2,3,abrus fruticulosus wall ex wight arn|wall ex wight arn,Abrus fruticulosus Wall. ex Wight & Arn.,Wall. ex Wight & Arn.,Fabaceae,ACCEPTED,SPECIES,5348700,5348700,5348700,2943776,5386,6,KNApSAcK World,,,,97
+e6724cea-4fe8-5306-b0c0-7bf86b55b852,4,abrus precatorius l|l,Abrus precatorius L.,L.,Fabaceae,ACCEPTED,SPECIES,5348711,5348711,5348711,2943776,5386,6,KNApSAcK World,,,,97
+2865f4c4-7ec0-5894-9245-d8635436027a,5,abutilon indicum l sweet|l sweet,Abutilon indicum (L.) Sweet,(L.) Sweet,Malvaceae,ACCEPTED,SPECIES,3152634,3152634,3152634,3152599,6685,6,KNApSAcK World,,,,97
+1ad0614f-f090-5768-9cc3-0d3d073e686e,308,acaciella glauca l l rico|l benth,Acaciella glauca (L.) L.Rico,(L.) Benth.,Fabaceae,SYNONYM,SPECIES,2970419,3794870,3794870,6627713,5386,6,KNApSAcK World,,,,98
+bd6a4b0d-d4b4-514d-80ef-6957b0b1bd51,6,acalypha hispida burm f|burm f,Acalypha hispida Burm.f.,Burm.f.,Euphorbiaceae,ACCEPTED,SPECIES,3056375,3056375,3056375,3055964,4691,6,KNApSAcK World,,,,97
+f29def8d-fa5b-58c6-b346-ebe6e358f678,7,acalypha indica l|l,Acalypha indica L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3056259,3056259,3056259,3055964,4691,6,KNApSAcK World,,,,97
+d06dfdad-eba7-5402-a46e-2f69dde32745,8,acanthus ilicifolius l|l,Acanthus ilicifolius L.,L.,Acanthaceae,ACCEPTED,SPECIES,6359819,6359819,6359819,3173198,2393,6,KNApSAcK World,,,,97
+ab9c7ebe-c1e7-5090-b144-f663c480c0e4,9,achyranthes aspera l|l,Achyranthes aspera L.,L.,Amaranthaceae,ACCEPTED,SPECIES,3085168,3085168,3085168,3085166,3064,6,KNApSAcK World,,,,98
+c725ba0c-3ae4-5d55-9d12-d0cde477f454,10,acorus calamus l|l,Acorus calamus L.,L.,Acoraceae,ACCEPTED,SPECIES,2873769,2873769,2873769,2730063,3719,6,KNApSAcK World,,,,99
+c0f06925-8132-546f-a1f9-771700da5372,11,aegle marmelos l correa|l correa,Aegle marmelos (L.) Corrêa,(L.) Corrêa,Rutaceae,ACCEPTED,SPECIES,5421195,5421195,5421195,8397331,2396,6,KNApSAcK World,,,,97
+7a7faecb-74b1-5e6b-9916-aca214798d9d,13,agathis dammara lamb rich a rich|lamb rich a rich,Agathis dammara (Lamb.) Rich. & A.Rich.,(Lamb.) Rich. & A.Rich.,Araucariaceae,ACCEPTED,SPECIES,5284442,5284442,5284442,2685008,3924,6,KNApSAcK World,,,,97
+6e63e0f8-04b4-5e11-8bf3-32b68dd8f232,14,ageratum conyzoides l|l,Ageratum conyzoides L.,L.,Asteraceae,ACCEPTED,SPECIES,5401673,5401673,5401673,3138550,3065,6,KNApSAcK World,,,,97
+fe82855c-3cc4-567f-a459-eac53ad9a115,15,ageratum houstonianum mill|mill,Ageratum houstonianum Mill.,Mill.,Asteraceae,ACCEPTED,SPECIES,5401760,5401760,5401760,3138550,3065,6,KNApSAcK World,,,,99
+77106add-e5b7-516d-a9b6-118504376c8f,16,aglaia odorata lour|lour,Aglaia odorata Lour.,Lour.,Meliaceae,ACCEPTED,SPECIES,5597349,5597349,5597349,3190479,2397,6,KNApSAcK World,,,,99
+70f168f5-ae82-5dd9-aea5-ec65de508eeb,17,albizia chinensis osbeck merr|osbeck merr,Albizia chinensis (Osbeck) Merr.,(Osbeck) Merr.,Fabaceae,ACCEPTED,SPECIES,2973197,2973197,2973197,2972897,5386,6,KNApSAcK World,,,,99
+aac0c2c0-6452-5371-92ac-455e7c95199c,18,aleurites moluccanus l willd|l willd,Aleurites moluccanus (L.) Willd.,(L.) Willd.,Euphorbiaceae,ACCEPTED,SPECIES,4930679,4930679,4930679,3072436,4691,6,KNApSAcK World,,,,96
+791347da-ffd7-5e76-a57a-f53afc5b8c7b,19,allamanda cathartica l|l,Allamanda cathartica L.,L.,Apocynaceae,ACCEPTED,SPECIES,3169836,3169836,3169836,3169834,6701,6,KNApSAcK World,,,,97
+3bb83a65-d6d3-5002-9e27-7ac628e3d4aa,20,allium cepa l|l,Allium cepa L.,L.,Amaryllidaceae,ACCEPTED,SPECIES,2857697,2857697,2857697,9624496,7682,6,KNApSAcK World,,,,99
+c1a424ae-6470-5d74-bf2e-3ccc796ce293,21,allium chinense g don|g don,Allium chinense G.Don,G.Don,Amaryllidaceae,ACCEPTED,SPECIES,2856307,2856307,2856307,9624496,7682,6,KNApSAcK World,,,,97
+69065180-d54f-5e6f-bf39-1e1345843143,22,allium fistulosum l|l,Allium fistulosum L.,L.,Amaryllidaceae,ACCEPTED,SPECIES,2856504,2856504,2856504,9624496,7682,6,KNApSAcK World,,,,99
+82dc9baf-0592-5a86-9e72-041aee3df227,23,allium sativum l|l,Allium sativum L.,L.,Amaryllidaceae,ACCEPTED,SPECIES,2856681,2856681,2856681,9624496,7682,6,KNApSAcK World,,,,99
+0ca4453f-79a6-5f6c-bd26-bd7446b8aa60,24,allium tuberosum rottler ex spreng|rottler ex spreng,Allium tuberosum Rottler ex Spreng.,Rottler ex Spreng.,Amaryllidaceae,ACCEPTED,SPECIES,2856297,2856297,2856297,9624496,7682,6,KNApSAcK World,,,,97
+e57f7ffb-4ed8-502f-91ab-0e5380bf4385,25,alocasia macrorrhizos l g don|l schott,Alocasia macrorrhizos (L.) G.Don,(L.) Schott,Araceae,SYNONYM,SPECIES,5708184,5329904,5329904,5329822,6979,6,KNApSAcK World,,,,98
+bf83568f-f4f5-59f5-ba31-2e407b094366,26,aloe vera l burm f|l burm f,Aloe vera (L.) Burm.f.,(L.) Burm.f.,Asphodelaceae,ACCEPTED,SPECIES,2777724,2777724,2777724,2770879,4259209,6,KNApSAcK World,,,,97
+93816ea4-a503-58ee-b0f8-15b5d287d925,27,alpinia galanga l willd|l willd,Alpinia galanga (L.) Willd.,(L.) Willd.,Zingiberaceae,ACCEPTED,SPECIES,5302225,5302225,5302225,5301253,4687,6,KNApSAcK World,,,,99
+b92cc159-f9c2-5d20-930b-c22812b8d66c,28,alpinia officinarum hance|hance,Alpinia officinarum Hance,Hance,Zingiberaceae,ACCEPTED,SPECIES,5302199,5302199,5302199,5301253,4687,6,KNApSAcK World,,,,99
+86123055-07a2-5a97-b714-4851d3051478,29,alstonia scholaris l r br|l r br,Alstonia scholaris (L.) R.Br.,(L.) R.Br.,Apocynaceae,ACCEPTED,SPECIES,5414410,5414410,5414410,8412045,6701,6,KNApSAcK World,,,,99
+3123e6b2-c48a-5851-9e6a-dc3f8f61a4f9,30,alternanthera philoxeroides mart griseb|mart griseb,Alternanthera philoxeroides (Mart.) Griseb.,(Mart.) Griseb.,Amaranthaceae,ACCEPTED,SPECIES,3084923,3084923,3084923,3084921,3064,6,KNApSAcK World,,,,99
+9f1b9834-7277-55c6-a512-fc207bd773ad,31,alternanthera sessilis l r br ex dc|l r br ex dc,Alternanthera sessilis (L.) R.Br. ex DC.,(L.) R.Br. ex DC.,Amaranthaceae,ACCEPTED,SPECIES,3084939,3084939,3084939,3084921,3064,6,KNApSAcK World,,,,97
+b43c3a04-4b0d-5a82-abc9-95e9dd3aaf5f,32,amaranthus spinosus l|l,Amaranthus spinosus L.,L.,Amaranthaceae,ACCEPTED,SPECIES,5384401,5384401,5384401,3085074,3064,6,KNApSAcK World,,,,99
+b5c649ab-a20a-54a0-9a71-ce0e964a89c2,33,amaranthus tricolor l|l,Amaranthus tricolor L.,L.,Amaranthaceae,ACCEPTED,SPECIES,5384397,5384397,5384397,3085074,3064,6,KNApSAcK World,,,,99
+91ae76f6-0d18-56fa-a897-5c7ec329ec11,35,anacardium occidentale l|l,Anacardium occidentale L.,L.,Anacardiaceae,ACCEPTED,SPECIES,5421368,5421368,5421368,5421367,2398,6,KNApSAcK World,,,,98
+be5e5e77-37a9-5715-a927-163d3f269264,36,ananas comosus l merr|l merr,Ananas comosus (L.) Merr.,(L.) Merr.,Bromeliaceae,ACCEPTED,SPECIES,5288819,5288819,5288819,2699430,3740,6,KNApSAcK World,,,,98
+eebfb643-4b40-5250-a1da-6f356c0c7463,37,andrographis paniculata burm fil nees|burm fil nees,Andrographis paniculata (Burm.fil.) Nees,(Burm.fil.) Nees,Acanthaceae,ACCEPTED,SPECIES,3173178,3173178,3173178,7740842,2393,6,KNApSAcK World,,,,98
+dccbd49c-d043-56b0-8945-d198d1be10ce,38,angelica keiskei miq koidz|miq koidz,Angelica keiskei (Miq.) Koidz.,(Miq.) Koidz.,Apiaceae,ACCEPTED,SPECIES,6026372,6026372,6026372,3034560,6720,6,KNApSAcK World,,,,99
+521bef4d-5a1a-5ed5-a341-082fb4bc1942,435,annona mucosa jacq|jacq baill,Annona mucosa Jacq.,(Jacq.) Baill.,Annonaceae,SYNONYM,SPECIES,3158590,5407571,5407571,3155252,9291,6,KNApSAcK World,,,,98
+23b55e71-596b-51fb-a563-fb9afa5ccceb,39,annona muricata l|l,Annona muricata L.,L.,Annonaceae,ACCEPTED,SPECIES,5407273,5407273,5407273,3155252,9291,6,KNApSAcK World,,,,97
+6711340e-0191-5338-b6c9-537e607ed2db,40,annona reticulata l|l,Annona reticulata L.,L.,Annonaceae,ACCEPTED,SPECIES,5407123,5407123,5407123,3155252,9291,6,KNApSAcK World,,,,97
+36391970-0c41-587a-8a68-d4416c71bc71,41,annona squamosa l|l,Annona squamosa L.,L.,Annonaceae,ACCEPTED,SPECIES,5407099,5407099,5407099,3155252,9291,6,KNApSAcK World,,,,97
+deb58575-8d8f-5c7d-8987-e855c6dbaa58,42,anredera cordifolia ten steenis|ten steenis,Anredera cordifolia (Ten.) Steenis,(Ten.) Steenis,Basellaceae,ACCEPTED,SPECIES,3083508,3083508,3083508,3083506,3063,6,KNApSAcK World,,,,99
+7df79ac6-907b-54b3-ab9a-c2d644a57a14,43,antiaris toxicaria pers lesch|pers lesch,Antiaris toxicaria (Pers.) Lesch.,(Pers.) Lesch.,Moraceae,ACCEPTED,SPECIES,7262663,7262663,7262663,7262656,6640,6,KNApSAcK World,,,,99
+f94fb92a-9e16-5be7-a284-8e5b8d0d37fb,44,apium graveolens l|l,Apium graveolens L.,L.,Apiaceae,ACCEPTED,SPECIES,5371879,5371879,5371879,3034812,6720,6,KNApSAcK World,,,,97
+5a9adc20-5e3d-501b-8f7f-cac8aabed8a2,45,arachis hypogaea l|l,Arachis hypogaea L.,L.,Fabaceae,ACCEPTED,SPECIES,5353770,5353770,5353770,2956684,5386,6,KNApSAcK World,,,,99
+95ed27f8-0d75-51fa-8d14-d14e70df0d87,46,arcangelisia flava l merr|l merr,Arcangelisia flava (L.) Merr.,(L.) Merr.,Menispermaceae,ACCEPTED,SPECIES,3830318,3830318,3830318,7268743,2411,6,KNApSAcK World,,,,99
+a8500db7-19f1-574e-8b37-0b360b6e2593,47,areca catechu l|l,Areca catechu L.,L.,Arecaceae,ACCEPTED,SPECIES,2736531,2736531,2736531,2736518,7681,6,KNApSAcK World,,,,99
+db295174-113b-5328-8c88-1d04d2dd729d,48,artemisia abrotanum l|l,Artemisia abrotanum L.,L.,Asteraceae,ACCEPTED,SPECIES,8042568,8042568,8042568,3120641,3065,6,KNApSAcK World,,,,97
+878f4afc-c41d-5d48-b3b0-7512a8cab546,49,artemisia cina o c berg schmidt|o c berg schmidt,Artemisia cina O.C.Berg & Schmidt,O.C.Berg & Schmidt,Asteraceae,ACCEPTED,SPECIES,3120942,3120942,3120942,3120641,3065,6,KNApSAcK World,,,,97
+aa05a75d-6174-5031-a3f6-dd4bef7504d6,50,artemisia lactiflora wall ex dc|wall ex dc,Artemisia lactiflora Wall. ex DC.,Wall. ex DC.,Asteraceae,ACCEPTED,SPECIES,3121137,3121137,3121137,3120641,3065,6,KNApSAcK World,,,,97
+8e634764-8e29-58df-a513-240878422afe,51,artemisia vulgaris l|l,Artemisia vulgaris L.,L.,Asteraceae,ACCEPTED,SPECIES,3120946,3120946,3120946,3120641,3065,6,KNApSAcK World,,,,97
+145b3b47-0239-5dc8-afec-1d1fb79c9051,53,artocarpus altilis parkinson fosberg|j r forst g forst,Artocarpus altilis (Parkinson) Fosberg,J.R.Forst. & G.Forst.,Moraceae,SYNONYM,SPECIES,2984574,2984573,2984573,2984563,6640,6,KNApSAcK World,,,,98
+f2beca40-9956-54ed-b734-d017ed4cac93,54,artocarpus heterophyllus lam|lam,Artocarpus heterophyllus Lam.,Lam.,Moraceae,ACCEPTED,SPECIES,2984565,2984565,2984565,2984563,6640,6,KNApSAcK World,,,,99
+fb91e55f-9133-5582-90da-7f941bc2e43f,55,asclepias curassavica l|l,Asclepias curassavica L.,L.,Apocynaceae,ACCEPTED,SPECIES,3170241,3170241,3170241,3170229,6701,6,KNApSAcK World,,,,97
+e5786358-ff46-52d2-a694-1755828db71a,56,asparagus cochinchinensis lour merr|lour merr,Asparagus cochinchinensis (Lour.) Merr.,(Lour.) Merr.,Asparagaceae,ACCEPTED,SPECIES,2768772,2768772,2768772,9527393,7683,6,KNApSAcK World,,,,99
+94b64218-e0a0-5271-9a3b-b24d1fcd7000,57,atropa belladonna l|l,Atropa belladonna L.,L.,Solanaceae,ACCEPTED,SPECIES,3802655,3802655,3802655,2928892,7717,6,KNApSAcK World,,,,99
+6d996f96-3991-5410-8262-50b9a4ee2a0a,58,aucuba japonica thunb|thunb,Aucuba japonica Thunb.,Thunb.,Garryaceae,ACCEPTED,SPECIES,3033077,3033077,3033077,9578104,8805,6,KNApSAcK World,,,,99
+5e87ab12-2391-53ca-91c7-143897ed43d7,59,averrhoa bilimbi l|l,Averrhoa bilimbi L.,L.,Oxalidaceae,ACCEPTED,SPECIES,2891640,2891640,2891640,9407103,6697,6,KNApSAcK World,,,,99
+fd46296f-75d7-5096-a696-0dbaf95854e6,60,averrhoa carambola l|l,Averrhoa carambola L.,L.,Oxalidaceae,ACCEPTED,SPECIES,2891641,2891641,2891641,9407103,6697,6,KNApSAcK World,,,,99
+e2d14ada-b393-56d1-a94b-bb4b9437cef6,215,ayapana triplinervis vahl r m king h rob|vahl,Ayapana triplinervis (Vahl) R.M.King & H.Rob.,Vahl,Asteraceae,SYNONYM,SPECIES,5402967,3142644,3142644,3126519,3065,6,KNApSAcK World,,,,97
+93a13a5f-257a-5c0e-be05-f2844e74cd7b,61,azadirachta indica a juss|a juss,Azadirachta indica A.Juss.,A.Juss.,Meliaceae,ACCEPTED,SPECIES,3190474,3190474,3190474,3190473,2397,6,KNApSAcK World,,,,99
+6606293e-cffe-5b8d-ba9c-be464e7e3241,62,baeckea frutescens l|l,Baeckea frutescens L.,L.,Myrtaceae,ACCEPTED,SPECIES,3187799,3187799,3187799,3187737,5014,6,KNApSAcK World,,,,99
+78164004-b3dc-5571-bf5d-e59ebb56f8e9,63,barleria lupulina lindl|lindl,Barleria lupulina Lindl.,Lindl.,Acanthaceae,ACCEPTED,SPECIES,3173126,3173126,3173126,3173125,2393,6,KNApSAcK World,,,,99
+204ca237-5f29-5491-be42-8a84fb720aa2,64,barleria prionitis l|l,Barleria prionitis L.,L.,Acanthaceae,ACCEPTED,SPECIES,3173129,3173129,3173129,3173125,2393,6,KNApSAcK World,,,,99
+0b2bf473-ea68-5107-b473-b5f0474a5e32,65,basella alba l|l,Basella alba L.,L.,Basellaceae,SYNONYM,SPECIES,3083505,3083504,3083504,3083503,3063,6,KNApSAcK World,,,,98
+7f1478ec-5540-5df1-94d8-2487d91c1873,66,bauhinia purpurea l|l,Bauhinia purpurea L.,L.,Fabaceae,ACCEPTED,SPECIES,2953871,2953871,2953871,2952935,5386,6,KNApSAcK World,,,,97
+0dfd81ae-0517-5b4b-b9dd-8e845862e8b1,68,beilschmiedia madang blume blume|blume blume,Beilschmiedia madang (Blume) Blume,(Blume) Blume,Lauraceae,ACCEPTED,SPECIES,4176422,4176422,4176422,3034072,6688,6,KNApSAcK World,,,,99
+6bdbe6c3-a3a8-5fff-9e45-bb554dd1d247,70,benincasa hispida thunb cogn|thunb cogn,Benincasa hispida (Thunb.) Cogn.,(Thunb.) Cogn.,Cucurbitaceae,ACCEPTED,SPECIES,2874524,2874524,2874524,2874523,6634,6,KNApSAcK World,,,,99
+0dd823d1-116a-5754-9c7c-42d8d2f3952d,86,biancaea sappan l tod|l,Biancaea sappan (L.) Tod.,L.,Fabaceae,SYNONYM,SPECIES,2958870,2958871,2958871,7302381,5386,6,KNApSAcK World,,,,98
+1a362ee3-2d0c-58f5-9a0b-902303aa3077,71,bidens bipinnata l|l,Bidens bipinnata L.,L.,Asteraceae,ACCEPTED,SPECIES,5389402,5389402,5389402,3105856,3065,6,KNApSAcK World,,,,97
+cb74ad62-16dc-56c5-81e4-f7b94dad26d4,72,bidens pilosa l|l,Bidens pilosa L.,L.,Asteraceae,ACCEPTED,SPECIES,5391845,5391845,5391845,3105856,3065,6,KNApSAcK World,,,,99
+070365ba-2b03-54b6-bdd1-0e6e2cb460b5,73,bixa orellana l|l,Bixa orellana L.,L.,Bixaceae,ACCEPTED,SPECIES,2874863,2874863,2874863,2874862,6637,6,KNApSAcK World,,,,99
+b31d2724-7805-5196-aa58-e5d7bed0e853,74,blumea balsamifera l dc|l dc,Blumea balsamifera (L.) DC.,(L.) DC.,Asteraceae,ACCEPTED,SPECIES,5395786,5395786,5395786,3119250,3065,6,KNApSAcK World,,,,99
+f3ecf34e-704f-5940-9345-009f53ad0b3e,75,blumea lacera burm fil dc|burm fil dc,Blumea lacera (Burm.fil.) DC.,(Burm.fil.) DC.,Asteraceae,ACCEPTED,SPECIES,5395639,5395639,5395639,3119250,3065,6,KNApSAcK World,,,,97
+ab5de70f-61df-5eb4-9dad-107e4af15830,77,boesenbergia rotunda l mansf|l mansf,Boesenbergia rotunda (L.) Mansf.,(L.) Mansf.,Zingiberaceae,ACCEPTED,SPECIES,2758480,2758480,2758480,2758458,4687,6,KNApSAcK World,,,,99
+034f9d9a-7bde-5d22-8201-85491cbf3d5e,78,borassus flabellifer l|l,Borassus flabellifer L.,L.,Arecaceae,ACCEPTED,SPECIES,2733934,2733934,2733934,2733922,7681,6,KNApSAcK World,,,,99
+fd61f8f4-c00d-5043-9e32-a8c083da8fa2,79,bougainvillea glabra choisy|choisy,Bougainvillea glabra Choisy,Choisy,Nyctaginaceae,ACCEPTED,SPECIES,5384862,5384862,5384862,3086089,6718,6,KNApSAcK World,,,,98
+15a94dd3-f501-5e4b-a3bb-af8bb60d0954,174,brachypterum robustum roxb ex dc dalzell a gibson|roxb ex dc benth,Brachypterum robustum (Roxb. ex DC.) Dalzell & A.Gibson,(Roxb. ex DC.) Benth.,Fabaceae,SYNONYM,SPECIES,5350230,2947483,2947483,2952879,5386,6,KNApSAcK World,,,,98
+52ead4bd-cd08-5d61-b17f-d26ce26e6021,80,brassica oleracea l|l,Brassica oleracea L.,L.,Brassicaceae,ACCEPTED,SPECIES,3042845,3042845,3042845,3042506,3112,6,KNApSAcK World,,,,98
+e7662188-8f45-5e2f-8c9b-31380166fc09,446,breynia androgyna l chakrab n p balakr|l merr,Breynia androgyna (L.) Chakrab. & N.P.Balakr.,(L.) Merr.,Phyllanthaceae,SYNONYM,SPECIES,6109767,9197670,9197670,3079696,8807,6,KNApSAcK World,,,,98
+18e69f0d-7748-52b4-8d6a-79aff0e58269,344,broussonetia papyrifera l l her ex vent|poir,Broussonetia papyrifera (L.) L'Hér. ex Vent.,Poir.,Moraceae,SYNONYM,SPECIES,7262450,5361944,5361944,2984643,6640,6,KNApSAcK World,,,,98
+43c2e4ed-2f07-5622-b923-b3ca776bec9d,81,brucea javanica l merr|l merr,Brucea javanica (L.) Merr.,(L.) Merr.,Simaroubaceae,ACCEPTED,SPECIES,5555210,5555210,5555210,3233020,2395,6,KNApSAcK World,,,,99
+dd27dec5-0927-521c-821a-369af6f9f863,84,caesalpinia major brenan|brenan,Caesalpinia major Brenan,Brenan,Fabaceae,ACCEPTED,SPECIES,11131378,11131378,11131378,2958443,5386,6,KNApSAcK World,,,,97
+61618218-45c2-53b0-8673-47b32e69e330,85,caesalpinia pulcherrima l sw|l sw,Caesalpinia pulcherrima (L.) Sw.,(L.) Sw.,Fabaceae,ACCEPTED,SPECIES,2958715,2958715,2958715,2958443,5386,6,KNApSAcK World,,,,98
+9e9b09e3-6b7d-5645-b441-dd2a243ea6f2,87,cajanus cajan l huth|l huth,Cajanus cajan (L.) Huth,(L.) Huth,Fabaceae,ACCEPTED,SPECIES,7587087,7587087,7587087,2960263,5386,6,KNApSAcK World,,,,97
+97bdc34f-2790-54de-a843-ae6914caa55b,88,callicarpa candicans burm f hochr|burm f hochr,Callicarpa candicans (Burm.f.) Hochr.,(Burm.f.) Hochr.,Lamiaceae,ACCEPTED,SPECIES,6412107,6412107,6412107,2925549,2497,6,KNApSAcK World,,,,97
+9529c2dd-38da-5bd3-93bf-c837ec13e8c3,89,calophyllum inophyllum l|l,Calophyllum inophyllum L.,L.,Calophyllaceae,ACCEPTED,SPECIES,9531830,9531830,9531830,3189443,4907584,6,KNApSAcK World,,,,97
+db9d7719-81aa-5063-ac74-8c6b750f20a0,90,calotropis gigantea l w t aiton|l w t aiton,Calotropis gigantea (L.) W.T.Aiton,(L.) W.T.Aiton,Apocynaceae,ACCEPTED,SPECIES,3579089,3579089,3579089,3170557,6701,6,KNApSAcK World,,,,97
+9dededbd-fe87-5c51-a6b5-c1edbe3cb09b,91,camellia sinensis l kuntze|l kuntze,Camellia sinensis (L.) Kuntze,(L.) Kuntze,Theaceae,ACCEPTED,SPECIES,3189635,3189635,3189635,3189634,3189597,6,KNApSAcK World,,,,99
+3c0c92bc-5e98-5fce-9a2d-9371daf6bc2f,92,cananga odorata lam hook f thomson|lam hook f thomson,Cananga odorata (Lam.) Hook.f. & Thomson,(Lam.) Hook.f. & Thomson,Annonaceae,ACCEPTED,SPECIES,5407583,5407583,5407583,5407582,9291,6,KNApSAcK World,,,,99
+c915e4d9-1316-5684-81d0-f6882a0d74a1,95,canna indica l|ker gawl,Canna indica L.,Ker Gawl.,Cannaceae,SYNONYM,SPECIES,5303275,8034409,8034409,2762470,8497,6,KNApSAcK World,,,,97
+c5abce80-7ce8-56c5-bffe-ae12ce4bdddf,94,cannabis sativa l|l,Cannabis sativa L.,L.,Cannabaceae,ACCEPTED,SPECIES,5361880,5361880,5361880,2984538,2384,6,KNApSAcK World,,,,99
+e903fbc6-229b-5387-8db4-249261f4994d,96,capsicum annuum l|l,Capsicum annuum L.,L.,Solanaceae,ACCEPTED,SPECIES,2932944,2932944,2932944,2932937,7717,6,KNApSAcK World,,,,99
+55fc2760-4bde-54a1-9781-43aeec8a3eb0,97,capsicum frutescens l|l,Capsicum frutescens L.,L.,Solanaceae,ACCEPTED,SPECIES,8403992,8403992,8403992,2932937,7717,6,KNApSAcK World,,,,97
+00eebe5d-42dd-5b23-bf85-8c68debbe6ae,115,carapichea ipecacuanha brot l andersson|brot a rich,Carapichea ipecacuanha (Brot.) L.Andersson,(Brot.) A.Rich.,Rubiaceae,SYNONYM,SPECIES,2921353,2921359,2921359,2898583,8798,6,KNApSAcK World,,,,97
+ab5df454-da2b-568c-809b-977784b7a8e7,98,carica papaya l|l,Carica papaya L.,L.,Caricaceae,ACCEPTED,SPECIES,2874484,2874484,2874484,2874482,6636,6,KNApSAcK World,,,,99
+57f24584-5c18-5cfb-8c1d-e7c9394aab78,99,carthamus tinctorius l|l,Carthamus tinctorius L.,L.,Asteraceae,ACCEPTED,SPECIES,3138327,3138327,3138327,3138214,3065,6,KNApSAcK World,,,,99
+ffe79f6a-ea5f-5553-9bdc-c506e19ca636,503,cascabela thevetia l lippold|pers k schum,Cascabela thevetia (L.) Lippold,(Pers.) K.Schum.,Apocynaceae,SYNONYM,SPECIES,5414405,3169652,3169652,7950372,6701,6,KNApSAcK World,,,,97
+555c66db-a145-573b-9f4a-de07088c9c23,102,cassia fistula l|l,Cassia fistula L.,L.,Fabaceae,ACCEPTED,SPECIES,5357108,5357108,5357108,2963414,5386,6,KNApSAcK World,,,,97
+32aafb3e-f22f-5b9a-a0ad-255b12ba122d,103,cassia javanica l|l,Cassia javanica L.,L.,Fabaceae,ACCEPTED,SPECIES,5357125,5357125,5357125,2963414,5386,6,KNApSAcK World,,,,97
+b0e46197-19d7-5a8e-aa43-ca3e5f7f7fd5,108,cassytha filiformis l|l,Cassytha filiformis L.,L.,Lauraceae,ACCEPTED,SPECIES,3033999,3033999,3033999,3033998,6688,6,KNApSAcK World,,,,97
+87b7b218-497b-5a17-b995-eb050440945f,109,casuarina equisetifolia l|l,Casuarina equisetifolia L.,L.,Casuarinaceae,ACCEPTED,SPECIES,2891930,2891930,2891930,2891925,5352,6,KNApSAcK World,,,,97
+d3edac8d-f772-532a-85ad-bbaf368320c4,110,catharanthus roseus l g don|l g don,Catharanthus roseus (L.) G.Don,(L.) G.Don,Apocynaceae,ACCEPTED,SPECIES,3169830,3169830,3169830,3169829,6701,6,KNApSAcK World,,,,99
+ee090c4a-14db-5721-aa3a-ba02019e3fa8,111,ceiba pentandra l gaertn|l gaertn,Ceiba pentandra (L.) Gaertn.,(L.) Gaertn.,Malvaceae,ACCEPTED,SPECIES,5406697,5406697,5406697,3152218,6685,6,KNApSAcK World,,,,98
+e6dfdfe8-3edb-53ac-90ca-26a757a4bb72,113,celosia argentea f cristata l schinz|l,Celosia argentea f. cristata (L.) Schinz,L.,Amaranthaceae,SYNONYM,SPECIES,3085196,6429520,3085191,3085190,3064,6,KNApSAcK World,,,,98
+4a7e3109-3a3c-5505-a145-f655e8f0edd2,112,celosia argentea l|l,Celosia argentea L.,L.,Amaranthaceae,ACCEPTED,SPECIES,3085191,3085191,3085191,3085190,3064,6,KNApSAcK World,,,,99
+3c25bfc2-57f8-5780-9c5f-40475a663537,114,centella asiatica l urb|l urb,Centella asiatica (L.) Urb.,(L.) Urb.,Apiaceae,ACCEPTED,SPECIES,3034128,3034128,3034128,3034124,6720,6,KNApSAcK World,,,,99
+a0024779-852e-5210-ab6f-b1b9e3a73d78,116,cerbera manghas l|l,Cerbera manghas L.,L.,Apocynaceae,ACCEPTED,SPECIES,7155766,7155766,7155766,3169757,6701,6,KNApSAcK World,,,,99
+9514b996-03cc-5a66-8c3d-63b4e0bea3c7,117,cibotium barometz l j sm|l j sm,Cibotium barometz (L.) J.Sm.,(L.) J.Sm.,Cibotiaceae,ACCEPTED,SPECIES,4195539,4195539,4195539,2650328,4262049,6,KNApSAcK World,,,,99
+a9c1a6ac-3bac-5476-9611-df7335ad7426,118,cinnamomum burmanni nees t nees blume|nees t nees blume,Cinnamomum burmanni (Nees & T.Nees) Blume,(Nees & T.Nees) Blume,Lauraceae,ACCEPTED,SPECIES,3033985,3033985,3033985,3033980,6688,6,KNApSAcK World,,,,96
+35be1166-9a9c-5ff5-b7e2-c6e659bda20c,119,cinnamomum camphora l j presl|l j presl,Cinnamomum camphora (L.) J.Presl,(L.) J.Presl,Lauraceae,ACCEPTED,SPECIES,3033991,3033991,3033991,3033980,6688,6,KNApSAcK World,,,,97
+d5c83d21-e38d-5c32-bd3e-350c74c3eaaa,121,cinnamomum verum j presl|j presl,Cinnamomum verum J.Presl,J.Presl,Lauraceae,ACCEPTED,SPECIES,3033987,3033987,3033987,3033980,6688,6,KNApSAcK World,,,,99
+533497fc-8d65-5771-96ff-4c1aa1563bc4,123,cissampelos pareira l|l,Cissampelos pareira L.,L.,Menispermaceae,ACCEPTED,SPECIES,3033937,3033937,3033937,3033936,2411,6,KNApSAcK World,,,,99
+cf1440b4-1186-586b-9516-b60171833ed3,124,citrullus lanatus thunb matsum nakai|schrad,Citrullus lanatus (Thunb.) Matsum. & Nakai,Schrad.,Cucurbitaceae,SYNONYM,SPECIES,3625068,2874621,2874621,8257011,6634,6,KNApSAcK World,,,,97
+a143aa78-feb2-5564-ac4a-845faa52a803,125,citrus aurantiifolia christm swingle|christm swingle,Citrus × aurantiifolia (Christm.) Swingle,(Christm.) Swingle,Rutaceae,ACCEPTED,SPECIES,3190164,3190164,3190164,3190155,2396,6,KNApSAcK World,,,,96
+bea32f61-bcc4-5c97-bf0d-a1628fb2c936,126,citrus aurantium l|l,Citrus × aurantium L.,L.,Rutaceae,ACCEPTED,SPECIES,8077391,8077391,8077391,3190155,2396,6,KNApSAcK World,,,,97
+5dbe0f30-06d8-5102-a891-be9c84696adf,127,citrus hystrix dc|dc,Citrus hystrix DC.,DC.,Rutaceae,ACCEPTED,SPECIES,6433679,6433679,6433679,3190155,2396,6,KNApSAcK World,,,,99
+6c99dd41-2487-5be9-9e7b-af1e428a32d2,128,citrus maxima burm merr|burm merr,Citrus maxima (Burm.) Merr.,(Burm.) Merr.,Rutaceae,ACCEPTED,SPECIES,3190160,3190160,3190160,3190155,2396,6,KNApSAcK World,,,,97
+b2d4ecac-376f-53a0-b247-f910dcfb0944,129,citrus medica l|l,Citrus medica L.,L.,Rutaceae,ACCEPTED,SPECIES,3190157,3190157,3190157,3190155,2396,6,KNApSAcK World,,,,97
+59dcfb22-ab89-5b7b-a51e-521f78e5c045,131,clausena excavata burm fil|burm fil,Clausena excavata Burm.fil.,Burm.fil.,Rutaceae,ACCEPTED,SPECIES,5834596,5834596,5834596,3190412,2396,6,KNApSAcK World,,,,99
+09064110-b6df-518f-9a05-b2a19444027d,134,clerodendrum serratum spreng 1825|spreng 1825,"Clerodendrum serratum Spreng., 1825","Spreng., 1825",Lamiaceae,ACCEPTED,SPECIES,8355397,8355397,8355397,2925347,2497,6,KNApSAcK World,,,,97
+5ed35f94-d072-5fe1-8950-f47b56c61c0d,135,clinacanthus nutans burm fil lindau|burm fil lindau,Clinacanthus nutans (Burm.fil.) Lindau,(Burm.fil.) Lindau,Acanthaceae,ACCEPTED,SPECIES,3774284,3774284,3774284,7263674,2393,6,KNApSAcK World,,,,99
+4993fe07-e06a-5ac7-8ef5-15356a75bea4,136,clitoria ternatea l|l,Clitoria ternatea L.,L.,Fabaceae,ACCEPTED,SPECIES,2946519,2946519,2946519,2946499,5386,6,KNApSAcK World,,,,99
+b56b9e33-5714-5e7d-8837-1d7b18222eef,137,cocos nucifera l|l,Cocos nucifera L.,L.,Arecaceae,ACCEPTED,SPECIES,2735117,2735117,2735117,2735116,7681,6,KNApSAcK World,,,,99
+d4bee25d-0a63-52d4-9d34-ddb3fc3874bc,138,coffea arabica l|l,Coffea arabica L.,L.,Rubiaceae,ACCEPTED,SPECIES,2895345,2895345,2895345,2895315,8798,6,KNApSAcK World,,,,98
+f61f7125-4023-5f11-ab83-a60137827b98,140,coffea canephora pierre ex a froehner|l linden,Coffea canephora Pierre ex A.Froehner,L.Linden,Rubiaceae,SYNONYM,SPECIES,2895553,2895528,2895528,2895315,8798,6,KNApSAcK World,,,,98
+b5280236-92c0-5232-a946-b17481b9dcc7,141,coix lacryma jobi l|l,Coix lacryma-jobi L.,L.,Poaceae,ACCEPTED,SPECIES,2706301,2706301,2706301,2706300,3073,6,KNApSAcK World,,,,99
+c5059edb-5853-54df-ba33-d0ba16fff004,142,cola acuminata p beauv schott endl|p beauv schott endl,Cola acuminata (P.Beauv.) Schott & Endl.,(P.Beauv.) Schott & Endl.,Malvaceae,ACCEPTED,SPECIES,5406685,5406685,5406685,3152143,6685,6,KNApSAcK World,,,,99
+05e8de0c-c078-54a3-b283-d07e26494e70,143,coleus amboinicus lour|lour,Coleus amboinicus Lour.,Lour.,Lamiaceae,ACCEPTED,SPECIES,5341313,5341313,5341313,2927310,2497,6,KNApSAcK World,,,,99
+a1a0f7f6-3417-5ce4-ae54-a357ce0ca0fb,145,colocasia esculenta l schott|l schott,Colocasia esculenta (L.) Schott,(L.) Schott,Araceae,ACCEPTED,SPECIES,5330776,5330776,5330776,5330758,6979,6,KNApSAcK World,,,,99
+9e58df87-5132-5fb3-9d08-21836302f0dc,146,coriandrum sativum l|l,Coriandrum sativum L.,L.,Apiaceae,ACCEPTED,SPECIES,3034871,3034871,3034871,3034870,6720,6,KNApSAcK World,,,,99
+0eb6519f-ca1f-5b7d-83d2-1832683ba991,148,crinum asiaticum l|l,Crinum asiaticum L.,L.,Amaryllidaceae,ACCEPTED,SPECIES,2853796,2853796,2853796,2773870,7682,6,KNApSAcK World,,,,98
+f6877b00-eaae-5c81-bc68-4bc2e9a6be05,149,crocus sativus l|l,Crocus sativus L.,L.,Iridaceae,ACCEPTED,SPECIES,2747430,2747430,2747430,2747303,7698,6,KNApSAcK World,,,,97
+d44fad7e-f931-578e-a729-5d9cc0490417,150,croton tiglium l|l,Croton tiglium L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3057656,3057656,3057656,3057454,4691,6,KNApSAcK World,,,,99
+b89fde91-120d-5925-afab-e283c165ac2a,151,cucumis sativus l|l,Cucumis sativus L.,L.,Cucurbitaceae,ACCEPTED,SPECIES,2874569,2874569,2874569,2874568,6634,6,KNApSAcK World,,,,99
+0f07d817-71e3-5519-8ed6-543c75967c8d,152,cucurbita moschata duchesne duchesne ex poir|duchesne duchesne ex poir,Cucurbita moschata (Duchesne) Duchesne ex Poir.,(Duchesne) Duchesne ex Poir.,Cucurbitaceae,ACCEPTED,SPECIES,7393329,7393329,7393329,2874506,6634,6,KNApSAcK World,,,,97
+53cb783b-9be9-51cf-a73d-4262106b5731,153,cuminum cyminum l|l,Cuminum cyminum L.,L.,Apiaceae,ACCEPTED,SPECIES,3034775,3034775,3034775,3034774,6720,6,KNApSAcK World,,,,97
+8adaa563-8f9e-5ceb-beb5-7c5ec3e2a9c7,154,curcuma aeruginosa roxb|roxb,Curcuma aeruginosa Roxb.,Roxb.,Zingiberaceae,ACCEPTED,SPECIES,2757635,2757635,2757635,2757518,4687,6,KNApSAcK World,,,,99
+0b9e68d9-45a7-5a11-a0e0-83346e98b380,156,curcuma heyneana valeton zijp|valeton zijp,Curcuma heyneana Valeton & Zijp,Valeton & Zijp,Zingiberaceae,ACCEPTED,SPECIES,2757572,2757572,2757572,2757518,4687,6,KNApSAcK World,,,,99
+2d3d5e71-4dd1-5654-89fb-2bac5299842b,157,curcuma longa l|l,Curcuma longa L.,L.,Zingiberaceae,ACCEPTED,SPECIES,2757624,2757624,2757624,2757518,4687,6,KNApSAcK World,,,,99
+8c2a12ae-a723-5639-91c5-4fa9adc6bf7a,158,curcuma mangga valeton zijp|valeton zijp,Curcuma mangga Valeton & Zijp,Valeton & Zijp,Zingiberaceae,ACCEPTED,SPECIES,2757639,2757639,2757639,2757518,4687,6,KNApSAcK World,,,,99
+81403c6b-c063-50a1-b9df-0c9a2ff97b9c,160,curcuma xanthorrhiza d dietr|d dietr,Curcuma xanthorrhiza D.Dietr.,D.Dietr.,Zingiberaceae,ACCEPTED,SPECIES,3990387,3990387,3990387,2757518,4687,6,KNApSAcK World,,,,99
+58d7b7ee-3c9f-518b-801c-44f8fbdd765d,161,curcuma zanthorrhiza roxb|roxb,Curcuma zanthorrhiza Roxb.,Roxb.,Zingiberaceae,ACCEPTED,SPECIES,2757547,2757547,2757547,2757518,4687,6,KNApSAcK World,,,,99
+dd2adb83-eda7-5a84-a2fa-f9de754850b7,162,curcuma zedoaria christm roscoe|christm roscoe,Curcuma zedoaria (Christm.) Roscoe,(Christm.) Roscoe,Zingiberaceae,ACCEPTED,SPECIES,2757545,2757545,2757545,2757518,4687,6,KNApSAcK World,,,,97
+b784262d-0b65-58e1-a24b-a316af6e0356,519,cyanthillium cinereum l h rob|l less,Cyanthillium cinereum (L.) H.Rob.,(L.) Less.,Asteraceae,SYNONYM,SPECIES,6445389,6445734,6445734,3148294,3065,6,KNApSAcK World,,,,98
+465a4ade-ca6d-54ca-bc61-c5ffcbc9942c,163,cycas revoluta thunb|thunb,Cycas revoluta Thunb.,Thunb.,Cycadaceae,ACCEPTED,SPECIES,2683217,2683217,2683217,2683206,6168,6,KNApSAcK World,,,,98
+b96a0567-85db-5cde-b91d-7934ec7f348f,164,cyclea barbata miers|miers,Cyclea barbata Miers,Miers,Menispermaceae,ACCEPTED,SPECIES,3830078,3830078,3830078,7268667,2411,6,KNApSAcK World,,,,99
+3050d480-6a52-57e2-a71a-af3cef9b4bde,165,cymbopogon citratus dc stapf|dc stapf,Cymbopogon citratus (DC.) Stapf,(DC.) Stapf,Poaceae,ACCEPTED,SPECIES,2705275,2705275,2705275,2705264,3073,6,KNApSAcK World,,,,99
+54cf5ab7-c09e-546e-857b-2e0db1ecc774,166,cymbopogon nardus l rendle|l rendle,Cymbopogon nardus (L.) Rendle,(L.) Rendle,Poaceae,ACCEPTED,SPECIES,2705267,2705267,2705267,2705264,3073,6,KNApSAcK World,,,,99
+39eb7d20-94f7-5c3c-96ff-d621f57eee33,167,cyperus iria l|l,Cyperus iria L.,L.,Cyperaceae,ACCEPTED,SPECIES,2715729,2715729,2715729,2713455,7708,6,KNApSAcK World,,,,99
+b83b9065-7d31-5140-ad50-0d7f4e04609c,168,cyperus rotundus l|l,Cyperus rotundus L.,L.,Cyperaceae,ACCEPTED,SPECIES,2714818,2714818,2714818,2713455,7708,6,KNApSAcK World,,,,98
+fcde8427-5b8f-5be3-94e8-2a6fc3d6ce32,169,datura metel l|l,Datura metel L.,L.,Solanaceae,ACCEPTED,SPECIES,2928747,2928747,2928747,2928734,7717,6,KNApSAcK World,,,,97
+cd4ea028-4361-5037-81c9-18a4cb8e31c9,170,datura stramonium l|l,Datura stramonium L.,L.,Solanaceae,ACCEPTED,SPECIES,2928751,2928751,2928751,2928734,7717,6,KNApSAcK World,,,,98
+f56a2064-58d6-5b06-868b-affcac1bb7e6,171,datura stramonium var tatula l torr|l,Datura stramonium var. tatula (L.) Torr.,L.,Solanaceae,SYNONYM,SPECIES,2928754,2928753,2928751,2928734,7717,6,KNApSAcK World,,,,98
+62a3a4b0-b67b-5462-bcd9-e2800eba5e58,172,daucus carota l|l,Daucus carota L.,L.,Apiaceae,ACCEPTED,SPECIES,3034742,3034742,3034742,3034740,6720,6,KNApSAcK World,,,,97
+1b22506d-f103-57ae-89d0-aca374870c6c,173,derris elliptica wall benth|wall benth,Derris elliptica (Wall.) Benth.,(Wall.) Benth.,Fabaceae,ACCEPTED,SPECIES,5350305,5350305,5350305,2947465,5386,6,KNApSAcK World,,,,97
+04b0f805-cef9-55ba-a383-23c86e39714b,176,derris trifoliata lour|lour,Derris trifoliata Lour.,Lour.,Fabaceae,ACCEPTED,SPECIES,5350336,5350336,5350336,2947465,5386,6,KNApSAcK World,,,,99
+613a71aa-db03-520a-ac22-205eb41cfbab,177,desmodium gangeticum puri 1951|puri 1951,"Desmodium gangeticum Puri, 1951","Puri, 1951",Fabaceae,ACCEPTED,SPECIES,11440699,11440699,11440699,2967050,5386,6,KNApSAcK World,,,,97
+ed495392-99a1-5c6c-82be-67655d0ae438,181,digitalis purpurea l|l,Digitalis purpurea L.,L.,Plantaginaceae,ACCEPTED,SPECIES,5414995,5414995,5414995,3172032,2420,6,KNApSAcK World,,,,99
+94a2cc38-34f0-519f-99c1-72dcbdac8516,182,dioscorea hispida dennst|dennst,Dioscorea hispida Dennst.,Dennst.,Dioscoreaceae,ACCEPTED,SPECIES,2755784,2755784,2755784,2754367,7694,6,KNApSAcK World,,,,99
+adc8a98f-b7df-5db5-bc09-ec90995cfecc,183,drymaria cordata l willd ex schult|l willd ex schult,Drymaria cordata (L.) Willd. ex Schult.,(L.) Willd. ex Schult.,Caryophyllaceae,ACCEPTED,SPECIES,5384509,5384509,5384509,3085329,2518,6,KNApSAcK World,,,,97
+ab5f8553-a78f-5fcc-ba8f-2a4362285641,184,dryobalanops aromatica c f gaertn|c f gaertn,Dryobalanops aromatica C.F.Gaertn.,C.F.Gaertn.,Dipterocarpaceae,ACCEPTED,SPECIES,3189690,3189690,3189690,3189689,6645,6,KNApSAcK World,,,,99
+25279352-5885-5bf6-b895-778a2c17ee42,185,duranta erecta l|l,Duranta erecta L.,L.,Verbenaceae,ACCEPTED,SPECIES,2925655,2925655,2925655,2925654,6689,6,KNApSAcK World,,,,99
+f963f765-0beb-5f24-9832-ae93f389342d,187,durio zibethinus murray|murray,Durio zibethinus Murray,Murray,Malvaceae,ACCEPTED,SPECIES,3152230,3152230,3152230,3152229,6685,6,KNApSAcK World,,,,97
+51748524-728d-5363-aa54-bb014ce67113,188,dysoxylum acutangulum miq|miq,Dysoxylum acutangulum Miq.,Miq.,Meliaceae,ACCEPTED,SPECIES,7271367,7271367,7271367,3190481,2397,6,KNApSAcK World,,,,99
+ed5558b1-990e-54fd-a114-056ad8ff474c,189,echinacea purpurea l moench|l moench,Echinacea purpurea (L.) Moench,(L.) Moench,Asteraceae,ACCEPTED,SPECIES,3150935,3150935,3150935,3150914,3065,6,KNApSAcK World,,,,99
+800ebbf9-1e7a-558e-a97a-8dbac8953333,191,eclipta alba l hassk|l hassk,Eclipta alba (L.) Hassk.,(L.) Hassk.,Asteraceae,ACCEPTED,SPECIES,5384955,5384955,5384955,3086569,3065,6,KNApSAcK World,,,,97
+a6360876-e9ce-5688-9b1e-9066d5a22495,192,eclipta prostrata l l|l l,Eclipta prostrata (L.) L.,(L.) L.,Asteraceae,ACCEPTED,SPECIES,5384950,5384950,5384950,3086569,3065,6,KNApSAcK World,,,,97
+f11691f4-8c78-5a94-82c9-0c074da34ad1,195,elaeocarpus grandiflorus sm|sm,Elaeocarpus grandiflorus Sm.,Sm.,Elaeocarpaceae,ACCEPTED,SPECIES,8368501,8368501,8368501,3152094,2435,6,KNApSAcK World,,,,97
+649e4eb4-8873-5e57-920b-56ef381dcb03,196,elateriospermum tapos blume|blume,Elateriospermum tapos Blume,Blume,Euphorbiaceae,ACCEPTED,SPECIES,3071462,3071462,3071462,3071461,4691,6,KNApSAcK World,,,,99
+e9883d4a-a9fc-57b7-90ac-95a1c74da200,197,elephantopus scaber l|l,Elephantopus scaber L.,L.,Asteraceae,ACCEPTED,SPECIES,5395925,5395925,5395925,3119618,3065,6,KNApSAcK World,,,,99
+7eea4ca9-5a35-5df9-a672-a7d5627ae73f,198,elettaria cardamomum l maton|l maton,Elettaria cardamomum (L.) Maton,(L.) Maton,Zingiberaceae,ACCEPTED,SPECIES,2759871,2759871,2759871,2759853,4687,6,KNApSAcK World,,,,99
+ec522fd9-5d00-5c12-a723-805a113a2fb2,199,eleutherine bulbosa mill urb|aubl merr ex k heyne,Eleutherine bulbosa (Mill.) Urb.,(Aubl.) Merr. ex K.Heyne,Iridaceae,SYNONYM,SPECIES,2749558,2749556,2749556,2749552,7698,6,KNApSAcK World,,,,97
+7cc73d1f-afd8-5ab2-afb7-99e6727398a8,200,embelia ribes burm fil|burm fil,Embelia ribes Burm.fil.,Burm.fil.,Primulaceae,ACCEPTED,SPECIES,7330952,7330952,7330952,2984886,6674,6,KNApSAcK World,,,,99
+1444eb1f-f74d-59a1-bbe6-7d28ba687874,201,emilia sonchifolia l dc ex wight|l dc ex wight,Emilia sonchifolia (L.) DC. ex Wight,(L.) DC. ex Wight,Asteraceae,ACCEPTED,SPECIES,7376217,7376217,7376217,3137995,3065,6,KNApSAcK World,,,,97
+82885a87-1563-5511-9c94-a0c9a973cd74,202,entada phaseoloides l merr|l benth,Entada phaseoloides (L.) Merr.,(L.) Benth.,Fabaceae,SYNONYM,SPECIES,8436855,2976244,2976244,2976182,5386,6,KNApSAcK World,,,,98
+b3b56b0a-50f7-57f9-8934-b793d82da0d0,203,equisetum debile roxb ex wall 1829|roxb ex wall 1829,"Equisetum debile Roxb. ex Wall., 1829","Roxb. ex Wall., 1829",Equisetaceae,ACCEPTED,SPECIES,10769463,10769463,10769463,2687913,3105,6,KNApSAcK World,,,,97
+4f5409c2-6036-5340-918c-f3614f9aab40,204,erigeron sumatrensis retz|retz,Erigeron sumatrensis Retz.,Retz.,Asteraceae,ACCEPTED,SPECIES,3146683,3146683,3146683,3146588,3065,6,KNApSAcK World,,,,99
+c19af962-d949-5565-9517-d109ac40589e,206,eryngium foetidum l|l,Eryngium foetidum L.,L.,Apiaceae,ACCEPTED,SPECIES,3034425,3034425,3034425,3034387,6720,6,KNApSAcK World,,,,97
+9d92bc6d-6a98-5d1c-8a84-8a96ccf967f5,208,erythrina subumbrans hassk merr|hassk merr,Erythrina subumbrans (Hassk.) Merr.,(Hassk.) Merr.,Fabaceae,ACCEPTED,SPECIES,5349636,5349636,5349636,2945830,5386,6,KNApSAcK World,,,,99
+c9518619-a3c6-5bfe-ac9a-f75d435e78f3,209,erythrina variegata l|l,Erythrina variegata L.,L.,Fabaceae,ACCEPTED,SPECIES,5349581,5349581,5349581,2945830,5386,6,KNApSAcK World,,,,99
+49366bb1-f16e-5ac6-bd71-0fbc60423e26,210,eucalyptus globulus labill|labill,Eucalyptus globulus Labill.,Labill.,Myrtaceae,ACCEPTED,SPECIES,3176787,3176787,3176787,7493935,5014,6,KNApSAcK World,,,,99
+4345453f-053e-53dd-a18f-9eb8277224b0,211,euchresta horsfieldii lesch benn|lesch benn,Euchresta horsfieldii (Lesch.) Benn.,(Lesch.) Benn.,Fabaceae,ACCEPTED,SPECIES,2951871,2951871,2951871,2951865,5386,6,KNApSAcK World,,,,99
+ad137303-a9de-5d27-a24f-50b632a0471e,212,eugenia aromatica kuntze 1891|kuntze 1891,"Eugenia aromatica Kuntze, 1891","Kuntze, 1891",Myrtaceae,ACCEPTED,SPECIES,8052532,8052532,8052532,3177662,5014,6,KNApSAcK World,,,,97
+382cf94b-0831-5e83-adf4-059d57e161ef,214,eupatorium riparium sch bip ex schnittsp|sch bip ex schnittsp,Eupatorium riparium Sch.Bip. ex Schnittsp.,Sch.Bip. ex Schnittsp.,Asteraceae,ACCEPTED,SPECIES,7694888,7694888,7694888,3142374,3065,6,KNApSAcK World,,,,97
+5f4035be-2920-54d5-b9f3-f48ca18a4b7d,216,euphorbia antiquorum l|l,Euphorbia antiquorum L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3069535,3069535,3069535,11397237,4691,6,KNApSAcK World,,,,98
+4823a5f2-724d-58e1-8555-07b62dfdceb7,217,euphorbia heterophylla l|l,Euphorbia heterophylla L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3064495,3064495,3064495,11397237,4691,6,KNApSAcK World,,,,97
+a3db7b35-3750-5698-b3df-15c64b6e23b5,218,euphorbia hirta l|l,Euphorbia hirta L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3068937,3068937,3068937,11397237,4691,6,KNApSAcK World,,,,99
+f09d6fe5-40dd-5fa3-938f-5d007ed36585,219,euphorbia milii des moul|des moul,Euphorbia milii Des Moul.,Des Moul.,Euphorbiaceae,ACCEPTED,SPECIES,3067157,3067157,3067157,11397237,4691,6,KNApSAcK World,,,,98
+8207f5fd-64e8-58b3-a008-76a05a9b8679,220,euphorbia neriifolia l|l,Euphorbia neriifolia L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3064865,3064865,3064865,11397237,4691,6,KNApSAcK World,,,,97
+eac5483f-72a4-5808-92fd-dfac4044080d,221,euphorbia prostrata aiton|aiton,Euphorbia prostrata Aiton,Aiton,Euphorbiaceae,ACCEPTED,SPECIES,3067891,3067891,3067891,11397237,4691,6,KNApSAcK World,,,,97
+f8a23446-11cc-568a-974e-02101765deaf,222,euphorbia pulcherrima willd ex klotzsch|willd ex klotzsch,Euphorbia pulcherrima Willd. ex Klotzsch,Willd. ex Klotzsch,Euphorbiaceae,ACCEPTED,SPECIES,3066465,3066465,3066465,11397237,4691,6,KNApSAcK World,,,,97
+6108a760-4c6d-5e8b-9d31-766d8044b05f,223,euphorbia tirucalli l|l,Euphorbia tirucalli L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3069353,3069353,3069353,11397237,4691,6,KNApSAcK World,,,,98
+73719084-73cd-58e1-9c49-5256575aa404,377,euphorbia tithymaloides l|l poit,Euphorbia tithymaloides L.,(L.) Poit.,Euphorbiaceae,SYNONYM,SPECIES,3069185,3069168,3069168,11397237,4691,6,KNApSAcK World,,,,98
+44a0b18d-e8de-55e9-a0eb-7b066f89e92b,224,eurycoma longifolia jack|jack,Eurycoma longifolia Jack,Jack,Simaroubaceae,ACCEPTED,SPECIES,3709190,3709190,3709190,7329629,2395,6,KNApSAcK World,,,,99
+e54b18e0-c6af-5628-9293-88bf81f131aa,225,excoecaria agallocha l|l,Excoecaria agallocha L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3071702,3071702,3071702,3054277,4691,6,KNApSAcK World,,,,99
+76e984c7-409e-5ac4-991d-e63276e54e47,226,excoecaria cochinchinensis lour|lour,Excoecaria cochinchinensis Lour.,Lour.,Euphorbiaceae,ACCEPTED,SPECIES,3071716,3071716,3071716,3054277,4691,6,KNApSAcK World,,,,98
+882d863e-5f34-50cc-bb4a-d088d8812c7b,419,fabisporus sanguineus l zmitr|l murrill,Fabisporus sanguineus (L.) Zmitr.,(L.) Murrill,Polyporaceae,SYNONYM,SPECIES,5246472,2546050,2546050,2545921,3286,5,KNApSAcK World,,,,98
+76b6ad10-c9ce-5102-8715-42de19c2b103,228,ficus carica l|l,Ficus carica L.,L.,Moraceae,ACCEPTED,SPECIES,5361909,5361909,5361909,2984588,6640,6,KNApSAcK World,,,,99
+ae37549f-4335-52c2-840e-0de802a96e66,229,ficus microcarpa l fil|l fil,Ficus microcarpa L.fil.,L.fil.,Moraceae,ACCEPTED,SPECIES,7467639,7467639,7467639,2984588,6640,6,KNApSAcK World,,,,97
+df7708c1-ef0d-551b-91b6-67f4286bb8fd,230,ficus pumila l|l,Ficus pumila L.,L.,Moraceae,ACCEPTED,SPECIES,5361930,5361930,5361930,2984588,6640,6,KNApSAcK World,,,,97
+fcb23288-56d3-5453-99d4-42621d9b54f8,231,ficus septica burm fil|burm fil,Ficus septica Burm.fil.,Burm.fil.,Moraceae,ACCEPTED,SPECIES,7852448,7852448,7852448,2984588,6640,6,KNApSAcK World,,,,97
+5354c751-13e0-5904-959b-948b75fa9516,233,foeniculum vulgare mill|mill,Foeniculum vulgare Mill.,Mill.,Apiaceae,ACCEPTED,SPECIES,3034922,3034922,3034922,10704390,6720,6,KNApSAcK World,,,,98
+b8f4247f-a715-5ccc-acd9-e0eab725b382,234,ganoderma lucidum curtis p karst|curtis p karst,Ganoderma lucidum (Curtis) P.Karst.,(Curtis) P.Karst.,Polyporaceae,ACCEPTED,SPECIES,2549730,2549730,2549730,2519220,3286,5,KNApSAcK World,,,,99
+cad72100-0838-5766-840b-a0849a9815ce,235,garcinia dulcis roxb kurz|roxb kurz,Garcinia dulcis (Roxb.) Kurz,(Roxb.) Kurz,Clusiaceae,ACCEPTED,SPECIES,3189565,3189565,3189565,3189556,6646,6,KNApSAcK World,,,,97
+bf9dbb3b-983b-5c4d-bb6d-03f5c48e51bc,236,garcinia mangostana l|l,Garcinia mangostana L.,L.,Clusiaceae,ACCEPTED,SPECIES,3189571,3189571,3189571,3189556,6646,6,KNApSAcK World,,,,99
+db977407-218e-55c0-9183-494f50bd1f4a,237,gardenia jasminoides j ellis|j ellis,Gardenia jasminoides J.Ellis,J.Ellis,Rubiaceae,ACCEPTED,SPECIES,5335125,5335125,5335125,2894320,8798,6,KNApSAcK World,,,,98
+27e88b3b-68a0-5ea0-a15a-db4c58b05880,238,gaultheria procumbens l|l,Gaultheria procumbens L.,L.,Ericaceae,ACCEPTED,SPECIES,2882753,2882753,2882753,2882751,2505,6,KNApSAcK World,,,,99
+29568998-77eb-5870-8a6f-4c22c25819b8,239,ginkgo biloba l|l,Ginkgo biloba L.,L.,Ginkgoaceae,ACCEPTED,SPECIES,2687885,2687885,2687885,2687884,3070,6,KNApSAcK World,,,,99
+0a2d9ed4-f049-56e7-b20c-3245a3658505,240,glochidion rubrum blume|blume,Glochidion rubrum Blume,Blume,Phyllanthaceae,ACCEPTED,SPECIES,3080882,3080882,3080882,3080069,8807,6,KNApSAcK World,,,,99
+74f73dad-6cef-59bd-92f6-b8602839c5b6,241,gloriosa superba l|l,Gloriosa superba L.,L.,Colchicaceae,ACCEPTED,SPECIES,2740024,2740024,2740024,2740022,7697,6,KNApSAcK World,,,,99
+b07e750e-7d38-5523-ad5d-28dabca37a2e,242,glycine max l merr|l merr,Glycine max (L.) Merr.,(L.) Merr.,Fabaceae,ACCEPTED,SPECIES,5359660,5359660,5359660,7968287,5386,6,KNApSAcK World,,,,99
+b90e04f9-cc68-51f0-9d64-01609e9175a5,243,glycine max subsp soja siebold zucc h ohashi|siebold zucc,Glycine max subsp. soja (Siebold & Zucc.) H.Ohashi,Siebold & Zucc.,Fabaceae,SYNONYM,SPECIES,5359668,5359662,5359660,7968287,5386,6,KNApSAcK World,,,,97
+6ff823f1-8a16-5963-ac60-1303a50660ce,244,glycyrrhiza glabra l|l,Glycyrrhiza glabra L.,L.,Fabaceae,ACCEPTED,SPECIES,2965732,2965732,2965732,2965731,5386,6,KNApSAcK World,,,,98
+84a4a066-2c17-5b14-9080-704c1fb8c6dc,245,gnetum gnemon l|l,Gnetum gnemon L.,L.,Gnetaceae,ACCEPTED,SPECIES,2653133,2653133,2653133,2653091,6755,6,KNApSAcK World,,,,99
+e1a36bd1-2b93-5342-9636-942f9461fc8c,246,gomphrena globosa l|l,Gomphrena globosa L.,L.,Amaranthaceae,ACCEPTED,SPECIES,3084908,3084908,3084908,3084899,3064,6,KNApSAcK World,,,,99
+e1e6d10a-afb9-5655-82bb-de1e7b4c658d,247,goniothalamus macrophyllus blume hook f thomson|blume hook f thomson,Goniothalamus macrophyllus (Blume) Hook.f. & Thomson,(Blume) Hook.f. & Thomson,Annonaceae,ACCEPTED,SPECIES,3154616,3154616,3154616,3154482,9291,6,KNApSAcK World,,,,97
+1c7723bb-c312-5646-8560-69cd140e52ff,248,gossypium herbaceum l|l,Gossypium herbaceum L.,L.,Malvaceae,ACCEPTED,SPECIES,3152658,3152658,3152658,3152652,6685,6,KNApSAcK World,,,,99
+29603ddc-1e3c-57dc-8fa6-e93489040f60,179,grona styracifolia osbeck h ohashi k ohashi|osbeck merr,Grona styracifolia (Osbeck) H.Ohashi & K.Ohashi,(Osbeck) Merr.,Fabaceae,SYNONYM,SPECIES,2967806,10722283,10722283,9615544,5386,6,KNApSAcK World,,,,98
+bdbeff56-06f0-5b6b-95ac-c219da78320d,249,guazuma ulmifolia lam|lam,Guazuma ulmifolia Lam.,Lam.,Malvaceae,ACCEPTED,SPECIES,3152195,3152195,3152195,3152194,6685,6,KNApSAcK World,,,,98
+b8bb9539-3c00-5227-8189-f3b977f4c0e6,250,gynandropsis gynandra l briq|l briq,Gynandropsis gynandra (L.) Briq.,(L.) Briq.,Cleomaceae,ACCEPTED,SPECIES,3054227,3054227,3054227,6370688,3845332,6,KNApSAcK World,,,,97
+abb7af21-2d51-5f94-a231-960e63676d47,251,gynura japonica thunb juel|lour merr,Gynura japonica (Thunb.) Juel,(Lour.) Merr.,Asteraceae,SYNONYM,SPECIES,3139809,3139807,3139807,3139806,3065,6,KNApSAcK World,,,,98
+30f37eb1-1d71-5bc5-ba10-59f243f99fc3,252,hedychium coronarium j koenig|j koenig,Hedychium coronarium J.Koenig,J.Koenig,Zingiberaceae,ACCEPTED,SPECIES,7883492,7883492,7883492,2758595,4687,6,KNApSAcK World,,,,99
+9254e7d5-dd31-596e-8e2d-08774e626a6b,254,helianthus annuus l|l,Helianthus annuus L.,L.,Asteraceae,ACCEPTED,SPECIES,9206251,9206251,9206251,3119134,3065,6,KNApSAcK World,,,,99
+7dbe8bd0-68af-5b3f-a2f8-615f5bd35722,255,helicteres isora l|l,Helicteres isora L.,L.,Malvaceae,ACCEPTED,SPECIES,5546922,5546922,5546922,3152154,6685,6,KNApSAcK World,,,,97
+a08dd058-d102-508a-8514-5a88cb437835,256,heliotropium indicum l|l,Heliotropium indicum L.,L.,Heliotropiaceae,ACCEPTED,SPECIES,2925788,2925788,2925788,2925766,4930387,6,KNApSAcK World,,,,99
+3ef0cb53-81ee-5a62-ab9c-e6e8095a3a1c,147,hellenia speciosa j koenig s r dutta|j koenig sm,Hellenia speciosa (J.Koenig) S.R.Dutta,(J.Koenig) Sm.,Costaceae,SYNONYM,SPECIES,2756724,7584507,7584507,8189889,4492,6,KNApSAcK World,,,,98
+d6e745c4-510a-5933-9317-1b9af10b23b1,257,hevea brasiliensis willd ex a juss mull arg|willd ex a juss mull arg,Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg.,(Willd. ex A.Juss.) Müll.Arg.,Euphorbiaceae,ACCEPTED,SPECIES,3071171,3071171,3071171,3071157,4691,6,KNApSAcK World,,,,99
+9b113377-85f5-5177-bcfa-39dfeba8ccba,259,hibiscus mutabilis l|l,Hibiscus mutabilis L.,L.,Malvaceae,ACCEPTED,SPECIES,3152555,3152555,3152555,3152542,6685,6,KNApSAcK World,,,,99
+6d533268-9c9c-5c8b-9574-3fd46e82d892,260,hibiscus rosa sinensis l|l,Hibiscus rosa-sinensis L.,L.,Malvaceae,ACCEPTED,SPECIES,3152559,3152559,3152559,3152542,6685,6,KNApSAcK World,,,,99
+36880b76-12b6-54a8-b2c7-237498fae656,261,hibiscus sabdariffa l|l,Hibiscus sabdariffa L.,L.,Malvaceae,ACCEPTED,SPECIES,3152582,3152582,3152582,3152542,6685,6,KNApSAcK World,,,,97
+202c9e6e-c3ee-5d6d-a097-9fc3d76d9472,281,hippobroma longiflora l g don|l c presl,Hippobroma longiflora (L.) G.Don,(L.) C.Presl,Campanulaceae,SYNONYM,SPECIES,5414194,3168943,3168943,3168942,8801,6,KNApSAcK World,,,,97
+43ff4d01-c2d5-58e6-a7f3-83b68a982ab9,263,homalomena occulta lour schott|lour schott,Homalomena occulta (Lour.) Schott,(Lour.) Schott,Araceae,ACCEPTED,SPECIES,2868708,2868708,2868708,2868531,6979,6,KNApSAcK World,,,,99
+ffa6aefe-07e5-5198-b578-aadbc3a5bce7,264,hura crepitans l|l,Hura crepitans L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,5380015,5380015,5380015,3071143,4691,6,KNApSAcK World,,,,99
+86710eee-57ab-5798-8dc6-1c8328615b79,265,hydrangea macrophylla thunb ser|thunb ser,Hydrangea macrophylla (Thunb.) Ser.,(Thunb.) Ser.,Hydrangeaceae,ACCEPTED,SPECIES,2985994,2985994,2985994,2985983,6667,6,KNApSAcK World,,,,99
+ffb44a57-b5b7-5a2f-8871-d297e129ec0c,266,hydrocotyle sibthorpioides lam|lam,Hydrocotyle sibthorpioides Lam.,Lam.,Araliaceae,ACCEPTED,SPECIES,8418338,8418338,8418338,3034601,8800,6,KNApSAcK World,,,,97
+68a4dadf-36d4-5d7f-8140-7fa0940eca98,268,hyptis brevipes poit|poit,Hyptis brevipes Poit.,Poit.,Lamiaceae,ACCEPTED,SPECIES,7306536,7306536,7306536,2926807,2497,6,KNApSAcK World,,,,97
+a419a21f-7939-5a0d-8ded-8db4ae34820d,271,impatiens balsamina l|l,Impatiens balsamina L.,L.,Balsaminaceae,ACCEPTED,SPECIES,2891773,2891773,2891773,2891766,6699,6,KNApSAcK World,,,,99
+a8ba0e16-a029-550c-a0b8-69ec03d5bc46,272,imperata cylindrica l raeusch|l raeusch,Imperata cylindrica (L.) Raeusch.,(L.) Raeusch.,Poaceae,ACCEPTED,SPECIES,8424006,8424006,8424006,7627509,3073,6,KNApSAcK World,,,,97
+8259a1cd-40bc-52d1-b4b8-4fd64acec8ff,273,indigofera tinctoria l|l,Indigofera tinctoria L.,L.,Fabaceae,ACCEPTED,SPECIES,2972043,2972043,2972043,2971355,5386,6,KNApSAcK World,,,,97
+50ecd9e7-6dd0-5b0c-801d-60b16c44956c,274,intsia bijuga colebr kuntze|colebr kuntze,Intsia bijuga (Colebr.) Kuntze,(Colebr.) Kuntze,Fabaceae,ACCEPTED,SPECIES,2963211,2963211,2963211,2963210,5386,6,KNApSAcK World,,,,98
+89428959-b4b0-5ef0-abd7-0a1fe8743e9f,275,ipomoea aquatica forssk|forssk,Ipomoea aquatica Forssk.,Forssk.,Convolvulaceae,ACCEPTED,SPECIES,2928525,2928525,2928525,2928509,2389,6,KNApSAcK World,,,,99
+dcff579c-8253-5116-a235-16d79a368995,276,ipomoea batatas l lam|l lam,Ipomoea batatas (L.) Lam.,(L.) Lam.,Convolvulaceae,ACCEPTED,SPECIES,2928551,2928551,2928551,2928509,2389,6,KNApSAcK World,,,,97
+afb07981-3f5e-53b3-a0a5-9095bcd22f57,277,ipomoea cairica l sweet|l sweet,Ipomoea cairica (L.) Sweet,(L.) Sweet,Convolvulaceae,ACCEPTED,SPECIES,2928531,2928531,2928531,2928509,2389,6,KNApSAcK World,,,,99
+c960abae-9486-5957-aed1-c1bc2e593715,278,ipomoea pes caprae l r br|l r br,Ipomoea pes-caprae (L.) R.Br.,(L.) R.Br.,Convolvulaceae,ACCEPTED,SPECIES,7999386,7999386,7999386,2928509,2389,6,KNApSAcK World,,,,97
+0f99463a-5195-5c90-9963-3945bb4d8e27,421,ipomoea quamoclit l|bojer,Ipomoea quamoclit L.,Bojer,Convolvulaceae,SYNONYM,SPECIES,5549024,2928562,2928562,2928509,2389,6,KNApSAcK World,,,,98
+808b1cb1-b474-5f09-b36e-afc19fde692f,69,iris domestica l goldblatt mabb|l dc,Iris domestica (L.) Goldblatt & Mabb.,(L.) DC.,Iridaceae,SYNONYM,SPECIES,2748796,5298546,5298546,2748017,7698,6,KNApSAcK World,,,,97
+ee4babab-9b5e-5d38-a9e5-17048d9a20cd,282,ixora chinensis lam|lam,Ixora chinensis Lam.,Lam.,Rubiaceae,ACCEPTED,SPECIES,2905600,2905600,2905600,2905224,8798,6,KNApSAcK World,,,,99
+71650966-c5c2-591e-b703-6247f84391a2,283,jasminum officinale l|l,Jasminum officinale L.,L.,Oleaceae,ACCEPTED,SPECIES,3172261,3172261,3172261,3172260,6652,6,KNApSAcK World,,,,99
+869ee80f-3632-5ac2-9c86-b63e3b105821,284,jasminum sambac l aiton|l aiton,Jasminum sambac (L.) Aiton,(L.) Aiton,Oleaceae,ACCEPTED,SPECIES,7587215,7587215,7587215,3172260,6652,6,KNApSAcK World,,,,98
+eb9f2f9f-8625-54f6-9751-63e078b61963,285,jatropha curcas l|l,Jatropha curcas L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3072953,3072953,3072953,3072692,4691,6,KNApSAcK World,,,,98
+42d3ad68-7bb9-53e9-bd96-be2cae5e11e5,287,jatropha gossypiifolia l|l,Jatropha gossypiifolia L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3072900,3072900,3072900,3072692,4691,6,KNApSAcK World,,,,99
+1097b974-4fb6-528b-a96d-e1abf6a5a140,288,jatropha multifida l|l,Jatropha multifida L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,3072985,3072985,3072985,3072692,4691,6,KNApSAcK World,,,,99
+7c623327-c1e0-5811-8e38-50bbb94279d1,289,jatropha podagrica hook|hook,Jatropha podagrica Hook.,Hook.,Euphorbiaceae,ACCEPTED,SPECIES,3073016,3073016,3073016,3072692,4691,6,KNApSAcK World,,,,99
+ca6543df-fa47-5fb3-bf7d-524741c37f25,291,kaempferia galanga l|l,Kaempferia galanga L.,L.,Zingiberaceae,ACCEPTED,SPECIES,5301451,5301451,5301451,2756998,4687,6,KNApSAcK World,,,,99
+5b6fabcd-bb54-56aa-98b6-c2c6cc6c79b8,292,kaempferia rotunda l|l,Kaempferia rotunda L.,L.,Zingiberaceae,ACCEPTED,SPECIES,5301445,5301445,5301445,2756998,4687,6,KNApSAcK World,,,,97
+8787f75c-44fa-5135-a445-3f30f92c7bed,293,kalanchoe daigremontiana raym hamet h perrier|raym hamet h perrier,Kalanchoe daigremontiana Raym.-Hamet & H.Perrier,Raym.-Hamet & H.Perrier,Crassulaceae,ACCEPTED,SPECIES,2985936,2985936,2985936,2985928,2406,6,KNApSAcK World,,,,99
+400cf356-c4d0-5493-b30a-6d0d0cbe725b,294,kalanchoe pinnata lam pers|lam pers,Kalanchoe pinnata (Lam.) Pers.,(Lam.) Pers.,Crassulaceae,ACCEPTED,SPECIES,2985930,2985930,2985930,2985928,2406,6,KNApSAcK World,,,,99
+bd07b80c-bb48-57ef-9670-820a9e518da4,296,lactuca indica l|l,Lactuca indica L.,L.,Asteraceae,ACCEPTED,SPECIES,3140510,3140510,3140510,3140231,3065,6,KNApSAcK World,,,,99
+810f44e8-bf25-5eb7-8f5a-dd1c3872ebb4,297,lagerstroemia indica l|l,Lagerstroemia indica L.,L.,Lythraceae,ACCEPTED,SPECIES,3188725,3188725,3188725,3188723,6684,6,KNApSAcK World,,,,99
+2d685822-9302-5d5a-a316-da5461ed61e9,298,lagerstroemia speciosa l pers|l pers,Lagerstroemia speciosa (L.) Pers.,(L.) Pers.,Lythraceae,ACCEPTED,SPECIES,3188724,3188724,3188724,3188723,6684,6,KNApSAcK World,,,,97
+d4db2e2d-bd9c-5e08-b757-2a0f3ad5cd10,299,lansium domesticum correa|correa,Lansium domesticum Corrêa,Corrêa,Meliaceae,ACCEPTED,SPECIES,3190478,3190478,3190478,3190477,2397,6,KNApSAcK World,,,,97
+deb237ef-8c96-5cf7-bdef-7296261057b1,300,lantana camara l|l,Lantana camara L.,L.,Verbenaceae,ACCEPTED,SPECIES,2925303,2925303,2925303,2925302,6689,6,KNApSAcK World,,,,99
+edc84aab-a201-5631-8de4-a4d73d661b8a,301,lantana trifolia l|l,Lantana trifolia L.,L.,Verbenaceae,ACCEPTED,SPECIES,2925321,2925321,2925321,2925302,6689,6,KNApSAcK World,,,,98
+c30925c4-7bd2-519b-8cd2-90a3a4048cfb,303,lawsonia inermis l|l,Lawsonia inermis L.,L.,Lythraceae,ACCEPTED,SPECIES,5420912,5420912,5420912,3188701,6684,6,KNApSAcK World,,,,99
+8e49fff5-9477-5a1c-8997-f21f73d6cea1,304,leonurus japonicus houtt|sweet,Leonurus japonicus Houtt.,Sweet,Lamiaceae,SYNONYM,SPECIES,5607368,6410563,6410563,7492548,2497,6,KNApSAcK World,,,,98
+a5547086-40fd-5b91-93b7-bfff24e9abd5,305,leonurus sibiricus l|l,Leonurus sibiricus L.,L.,Lamiaceae,ACCEPTED,SPECIES,5341392,5341392,5341392,7492548,2497,6,KNApSAcK World,,,,97
+bd1cdf58-9cf5-5b18-99e7-3ba4832a4869,306,lepidium sativum l|l,Lepidium sativum L.,L.,Brassicaceae,ACCEPTED,SPECIES,5376565,5376565,5376565,3051713,3112,6,KNApSAcK World,,,,98
+31682641-897d-5fda-8dea-4197cbbaf51f,307,leptospermum polygalifolium subsp polygalifolium|j e sm,Leptospermum polygalifolium subsp. polygalifolium,J.E.Sm.,Myrtaceae,SYNONYM,SPECIES,3181797,7223950,3181788,3181696,5014,6,KNApSAcK World,,,,98
+915e5043-4807-5173-ab1c-51290439524c,309,leucaena leucocephala lam de wit|lam de wit,Leucaena leucocephala (Lam.) de Wit,(Lam.) de Wit,Fabaceae,ACCEPTED,SPECIES,2970418,2970418,2970418,2970337,5386,6,KNApSAcK World,,,,97
+532d0928-6d42-5dfc-ab56-d62d2c7c3386,310,litsea cubeba lour pers|lour pers,Litsea cubeba (Lour.) Pers.,(Lour.) Pers.,Lauraceae,ACCEPTED,SPECIES,3033977,3033977,3033977,3033976,6688,6,KNApSAcK World,,,,98
+fb1988dd-e0c7-57cc-acf2-bf73c5176c24,311,litsea glutinosa lour c b rob|lour c b rob,Litsea glutinosa (Lour.) C.B.Rob.,(Lour.) C.B.Rob.,Lauraceae,ACCEPTED,SPECIES,7304140,7304140,7304140,3033976,6688,6,KNApSAcK World,,,,99
+7d411461-78dc-5a5d-8754-da69b31d7455,312,ludwigia octovalvis jacq p h raven|jacq p h raven,Ludwigia octovalvis (Jacq.) P.H.Raven,(Jacq.) P.H.Raven,Onagraceae,ACCEPTED,SPECIES,5420987,5420987,5420987,3189286,2430,6,KNApSAcK World,,,,99
+8edbd1ab-7c8e-57ed-a098-ea83b79147a5,314,luvunga sarmentosa blume kurz|blume kurz,Luvunga sarmentosa (Blume) Kurz,(Blume) Kurz,Rutaceae,ACCEPTED,SPECIES,3834748,3834748,3834748,8176821,2396,6,KNApSAcK World,,,,99
+46321129-1b4c-5ef9-af18-9f741e9188c2,315,madhuca longifolia var latifolia roxb a chev|j f gmel,Madhuca longifolia var. latifolia (Roxb.) A.Chev.,J.F.Gmel.,Sapotaceae,SYNONYM,SPECIES,2883353,2883352,2883346,2883218,8802,6,KNApSAcK World,,,,98
+750c6ec2-2c46-5145-9824-7da2f9b84d0b,330,magnolia alba dc figlar|dc,Magnolia × alba (DC.) Figlar,DC.,Magnoliaceae,SYNONYM,SPECIES,5635329,3987892,3987892,2888195,4690,6,KNApSAcK World,,,,98
+cd23de7f-5bb4-571a-8591-5974779543a6,331,magnolia champaca l baill ex pierre|l,Magnolia champaca (L.) Baill. ex Pierre,L.,Magnoliaceae,SYNONYM,SPECIES,5939079,3153099,3153099,2888195,4690,6,KNApSAcK World,,,,98
+e598c8a8-1d56-5866-bd85-0829a9729841,316,mallotus philippensis lam mull arg|lam mull arg,Mallotus philippensis (Lam.) Müll.Arg.,(Lam.) Müll.Arg.,Euphorbiaceae,ACCEPTED,SPECIES,5378605,5378605,5378605,3062330,4691,6,KNApSAcK World,,,,98
+802c77bf-f5ca-5d9a-9ad7-a12140734fc3,317,malus sylvestris mill|mill,Malus sylvestris Mill.,Mill.,Rosaceae,ACCEPTED,SPECIES,3001509,3001509,3001509,3001068,5015,6,KNApSAcK World,,,,97
+393f4107-db94-57cf-9afc-9b67e5a3d9c6,318,manihot esculenta crantz|crantz,Manihot esculenta Crantz,Crantz,Euphorbiaceae,ACCEPTED,SPECIES,3060998,3060998,3060998,3060685,4691,6,KNApSAcK World,,,,99
+0a55c209-d6d4-5c01-acc3-96d8419cc01f,320,manilkara zapota l p royen|l p royen,Manilkara zapota (L.) P.Royen,(L.) P.Royen,Sapotaceae,ACCEPTED,SPECIES,2885158,2885158,2885158,2885024,8802,6,KNApSAcK World,,,,99
+4c5ae273-ff35-5e7b-9d36-4aa14b6f2590,34,meistera aculeata roxb skornick m f newman|roxb,Meistera aculeata (Roxb.) Škorničk. & M.F.Newman,Roxb.,Zingiberaceae,SYNONYM,SPECIES,5301584,11037528,11037528,2758958,4687,6,KNApSAcK World,,,,98
+85d39d3b-e53b-5331-83e5-2be13c69618f,321,melaleuca leucadendra l l|l l,Melaleuca leucadendra (L.) L.,(L.) L.,Myrtaceae,ACCEPTED,SPECIES,5415976,5415976,5415976,3175449,5014,6,KNApSAcK World,,,,99
+f60df7b2-9908-5509-8e90-eecda462debb,323,melastoma malabathricum l|l,Melastoma malabathricum L.,L.,Melastomataceae,ACCEPTED,SPECIES,3188511,3188511,3188511,3188510,6683,6,KNApSAcK World,,,,99
+fdfb27d1-8f4c-5532-ac38-70d3c05ca8d2,324,melia azedarach l|l,Melia azedarach L.,L.,Meliaceae,ACCEPTED,SPECIES,5914287,5914287,5914287,3190496,2397,6,KNApSAcK World,,,,98
+ae23e6b5-4e85-5c59-88a7-dbf2a98e5fc2,325,melochia corchorifolia l|l,Melochia corchorifolia L.,L.,Malvaceae,ACCEPTED,SPECIES,3152125,3152125,3152125,3152114,6685,6,KNApSAcK World,,,,97
+3ed0b8f7-9c2b-503f-b8d1-4ce9f339d4cb,326,mentha arvensis l|l,Mentha arvensis L.,L.,Lamiaceae,ACCEPTED,SPECIES,2927192,2927192,2927192,2927173,2497,6,KNApSAcK World,,,,99
+a611e578-07b3-560e-bc40-2d76e6f5d205,327,mentha piperita l|l,Mentha × piperita L.,L.,Lamiaceae,ACCEPTED,SPECIES,8707933,8707933,8707933,2927173,2497,6,KNApSAcK World,,,,99
+3d6e0384-7300-5b1d-bb70-0fd5b7ebfd5e,269,mesosphaerum pectinatum l kuntze|l poit,Mesosphaerum pectinatum (L.) Kuntze,(L.) Poit.,Lamiaceae,SYNONYM,SPECIES,2926820,3889976,3889976,7307350,2497,6,KNApSAcK World,,,,98
+7466d73d-0695-5287-8ad5-a35ef864a87d,270,mesosphaerum suaveolens l kuntze|l poit,Mesosphaerum suaveolens (L.) Kuntze,(L.) Poit.,Lamiaceae,SYNONYM,SPECIES,2926823,3889017,3889017,7307350,2497,6,KNApSAcK World,,,,98
+ec18b007-b51f-5717-a7df-ab7856a49668,328,mesua ferrea l|l,Mesua ferrea L.,L.,Calophyllaceae,ACCEPTED,SPECIES,7330039,7330039,7330039,7329993,4907584,6,KNApSAcK World,,,,99
+7ba3f3eb-a740-51e3-b3b1-67e74503e5c2,329,metroxylon sagu rottb|rottb,Metroxylon sagu Rottb.,Rottb.,Arecaceae,ACCEPTED,SPECIES,2733781,2733781,2733781,2733775,7681,6,KNApSAcK World,,,,99
+9fba95c3-909f-5226-bb22-6110f9f13962,332,mikania micrantha kunth|kunth,Mikania micrantha Kunth,Kunth,Asteraceae,ACCEPTED,SPECIES,5398421,5398421,5398421,7722389,3065,6,KNApSAcK World,,,,97
+cadda83c-9bfc-536a-a30a-e9d895118465,333,millingtonia hortensis l fil|l fil,Millingtonia hortensis L.fil.,L.fil.,Bignoniaceae,ACCEPTED,SPECIES,7629955,7629955,7629955,8217499,6655,6,KNApSAcK World,,,,99
+87e9630d-8934-59db-8aaf-bd540d2acbaa,334,mimosa pudica l|l,Mimosa pudica L.,L.,Fabaceae,ACCEPTED,SPECIES,2969284,2969284,2969284,2969235,5386,6,KNApSAcK World,,,,98
+b301364e-861d-585d-9503-ea7cd09302ba,335,mimusops elengi l|l,Mimusops elengi L.,L.,Sapotaceae,ACCEPTED,SPECIES,2883768,2883768,2883768,2883690,8802,6,KNApSAcK World,,,,97
+42850d6c-add3-5b17-a91a-d5165d94c14f,336,mirabilis jalapa l|l,Mirabilis jalapa L.,L.,Nyctaginaceae,ACCEPTED,SPECIES,3086240,3086240,3086240,3086140,6718,6,KNApSAcK World,,,,99
+9fab948f-037e-5ee8-9751-8e45ffb6e08b,338,momordica charantia l|l,Momordica charantia L.,L.,Cucurbitaceae,ACCEPTED,SPECIES,2874581,2874581,2874581,2874578,6634,6,KNApSAcK World,,,,97
+51594fbf-c1ea-5a0e-bdb9-f253d0ee0029,339,momordica cochinchinensis lour spreng|lour spreng,Momordica cochinchinensis (Lour.) Spreng.,(Lour.) Spreng.,Cucurbitaceae,ACCEPTED,SPECIES,2874580,2874580,2874580,2874578,6634,6,KNApSAcK World,,,,98
+f04c13fb-f167-5dd1-ab15-85ef1af40fb5,340,morinda citrifolia l|l,Morinda citrifolia L.,L.,Rubiaceae,ACCEPTED,SPECIES,5339879,5339879,5339879,2915429,8798,6,KNApSAcK World,,,,99
+b5e0a7bf-d47a-51ea-b0be-24cf9da7f58e,342,moringa oleifera lam|gaertn,Moringa oleifera Lam.,Gaertn.,Moringaceae,SYNONYM,SPECIES,3054182,3054181,3054181,3054180,6753,6,KNApSAcK World,,,,98
+14316e91-9e67-5187-ba0f-e917586493e8,343,morus alba l|l,Morus alba L.,L.,Moraceae,ACCEPTED,SPECIES,5361889,5361889,5361889,2984545,6640,6,KNApSAcK World,,,,97
+a3c3ab5b-ccac-5c57-b7fd-9eb4308c23d2,345,murraya paniculata l jacq|l jacq,Murraya paniculata (L.) Jacq.,(L.) Jacq.,Rutaceae,ACCEPTED,SPECIES,8190743,8190743,8190743,3190383,2396,6,KNApSAcK World,,,,97
+d2811967-1846-57de-bb2c-77b87b9a7ea6,346,musa paradisiaca l|l,Musa × paradisiaca L.,L.,Musaceae,ACCEPTED,SPECIES,2762752,2762752,2762752,2760990,4686,6,KNApSAcK World,,,,99
+212863f5-1f09-5ffe-bd9f-8d3be6679db2,348,mussaenda pubescens dryand|dryand,Mussaenda pubescens Dryand.,Dryand.,Rubiaceae,ACCEPTED,SPECIES,2892558,2892558,2892558,2892394,8798,6,KNApSAcK World,,,,97
+b05984e3-b6fb-58a6-9097-bf3986a18652,349,myristica fragrans houtt|houtt,Myristica fragrans Houtt.,Houtt.,Myristicaceae,ACCEPTED,SPECIES,5406817,5406817,5406817,3152840,2439,6,KNApSAcK World,,,,98
+91987730-2645-5301-a0f7-72ce365afd06,350,nelumbo nucifera gaertn|gaertn,Nelumbo nucifera Gaertn.,Gaertn.,Nelumbonaceae,ACCEPTED,SPECIES,2882449,2882449,2882449,2882448,2424,6,KNApSAcK World,,,,99
+306476cc-5a61-5847-b5a5-ed2431bb50cd,351,nephelium lappaceum l|l,Nephelium lappaceum L.,L.,Sapindaceae,ACCEPTED,SPECIES,5421126,5421126,5421126,3189978,6657,6,KNApSAcK World,,,,97
+fe7667fa-0fb0-505e-be9e-8c0eb1bc3df0,352,nerium oleander l|l,Nerium oleander L.,L.,Apocynaceae,ACCEPTED,SPECIES,3169756,3169756,3169756,3169755,6701,6,KNApSAcK World,,,,99
+9c0a8406-21e9-5b32-92a5-bbade088e779,353,nicotiana tabacum l|l,Nicotiana tabacum L.,L.,Solanaceae,ACCEPTED,SPECIES,2928774,2928774,2928774,2928756,7717,6,KNApSAcK World,,,,99
+585cc078-3bf2-58bf-a740-a34f313ef836,354,nigella sativa l|l,Nigella sativa L.,L.,Ranunculaceae,ACCEPTED,SPECIES,5371700,5371700,5371700,3033657,2410,6,KNApSAcK World,,,,99
+c4099086-0121-5376-ae78-72a073508457,355,nyctanthes arbor tristis l|l,Nyctanthes arbor-tristis L.,L.,Oleaceae,ACCEPTED,SPECIES,3683008,3683008,3683008,7325974,6652,6,KNApSAcK World,,,,99
+7337e3bd-1a15-5223-b496-855a19758ab8,356,nymphaea lotus l|l,Nymphaea lotus L.,L.,Nymphaeaceae,ACCEPTED,SPECIES,2882429,2882429,2882429,2882411,2423,6,KNApSAcK World,,,,97
+aaaca2a9-6dc0-57fd-b8ca-b8c2785ee3cd,357,ocimum basilicum l|l,Ocimum basilicum L.,L.,Lamiaceae,ACCEPTED,SPECIES,2927096,2927096,2927096,2874693,2497,6,KNApSAcK World,,,,99
+a233f34f-2af8-5c6b-ba72-13b5da112e88,358,ocimum tenuiflorum l|l,Ocimum tenuiflorum L.,L.,Lamiaceae,SYNONYM,SPECIES,2927101,2927100,2927100,2874693,2497,6,KNApSAcK World,,,,98
+7b537c0e-1965-5799-8927-d2799fc359a7,359,oldenlandia corymbosa l|l,Oldenlandia corymbosa L.,L.,Rubiaceae,ACCEPTED,SPECIES,2911970,2911970,2911970,2915706,8798,6,KNApSAcK World,,,,97
+259cb85f-ded3-5038-820e-1821a7560fc7,360,ophiopogon japonicus thunb ker gawl|thunb ker gawl,Ophiopogon japonicus (Thunb.) Ker Gawl.,(Thunb.) Ker Gawl.,Asparagaceae,ACCEPTED,SPECIES,2774158,2774158,2774158,9560529,7683,6,KNApSAcK World,,,,98
+b1a0f905-8fb0-5edb-98d1-b261f4bc5349,361,oroxylum indicum l kurz|l kurz,Oroxylum indicum (L.) Kurz,(L.) Kurz,Bignoniaceae,ACCEPTED,SPECIES,7414934,7414934,7414934,7298257,6655,6,KNApSAcK World,,,,97
+94ff622e-dc87-5b31-aa87-09684ffb098d,362,orthosiphon aristatus blume miq|blume miq,Orthosiphon aristatus (Blume) Miq.,(Blume) Miq.,Lamiaceae,ACCEPTED,SPECIES,7308026,7308026,7308026,6410205,2497,6,KNApSAcK World,,,,99
+a98f66dd-4d9f-52de-804f-4d0d03165cbb,364,orthosiphon aristatus var aristatus|benth,Orthosiphon aristatus var. aristatus,Benth.,Lamiaceae,SYNONYM,SPECIES,3891871,7308027,7308026,6410205,2497,6,KNApSAcK World,,,,98
+d288594a-1861-5d49-b80c-421f7138fd18,365,oryza sativa l|l,Oryza sativa L.,L.,Poaceae,ACCEPTED,SPECIES,2703459,2703459,2703459,2703455,3073,6,KNApSAcK World,,,,97
+37cef2f0-5ada-5606-9f39-f57f2aa54fbe,12,ouret lanata l kuntze|l juss ex schult,Ouret lanata (L.) Kuntze,(L.) Juss. ex Schult.,Amaranthaceae,SYNONYM,SPECIES,3085014,10974033,10974033,7323304,3064,6,KNApSAcK World,,,,97
+6091c804-8103-53d8-b324-d508fefe630a,366,oxalis corniculata l|l,Oxalis corniculata L.,L.,Oxalidaceae,ACCEPTED,SPECIES,8427624,8427624,8427624,2891642,6697,6,KNApSAcK World,,,,99
+6d6c502e-bcdf-5e4d-8e56-0b5e3eca7418,367,pachyrhizus erosus l urb|l urb,Pachyrhizus erosus (L.) Urb.,(L.) Urb.,Fabaceae,SYNONYM,SPECIES,3963605,2974683,2974683,2974664,5386,6,KNApSAcK World,,,,98
+03bc6f15-c3af-5e13-b5d0-f18352889f11,368,paederia foetida l|l,Paederia foetida L.,L.,Rubiaceae,ACCEPTED,SPECIES,2909527,2909527,2909527,2909469,8798,6,KNApSAcK World,,,,98
+3708fde4-6141-50ed-bcd0-5661029af8a5,370,pandanus amaryllifolius roxb ex lindl|roxb ex lindl,Pandanus amaryllifolius Roxb. ex Lindl.,Roxb. ex Lindl.,Pandanaceae,ACCEPTED,SPECIES,9296315,9296315,9296315,8404076,3737,6,KNApSAcK World,,,,98
+9af2bd87-5587-55f2-9b35-7ee9bad0fe9c,371,pandanus conoideus lam|lam,Pandanus conoideus Lam.,Lam.,Pandanaceae,ACCEPTED,SPECIES,5328074,5328074,5328074,8404076,3737,6,KNApSAcK World,,,,97
+0786b8fa-3616-53a2-a3f9-6b180c094aa0,372,pangium edule reinw|reinw,Pangium edule Reinw.,Reinw.,Achariaceae,ACCEPTED,SPECIES,9796769,9796769,9796769,7110797,3231308,6,KNApSAcK World,,,,99
+19b76e14-c4e1-54d7-92a6-64b28ad34525,373,papaver somniferum l|l,Papaver somniferum L.,L.,Papaveraceae,ACCEPTED,SPECIES,2888439,2888439,2888439,2888431,2422,6,KNApSAcK World,,,,99
+b7e397f9-bc05-5ab1-b673-c9391727d637,375,parkia speciosa hassk|hassk,Parkia speciosa Hassk.,Hassk.,Fabaceae,ACCEPTED,SPECIES,5348811,5348811,5348811,2943936,5386,6,KNApSAcK World,,,,99
+ef6de2d2-5d1a-5ff8-9ae9-93b3ff6736fa,376,passiflora foetida l|l,Passiflora foetida L.,L.,Passifloraceae,ACCEPTED,SPECIES,2874211,2874211,2874211,2874172,2378,6,KNApSAcK World,,,,97
+610f010e-825c-5d46-b8a4-2830ca0bda3c,378,peltophorum pterocarpum dc backer ex k heyne|dc backer ex k heyne,Peltophorum pterocarpum (DC.) Backer ex K.Heyne,(DC.) Backer ex K.Heyne,Fabaceae,ACCEPTED,SPECIES,2952775,2952775,2952775,2952763,5386,6,KNApSAcK World,,,,97
+883a3d38-b272-5281-b45f-466d39893d75,379,peperomia pellucida l kunth|l kunth,Peperomia pellucida (L.) Kunth,(L.) Kunth,Piperaceae,ACCEPTED,SPECIES,3086412,3086412,3086412,3086367,6678,6,KNApSAcK World,,,,99
+d8b13fcc-4ed5-5859-aa3e-c375c187c8aa,380,persea americana mill|mill,Persea americana Mill.,Mill.,Lauraceae,ACCEPTED,SPECIES,3034046,3034046,3034046,3034041,6688,6,KNApSAcK World,,,,97
+3c17d82b-8993-5618-9ef2-42ad3fd9d7dc,382,phaleria macrocarpa scheff boerl|scheff boerl,Phaleria macrocarpa (Scheff.) Boerl.,(Scheff.) Boerl.,Thymelaeaceae,ACCEPTED,SPECIES,5524327,5524327,5524327,3233887,2428,6,KNApSAcK World,,,,99
+615cab8c-027a-5dff-8d05-9ac590191175,383,phaseolus mungo wall|wall,Phaseolus mungo Wall.,Wall.,Fabaceae,ACCEPTED,SPECIES,8305376,8305376,8305376,2947798,5386,6,KNApSAcK World,,,,97
+21eaf6f5-4394-5278-ba65-af7e5790be84,385,phaseolus vulgaris l|l,Phaseolus vulgaris L.,L.,Fabaceae,ACCEPTED,SPECIES,5350452,5350452,5350452,2947798,5386,6,KNApSAcK World,,,,97
+e40962e1-7ca1-51a7-8964-38fc2daa70b8,386,phyllanthus acidus l skeels|l skeels,Phyllanthus acidus (L.) Skeels,(L.) Skeels,Phyllanthaceae,ACCEPTED,SPECIES,5381567,5381567,5381567,3061139,8807,6,KNApSAcK World,,,,99
+5bf11449-b1c5-50a5-bd40-bd17a0f68d2b,387,phyllanthus amarus schumach thonn|schumach thonn,Phyllanthus amarus Schumach. & Thonn.,Schumach. & Thonn.,Phyllanthaceae,ACCEPTED,SPECIES,5382589,5382589,5382589,3061139,8807,6,KNApSAcK World,,,,99
+a68f7806-a1a0-5035-b7f7-f650b4c22f42,388,phyllanthus emblica l|l,Phyllanthus emblica L.,L.,Phyllanthaceae,ACCEPTED,SPECIES,5381660,5381660,5381660,3061139,8807,6,KNApSAcK World,,,,99
+cbd1363f-31fa-5598-a3bf-bbd1fefabc8d,389,phyllanthus niruri l|l,Phyllanthus niruri L.,L.,Phyllanthaceae,ACCEPTED,SPECIES,5381945,5381945,5381945,3061139,8807,6,KNApSAcK World,,,,97
+e07cbd95-5c94-52d5-b964-e0fb5d9fb8bd,390,phyllanthus reticulatus poir|poir,Phyllanthus reticulatus Poir.,Poir.,Phyllanthaceae,ACCEPTED,SPECIES,5382478,5382478,5382478,3061139,8807,6,KNApSAcK World,,,,98
+ab4b4980-e877-5cab-90f8-42c4c36d2f96,391,phyllanthus urinaria l|l,Phyllanthus urinaria L.,L.,Phyllanthaceae,ACCEPTED,SPECIES,5382780,5382780,5382780,3061139,8807,6,KNApSAcK World,,,,98
+f374d5ed-3d5d-57a3-a474-1a1961759b2b,393,physalis angulata l|l,Physalis angulata L.,L.,Solanaceae,SYNONYM,SPECIES,5341772,5341792,5341792,2928907,7717,6,KNApSAcK World,,,,98
+22227aaf-2d1e-5e95-99bd-6b7ad2b723ea,394,physalis peruviana l|l,Physalis peruviana L.,L.,Solanaceae,ACCEPTED,SPECIES,5341784,5341784,5341784,2928907,7717,6,KNApSAcK World,,,,97
+b42dcfc6-ca5a-5b76-b673-28d693c9df32,395,pimpinella anisum l|l,Pimpinella anisum L.,L.,Apiaceae,ACCEPTED,SPECIES,8080300,8080300,8080300,3034784,6720,6,KNApSAcK World,,,,97
+bfb42401-47fc-5b03-9345-806f658c40c8,396,piper betle l|l,Piper betle L.,L.,Piperaceae,ACCEPTED,SPECIES,4187904,4187904,4187904,3075433,6678,6,KNApSAcK World,,,,99
+cbb6c07b-1244-5d0f-9996-9100929a74d1,397,piper cubeba l fil|l fil,Piper cubeba L.fil.,L.fil.,Piperaceae,ACCEPTED,SPECIES,7606629,7606629,7606629,3075433,6678,6,KNApSAcK World,,,,97
+122d6120-5804-55f6-b870-86c76c911f34,399,piper nigrum l|l,Piper nigrum L.,L.,Piperaceae,ACCEPTED,SPECIES,3086357,3086357,3086357,3075433,6678,6,KNApSAcK World,,,,97
+e598c2e9-fd72-521b-8639-ae852851c2e2,400,piper retrofractum vahl|vahl,Piper retrofractum Vahl,Vahl,Piperaceae,ACCEPTED,SPECIES,3086342,3086342,3086342,3075433,6678,6,KNApSAcK World,,,,99
+0745105b-33be-58a1-8baf-7985464801a2,401,plantago major l|l,Plantago major L.,L.,Plantaginaceae,ACCEPTED,SPECIES,3189767,3189767,3189767,3189695,2420,6,KNApSAcK World,,,,97
+cab9f83a-32e2-5627-96c0-7a4666a28ab8,402,platycladus orientalis l franco|l franco,Platycladus orientalis (L.) Franco,(L.) Franco,Cupressaceae,ACCEPTED,SPECIES,2684855,2684855,2684855,2684854,8144,6,KNApSAcK World,,,,99
+84ecea23-b5c6-5595-864c-befd0ec7a409,403,platycodon grandiflorus jacq a dc|jacq a dc,Platycodon grandiflorus (Jacq.) A.DC.,(Jacq.) A.DC.,Campanulaceae,ACCEPTED,SPECIES,3164340,3164340,3164340,3164339,8801,6,KNApSAcK World,,,,93
+e40b9ad0-9311-5b74-bbe9-4e9003841db7,404,pluchea indica l less|l less,Pluchea indica (L.) Less.,(L.) Less.,Asteraceae,ACCEPTED,SPECIES,3132728,3132728,3132728,3132596,3065,6,KNApSAcK World,,,,99
+9b91837e-369e-5a17-9e24-f3a9083e1725,405,plumbago indica l|l,Plumbago indica L.,L.,Plumbaginaceae,ACCEPTED,SPECIES,3082286,3082286,3082286,3082281,2419,6,KNApSAcK World,,,,99
+5e4a22e9-9d5f-546c-9b4f-b43d16e11676,406,plumbago zeylanica l|l,Plumbago zeylanica L.,L.,Plumbaginaceae,ACCEPTED,SPECIES,3082282,3082282,3082282,3082281,2419,6,KNApSAcK World,,,,99
+e9537157-d57f-54ea-beab-4c6b1e5739b7,408,plumeria rubra l|l,Plumeria rubra L.,L.,Apocynaceae,ACCEPTED,SPECIES,3169674,3169674,3169674,3169672,6701,6,KNApSAcK World,,,,99
+946b77f3-2643-5b05-8948-7646e186c423,409,pogostemon cablin blanco benth|blanco benth,Pogostemon cablin (Blanco) Benth.,(Blanco) Benth.,Lamiaceae,ACCEPTED,SPECIES,2926672,2926672,2926672,2926671,2497,6,KNApSAcK World,,,,99
+d48964b1-d2ed-511d-b038-8ccba44bdbd6,410,pongamia pinnata l pierre|l pierre,Pongamia pinnata (L.) Pierre,(L.) Pierre,Fabaceae,ACCEPTED,SPECIES,2965911,2965911,2965911,7953486,5386,6,KNApSAcK World,,,,97
+dc9fb169-31c8-500d-9e56-095f92716066,193,pontederia crassipes mart|mart solms,Pontederia crassipes Mart.,(Mart.) Solms,Pontederiaceae,SYNONYM,SPECIES,2765940,2765942,2765942,2740415,3731,6,KNApSAcK World,,,,98
+0bc8a8a6-c8a1-51fa-bed1-4fe09de6e1e7,411,portulaca grandiflora hook|hook,Portulaca grandiflora Hook.,Hook.,Portulacaceae,ACCEPTED,SPECIES,3084700,3084700,3084700,3084696,6717,6,KNApSAcK World,,,,99
+ba8479af-5213-54d3-a990-3ea00d8a4d2b,412,portulaca oleracea l|l,Portulaca oleracea L.,L.,Portulacaceae,ACCEPTED,SPECIES,3084719,3084719,3084719,3084696,6717,6,KNApSAcK World,,,,99
+f2643ef1-c5b2-59ea-8cd3-ef7db41a8c6a,413,premna corymbosa rottler|rottler,Premna corymbosa Rottler,Rottler,Lamiaceae,ACCEPTED,SPECIES,7713954,7713954,7713954,2925344,2497,6,KNApSAcK World,,,,97
+9cf0bf6d-ac4e-5e2f-9bc4-3da8faf1bc61,414,psidium guajava l|l,Psidium guajava L.,L.,Myrtaceae,ACCEPTED,SPECIES,5420380,5420380,5420380,3187232,5014,6,KNApSAcK World,,,,99
+27c1770f-9b92-5220-980f-dbabddc7fdc3,415,psophocarpus tetragonolobus l dc|l dc,Psophocarpus tetragonolobus (L.) DC.,(L.) DC.,Fabaceae,ACCEPTED,SPECIES,2944683,2944683,2944683,2944679,5386,6,KNApSAcK World,,,,99
+c153c9ce-3fc6-5d6b-9c40-376771070236,416,pterocarpus indicus willd|willd,Pterocarpus indicus Willd.,Willd.,Fabaceae,ACCEPTED,SPECIES,5349242,5349242,5349242,5349236,5386,6,KNApSAcK World,,,,97
+995697b3-aa42-539c-8625-9ca62627f7d8,417,pueraria montana lour merr|lour merr,Pueraria montana (Lour.) Merr.,(Lour.) Merr.,Fabaceae,ACCEPTED,SPECIES,2977636,2977636,2977636,2977604,5386,6,KNApSAcK World,,,,99
+517b6986-2df9-54e4-bf3a-6b9a6633f347,418,punica granatum l|l,Punica granatum L.,L.,Lythraceae,ACCEPTED,SPECIES,5420901,5420901,5420901,3188663,6684,6,KNApSAcK World,,,,99
+0e2caebf-4009-5554-ad1d-ba74113adb2c,422,quassia amara l|l,Quassia amara L.,L.,Simaroubaceae,ACCEPTED,SPECIES,3190647,3190647,3190647,3190646,2395,6,KNApSAcK World,,,,99
+5a621069-5e08-5643-b368-8f23730913ce,424,raphanus sativus l|l,Raphanus sativus L.,L.,Brassicaceae,ACCEPTED,SPECIES,7678610,7678610,7678610,3040962,3112,6,KNApSAcK World,,,,99
+5d904d27-040e-59f7-ad64-17e818e39d61,425,rauvolfia reflexa koord valeton|koord valeton,Rauvolfia reflexa Koord. & Valeton,Koord. & Valeton,Apocynaceae,ACCEPTED,SPECIES,3616839,3616839,3616839,3169769,6701,6,KNApSAcK World,,,,97
+bc2c8e7d-ed98-5ee5-9c64-b29ce388ac8d,426,rauvolfia serpentina l benth ex kurz|l benth ex kurz,Rauvolfia serpentina (L.) Benth. ex Kurz,(L.) Benth. ex Kurz,Apocynaceae,ACCEPTED,SPECIES,3169787,3169787,3169787,3169769,6701,6,KNApSAcK World,,,,98
+8b57e769-e5cc-5e3e-a656-bb15e2c1eb80,427,rauvolfia sumatrana jack|jack,Rauvolfia sumatrana Jack,Jack,Apocynaceae,ACCEPTED,SPECIES,3616339,3616339,3616339,3169769,6701,6,KNApSAcK World,,,,99
+615f6eac-acf7-563f-af39-d43cbb9d3834,428,rauvolfia verticillata lour baill|lour baill,Rauvolfia verticillata (Lour.) Baill.,(Lour.) Baill.,Apocynaceae,ACCEPTED,SPECIES,3616228,3616228,3616228,3169769,6701,6,KNApSAcK World,,,,97
+5227e2ff-c2a9-5f70-ba28-57942dc87b9c,430,rheum palmatum l|l,Rheum palmatum L.,L.,Polygonaceae,ACCEPTED,SPECIES,2888864,2888864,2888864,2888863,2416,6,KNApSAcK World,,,,99
+31d059c9-d244-5c7c-9a95-ae1e77d142e8,431,rhinacanthus nasutus l kuntze|l kuntze,Rhinacanthus nasutus (L.) Kuntze,(L.) Kuntze,Acanthaceae,ACCEPTED,SPECIES,7263230,7263230,7263230,3233825,2393,6,KNApSAcK World,,,,97
+df693a77-1050-5520-854b-4a1eb4ad9906,432,rhodomyrtus tomentosa aiton hassk|aiton hassk,Rhodomyrtus tomentosa (Aiton) Hassk.,(Aiton) Hassk.,Myrtaceae,ACCEPTED,SPECIES,3179997,3179997,3179997,3179966,5014,6,KNApSAcK World,,,,97
+be944a0f-3704-5e60-92e2-0c1015a12822,433,ricinus communis l|l,Ricinus communis L.,L.,Euphorbiaceae,ACCEPTED,SPECIES,5380041,5380041,5380041,9188216,4691,6,KNApSAcK World,,,,99
+4aad9c43-1617-5afe-bd16-ade3bfeec512,434,rivina humilis l|l,Rivina humilis L.,L.,Phytolaccaceae,ACCEPTED,SPECIES,3084027,3084027,3084027,3084026,2516,6,KNApSAcK World,,,,99
+3dc36c63-40cc-54dd-8876-cce57968085f,436,rosa chinensis jacq|jacq,Rosa chinensis Jacq.,Jacq.,Rosaceae,ACCEPTED,SPECIES,3005039,3005039,3005039,8395064,5015,6,KNApSAcK World,,,,98
+ab51eb9f-5a3d-54a5-9240-342d6bdb51e0,437,rosa damascena mill|mill,Rosa × damascena Mill.,Mill.,Rosaceae,ACCEPTED,SPECIES,7390572,7390572,7390572,8395064,5015,6,KNApSAcK World,,,,97
+0a903994-29f8-5e45-92ad-cebfdf59fe49,438,ruellia tuberosa l|l,Ruellia tuberosa L.,L.,Acanthaceae,ACCEPTED,SPECIES,5415418,5415418,5415418,3171840,2393,6,KNApSAcK World,,,,99
+257aa98f-c1ab-52a4-9733-55bc7adcbb9e,439,rumex nepalensis spreng|spreng,Rumex nepalensis Spreng.,Spreng.,Polygonaceae,ACCEPTED,SPECIES,7291884,7291884,7291884,2888942,2416,6,KNApSAcK World,,,,97
+e2bfef9c-dcb2-50fc-95e7-bde5cd208158,440,ruta angustifolia pers|pers,Ruta angustifolia Pers.,Pers.,Rutaceae,ACCEPTED,SPECIES,3832875,3832875,3832875,3190380,2396,6,KNApSAcK World,,,,99
+1181d3c6-d169-501b-90de-26b1bf6b505a,441,saccharum officinarum l|l,Saccharum officinarum L.,L.,Poaceae,ACCEPTED,SPECIES,2703912,2703912,2703912,2703910,3073,6,KNApSAcK World,,,,99
+66c676f5-8f72-5cee-8314-4c03dbd55a8b,442,salvia splendens sellow ex nees|sellow ex nees,Salvia splendens Sellow ex Nees,Sellow ex Nees,Lamiaceae,ACCEPTED,SPECIES,8249932,8249932,8249932,2926981,2497,6,KNApSAcK World,,,,97
+c3b749b1-b411-5efd-ae0a-32364d7529c1,443,sandoricum koetjape burm fil merr|burm fil merr,Sandoricum koetjape (Burm.fil.) Merr.,(Burm.fil.) Merr.,Meliaceae,ACCEPTED,SPECIES,3850843,3850843,3850843,7107971,2397,6,KNApSAcK World,,,,99
+3a9960e7-34ac-5a19-92d2-9865e05c9cca,444,santalum album l|l,Santalum album L.,L.,Santalaceae,ACCEPTED,SPECIES,2889785,2889785,2889785,2889778,6661,6,KNApSAcK World,,,,99
+348304da-ba23-5630-8651-bf3d9c9ba2fb,445,sapindus rarak dc|dc,Sapindus rarak DC.,DC.,Sapindaceae,ACCEPTED,SPECIES,7264721,7264721,7264721,3189983,6657,6,KNApSAcK World,,,,99
+3f83bba0-c9c9-515d-a899-c42860cec622,447,scaevola taccada gaertn roxb|k krause,Scaevola taccada (Gaertn.) Roxb.,K.Krause,Goodeniaceae,SYNONYM,SPECIES,7099691,6358362,6358362,3158673,3113,6,KNApSAcK World,,,,98
+62a7c6a1-b039-5166-8298-b95ea57e44ff,448,scurrula fusca blume g don|blume g don,Scurrula fusca (Blume) G.Don,(Blume) G.Don,Loranthaceae,ACCEPTED,SPECIES,4001481,4001481,4001481,7287875,6663,6,KNApSAcK World,,,,99
+464850e4-4c77-58a0-8834-1d9725a76c2b,449,scutellaria discolor wall ex benth|wall ex benth,Scutellaria discolor Wall. ex Benth.,Wall. ex Benth.,Lamiaceae,ACCEPTED,SPECIES,7996273,7996273,7996273,2926730,2497,6,KNApSAcK World,,,,97
+7054388a-5859-5aab-8961-de58efff7641,450,scutellaria indica l|l,Scutellaria indica L.,L.,Lamiaceae,ACCEPTED,SPECIES,7308714,7308714,7308714,2926730,2497,6,KNApSAcK World,,,,97
+dfb46326-e222-509a-9355-dc03980f475b,451,sechium edule jacq sw|jacq sw,Sechium edule (Jacq.) Sw.,(Jacq.) Sw.,Cucurbitaceae,ACCEPTED,SPECIES,2874612,2874612,2874612,2874611,6634,6,KNApSAcK World,,,,99
+ad5d63fe-a1ed-5214-9fab-e64caabbd82c,452,selaginella doederleinii hieron|hieron,Selaginella doederleinii Hieron.,Hieron.,Selaginellaceae,ACCEPTED,SPECIES,7329850,7329850,7329850,2688177,6724,6,KNApSAcK World,,,,99
+70eb4f76-ad8c-5ca6-a522-821ef3cfcd00,267,selenicereus undatus haw d r hunt|haw britton rose,Selenicereus undatus (Haw.) D.R.Hunt,(Haw.) Britton & Rose,Cactaceae,SYNONYM,SPECIES,3084394,10334868,10334868,3084461,2519,6,KNApSAcK World,,,,98
+2281db57-36ca-50e3-8535-54c74b8037c6,453,senna alata l roxb|l roxb,Senna alata (L.) Roxb.,(L.) Roxb.,Fabaceae,ACCEPTED,SPECIES,2956947,2956947,2956947,2956904,5386,6,KNApSAcK World,,,,99
+23315eea-bc3c-5e08-a4e4-7fcc73681306,105,senna alexandrina mill|l,Senna alexandrina Mill.,L.,Fabaceae,SYNONYM,SPECIES,5354411,2958032,2958032,2956904,5386,6,KNApSAcK World,,,,98
+f20c9949-3361-51a7-ad8e-6a3806e4de17,101,senna alexandrina var alexandrina|vahl,Senna alexandrina var. alexandrina,Vahl,Fabaceae,SYNONYM,SPECIES,5354413,7302622,2958032,2956904,5386,6,KNApSAcK World,,,,98
+2953a062-f969-508f-9d6d-abf0d449024d,104,senna occidentalis l link|l,Senna occidentalis (L.) Link,L.,Fabaceae,SYNONYM,SPECIES,5354381,2957966,2957966,2956904,5386,6,KNApSAcK World,,,,97
+8952ff2f-206e-50cb-b256-c241c4f678b9,106,senna siamea lam h s irwin barneby|lam,Senna siamea (Lam.) H.S.Irwin & Barneby,Lam.,Fabaceae,SYNONYM,SPECIES,5353880,2956905,2956905,2956904,5386,6,KNApSAcK World,,,,98
+f2132d15-549a-59ed-9c8a-966d0bf6db23,454,senna sophera l roxb|l roxb,Senna sophera (L.) Roxb.,(L.) Roxb.,Fabaceae,ACCEPTED,SPECIES,2957379,2957379,2957379,2956904,5386,6,KNApSAcK World,,,,99
+45c4e92b-6c21-5082-b446-7f2d318458db,455,senna tora l roxb|l roxb,Senna tora (L.) Roxb.,(L.) Roxb.,Fabaceae,ACCEPTED,SPECIES,2957728,2957728,2957728,2956904,5386,6,KNApSAcK World,,,,99
+4c96ef5e-6c4f-546d-b99a-4d5651fb4539,456,sesamum indicum l|l,Sesamum indicum L.,L.,Pedaliaceae,ACCEPTED,SPECIES,3172622,3172622,3172622,3172619,6650,6,KNApSAcK World,,,,99
+70829334-7974-5d15-b75c-ec9e2eaa58b6,457,sesbania grandiflora l poir|l poir,Sesbania grandiflora (L.) Poir.,(L.) Poir.,Fabaceae,ACCEPTED,SPECIES,8281950,8281950,8281950,7854649,5386,6,KNApSAcK World,,,,97
+50d9b395-1e50-5fe0-b8a2-dbdfc7a3e6fb,458,sesbania sesban l merr|l merr,Sesbania sesban (L.) Merr.,(L.) Merr.,Fabaceae,ACCEPTED,SPECIES,2970648,2970648,2970648,7854649,5386,6,KNApSAcK World,,,,97
+6dfa8a76-a9d1-5f03-bbaa-1616df64ea09,459,sida rhombifolia l|l,Sida rhombifolia L.,L.,Malvaceae,ACCEPTED,SPECIES,5406735,5406735,5406735,3152100,6685,6,KNApSAcK World,,,,99
+62adf844-b3b1-5c99-acdc-fcb4d8cbaf60,460,smilax china l|l,Smilax china L.,L.,Smilacaceae,ACCEPTED,SPECIES,5295472,5295472,5295472,2740627,7702,6,KNApSAcK World,,,,97
+eaf6b817-2b74-5643-8f62-764bdb507403,461,smilax zeylanica l|l,Smilax zeylanica L.,L.,Smilacaceae,ACCEPTED,SPECIES,5295128,5295128,5295128,2740627,7702,6,KNApSAcK World,,,,98
+58fb7329-0c6b-55f0-b713-eaaeb9c16157,463,solanum lycopersicum l|l,Solanum lycopersicum L.,L.,Solanaceae,ACCEPTED,SPECIES,2930137,2930137,2930137,2928997,7717,6,KNApSAcK World,,,,98
+b4ffc96d-94d9-554a-8346-1d5905cd3ad5,464,solanum melongena l|l,Solanum melongena L.,L.,Solanaceae,ACCEPTED,SPECIES,2930617,2930617,2930617,2928997,7717,6,KNApSAcK World,,,,97
+52fb3ca3-942f-533c-90d8-77f52cb37037,465,solanum nigrum l|l,Solanum nigrum L.,L.,Solanaceae,ACCEPTED,SPECIES,9150405,9150405,9150405,2928997,7717,6,KNApSAcK World,,,,97
+b694a309-259d-5347-a070-1634715303bf,466,solanum torvum sw|sw,Solanum torvum Sw.,Sw.,Solanaceae,ACCEPTED,SPECIES,2932389,2932389,2932389,2928997,7717,6,KNApSAcK World,,,,97
+07b85b62-dcdb-56f0-83d7-d016c6cc81b5,467,solanum tuberosum l|l,Solanum tuberosum L.,L.,Solanaceae,ACCEPTED,SPECIES,2930262,2930262,2930262,2928997,7717,6,KNApSAcK World,,,,97
+d3aac8ad-bd98-58fb-9d34-63b4b139d8e6,468,solidago virgaurea l|l,Solidago virgaurea L.,L.,Asteraceae,ACCEPTED,SPECIES,6446462,6446462,6446462,5388868,3065,6,KNApSAcK World,,,,98
+5e0966a2-1fa2-5231-96c4-69baaae311c3,469,sonchus arvensis l|l,Sonchus arvensis L.,L.,Asteraceae,ACCEPTED,SPECIES,3105813,3105813,3105813,3105646,3065,6,KNApSAcK World,,,,99
+227a3e37-3bb0-5ce3-996a-8b9ae0a115e9,470,sophora tomentosa l|l,Sophora tomentosa L.,L.,Fabaceae,ACCEPTED,SPECIES,2958970,2958970,2958970,2958901,5386,6,KNApSAcK World,,,,97
+2c8d272e-d362-5220-b93c-3745766132ff,471,spilanthes acmella a chev 1920|a chev 1920,"Spilanthes acmella A.Chev., 1920","A.Chev., 1920",Asteraceae,ACCEPTED,SPECIES,7367845,7367845,7367845,3092842,3065,6,KNApSAcK World,,,,97
+387a170d-fa9d-5d05-a23b-5dff3bf850ca,472,stachytarpheta jamaicensis l vahl|l vahl,Stachytarpheta jamaicensis (L.) Vahl,(L.) Vahl,Verbenaceae,ACCEPTED,SPECIES,2925463,2925463,2925463,2925448,6689,6,KNApSAcK World,,,,98
+a76247ab-6721-52f3-9563-2c73d149f929,473,stachytarpheta mutabilis jacq vahl|jacq vahl,Stachytarpheta mutabilis (Jacq.) Vahl,(Jacq.) Vahl,Verbenaceae,ACCEPTED,SPECIES,2925462,2925462,2925462,2925448,6689,6,KNApSAcK World,,,,99
+7a429533-8bc5-595e-b439-0c79d8233f87,474,stephania japonica thunb miers|thunb miers,Stephania japonica (Thunb.) Miers,(Thunb.) Miers,Menispermaceae,ACCEPTED,SPECIES,7268792,7268792,7268792,3234321,2411,6,KNApSAcK World,,,,99
+be1629ce-f9e9-5f4f-a16d-fddb52fbe97c,475,stephania venosa blume spreng|blume spreng,Stephania venosa (Blume) Spreng.,(Blume) Spreng.,Menispermaceae,ACCEPTED,SPECIES,5592725,5592725,5592725,3234321,2411,6,KNApSAcK World,,,,99
+d011dc17-838d-5176-991a-7c9cd65284b1,476,sterculia foetida l|l,Sterculia foetida L.,L.,Malvaceae,ACCEPTED,SPECIES,5406675,5406675,5406675,3152129,6685,6,KNApSAcK World,,,,99
+02806702-8699-5c5b-b100-e4b281eb908a,477,strobilanthes crispa l blume|l blume,Strobilanthes crispa (L.) Blume,(L.) Blume,Acanthaceae,ACCEPTED,SPECIES,3781433,3781433,3781433,6359394,2393,6,KNApSAcK World,,,,95
+bc80e3d2-d113-5435-a71b-81e0f065cd5d,478,strychnos ignatii bergius|bergius,Strychnos ignatii Bergius,Bergius,Loganiaceae,ACCEPTED,SPECIES,5645763,5645763,5645763,3169589,2502,6,KNApSAcK World,,,,99
+828176d7-1639-540b-8f76-fa8122fb07e4,480,strychnos lucida r br|r br,Strychnos lucida R.Br.,R.Br.,Loganiaceae,ACCEPTED,SPECIES,5645531,5645531,5645531,3169589,2502,6,KNApSAcK World,,,,97
+4c543848-2d00-51f9-b101-b03711aebe39,481,strychnos nux vomica l|l,Strychnos nux-vomica L.,L.,Loganiaceae,ACCEPTED,SPECIES,5414399,5414399,5414399,3169589,2502,6,KNApSAcK World,,,,99
+4c9f3c4f-c0bb-548c-a31e-e857d902dead,482,styphnolobium japonicum l schott|l schott,Styphnolobium japonicum (L.) Schott,(L.) Schott,Fabaceae,ACCEPTED,SPECIES,2963569,2963569,2963569,2963568,5386,6,KNApSAcK World,,,,99
+34150dc5-2198-54e1-8dda-a2fe6199e680,483,styrax benzoin dryand|dryand,Styrax benzoin Dryand.,Dryand.,Styracaceae,ACCEPTED,SPECIES,5371679,5371679,5371679,3032925,2507,6,KNApSAcK World,,,,99
+11e03e77-0e0a-5234-bc10-e3d325ab7ea4,484,swietenia mahagoni l jacq|l jacq,Swietenia mahagoni (L.) Jacq.,(L.) Jacq.,Meliaceae,ACCEPTED,SPECIES,3190485,3190485,3190485,3190483,2397,6,KNApSAcK World,,,,97
+4d0d61e1-a2ba-5f47-92cc-2fd7087366e8,485,symphytum officinale l|l,Symphytum officinale L.,L.,Boraginaceae,ACCEPTED,SPECIES,7558421,7558421,7558421,2926061,2498,6,KNApSAcK World,,,,99
+a4790219-6814-5f09-9f49-17fd2bb82c16,487,syzygium aromaticum l merr l m perry|l merr l m perry,Syzygium aromaticum (L.) Merr. & L.M.Perry,(L.) Merr. & L.M.Perry,Myrtaceae,ACCEPTED,SPECIES,3183002,3183002,3183002,3029010,5014,6,KNApSAcK World,,,,99
+97888b57-4f84-56ff-bff0-c32cf240d337,488,syzygium cumini l skeels|l skeels,Syzygium cumini (L.) Skeels,(L.) Skeels,Myrtaceae,ACCEPTED,SPECIES,3183840,3183840,3183840,3029010,5014,6,KNApSAcK World,,,,99
+13c64f90-e97c-5224-a17f-010921cc840e,489,tabernaemontana corymbosa roxb ex wall|roxb ex wall,Tabernaemontana corymbosa Roxb. ex Wall.,Roxb. ex Wall.,Apocynaceae,ACCEPTED,SPECIES,8172343,8172343,8172343,3169624,6701,6,KNApSAcK World,,,,98
+06b255d0-d76c-572d-94a8-7459f801eee5,205,tabernaemontana divaricata l r br ex roem schult|l burkill,Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.,(L.) Burkill,Apocynaceae,SYNONYM,SPECIES,7317152,3169625,3169625,3169624,6701,6,KNApSAcK World,,,,98
+dcfffe66-6836-537c-acbc-d99a0bbf3aae,491,tabernaemontana sphaerocarpa blume|blume,Tabernaemontana sphaerocarpa Blume,Blume,Apocynaceae,ACCEPTED,SPECIES,3621871,3621871,3621871,3169624,6701,6,KNApSAcK World,,,,99
+3dbc12c3-b71b-53ee-80a8-dd416a5e4d6d,492,tagetes erecta l|l,Tagetes erecta L.,L.,Asteraceae,ACCEPTED,SPECIES,3088488,3088488,3088488,3088468,3065,6,KNApSAcK World,,,,99
+4fd36fc3-7465-51a8-b611-ae460760a8ba,494,talinum fruticosum l juss|jacq willd,Talinum fruticosum (L.) Juss.,(Jacq.) Willd.,Talinaceae,SYNONYM,SPECIES,3084671,3084670,3084670,3084663,4055896,6,KNApSAcK World,,,,98
+fe18adee-35c4-5089-ba80-efddaeaa70e7,493,talinum paniculatum jacq gaertn|jacq gaertn,Talinum paniculatum (Jacq.) Gaertn.,(Jacq.) Gaertn.,Talinaceae,ACCEPTED,SPECIES,3084672,3084672,3084672,3084663,4055896,6,KNApSAcK World,,,,97
+9419e1fd-abc1-586d-aac8-6cf968c8c982,262,talipariti tiliaceum l fryxell|l,Talipariti tiliaceum (L.) Fryxell,L.,Malvaceae,SYNONYM,SPECIES,3152584,7115794,7115794,7115793,6685,6,KNApSAcK World,,,,98
+c3737155-fbdd-53d9-a5ee-1e6574e9702e,495,tamarindus indica l|l,Tamarindus indica L.,L.,Fabaceae,ACCEPTED,SPECIES,2975768,2975768,2975768,2975767,5386,6,KNApSAcK World,,,,99
+824f5b78-b47a-5f6e-a94a-ec81d5a65dba,496,taraxacum mongolicum hand mazz|hand mazz,Taraxacum mongolicum Hand.-Mazz.,Hand.-Mazz.,Asteraceae,ACCEPTED,SPECIES,5394645,5394645,5394645,7787708,3065,6,KNApSAcK World,,,,99
+75c18753-0901-5f3d-8c04-e7e66174e9ca,497,taraxacum officinale weber ex f h wigg|weber ex f h wigg,Taraxacum officinale Weber ex F.H.Wigg.,Weber ex F.H.Wigg.,Asteraceae,ACCEPTED,SPECIES,5394163,5394163,5394163,7787708,3065,6,KNApSAcK World,,,,98
+b35d7228-57c0-586c-8278-86febf8e0a47,498,taxus wallichiana zucc|miq de laub,Taxus wallichiana Zucc.,(Miq.) de Laub.,Taxaceae,SYNONYM,SPECIES,5284551,5284540,5284540,2684902,4863,6,KNApSAcK World,,,,97
+d88fe7bf-6d43-587e-bfd5-50522c877027,499,tectona grandis l f|l f,Tectona grandis L.f.,L.f.,Lamiaceae,ACCEPTED,SPECIES,2925649,2925649,2925649,2925648,2497,6,KNApSAcK World,,,,98
+a02e6428-a356-5b32-9e3e-d2b208294173,500,terminalia bellirica gaertn roxb|gaertn roxb,Terminalia bellirica (Gaertn.) Roxb.,(Gaertn.) Roxb.,Combretaceae,ACCEPTED,SPECIES,3189390,3189390,3189390,3189387,2431,6,KNApSAcK World,,,,99
+b43406fe-c6c1-580f-ac63-7a32f747ee6f,501,terminalia catappa l|l,Terminalia catappa L.,L.,Combretaceae,ACCEPTED,SPECIES,3189394,3189394,3189394,3189387,2431,6,KNApSAcK World,,,,99
+888bd9f9-87a7-56bc-aad7-08c338299614,504,thymus vulgaris l|l,Thymus vulgaris L.,L.,Lamiaceae,ACCEPTED,SPECIES,5341442,5341442,5341442,2926960,2497,6,KNApSAcK World,,,,98
+85dd0571-69bb-5ed6-8df0-62fbe88129b1,505,tinospora crispa l miers ex hook fil thomson|l miers ex hook fil thomson,Tinospora crispa (L.) Miers ex Hook.fil. & Thomson,(L.) Miers ex Hook.fil. & Thomson,Menispermaceae,ACCEPTED,SPECIES,8298918,8298918,8298918,7268723,2411,6,KNApSAcK World,,,,97
+81cf650a-1213-5f8b-8d22-fb6c2e0d78db,506,tinospora glabra burm fil merr|burm fil merr,Tinospora glabra (Burm.fil.) Merr.,(Burm.fil.) Merr.,Menispermaceae,ACCEPTED,SPECIES,3830649,3830649,3830649,7268723,2411,6,KNApSAcK World,,,,99
+11e183b5-2953-5994-a879-9595d43e6d15,508,trema orientale l blume|l blume,Trema orientale (L.) Blume,(L.) Blume,Cannabaceae,SYNONYM,SPECIES,7141659,2984508,2984508,2984500,2384,6,KNApSAcK World,,,,98
+7cbe22c4-7bf5-559d-ba6b-ea895aabb17b,509,trichosanthes tricuspidata lour|lour,Trichosanthes tricuspidata Lour.,Lour.,Cucurbitaceae,ACCEPTED,SPECIES,7317567,7317567,7317567,2874604,6634,6,KNApSAcK World,,,,99
+d02510a4-c7c4-5a44-b876-d33f4e3e47d5,510,tridax procumbens l|l,Tridax procumbens L.,L.,Asteraceae,ACCEPTED,SPECIES,3149462,3149462,3149462,3149429,3065,6,KNApSAcK World,,,,99
+43dbbd7f-5981-5499-b037-9697c3872e62,337,trigastrotheca pentaphylla l thulin|l,Trigastrotheca pentaphylla (L.) Thulin,L.,Molluginaceae,SYNONYM,SPECIES,3084608,9381433,9381433,3231669,2517,6,KNApSAcK World,,,,98
+91818989-628d-58b1-bff0-6426452b1f48,511,trigonella foenum graecum l|l,Trigonella foenum-graecum L.,L.,Fabaceae,ACCEPTED,SPECIES,5360475,5360475,5360475,2981525,5386,6,KNApSAcK World,,,,98
+7352685d-de5e-527b-aebc-c42173d25957,512,triphasia trifolia burm fil p wilson|burm fil p wilson,Triphasia trifolia (Burm.fil.) P.Wilson,(Burm.fil.) P.Wilson,Rutaceae,ACCEPTED,SPECIES,3190406,3190406,3190406,3190405,2396,6,KNApSAcK World,,,,99
+98dc45da-a441-53da-83db-97fcf8d3a50f,513,turnera ulmifolia l|l,Turnera ulmifolia L.,L.,Turneraceae,ACCEPTED,SPECIES,2874852,2874852,2874852,2874846,2377,6,KNApSAcK World,,,,98
+f0b40824-92dd-58f8-ab32-ca176a4d30a2,515,uncaria gambir w hunter roxb|w hunter roxb,Uncaria gambir (W.Hunter) Roxb.,(W.Hunter) Roxb.,Rubiaceae,ACCEPTED,SPECIES,5338190,5338190,5338190,2906635,8798,6,KNApSAcK World,,,,99
+35686ea7-b69c-5288-98e8-5d52a3245fa6,374,urceola laevigata juss d j middleton livsh|juss moldenke,Urceola laevigata (Juss.) D.J.Middleton & Livsh.,(Juss.) Moldenke,Apocynaceae,SYNONYM,SPECIES,5536603,9827170,9827170,3229511,6701,6,KNApSAcK World,,,,98
+a9ab5b25-793e-5072-a9db-3199c3912352,516,urena lobata l|l,Urena lobata L.,L.,Malvaceae,ACCEPTED,SPECIES,3152253,3152253,3152253,3152250,6685,6,KNApSAcK World,,,,99
+dff8b4db-abaa-51e7-8e47-ff16fc97232a,517,valeriana officinalis l|l,Valeriana officinalis L.,L.,Caprifoliaceae,ACCEPTED,SPECIES,2888763,2888763,2888763,2888741,6710,6,KNApSAcK World,,,,99
+69984b25-58c1-5b8d-a397-920d68f7aa6d,518,vanilla planifolia andrews|andrews,Vanilla planifolia Andrews,Andrews,Orchidaceae,ACCEPTED,SPECIES,2803398,2803398,2803398,2743233,7689,6,KNApSAcK World,,,,97
+8265f5bf-cd61-55bf-9e25-391524c61333,520,vetiveria zizanioides stapf 1906|stapf 1906,"Vetiveria zizanioides Stapf, 1906","Stapf, 1906",Poaceae,ACCEPTED,SPECIES,7352653,7352653,7352653,8289208,3073,6,KNApSAcK World,,,,97
+d8a0133a-9263-529b-b7c7-1b7d3a168c14,521,vigna radiata l r wilczek|l r wilczek,Vigna radiata (L.) R.Wilczek,(L.) R.Wilczek,Fabaceae,ACCEPTED,SPECIES,2982380,2982380,2982380,2982372,5386,6,KNApSAcK World,,,,99
+c1ab6cfc-5e73-5b48-89d2-4241c441914f,523,viola odorata l|l,Viola odorata L.,L.,Violaceae,ACCEPTED,SPECIES,5331181,5331181,5331181,2874237,6631,6,KNApSAcK World,,,,97
+0e61db4e-856f-52f6-a739-3ca4a8092752,524,vitex negundo l|l,Vitex negundo L.,L.,Lamiaceae,ACCEPTED,SPECIES,2925564,2925564,2925564,2925556,2497,6,KNApSAcK World,,,,98
+e770bbcd-4dcc-5946-b737-606ed83201f3,525,vitex trifolia l|l,Vitex trifolia L.,L.,Lamiaceae,ACCEPTED,SPECIES,2925561,2925561,2925561,2925556,2497,6,KNApSAcK World,,,,99
+52971c70-99c8-52cd-af26-48bbec9e9d25,526,volvariella volvacea bull singer|bull singer,Volvariella volvacea (Bull.) Singer,(Bull.) Singer,Pluteaceae,ACCEPTED,SPECIES,5241445,5241445,5241445,2530192,8447,5,KNApSAcK World,,,,99
+5ce59e8d-1257-52a2-9f2c-c417e03d18a8,527,woodfordia fruticosa l kurz|l kurz,Woodfordia fruticosa (L.) Kurz,(L.) Kurz,Lythraceae,ACCEPTED,SPECIES,5635525,5635525,5635525,3231604,6684,6,KNApSAcK World,,,,98
+d33bfc9f-537b-5734-8e79-c6dfc51fac19,528,ximenia americana l|l,Ximenia americana L.,L.,Ximeniaceae,ACCEPTED,SPECIES,2889811,2889811,2889811,2889810,4930777,6,KNApSAcK World,,,,99
+6adb383e-f4e2-57d6-9ea6-f12b51cf5070,227,zanthoxylum rhetsa roxb dc|roxb,Zanthoxylum rhetsa (Roxb.) DC.,Roxb.,Rutaceae,SYNONYM,SPECIES,5594688,3834800,3834800,3190076,2396,6,KNApSAcK World,,,,93
+86be7a25-6b6b-5672-9a1f-4ca88b299e75,529,zea mays l|l,Zea mays L.,L.,Poaceae,ACCEPTED,SPECIES,5290052,5290052,5290052,2705049,3073,6,KNApSAcK World,,,,99
+11cf8cec-79db-55aa-aec7-a54fbefe4832,530,zephyranthes candida herb|herb,Zephyranthes candida Herb.,Herb.,Amaryllidaceae,ACCEPTED,SPECIES,2859976,2859976,2859976,2859808,7682,6,KNApSAcK World,,,,99
+273293ec-8ab4-56da-8913-def182ea59b2,533,zingiber officinale roscoe|roscoe,Zingiber officinale Roscoe,Roscoe,Zingiberaceae,ACCEPTED,SPECIES,2757280,2757280,2757280,2756693,4687,6,KNApSAcK World,,,,99
+a2803193-ec32-57d6-88c0-f94dfb856a85,532,zingiber purpureum roscoe|roxb,Zingiber purpureum Roscoe,Roxb.,Zingiberaceae,SYNONYM,SPECIES,2757208,2757204,2757204,2756693,4687,6,KNApSAcK World,,,,98
+a580b547-a95b-5d53-92ce-214aaf9a8d12,534,zingiber zerumbet l roscoe ex sm|l roscoe ex sm,Zingiber zerumbet (L.) Roscoe ex Sm.,(L.) Roscoe ex Sm.,Zingiberaceae,ACCEPTED,SPECIES,2757108,2757108,2757108,2756693,4687,6,KNApSAcK World,,,,97
+7b1e2f69-21f5-5821-bfed-98743a520a04,535,zinnia elegans jacq|jacq,Zinnia elegans Jacq.,Jacq.,Asteraceae,ACCEPTED,SPECIES,3111754,3111754,3111754,3111750,3065,6,KNApSAcK World,,,,98

@@ -14,7 +14,7 @@
       ],
       "kind": "core",
       "path": "C:\\code\\web\\herbaflow\\etl\\compounds\\07_export\\out\\compound_aliases.csv",
-      "row_count": 73425
+      "row_count": 73420
     },
     "compound_candidate_map.csv": {
       "columns": [
@@ -101,7 +101,8 @@
         "canonical_strategy",
         "canonical_reason",
         "evidence_count",
-        "plant_count"
+        "plant_count",
+        "is_pains_positive"
       ],
       "kind": "core",
       "path": "C:\\code\\web\\herbaflow\\etl\\compounds\\07_export\\out\\compounds.csv",
@@ -128,7 +129,7 @@
       ],
       "kind": "audit",
       "path": "C:\\code\\web\\herbaflow\\etl\\compounds\\07_export\\out\\plant_compound_review.csv",
-      "row_count": 237
+      "row_count": 829
     },
     "plant_compounds.csv": {
       "columns": [
@@ -144,7 +145,7 @@
       ],
       "kind": "core",
       "path": "C:\\code\\web\\herbaflow\\etl\\compounds\\07_export\\out\\plant_compounds.csv",
-      "row_count": 20891
+      "row_count": 20240
     },
     "validation_counts.csv": {
       "columns": [
@@ -167,12 +168,12 @@
       "row_count": 1
     }
   },
-  "generated_at": "2026-05-17T15:51:38.027715+00:00",
+  "generated_at": "2026-05-24T15:19:36.802217+00:00",
   "include_audit_exports": true,
   "include_validation_artifacts": true,
   "module": "compounds",
   "note": "export_pass_through_only",
-  "run_id": "compounds_20260517_155138",
+  "run_id": "compounds_20260524_151936",
   "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
   "source_validated_dir": "C:\\code\\web\\herbaflow\\etl\\compounds\\06_validate\\out",
   "sql_enabled": false,
@@ -181,12 +182,12 @@
   "sql_schema": "public",
   "step": "07_export",
   "summary": {
-    "compound_aliases_row_count": 73425,
+    "compound_aliases_row_count": 73420,
     "compound_candidate_map_row_count": 12593,
     "compound_review_row_count": 8,
     "compounds_row_count": 11305,
-    "plant_compound_review_row_count": 237,
-    "plant_compounds_row_count": 20891,
+    "plant_compound_review_row_count": 829,
+    "plant_compounds_row_count": 20240,
     "validation_counts_present": true,
     "validation_report_present": true
   }

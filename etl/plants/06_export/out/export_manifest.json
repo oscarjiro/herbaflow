@@ -1,19 +1,19 @@
 {
   "dry_run": false,
   "emit_sql": false,
-  "generated_at": "2026-04-22T23:13:16.993027+00:00",
-  "input_dir": "05_validate\\out",
+  "generated_at": "2026-05-24T14:55:42.712452+00:00",
+  "input_dir": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out",
   "outputs": {
-    "plant_aliases_csv": "06_export\\out\\plant_aliases.csv",
+    "plant_aliases_csv": "C:\\code\\web\\herbaflow\\etl\\plants\\06_export\\out\\plant_aliases.csv",
     "plant_aliases_sql": "",
-    "plants_csv": "06_export\\out\\plants.csv",
+    "plants_csv": "C:\\code\\web\\herbaflow\\etl\\plants\\06_export\\out\\plants.csv",
     "plants_sql": ""
   },
   "row_counts": {
-    "aliases_input_rows": 597,
-    "aliases_output_rows": 597,
-    "plants_input_rows": 519,
-    "plants_output_rows": 519
+    "aliases_input_rows": 556,
+    "aliases_output_rows": 556,
+    "plants_input_rows": 478,
+    "plants_output_rows": 478
   },
   "schema": {
     "plant_aliases_columns": [
@@ -50,8 +50,8 @@
     ]
   },
   "sources": {
-    "plant_aliases_input": "05_validate\\out\\plant_aliases.csv",
-    "plants_input": "05_validate\\out\\plants.csv"
+    "plant_aliases_input": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\plant_aliases.csv",
+    "plants_input": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\plants.csv"
   },
   "status": "written"
 }

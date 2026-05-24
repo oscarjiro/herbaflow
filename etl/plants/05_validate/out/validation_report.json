@@ -2,27 +2,27 @@
   "checks": {
     "suspicious_canonical_name": {
       "critical": 0,
-      "total": 7,
-      "warning": 7
+      "total": 6,
+      "warning": 6
     }
   },
-  "generated_at": "2026-04-22T23:13:16.257470+00:00",
+  "generated_at": "2026-05-24T14:55:36.067159+00:00",
   "output_files": {
-    "report_csv": "05_validate\\out\\validation_report.csv",
-    "report_json": "05_validate\\out\\validation_report.json",
-    "validated_aliases": "05_validate\\out\\plant_aliases.csv",
-    "validated_plants": "05_validate\\out\\plants.csv"
+    "report_csv": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\validation_report.csv",
+    "report_json": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\validation_report.json",
+    "validated_aliases": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\plant_aliases.csv",
+    "validated_plants": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\plants.csv"
   },
   "source_files": {
-    "aliases": "04_build_canonical\\out\\plant_aliases.csv",
-    "plants": "04_build_canonical\\out\\plants.csv"
+    "aliases": "C:\\code\\web\\herbaflow\\etl\\plants\\04_build_canonical\\out\\plant_aliases.csv",
+    "plants": "C:\\code\\web\\herbaflow\\etl\\plants\\04_build_canonical\\out\\plants.csv"
   },
   "summary": {
-    "aliases_rows": 597,
+    "aliases_rows": 556,
     "critical_issues": 0,
-    "plants_rows": 519,
+    "plants_rows": 478,
     "status": "pass",
-    "total_issues": 7,
-    "warning_issues": 7
+    "total_issues": 6,
+    "warning_issues": 6
   }
 }

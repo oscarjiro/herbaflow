@@ -1,8 +1,8 @@
 04_BUILD_CANONICAL (PART 1) REPORT
 =================================
 input_rows=535
-accepted_rows=528 (previously 503)
-review_rows=0 (25 accepted, 5 rejected)
+accepted_rows=503
+review_rows=30
 rejected_rows=2
 
 Decision counts:
@@ -21,40 +21,40 @@ Schema corrections applied:
 - authorship is stored separately
 - GBIF identifier fields are normalized to plain string form
 
-accepted_path=04_build_canonical\out\accepted_plants.csv
-review_path=04_build_canonical\out\review_plants.csv
-rejected_path=04_build_canonical\out\rejected_plants.csv
-report_path=04_build_canonical\out\build_canonical_report.txt
+accepted_path=C:\code\web\herbaflow\etl\plants\04_build_canonical\out\accepted_plants.csv
+review_path=C:\code\web\herbaflow\etl\plants\04_build_canonical\out\review_plants.csv
+rejected_path=C:\code\web\herbaflow\etl\plants\04_build_canonical\out\rejected_plants.csv
+report_path=C:\code\web\herbaflow\etl\plants\04_build_canonical\out\build_canonical_report.txt
 status=success
 
-Manual review results (input_name, matched_name, ACCEPTED/REJECTED/UNSURE):
-1. Begonia sp., Begonia L., REJECTED
-2. Caesalpinia crista, Fabaceae, ACCEPTED (https://www.gbif.org/species/8179846)
-3. Canarium commune, Canarium L., ACCEPTED (https://www.gbif.org/species/5421346)
-4. Cinnamomum cassia, Lauraceae, ACCEPTED (https://www.gbif.org/species/7512166)
-5. Citrus nobilis, Citrus L., ACCEPTED (https://www.gbif.org/species/3190173)
-6. Cleome spinosa, Tarenaya Raf., ACCEPTED (https://www.gbif.org/species/8860549)
-7. Clerodendron serratum, Clerodendron, ACCEPTED (https://www.gbif.org/species/8355397)
-8. Coleus carnosus, Coleus Lour., ACCEPTED (https://www.gbif.org/species/5341313)
-9. Derris scandens, Fabaceae, ACCEPTED (https://www.gbif.org/species/5350316)
-10. Desmodium pulchellum, Fabaceae, ACCEPTED (https://www.gbif.org/species/2948568)
-11. Desmodium triflorum, Grona Lour., ACCEPTED (https://www.gbif.org/species/2967163)
-12. Echinacea spp., Echinacea Moench, REJECTED
-13. Elaeocarpus ganitrus, Elaeocarpus L., ACCEPTED (https://www.gbif.org/species/4031193)
-14. Hedyotis corymbosa, Rubiaceae, ACCEPTED (https://www.gbif.org/species/2912014)
-15. Ipomoea reptans, Convolvulaceae, ACCEPTED (https://www.gbif.org/species/4925685)
-16. Ipomoea sp., Ipomoea L., REJECTED
-17. Juniperus sp., Juniperus L., REJECTED
-18. Kyllinga brevifolia, Cyperaceae, ACCEPTED (https://www.gbif.org/species/2718737)
-19. Laurentia longiflora, Campanulaceae, ACCEPTED (https://www.gbif.org/species/5414185)
-20. Luffa cylindrica, Cucurbitaceae, ACCEPTED (https://www.gbif.org/species/12387721)
-21. Orthosiphon spicatus, Lamiaceae, ACCEPTED (https://www.gbif.org/species/3891892)
-22. Phaseolus radiatus, Vigna Savi, ACCEPTED (https://www.gbif.org/species/7895892)
-23. Piper methysticum, Piperaceae, ACCEPTED (https://www.gbif.org/species/3086358)
-24. Pyrus malus, Malus Mill., ACCEPTED (https://www.gbif.org/species/5362336)
-25. Quisqualis indica, Combretum Loefl., ACCEPTED (https://www.gbif.org/species/5421048)
-26. Rauwolfia serpentina, Rauvolfia serpentina (L.) Benth. ex Kurz, ACCEPTED
-27. Solanum indicum, Solanum L., ACCEPTED (https://www.gbif.org/species/2930111)
-28. Strychnos ligustrina, Strychnos L., ACCEPTED (https://www.gbif.org/species/8381474)
-29. Uncaria ferrea, Uncaria Schreb., UNSURE (https://www.gbif.org/species/5338116)
-30. Zingiber aromaticum, Zingiber Mill., ACCEPTED (https://www.gbif.org/species/2757132)
+Manual review results (input_name, matched_name, ACCEPTED/REJECTED):
+1. Begonia sp., Begonia L., UNREVIEWED
+2. Caesalpinia crista, Fabaceae, UNREVIEWED
+3. Canarium commune, Canarium L., UNREVIEWED
+4. Cinnamomum cassia, Lauraceae, UNREVIEWED
+5. Citrus nobilis, Citrus L., UNREVIEWED
+6. Cleome spinosa, Tarenaya Raf., UNREVIEWED
+7. Clerodendron serratum, Clerodendron, UNREVIEWED
+8. Coleus carnosus, Coleus Lour., UNREVIEWED
+9. Derris scandens, Fabaceae, UNREVIEWED
+10. Desmodium pulchellum, Fabaceae, UNREVIEWED
+11. Desmodium triflorum, Grona Lour., UNREVIEWED
+12. Echinacea spp., Echinacea Moench, UNREVIEWED
+13. Elaeocarpus ganitrus, Elaeocarpus L., UNREVIEWED
+14. Hedyotis corymbosa, Rubiaceae, UNREVIEWED
+15. Ipomoea reptans, Convolvulaceae, UNREVIEWED
+16. Ipomoea sp., Ipomoea L., UNREVIEWED
+17. Juniperus sp., Juniperus L., UNREVIEWED
+18. Kyllinga brevifolia, Cyperaceae, UNREVIEWED
+19. Laurentia longiflora, Campanulaceae, UNREVIEWED
+20. Luffa cylindrica, Cucurbitaceae, UNREVIEWED
+21. Orthosiphon spicatus, Lamiaceae, UNREVIEWED
+22. Phaseolus radiatus, Vigna Savi, UNREVIEWED
+23. Piper methysticum, Piperaceae, UNREVIEWED
+24. Pyrus malus, Malus Mill., UNREVIEWED
+25. Quisqualis indica, Combretum Loefl., UNREVIEWED
+26. Rauwolfia serpentina, Rauvolfia serpentina (L.) Benth. ex Kurz, UNREVIEWED
+27. Solanum indicum, Solanum L., UNREVIEWED
+28. Strychnos ligustrina, Strychnos L., UNREVIEWED
+29. Uncaria ferrea, Uncaria Schreb., UNREVIEWED
+30. Zingiber aromaticum, Zingiber Mill., UNREVIEWED
