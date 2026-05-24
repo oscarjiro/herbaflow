@@ -33,12 +33,19 @@ async def create_analysis(
     session: AsyncSession = Depends(get_session),
 ):
     from analysis.pipeline import start_pipeline  # imported here; pipeline.py created in Task 11
+    if not body.disease_ids:
+        raise HTTPException(
+            status_code=422,
+            detail="disease_ids must contain at least one disease ID",
+        )
     parameters = {
         **body.parameters,
         "_plant_ids": [str(pid) for pid in body.plant_ids],
         "_disease_ids": [str(did) for did in body.disease_ids],
     }
-    run = await analysis_repo.create_run(session, body.name, body.mode, parameters)
+    run = await analysis_repo.create_run(
+        session, body.name, body.mode, parameters, disease_id=body.disease_ids[0]
+    )
     background_tasks.add_task(
         start_pipeline, run.analysis_id, body.plant_ids, body.disease_ids, async_session_factory
     )

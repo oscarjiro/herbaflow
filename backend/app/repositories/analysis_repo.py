@@ -10,12 +10,14 @@ async def create_run(
     name: str,
     mode: str,
     parameters: dict,
+    disease_id: str | None = None,
 ) -> AnalysisRun:
     run = AnalysisRun(
         analysis_id=uuid4(),
         analysis_name=name,
         mode=mode,
         parameters=parameters,
+        disease_id=disease_id,
         status="pending",
         stage_results={},
         created_at=datetime.utcnow(),

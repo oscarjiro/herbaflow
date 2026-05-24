@@ -120,6 +120,7 @@ export interface AnalysisRunResponse {
   analysis_name: string
   status: AnalysisStatus
   mode: AnalysisMode
+  disease_id: string | null
   current_stage: number | null
   stage_results: Record<string, unknown>
   parameters: Record<string, unknown> | null

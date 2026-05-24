@@ -8,7 +8,7 @@ class CreateAnalysisRequest(BaseModel):
     name: str
     mode: str = "guided"
     plant_ids: list[str] = []
-    disease_ids: list[str] = []
+    disease_ids: list[str]
     parameters: dict[str, Any] = {}
 
 
@@ -28,6 +28,7 @@ class AnalysisRunResponse(BaseModel):
     analysis_name: str
     status: str
     mode: str
+    disease_id: str | None = None
     current_stage: int | None
     stage_results: dict[str, Any]
     parameters: dict[str, Any] | None
