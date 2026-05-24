@@ -129,4 +129,39 @@ Changes:
 
 ## P2-C: Alias Completeness
 
-<!-- TO BE FILLED BY P2-C SUBAGENT -->
+### Alias Type Distribution (Phase 0 baseline)
+
+| alias_type | count |
+|---|---|
+| enrichment_synonym | 30,036 |
+| source_compound_id | 12,424 |
+| cas_id | 12,391 |
+| canonical_name | 11,015 |
+| raw_metabolite_name | 4,213 |
+| iupac_name | 3,390 |
+
+**Total alias rows**: 73,469 across 11,305 compounds = ~6.5 aliases/compound on average.
+
+### Expected vs. Actual Alias Types
+
+The plan expected: `chembl_id`, `pubchem_cid`, `cas_id`, `inchi_key`, `synonym`.
+
+Actual coverage:
+- `chembl_id` / `pubchem_cid` / `inchi_key` — stored **directly on the `compounds` table** as dedicated columns, not as alias rows. This is by design; alias rows are for supplementary/external names.
+- `cas_id` ✓ — present (12,391 rows)
+- `synonym` → `enrichment_synonym` ✓ — present (30,036 rows, populated from ChEMBL synonym enrichment step)
+- `source_compound_id` — KNApSAcK-internal raw compound ID, used for provenance tracing
+- `raw_metabolite_name` — original scraped name before normalization
+- `iupac_name` ✓ — present (3,390 rows, from PubChem IUPACName)
+
+All expected external-linkage types are either present as alias rows or stored on the compounds table directly. No missing alias categories.
+
+### Zero-Alias Compounds
+
+**0 compounds have zero aliases.** Every compound has at least one alias row. No orphaned compounds.
+
+### Verdict
+
+Alias completeness is **good**. No bug in alias creation step (`etl/compounds/05_build_canonical/run.py`). The alias type set differs from initial expectations only because `chembl_id`/`pubchem_cid`/`inchi_key` are canonical foreign-key columns on the compounds table rather than alias rows — a sound schema design choice.
+
+**No code fix required.**
