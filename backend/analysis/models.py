@@ -109,7 +109,7 @@ class CompoundRecord:
     rotatable_bonds: int | None
     np_likeness_score: float | None
     is_pains_positive: bool = False
-    num_ro5_violations: int | None
+    num_ro5_violations: int | None = None
 
 
 @dataclass

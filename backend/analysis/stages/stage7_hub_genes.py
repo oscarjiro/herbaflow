@@ -7,19 +7,19 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = True) -> dict:
     if len(G.nodes) == 0:
-        return {"hub_genes": [], "threshold_degree": 0, "hub_betweenness_threshold": 0}
+        return {"ranked": [], "threshold_degree": 0, "threshold_betweenness": 0}
 
     degrees = dict(G.degree())
 
     if len(G.nodes) == 1:
         node = list(G.nodes)[0]
-        hub_genes_list = [{"gene_symbol": node, "degree": 0, "betweenness_centrality": 0.0,
-                            "closeness_centrality": 0.0, "eigenvector_centrality": 0.0,
-                            "is_hub": False, "is_bottleneck": False, "rank": 1}]
+        ranked_list = [{"gene_symbol": node, "degree": 0, "betweenness": 0.0,
+                        "closeness": 0.0, "eigenvector": 0.0,
+                        "is_hub": False, "is_hub_bottleneck": False, "rank": 1}]
         return {
-            "hub_genes": hub_genes_list,
+            "ranked": ranked_list,
             "threshold_degree": 0,
-            "hub_betweenness_threshold": 0, "threshold_betweenness": 0,
+            "threshold_betweenness": 0,
         }
 
     betweenness = nx.betweenness_centrality(G, normalized=True)
@@ -44,7 +44,7 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
         hub_degree_threshold = 0
         hub_bet_threshold = 0
 
-    hub_genes = []
+    ranked = []
     for node in G.nodes:
         deg = degrees[node]
         bet = betweenness[node]
@@ -56,39 +56,37 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
         entry = {
             "gene_symbol": node,
             "degree": deg,
-            "degree_centrality": float(deg),
-            "betweenness_centrality": round(bet, 6),
-            "closeness_centrality": round(closeness[node], 6),
-            "eigenvector_centrality": round(eigenvector[node], 6),
+            "betweenness": round(bet, 6),
+            "closeness": round(closeness[node], 6),
+            "eigenvector": round(eigenvector[node], 6),
             "is_hub": is_hub,
-            "is_bottleneck": is_hub_bottleneck,
+            "is_hub_bottleneck": is_hub_bottleneck,
         }
-        hub_genes.append({k: v for k, v in entry.items() if v is not None})
+        ranked.append({k: v for k, v in entry.items() if v is not None})
 
     if use_hub_bottleneck:
         # Hub+bottleneck composite score: Jeong et al., Nature 411:41-42, 2001.
         # Identifies nodes with both high degree (connectivity) and high betweenness
         # (information flow). Score = 0.5 * norm_degree + 0.5 * norm_betweenness.
-        max_deg = max((e["degree_centrality"] for e in hub_genes), default=1) or 1
-        max_bet = max((e["betweenness_centrality"] for e in hub_genes), default=1) or 1
-        for e in hub_genes:
+        max_deg = max((e["degree"] for e in ranked), default=1) or 1
+        max_bet = max((e["betweenness"] for e in ranked), default=1) or 1
+        for e in ranked:
             e["hub_score"] = round(
-                0.5 * (e["degree_centrality"] / max_deg) +
-                0.5 * (e["betweenness_centrality"] / max_bet),
+                0.5 * (e["degree"] / max_deg) +
+                0.5 * (e["betweenness"] / max_bet),
                 6,
             )
-        hub_genes.sort(key=lambda x: x["hub_score"], reverse=True)
+        ranked.sort(key=lambda x: x["hub_score"], reverse=True)
     else:
-        hub_genes.sort(key=lambda x: x["degree"], reverse=True)
+        ranked.sort(key=lambda x: x["degree"], reverse=True)
 
-    hub_genes = hub_genes[:top_n]
-    for i, r in enumerate(hub_genes):
+    ranked = ranked[:top_n]
+    for i, r in enumerate(ranked):
         r["rank"] = i + 1
 
     return {
-        "hub_genes": hub_genes,
+        "ranked": ranked,
         "threshold_degree": round(hub_degree_threshold, 2),
-        "hub_betweenness_threshold": round(hub_bet_threshold, 6) if isinstance(hub_bet_threshold, float) else 0,
         "threshold_betweenness": round(hub_bet_threshold, 6) if isinstance(hub_bet_threshold, float) else 0,
     }
 
@@ -119,7 +117,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     from app.models.target import Target
     from sqlmodel import select
 
-    for entry in result["hub_genes"]:
+    for entry in result["ranked"]:
         gene = entry["gene_symbol"]
         target_result = await session.exec(select(Target).where(Target.gene_symbol == gene))
         target = target_result.first()
@@ -130,9 +128,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             analysis_id=run.analysis_id,
             target_id=target.target_id,
             degree_centrality=float(entry["degree"]),
-            betweenness_centrality=entry["betweenness_centrality"],
-            closeness_centrality=entry["closeness_centrality"],
-            eigenvector_centrality=entry["eigenvector_centrality"],
+            betweenness_centrality=entry["betweenness"],
+            closeness_centrality=entry["closeness"],
+            eigenvector_centrality=entry["eigenvector"],
             rank_position=entry["rank"],
             created_at=datetime.utcnow(),
         )
