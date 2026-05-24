@@ -354,6 +354,25 @@ ALL_TABLES = [
     "targets", "target_aliases", "disease_targets",
 ]
 
+# All ETL-managed tables to wipe on --reset (reverse FK dependency order).
+# Excludes source_systems (pre-seeded reference data, never wiped).
+RESET_TABLES = [
+    "analysis_runs",
+    "import_batches",
+    "disease_targets", "target_aliases", "targets",
+    "disease_aliases", "diseases",
+    "plant_compounds", "compound_aliases", "compounds",
+    "plant_aliases", "plants",
+]
+
+
+def reset_all_tables(cur) -> None:
+    """Truncate all ETL-managed tables in dependency order + CASCADE."""
+    tables_sql = ", ".join(RESET_TABLES)
+    print(f"Resetting: {tables_sql}")
+    cur.execute(f"TRUNCATE {tables_sql} CASCADE")
+    print("All tables cleared.")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Load ETL CSVs into Supabase")
@@ -365,9 +384,22 @@ def main():
         "--upsert", action="store_true",
         help="Replace existing rows on conflict instead of skipping",
     )
+    parser.add_argument(
+        "--reset", action="store_true",
+        help=(
+            "Wipe all ETL-managed tables (TRUNCATE CASCADE) then re-seed from "
+            "current CSVs. Ignores --tables and --upsert — always loads all "
+            "tables fresh. Preserves source_systems."
+        ),
+    )
     args = parser.parse_args()
-    tables = set(args.tables) if args.tables else set(ALL_TABLES)
-    upsert = args.upsert
+
+    if args.reset:
+        tables = set(ALL_TABLES)  # always load everything after a reset
+        upsert = False            # tables are empty — no conflicts possible
+    else:
+        tables = set(args.tables) if args.tables else set(ALL_TABLES)
+        upsert = args.upsert
 
     conn = connect()
     conn.autocommit = False
@@ -375,6 +407,9 @@ def main():
     try:
         source_map = load_source_map(cur)
         print(f"source_systems: {len(source_map)} entries")
+
+        if args.reset:
+            reset_all_tables(cur)
 
         plants_batch    = create_batch(cur, "etl/plants/06_export")    if tables & {"plants", "plant_aliases"}                     else None
         compounds_batch = create_batch(cur, "etl/compounds/07_export") if tables & {"compounds", "compound_aliases", "plant_compounds"} else None
