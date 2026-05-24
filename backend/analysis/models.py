@@ -38,6 +38,11 @@ class AdmeParams:
 class TargetParams:
     min_pchembl: float = 5.0
     human_only: bool = True
+    min_assay_confidence: int = 7
+    # ChEMBL assay confidence score: 9=direct single protein, 8=direct protein,
+    # 7=functional assay, ≤6=indirect/cell-based/organism-level assay.
+    # Use 7 for standard NP target identification (functional assays and above).
+    # Set 0 to disable filter. (ChEMBL documentation, 2024)
 
 
 @dataclass
@@ -53,6 +58,11 @@ class PpiParams:
 @dataclass
 class HubGeneParams:
     top_n: int = 20
+    use_hub_bottleneck: bool = True
+    # Hub+bottleneck composite score: 0.5 × norm_degree + 0.5 × norm_betweenness.
+    # Identifies nodes with both high connectivity and high information flow.
+    # (Jeong et al., Nature 411:41-42, 2001)
+    # Set False to rank by degree centrality only (legacy behaviour).
 
 
 @dataclass

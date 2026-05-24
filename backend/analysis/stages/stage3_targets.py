@@ -59,6 +59,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             list(chembl_to_compound.keys()),
             min_pchembl=config.target.min_pchembl,
             human_only=config.target.human_only,
+            min_assay_confidence=config.target.min_assay_confidence,
         )
 
     # Build gene -> compound_ids mapping

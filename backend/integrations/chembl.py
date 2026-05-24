@@ -30,6 +30,7 @@ async def get_bioactivities(
     molecule_chembl_id: str,
     min_pchembl: float = 5.0,
     human_only: bool = True,
+    min_assay_confidence: int = 7,
 ) -> list[ChemblBioactivity]:
     params = {
         "molecule_chembl_id": molecule_chembl_id,
@@ -39,6 +40,8 @@ async def get_bioactivities(
     }
     if human_only:
         params["target_organism"] = "Homo sapiens"
+    if min_assay_confidence > 0:
+        params["assay_confidence_score__gte"] = min_assay_confidence
 
     async with SEMAPHORE:
         try:
@@ -114,12 +117,13 @@ async def get_targets_for_compounds(
     chembl_ids: list[str],
     min_pchembl: float = 5.0,
     human_only: bool = True,
+    min_assay_confidence: int = 7,
 ) -> dict[str, list[ChemblTarget]]:
     target_cache: dict[str, ChemblTarget] = {}
     compound_targets: dict[str, list[ChemblTarget]] = {cid: [] for cid in chembl_ids}
 
     async with httpx.AsyncClient() as client:
-        tasks = [get_bioactivities(client, cid, min_pchembl, human_only) for cid in chembl_ids]
+        tasks = [get_bioactivities(client, cid, min_pchembl, human_only, min_assay_confidence) for cid in chembl_ids]
         all_bioactivities = await asyncio.gather(*tasks)
 
         unique_target_ids = set()
