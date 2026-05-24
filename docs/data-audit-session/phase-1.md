@@ -256,3 +256,33 @@ After ETL re-run from step 03 onward:
 - `accepted_plants.csv` will carry `family_name` through unchanged (run_part1.py preserves all input columns).
 - `plants.csv` (the DB seed) will have `family_name` populated for all successfully matched plants (~519 rows).
 - ETL re-run is deferred — code-only fix.
+
+---
+
+## P1-D: ID Format Convention
+
+> Applied: 2026-05-24
+
+### Decision
+
+User selected Option C: Full bare UUID migration. All entity IDs use bare UUID v5, no prefixes.
+
+### Changes Applied
+
+1. `backend/analysis/stages/stage3_targets.py`: replaced `tgt_` + MD5 target IDs and `ct_` + MD5 compound-target IDs with bare UUID v5 via `uuid.uuid5()`. `TARGET_NS` is replicated from `etl/disease_targets/utils.py` (value `421e4557-e00d-533d-ab26-5f7b761b9483`, derived from `uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.targets")`). `canonical_key` written to Target rows now uses `uniprot:{acc}` / `gene:{symbol}` format, matching ETL convention.
+2. Plant IDs: current ETL (`etl/plants/utils.py`) already generates bare UUIDs. Existing DB data (`pl_` prefix format) will be replaced during ETL re-run with `--reset` (see Phase 6 ETL re-run checklist).
+
+### ID Convention (final)
+
+| Entity | Format | Namespace derivation | Input key |
+|---|---|---|---|
+| `plant_id` | bare UUID v5 | `uuid.uuid5(NAMESPACE_DNS, "herbaflow.plants")` in `etl/plants/utils.py` | `gbif_accepted_usage_key` |
+| `compound_id` | bare UUID v5 | `uuid.uuid5(NAMESPACE_DNS, "herbaflow.compounds")` in `etl/compounds/utils.py` | InChIKey or canonical key |
+| `target_id` | bare UUID v5 | `uuid.uuid5(NAMESPACE_DNS, "herbaflow.targets")` in `etl/disease_targets/utils.py` — replicated in `backend/analysis/stages/stage3_targets.py` | `uniprot:{acc}` or `gene:{symbol}` |
+| `compound_target_id` | bare UUID v5 | `uuid.uuid5(NAMESPACE_DNS, "herbaflow.compound_targets")` in `backend/analysis/stages/stage3_targets.py` (backend-only) | `{compound_id}:{target_id}` |
+| `disease_id` | bare UUID v5 | `uuid.uuid5(NAMESPACE_DNS, "herbaflow.diseases")` in `etl/diseases/utils.py` | ontology ID (DOID/MeSH) |
+| `disease_target_id` | bare UUID v5 | `uuid.uuid5(NAMESPACE_DNS, "herbaflow.disease_targets")` in `etl/disease_targets/utils.py` | `{disease_id}:{target_id}` |
+
+### Data Migration Note
+
+Existing plant rows with `pl_` prefix IDs will be replaced when the plants ETL pipeline is re-run and `load.py --reset` is executed (Phase 6 checklist). No code migration needed — the ETL code already generates correct bare UUIDs after P1-B fix.
