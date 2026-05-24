@@ -31,10 +31,17 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     if not hub_genes:
         return {"total_significant": 0, "go_bp": [], "go_mf": [], "go_cc": [], "kegg": []}
 
+    # Background: Stage 5 overlap genes — standard for NP enrichment (Tang et al. 2022, Ru et al. 2019).
+    # Using the overlap gene set as background instead of the full genome (~20,000 genes)
+    # produces biologically specific enrichment and reduces false positives.
+    stage5 = (run.stage_results or {}).get("stage_5", {})
+    background = stage5.get("overlap") or None  # list[str] of gene symbols, or None if absent
+
     results = await run_enrichment(
         gene_symbols=hub_genes,
         sources=config.enrichment.sources,
         fdr_threshold=config.enrichment.fdr_threshold,
+        background=background,
     )
 
     grouped = _group_by_source(results)

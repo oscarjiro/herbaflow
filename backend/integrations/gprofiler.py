@@ -22,8 +22,16 @@ async def run_enrichment(
     sources: list[str] | None = None,
     fdr_threshold: float = 0.05,
     organism: str = "hsapiens",
+    background: list[str] | None = None,
 ) -> list[EnrichmentResult]:
-    """Run GO and KEGG enrichment via g:Profiler. Returns results with fdr <= fdr_threshold."""
+    """Run GO and KEGG enrichment via g:Profiler. Returns results with fdr <= fdr_threshold.
+
+    Args:
+        background: Custom statistical background gene set. When provided, g:Profiler
+            uses only these genes as the reference universe instead of the full genome.
+            Standard for NP network pharmacology: pass Stage 5 overlap genes.
+            (Tang et al. 2022, Ru et al. 2019)
+    """
     if not gene_symbols:
         return []
 
@@ -38,6 +46,8 @@ async def run_enrichment(
         "domain_scope": "annotated",
         "no_evidences": False,
     }
+    if background:
+        payload["background"] = background
 
     async with httpx.AsyncClient() as client:
         try:
