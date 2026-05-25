@@ -174,7 +174,7 @@ export interface TargetResult {
   compound_count: number
   compound_ids: string[]
   /** Source that identified this target: "chembl" (primary) or "pubchem_bioassay" (fallback) */
-  source: 'chembl' | 'pubchem_bioassay'
+  source: 'chembl' | 'pubchem_bioassay' | 'user_provided'
 }
 
 export interface UncoveredCompound {
