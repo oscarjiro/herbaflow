@@ -14,6 +14,7 @@ from app.schemas.analysis import (
     CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse,
     ResetFromRequest, ApproveRequest,
     AddUserTargetRequest, AddUserTargetResponse,
+    InjectCompoundsRequest, InjectCompoundsResponse,
 )
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
@@ -632,6 +633,117 @@ async def import_targets(
     )
 
     return ImportTargetsResponse(imported=imported, skipped=skipped)
+
+
+@router.post("/{analysis_id}/inject-compounds", response_model=InjectCompoundsResponse, status_code=200)
+async def inject_compounds(
+    analysis_id: UUID,
+    body: InjectCompoundsRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Validate SMILES/InChI strings via PubChem and inject as stage 1+2 results.
+
+    Enables manual compound input mode (T4.3): stage 3 will read the injected
+    compounds from stage_results["stage_2"]["all_active_compound_ids"] as usual,
+    but those compound IDs belong to manually-provided structures rather than
+    plant-sourced ones. Because manual compounds are not in the compounds table,
+    stage 3 uses the inline target-lookup path (ChEMBL/PubChem by InChIKey).
+
+    After injection the endpoint:
+    1. Stores stage_1 and stage_2 synthetic results in stage_results.
+    2. Sets _input_mode = "manual_compounds" in parameters.
+
+    The frontend is responsible for then starting the pipeline.
+    """
+    import httpx
+    from integrations.pubchem_compound import validate_compounds_batch
+
+    if not body.compounds:
+        raise HTTPException(status_code=422, detail="compounds list must not be empty")
+    if len(body.compounds) > 100:
+        raise HTTPException(status_code=422, detail="compounds list must not exceed 100 items")
+
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        validated, failed = await validate_compounds_batch(body.compounds, client)
+
+    if not validated:
+        return InjectCompoundsResponse(injected=0, failed=failed)
+
+    # Build stage_1 synthetic result — mimics stage1_selection.run() output.
+    # Stage 2 reads compound_ids from stage_1; stage 3 reads all_active_compound_ids
+    # from stage_2. We populate both so the chain works unchanged.
+    compound_ids = [c["compound_id"] for c in validated]
+
+    stage1_compounds = [
+        {
+            "compound_id": c["compound_id"],
+            "canonical_name": c["canonical_name"],
+            "plant_ids": [],  # no plant source for manual input
+        }
+        for c in validated
+    ]
+    stage1_result = {
+        "compound_ids": compound_ids,
+        "compound_count": len(validated),
+        "plant_ids": [],
+        "total_compounds": len(validated),
+        "plants_covered": 0,
+        "compounds": stage1_compounds,
+        # Store full property data for downstream use (inchikey, mw, etc.)
+        "_manual_compounds": validated,
+    }
+
+    # Build stage_2 synthetic result — mimics stage2_adme.run() output.
+    pass_count = sum(1 for c in validated if c.get("adme_pass"))
+    stage2_compounds = [
+        {
+            "compound_id": c["compound_id"],
+            "canonical_name": c["canonical_name"],
+            "plant_ids": [],
+            "adme_pass": c["adme_pass"],
+            "is_np_exception": c["is_np_exception"],
+            "is_pains_positive": c["is_pains_positive"],
+            "molecular_weight": c["molecular_weight"],
+            "logp": c["logp"],
+            "tpsa": c["tpsa"],
+            "hbond_donors": c["hbond_donors"],
+            "hbond_acceptors": c["hbond_acceptors"],
+            "np_likeness_score": c["np_likeness_score"],
+            "rotatable_bonds": c["rotatable_bonds"],
+        }
+        for c in validated
+    ]
+    # Stage 3 reads all_active_compound_ids from stage_2 to get its work list.
+    # For manual input all validated compounds are "active" (ADME filter already applied).
+    stage2_result = {
+        "passed": pass_count,
+        "failed": len(validated) - pass_count,
+        "np_exceptions": 0,
+        "passed_compound_ids": [c["compound_id"] for c in validated if c.get("adme_pass")],
+        "np_exception_compound_ids": [],
+        "all_active_compound_ids": compound_ids,  # stage 3 reads this
+        "compounds": stage2_compounds,
+        # Store inchikey map so stage3 can use PubChem bioassay lookup by inchikey
+        "_inchikey_map": {c["compound_id"]: c["inchikey"] for c in validated},
+    }
+
+    await analysis_repo.update_run_status(
+        session,
+        analysis_id,
+        status=run.status,  # leave status unchanged — pipeline not started yet
+        stage_results={"stage_1": stage1_result, "stage_2": stage2_result},
+    )
+    await analysis_repo.merge_run_parameters(
+        session,
+        analysis_id,
+        {"_input_mode": "manual_compounds"},
+    )
+
+    return InjectCompoundsResponse(injected=len(validated), failed=failed)
 
 
 @router.post("/{analysis_id}/targets/user", response_model=AddUserTargetResponse, status_code=201)

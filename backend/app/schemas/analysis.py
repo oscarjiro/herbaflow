@@ -64,3 +64,12 @@ class AddUserTargetResponse(BaseModel):
     gene_symbol: str
     uniprot_id: str | None
     protein_name: str | None
+
+
+class InjectCompoundsRequest(BaseModel):
+    compounds: list[str]  # SMILES or InChI strings, 1–100 items
+
+
+class InjectCompoundsResponse(BaseModel):
+    injected: int          # number successfully validated and stored
+    failed: list[str]      # raw input strings that failed PubChem validation
