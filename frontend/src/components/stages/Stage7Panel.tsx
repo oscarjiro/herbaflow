@@ -3,8 +3,18 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DataSources } from '@/components/shared/DataSources'
 import { ExportButton } from '@/components/shared/ExportButton'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage7Result, HubGeneResult } from '@/types/api'
+
+const SOURCES = [
+  {
+    name: 'NetworkX',
+    url: 'https://networkx.org/',
+    description: 'Graph analysis library used for centrality computation. Degree centrality normalized 0–1 (Freeman 1979): deg(v)/(n−1). Betweenness, closeness, and eigenvector centralities computed with built-in NetworkX algorithms.',
+    citation: 'Hagberg AA, Schult DA, Swart PJ (2008). Exploring network structure, dynamics, and function using NetworkX. Proc 7th Python in Science Conf, pp. 11–15.',
+  },
+]
 
 interface Stage7PanelProps {
   stage: number
@@ -121,6 +131,8 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
           <span className="font-medium text-hf-fg2">Eigenvector</span> — influence weighted by neighbour influence (analogous to PageRank).
         </p>
       </div>
+
+      <DataSources sources={SOURCES} />
     </div>
   )
 }

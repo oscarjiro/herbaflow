@@ -5,9 +5,31 @@ import { StatCard } from '@/components/shared/StatCard'
 import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DataSources } from '@/components/shared/DataSources'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, Stage3Result, TargetResult, UncoveredCompound, STPTargetImport } from '@/types/api'
 import { parseSTPCsv, generateSTPExportCsv } from '@/lib/stp'
 import { api } from '@/lib/api'
+
+const SOURCES = [
+  {
+    name: 'ChEMBL',
+    url: 'https://www.ebi.ac.uk/chembl/',
+    description: 'Primary target source. Curated bioactivity database of human protein targets. Filtered to pChEMBL ≥ 5.0 (IC₅₀ ≤ 10µM) and assay confidence ≥ 7.',
+    citation: 'Zdrazil B et al. (2024). The ChEMBL Database in 2023. Nucleic Acids Res 52(D1):D1180–D1192.',
+  },
+  {
+    name: 'PubChem BioAssay',
+    url: 'https://pubchem.ncbi.nlm.nih.gov/',
+    description: 'Secondary target source. Queried for compounds with zero ChEMBL targets. Aggregates BindingDB, STITCH, and 300+ bioactivity sources via PubChem PUG REST API.',
+    citation: 'Kim S et al. (2023). PubChem 2023 update. Nucleic Acids Res 51(D1):D1373–D1380.',
+  },
+  {
+    name: 'SwissTargetPrediction',
+    url: 'https://www.swisstargetprediction.ch/',
+    description: 'Supplementary (manual) source. Ligand-based similarity + machine learning target predictions. User exports compound SMILES, predicts externally, then imports results via the STP import panel.',
+    citation: 'Daina A, Michielin O, Zoete V (2019). SwissTargetPrediction: updated data and new features. Nucleic Acids Res 47(W1):W357–W364.',
+  },
+]
 
 interface Stage3PanelProps {
   stage: number
@@ -448,11 +470,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
             filterKeys={['gene_symbol']}
           />
 
-          <p className="text-xs text-hf-fg3 font-sans">
-            <span className="font-medium text-hf-fg2">Primary source:</span> ChEMBL (human protein targets, pChEMBL ≥ 5.0 = IC₅₀ ≤ 10µM). ·{' '}
-            <span className="font-medium text-hf-fg2">Secondary source:</span> PubChem BioAssay — queried for compounds with zero ChEMBL targets; aggregates BindingDB, STITCH, and 300+ bioactivity sources (Kim et al. <em>Nucleic Acids Res</em> 2023, 51:D1373–D1380). ·{' '}
-            <span className="font-medium text-hf-fg2">Supplementary (manual):</span> SwissTargetPrediction — user-imported computational predictions for uncovered compounds (Daina et al. <em>Nucleic Acids Res</em> 2019, 47:W357–W364).
-          </p>
+          <DataSources sources={SOURCES} />
         </>
       )}
     </div>

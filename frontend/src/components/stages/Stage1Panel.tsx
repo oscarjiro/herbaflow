@@ -3,7 +3,16 @@ import { StatCard } from '@/components/shared/StatCard'
 import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DataSources } from '@/components/shared/DataSources'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage1Result, CompoundResult } from '@/types/api'
+
+const SOURCES = [
+  {
+    name: 'KNApSAcK Core',
+    url: 'https://www.knapsackfamily.com/KNApSAcK/',
+    description: 'Metabolite–species relationship database mapping plant-derived compounds to their source organisms. Provides compound canonical names, molecular identifiers, and plant species associations.',
+  },
+]
 
 interface Stage1PanelProps {
   stage: number
@@ -64,9 +73,7 @@ export function Stage1Panel({ stage, analysis, status }: Stage1PanelProps) {
             filterKeys={['canonical_name']}
           />
 
-          <p className="text-xs text-hf-fg3 font-sans">
-            <span className="font-medium text-hf-fg2">Source:</span> KNApSAcK Core — metabolite–species database mapping compounds to plant species.
-          </p>
+          <DataSources sources={SOURCES} />
         </>
       )}
     </div>

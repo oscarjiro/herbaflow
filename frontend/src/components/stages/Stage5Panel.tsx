@@ -1,7 +1,17 @@
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DataSources } from '@/components/shared/DataSources'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage5Result } from '@/types/api'
+
+const SOURCES = [
+  {
+    name: 'SciPy',
+    url: 'https://scipy.org/',
+    description: 'Statistical computing library. Hypergeometric distribution used for gene-set overlap significance testing (equivalent to Fisher\'s exact test for one-sided 2×2 tables). Background = human proteome size (N = 20,000).',
+    citation: 'Virtanen P et al. (2020). SciPy 1.0: fundamental algorithms for scientific computing in Python. Nature Methods 17:261–272.',
+  },
+]
 
 interface Stage5PanelProps {
   stage: number
@@ -126,6 +136,8 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
           </div>
         )}
       </div>
+
+      <DataSources sources={SOURCES} />
     </div>
   )
 }

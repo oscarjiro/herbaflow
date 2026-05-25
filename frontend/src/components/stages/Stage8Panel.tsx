@@ -3,7 +3,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DataSources } from '@/components/shared/DataSources'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, PathwayTerm, PathwaySource } from '@/types/api'
+
+const DATA_SOURCES = [
+  {
+    name: 'g:Profiler',
+    url: 'https://biit.cs.ut.ee/gprofiler/',
+    description: 'Over-representation analysis (ORA) across GO (BP, MF, CC) and KEGG pathway databases. Input: hub genes from Stage 7. Background: all compound targets from Stage 3 (the study protein universe). FDR corrected via Benjamini–Hochberg.',
+    citation: 'Raudvere U et al. (2019). g:Profiler: a web server for functional enrichment analysis and conversions of gene lists. Nucleic Acids Res 47(W1):W191–W198.',
+  },
+]
 
 interface Stage8PanelProps {
   stage: number
@@ -150,6 +160,8 @@ export function Stage8Panel({ stage, analysis, status }: Stage8PanelProps) {
           <span className="font-medium text-hf-fg2">Correction:</span> Benjamini–Hochberg FDR
         </p>
       </div>
+
+      <DataSources sources={DATA_SOURCES} />
     </div>
   )
 }

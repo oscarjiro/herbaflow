@@ -4,8 +4,23 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DataSources } from '@/components/shared/DataSources'
 import { cn } from '@/lib/utils'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, AdmeCompoundResult } from '@/types/api'
+
+const SOURCES = [
+  {
+    name: 'PubChem Compound',
+    url: 'https://pubchem.ncbi.nlm.nih.gov/',
+    description: 'Physicochemical property data (MW, LogP, TPSA, HBD, HBA, rotatable bonds, NP-likeness) sourced from PubChem compound records computed via RDKit during ETL.',
+    citation: 'Kim S et al. (2023). PubChem 2023 update. Nucleic Acids Res 51(D1):D1373–D1380.',
+  },
+  {
+    name: 'RDKit',
+    url: 'https://www.rdkit.org/',
+    description: 'Open-source cheminformatics toolkit used to compute molecular descriptors (ADME properties) and PAINS pattern matching from SMILES strings.',
+  },
+]
 
 interface Stage2PanelProps {
   stage: number
@@ -182,6 +197,8 @@ export function Stage2Panel({ stage, analysis, status }: Stage2PanelProps) {
               <span className="font-medium text-hf-fg2">PAINS:</span> Pan-Assay INterference compoundS — structural motifs known to produce false positives in biochemical assays. Flagged for awareness; not excluded from the pipeline.
             </p>
           </div>
+
+          <DataSources sources={SOURCES} />
         </>
       )}
     </div>

@@ -6,9 +6,19 @@ import Cytoscape from 'cytoscape'
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DataSources } from '@/components/shared/DataSources'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage6Result } from '@/types/api'
 
 Cytoscape.use(fcose)
+
+const SOURCES = [
+  {
+    name: 'STRING-DB',
+    url: 'https://string-db.org/',
+    description: 'Protein–protein interaction network database. Interactions filtered to human (taxon 9606) at the configured confidence threshold (default 0.4 = medium confidence). Edge weight proportional to combined interaction score (0–1).',
+    citation: 'Szklarczyk D et al. (2023). The STRING database in 2023: protein–protein association networks for any of 12 000+ organisms. Nucleic Acids Res 51(D1):D638–D646.',
+  },
+]
 
 interface Stage6PanelProps {
   stage: number
@@ -226,6 +236,8 @@ export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
           <span className="font-medium text-hf-fg2">Hub criterion:</span> overlap gene with degree &gt; µ + σ (mean + 1 SD of degree distribution). Hub+Bottleneck additionally requires betweenness &gt; µ + σ.
         </p>
       </div>
+
+      <DataSources sources={SOURCES} />
     </div>
   )
 }

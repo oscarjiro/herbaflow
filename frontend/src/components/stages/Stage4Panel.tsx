@@ -4,7 +4,17 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { DataSources } from '@/components/shared/DataSources'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage4Result, DiseaseTargetResult } from '@/types/api'
+
+const SOURCES = [
+  {
+    name: 'Open Targets Platform',
+    url: 'https://platform.opentargets.org/',
+    description: 'Disease–gene association scores (0–1) integrating genetic, genomic, and literature evidence via harmonic sum across evidence types. Pre-fetched to DB cache for reproducibility; falls back to live API when cache is empty.',
+    citation: 'Ochoa D et al. (2021). Open Targets Platform: supporting systematic drug–target identification and prioritisation. Nucleic Acids Res 49:D1302–D1310.',
+  },
+]
 
 interface Stage4PanelProps {
   stage: number
@@ -85,6 +95,8 @@ export function Stage4Panel({ stage, analysis, status }: Stage4PanelProps) {
               <span className="font-medium text-hf-fg2">Source:</span> <code className="text-hf-fg2">DB cache</code> = pre-fetched Open Targets data (ensures reproducibility); <code className="text-hf-fg2">API</code> = live Open Targets query at analysis time.
             </p>
           </div>
+
+          <DataSources sources={SOURCES} />
         </>
       )}
     </div>
