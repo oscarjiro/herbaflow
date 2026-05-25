@@ -6,10 +6,14 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { AddTargetForm } from '@/components/shared/AddTargetForm'
+import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
+import { useAddUserTarget } from '@/hooks/useAddUserTarget'
+import { useRemoveUserTarget } from '@/hooks/useRemoveUserTarget'
+import { useResetFromStage } from '@/hooks/useResetFromStage'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, Stage3Result, TargetResult, UncoveredCompound, STPTargetImport } from '@/types/api'
 import { parseSTPCsv, generateSTPExportCsv } from '@/lib/stp'
 import { api } from '@/lib/api'
-import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 
 const SOURCES = [
   {
@@ -46,64 +50,82 @@ type TargetRow = TargetResult & Record<string, unknown>
 const SOURCE_LABELS: Record<string, string> = {
   chembl: 'ChEMBL',
   pubchem_bioassay: 'PubChem BioAssay',
+  user_provided: 'User',
 }
 
 const SOURCE_CLASSES: Record<string, string> = {
   chembl: 'bg-hf-sage/20 text-hf-sage',
   pubchem_bioassay: 'bg-hf-terracotta/20 text-hf-terracotta',
+  user_provided: 'bg-hf-border text-hf-fg2',
 }
-
-const columns: ColumnDef<TargetRow>[] = [
-  {
-    key: 'gene_symbol',
-    header: 'Gene Symbol',
-    sortable: true,
-    className: 'font-mono',
-  },
-  {
-    key: 'compound_count',
-    header: 'Binding Compounds',
-    sortable: true,
-  },
-  {
-    key: 'uniprot_id',
-    header: 'UniProt ID',
-    className: 'font-mono text-hf-fg3',
-  },
-  {
-    key: 'source',
-    header: 'Source',
-    render: (value) => {
-      const src = value as string
-      return (
-        <span className={`text-xs px-2 py-0.5 rounded font-mono ${SOURCE_CLASSES[src] ?? 'bg-hf-border text-hf-fg3'}`}>
-          {SOURCE_LABELS[src] ?? src}
-        </span>
-      )
-    },
-  },
-]
 
 export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }: Stage3PanelProps) {
   const result = analysis?.stage_results[`stage_${stage}`] as Stage3Result | null | undefined
   const [showAllGenes, setShowAllGenes] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
+
+  const addTarget = useAddUserTarget(_analysisId)
+  const removeTarget = useRemoveUserTarget(_analysisId)
+  const resetFromStage = useResetFromStage(_analysisId)
+
+  // columns defined inside component to close over removeTarget
+  const columns: ColumnDef<TargetRow>[] = [
+    {
+      key: 'gene_symbol',
+      header: 'Gene Symbol',
+      sortable: true,
+      className: 'font-mono',
+    },
+    {
+      key: 'compound_count',
+      header: 'Binding Compounds',
+      sortable: true,
+    },
+    {
+      key: 'uniprot_id',
+      header: 'UniProt ID',
+      className: 'font-mono text-hf-fg3',
+    },
+    {
+      key: 'source',
+      header: 'Source',
+      render: (value) => {
+        const src = value as string
+        return (
+          <span className={`text-xs px-2 py-0.5 rounded font-mono ${SOURCE_CLASSES[src] ?? 'bg-hf-border text-hf-fg3'}`}>
+            {SOURCE_LABELS[src] ?? src}
+          </span>
+        )
+      },
+    },
+    {
+      key: '_remove' as keyof TargetRow,
+      header: '',
+      render: (_, row) => (
+        <button
+          onClick={() => removeTarget.mutate((row as TargetRow).gene_symbol as string)}
+          disabled={removeTarget.isPending}
+          title="Remove target from this analysis"
+          className="text-xs text-hf-fg3 hover:text-hf-terracotta transition-colors disabled:opacity-40"
+        >
+          ✕
+        </button>
+      ),
+    },
+  ]
 
   const genes = result?.targets.map(t => t.gene_symbol) ?? []
   const visibleGenes = showAllGenes ? genes : genes.slice(0, GENE_PREVIEW_COUNT)
 
-  // Stage 2 result contains all ADME-passed compounds (needed for import dropdown in Task 6)
   const stage2Result = analysis?.stage_results['stage_2'] as Stage2Result | null | undefined
   const allCompounds = stage2Result?.compounds ?? []
 
   const uncoveredCompounds: UncoveredCompound[] = result?.uncovered_compounds ?? []
-  // Use Stage 2 compounds for total count when available.
-  // If Stage 2 result not loaded, hide the X/Y line (coveredCount = null signals this).
   const totalCompounds = allCompounds.length
   const coveredCount = totalCompounds > 0 ? totalCompounds - uncoveredCompounds.length : null
 
-  // Note: _analysisId (from props) is used in Task 6's import handler
   const [showUncovered, setShowUncovered] = useState(false)
-  // showImportPanel read in Task 6 (import panel rendering)
   const [showImportPanel, setShowImportPanel] = useState(false)
 
   const handleExportSTP = useCallback(() => {
@@ -121,7 +143,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Import panel state
   const [selectedCompoundId, setSelectedCompoundId] = useState<string>('')
   const [rawCsvText, setRawCsvText] = useState<string>('')
   const [minProbability, setMinProbability] = useState<number>(0.1)
@@ -174,7 +195,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
         targets: parsedTargets,
       })
       setImportResult(response)
-      // Reset panel
       setRawCsvText('')
       setParsedTargets([])
       setSelectedCompoundId('')
@@ -184,9 +204,21 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
     } finally {
       setImporting(false)
     }
-    // Fire-and-forget invalidation — failure is non-critical, import already succeeded
     queryClient.invalidateQueries({ queryKey: ['analysis', _analysisId] }).catch(() => {})
   }, [selectedCompoundId, parsedTargets, _analysisId, queryClient])
+
+  const handleAddTarget = async (input: string) => {
+    setAddError(null)
+    const isAccession = /^[A-Z][0-9][A-Z0-9]{3}[0-9]$/i.test(input.trim())
+    try {
+      await addTarget.mutateAsync(
+        isAccession ? { uniprot_id: input.trim() } : { gene_symbol: input.trim() }
+      )
+      setShowAddForm(false)
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to add target')
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -207,12 +239,28 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
             currentParams={analysis?.parameters ?? null}
             canRerun={status?.mode === 'guided'}
           />
+
+          {/* Stale banner */}
+          {result.user_modified && (
+            <div className="rounded-md border border-hf-border bg-hf-bg2 px-4 py-3 flex items-center justify-between">
+              <p className="text-xs font-sans text-hf-fg2">
+                ⚠ Stage 3 was modified — downstream results (Stages 5–8) are stale.
+              </p>
+              <button
+                onClick={() => resetFromStage.mutate({ stage: 5, body: { rerun: true } })}
+                disabled={resetFromStage.isPending}
+                className="text-xs px-3 py-1 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans disabled:opacity-40"
+              >
+                {resetFromStage.isPending ? 'Starting…' : 'Rerun Stages 5–8'}
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <StatCard label="Targets Found" value={result.target_count} />
             <StatCard label="Coverage" value={`${(result.coverage_pct ?? 0).toFixed(1)}%`} />
           </div>
 
-          {/* Coverage section — Layout A: between stat cards and gene cloud */}
           {uncoveredCompounds.length > 0 && (
             <div className="rounded-md border border-hf-border bg-hf-bg2 p-4 space-y-3">
               <div className="flex items-center justify-between">
@@ -243,7 +291,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 </div>
               </div>
 
-              {/* Uncovered compounds list */}
               <div>
                 <button
                   onClick={() => setShowUncovered(prev => !prev)}
@@ -269,7 +316,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
             </div>
           )}
 
-          {/* All-covered state — show brief note and import button */}
           {uncoveredCompounds.length === 0 && result && (
             <div className="rounded-md border border-hf-border bg-hf-bg2 px-4 py-3 flex items-center justify-between">
               <p className="text-xs font-sans text-hf-fg3">
@@ -284,7 +330,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
             </div>
           )}
 
-          {/* Import panel */}
           {showImportPanel && (
             <div className="rounded-md border border-hf-border bg-hf-bg2 p-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -302,7 +347,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 </button>
               </div>
 
-              {/* Step 1: Compound selector */}
               <div className="space-y-1">
                 <label className="text-xs font-sans text-hf-fg3">
                   Importing targets for:
@@ -324,7 +368,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 </select>
               </div>
 
-              {/* Step 2: File upload + paste */}
               <div className="space-y-2">
                 <label className="text-xs font-sans text-hf-fg3">
                   Upload or paste STP result CSV:
@@ -365,7 +408,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 />
               </div>
 
-              {/* Step 3: Probability threshold */}
               <div className="flex items-center gap-3">
                 <label className="text-xs font-sans text-hf-fg3 shrink-0">
                   Min probability:
@@ -384,12 +426,10 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 </span>
               </div>
 
-              {/* Parse error */}
               {parseError && (
                 <p className="text-xs font-sans text-hf-terracotta">{parseError}</p>
               )}
 
-              {/* Preview */}
               {parsedTargets.length > 0 && !parseError && (
                 <div className="space-y-1">
                   <p className="text-xs font-sans text-hf-fg3">
@@ -418,7 +458,6 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 </div>
               )}
 
-              {/* Import result success message */}
               {importResult && (
                 <p className="text-xs font-sans text-hf-fg2">
                   ✓ Imported {importResult.imported} targets
@@ -426,12 +465,10 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 </p>
               )}
 
-              {/* Import error */}
               {importError && (
                 <p className="text-xs font-sans text-hf-terracotta">{importError}</p>
               )}
 
-              {/* Confirm button */}
               <button
                 onClick={handleImport}
                 disabled={!selectedCompoundId || parsedTargets.length === 0 || importing}
@@ -447,7 +484,26 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
           )}
 
           <div>
-            <p className="text-xs font-sans text-hf-fg3 mb-2">Gene Targets</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-sans text-hf-fg3">Gene Targets</p>
+              <button
+                onClick={() => { setShowAddForm(prev => !prev); setAddError(null) }}
+                className="text-xs px-2 py-0.5 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans"
+              >
+                {showAddForm ? 'Cancel' : '＋ Add Target'}
+              </button>
+            </div>
+
+            {showAddForm && (
+              <div className="mb-3">
+                <AddTargetForm
+                  onSubmit={handleAddTarget}
+                  loading={addTarget.isPending}
+                  error={addError}
+                />
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-1.5">
               {visibleGenes.map(gene => (
                 <span
