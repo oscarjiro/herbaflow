@@ -513,6 +513,46 @@ def _remove_target_from_stage3(stage3: dict, gene_symbol: str) -> dict:
     return result
 
 
+def _add_target_to_stage4(
+    stage4: dict,
+    gene_symbol: str,
+    uniprot_id: str | None,
+    protein_name: str | None,
+    disease_name: str,
+) -> dict:
+    """Inject a user-provided target into a stage_4 result dict (deep copy — no mutation)."""
+    result = copy.deepcopy(stage4)
+    existing_genes = {t["gene_symbol"].upper() for t in result.get("targets", [])}
+    if gene_symbol.upper() in existing_genes:
+        raise ValueError(f"Target {gene_symbol} already in Stage 4 results")
+    result.setdefault("targets", []).append({
+        "gene_symbol": gene_symbol,
+        "uniprot_id": uniprot_id or "",
+        "protein_name": protein_name,
+        "association_score": 1.0,
+        "disease_name": disease_name,
+        "source": "user_provided",
+    })
+    result["disease_target_count"] = len(result["targets"])
+    result.setdefault("disease_gene_symbols", []).append(gene_symbol)
+    result["user_modified"] = True
+    return result
+
+
+def _remove_target_from_stage4(stage4: dict, gene_symbol: str) -> dict:
+    """Remove a target from a stage_4 result dict by gene_symbol (deep copy — no mutation)."""
+    result = copy.deepcopy(stage4)
+    targets = result.get("targets", [])
+    new_targets = [t for t in targets if t["gene_symbol"].upper() != gene_symbol.upper()]
+    if len(new_targets) == len(targets):
+        raise KeyError(f"Target {gene_symbol} not found in Stage 4 results")
+    result["targets"] = new_targets
+    result["disease_target_count"] = len(new_targets)
+    result["disease_gene_symbols"] = [t["gene_symbol"] for t in new_targets]
+    result["user_modified"] = True
+    return result
+
+
 @router.post("/{analysis_id}/import-targets", response_model=ImportTargetsResponse)
 async def import_targets(
     analysis_id: UUID,
@@ -671,5 +711,92 @@ async def remove_user_target(
         session, analysis_id,
         status=run.status,
         stage_results={"stage_3": updated},
+    )
+    return None
+
+
+@router.post("/{analysis_id}/disease-targets/user", response_model=AddUserTargetResponse, status_code=201)
+async def add_user_disease_target(
+    analysis_id: UUID,
+    body: AddUserTargetRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Add a user-provided target to Stage 4 (disease targets) results. Validates via UniProt."""
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    stage4 = (run.stage_results or {}).get("stage_4")
+    if not stage4:
+        raise HTTPException(status_code=400, detail="Stage 4 results not available")
+
+    try:
+        info = await validate_human_target(body.gene_symbol, body.uniprot_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    # Upsert Target row (canonical cache — permanent)
+    target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
+    existing = (await session.exec(
+        select(Target).where(Target.target_id == target_id)
+    )).one_or_none()
+    if existing is None:
+        session.add(Target(
+            target_id=target_id,
+            canonical_key=f"uniprot:{info.uniprot_accession}",
+            gene_symbol=info.gene_symbol,
+            uniprot_accession=info.uniprot_accession,
+            protein_name=info.protein_name,
+            organism_tax_id=9606,
+            retrieved_at=datetime.utcnow(),
+        ))
+
+    # Use disease_name from first existing target (stage 4 always has a disease context)
+    existing_targets = stage4.get("targets", [])
+    disease_name = existing_targets[0]["disease_name"] if existing_targets else ""
+
+    try:
+        updated = _add_target_to_stage4(
+            stage4, info.gene_symbol, info.uniprot_accession, info.protein_name, disease_name
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+
+    await session.commit()
+    await analysis_repo.update_run_status(
+        session, analysis_id,
+        status=run.status,
+        stage_results={"stage_4": updated},
+    )
+    return AddUserTargetResponse(
+        target_id=target_id,
+        gene_symbol=info.gene_symbol,
+        uniprot_id=info.uniprot_accession,
+        protein_name=info.protein_name,
+    )
+
+
+@router.delete("/{analysis_id}/disease-targets/{gene_symbol}", status_code=204)
+async def remove_user_disease_target(
+    analysis_id: UUID,
+    gene_symbol: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Remove any target from Stage 4 results by gene symbol."""
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    stage4 = (run.stage_results or {}).get("stage_4")
+    if not stage4:
+        raise HTTPException(status_code=400, detail="Stage 4 results not available")
+
+    try:
+        updated = _remove_target_from_stage4(stage4, gene_symbol)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+    await analysis_repo.update_run_status(
+        session, analysis_id,
+        status=run.status,
+        stage_results={"stage_4": updated},
     )
     return None
