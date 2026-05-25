@@ -194,4 +194,44 @@ Fix: Changed stylesheet to `'width': 'mapData(weight, 0, 1, 1, 6)'` — Cytoscap
 
 ---
 
-*Further tasks: T0.6 (Stage 7), T0.7 (Stage 8), T0.8 (misc)*
+---
+
+## T0.6 — Stage 7 Hub Gene Analysis
+
+**Status**: ✅ Complete  
+**Files touched**: `backend/analysis/stages/stage7_hub_genes.py`, `frontend/src/components/stages/Stage7Panel.tsx`
+
+### Scientific Methodology Verified
+
+| Item | Implementation | Standard | Status |
+|------|----------------|----------|--------|
+| Betweenness centrality | `nx.betweenness_centrality(G, normalized=True)` | Freeman 1977 | ✅ |
+| Closeness centrality | `nx.closeness_centrality(G)` (normalized by default) | Sabidussi 1966 | ✅ |
+| Eigenvector centrality | `nx.eigenvector_centrality(G, max_iter=1000, tol=1e-6)` | Bonacich 1987 | ✅ |
+| Hub threshold | degree > µ + σ | Jeong et al. 2001, Nature | ✅ |
+| Bottleneck threshold | betweenness > µ + σ | Yu et al. 2007 | ✅ |
+| Hub+Bottleneck composite | `0.5 * norm_degree + 0.5 * norm_betweenness` | Jeong et al. 2001 | ✅ |
+| Convergence fallback | `PowerIterationFailedConvergence` → all eigenvector = 0.0 | Robust | ✅ |
+| **Degree centrality** | **FIXED** — was `G.degree()` (raw count); now `nx.degree_centrality(G)` (0–1) | **Freeman 1979** | ✅ |
+
+**Citations**:
+- Freeman LC (1979). *Centrality in social networks: conceptual clarification.* Soc Networks 1:215–239.
+- Jeong H et al. (2001). *Lethality and centrality in protein networks.* Nature 411:41–42.
+- Yu H et al. (2007). *The importance of bottlenecks in protein networks: correlation with gene essentiality and expression dynamics.* PLoS Comput Biol 3:e59.
+
+### Bugs Found & Fixed
+
+**Bug — Degree uses raw count instead of normalized centrality**  
+`degrees = dict(G.degree())` returns raw edge count per node (integer, unbounded). Column header and DB column `degree_centrality` imply the normalized Freeman form: `C_D(v) = deg(v)/(n-1)`. All three other centralities were already normalized; degree was inconsistent.  
+Fix: replaced with `degree_centrality = nx.degree_centrality(G)` → 0-1 float. Hub threshold recomputed from normalized values (classification logic unchanged — same µ+σ criterion, values just scaled). DB now stores true degree centrality.
+
+Frontend: added `.toFixed(4)` render for degree column for visual consistency with other centralities. Updated footnote description: "normalized connections (0–1): deg(v)/(n−1), Freeman 1979".
+
+### No Issues Found
+
+- Hub score computation correctly normalizes both degree and betweenness by their max values before combining.
+- Null suppression in `ranked` dict already correct (`{k: v for k, v in entry.items() if v is not None}`).
+
+---
+
+*Further tasks: T0.7 (Stage 8), T0.8 (misc)*

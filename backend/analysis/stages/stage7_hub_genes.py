@@ -9,11 +9,13 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
     if len(G.nodes) == 0:
         return {"ranked": [], "threshold_degree": 0, "threshold_betweenness": 0}
 
-    degrees = dict(G.degree())
+    # Degree centrality: Freeman 1979 normalized form C_D(v) = deg(v)/(n-1), range 0-1.
+    # nx.degree_centrality() implements this directly. Do NOT use G.degree() (raw count).
+    degree_centrality = nx.degree_centrality(G)
 
     if len(G.nodes) == 1:
         node = list(G.nodes)[0]
-        ranked_list = [{"gene_symbol": node, "degree": 0, "betweenness": 0.0,
+        ranked_list = [{"gene_symbol": node, "degree": 0.0, "betweenness": 0.0,
                         "closeness": 0.0, "eigenvector": 0.0,
                         "is_hub": False, "is_hub_bottleneck": False, "rank": 1}]
         return {
@@ -29,7 +31,7 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
     except nx.PowerIterationFailedConvergence:
         eigenvector = {n: 0.0 for n in G.nodes}
 
-    degree_values = list(degrees.values())
+    degree_values = list(degree_centrality.values())
     bet_values = list(betweenness.values())
 
     if len(degree_values) >= 2:
@@ -46,7 +48,7 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
 
     ranked = []
     for node in G.nodes:
-        deg = degrees[node]
+        deg = degree_centrality[node]  # normalized 0-1 (Freeman 1979)
         bet = betweenness[node]
         is_hub = deg > hub_degree_threshold
         is_hub_bottleneck = is_hub and bet >= hub_bet_threshold
@@ -55,7 +57,7 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
         # enrichment fields and must NOT appear as null keys in the stored dict.
         entry = {
             "gene_symbol": node,
-            "degree": deg,
+            "degree": round(deg, 6),
             "betweenness": round(bet, 6),
             "closeness": round(closeness[node], 6),
             "eigenvector": round(eigenvector[node], 6),

@@ -18,7 +18,12 @@ type HubGeneRow = HubGeneResult & Record<string, unknown>
 const columns: ColumnDef<HubGeneRow>[] = [
   { key: 'rank', header: 'Rank', sortable: true },
   { key: 'gene_symbol', header: 'Gene', sortable: true },
-  { key: 'degree', header: 'Degree Centrality', sortable: true },
+  {
+    key: 'degree',
+    header: 'Degree Centrality',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(4) : '—',
+  },
   {
     key: 'betweenness',
     header: 'Betweenness Centrality',
@@ -110,7 +115,7 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
         </p>
         <p>
           <span className="font-medium text-hf-fg2">Centrality definitions:</span>{' '}
-          <span className="font-medium text-hf-fg2">Degree</span> — number of direct neighbours ·{' '}
+          <span className="font-medium text-hf-fg2">Degree</span> — normalized connections (0–1): deg(v)/(n−1), Freeman 1979 ·{' '}
           <span className="font-medium text-hf-fg2">Betweenness</span> — fraction of shortest paths passing through the node ·{' '}
           <span className="font-medium text-hf-fg2">Closeness</span> — inverse mean distance to all other nodes ·{' '}
           <span className="font-medium text-hf-fg2">Eigenvector</span> — influence weighted by neighbour influence (analogous to PageRank).
