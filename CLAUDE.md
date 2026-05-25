@@ -15,7 +15,7 @@ relationships from the KNApSAcK database.
 | Path                    | Status      | Purpose                                              |
 | ----------------------- | ----------- | ---------------------------------------------------- |
 | `/etl/`                 | Active      | Data ingestion and canonicalization pipelines        |
-| `/backend/`             | Active      | FastAPI REST API — 8-stage pipeline, 60 tests        |
+| `/backend/`             | Active      | FastAPI REST API — 8-stage pipeline, 132 tests       |
 | `/frontend/`            | Active      | React 18 + TS SPA — 8-stage pipeline UI              |
 | `/supabase/migrations/` | Active      | All Supabase SQL migrations (single source of truth) |
 
