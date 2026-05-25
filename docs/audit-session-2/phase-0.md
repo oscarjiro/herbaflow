@@ -51,4 +51,42 @@ Fix: "Passed" filter → `adme_pass || is_np_exception`; "Failed" filter → `!a
 
 ---
 
-*Further tasks: T0.2 (Stage 3), T0.3 (Stage 4), T0.4 (Stage 5), T0.5 (Stage 6), T0.6 (Stage 7), T0.7 (Stage 8), T0.8 (misc)*
+---
+
+## T0.2 — Stage 3 Target Identification
+
+**Status**: ✅ Complete  
+**Files touched**: `frontend/src/types/api.ts`, `frontend/src/components/stages/Stage3Panel.tsx`
+
+### Scientific Methodology Verified
+
+| Parameter | Implementation | Standard | Status |
+|-----------|----------------|----------|--------|
+| pChEMBL ≥ 5.0 | API param `assay_confidence_score__gte` + client-side filter | IC₅₀ ≤ 10µM standard (Srivastava 2020) | ✅ |
+| Human only | `target_organism=Homo sapiens` in ChEMBL query | Standard for human disease NP research | ✅ |
+| Assay confidence ≥ 7 | `min_assay_confidence=7` default | ChEMBL confidence ≥6 is standard; 7 is more stringent (ChEMBL docs) | ✅ |
+| UniProt accession | `syn_type=="UNIPROT"` from target_component_synonyms | Returns bare accession (e.g. P02794), not protein name | ✅ |
+
+**Citations**:
+- Srivastava V et al. (2020). *Network pharmacology-based identification of key pharmacological pathways of Yin-Huang-Ke-Li.* Front Pharmacol 11:1491.
+- ChEMBL documentation: assay_confidence_score scale 0–9; ≥6 = directaly-assigned protein target, ≥7 = curated single-protein target.
+
+### Bugs Found & Fixed
+
+**Bug 1 — Frontend: `coverage_percent` vs `coverage_pct` field name mismatch**  
+Backend `stage3_targets.py` returns `coverage_pct` (renamed in prior audit). `Stage3Result` TypeScript type and `Stage3Panel.tsx` template both still used `coverage_percent` → Coverage StatCard always showed 0.0%.  
+Fix: Updated `Stage3Result.coverage_percent` → `coverage_pct` in `api.ts`; updated template reference.
+
+### Minor Improvements
+
+- `compound_count` column header renamed to "Binding Compounds" — more precise: counts compounds that bind to that target, not all compounds in the analysis.
+
+### No Issues Found
+
+- UniProt accession rendering is correct — plan concern was based on wrong assumption about field content.
+- `min_assay_confidence=7` (default) is more stringent than the ≥6 minimum, which is scientifically conservative and defensible.
+- Coverage calculation uses correct denominator: `len(compound_ids)` (all active compounds from Stage 2).
+
+---
+
+*Further tasks: T0.3 (Stage 4), T0.4 (Stage 5), T0.5 (Stage 6), T0.6 (Stage 7), T0.7 (Stage 8), T0.8 (misc)*

@@ -26,7 +26,7 @@ const columns: ColumnDef<TargetRow>[] = [
   },
   {
     key: 'compound_count',
-    header: 'Compound Count',
+    header: 'Binding Compounds',
     sortable: true,
   },
   {
@@ -58,7 +58,7 @@ export function Stage3Panel({ stage, analysis, status }: Stage3PanelProps) {
         <>
           <div className="grid grid-cols-2 gap-4">
             <StatCard label="Targets Found" value={result.target_count} />
-            <StatCard label="Coverage" value={`${(result.coverage_percent ?? 0).toFixed(1)}%`} />
+            <StatCard label="Coverage" value={`${(result.coverage_pct ?? 0).toFixed(1)}%`} />
           </div>
 
           <div>

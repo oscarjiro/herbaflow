@@ -177,7 +177,8 @@ export interface TargetResult {
 
 export interface Stage3Result {
   target_count: number
-  coverage_percent: number
+  /** Backend field name: coverage_pct (renamed from coverage_percent in stage3 output) */
+  coverage_pct: number
   targets: TargetResult[]
 }
 
