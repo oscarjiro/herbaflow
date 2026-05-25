@@ -10,12 +10,17 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session, async_session_factory
-from app.schemas.analysis import CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse, ResetFromRequest, ApproveRequest
+from app.schemas.analysis import (
+    CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse,
+    ResetFromRequest, ApproveRequest,
+    AddUserTargetRequest, AddUserTargetResponse,
+)
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
 from app.repositories import analysis_repo
 from analysis.pipeline import run_stage
 from analysis.stages.stage3_targets import _make_target_id, _make_ct_id
+from integrations.uniprot import validate_human_target
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
 
@@ -587,3 +592,84 @@ async def import_targets(
     )
 
     return ImportTargetsResponse(imported=imported, skipped=skipped)
+
+
+@router.post("/{analysis_id}/targets/user", response_model=AddUserTargetResponse, status_code=201)
+async def add_user_target(
+    analysis_id: UUID,
+    body: AddUserTargetRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Add a user-provided target to Stage 3 results. Validates via UniProt."""
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    stage3 = (run.stage_results or {}).get("stage_3")
+    if not stage3:
+        raise HTTPException(status_code=400, detail="Stage 3 results not available")
+
+    try:
+        info = await validate_human_target(body.gene_symbol, body.uniprot_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    # Upsert Target row (canonical cache — permanent)
+    target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
+    existing = (await session.exec(
+        select(Target).where(Target.target_id == target_id)
+    )).one_or_none()
+    if existing is None:
+        session.add(Target(
+            target_id=target_id,
+            canonical_key=f"uniprot:{info.uniprot_accession}",
+            gene_symbol=info.gene_symbol,
+            uniprot_accession=info.uniprot_accession,
+            protein_name=info.protein_name,
+            organism_tax_id=9606,
+            retrieved_at=datetime.utcnow(),
+        ))
+
+    try:
+        updated = _add_target_to_stage3(stage3, info.gene_symbol, info.uniprot_accession, info.protein_name)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+
+    await session.commit()
+    await analysis_repo.update_run_status(
+        session, analysis_id,
+        status=run.status,
+        stage_results={"stage_3": updated},
+    )
+    return AddUserTargetResponse(
+        target_id=target_id,
+        gene_symbol=info.gene_symbol,
+        uniprot_id=info.uniprot_accession,
+        protein_name=info.protein_name,
+    )
+
+
+@router.delete("/{analysis_id}/targets/{gene_symbol}", status_code=204)
+async def remove_user_target(
+    analysis_id: UUID,
+    gene_symbol: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Remove any target from Stage 3 results by gene symbol."""
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    stage3 = (run.stage_results or {}).get("stage_3")
+    if not stage3:
+        raise HTTPException(status_code=400, detail="Stage 3 results not available")
+
+    try:
+        updated = _remove_target_from_stage3(stage3, gene_symbol)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+    await analysis_repo.update_run_status(
+        session, analysis_id,
+        status=run.status,
+        stage_results={"stage_3": updated},
+    )
+    return None
