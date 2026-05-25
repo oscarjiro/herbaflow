@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { DataTable } from '@/components/shared/DataTable'
@@ -6,6 +7,10 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
+import { AddTargetForm } from '@/components/shared/AddTargetForm'
+import { useAddUserDiseaseTarget } from '@/hooks/useAddUserDiseaseTarget'
+import { useRemoveUserDiseaseTarget } from '@/hooks/useRemoveUserDiseaseTarget'
+import { useResetFromStage } from '@/hooks/useResetFromStage'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage4Result, DiseaseTargetResult } from '@/types/api'
 
 const SOURCES = [
@@ -26,43 +31,79 @@ interface Stage4PanelProps {
 
 type DiseaseRow = DiseaseTargetResult & Record<string, unknown>
 
-const columns: ColumnDef<DiseaseRow>[] = [
-  {
-    key: 'gene_symbol',
-    header: 'Gene Symbol',
-    sortable: true,
-    className: 'font-mono',
-  },
-  {
-    key: 'uniprot_id',
-    header: 'UniProt ID',
-    className: 'font-mono text-hf-fg3',
-  },
-  {
-    key: 'association_score',
-    header: 'Open Targets Score',
-    sortable: true,
-    render: (value) =>
-      value != null ? (value as number).toFixed(3) : '—',
-  },
-  {
-    key: 'disease_name',
-    header: 'Disease',
-    sortable: true,
-  },
-  {
-    key: 'source',
-    header: 'Source',
-    render: (value) => {
-      const label = value === 'db_cache' ? 'Cached' : value === 'open_targets_api' ? 'Live API' : String(value)
-      const status = value === 'db_cache' ? 'complete' : 'stage_1_awaiting_approval'
-      return <StatusBadge status={status} label={label} />
-    },
-  },
-]
-
 export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4PanelProps) {
   const result = analysis?.stage_results[`stage_${stage}`] as Stage4Result | null | undefined
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
+
+  const addTarget = useAddUserDiseaseTarget(analysisId)
+  const removeTarget = useRemoveUserDiseaseTarget(analysisId)
+  const resetFromStage = useResetFromStage(analysisId)
+
+  const columns: ColumnDef<DiseaseRow>[] = [
+    {
+      key: 'gene_symbol',
+      header: 'Gene Symbol',
+      sortable: true,
+      className: 'font-mono',
+    },
+    {
+      key: 'uniprot_id',
+      header: 'UniProt ID',
+      className: 'font-mono text-hf-fg3',
+    },
+    {
+      key: 'association_score',
+      header: 'Open Targets Score',
+      sortable: true,
+      render: (value) =>
+        value != null ? (value as number).toFixed(3) : '—',
+    },
+    {
+      key: 'disease_name',
+      header: 'Disease',
+      sortable: true,
+    },
+    {
+      key: 'source',
+      header: 'Source',
+      render: (value) => {
+        if (value === 'user_provided') {
+          return <span className="text-xs px-2 py-0.5 rounded font-mono bg-hf-border text-hf-fg2">User</span>
+        }
+        const label = value === 'db_cache' ? 'Cached' : value === 'open_targets_api' ? 'Live API' : String(value)
+        const badgeStatus = value === 'db_cache' ? 'complete' : 'stage_1_awaiting_approval'
+        return <StatusBadge status={badgeStatus} label={label} />
+      },
+    },
+    {
+      key: '_remove' as keyof DiseaseRow,
+      header: '',
+      render: (_, row) => (
+        <button
+          onClick={() => removeTarget.mutate((row as DiseaseRow).gene_symbol as string)}
+          disabled={removeTarget.isPending}
+          title="Remove target from this analysis"
+          className="text-xs text-hf-fg3 hover:text-hf-terracotta transition-colors disabled:opacity-40"
+        >
+          ✕
+        </button>
+      ),
+    },
+  ]
+
+  const handleAddTarget = async (input: string) => {
+    setAddError(null)
+    const isAccession = /^[A-Z][0-9][A-Z0-9]{3}[0-9]$/i.test(input.trim())
+    try {
+      await addTarget.mutateAsync(
+        isAccession ? { uniprot_id: input.trim() } : { gene_symbol: input.trim() }
+      )
+      setShowAddForm(false)
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to add target')
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -83,9 +124,44 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
             currentParams={analysis?.parameters ?? null}
             canRerun={status?.mode === 'guided'}
           />
+
+          {/* Stale banner */}
+          {result.user_modified && (
+            <div className="rounded-md border border-hf-border bg-hf-bg2 px-4 py-3 flex items-center justify-between">
+              <p className="text-xs font-sans text-hf-fg2">
+                ⚠ Stage 4 was modified — downstream results (Stages 5–8) are stale.
+              </p>
+              <button
+                onClick={() => resetFromStage.mutate({ stage: 5, body: { rerun: true } })}
+                disabled={resetFromStage.isPending}
+                className="text-xs px-3 py-1 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans disabled:opacity-40"
+              >
+                {resetFromStage.isPending ? 'Starting…' : 'Rerun Stages 5–8'}
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 gap-4 max-w-xs">
             <StatCard label="Disease-Associated Targets" value={result.disease_target_count} />
           </div>
+
+          <div className="flex items-center justify-between">
+            <span />
+            <button
+              onClick={() => { setShowAddForm(prev => !prev); setAddError(null) }}
+              className="text-xs px-2 py-0.5 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans"
+            >
+              {showAddForm ? 'Cancel' : '＋ Add Target'}
+            </button>
+          </div>
+
+          {showAddForm && (
+            <AddTargetForm
+              onSubmit={handleAddTarget}
+              loading={addTarget.isPending}
+              error={addError}
+            />
+          )}
 
           <DataTable
             data={result.targets as DiseaseRow[]}
@@ -99,7 +175,7 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
               <span className="font-medium text-hf-fg2">Open Targets score</span> (0–1): overall disease–gene association strength integrating genetic, genomic, and literature evidence.
             </p>
             <p>
-              <span className="font-medium text-hf-fg2">Source:</span> <code className="text-hf-fg2">DB cache</code> = pre-fetched Open Targets data (ensures reproducibility); <code className="text-hf-fg2">API</code> = live Open Targets query at analysis time.
+              <span className="font-medium text-hf-fg2">Source:</span> <code className="text-hf-fg2">DB cache</code> = pre-fetched Open Targets data (ensures reproducibility); <code className="text-hf-fg2">API</code> = live Open Targets query at analysis time; <code className="text-hf-fg2">User</code> = manually added (score set to 1.0).
             </p>
           </div>
 
