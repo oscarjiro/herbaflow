@@ -65,6 +65,7 @@ export function DiseaseSelector({ value, onChange }: DiseaseSelectorProps) {
   }
 
   const selectedDiseases = diseases.filter((d) => value.includes(d.disease_id))
+  const orphanedIds = value.filter((id) => !diseases.some((d) => d.disease_id === id))
 
   return (
     <div className="flex flex-col gap-2">
@@ -135,7 +136,7 @@ export function DiseaseSelector({ value, onChange }: DiseaseSelectorProps) {
         </PopoverContent>
       </Popover>
 
-      {selectedDiseases.length > 0 && (
+      {(selectedDiseases.length > 0 || orphanedIds.length > 0) && (
         <div className="flex flex-wrap gap-1.5">
           {selectedDiseases.map((disease) => (
             <span
@@ -148,6 +149,22 @@ export function DiseaseSelector({ value, onChange }: DiseaseSelectorProps) {
                 onClick={() => remove(disease.disease_id)}
                 className="text-hf-fg3 hover:text-hf-fg1 transition-colors"
                 aria-label={`Remove ${disease.disease_name}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+          {orphanedIds.map((id) => (
+            <span
+              key={id}
+              className="inline-flex items-center gap-1 rounded-sm bg-hf-surface border border-hf-border px-2 py-0.5 text-xs text-hf-fg3"
+            >
+              <span>Unknown ({id})</span>
+              <button
+                type="button"
+                onClick={() => remove(id)}
+                className="text-hf-fg3 hover:text-hf-fg1 transition-colors"
+                aria-label={`Remove unknown disease ${id}`}
               >
                 <X className="h-3 w-3" />
               </button>

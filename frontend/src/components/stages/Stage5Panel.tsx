@@ -187,13 +187,16 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
       {result.per_disease && Object.keys(result.per_disease).length > 1 && (
         <div className="space-y-3">
           <h3 className="text-sm font-medium text-hf-fg1">Per-Disease Overlap</h3>
-          {Object.entries(result.per_disease).map(([diseaseId, stats]) => (
-            <OverlapSection
-              key={diseaseId}
-              label={diseaseId}
-              stats={stats}
-            />
-          ))}
+          {Object.entries(result.per_disease).map(([diseaseId, stats]) => {
+            if (stats.overlap_count == null || stats.p_value == null) return null
+            return (
+              <OverlapSection
+                key={diseaseId}
+                label={diseaseId}
+                stats={stats}
+              />
+            )
+          })}
         </div>
       )}
 

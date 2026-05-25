@@ -47,13 +47,14 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                     }
                 else:
                     existing = all_targets[gene]
-                    existing["diseases"].append(
-                        {
-                            "disease_id": did,
-                            "disease_name": disease.disease_name,
-                            "association_score": score,
-                        }
-                    )
+                    if not any(d["disease_id"] == did for d in existing["diseases"]):
+                        existing["diseases"].append(
+                            {
+                                "disease_id": did,
+                                "disease_name": disease.disease_name,
+                                "association_score": score,
+                            }
+                        )
                     if score > existing["association_score"]:
                         existing["association_score"] = score
         else:
@@ -64,7 +65,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 ontology_id, min_score=config.disease_targets.min_score
             )
             for t in ot_targets:
-                gene = t.gene_symbol.upper()
+                gene = (t.gene_symbol or "").upper()
+                if not gene:
+                    continue
                 disease_gene_symbols_by_disease[did].append(gene)
                 if gene not in all_targets:
                     all_targets[gene] = {
@@ -83,13 +86,14 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                     }
                 else:
                     existing = all_targets[gene]
-                    existing["diseases"].append(
-                        {
-                            "disease_id": did,
-                            "disease_name": disease.disease_name,
-                            "association_score": t.score,
-                        }
-                    )
+                    if not any(d["disease_id"] == did for d in existing["diseases"]):
+                        existing["diseases"].append(
+                            {
+                                "disease_id": did,
+                                "disease_name": disease.disease_name,
+                                "association_score": t.score,
+                            }
+                        )
                     if t.score > existing["association_score"]:
                         existing["association_score"] = t.score
 
