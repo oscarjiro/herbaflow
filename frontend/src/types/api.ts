@@ -426,3 +426,9 @@ export interface AddUserTargetResponse {
   uniprot_id: string | null
   protein_name: string | null
 }
+
+// T4.3: Manual compound input
+export interface InjectCompoundsResponse {
+  injected: number
+  failed: string[]
+}

@@ -10,6 +10,7 @@ import type {
   ApproveRequest,
   AddUserTargetRequest,
   AddUserTargetResponse,
+  InjectCompoundsResponse,
 } from '@/types/api'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -113,5 +114,13 @@ export const api = {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
       throw new Error(err.detail ?? 'Failed to remove disease target')
     }
+  },
+
+  // T4.3: Inject manually-provided SMILES/InChI strings as stage 1+2 results
+  injectCompounds(analysisId: string, compounds: string[]): Promise<InjectCompoundsResponse> {
+    return request(`/analyses/${analysisId}/inject-compounds`, {
+      method: 'POST',
+      body: JSON.stringify({ compounds }),
+    })
   },
 }
