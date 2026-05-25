@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAnalysisStatus } from '@/hooks/useAnalysisStatus'
 import { useAnalysis } from '@/hooks/useAnalysis'
 import { useApproveStage } from '@/hooks/useApproveStage'
@@ -120,6 +121,7 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
 export default function PipelinePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [activeStage, setActiveStage] = useState<number | null>(null)
 
   const { data: status, isError: statusError } = useAnalysisStatus(id!)
@@ -131,6 +133,15 @@ export default function PipelinePage() {
       setActiveStage(status.current_stage)
     }
   }, [status?.current_stage])
+
+  // Invalidate analysis cache on every status change so stage_results are
+  // always fresh — prevents stale panel data in auto mode when the sidebar
+  // has already advanced to the next stage.
+  useEffect(() => {
+    if (status?.status) {
+      void queryClient.invalidateQueries({ queryKey: ['analysis', id] })
+    }
+  }, [status?.status, id, queryClient])
 
   // Terminal failure — show error
   if (status?.status === 'failed') {
