@@ -103,6 +103,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
   const [rawCsvText, setRawCsvText] = useState<string>('')
   const [minProbability, setMinProbability] = useState<number>(0.1)
   const [parseError, setParseError] = useState<string | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
   const [parsedTargets, setParsedTargets] = useState<STPTargetImport[]>([])
   const [importing, setImporting] = useState(false)
   const [importResult, setImportResult] = useState<{ imported: number; skipped: number } | null>(null)
@@ -142,6 +143,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
 
   const handleImport = useCallback(async () => {
     if (!selectedCompoundId || parsedTargets.length === 0) return
+    setImportError(null)
     setImporting(true)
     try {
       const response = await api.importTargets(_analysisId, {
@@ -149,18 +151,18 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
         targets: parsedTargets,
       })
       setImportResult(response)
-      // Invalidate analysis query so Stage3Panel re-fetches updated stage_results
-      await queryClient.invalidateQueries({ queryKey: ['analysis', _analysisId] })
       // Reset panel
       setRawCsvText('')
       setParsedTargets([])
       setSelectedCompoundId('')
       if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (err) {
-      setParseError(err instanceof Error ? err.message : 'Import failed')
+      setImportError(err instanceof Error ? err.message : 'Import failed')
     } finally {
       setImporting(false)
     }
+    // Fire-and-forget invalidation — failure is non-critical, import already succeeded
+    queryClient.invalidateQueries({ queryKey: ['analysis', _analysisId] }).catch(() => {})
   }, [selectedCompoundId, parsedTargets, _analysisId, queryClient])
 
   return (
@@ -296,6 +298,16 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 <div
                   className="border border-dashed border-hf-border rounded p-3 text-center cursor-pointer hover:border-hf-fg3 transition-colors"
                   onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    const file = e.dataTransfer.files?.[0]
+                    if (!file) return
+                    const reader = new FileReader()
+                    reader.onload = (ev) => handleCsvChange(ev.target?.result as string)
+                    reader.readAsText(file)
+                    if (fileInputRef.current) fileInputRef.current.value = ''
+                  }}
                 >
                   <p className="text-xs text-hf-fg3 font-sans">
                     Drop CSV file here or{' '}
@@ -378,6 +390,11 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                   ✓ Imported {importResult.imported} targets
                   {importResult.skipped > 0 && ` · ${importResult.skipped} already existed`}
                 </p>
+              )}
+
+              {/* Import error */}
+              {importError && (
+                <p className="text-xs font-sans text-hf-terracotta">{importError}</p>
               )}
 
               {/* Confirm button */}
