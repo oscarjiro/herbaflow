@@ -1,11 +1,13 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
-import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, Stage3Result, TargetResult, UncoveredCompound } from '@/types/api'
-import { generateSTPExportCsv } from '@/lib/stp'
+import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, Stage3Result, TargetResult, UncoveredCompound, STPTargetImport } from '@/types/api'
+import { parseSTPCsv, generateSTPExportCsv } from '@/lib/stp'
+import { api } from '@/lib/api'
 
 interface Stage3PanelProps {
   stage: number
@@ -92,6 +94,74 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
     a.click()
     setTimeout(() => URL.revokeObjectURL(url), 100)
   }, [result])
+
+  const queryClient = useQueryClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Import panel state
+  const [selectedCompoundId, setSelectedCompoundId] = useState<string>('')
+  const [rawCsvText, setRawCsvText] = useState<string>('')
+  const [minProbability, setMinProbability] = useState<number>(0.1)
+  const [parseError, setParseError] = useState<string | null>(null)
+  const [parsedTargets, setParsedTargets] = useState<STPTargetImport[]>([])
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<{ imported: number; skipped: number } | null>(null)
+
+  const handleCsvChange = useCallback((text: string) => {
+    setRawCsvText(text)
+    setImportResult(null)
+    if (!text.trim()) {
+      setParsedTargets([])
+      setParseError(null)
+      return
+    }
+    const { targets, error } = parseSTPCsv(text, minProbability)
+    setParsedTargets(targets)
+    setParseError(error)
+  }, [minProbability])
+
+  const handleProbabilityChange = useCallback((prob: number) => {
+    setMinProbability(prob)
+    if (rawCsvText.trim()) {
+      const { targets, error } = parseSTPCsv(rawCsvText, prob)
+      setParsedTargets(targets)
+      setParseError(error)
+    }
+  }, [rawCsvText])
+
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string
+      handleCsvChange(text)
+    }
+    reader.readAsText(file)
+  }, [handleCsvChange])
+
+  const handleImport = useCallback(async () => {
+    if (!selectedCompoundId || parsedTargets.length === 0) return
+    setImporting(true)
+    try {
+      const response = await api.importTargets(_analysisId, {
+        compound_id: selectedCompoundId,
+        targets: parsedTargets,
+      })
+      setImportResult(response)
+      // Invalidate analysis query so Stage3Panel re-fetches updated stage_results
+      await queryClient.invalidateQueries({ queryKey: ['analysis', _analysisId] })
+      // Reset panel
+      setRawCsvText('')
+      setParsedTargets([])
+      setSelectedCompoundId('')
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    } catch (err) {
+      setParseError(err instanceof Error ? err.message : 'Import failed')
+    } finally {
+      setImporting(false)
+    }
+  }, [selectedCompoundId, parsedTargets, _analysisId, queryClient])
 
   return (
     <div className="space-y-6">
@@ -183,8 +253,147 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
             </div>
           )}
 
-          {/* Import panel placeholder — Task 6 renders content here when showImportPanel is true */}
-          {showImportPanel && null}
+          {/* Import panel */}
+          {showImportPanel && (
+            <div className="rounded-md border border-hf-border bg-hf-bg2 p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-sans font-medium text-hf-fg2">Import STP Results</p>
+                <button
+                  onClick={() => setShowImportPanel(false)}
+                  className="text-xs text-hf-fg3 hover:text-hf-fg1 font-sans"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Step 1: Compound selector */}
+              <div className="space-y-1">
+                <label className="text-xs font-sans text-hf-fg3">
+                  Importing targets for:
+                </label>
+                <select
+                  value={selectedCompoundId}
+                  onChange={e => setSelectedCompoundId(e.target.value)}
+                  className="w-full text-xs font-sans bg-hf-bg1 border border-hf-border text-hf-fg2 rounded px-2 py-1.5 focus:outline-none focus:border-hf-fg3"
+                >
+                  <option value="">— Select compound —</option>
+                  {allCompounds.map(c => {
+                    const isUncovered = uncoveredCompounds.some(u => u.compound_id === c.compound_id)
+                    return (
+                      <option key={c.compound_id} value={c.compound_id}>
+                        {c.canonical_name}{isUncovered ? ' — ⚠ 0 targets' : ''}
+                      </option>
+                    )
+                  })}
+                </select>
+              </div>
+
+              {/* Step 2: File upload + paste */}
+              <div className="space-y-2">
+                <label className="text-xs font-sans text-hf-fg3">
+                  Upload or paste STP result CSV:
+                </label>
+                <div
+                  className="border border-dashed border-hf-border rounded p-3 text-center cursor-pointer hover:border-hf-fg3 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <p className="text-xs text-hf-fg3 font-sans">
+                    Drop CSV file here or{' '}
+                    <span className="underline underline-offset-2 text-hf-fg2">browse</span>
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv,.tsv,.txt"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                </div>
+                <p className="text-xs text-hf-fg3 font-sans text-center">— or paste CSV text —</p>
+                <textarea
+                  value={rawCsvText}
+                  onChange={e => handleCsvChange(e.target.value)}
+                  placeholder={'Target,Uniprot,Common name,Gene name,...\nCarbonic anhydrase I,P00915,...'}
+                  rows={4}
+                  className="w-full text-xs font-mono bg-hf-bg1 border border-hf-border text-hf-fg2 rounded px-2 py-1.5 focus:outline-none focus:border-hf-fg3 resize-none"
+                />
+              </div>
+
+              {/* Step 3: Probability threshold */}
+              <div className="flex items-center gap-3">
+                <label className="text-xs font-sans text-hf-fg3 shrink-0">
+                  Min probability:
+                </label>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={minProbability}
+                  onChange={e => handleProbabilityChange(parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="text-xs font-mono text-hf-fg2 w-8 text-right">
+                  {minProbability.toFixed(2)}
+                </span>
+              </div>
+
+              {/* Parse error */}
+              {parseError && (
+                <p className="text-xs font-sans text-hf-terracotta">{parseError}</p>
+              )}
+
+              {/* Preview */}
+              {parsedTargets.length > 0 && !parseError && (
+                <div className="space-y-1">
+                  <p className="text-xs font-sans text-hf-fg3">
+                    Preview — {parsedTargets.length} targets will be imported:
+                  </p>
+                  <div className="max-h-32 overflow-y-auto border border-hf-border rounded">
+                    <table className="w-full text-xs font-mono">
+                      <thead className="bg-hf-bg1 sticky top-0">
+                        <tr>
+                          <th className="px-2 py-1 text-left text-hf-fg3 font-sans">Gene</th>
+                          <th className="px-2 py-1 text-left text-hf-fg3 font-sans">UniProt</th>
+                          <th className="px-2 py-1 text-right text-hf-fg3 font-sans">Prob.</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parsedTargets.map((t, i) => (
+                          <tr key={i} className="border-t border-hf-border">
+                            <td className="px-2 py-0.5 text-hf-fg2">{t.gene_symbol}</td>
+                            <td className="px-2 py-0.5 text-hf-fg3">{t.uniprot_id}</td>
+                            <td className="px-2 py-0.5 text-hf-fg3 text-right">{t.probability.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Import result success message */}
+              {importResult && (
+                <p className="text-xs font-sans text-hf-fg2">
+                  ✓ Imported {importResult.imported} targets
+                  {importResult.skipped > 0 && ` · ${importResult.skipped} already existed`}
+                </p>
+              )}
+
+              {/* Confirm button */}
+              <button
+                onClick={handleImport}
+                disabled={!selectedCompoundId || parsedTargets.length === 0 || importing}
+                className="w-full text-xs py-2 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {importing
+                  ? 'Importing…'
+                  : parsedTargets.length > 0
+                  ? `Import ${parsedTargets.length} targets`
+                  : 'Import STP Targets'}
+              </button>
+            </div>
+          )}
 
           <div>
             <p className="text-xs font-sans text-hf-fg3 mb-2">Gene Targets</p>
