@@ -265,37 +265,50 @@ export interface ImportTargetsResponse {
 }
 
 // Stage 4: Disease Targets
+export interface DiseaseSourceEntry {
+  disease_id: string
+  disease_name: string
+  association_score: number
+}
+
 export interface DiseaseTargetResult {
   gene_symbol: string
   uniprot_id: string
   association_score: number | null
   disease_name: string
   source: string
+  /** All diseases this gene is associated with (multi-disease analyses) */
+  diseases?: DiseaseSourceEntry[]
 }
 
 export interface Stage4Result {
   disease_target_count: number
   targets: DiseaseTargetResult[]
+  /** Per-disease gene symbol lists for Stage 5 per-disease overlap */
+  disease_gene_symbols_by_disease?: Record<string, string[]>
   /** Set to true when user has added or removed targets; drives stale banner */
   user_modified?: boolean
 }
 
 // Stage 5: Target Overlap
-export interface Stage5Result {
-  compound_only_count: number
+export interface OverlapStats {
+  overlap: string[]
   overlap_count: number
+  compound_only_count: number
   disease_only_count: number
-  /** Backend field name: jaccard (not jaccard_index) */
   jaccard: number
   p_value: number | null
   significant: boolean
-  /** Backend field name: overlap (not overlap_genes) */
-  overlap: string[]
   venn?: {
     overlap: number
     disease_only: number
     compound_only: number
   }
+}
+
+export interface Stage5Result extends OverlapStats {
+  /** Per-disease overlap breakdown keyed by disease_id */
+  per_disease?: Record<string, OverlapStats>
 }
 
 // Stage 6: PPI Network (Cytoscape.js format)

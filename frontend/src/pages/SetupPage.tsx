@@ -31,7 +31,7 @@ export default function SetupPage() {
   // Form state
   const [name, setName] = useState(() => generateDefaultName())
   const [plantIds, setPlantIds] = useState<string[]>([])
-  const [diseaseId, setDiseaseId] = useState<string | null>(null)
+  const [diseaseIds, setDiseaseIds] = useState<string[]>([])
   const [mode, setMode] = useState<'guided' | 'auto'>('guided')
   const [params, setParams] = useState<AdvancedParams>(DEFAULT_PARAMS)
 
@@ -55,7 +55,7 @@ export default function SetupPage() {
 
   // Derived state
   const isDisabled =
-    plantIds.length === 0 || diseaseId === null || mutation.isPending
+    plantIds.length === 0 || diseaseIds.length === 0 || mutation.isPending
 
   function handleSubmit() {
     if (isDisabled) return
@@ -63,7 +63,7 @@ export default function SetupPage() {
       name,
       mode,
       plant_ids: plantIds,
-      disease_ids: [diseaseId!],
+      disease_ids: diseaseIds,
       parameters: params as unknown as Record<string, unknown>,
     })
   }
@@ -91,8 +91,8 @@ export default function SetupPage() {
 
       {/* Disease */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
-        <p className="text-sm font-medium text-hf-fg2 mb-2">Disease</p>
-        <DiseaseSelector value={diseaseId} onChange={setDiseaseId} />
+        <p className="text-sm font-medium text-hf-fg2 mb-2">Diseases</p>
+        <DiseaseSelector value={diseaseIds} onChange={setDiseaseIds} />
       </div>
 
       {/* Mode */}

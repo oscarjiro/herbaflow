@@ -31,7 +31,7 @@ describe('SetupPage', () => {
 
     // Section labels
     expect(screen.getByText('Plants')).toBeInTheDocument()
-    expect(screen.getByText('Disease')).toBeInTheDocument()
+    expect(screen.getByText('Diseases')).toBeInTheDocument()
     expect(screen.getByText('Mode')).toBeInTheDocument()
     expect(screen.getByText('Analysis Name')).toBeInTheDocument()
     expect(screen.getByText('Advanced Parameters')).toBeInTheDocument()

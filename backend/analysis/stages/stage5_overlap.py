@@ -53,4 +53,16 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     compound_genes = set(stage3.get("target_gene_symbols", []))
     disease_genes = set(stage4.get("disease_gene_symbols", []))
 
-    return compute_overlap(compound_genes, disease_genes)
+    combined = compute_overlap(compound_genes, disease_genes)
+
+    # Per-disease breakdown
+    per_disease: dict[str, dict] = {}
+    disease_gene_map: dict[str, list[str]] = stage4.get("disease_gene_symbols_by_disease", {})
+    for disease_id, d_genes in disease_gene_map.items():
+        d_gene_set = set(d_genes)
+        per_disease[disease_id] = compute_overlap(compound_genes, d_gene_set)
+
+    return {
+        **combined,
+        "per_disease": per_disease,
+    }

@@ -60,9 +60,28 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
         value != null ? (value as number).toFixed(3) : '—',
     },
     {
-      key: 'disease_name',
-      header: 'Disease',
-      sortable: true,
+      key: 'diseases',
+      header: 'Disease(s)',
+      render: (value, row) => {
+        const diseases = (value as DiseaseTargetResult['diseases']) ?? []
+        if (diseases.length > 1) {
+          return (
+            <div className="flex flex-wrap gap-1">
+              {diseases.map((d) => (
+                <span
+                  key={d.disease_id}
+                  className="inline-block px-1.5 py-0.5 rounded text-xs bg-hf-surface-2 border border-hf-border text-hf-fg2 font-sans"
+                  title={`Score: ${d.association_score.toFixed(3)}`}
+                >
+                  {d.disease_name}
+                </span>
+              ))}
+            </div>
+          )
+        }
+        // Single disease or legacy (no diseases list) — fall back to disease_name
+        return <span className="text-sm text-hf-fg1">{(row as DiseaseRow).disease_name as string}</span>
+      },
     },
     {
       key: 'source',
