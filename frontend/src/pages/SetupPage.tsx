@@ -291,6 +291,9 @@ export default function SetupPage() {
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
         <p className="text-sm font-medium text-hf-fg2 mb-2">Advanced Parameters</p>
         <AdvancedParameters value={params} onChange={setParams} />
+        {formErrors.parameters && (
+          <p className="text-xs text-hf-danger mt-1">{formErrors.parameters}</p>
+        )}
       </div>
 
       {/* Error message */}

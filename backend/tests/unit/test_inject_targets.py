@@ -6,8 +6,9 @@ Tests:
 3. Unknown gene symbol → in failed list
 4. Race condition guard: 409 when analysis status is not pending/failed
 5. Input mode set to manual_targets in parameters
-6. Empty targets list → 422
+6. Empty targets list → 422 (Pydantic ValidationError)
 7. Deduplication: same gene symbol appears twice → only one entry injected
+8. HTTP boundary: POST /analyses/{id}/inject-targets with [] → HTTP 422
 """
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -278,3 +279,24 @@ async def test_inject_targets_deduplicates_gene_symbols():
     stage3 = captured_stage_results["stage_3"]
     assert len(stage3["targets"]) == 1
     assert stage3["target_count"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Test 8: HTTP boundary — FastAPI translates Pydantic ValidationError → 422
+# ---------------------------------------------------------------------------
+
+
+def test_inject_targets_http_empty_list_returns_422():
+    """Sending targets=[] over HTTP must produce a 422 response.
+
+    This confirms the full FastAPI request/response boundary: Pydantic's
+    ValidationError (raised because InjectTargetsRequest.targets has
+    min_length=1) is automatically converted to HTTP 422 by FastAPI before
+    the route handler is ever called.
+    """
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.post(
+        f"/analyses/{ANALYSIS_ID}/inject-targets",
+        json={"targets": []},
+    )
+    assert response.status_code == 422

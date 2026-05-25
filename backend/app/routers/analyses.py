@@ -47,11 +47,11 @@ async def create_analysis(
     session: AsyncSession = Depends(get_session),
 ):
     from analysis.pipeline import start_pipeline  # imported here; pipeline.py created in Task 11
-    if not body.disease_ids:
-        raise HTTPException(
-            status_code=422,
-            detail="disease_ids must contain at least one disease ID",
-        )
+    # plant_ids is intentionally allowed to be empty here: manual_compounds and
+    # manual_targets modes send an empty list because stage 1 is skipped.
+    # _input_mode is set later by inject-compounds / inject-targets endpoints,
+    # so we cannot enforce plant_ids ≥ 1 at the schema level for standard mode.
+    # The frontend Zod schema enforces plant_ids ≥ 1 for standard mode before submit.
     parameters = {
         **body.parameters,
         "_plant_ids": [str(pid) for pid in body.plant_ids],

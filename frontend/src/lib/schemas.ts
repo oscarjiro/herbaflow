@@ -55,7 +55,7 @@ export const advancedParamsSchema = z.object({
   use_hub_bottleneck: z.boolean(),
 
   // Enrichment (Stage 8)
-  fdr_threshold: z.number().min(0, 'Must be > 0').max(1, 'Must be ≤ 1'),
+  fdr_threshold: z.number().gt(0, 'Must be > 0').max(1, 'Must be ≤ 1'),
   sources: z.array(z.string()).min(1, 'At least one pathway source required'),
 })
 
