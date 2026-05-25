@@ -87,6 +87,7 @@ async def get_status(analysis_id: UUID, session: AsyncSession = Depends(get_sess
         created_at=run.created_at,
         updated_at=run.updated_at,
         error_message=run.error_message,
+        expires_at=run.expires_at,
     )
 
 
@@ -95,6 +96,8 @@ async def get_analysis(analysis_id: UUID, session: AsyncSession = Depends(get_se
     run = await analysis_repo.get_run(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
+    if run.expires_at and run.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=410, detail="Analysis has expired")
     return AnalysisRunResponse(**run.model_dump())
 
 

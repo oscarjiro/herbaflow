@@ -1,5 +1,5 @@
 from uuid import UUID, uuid4
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.models.analysis import AnalysisRun
@@ -63,6 +63,7 @@ async def update_run_status(
         run.error_message = error_message
     if completed:
         run.completed_at = datetime.utcnow()
+        run.expires_at = datetime.utcnow() + timedelta(hours=24)
     session.add(run)
     await session.commit()
     await session.refresh(run)

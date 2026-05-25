@@ -25,6 +25,7 @@ class AnalysisRun(SQLModel, table=True):
     current_stage: Optional[int] = None
     created_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
     error_message: Optional[str] = None
     updated_at: Optional[datetime] = None
     created_by: Optional[str] = None

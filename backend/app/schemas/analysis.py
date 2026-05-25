@@ -21,6 +21,7 @@ class AnalysisStatusResponse(BaseModel):
     created_at: datetime | None
     updated_at: datetime | None
     error_message: str | None = None
+    expires_at: datetime | None = None
 
 
 class AnalysisRunResponse(BaseModel):
@@ -34,4 +35,5 @@ class AnalysisRunResponse(BaseModel):
     parameters: dict[str, Any] | None
     created_at: datetime | None
     completed_at: datetime | None
+    expires_at: datetime | None = None
     error_message: str | None

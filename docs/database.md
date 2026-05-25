@@ -333,6 +333,7 @@ Unique constraint: `(target_a_id, target_b_id, source_id)`
 | `stage_results`   | jsonb NOT NULL  | per-stage intermediate results `{stage_1: {...}}`; default `{}` |
 | `mode`            | text NOT NULL   | `auto` (end-to-end) or `guided` (pauses for approval per stage); default `auto` |
 | `completed_at`    | timestamptz     |          |
+| `expires_at`      | timestamptz     | null until complete; set to `completed_at + 24h`; GET returns 410 Gone after expiry |
 | `error_message`   | text            |          |
 | `updated_at`      | timestamptz NOT NULL | last write timestamp; default `now()` |
 | `created_at`      | timestamptz     |          |

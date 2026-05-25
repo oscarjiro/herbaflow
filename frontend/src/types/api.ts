@@ -113,6 +113,7 @@ export interface AnalysisStatusResponse {
   created_at: string | null // ISO 8601 datetime string
   updated_at: string | null
   error_message: string | null
+  expires_at: string | null // ISO 8601 datetime; set when status = 'complete'
 }
 
 export interface AnalysisRunResponse {
@@ -126,6 +127,7 @@ export interface AnalysisRunResponse {
   parameters: Record<string, unknown> | null
   created_at: string | null // ISO 8601 datetime string
   completed_at: string | null
+  expires_at: string | null // set on completion; null until complete
   error_message: string | null
 }
 
