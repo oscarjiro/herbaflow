@@ -8,6 +8,7 @@ import { PipelineSidebar } from '@/components/pipeline/PipelineSidebar'
 import { ApprovalBar } from '@/components/shared/ApprovalBar'
 import { ErrorState } from '@/components/shared/ErrorState'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { StageSkeletonLoader } from '@/components/shared/StageSkeletonLoader'
 import { Stage1Panel } from '@/components/stages/Stage1Panel'
 import { Stage2Panel } from '@/components/stages/Stage2Panel'
 import { Stage3Panel } from '@/components/stages/Stage3Panel'
@@ -73,6 +74,18 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
     return (
       <div className="p-8">
         <ErrorState message={status?.error_message ?? `Stage ${stage} failed. Check backend logs for details.`} />
+      </div>
+    )
+  }
+
+  // Show skeleton while stage is actively running (results not yet available)
+  const isStageRunning = status?.status === `stage_${stage}_running`
+  if (isStageRunning) {
+    const progressText =
+      stage === 3 ? 'Identifying targets across ChEMBL, PubChem BioAssay…' : undefined
+    return (
+      <div className="p-2">
+        <StageSkeletonLoader stage={stage} progressText={progressText} />
       </div>
     )
   }
