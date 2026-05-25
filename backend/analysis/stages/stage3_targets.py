@@ -44,6 +44,24 @@ def _make_ct_id(compound_id: str, target_id: str) -> str:
     return str(uuid.uuid5(COMPOUND_TARGET_NS, f"{compound_id}:{target_id}"))
 
 
+class _ManualCompoundProxy:
+    """Lightweight proxy that exposes DB-compound attributes for manual compounds.
+
+    Manual compounds are never stored in the database — they arrive via the
+    inject-compounds endpoint and are persisted only in stage_1._manual_compounds.
+    This proxy lets the rest of stage3 treat them identically to ORM objects.
+    """
+
+    def __init__(self, data: dict) -> None:
+        self.compound_id: str = data["compound_id"]
+        self.canonical_name: str = data.get("canonical_name", "")
+        # PubChem inchikey field is "inchikey" (no underscore) in validated dicts
+        self.inchi_key: str | None = data.get("inchikey") or data.get("inchi_key")
+        self.smiles: str | None = data.get("smiles") or data.get("isomeric_smiles")
+        # Manual compounds have no ChEMBL ID — ChEMBL lookup will be skipped
+        self.chembl_id: str | None = None
+
+
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:
     stage2 = (run.stage_results or {}).get("stage_2", {})
     compound_ids = stage2.get("all_active_compound_ids", [])
@@ -53,6 +71,28 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
 
     # Load compounds to get chembl_ids and inchi_keys — use bulk fetch
     fetched_compounds = await compound_repo.get_compounds_by_ids(session, compound_ids)
+
+    # Fallback: if DB returned nothing, try manual compounds from stage_1 synthetic result.
+    # Manual compounds (injected via T4.3) are not stored in the database — they live
+    # exclusively in stage_results["stage_1"]["_manual_compounds"].
+    if not fetched_compounds:
+        stage1_result = (run.stage_results or {}).get("stage_1", {})
+        manual_raw = stage1_result.get("_manual_compounds", [])
+        if manual_raw:
+            logger.debug(
+                "stage3: no DB compounds found for %d compound_ids; "
+                "falling back to %d manual compounds from stage_1",
+                len(compound_ids),
+                len(manual_raw),
+            )
+            # Only include compounds that are in compound_ids (safety filter)
+            active_ids = set(compound_ids)
+            fetched_compounds = [
+                _ManualCompoundProxy(mc)
+                for mc in manual_raw
+                if mc.get("compound_id") in active_ids
+            ]
+
     chembl_to_compound: dict[str, str] = {
         c.chembl_id: c.compound_id
         for c in fetched_compounds

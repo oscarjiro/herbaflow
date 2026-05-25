@@ -727,8 +727,6 @@ async def inject_compounds(
         "np_exception_compound_ids": [],
         "all_active_compound_ids": compound_ids,  # stage 3 reads this
         "compounds": stage2_compounds,
-        # Store inchikey map so stage3 can use PubChem bioassay lookup by inchikey
-        "_inchikey_map": {c["compound_id"]: c["inchikey"] for c in validated},
     }
 
     await analysis_repo.update_run_status(
