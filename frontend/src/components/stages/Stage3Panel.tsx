@@ -259,7 +259,12 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
           {showImportPanel && (
             <div className="rounded-md border border-hf-border bg-hf-bg2 p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-sans font-medium text-hf-fg2">Import STP Results</p>
+                <div>
+                  <p className="text-xs font-sans font-medium text-hf-fg2">Import STP Results</p>
+                  <p className="text-xs font-sans text-hf-fg3 mt-0.5">
+                    SwissTargetPrediction — Daina et al. <em>Nucleic Acids Res</em> 2019, 47:W357–W364
+                  </p>
+                </div>
                 <button
                   onClick={() => setShowImportPanel(false)}
                   className="text-xs text-hf-fg3 hover:text-hf-fg1 font-sans"
@@ -445,7 +450,8 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
 
           <p className="text-xs text-hf-fg3 font-sans">
             <span className="font-medium text-hf-fg2">Primary source:</span> ChEMBL (human protein targets, pChEMBL ≥ 5.0 = IC₅₀ ≤ 10µM). ·{' '}
-            <span className="font-medium text-hf-fg2">Secondary source:</span> PubChem BioAssay — queried for compounds with zero ChEMBL targets; aggregates BindingDB, STITCH, and 300+ bioactivity sources (Kim et al. NAR 2023).
+            <span className="font-medium text-hf-fg2">Secondary source:</span> PubChem BioAssay — queried for compounds with zero ChEMBL targets; aggregates BindingDB, STITCH, and 300+ bioactivity sources (Kim et al. <em>Nucleic Acids Res</em> 2023, 51:D1373–D1380). ·{' '}
+            <span className="font-medium text-hf-fg2">Supplementary (manual):</span> SwissTargetPrediction — user-imported computational predictions for uncovered compounds (Daina et al. <em>Nucleic Acids Res</em> 2019, 47:W357–W364).
           </p>
         </>
       )}
