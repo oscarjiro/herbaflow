@@ -31,11 +31,15 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     if not hub_genes:
         return {"total_significant": 0, "go_bp": [], "go_mf": [], "go_cc": [], "kegg": []}
 
-    # Background: Stage 5 overlap genes — standard for NP enrichment (Tang et al. 2022, Ru et al. 2019).
-    # Using the overlap gene set as background instead of the full genome (~20,000 genes)
-    # produces biologically specific enrichment and reduces false positives.
-    stage5 = (run.stage_results or {}).get("stage_5", {})
-    background = stage5.get("overlap") or None  # list[str] of gene symbols, or None if absent
+    # Background: ALL compound targets from Stage 3 — the study protein space.
+    # Using the full compound target universe (not just Stage 5 overlap genes) is the
+    # scientifically correct background for enrichment: it represents all proteins the
+    # compound set has been screened against, giving a meaningful reference universe.
+    # Using the small overlap set (~10-50 genes) as background inflates significance
+    # because hub genes are a large fraction of a tiny denominator.
+    # Cite: Rivals et al. 2007 (Bioinformatics 23:401) — background set methodology.
+    stage3 = (run.stage_results or {}).get("stage_3", {})
+    background = stage3.get("target_gene_symbols") or None  # list[str] of gene symbols
 
     results = await run_enrichment(
         gene_symbols=hub_genes,

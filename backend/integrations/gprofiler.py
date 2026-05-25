@@ -29,8 +29,9 @@ async def run_enrichment(
     Args:
         background: Custom statistical background gene set. When provided, g:Profiler
             uses only these genes as the reference universe instead of the full genome.
-            Standard for NP network pharmacology: pass Stage 5 overlap genes.
-            (Tang et al. 2022, Ru et al. 2019)
+            Standard for NP network pharmacology: pass ALL compound targets (Stage 3
+            target_gene_symbols) as the study protein space.
+            (Rivals et al. 2007, Bioinformatics 23:401)
     """
     if not gene_symbols:
         return []

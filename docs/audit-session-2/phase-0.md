@@ -234,4 +234,42 @@ Frontend: added `.toFixed(4)` render for degree column for visual consistency wi
 
 ---
 
-*Further tasks: T0.7 (Stage 8), T0.8 (misc)*
+---
+
+## T0.7 — Stage 8 Pathway Enrichment
+
+**Status**: ✅ Complete  
+**Files touched**: `backend/analysis/stages/stage8_enrichment.py`, `backend/integrations/gprofiler.py`
+
+### Scientific Methodology Verified
+
+| Item | Implementation | Standard | Status |
+|------|----------------|----------|--------|
+| g:Profiler tool | `biit.cs.ut.ee/gprofiler/api` | Raudvere et al. 2019 (NAR) | ✅ |
+| Sources | GO:BP, GO:MF, GO:CC, KEGG | Standard multi-ontology enrichment | ✅ |
+| FDR threshold | `config.enrichment.fdr_threshold` (default 0.05) | Standard significance cutoff | ✅ |
+| Input genes | Hub genes from Stage 7 `ranked` field | Biologically significant subnetwork | ✅ |
+| `domain_scope` | `"annotated"` — only annotated genes as background | Correct g:Profiler parameter | ✅ |
+| correction_method | Removed (was causing zero results) | g:Profiler uses its own FDR by default | ✅ |
+| **Background set** | **FIXED** — was Stage 5 overlap (~10-50 genes); now Stage 3 compound targets | **Rivals et al. 2007** | ✅ |
+
+**Citations**:
+- Raudvere U et al. (2019). *g:Profiler: a web server for functional enrichment analysis and conversions of gene lists.* Nucleic Acids Res 47:W191–W198.
+- Rivals I et al. (2007). *Enrichment or depletion of a GO category within a class of genes: which test?* Bioinformatics 23:401–407.
+
+### Bugs Found & Fixed
+
+**Bug — Wrong enrichment background set**  
+Background was set to Stage 5 overlap genes (`stage5.get("overlap")`), a small set of ~10–50 genes. This is scientifically incorrect: using hub genes (a large fraction of a tiny background) inflates significance — nearly any pathway with even one hub gene appears significant.  
+The correct background is **all compound targets from Stage 3** (`target_gene_symbols`) — the full set of proteins the compound library was screened against. This represents the "study universe" per Rivals et al. 2007 methodology.  
+Fix: background now reads `stage3.get("target_gene_symbols")`. Updated gprofiler.py docstring accordingly.
+
+### No Issues Found
+
+- Hub genes correctly read from `stage7.ranked[].gene_symbol` (prior fix preserved) ✅
+- Results capped at top 20 per source by FDR ✅
+- `hub_genes_queried` preserved in output for provenance ✅
+
+---
+
+*Further task: T0.8 (misc fixes)*
