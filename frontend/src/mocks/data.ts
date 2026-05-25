@@ -58,6 +58,18 @@ export const analysisFixture = {
       target_count: 18,
       coverage_percent: 85.7,
       targets: [],
+      uncovered_compounds: [
+        {
+          compound_id: 'mock-uncovered-1',
+          canonical_name: 'Quercetin',
+          smiles: 'OC1=CC=CC(O)=C1O',
+        },
+        {
+          compound_id: 'mock-uncovered-2',
+          canonical_name: 'Kaempferol',
+          smiles: null,
+        },
+      ],
     },
     '4': null,
     '5': {
