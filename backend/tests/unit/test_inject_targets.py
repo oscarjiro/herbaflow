@@ -84,8 +84,8 @@ async def test_inject_valid_gene_symbol():
     assert t["uniprot_id"] == "P04637"
     assert t["protein_name"] == "Cellular tumor antigen p53"
     assert t["sources"] == ["manual"]
-    assert t["target_score"] == 1.0
     assert t["compound_ids"] == []
+    assert "target_score" not in t
 
 
 # ---------------------------------------------------------------------------

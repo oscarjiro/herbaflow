@@ -974,20 +974,25 @@ async def inject_targets(
             seen_genes.add(gene)
             deduped.append(t)
 
+    validated_targets = [
+        {k: v for k, v in t.items() if k != "target_score"}
+        for t in deduped
+    ]
+
     # Build synthetic stage_3 result — stage 5 reads target_gene_symbols
     stage3_result = {
-        "target_count": len(deduped),
-        "target_gene_symbols": [t["gene_symbol"] for t in deduped],
-        "target_compound_map": {t["gene_symbol"]: [] for t in deduped},
-        "targets": deduped,
+        "target_count": len(validated_targets),
+        "target_ids": [t["target_id"] for t in validated_targets],
+        "target_gene_symbols": [t["gene_symbol"] for t in validated_targets],
+        # Manual targets have no associated compounds — empty list is correct
+        "target_compound_map": {t["gene_symbol"]: [] for t in validated_targets},
+        "targets": validated_targets,
         # Coverage fields (not meaningful for manual input)
-        "covered": len(deduped),
+        "covered": len(validated_targets),
         "no_data": 0,
         "coverage_pct": 100.0,
         "compound_sources": {},
         "uncovered_compounds": [],
-        # Tag so UI can recognise manual injection
-        "_input_mode": "manual_targets",
     }
 
     await analysis_repo.update_run_status(
