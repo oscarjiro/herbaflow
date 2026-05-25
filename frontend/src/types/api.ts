@@ -194,6 +194,8 @@ export interface Stage3Result {
   compound_sources: Record<string, Array<'chembl' | 'pubchem_bioassay' | 'user_provided'>>
   /** Compounds with zero targets after ChEMBL + PubChem; used for STP Coverage section */
   uncovered_compounds: UncoveredCompound[]
+  /** Set to true when user has added or removed targets; drives stale banner */
+  user_modified?: boolean
 }
 
 // ============================================================================
@@ -274,6 +276,8 @@ export interface DiseaseTargetResult {
 export interface Stage4Result {
   disease_target_count: number
   targets: DiseaseTargetResult[]
+  /** Set to true when user has added or removed targets; drives stale banner */
+  user_modified?: boolean
 }
 
 // Stage 5: Target Overlap
@@ -379,3 +383,16 @@ export type StageResult =
   | Stage6Result
   | Stage7Result
   | Stage8Result
+
+// T3.3: User-added targets
+export interface AddUserTargetRequest {
+  gene_symbol?: string
+  uniprot_id?: string
+}
+
+export interface AddUserTargetResponse {
+  target_id: string
+  gene_symbol: string
+  uniprot_id: string | null
+  protein_name: string | null
+}

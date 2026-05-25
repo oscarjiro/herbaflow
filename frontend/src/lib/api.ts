@@ -8,6 +8,8 @@ import type {
   ImportTargetsResponse,
   ResetFromRequest,
   ApproveRequest,
+  AddUserTargetRequest,
+  AddUserTargetResponse,
 } from '@/types/api'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -66,4 +68,50 @@ export const api = {
       method: 'POST',
       ...(body ? { body: JSON.stringify(body) } : {}),
     }),
+
+  async addUserTarget(analysisId: string, body: AddUserTargetRequest): Promise<AddUserTargetResponse> {
+    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/targets/user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail ?? 'Failed to add target')
+    }
+    return res.json()
+  },
+
+  async removeUserTarget(analysisId: string, geneSymbol: string): Promise<void> {
+    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/targets/${encodeURIComponent(geneSymbol)}`, {
+      method: 'DELETE',
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail ?? 'Failed to remove target')
+    }
+  },
+
+  async addUserDiseaseTarget(analysisId: string, body: AddUserTargetRequest): Promise<AddUserTargetResponse> {
+    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/disease-targets/user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail ?? 'Failed to add disease target')
+    }
+    return res.json()
+  },
+
+  async removeUserDiseaseTarget(analysisId: string, geneSymbol: string): Promise<void> {
+    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/disease-targets/${encodeURIComponent(geneSymbol)}`, {
+      method: 'DELETE',
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail ?? 'Failed to remove disease target')
+    }
+  },
 }
