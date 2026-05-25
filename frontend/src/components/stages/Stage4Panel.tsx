@@ -42,7 +42,11 @@ const columns: ColumnDef<DiseaseRow>[] = [
   {
     key: 'source',
     header: 'Source',
-    render: (value) => <StatusBadge status={String(value)} label={String(value)} />,
+    render: (value) => {
+      const label = value === 'db_cache' ? 'Cached' : value === 'open_targets_api' ? 'Live API' : String(value)
+      const status = value === 'db_cache' ? 'complete' : 'stage_1_awaiting_approval'
+      return <StatusBadge status={status} label={label} />
+    },
   },
 ]
 

@@ -26,7 +26,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                     all_targets[gene] = {
                         "gene_symbol": gene,
                         "uniprot_id": target.uniprot_accession or "",
-                        "score": score,
+                        "association_score": score,
                         "disease_name": disease.disease_name,
                         "source": "db_cache",
                     }

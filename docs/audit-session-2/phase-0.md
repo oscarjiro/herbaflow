@@ -89,4 +89,41 @@ Fix: Updated `Stage3Result.coverage_percent` → `coverage_pct` in `api.ts`; upd
 
 ---
 
-*Further tasks: T0.3 (Stage 4), T0.4 (Stage 5), T0.5 (Stage 6), T0.6 (Stage 7), T0.7 (Stage 8), T0.8 (misc)*
+---
+
+## T0.3 — Stage 4 Disease Targets
+
+**Status**: ✅ Complete  
+**Files touched**: `backend/analysis/stages/stage4_disease_targets.py`, `frontend/src/components/stages/Stage4Panel.tsx`, `backend/tests/unit/test_stage4.py`
+
+### Scientific Methodology Verified
+
+| Item | Implementation | Standard | Status |
+|------|----------------|----------|--------|
+| Open Targets score (0–1) | Harmonic sum from disease_repo / Open Targets API | Ochoa et al. 2021 (Open Targets Platform) | ✅ |
+| `min_score` threshold | `config.disease_targets.min_score` passed to DB query and API | Configurable; typically 0.1 for broad coverage | ✅ |
+| DB cache → API fallback | DB cache first; API fallback when no cached data | Reproducibility preserved when cache populated | ✅ |
+| Score disclosure | UI footnote: "0–1 scale, integrating genetic, genomic, and literature evidence" | ✅ |
+
+**Citations**:
+- Ochoa D et al. (2021). *Open Targets Platform: supporting systematic drug–target identification and prioritisation.* Nucleic Acids Res 49:D1302–D1310.
+
+### Bugs Found & Fixed
+
+**Bug 1 — Backend: `score` vs `association_score` inconsistency**  
+DB cache path (lines 22–32) emitted `"score": score`; API fallback path (lines 38–48) emitted `"association_score": t.score`. Frontend `DiseaseTargetResult.association_score` only matched API fallback. DB-sourced targets (the common case) always showed '—' in the score column.  
+Fix: DB cache path now emits `"association_score": score` to match API fallback and frontend type.  
+Test `test_stage4_uses_db_cache` updated accordingly.
+
+**Bug 2 — Frontend: raw source keys rendered as StatusBadge labels**  
+Source column rendered `"db_cache"` and `"open_targets_api"` as literal label strings. StatusBadge received unknown status values.  
+Fix: Mapped to human-readable labels: `"db_cache"` → "Cached" (green), `"open_targets_api"` → "Live API" (amber).
+
+### No Issues Found
+
+- `_disease_ids` correctly handles multiple diseases (iterates all, deduplicates by gene symbol).
+- Open Targets score scale and methodology correctly disclosed in UI footnote.
+
+---
+
+*Further tasks: T0.4 (Stage 5), T0.5 (Stage 6), T0.6 (Stage 7), T0.7 (Stage 8), T0.8 (misc)*
