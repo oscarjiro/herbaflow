@@ -4,7 +4,9 @@ import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
+import { isSkippedStage } from '@/types/api'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, PathwayTerm, PathwaySource } from '@/types/api'
 
 const DATA_SOURCES = [
@@ -101,7 +103,17 @@ function PathwayChart({ terms }: { terms: PathwayTerm[] }) {
 }
 
 export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8PanelProps) {
-  const result = analysis?.stage_results[`stage_${stage}`] as Stage8Result | null | undefined
+  const rawResult = analysis?.stage_results[`stage_${stage}`]
+  const result = rawResult as Stage8Result | null | undefined
+
+  if (isSkippedStage(rawResult)) {
+    return (
+      <div className="space-y-6">
+        <StageHeader stage={stage} name="Pathway Enrichment" status={status?.status ?? 'pending'} elapsedSeconds={null} />
+        <SkippedStageNotice />
+      </div>
+    )
+  }
 
   if (!result) {
     return (

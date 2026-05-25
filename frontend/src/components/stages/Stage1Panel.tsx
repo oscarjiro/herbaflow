@@ -4,6 +4,8 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
+import { isSkippedStage } from '@/types/api'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage1Result, CompoundResult } from '@/types/api'
 
 const SOURCES = [
@@ -38,7 +40,8 @@ const columns: ColumnDef<CompoundRow>[] = [
 ]
 
 export function Stage1Panel({ stage, analysis, status }: Stage1PanelProps) {
-  const result = analysis?.stage_results[`stage_${stage}`] as Stage1Result | null | undefined
+  const rawResult = analysis?.stage_results[`stage_${stage}`]
+  const result = rawResult as Stage1Result | null | undefined
 
   return (
     <div className="space-y-6">
@@ -49,7 +52,9 @@ export function Stage1Panel({ stage, analysis, status }: Stage1PanelProps) {
         elapsedSeconds={null}
       />
 
-      {!result ? (
+      {isSkippedStage(rawResult) ? (
+        <SkippedStageNotice />
+      ) : !result ? (
         <EmptyState message="Stage 1 results not yet available" />
       ) : (
         <>

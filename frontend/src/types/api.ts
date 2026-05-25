@@ -397,6 +397,23 @@ export type StageResult =
   | Stage7Result
   | Stage8Result
 
+// ============================================================================
+// Skipped Stage
+// ============================================================================
+
+export interface SkippedStageResult {
+  status: 'skipped'
+  input_mode: string
+}
+
+export function isSkippedStage(result: unknown): result is SkippedStageResult {
+  return (
+    typeof result === 'object' &&
+    result !== null &&
+    (result as SkippedStageResult).status === 'skipped'
+  )
+}
+
 // T3.3: User-added targets
 export interface AddUserTargetRequest {
   gene_symbol?: string

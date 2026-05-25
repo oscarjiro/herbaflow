@@ -6,6 +6,8 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
+import { isSkippedStage } from '@/types/api'
 import { AddTargetForm } from '@/components/shared/AddTargetForm'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import { useAddUserTarget } from '@/hooks/useAddUserTarget'
@@ -60,7 +62,8 @@ const SOURCE_CLASSES: Record<string, string> = {
 }
 
 export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }: Stage3PanelProps) {
-  const result = analysis?.stage_results[`stage_${stage}`] as Stage3Result | null | undefined
+  const rawResult = analysis?.stage_results[`stage_${stage}`]
+  const result = rawResult as Stage3Result | null | undefined
   const [showAllGenes, setShowAllGenes] = useState(false)
   const [showAddForm, setShowAddForm] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
@@ -229,7 +232,9 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
         elapsedSeconds={null}
       />
 
-      {!result ? (
+      {isSkippedStage(rawResult) ? (
+        <SkippedStageNotice />
+      ) : !result ? (
         <EmptyState message="Stage 3 results not yet available" />
       ) : (
         <>

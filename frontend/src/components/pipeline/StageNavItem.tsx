@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 export interface StageNavItemProps {
   stageNumber: number
   name: string
-  status: 'completed' | 'running' | 'awaiting_approval' | 'future' | 'pending' | 'failed'
+  status: 'completed' | 'running' | 'awaiting_approval' | 'future' | 'pending' | 'failed' | 'skipped'
   isActive: boolean
   onClick?: () => void
 }
@@ -18,6 +18,7 @@ export function StageNavItem({
 }: StageNavItemProps) {
   const isClickable =
     status === 'completed' || status === 'running' || status === 'awaiting_approval' || status === 'failed'
+  // skipped stages are never clickable (handled separately from isClickable)
 
   function handleClick() {
     if (isClickable && onClick) onClick()
@@ -59,6 +60,9 @@ export function StageNavItem({
       {(status === 'future' || status === 'pending') && (
         <div className="w-3.5 h-3.5 shrink-0" />
       )}
+      {status === 'skipped' && (
+        <div className="w-3.5 h-3.5 shrink-0" />
+      )}
 
       {/* Stage name */}
       <span
@@ -68,10 +72,14 @@ export function StageNavItem({
           status === 'running' && 'font-medium text-hf-fg1',
           status === 'awaiting_approval' && 'font-medium text-hf-fg1',
           status === 'failed' && 'text-hf-danger',
-        (status === 'future' || status === 'pending') && 'text-hf-fg4',
+          (status === 'future' || status === 'pending') && 'text-hf-fg4',
+          status === 'skipped' && 'text-hf-fg3',
         )}
       >
         {name}
+        {status === 'skipped' && (
+          <span className="ml-1.5 text-xs text-hf-fg3 font-normal">(Skipped)</span>
+        )}
       </span>
     </button>
   )

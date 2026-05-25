@@ -5,6 +5,8 @@ import type { ColumnDef } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
+import { isSkippedStage } from '@/types/api'
 import { cn } from '@/lib/utils'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, AdmeCompoundResult } from '@/types/api'
@@ -114,7 +116,8 @@ const columns: ColumnDef<AdmeRow>[] = [
 ]
 
 export function Stage2Panel({ stage, analysis, status, analysisId }: Stage2PanelProps) {
-  const result = analysis?.stage_results[`stage_${stage}`] as Stage2Result | null | undefined
+  const rawResult = analysis?.stage_results[`stage_${stage}`]
+  const result = rawResult as Stage2Result | null | undefined
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
 
   const total = result ? result.passed + result.failed + result.np_exceptions : 0
@@ -142,7 +145,9 @@ export function Stage2Panel({ stage, analysis, status, analysisId }: Stage2Panel
         elapsedSeconds={null}
       />
 
-      {!result ? (
+      {isSkippedStage(rawResult) ? (
+        <SkippedStageNotice />
+      ) : !result ? (
         <EmptyState message="Stage 2 results not yet available" />
       ) : (
         <>

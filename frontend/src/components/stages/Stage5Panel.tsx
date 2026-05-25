@@ -2,6 +2,8 @@ import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
+import { isSkippedStage } from '@/types/api'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage5Result, OverlapStats } from '@/types/api'
 
 const SOURCES = [
@@ -101,7 +103,17 @@ function VennDiagram({ compoundOnly, overlap, diseaseOnly }: VennProps) {
 }
 
 export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
-  const result = analysis?.stage_results[`stage_${stage}`] as Stage5Result | null | undefined
+  const rawResult = analysis?.stage_results[`stage_${stage}`]
+  const result = rawResult as Stage5Result | null | undefined
+
+  if (isSkippedStage(rawResult)) {
+    return (
+      <div className="space-y-6">
+        <StageHeader stage={5} name="Target Overlap" status={status?.status ?? 'pending'} elapsedSeconds={null} />
+        <SkippedStageNotice />
+      </div>
+    )
+  }
 
   if (!result) {
     return (

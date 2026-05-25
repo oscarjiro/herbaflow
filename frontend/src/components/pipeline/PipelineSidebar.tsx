@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { StageNavItem } from './StageNavItem'
 import type { StageNavItemProps } from './StageNavItem'
 import type { AnalysisStatusResponse, AnalysisRunResponse } from '@/types/api'
+import { isSkippedStage } from '@/types/api'
 
 const STAGE_NAMES = [
   'Compound Selection',
@@ -20,10 +21,15 @@ const STAGE_NAMES = [
   'Pathway Enrichment',
 ]
 
-function getStageStatus(
+export function getStageStatus(
   stageNum: number,
   statusData: AnalysisStatusResponse | undefined,
+  analysis: AnalysisRunResponse | undefined,
 ): StageNavItemProps['status'] {
+  // Check for skipped stage first — overrides all other status logic
+  const stageResult = analysis?.stage_results[`stage_${stageNum}`]
+  if (isSkippedStage(stageResult)) return 'skipped'
+
   if (!statusData) return 'future'
   const s = statusData.status
   const cur = statusData.current_stage ?? 0
@@ -82,7 +88,7 @@ export function PipelineSidebar({
       <nav className="flex-1 overflow-y-auto py-1">
         {STAGE_NAMES.map((name, index) => {
           const stageNumber = index + 1
-          const stageStatus = getStageStatus(stageNumber, status)
+          const stageStatus = getStageStatus(stageNumber, status, analysis)
           const isClickable =
             stageStatus === 'completed' ||
             stageStatus === 'running' ||

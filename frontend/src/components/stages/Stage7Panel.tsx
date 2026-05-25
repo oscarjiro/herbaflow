@@ -4,8 +4,10 @@ import type { ColumnDef } from '@/components/shared/DataTable'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { ExportButton } from '@/components/shared/ExportButton'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
+import { isSkippedStage } from '@/types/api'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage7Result, HubGeneResult } from '@/types/api'
 
 const SOURCES = [
@@ -80,7 +82,17 @@ const columns: ColumnDef<HubGeneRow>[] = [
 
 export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7PanelProps) {
   // analysisId used by StageParamsPanel for rerun mutation
-  const result = analysis?.stage_results[`stage_${stage}`] as Stage7Result | null | undefined
+  const rawResult = analysis?.stage_results[`stage_${stage}`]
+  const result = rawResult as Stage7Result | null | undefined
+
+  if (isSkippedStage(rawResult)) {
+    return (
+      <div className="space-y-6">
+        <StageHeader stage={7} name="Hub Gene Analysis" status={status?.status ?? 'pending'} elapsedSeconds={null} />
+        <SkippedStageNotice />
+      </div>
+    )
+  }
 
   if (!result) {
     return (

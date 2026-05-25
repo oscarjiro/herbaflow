@@ -7,7 +7,9 @@ import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
+import { isSkippedStage } from '@/types/api'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage6Result } from '@/types/api'
 
 Cytoscape.use(fcose)
@@ -88,7 +90,8 @@ export function Stage6Panel({ stage, analysis, status, analysisId }: Stage6Panel
   const [layout, setLayout] = useState<LayoutName>('fcose')
   const [tooltip, setTooltip] = useState<{ gene: string; degree: number } | null>(null)
 
-  const result = analysis?.stage_results[`stage_${stage}`] as Stage6Result | null | undefined
+  const rawResult = analysis?.stage_results[`stage_${stage}`]
+  const result = rawResult as Stage6Result | null | undefined
 
   // Combine nodes and edges for Cytoscape — must be before any conditional return
   const elements = useMemo(
@@ -121,6 +124,15 @@ export function Stage6Panel({ stage, analysis, status, analysisId }: Stage6Panel
       })
       .catch(() => { /* export failed silently */ })
   }, [])
+
+  if (isSkippedStage(rawResult)) {
+    return (
+      <div className="space-y-6">
+        <StageHeader stage={6} name="PPI Network" status={status?.status ?? 'pending'} elapsedSeconds={null} />
+        <SkippedStageNotice />
+      </div>
+    )
+  }
 
   if (!result) {
     return (

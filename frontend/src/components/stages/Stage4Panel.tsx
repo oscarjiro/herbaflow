@@ -6,6 +6,8 @@ import type { ColumnDef } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
+import { isSkippedStage } from '@/types/api'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import { AddTargetForm } from '@/components/shared/AddTargetForm'
 import { useAddUserDiseaseTarget } from '@/hooks/useAddUserDiseaseTarget'
@@ -32,7 +34,8 @@ interface Stage4PanelProps {
 type DiseaseRow = DiseaseTargetResult & Record<string, unknown>
 
 export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4PanelProps) {
-  const result = analysis?.stage_results[`stage_${stage}`] as Stage4Result | null | undefined
+  const rawResult = analysis?.stage_results[`stage_${stage}`]
+  const result = rawResult as Stage4Result | null | undefined
   const [showAddForm, setShowAddForm] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
 
@@ -133,7 +136,9 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
         elapsedSeconds={null}
       />
 
-      {!result ? (
+      {isSkippedStage(rawResult) ? (
+        <SkippedStageNotice />
+      ) : !result ? (
         <EmptyState message="Stage 4 results not yet available" />
       ) : (
         <>
