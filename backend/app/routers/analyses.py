@@ -1,14 +1,20 @@
+import copy
 import csv
 import io
 import json
+from datetime import datetime
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from fastapi.responses import StreamingResponse
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session, async_session_factory
 from app.schemas.analysis import CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse
+from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
+from app.models.target import Target, CompoundTarget
 from app.repositories import analysis_repo
 from analysis.pipeline import run_stage
+from analysis.stages.stage3_targets import _make_target_id, _make_ct_id
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
 
@@ -321,3 +327,153 @@ async def export_stage_results(
         media_type="application/json",
         headers={"Content-Disposition": f"attachment; filename={run.analysis_name}_{stage_key}.json"},
     )
+
+
+def _merge_stp_targets(stage3: dict, compound_id: str, new_targets: list[STPTarget]) -> dict:
+    """Merge STP-imported targets into a Stage 3 result dict.
+
+    Preserves all existing ChEMBL/PubChem targets. Adds new STP targets tagged
+    as 'user_provided'. Updates coverage stats and removes the compound from the
+    uncovered_compounds list if it had zero targets before.
+    """
+    result = copy.deepcopy(stage3)
+
+    was_uncovered = any(
+        c["compound_id"] == compound_id
+        for c in result.get("uncovered_compounds", [])
+    )
+
+    # Index existing targets by gene symbol for fast lookup
+    gene_to_target: dict[str, dict] = {
+        t["gene_symbol"].upper(): t for t in result.get("targets", [])
+    }
+
+    for stp_t in new_targets:
+        gene = stp_t.gene_symbol.upper()
+        if not gene:
+            continue
+        if gene in gene_to_target:
+            # Extend existing target with this compound
+            et = gene_to_target[gene]
+            if compound_id not in et["compound_ids"]:
+                et["compound_ids"].append(compound_id)
+                et["compound_count"] = len(et["compound_ids"])
+        else:
+            # New target from STP
+            new_t: dict = {
+                "gene_symbol": gene,
+                "uniprot_id": stp_t.uniprot_id,
+                "compound_count": 1,
+                "compound_ids": [compound_id],
+                "source": "user_provided",
+            }
+            result.setdefault("targets", []).append(new_t)
+            gene_to_target[gene] = new_t
+
+    # Update compound_sources
+    sources: dict[str, list[str]] = result.get("compound_sources", {})
+    compound_srcs = list(sources.get(compound_id, []))
+    if "user_provided" not in compound_srcs:
+        compound_srcs.append("user_provided")
+    sources[compound_id] = compound_srcs
+    result["compound_sources"] = sources
+
+    # Remove from uncovered list
+    result["uncovered_compounds"] = [
+        c for c in result.get("uncovered_compounds", [])
+        if c["compound_id"] != compound_id
+    ]
+
+    # Update pipeline chain keys
+    result["target_count"] = len(result.get("targets", []))
+    result["target_gene_symbols"] = [t["gene_symbol"] for t in result.get("targets", [])]
+    result["target_compound_map"] = {
+        t["gene_symbol"]: t["compound_ids"] for t in result.get("targets", [])
+    }
+
+    # Update coverage stats
+    if was_uncovered:
+        result["covered"] = result.get("covered", 0) + 1
+        result["no_data"] = max(0, result.get("no_data", 0) - 1)
+
+    total = result.get("covered", 0) + len(result["uncovered_compounds"])
+    result["coverage_pct"] = round(result["covered"] / total * 100, 1) if total else 0.0
+
+    return result
+
+
+@router.post("/{analysis_id}/import-targets", response_model=ImportTargetsResponse)
+async def import_targets(
+    analysis_id: UUID,
+    body: ImportTargetsRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Import SwissTargetPrediction results for one compound into Stage 3."""
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+    stage3 = (run.stage_results or {}).get("stage_3")
+    if not stage3:
+        raise HTTPException(status_code=400, detail="Stage 3 results not available")
+
+    # Validate compound belongs to this analysis
+    all_compound_ids: list[str] = (run.stage_results.get("stage_2") or {}).get(
+        "all_active_compound_ids", []
+    )
+    if body.compound_id not in all_compound_ids:
+        raise HTTPException(
+            status_code=422, detail=f"compound_id {body.compound_id!r} not found in this analysis"
+        )
+
+    now = datetime.utcnow()
+    imported = 0
+    skipped = 0
+
+    for stp_t in body.targets:
+        target_id = _make_target_id(stp_t.uniprot_id, stp_t.gene_symbol)
+
+        # Upsert Target row
+        existing_target = await session.exec(
+            select(Target).where(Target.target_id == target_id)
+        )
+        if not existing_target.first():
+            session.add(Target(
+                target_id=target_id,
+                canonical_key=f"uniprot:{stp_t.uniprot_id}",
+                gene_symbol=stp_t.gene_symbol.upper(),
+                uniprot_accession=stp_t.uniprot_id,
+                organism_tax_id=9606,
+                retrieved_at=now,
+            ))
+
+        # Upsert CompoundTarget row
+        ct_id = _make_ct_id(body.compound_id, target_id)
+        existing_ct = await session.exec(
+            select(CompoundTarget).where(CompoundTarget.compound_target_id == ct_id)
+        )
+        if not existing_ct.first():
+            session.add(CompoundTarget(
+                compound_target_id=ct_id,
+                compound_id=body.compound_id,
+                target_id=target_id,
+                prediction_method="stp_import",
+                evidence_type="computational",
+                pchembl_value=None,
+                retrieved_at=now,
+            ))
+            imported += 1
+        else:
+            skipped += 1
+
+    await session.commit()
+
+    # Re-aggregate Stage 3 results and persist
+    updated_stage3 = _merge_stp_targets(stage3, body.compound_id, body.targets)
+    await analysis_repo.update_run_status(
+        session, analysis_id,
+        status=run.status,
+        stage_results={"stage_3": updated_stage3},
+    )
+
+    return ImportTargetsResponse(imported=imported, skipped=skipped)
