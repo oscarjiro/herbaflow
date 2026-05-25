@@ -228,19 +228,21 @@ async def test_inject_targets_sets_input_mode():
 
 @pytest.mark.asyncio
 async def test_inject_targets_empty_list_422():
-    run = _make_run(status="pending")
+    """Empty targets list must be rejected.
 
-    with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)):
-        from app.routers.analyses import inject_targets
-        from app.schemas.analysis import InjectTargetsRequest
-        from fastapi import HTTPException
+    Previously the router enforced this via an explicit HTTPException.
+    Now InjectTargetsRequest has min_length=1 on the ``targets`` field,
+    so Pydantic raises ValidationError *before* the route handler runs.
+    FastAPI converts this to a 422 Unprocessable Entity automatically.
+    """
+    from pydantic import ValidationError
+    from app.schemas.analysis import InjectTargetsRequest
 
-        mock_session = AsyncMock()
-        request = InjectTargetsRequest(targets=[])
-        with pytest.raises(HTTPException) as exc_info:
-            await inject_targets(ANALYSIS_UUID, request, mock_session)
+    with pytest.raises(ValidationError) as exc_info:
+        InjectTargetsRequest(targets=[])
 
-    assert exc_info.value.status_code == 422
+    errors = exc_info.value.errors()
+    assert any(e["loc"] == ("targets",) for e in errors)
 
 
 # ---------------------------------------------------------------------------

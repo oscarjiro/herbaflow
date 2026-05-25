@@ -1,7 +1,7 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from uuid import UUID
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 
 class ResetFromRequest(BaseModel):
@@ -14,11 +14,22 @@ class ApproveRequest(BaseModel):
 
 
 class CreateAnalysisRequest(BaseModel):
-    name: str
-    mode: str = "guided"
-    plant_ids: list[str] = []
-    disease_ids: list[str]
-    parameters: dict[str, Any] = {}
+    name: str = Field(
+        min_length=1,
+        max_length=200,
+        description="Human-readable label for the analysis run",
+    )
+    mode: Literal["guided", "auto"] = "guided"
+    plant_ids: list[str] = Field(default_factory=list)
+    disease_ids: list[str] = Field(min_length=1, description="At least one disease is required")
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("name")
+    @classmethod
+    def name_not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("name must not be blank")
+        return v
 
 
 class AnalysisStatusResponse(BaseModel):
@@ -67,7 +78,11 @@ class AddUserTargetResponse(BaseModel):
 
 
 class InjectCompoundsRequest(BaseModel):
-    compounds: list[str]  # SMILES or InChI strings, 1–100 items
+    compounds: list[str] = Field(
+        min_length=1,
+        max_length=100,
+        description="SMILES or InChI strings, 1–100 items",
+    )
 
 
 class InjectCompoundsResponse(BaseModel):
@@ -76,7 +91,11 @@ class InjectCompoundsResponse(BaseModel):
 
 
 class InjectTargetsRequest(BaseModel):
-    targets: list[str]  # gene symbols or UniProt accessions, 1–200 items
+    targets: list[str] = Field(
+        min_length=1,
+        max_length=200,
+        description="Gene symbols or UniProt accessions, 1–200 items",
+    )
 
 
 class InjectTargetsResponse(BaseModel):

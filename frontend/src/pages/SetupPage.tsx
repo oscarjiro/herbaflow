@@ -10,6 +10,7 @@ import type { AdvancedParams } from '@/components/setup/AdvancedParameters'
 import { useStartAnalysis } from '@/hooks/useStartAnalysis'
 import { api } from '@/lib/api'
 import { isTerminalStatus } from '@/types/api'
+import { validateSetupForm, type SetupFormErrors } from '@/lib/schemas'
 
 // ============================================================================
 // Helpers
@@ -106,6 +107,7 @@ export default function SetupPage() {
   const [inputMode, setInputMode] = useState<InputMode>('standard')
   const [compoundsRaw, setCompoundsRaw] = useState('')
   const [targetsRaw, setTargetsRaw] = useState('')
+  const [formErrors, setFormErrors] = useState<SetupFormErrors>({})
 
   const isManualCompounds = inputMode === 'manual_compounds'
   const isManualTargets = inputMode === 'manual_targets'
@@ -131,16 +133,31 @@ export default function SetupPage() {
       })
   }, [navigate])
 
-  // Derived validation
-  const hasInput = isManualCompounds
-    ? parsedCompounds.length > 0
-    : isManualTargets
-      ? parsedTargets.length > 0
-      : plantIds.length > 0
-  const isDisabled = !hasInput || diseaseIds.length === 0 || mutation.isPending
+  // Derived: only block submission while a request is in-flight;
+  // field-level errors are surfaced by Zod on submit.
+  const isDisabled = mutation.isPending
 
   function handleSubmit() {
-    if (isDisabled) return
+    if (mutation.isPending) return
+
+    // Run Zod validation
+    const formData: Record<string, unknown> = {
+      name,
+      mode,
+      disease_ids: diseaseIds,
+      parameters: params,
+      ...(isManualCompounds
+        ? { compounds: parsedCompounds }
+        : isManualTargets
+          ? { targets: parsedTargets }
+          : { plant_ids: plantIds }),
+    }
+    const { success, errors } = validateSetupForm(inputMode, formData)
+    if (!success) {
+      setFormErrors(errors)
+      return
+    }
+    setFormErrors({})
 
     const baseParams: Record<string, unknown> = {
       ...(params as unknown as Record<string, unknown>),
@@ -173,16 +190,19 @@ export default function SetupPage() {
         <p className="text-sm font-medium text-hf-fg2 mb-2">Analysis Name</p>
         <Input
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => { setName(e.target.value); setFormErrors((prev) => ({ ...prev, name: undefined })) }}
           placeholder="Enter analysis name"
-          className="border-hf-border bg-hf-surface text-hf-fg1"
+          className={`border-hf-border bg-hf-surface text-hf-fg1${formErrors.name ? ' border-hf-danger' : ''}`}
         />
+        {formErrors.name && (
+          <p className="text-xs text-hf-danger mt-1">{formErrors.name}</p>
+        )}
       </div>
 
       {/* Input Mode */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
         <p className="text-sm font-medium text-hf-fg2 mb-2">Input Mode</p>
-        <InputModeToggle value={inputMode} onChange={setInputMode} />
+        <InputModeToggle value={inputMode} onChange={(v) => { setInputMode(v); setFormErrors({}) }} />
         {isManualCompounds && (
           <p className="text-xs text-hf-fg3 mt-2">
             Stages 1–2 (compound selection and ADME screening) will be skipped.
@@ -201,7 +221,10 @@ export default function SetupPage() {
       {!isManual && (
         <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" data-testid="plants-section">
           <p className="text-sm font-medium text-hf-fg2 mb-2">Plants</p>
-          <PlantSelector value={plantIds} onChange={setPlantIds} />
+          <PlantSelector value={plantIds} onChange={(v) => { setPlantIds(v); setFormErrors((prev) => ({ ...prev, plant_ids: undefined })) }} />
+          {formErrors.plant_ids && (
+            <p className="text-xs text-hf-danger mt-1">{formErrors.plant_ids}</p>
+          )}
         </div>
       )}
 
@@ -211,17 +234,19 @@ export default function SetupPage() {
           <p className="text-sm font-medium text-hf-fg2 mb-2">Compounds</p>
           <textarea
             value={compoundsRaw}
-            onChange={(e) => setCompoundsRaw(e.target.value)}
+            onChange={(e) => { setCompoundsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
             placeholder="Enter SMILES or InChI strings, one per line"
             rows={6}
             data-testid="compounds-textarea"
-            className="w-full rounded-md border border-hf-border bg-hf-bg text-hf-fg1 text-sm p-3 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y font-mono"
+            className={`w-full rounded-md border bg-hf-bg text-hf-fg1 text-sm p-3 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y font-mono${formErrors.compounds ? ' border-hf-danger' : ' border-hf-border'}`}
           />
-          {parsedCompounds.length > 0 && (
+          {formErrors.compounds ? (
+            <p className="text-xs text-hf-danger mt-1">{formErrors.compounds}</p>
+          ) : parsedCompounds.length > 0 ? (
             <p className="text-xs text-hf-fg3 mt-1">
               {parsedCompounds.length} structure{parsedCompounds.length !== 1 ? 's' : ''} entered
             </p>
-          )}
+          ) : null}
         </div>
       )}
 
@@ -231,24 +256,29 @@ export default function SetupPage() {
           <p className="text-sm font-medium text-hf-fg2 mb-2">Targets</p>
           <textarea
             value={targetsRaw}
-            onChange={(e) => setTargetsRaw(e.target.value)}
+            onChange={(e) => { setTargetsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
             placeholder="Enter gene symbols or UniProt accessions, one per line"
             rows={6}
             data-testid="targets-textarea"
-            className="w-full rounded-md border border-hf-border bg-hf-bg text-hf-fg1 text-sm p-3 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y font-mono"
+            className={`w-full rounded-md border bg-hf-bg text-hf-fg1 text-sm p-3 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y font-mono${formErrors.targets ? ' border-hf-danger' : ' border-hf-border'}`}
           />
-          {parsedTargets.length > 0 && (
+          {formErrors.targets ? (
+            <p className="text-xs text-hf-danger mt-1">{formErrors.targets}</p>
+          ) : parsedTargets.length > 0 ? (
             <p className="text-xs text-hf-fg3 mt-1">
               {parsedTargets.length} target{parsedTargets.length !== 1 ? 's' : ''} entered
             </p>
-          )}
+          ) : null}
         </div>
       )}
 
       {/* Disease */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
         <p className="text-sm font-medium text-hf-fg2 mb-2">Diseases</p>
-        <DiseaseSelector value={diseaseIds} onChange={setDiseaseIds} />
+        <DiseaseSelector value={diseaseIds} onChange={(v) => { setDiseaseIds(v); setFormErrors((prev) => ({ ...prev, disease_ids: undefined })) }} />
+        {formErrors.disease_ids && (
+          <p className="text-xs text-hf-danger mt-1">{formErrors.disease_ids}</p>
+        )}
       </div>
 
       {/* Mode */}
