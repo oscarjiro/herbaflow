@@ -5,6 +5,28 @@ export interface ParsedSTPResult {
   error: string | null
 }
 
+/** Split a single CSV line into fields, respecting RFC 4180 quoting. Tab-separated lines pass through as-is. */
+function splitFields(line: string, sep: string): string[] {
+  if (sep === '\t') return line.split('\t').map(f => f.trim())
+  const result: string[] = []
+  let cur = ''
+  let inQ = false
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]
+    if (inQ) {
+      if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++ }
+      else if (ch === '"') { inQ = false }
+      else { cur += ch }
+    } else {
+      if (ch === '"') { inQ = true }
+      else if (ch === ',') { result.push(cur.trim()); cur = '' }
+      else { cur += ch }
+    }
+  }
+  result.push(cur.trim())
+  return result
+}
+
 /**
  * Parse a SwissTargetPrediction result CSV/TSV.
  *
@@ -22,7 +44,7 @@ export function parseSTPCsv(text: string, minProbability: number): ParsedSTPResu
 
   // Auto-detect separator: prefer tab, fall back to comma
   const separator = lines[0].includes('\t') ? '\t' : ','
-  const header = lines[0].split(separator).map(h => h.trim().replace(/"/g, '').toLowerCase())
+  const header = splitFields(lines[0], separator).map(h => h.replace(/"/g, '').toLowerCase())
 
   const uniprotIdx = header.findIndex(h => h === 'uniprot')
   const geneIdx = header.findIndex(h => h === 'gene name' || h === 'gene_name')
@@ -38,7 +60,7 @@ export function parseSTPCsv(text: string, minProbability: number): ParsedSTPResu
   const targets: STPTargetImport[] = []
   for (const line of lines.slice(1)) {
     if (!line.trim()) continue
-    const cols = line.split(separator).map(c => c.trim().replace(/"/g, ''))
+    const cols = splitFields(line, separator).map(c => c.replace(/"/g, ''))
     const prob = parseFloat(cols[probIdx] ?? '')
     if (isNaN(prob) || prob < minProbability) continue
     const uniprot = cols[uniprotIdx]?.trim()
@@ -65,7 +87,7 @@ export function generateSTPExportCsv(compounds: UncoveredCompound[]): string {
     'compound_name,smiles',
     ...compounds
       .filter(c => c.smiles !== null && c.smiles !== undefined)
-      .map(c => `"${c.canonical_name.replace(/"/g, '""')}","${c.smiles}"`),
+      .map(c => `"${c.canonical_name.replace(/"/g, '""')}",${c.smiles}`),
   ]
   return rows.join('\n')
 }

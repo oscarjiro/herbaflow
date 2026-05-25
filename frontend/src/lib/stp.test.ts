@@ -11,6 +11,10 @@ const SAMPLE_STP_TSV = `Target\tUniprot\tCommon name\tGene name\tChEMBL preferre
 Carbonic anhydrase I\tP00915\tCA1\tCA1\tCHEMBL104\t0.43\t0\t5
 Epidermal growth factor receptor\tP00533\tEGFR\tEGFR\tCHEMBL203\t0.12\t2\t8`
 
+const SAMPLE_STP_CSV_WITH_QUOTED_TARGET = `Target,Uniprot,Common name,Gene name,ChEMBL preferred compound,Probability,Known actives (3D),Known actives (2D)
+"Carbonic anhydrase, isoform I",P00915,CA1,CA1,CHEMBL104,0.43,0,5
+Epidermal growth factor receptor,P00533,EGFR,EGFR,CHEMBL203,0.12,2,8`
+
 describe('parseSTPCsv', () => {
   it('parses comma-separated STP output and filters by probability', () => {
     const result = parseSTPCsv(SAMPLE_STP_CSV, 0.1)
@@ -43,6 +47,15 @@ describe('parseSTPCsv', () => {
     expect(result.error).toBeNull()
     expect(result.targets).toHaveLength(0)
   })
+
+  it('parses CSV with quoted target names containing commas', () => {
+    const result = parseSTPCsv(SAMPLE_STP_CSV_WITH_QUOTED_TARGET, 0.1)
+    expect(result.error).toBeNull()
+    expect(result.targets).toHaveLength(2)
+    expect(result.targets[0].uniprot_id).toBe('P00915')
+    expect(result.targets[0].gene_symbol).toBe('CA1')
+    expect(result.targets[0].probability).toBe(0.43)
+  })
 })
 
 describe('generateSTPExportCsv', () => {
@@ -69,5 +82,14 @@ describe('generateSTPExportCsv', () => {
       { compound_id: 'x', canonical_name: 'No SMILES', smiles: null },
     ])
     expect(result.trim()).toBe('compound_name,smiles')
+  })
+
+  it('does not quote the SMILES column', () => {
+    const csv = generateSTPExportCsv([
+      { compound_id: 'cid-1', canonical_name: 'Quercetin', smiles: 'OC1=CC=CC=C1' },
+    ])
+    // SMILES must be unquoted — STP input format requires plain SMILES strings
+    expect(csv).toContain(',OC1=CC=CC=C1')
+    expect(csv).not.toContain(',"OC1=CC=CC=C1"')
   })
 })
