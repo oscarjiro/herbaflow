@@ -92,6 +92,14 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "adme_pass": str(c.compound_id) in passed_set,
             "is_np_exception": str(c.compound_id) in np_set,
             "is_pains_positive": c.is_pains_positive,
+            # ADME property values for frontend display
+            "molecular_weight": c.molecular_weight,
+            "logp": c.logp,
+            "tpsa": c.tpsa,
+            "hbond_donors": c.hbond_donors,
+            "hbond_acceptors": c.hbond_acceptors,
+            "np_likeness_score": c.np_likeness_score,
+            "rotatable_bonds": c.rotatable_bonds,
         }
         for c in result["passed"] + result["np_exceptions"] + result["failed"]
     ]

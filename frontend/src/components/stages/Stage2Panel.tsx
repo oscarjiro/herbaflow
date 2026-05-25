@@ -63,12 +63,17 @@ const columns: ColumnDef<AdmeRow>[] = [
   {
     key: 'adme_pass',
     header: 'Result',
-    render: (value) => (
-      <StatusBadge
-        status={value ? 'complete' : 'failed'}
-        label={value ? 'Pass' : 'Fail'}
-      />
-    ),
+    render: (value, row) => {
+      if (row.is_np_exception) {
+        return <StatusBadge status="stage_1_awaiting_approval" label="Pass (NP)" />
+      }
+      return (
+        <StatusBadge
+          status={value ? 'complete' : 'failed'}
+          label={value ? 'Pass' : 'Fail'}
+        />
+      )
+    },
   },
   {
     key: 'is_np_exception',
@@ -96,15 +101,15 @@ export function Stage2Panel({ stage, analysis, status }: Stage2PanelProps) {
   const result = analysis?.stage_results[`stage_${stage}`] as Stage2Result | null | undefined
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
 
-  const total = result ? result.passed + result.failed : 0
+  const total = result ? result.passed + result.failed + result.np_exceptions : 0
   const passedPct = total > 0 ? (((result?.passed ?? 0) / total) * 100).toFixed(1) : '0.0'
   const failedPct = total > 0 ? (((result?.failed ?? 0) / total) * 100).toFixed(1) : '0.0'
 
   const filteredCompounds: AdmeRow[] = result
     ? (filterMode === 'passed'
-      ? result.compounds.filter(c => c.adme_pass)
+      ? result.compounds.filter(c => c.adme_pass || c.is_np_exception)
       : filterMode === 'failed'
-        ? result.compounds.filter(c => !c.adme_pass)
+        ? result.compounds.filter(c => !c.adme_pass && !c.is_np_exception)
         : result.compounds) as AdmeRow[]
     : []
 
