@@ -305,7 +305,7 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
                 value={value.fdr_threshold}
                 onChange={(v) => set('fdr_threshold', v)}
                 step={0.01}
-                min={0}
+                min={0.001}
               />
               <div className="flex flex-col gap-2">
                 <span className="text-sm text-hf-fg2">Sources</span>

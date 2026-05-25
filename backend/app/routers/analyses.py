@@ -659,11 +659,6 @@ async def inject_compounds(
     import httpx
     from integrations.pubchem_compound import validate_compounds_batch
 
-    if not body.compounds:
-        raise HTTPException(status_code=422, detail="compounds list must not be empty")
-    if len(body.compounds) > 100:
-        raise HTTPException(status_code=422, detail="compounds list must not exceed 100 items")
-
     run = await analysis_repo.get_run(session, analysis_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
@@ -917,11 +912,6 @@ async def inject_targets(
         r"|^[A-NR-Z][0-9](?:[A-Z][A-Z0-9]{2}[0-9]){1,2}$",
         re.IGNORECASE,
     )
-
-    if not body.targets:
-        raise HTTPException(status_code=422, detail="targets list must not be empty")
-    if len(body.targets) > 200:
-        raise HTTPException(status_code=422, detail="targets list must not exceed 200 items")
 
     run = await analysis_repo.get_run(session, analysis_id)
     if run is None:

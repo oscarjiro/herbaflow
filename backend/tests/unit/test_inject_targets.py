@@ -227,8 +227,7 @@ async def test_inject_targets_sets_input_mode():
 # Test 6: Empty targets list → 422
 # ---------------------------------------------------------------------------
 
-@pytest.mark.asyncio
-async def test_inject_targets_empty_list_422():
+def test_inject_targets_empty_list_422():
     """Empty targets list must be rejected.
 
     Previously the router enforced this via an explicit HTTPException.
