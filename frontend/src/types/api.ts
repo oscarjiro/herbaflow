@@ -227,11 +227,11 @@ export interface CytoscapeNode {
 }
 
 export interface CytoscapeEdgeData {
-  id: string
+  id?: string          // Cytoscape auto-generates if omitted
   source: string
   target: string
-  weight: number
-  combined_score: number
+  weight: number       // combined_score stored as weight for Cytoscape mapData
+  combined_score?: number
 }
 
 export interface CytoscapeEdge {

@@ -126,4 +126,72 @@ Fix: Mapped to human-readable labels: `"db_cache"` → "Cached" (green), `"open_
 
 ---
 
-*Further tasks: T0.4 (Stage 5), T0.5 (Stage 6), T0.6 (Stage 7), T0.7 (Stage 8), T0.8 (misc)*
+---
+
+## T0.4 — Stage 5 Target Overlap
+
+**Status**: ✅ No bugs found  
+**Files touched**: none
+
+### Scientific Methodology Verified
+
+| Item | Implementation | Standard | Status |
+|------|----------------|----------|--------|
+| Hypergeometric test | `scipy.stats.hypergeom(M=20000, n=|disease|, N=|compound|).sf(k-1)` | Fisher's exact / hypergeometric equivalence for gene-set overlap | ✅ |
+| Background N | `HUMAN_PROTEOME_SIZE = 20_000` | Standard human proteome size for enrichment background | ✅ |
+| Jaccard index | `|A∩B| / |A∪B|` | Jaccard 1912 gene-set similarity | ✅ |
+| Significance threshold | `p < 0.05` | Disclosed in UI | ✅ |
+| Stats role | Annotations only, not gates — overlap genes all proceed to Stage 6 | ✅ |
+| Zero-overlap warning | Warning banner + downstream validity alert when overlap_count = 0 | ✅ |
+
+**Citations**:
+- Rivals I et al. (2007). *Enrichment or depletion of a GO category within a class of genes.* Bioinformatics 23:401–407. (Background set methodology)
+- Jaccard P (1912). *The distribution of the flora in the alpine zone.* New Phytol 11:37–50.
+
+### No Issues Found
+
+- Frontend label "Fisher's Exact p-value" with footnote "(hypergeometric model)" is mathematically accurate — the two tests are equivalent for one-sided 2×2 gene-set tables.
+- All field names correctly aligned between backend output and frontend type/template.
+
+---
+
+---
+
+## T0.5 — Stage 6 PPI Network
+
+**Status**: ✅ Complete  
+**Files touched**: `frontend/src/components/stages/Stage6Panel.tsx`, `frontend/src/types/api.ts`
+
+### Scientific Methodology Verified
+
+| Item | Implementation | Standard | Status |
+|------|----------------|----------|--------|
+| STRING confidence threshold | `min_confidence=0.4` default (medium), passed as `required_score=400` | Szklarczyk et al. 2023 — 0.4 most common in NP papers | ✅ |
+| Threshold disclosure | UI footnote shows `result.min_confidence` | ✅ |
+| Species filter | `species=9606` (Homo sapiens) | ✅ |
+| Network type | Default STRING network = all evidence channels (functional + physical) | Standard for NP pharmacology | ✅ |
+| Score scale | `score` field from STRING JSON = 0–1 (already normalized); `required_score=int(conf*1000)` converts correctly | ✅ |
+| Double filtering | API param `required_score` + client-side `if combined < min_confidence` | ✅ |
+| Overlap node contrast | bg=`#1A1A1A`, text=`#F7F5F2` — fixed in prior audit | ✅ |
+
+**Citations**:
+- Szklarczyk D et al. (2023). *The STRING database in 2023: protein–protein association networks and functional enrichment analyses for any of 12 000+ organisms.* Nucleic Acids Res 51:D638–D646.
+
+### Bugs Found & Fixed
+
+**Bug — Cytoscape edge width invisible**  
+`combined_score` (0–1 float) stored as `weight` in edge data. Stylesheet used `'width': 'data(weight)'` → edges were 0.4–1.0px (invisible). UI footnote correctly described "score × 5 + 1 (range 1–6)" but the transform was never applied.  
+Fix: Changed stylesheet to `'width': 'mapData(weight, 0, 1, 1, 6)'` — Cytoscape built-in linear mapping, 0→1px, 1→6px.
+
+**Type cleanup — `CytoscapeEdgeData`**  
+`id` and `combined_score` were declared as required but backend doesn't emit them. Made optional with explanatory comments.
+
+### No Issues Found
+
+- Network type (all evidence channels) correctly cited.
+- Overlap node label contrast correct (prior fix confirmed).
+- `min_confidence` correctly propagated from `PipelineConfig.ppi.min_confidence` and shown in UI.
+
+---
+
+*Further tasks: T0.6 (Stage 7), T0.7 (Stage 8), T0.8 (misc)*

@@ -53,7 +53,8 @@ const styleSheet = [
   {
     selector: 'edge',
     style: {
-      width: 'data(weight)',
+      // mapData scales weight (0–1 combined_score) to 1–6px width
+      width: 'mapData(weight, 0, 1, 1, 6)',
       'line-color': '#C8C4BC',
       opacity: 0.6,
     },
