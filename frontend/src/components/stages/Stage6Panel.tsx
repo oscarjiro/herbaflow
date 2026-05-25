@@ -1,5 +1,4 @@
 import { useRef, useState, useCallback, useMemo } from 'react'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import CytoscapeComponent from 'react-cytoscapejs'
 import fcose from 'cytoscape-fcose'
 import Cytoscape from 'cytoscape'
