@@ -68,6 +68,7 @@ uv run pytest tests/integration/
 | Open Targets      | Disease-target associations                    | `integrations/open_targets.py`        |
 | STRING-DB         | Protein-protein interactions                   | `integrations/stringdb.py`            |
 | g:Profiler        | Pathway enrichment                             | `integrations/gprofiler.py`           |
+| UniProt REST      | Human protein validation (gene symbol → accession, taxon 9606 check) | `integrations/uniprot.py` |
 
 ## Export Endpoint
 
