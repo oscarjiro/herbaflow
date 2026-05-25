@@ -9,6 +9,10 @@ class ResetFromRequest(BaseModel):
     rerun: bool = False
 
 
+class ApproveRequest(BaseModel):
+    param_overrides: dict[str, Any] | None = None   # e.g. {"target": {"min_pchembl": 6.0}}
+
+
 class CreateAnalysisRequest(BaseModel):
     name: str
     mode: str = "guided"

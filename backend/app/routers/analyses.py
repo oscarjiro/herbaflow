@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session, async_session_factory
-from app.schemas.analysis import CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse, ResetFromRequest
+from app.schemas.analysis import CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse, ResetFromRequest, ApproveRequest
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
 from app.repositories import analysis_repo
@@ -105,6 +105,7 @@ async def get_analysis(analysis_id: UUID, session: AsyncSession = Depends(get_se
 async def approve_stage(
     analysis_id: UUID,
     background_tasks: BackgroundTasks,
+    body: ApproveRequest | None = None,
     session: AsyncSession = Depends(get_session),
 ):
     run = await analysis_repo.get_run(session, analysis_id)
@@ -119,6 +120,10 @@ async def approve_stage(
 
     current_stage = int(run.status.split("_")[1])
     next_stage = current_stage + 1
+
+    # Apply param overrides for next stage before running it
+    if body and body.param_overrides:
+        await analysis_repo.merge_run_parameters(session, analysis_id, body.param_overrides)
 
     if next_stage > 8:
         await analysis_repo.update_run_status(

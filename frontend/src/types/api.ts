@@ -241,6 +241,10 @@ export interface ResetFromRequest {
   rerun?: boolean
 }
 
+export interface ApproveRequest {
+  param_overrides?: Record<string, unknown>
+}
+
 // Stage 3: STP Import
 export interface STPTargetImport {
   uniprot_id: string

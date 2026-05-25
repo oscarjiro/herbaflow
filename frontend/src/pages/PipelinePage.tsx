@@ -113,9 +113,11 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
       />
       {isAwaitingApproval && (
         <ApprovalBar
-          onApprove={() => approveMutation.mutate()}
+          onApprove={(overrides) => approveMutation.mutate(overrides)}
           onReject={() => rejectMutation.mutate()}
           isLoading={approveMutation.isPending || rejectMutation.isPending}
+          nextStage={stage + 1}
+          currentParams={analysis?.parameters ?? null}
         />
       )}
       {showRedoButton && (

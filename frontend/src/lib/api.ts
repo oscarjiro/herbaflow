@@ -7,6 +7,7 @@ import type {
   ImportTargetsRequest,
   ImportTargetsResponse,
   ResetFromRequest,
+  ApproveRequest,
 } from '@/types/api'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -39,8 +40,11 @@ export const api = {
   getAnalysisStatus: (id: string): Promise<AnalysisStatusResponse> =>
     request(`/analyses/${id}/status`),
 
-  approveStage: (id: string): Promise<void> =>
-    request(`/analyses/${id}/approve`, { method: 'POST' }),
+  approveStage: (id: string, body?: ApproveRequest): Promise<void> =>
+    request(`/analyses/${id}/approve`, {
+      method: 'POST',
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    }),
 
   rejectStage: (id: string): Promise<void> =>
     request(`/analyses/${id}/reject`, { method: 'POST' }),

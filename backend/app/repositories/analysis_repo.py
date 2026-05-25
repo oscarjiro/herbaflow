@@ -86,6 +86,29 @@ async def reset_run_from_stage(
     return run
 
 
+async def merge_run_parameters(
+    session: AsyncSession,
+    analysis_id: UUID,
+    param_overrides: dict,
+) -> None:
+    """Deep-merge param_overrides into run.parameters without clearing stage results.
+
+    Used by approve_stage to pre-configure the next stage before it runs.
+    Dict values are deep-merged; non-dict values are replaced.
+    """
+    run = await get_run(session, analysis_id)
+    merged = dict(run.parameters or {})
+    for key, val in param_overrides.items():
+        if isinstance(val, dict) and isinstance(merged.get(key), dict):
+            merged[key] = {**merged.get(key, {}), **val}
+        else:
+            merged[key] = val
+    run.parameters = merged
+    run.updated_at = datetime.utcnow()
+    session.add(run)
+    await session.commit()
+
+
 async def update_run_status(
     session: AsyncSession,
     analysis_id: UUID,
