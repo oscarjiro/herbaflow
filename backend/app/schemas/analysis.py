@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from uuid import UUID
 from datetime import datetime
 from typing import Any
@@ -46,3 +46,21 @@ class AnalysisRunResponse(BaseModel):
     completed_at: datetime | None
     expires_at: datetime | None = None
     error_message: str | None
+
+
+class AddUserTargetRequest(BaseModel):
+    gene_symbol: str | None = None
+    uniprot_id: str | None = None
+
+    @model_validator(mode="after")
+    def at_least_one(self) -> "AddUserTargetRequest":
+        if not self.gene_symbol and not self.uniprot_id:
+            raise ValueError("Provide at least one of gene_symbol or uniprot_id")
+        return self
+
+
+class AddUserTargetResponse(BaseModel):
+    target_id: str
+    gene_symbol: str
+    uniprot_id: str | None
+    protein_name: str | None

@@ -469,6 +469,45 @@ def _merge_stp_targets(stage3: dict, compound_id: str, new_targets: list[STPTarg
     return result
 
 
+def _add_target_to_stage3(
+    stage3: dict,
+    gene_symbol: str,
+    uniprot_id: str | None,
+    protein_name: str | None,
+) -> dict:
+    """Inject a user-provided target into a stage_3 result dict (deep copy — no mutation)."""
+    result = copy.deepcopy(stage3)
+    existing_genes = {t["gene_symbol"].upper() for t in result.get("targets", [])}
+    if gene_symbol.upper() in existing_genes:
+        raise ValueError(f"Target {gene_symbol} already in Stage 3 results")
+    result.setdefault("targets", []).append({
+        "gene_symbol": gene_symbol,
+        "uniprot_id": uniprot_id or "",
+        "protein_name": protein_name,
+        "compound_count": 0,
+        "compound_ids": [],
+        "source": "user_provided",
+    })
+    result["target_count"] = len(result["targets"])
+    result.setdefault("target_gene_symbols", []).append(gene_symbol)
+    result["user_modified"] = True
+    return result
+
+
+def _remove_target_from_stage3(stage3: dict, gene_symbol: str) -> dict:
+    """Remove a target from a stage_3 result dict by gene_symbol (deep copy — no mutation)."""
+    result = copy.deepcopy(stage3)
+    targets = result.get("targets", [])
+    new_targets = [t for t in targets if t["gene_symbol"].upper() != gene_symbol.upper()]
+    if len(new_targets) == len(targets):
+        raise KeyError(f"Target {gene_symbol} not found in Stage 3 results")
+    result["targets"] = new_targets
+    result["target_count"] = len(new_targets)
+    result["target_gene_symbols"] = [t["gene_symbol"] for t in new_targets]
+    result["user_modified"] = True
+    return result
+
+
 @router.post("/{analysis_id}/import-targets", response_model=ImportTargetsResponse)
 async def import_targets(
     analysis_id: UUID,
