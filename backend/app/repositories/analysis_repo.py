@@ -47,9 +47,25 @@ async def reset_run_from_stage(
     session: AsyncSession,
     analysis_id: UUID,
     from_stage: int,
+    param_overrides: dict | None = None,
 ) -> AnalysisRun:
-    """Clear stage results from from_stage onward and reset status."""
+    """Clear stage results from from_stage onward and reset status.
+
+    If param_overrides provided, merge into run.parameters before clearing results.
+    Dict values are deep-merged; non-dict values are replaced.
+    """
     run = await get_run(session, analysis_id)
+
+    # Apply param overrides BEFORE clearing stage results
+    if param_overrides:
+        merged = dict(run.parameters or {})
+        for key, val in param_overrides.items():
+            if isinstance(val, dict) and isinstance(merged.get(key), dict):
+                merged[key] = {**merged.get(key, {}), **val}
+            else:
+                merged[key] = val
+        run.parameters = merged
+
     stage_results = dict(run.stage_results or {})
     for s in range(from_stage, 9):
         stage_results.pop(f"stage_{s}", None)

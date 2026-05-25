@@ -155,7 +155,7 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
                     disabled={resetMutation.isPending}
                     className="rounded-md bg-hf-fg1 px-4 py-2 text-sm font-medium text-hf-bg1 hover:opacity-90 disabled:opacity-50 transition-opacity"
                     onClick={() => {
-                      resetMutation.mutate(stage, {
+                      resetMutation.mutate({ stage }, {
                         onSuccess: () => setRedoDialogOpen(false),
                       })
                     }}

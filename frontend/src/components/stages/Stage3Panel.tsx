@@ -9,6 +9,7 @@ import { DataSources } from '@/components/shared/DataSources'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, Stage3Result, TargetResult, UncoveredCompound, STPTargetImport } from '@/types/api'
 import { parseSTPCsv, generateSTPExportCsv } from '@/lib/stp'
 import { api } from '@/lib/api'
+import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 
 const SOURCES = [
   {
@@ -200,6 +201,12 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
         <EmptyState message="Stage 3 results not yet available" />
       ) : (
         <>
+          <StageParamsPanel
+            stage={3}
+            analysisId={_analysisId}
+            currentParams={analysis?.parameters ?? null}
+            canRerun={status?.mode === 'guided'}
+          />
           <div className="grid grid-cols-2 gap-4">
             <StatCard label="Targets Found" value={result.target_count} />
             <StatCard label="Coverage" value={`${(result.coverage_pct ?? 0).toFixed(1)}%`} />

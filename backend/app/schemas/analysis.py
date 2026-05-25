@@ -4,6 +4,11 @@ from datetime import datetime
 from typing import Any
 
 
+class ResetFromRequest(BaseModel):
+    params: dict[str, Any] | None = None   # e.g. {"adme": {"max_mw": 600}}
+    rerun: bool = False
+
+
 class CreateAnalysisRequest(BaseModel):
     name: str
     mode: str = "guided"

@@ -5,6 +5,7 @@ import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
 import { ExportButton } from '@/components/shared/ExportButton'
+import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage7Result, HubGeneResult } from '@/types/api'
 
 const SOURCES = [
@@ -78,6 +79,7 @@ const columns: ColumnDef<HubGeneRow>[] = [
 ]
 
 export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7PanelProps) {
+  // analysisId used by StageParamsPanel for rerun mutation
   const result = analysis?.stage_results[`stage_${stage}`] as Stage7Result | null | undefined
 
   if (!result) {
@@ -100,6 +102,13 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
         <StatCard label="Hub Genes" value={hubCount} />
         <StatCard label="Degree Threshold" value={result.threshold_degree} />
       </div>
+
+      <StageParamsPanel
+        stage={7}
+        analysisId={analysisId}
+        currentParams={analysis?.parameters ?? null}
+        canRerun={status?.mode === 'guided'}
+      />
 
       <div className="flex justify-end">
         <ExportButton analysisId={analysisId} stage={7} hasCsv={true} />

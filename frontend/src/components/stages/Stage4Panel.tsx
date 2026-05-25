@@ -5,6 +5,7 @@ import type { ColumnDef } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage4Result, DiseaseTargetResult } from '@/types/api'
 
 const SOURCES = [
@@ -60,7 +61,7 @@ const columns: ColumnDef<DiseaseRow>[] = [
   },
 ]
 
-export function Stage4Panel({ stage, analysis, status }: Stage4PanelProps) {
+export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4PanelProps) {
   const result = analysis?.stage_results[`stage_${stage}`] as Stage4Result | null | undefined
 
   return (
@@ -76,6 +77,12 @@ export function Stage4Panel({ stage, analysis, status }: Stage4PanelProps) {
         <EmptyState message="Stage 4 results not yet available" />
       ) : (
         <>
+          <StageParamsPanel
+            stage={4}
+            analysisId={analysisId}
+            currentParams={analysis?.parameters ?? null}
+            canRerun={status?.mode === 'guided'}
+          />
           <div className="grid grid-cols-1 gap-4 max-w-xs">
             <StatCard label="Disease-Associated Targets" value={result.disease_target_count} />
           </div>

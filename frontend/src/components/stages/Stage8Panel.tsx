@@ -4,6 +4,7 @@ import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, PathwayTerm, PathwaySource } from '@/types/api'
 
 const DATA_SOURCES = [
@@ -99,7 +100,7 @@ function PathwayChart({ terms }: { terms: PathwayTerm[] }) {
   )
 }
 
-export function Stage8Panel({ stage, analysis, status }: Stage8PanelProps) {
+export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8PanelProps) {
   const result = analysis?.stage_results[`stage_${stage}`] as Stage8Result | null | undefined
 
   if (!result) {
@@ -127,6 +128,13 @@ export function Stage8Panel({ stage, analysis, status }: Stage8PanelProps) {
         <StatCard label="Significant Pathways" value={result.total_significant} />
         <StatCard label="Total Terms" value={totalTerms} />
       </div>
+
+      <StageParamsPanel
+        stage={8}
+        analysisId={analysisId}
+        currentParams={analysis?.parameters ?? null}
+        canRerun={status?.mode === 'guided'}
+      />
 
       <Tabs defaultValue="GO:BP">
         <TabsList>

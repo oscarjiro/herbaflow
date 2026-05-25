@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session, async_session_factory
-from app.schemas.analysis import CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse
+from app.schemas.analysis import CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse, ResetFromRequest
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
 from app.repositories import analysis_repo
@@ -160,9 +160,14 @@ async def reset_from_stage(
     analysis_id: UUID,
     stage: int,
     background_tasks: BackgroundTasks,
+    body: ResetFromRequest | None = None,
     session: AsyncSession = Depends(get_session),
 ):
     """Clear stage results from `stage` onward and reset to previous approval state.
+
+    Optional body:
+    - params: dict of PipelineConfig param overrides (e.g. {"adme": {"max_mw": 600}})
+    - rerun: if True, immediately starts running the stage (stage > 1 only)
 
     After reset:
     - stage > 1: status becomes ``stage_{stage-1}_awaiting_approval``
@@ -178,7 +183,8 @@ async def reset_from_stage(
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
 
-    run = await analysis_repo.reset_run_from_stage(session, analysis_id, stage)
+    param_overrides = body.params if body else None
+    run = await analysis_repo.reset_run_from_stage(session, analysis_id, stage, param_overrides)
 
     if stage == 1:
         plant_ids = (run.parameters or {}).get("_plant_ids", [])
@@ -186,6 +192,8 @@ async def reset_from_stage(
         background_tasks.add_task(
             start_pipeline, run.analysis_id, plant_ids, disease_ids, async_session_factory
         )
+    elif body and body.rerun:
+        background_tasks.add_task(run_stage, analysis_id, stage, async_session_factory)
 
     return AnalysisStatusResponse(
         analysis_id=run.analysis_id,

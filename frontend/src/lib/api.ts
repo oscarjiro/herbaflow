@@ -6,6 +6,7 @@ import type {
   AnalysisStatusResponse,
   ImportTargetsRequest,
   ImportTargetsResponse,
+  ResetFromRequest,
 } from '@/types/api'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -56,6 +57,9 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  resetFromStage: (id: string, stage: number): Promise<AnalysisStatusResponse> =>
-    request(`/analyses/${id}/reset-from/${stage}`, { method: 'POST' }),
+  resetFromStage: (id: string, stage: number, body?: ResetFromRequest): Promise<AnalysisStatusResponse> =>
+    request(`/analyses/${id}/reset-from/${stage}`, {
+      method: 'POST',
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    }),
 }

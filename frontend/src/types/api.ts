@@ -196,6 +196,51 @@ export interface Stage3Result {
   uncovered_compounds: UncoveredCompound[]
 }
 
+// ============================================================================
+// Pipeline Config Param Types (mirrors backend analysis/models.py)
+// ============================================================================
+
+export interface AdmeParamsConfig {
+  max_mw: number
+  max_logp: number
+  max_hbd: number
+  max_hba: number
+  max_tpsa: number
+  max_rotatable_bonds: number
+  apply_veber: boolean
+  apply_pains: boolean
+  np_exception_threshold: number
+}
+
+export interface TargetParamsConfig {
+  min_pchembl: number
+  human_only: boolean
+  min_assay_confidence: number
+}
+
+export interface DiseaseTargetParamsConfig {
+  min_score: number
+}
+
+export interface PpiParamsConfig {
+  min_confidence: number
+}
+
+export interface HubGeneParamsConfig {
+  top_n: number
+  use_hub_bottleneck: boolean
+}
+
+export interface EnrichmentParamsConfig {
+  fdr_threshold: number
+  sources: string[]
+}
+
+export interface ResetFromRequest {
+  params?: Record<string, unknown>
+  rerun?: boolean
+}
+
 // Stage 3: STP Import
 export interface STPTargetImport {
   uniprot_id: string

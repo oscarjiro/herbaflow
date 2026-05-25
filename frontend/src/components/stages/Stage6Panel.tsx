@@ -7,6 +7,7 @@ import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage6Result } from '@/types/api'
 
 Cytoscape.use(fcose)
@@ -81,7 +82,7 @@ const LAYOUTS: Record<LayoutName, cytoscape.LayoutOptions> = {
   circle: { name: 'circle', animate: true, fit: true } as cytoscape.LayoutOptions,
 }
 
-export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
+export function Stage6Panel({ stage, analysis, status, analysisId }: Stage6PanelProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cyRef = useRef<any>(null)
   const [layout, setLayout] = useState<LayoutName>('fcose')
@@ -138,6 +139,13 @@ export function Stage6Panel({ stage, analysis, status }: Stage6PanelProps) {
         <StatCard label="Nodes" value={result.node_count} />
         <StatCard label="Edges" value={result.edge_count} />
       </div>
+
+      <StageParamsPanel
+        stage={6}
+        analysisId={analysisId}
+        currentParams={analysis?.parameters ?? null}
+        canRerun={status?.mode === 'guided'}
+      />
 
       {/* Controls */}
       <div className="flex items-center gap-2 flex-wrap">
