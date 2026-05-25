@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
-import type { AnalysisRunResponse, AnalysisStatusResponse, Stage3Result, TargetResult } from '@/types/api'
+import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, Stage3Result, TargetResult, UncoveredCompound } from '@/types/api'
+import { generateSTPExportCsv } from '@/lib/stp'
 
 interface Stage3PanelProps {
   stage: number
@@ -58,12 +59,37 @@ const columns: ColumnDef<TargetRow>[] = [
   },
 ]
 
-export function Stage3Panel({ stage, analysis, status }: Stage3PanelProps) {
+export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }: Stage3PanelProps) {
   const result = analysis?.stage_results[`stage_${stage}`] as Stage3Result | null | undefined
   const [showAllGenes, setShowAllGenes] = useState(false)
 
   const genes = result?.targets.map(t => t.gene_symbol) ?? []
   const visibleGenes = showAllGenes ? genes : genes.slice(0, GENE_PREVIEW_COUNT)
+
+  // Stage 2 result contains all ADME-passed compounds (needed for import dropdown in Task 6)
+  const stage2Result = analysis?.stage_results['stage_2'] as Stage2Result | null | undefined
+  const allCompounds = stage2Result?.compounds ?? []
+
+  const uncoveredCompounds: UncoveredCompound[] = result?.uncovered_compounds ?? []
+  // totalCompounds = covered + uncovered
+  const totalCompounds = allCompounds.length || (result ? uncoveredCompounds.length + (result.target_count > 0 ? 1 : 0) : 0)
+  const coveredCount = totalCompounds - uncoveredCompounds.length
+
+  const [showUncovered, setShowUncovered] = useState(false)
+  // showImportPanel read in Task 6 (import panel rendering)
+  const [showImportPanel, setShowImportPanel] = useState(false)
+
+  const handleExportSTP = useCallback(() => {
+    if (!result) return
+    const csv = generateSTPExportCsv(result.uncovered_compounds)
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'uncovered_compounds_stp.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [result])
 
   return (
     <div className="space-y-6">
@@ -82,6 +108,79 @@ export function Stage3Panel({ stage, analysis, status }: Stage3PanelProps) {
             <StatCard label="Targets Found" value={result.target_count} />
             <StatCard label="Coverage" value={`${(result.coverage_pct ?? 0).toFixed(1)}%`} />
           </div>
+
+          {/* Coverage section — Layout A: between stat cards and gene cloud */}
+          {uncoveredCompounds.length > 0 && (
+            <div className="rounded-md border border-hf-border bg-hf-bg2 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-sans font-medium text-hf-fg2">Coverage Details</p>
+                  <p className="text-xs font-sans text-hf-fg3 mt-0.5">
+                    {coveredCount} of {totalCompounds} compounds have targets ·{' '}
+                    <span className="text-hf-fg2 font-medium">
+                      {uncoveredCompounds.length} uncovered
+                    </span>
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleExportSTP}
+                    className="text-xs px-3 py-1 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans"
+                  >
+                    ↓ Export SMILES for STP
+                  </button>
+                  <button
+                    onClick={() => setShowImportPanel(prev => !prev)}
+                    className="text-xs px-3 py-1 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans"
+                  >
+                    ↑ Import STP Results
+                  </button>
+                </div>
+              </div>
+
+              {/* Uncovered compounds list */}
+              <div>
+                <button
+                  onClick={() => setShowUncovered(prev => !prev)}
+                  className="text-xs text-hf-fg3 hover:text-hf-fg1 underline underline-offset-2 font-sans"
+                >
+                  {showUncovered ? 'Hide uncovered compounds' : `Show ${uncoveredCompounds.length} uncovered compounds`}
+                </button>
+                {showUncovered && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {uncoveredCompounds.map(c => (
+                      <span
+                        key={c.compound_id}
+                        className="bg-hf-bg1 border border-hf-border text-hf-fg3 text-xs px-2 py-0.5 rounded font-mono"
+                        title={c.smiles ?? 'No SMILES available'}
+                      >
+                        {c.canonical_name}
+                        {!c.smiles && <span className="ml-1 text-hf-fg3 opacity-60">(no SMILES)</span>}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* All-covered state — show brief note and import button */}
+          {uncoveredCompounds.length === 0 && result && (
+            <div className="rounded-md border border-hf-border bg-hf-bg2 px-4 py-3 flex items-center justify-between">
+              <p className="text-xs font-sans text-hf-fg3">
+                All compounds covered ✓
+              </p>
+              <button
+                onClick={() => setShowImportPanel(prev => !prev)}
+                className="text-xs px-3 py-1 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans"
+              >
+                ↑ Import STP Results
+              </button>
+            </div>
+          )}
+
+          {/* Import panel placeholder — Task 6 renders content here when showImportPanel is true */}
+          {showImportPanel && null}
 
           <div>
             <p className="text-xs font-sans text-hf-fg3 mb-2">Gene Targets</p>
