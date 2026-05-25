@@ -213,6 +213,23 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     no_data = len(compound_ids) - covered
     coverage_pct = round(covered / len(compound_ids) * 100, 1) if compound_ids else 0.0
 
+    # Build uncovered_compounds list for frontend Coverage section.
+    # Includes compound_id, canonical_name, and smiles so frontend can generate
+    # the STP export CSV without additional API calls.
+    compound_detail: dict[str, tuple[str, str | None]] = {
+        c.compound_id: (c.canonical_name, getattr(c, "smiles", None))
+        for c in fetched_compounds
+    }
+    uncovered_compound_list = [
+        {
+            "compound_id": cid,
+            "canonical_name": compound_detail.get(cid, ("Unknown", None))[0],
+            "smiles": compound_detail.get(cid, ("Unknown", None))[1],
+        }
+        for cid in compound_ids
+        if cid not in all_covered
+    ]
+
     def _get_uniprot(gene: str) -> str:
         if gene in target_info:
             return target_info[gene].uniprot_accession or ""
@@ -261,4 +278,6 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         "targets": enriched_targets,
         # Source tracking: compound_id → list of sources that found targets for it
         "compound_sources": compound_sources,
+        # Coverage section: compounds with zero targets after ChEMBL + PubChem
+        "uncovered_compounds": uncovered_compound_list,
     }

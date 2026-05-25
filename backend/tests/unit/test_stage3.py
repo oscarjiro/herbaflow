@@ -29,11 +29,15 @@ def make_fake_compound(
     compound_id: str,
     chembl_id: str | None,
     inchi_key: str | None = None,
+    canonical_name: str = "Test Compound",
+    smiles: str | None = "C1CCCCC1",
 ):
     m = MagicMock()
     m.compound_id = compound_id
     m.chembl_id = chembl_id
     m.inchi_key = inchi_key
+    m.canonical_name = canonical_name
+    m.smiles = smiles
     return m
 
 
@@ -217,3 +221,38 @@ async def test_stage3_pubchem_not_called_when_chembl_covers_all():
     pubchem_mock.assert_not_called()
     assert result["covered"] == 1
     assert "EGFR" in result["target_gene_symbols"]
+
+
+@patch("analysis.stages.stage3_targets.compound_repo.get_compounds_by_ids")
+@patch("analysis.stages.stage3_targets.get_targets_for_compounds")
+@patch("analysis.stages.stage3_targets.get_targets_by_inchikey")
+async def test_stage3_uncovered_compounds_in_output(
+    mock_pubchem, mock_chembl, mock_get_compounds
+):
+    """Compounds with 0 targets appear in uncovered_compounds with name and smiles."""
+    covered_cid = "cid-covered"
+    uncovered_cid = "cid-uncovered"
+
+    mock_get_compounds.return_value = [
+        make_fake_compound(covered_cid, "CHEMBL1", canonical_name="Quercetin", smiles="OC1=CC=CC=C1"),
+        make_fake_compound(uncovered_cid, None, inchi_key="ABCDEF", canonical_name="Kaempferol", smiles="CC1=CC=CC=C1"),
+    ]
+
+    mock_chembl.return_value = {
+        "CHEMBL1": [ChemblTarget(chembl_id="CHEMBL_TGT_1", gene_symbol="TP53", uniprot_accession="P04637", organism="Homo sapiens", pchembl_value=6.0)]
+    }
+    mock_pubchem.return_value = []  # PubChem returns nothing for uncovered_cid
+
+    run = make_run(all_active_compound_ids=[covered_cid, uncovered_cid])
+    config = PipelineConfig()
+    session = make_session()
+
+    with patch("httpx.AsyncClient", return_value=_mock_httpx_client()):
+        result = await stage3_targets.run(run, config, session)
+
+    assert "uncovered_compounds" in result
+    uncovered = result["uncovered_compounds"]
+    assert len(uncovered) == 1
+    assert uncovered[0]["compound_id"] == uncovered_cid
+    assert uncovered[0]["canonical_name"] == "Kaempferol"
+    assert uncovered[0]["smiles"] == "CC1=CC=CC=C1"
