@@ -664,11 +664,16 @@ async def inject_compounds(
         raise HTTPException(status_code=422, detail="compounds list must not exceed 100 items")
 
     run = await analysis_repo.get_run(session, analysis_id)
-    if not run:
+    if run is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
+    if run.status not in ("pending", "failed"):
+        raise HTTPException(status_code=409, detail="Analysis already running or complete")
 
     async with httpx.AsyncClient(timeout=20.0) as client:
-        validated, failed = await validate_compounds_batch(body.compounds, client)
+        try:
+            validated, failed = await validate_compounds_batch(body.compounds, client)
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"PubChem validation failed: {str(e)}")
 
     if not validated:
         return InjectCompoundsResponse(injected=0, failed=failed)

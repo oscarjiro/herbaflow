@@ -5,10 +5,13 @@ retrieve canonical properties, and compute Lipinski ADME criteria.
 """
 from __future__ import annotations
 
+import logging
 import uuid
 from urllib.parse import quote
 
 import httpx
+
+logger = logging.getLogger(__name__)
 
 PUBCHEM_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 
@@ -88,7 +91,8 @@ async def validate_compound(
         url = f"{PUBCHEM_BASE}/compound/inchi/property/{_PROPERTY_LIST}/JSON"
         try:
             resp = await client.post(url, data={"inchi": structure})
-        except httpx.HTTPError:
+        except httpx.HTTPError as e:
+            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
             return None
     else:
         # Treat as SMILES
@@ -96,7 +100,8 @@ async def validate_compound(
         url = f"{PUBCHEM_BASE}/compound/smiles/{encoded}/property/{_PROPERTY_LIST}/JSON"
         try:
             resp = await client.get(url)
-        except httpx.HTTPError:
+        except httpx.HTTPError as e:
+            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
             return None
 
     if resp.status_code == 404 or resp.status_code == 400:
@@ -137,6 +142,9 @@ async def validate_compound(
         "is_np_exception": False,
         "is_pains_positive": False,
         "logp": adme["xlogp"],
+        # TPSA is not available from the PubChem property endpoint used here.
+        # stage2_adme.filter_compounds() already guards with `if c.tpsa is not None`,
+        # so None is safe — the Veber TPSA check is simply skipped for manual compounds.
         "tpsa": None,
         "hbond_donors": adme["hbd"],
         "hbond_acceptors": adme["hba"],
