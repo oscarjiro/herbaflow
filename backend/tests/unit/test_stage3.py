@@ -256,3 +256,4 @@ async def test_stage3_uncovered_compounds_in_output(
     assert uncovered[0]["compound_id"] == uncovered_cid
     assert uncovered[0]["canonical_name"] == "Kaempferol"
     assert uncovered[0]["smiles"] == "CC1=CC=CC=C1"
+    assert not any(u["compound_id"] == covered_cid for u in uncovered)

@@ -1,8 +1,11 @@
 import asyncio
+import logging
 import uuid
 from datetime import datetime
 
 import httpx
+
+logger = logging.getLogger(__name__)
 from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
 from app.models.target import Target, CompoundTarget
@@ -217,18 +220,25 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     # Includes compound_id, canonical_name, and smiles so frontend can generate
     # the STP export CSV without additional API calls.
     compound_detail: dict[str, tuple[str, str | None]] = {
-        c.compound_id: (c.canonical_name, getattr(c, "smiles", None))
+        c.compound_id: (c.canonical_name, c.smiles)
         for c in fetched_compounds
     }
-    uncovered_compound_list = [
-        {
+    uncovered_compound_list: list[dict[str, str | None]] = []
+    for cid in compound_ids:
+        if cid in all_covered:
+            continue
+        detail = compound_detail.get(cid)
+        if detail is None:
+            logger.warning(
+                "stage3: compound_id %r not found in fetched_compounds; skipping from uncovered list",
+                cid,
+            )
+            continue
+        uncovered_compound_list.append({
             "compound_id": cid,
-            "canonical_name": compound_detail.get(cid, ("Unknown", None))[0],
-            "smiles": compound_detail.get(cid, ("Unknown", None))[1],
-        }
-        for cid in compound_ids
-        if cid not in all_covered
-    ]
+            "canonical_name": detail[0],
+            "smiles": detail[1],
+        })
 
     def _get_uniprot(gene: str) -> str:
         if gene in target_info:
