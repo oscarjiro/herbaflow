@@ -112,6 +112,13 @@ async def advance_pipeline(
     await run_stage(analysis_id, next_stage, session_factory)
 
 
+_FIRST_REAL_STAGE = {
+    "standard": 1,
+    "manual_compounds": 3,
+    "manual_targets": 4,
+}
+
+
 async def start_pipeline(
     analysis_id: UUID,
     plant_ids: list[str],
@@ -127,4 +134,25 @@ async def start_pipeline(
         session.add(run)
         await session.commit()
 
-    await run_stage(analysis_id, 1, session_factory)
+    # Determine which stages (if any) to skip based on _input_mode.
+    async with session_factory() as session:
+        run = await analysis_repo.get_run(session, analysis_id)
+        input_mode = (run.parameters or {}).get("_input_mode", "standard")
+
+    first_real = _FIRST_REAL_STAGE.get(input_mode, 1)
+
+    if first_real > 1:
+        skipped = {
+            f"stage_{n}": {"status": "skipped", "input_mode": input_mode}
+            for n in range(1, first_real)
+        }
+        async with session_factory() as session:
+            await analysis_repo.update_run_status(
+                session,
+                analysis_id,
+                status=f"stage_{first_real}_running",
+                current_stage=first_real,
+                stage_results=skipped,
+            )
+
+    await run_stage(analysis_id, first_real, session_factory)
