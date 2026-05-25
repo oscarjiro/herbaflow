@@ -16,7 +16,7 @@
 | T2.5 | Redo Step button with reset-from endpoint | ✅ Complete | `9d04977` |
 | T2.6 | Data Sources collapsible per stage | ✅ Complete | `112d2b9` |
 | T2.7 | Fuzzy search + disease display names | ✅ Complete | pending |
-| T2.8 | DataTable pagination | 🔲 Next | — |
+| T2.8 | DataTable pagination | ✅ Complete | pending |
 
 ---
 
@@ -127,7 +127,29 @@ Added `DataSources.tsx` shared collapsible component to all 8 stage panels. Each
 
 ## Phase 2 Summary
 
-**7 tasks complete. 102 tests passing (68 backend + 34 frontend).**
+---
+
+## T2.8 — DataTable Pagination
+
+**Commit**: pending
+
+Replaced the "Show all N rows" toggle with proper pagination controls in `DataTable`.
+
+- **Page size selector**: 10 / 25 / 50 / All pills — pill for selected size gets `font-medium` + border; others borderless
+- **Row range indicator**: `rangeStart–rangeEnd of total` (e.g. "1–25 of 119"); tabular-nums for stable layout
+- **Prev/Next navigation**: `ChevronLeft`/`ChevronRight` (lucide-react); disabled + opacity-30 when at boundary; only shown when `totalPages > 1`
+- **Auto-reset to page 1** via `useEffect` when filter or sort changes — prevents stale pages after narrowing results
+- `pageSize` prop retained for initial selection; clamped to valid options (10/25/50); default changed 50 → 25
+- Footer only renders when `totalRows > 0` (avoids empty row below empty table)
+- Test updated: `DataTable.test.tsx` replaces "Show all" assertion with range indicator + aria-label button assertions
+
+**Files**: `shared/DataTable.tsx`, `tests/unit/DataTable.test.tsx`
+
+---
+
+## Phase 2 Summary
+
+**8 tasks complete. 102 tests passing (68 backend + 34 frontend).**
 
 | Task | Bugs / Features | Key files |
 |------|----------------|-----------|
@@ -138,3 +160,4 @@ Added `DataSources.tsx` shared collapsible component to all 8 stage panels. Each
 | T2.5 | Reset-from + redo button | analysis_repo.py, analyses.py, PipelinePage.tsx |
 | T2.6 | Data sources collapsible per stage | shared/DataSources.tsx, Stage*Panel.tsx × 8 |
 | T2.7 | Fuzzy search + disease title-case | format.ts, PlantSelector.tsx, DiseaseSelector.tsx |
+| T2.8 | DataTable pagination | DataTable.tsx, DataTable.test.tsx |

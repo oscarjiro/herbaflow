@@ -47,9 +47,16 @@ describe('DataTable', () => {
     expect(names2).toEqual(['Alpha', 'Gamma', 'Beta'])
   })
 
-  it('shows "Show all" button when rows exceed pageSize', () => {
+  it('shows pagination controls and range when rows exceed page size', () => {
     const bigData = Array.from({ length: 60 }, (_, i) => ({ name: `Item ${i}`, value: i }))
     render(<DataTable data={bigData} columns={columns} pageSize={50} />)
-    expect(screen.getByText(/Show all 60 rows/)).toBeInTheDocument()
+    // Range indicator: first page of 50 shows "1–50 of 60"
+    expect(screen.getByText('1–50 of 60')).toBeInTheDocument()
+    // Navigation buttons present
+    expect(screen.getByLabelText('Previous page')).toBeInTheDocument()
+    expect(screen.getByLabelText('Next page')).toBeInTheDocument()
+    // Prev disabled on first page, Next enabled
+    expect(screen.getByLabelText('Previous page')).toBeDisabled()
+    expect(screen.getByLabelText('Next page')).not.toBeDisabled()
   })
 })
