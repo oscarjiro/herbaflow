@@ -56,8 +56,12 @@ export const analysisFixture = {
     },
     '3': {
       target_count: 18,
-      coverage_percent: 85.7,
+      coverage_pct: 85.7,
       targets: [],
+      compound_sources: {
+        'mock-uncovered-1': [],
+        'mock-uncovered-2': [],
+      },
       uncovered_compounds: [
         {
           compound_id: 'mock-uncovered-1',
