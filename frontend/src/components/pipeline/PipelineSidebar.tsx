@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { Menu, X } from 'lucide-react'
+import { api } from '@/lib/api'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { StageNavItem } from './StageNavItem'
 import type { StageNavItemProps } from './StageNavItem'
@@ -48,12 +51,19 @@ export function PipelineSidebar({
   onStageClick,
 }: PipelineSidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const navigate = useNavigate()
 
-  function handleNewAnalysis() {
-    localStorage.removeItem('hf_last_analysis_id')
-    navigate('/analysis')
-  }
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      const id = analysis?.analysis_id
+      return id ? api.deleteAnalysis(id) : Promise.resolve()
+    },
+    onSettled: () => {
+      localStorage.removeItem('hf_last_analysis_id')
+      navigate('/analysis')
+    },
+  })
 
   const sidebarContent = (
     <div className="w-[220px] shrink-0 flex flex-col bg-hf-surface-2 border-r border-hf-border h-screen sticky top-0">
@@ -96,7 +106,7 @@ export function PipelineSidebar({
       <div className="border-t border-hf-border">
         <button
           type="button"
-          onClick={handleNewAnalysis}
+          onClick={() => setConfirmOpen(true)}
           className="text-xs text-hf-fg3 hover:text-hf-fg1 transition-colors px-4 py-3 w-full text-left"
         >
           New Analysis
@@ -107,6 +117,39 @@ export function PipelineSidebar({
 
   return (
     <>
+      {/* Confirmation dialog — portal renders above everything */}
+      <DialogPrimitive.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
+          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-hf-border bg-hf-surface p-6 shadow-lg focus:outline-none">
+            <DialogPrimitive.Title className="text-base font-semibold text-hf-fg1">
+              Start a new analysis?
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Description className="mt-2 text-sm text-hf-fg2">
+              This will permanently delete your current results. This cannot be undone.
+            </DialogPrimitive.Description>
+            <div className="mt-6 flex justify-end gap-3">
+              <DialogPrimitive.Close asChild>
+                <button
+                  type="button"
+                  className="rounded-md border border-hf-border bg-hf-surface px-4 py-2 text-sm text-hf-fg2 hover:text-hf-fg1 transition-colors"
+                >
+                  Cancel
+                </button>
+              </DialogPrimitive.Close>
+              <button
+                type="button"
+                disabled={deleteMutation.isPending}
+                onClick={() => deleteMutation.mutate()}
+                className="rounded-md bg-hf-danger px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {deleteMutation.isPending ? 'Deleting…' : 'Delete & Start New'}
+              </button>
+            </div>
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
+
       {/* Desktop sidebar — always visible at md+ */}
       <div className="hidden md:block">{sidebarContent}</div>
 
