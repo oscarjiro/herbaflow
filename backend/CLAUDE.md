@@ -61,12 +61,13 @@ uv run pytest tests/integration/
 
 ## External APIs
 
-| Integration  | Purpose                      | Client                         |
-| ------------ | ---------------------------- | ------------------------------ |
-| ChEMBL       | Target bioactivity           | `integrations/chembl.py`       |
-| Open Targets | Disease-target associations  | `integrations/open_targets.py` |
-| STRING-DB    | Protein-protein interactions | `integrations/stringdb.py`     |
-| g:Profiler   | Pathway enrichment           | `integrations/gprofiler.py`    |
+| Integration       | Purpose                                        | Client                                |
+| ----------------- | ---------------------------------------------- | ------------------------------------- |
+| ChEMBL            | Target bioactivity (primary, pChEMBL ≥ 5.0)   | `integrations/chembl.py`              |
+| PubChem BioAssay  | Secondary targets for ChEMBL-uncovered compounds (by InChIKey; aggregates BindingDB + 300+ sources) | `integrations/pubchem_bioassay.py` |
+| Open Targets      | Disease-target associations                    | `integrations/open_targets.py`        |
+| STRING-DB         | Protein-protein interactions                   | `integrations/stringdb.py`            |
+| g:Profiler        | Pathway enrichment                             | `integrations/gprofiler.py`           |
 
 ## Export Endpoint
 

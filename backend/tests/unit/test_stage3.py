@@ -3,6 +3,7 @@ from analysis.stages import stage3_targets
 from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
 from integrations.chembl import ChemblTarget
+from integrations.pubchem_bioassay import PubChemTarget
 
 
 def make_run(all_active_compound_ids=None):
@@ -24,11 +25,24 @@ def make_session():
     return session
 
 
-def make_fake_compound(compound_id: str, chembl_id: str | None):
+def make_fake_compound(
+    compound_id: str,
+    chembl_id: str | None,
+    inchi_key: str | None = None,
+):
     m = MagicMock()
     m.compound_id = compound_id
     m.chembl_id = chembl_id
+    m.inchi_key = inchi_key
     return m
+
+
+def _mock_httpx_client():
+    """Return a mock httpx.AsyncClient usable as an async context manager."""
+    cm = MagicMock()
+    cm.__aenter__ = AsyncMock(return_value=MagicMock())
+    cm.__aexit__ = AsyncMock(return_value=False)
+    return cm
 
 
 async def test_stage3_empty_compound_ids_early_return():
@@ -122,3 +136,84 @@ async def test_stage3_multiple_compounds_same_target():
     assert result["target_count"] == 1
     assert "TP53" in result["target_gene_symbols"]
     assert result["covered"] == 2
+
+
+async def test_stage3_pubchem_fallback_covers_uncovered_compound():
+    """
+    Compounds with 0 ChEMBL targets are queried via PubChem BioAssay by InChIKey.
+    A compound with no chembl_id but a valid inchi_key should be covered if
+    PubChem returns an active human target.
+    """
+    run = make_run(all_active_compound_ids=["c1"])
+    config = PipelineConfig()
+    session = make_session()
+    # No ChEMBL ID; has InChIKey → triggers PubChem fallback
+    fake_compound = make_fake_compound(
+        "c1", chembl_id=None, inchi_key="BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+    )
+
+    fake_pubchem_target = PubChemTarget(
+        uniprot_accession="P31749",
+        gene_symbol="AKT1",
+        protein_name="RAC-alpha serine/threonine-protein kinase",
+    )
+
+    with patch(
+        "analysis.stages.stage3_targets.compound_repo.get_compounds_by_ids",
+        return_value=[fake_compound],
+    ):
+        with patch(
+            "analysis.stages.stage3_targets.get_targets_for_compounds",
+            return_value={},
+        ):
+            with patch(
+                "analysis.stages.stage3_targets.get_targets_by_inchikey",
+                new=AsyncMock(return_value=[fake_pubchem_target]),
+            ):
+                with patch(
+                    "analysis.stages.stage3_targets.httpx.AsyncClient",
+                    return_value=_mock_httpx_client(),
+                ):
+                    result = await stage3_targets.run(run, config, session)
+
+    assert result["covered"] == 1
+    assert result["coverage_pct"] == 100.0
+    assert "AKT1" in result["target_gene_symbols"]
+    assert result["target_count"] == 1
+
+
+async def test_stage3_pubchem_not_called_when_chembl_covers_all():
+    """PubChem fallback is skipped if all compounds are covered by ChEMBL."""
+    run = make_run(all_active_compound_ids=["c1"])
+    config = PipelineConfig()
+    session = make_session()
+    fake_compound = make_fake_compound("c1", chembl_id="CHEMBL999", inchi_key="SOMEKEY-XXX")
+
+    fake_target = ChemblTarget(
+        chembl_id="CHEMBL_TGT_1",
+        gene_symbol="EGFR",
+        uniprot_accession="P00533",
+        organism="Homo sapiens",
+        pchembl_value=8.0,
+    )
+
+    pubchem_mock = AsyncMock(return_value=[])
+
+    with patch(
+        "analysis.stages.stage3_targets.compound_repo.get_compounds_by_ids",
+        return_value=[fake_compound],
+    ):
+        with patch(
+            "analysis.stages.stage3_targets.get_targets_for_compounds",
+            return_value={"CHEMBL999": [fake_target]},
+        ):
+            with patch(
+                "analysis.stages.stage3_targets.get_targets_by_inchikey",
+                new=pubchem_mock,
+            ):
+                result = await stage3_targets.run(run, config, session)
+
+    # PubChem should never have been called
+    pubchem_mock.assert_not_called()
+    assert result["covered"] == 1
+    assert "EGFR" in result["target_gene_symbols"]
