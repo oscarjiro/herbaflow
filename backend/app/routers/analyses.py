@@ -6,6 +6,7 @@ from datetime import datetime
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from fastapi.responses import StreamingResponse
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session, async_session_factory
@@ -370,19 +371,14 @@ def _merge_stp_targets(stage3: dict, compound_id: str, new_targets: list[STPTarg
             result.setdefault("targets", []).append(new_t)
             gene_to_target[gene] = new_t
 
-    # Update compound_sources
-    sources: dict[str, list[str]] = result.get("compound_sources", {})
-    compound_srcs = list(sources.get(compound_id, []))
-    if "user_provided" not in compound_srcs:
-        compound_srcs.append("user_provided")
-    sources[compound_id] = compound_srcs
-    result["compound_sources"] = sources
-
-    # Remove from uncovered list
-    result["uncovered_compounds"] = [
-        c for c in result.get("uncovered_compounds", [])
-        if c["compound_id"] != compound_id
-    ]
+    # Update compound_sources (only when new targets were actually provided)
+    if new_targets:
+        sources: dict[str, list[str]] = result.get("compound_sources", {})
+        compound_srcs = list(sources.get(compound_id, []))
+        if "user_provided" not in compound_srcs:
+            compound_srcs.append("user_provided")
+        sources[compound_id] = compound_srcs
+        result["compound_sources"] = sources
 
     # Update pipeline chain keys
     result["target_count"] = len(result.get("targets", []))
@@ -391,10 +387,21 @@ def _merge_stp_targets(stage3: dict, compound_id: str, new_targets: list[STPTarg
         t["gene_symbol"]: t["compound_ids"] for t in result.get("targets", [])
     }
 
-    # Update coverage stats
-    if was_uncovered:
+    # Only transition compound from uncovered→covered if new targets were actually added
+    if was_uncovered and new_targets:
         result["covered"] = result.get("covered", 0) + 1
         result["no_data"] = max(0, result.get("no_data", 0) - 1)
+        result["uncovered_compounds"] = [
+            c for c in result.get("uncovered_compounds", [])
+            if c["compound_id"] != compound_id
+        ]
+    elif not was_uncovered:
+        # Already covered — remove any stale entry if somehow present
+        result["uncovered_compounds"] = [
+            c for c in result.get("uncovered_compounds", [])
+            if c["compound_id"] != compound_id
+        ]
+    # If was_uncovered but new_targets is empty: leave uncovered_compounds and stats as-is
 
     total = result.get("covered", 0) + len(result["uncovered_compounds"])
     result["coverage_pct"] = round(result["covered"] / total * 100, 1) if total else 0.0
@@ -430,43 +437,47 @@ async def import_targets(
     imported = 0
     skipped = 0
 
-    for stp_t in body.targets:
-        target_id = _make_target_id(stp_t.uniprot_id, stp_t.gene_symbol)
+    try:
+        for stp_t in body.targets:
+            target_id = _make_target_id(stp_t.uniprot_id, stp_t.gene_symbol)
 
-        # Upsert Target row
-        existing_target = await session.exec(
-            select(Target).where(Target.target_id == target_id)
-        )
-        if not existing_target.first():
-            session.add(Target(
-                target_id=target_id,
-                canonical_key=f"uniprot:{stp_t.uniprot_id}",
-                gene_symbol=stp_t.gene_symbol.upper(),
-                uniprot_accession=stp_t.uniprot_id,
-                organism_tax_id=9606,
-                retrieved_at=now,
-            ))
+            # Upsert Target row
+            existing_target = (await session.exec(
+                select(Target).where(Target.target_id == target_id)
+            )).one_or_none()
+            if existing_target is None:
+                session.add(Target(
+                    target_id=target_id,
+                    canonical_key=f"uniprot:{stp_t.uniprot_id}",
+                    gene_symbol=stp_t.gene_symbol.upper(),
+                    uniprot_accession=stp_t.uniprot_id,
+                    organism_tax_id=9606,
+                    retrieved_at=now,
+                ))
 
-        # Upsert CompoundTarget row
-        ct_id = _make_ct_id(body.compound_id, target_id)
-        existing_ct = await session.exec(
-            select(CompoundTarget).where(CompoundTarget.compound_target_id == ct_id)
-        )
-        if not existing_ct.first():
-            session.add(CompoundTarget(
-                compound_target_id=ct_id,
-                compound_id=body.compound_id,
-                target_id=target_id,
-                prediction_method="stp_import",
-                evidence_type="computational",
-                pchembl_value=None,
-                retrieved_at=now,
-            ))
-            imported += 1
-        else:
-            skipped += 1
+            # Upsert CompoundTarget row
+            ct_id = _make_ct_id(body.compound_id, target_id)
+            existing_ct = (await session.exec(
+                select(CompoundTarget).where(CompoundTarget.compound_target_id == ct_id)
+            )).one_or_none()
+            if existing_ct is None:
+                session.add(CompoundTarget(
+                    compound_target_id=ct_id,
+                    compound_id=body.compound_id,
+                    target_id=target_id,
+                    prediction_method="stp_import",
+                    evidence_type="computational",
+                    pchembl_value=None,
+                    retrieved_at=now,
+                ))
+                imported += 1
+            else:
+                skipped += 1
 
-    await session.commit()
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        raise HTTPException(status_code=409, detail="Conflict: one or more targets already exist")
 
     # Re-aggregate Stage 3 results and persist
     updated_stage3 = _merge_stp_targets(stage3, body.compound_id, body.targets)

@@ -84,3 +84,18 @@ def test_merge_updates_existing_target_with_new_compound():
     assert "cid-B" in tp53["compound_ids"]
     assert "cid-A" in tp53["compound_ids"]
     assert tp53["compound_count"] == 2
+
+
+def test_merge_noop_for_empty_targets():
+    """Importing an empty target list does not change coverage stats or uncovered list."""
+    from app.routers.analyses import _merge_stp_targets
+
+    stage3 = _make_stage3(covered_cids=["cid-A"], uncovered_cids=["cid-B"])
+    result = _merge_stp_targets(stage3, "cid-B", [])
+
+    # Nothing should change in coverage
+    assert result["covered"] == 1
+    assert result["no_data"] == 1
+    assert len(result["uncovered_compounds"]) == 1
+    assert result["uncovered_compounds"][0]["compound_id"] == "cid-B"
+    assert result["coverage_pct"] == stage3["coverage_pct"]

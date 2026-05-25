@@ -10,10 +10,15 @@ class STPTarget(BaseModel):
     @field_validator("uniprot_id")
     @classmethod
     def validate_uniprot(cls, v: str) -> str:
-        # Basic UniProt accession format check: 6–10 uppercase alphanumeric chars
-        if not re.match(r"^[A-Z0-9]{6,10}$", v.strip()):
+        v = v.strip().upper()  # normalize before validating
+        if not re.match(r"^[A-Z0-9]{6,10}$", v):
             raise ValueError(f"Invalid UniProt accession format: {v!r}")
-        return v.strip()
+        return v
+
+    @field_validator("gene_symbol")
+    @classmethod
+    def normalize_gene_symbol(cls, v: str) -> str:
+        return v.strip().upper()
 
 
 class ImportTargetsRequest(BaseModel):
