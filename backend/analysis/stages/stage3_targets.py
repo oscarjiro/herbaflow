@@ -220,12 +220,28 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             return pubchem_target_info[gene].uniprot_accession or ""
         return ""
 
+    # Build compound → sources mapping.
+    # Each compound is tagged with the source(s) that yielded targets for it.
+    pubchem_covered: set[str] = {cid for cids in pubchem_ct.values() for cid in cids}
+    compound_sources: dict[str, list[str]] = {}
+    for cid in compound_ids:
+        srcs: list[str] = []
+        if cid in covered_by_chembl:
+            srcs.append("chembl")
+        if cid in pubchem_covered:
+            srcs.append("pubchem_bioassay")
+        if srcs:
+            compound_sources[cid] = srcs
+
     enriched_targets = [
         {
             "gene_symbol": gene,
             "uniprot_id": _get_uniprot(gene),
             "compound_count": len(set(cids)),
             "compound_ids": list(set(cids)),
+            # "chembl" if found via ChEMBL bioactivity; "pubchem_bioassay" if found
+            # via PubChem BioAssay fallback (aggregates BindingDB + 300+ sources).
+            "source": "chembl" if gene in target_info else "pubchem_bioassay",
         }
         for gene, cids in target_compound_map.items()
     ]
@@ -243,4 +259,6 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         # Frontend display keys
         "coverage_pct": coverage_pct,
         "targets": enriched_targets,
+        # Source tracking: compound_id → list of sources that found targets for it
+        "compound_sources": compound_sources,
     }

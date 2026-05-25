@@ -17,6 +17,16 @@ const GENE_PREVIEW_COUNT = 20
 
 type TargetRow = TargetResult & Record<string, unknown>
 
+const SOURCE_LABELS: Record<string, string> = {
+  chembl: 'ChEMBL',
+  pubchem_bioassay: 'PubChem BioAssay',
+}
+
+const SOURCE_CLASSES: Record<string, string> = {
+  chembl: 'bg-hf-sage/20 text-hf-sage',
+  pubchem_bioassay: 'bg-hf-terracotta/20 text-hf-terracotta',
+}
+
 const columns: ColumnDef<TargetRow>[] = [
   {
     key: 'gene_symbol',
@@ -33,6 +43,18 @@ const columns: ColumnDef<TargetRow>[] = [
     key: 'uniprot_id',
     header: 'UniProt ID',
     className: 'font-mono text-hf-fg3',
+  },
+  {
+    key: 'source',
+    header: 'Source',
+    render: (value) => {
+      const src = value as string
+      return (
+        <span className={`text-xs px-2 py-0.5 rounded font-mono ${SOURCE_CLASSES[src] ?? 'bg-hf-border text-hf-fg3'}`}>
+          {SOURCE_LABELS[src] ?? src}
+        </span>
+      )
+    },
   },
 ]
 
@@ -93,8 +115,8 @@ export function Stage3Panel({ stage, analysis, status }: Stage3PanelProps) {
           />
 
           <p className="text-xs text-hf-fg3 font-sans">
-            <span className="font-medium text-hf-fg2">Source:</span> ChEMBL (human protein targets only) ·{' '}
-            <span className="font-medium text-hf-fg2">Threshold:</span> pChEMBL ≥ 5.0 (equivalent to IC₅₀ ≤ 10µM — standard active binder cutoff).
+            <span className="font-medium text-hf-fg2">Primary source:</span> ChEMBL (human protein targets, pChEMBL ≥ 5.0 = IC₅₀ ≤ 10µM). ·{' '}
+            <span className="font-medium text-hf-fg2">Secondary source:</span> PubChem BioAssay — queried for compounds with zero ChEMBL targets; aggregates BindingDB, STITCH, and 300+ bioactivity sources (Kim et al. NAR 2023).
           </p>
         </>
       )}

@@ -11,8 +11,8 @@
 | Task | Title | Status |
 |------|-------|--------|
 | T1.1 | Research STITCH API + BindingDB viability | ✅ Complete |
-| T1.2 | Backend PubChem BioAssay integration in Stage 3 (STITCH rejected) | Pending |
-| T1.3 | Per-compound source tracking in Stage 3 output | Pending |
+| T1.2 | Backend PubChem BioAssay integration in Stage 3 (STITCH rejected) | ✅ Complete |
+| T1.3 | Per-compound source tracking in Stage 3 output | ✅ Complete |
 | T1.4 | Frontend STP copy UX — coverage panel, export, import | Pending |
 | T1.5 | Scientific documentation + citations | Pending |
 
@@ -31,3 +31,28 @@ Key facts:
 - Citation: Kim et al. *Nucleic Acids Research* 2023, 51(D1):D1373–D1380
 
 **Status**: ✅ Complete. See `.superpowers/audit-session-2/phase-1-t1.md` for full findings and implementation pseudocode.
+
+---
+
+## T1.2 — Backend PubChem BioAssay Integration
+
+Commit: `c8bc126` — `feat(backend/stage3): add PubChem BioAssay as secondary target source`
+
+- Created `backend/integrations/pubchem_bioassay.py`: `get_targets_by_inchikey()` — InChIKey → PubChem CID → assay summary → filter Active/human/UniProt → resolve gene symbol + protein name. Rate limited: `asyncio.Semaphore(5)`.
+- Extended `backend/analysis/stages/stage3_targets.py`: after ChEMBL, compounds with 0 targets + valid `inchi_key` queried in parallel via PubChem. Results merged into unified `target_compound_map`. CT rows tagged `prediction_method="pubchem_bioassay"`, `pchembl_value=None`.
+- 2 new unit tests in `backend/tests/unit/test_stage3.py`.
+
+**Status**: ✅ Complete.
+
+---
+
+## T1.3 — Source Tracking
+
+Files changed:
+- `backend/analysis/stages/stage3_targets.py`: each target in `targets` list tagged with `source: "chembl" | "pubchem_bioassay"`; output includes `compound_sources: {compound_id: [source, ...]}` mapping
+- `frontend/src/types/api.ts`: `TargetResult.source` added; `Stage3Result.compound_sources` added
+- `frontend/src/components/stages/Stage3Panel.tsx`: Source column added to targets DataTable with colored badges (sage = ChEMBL, terracotta = PubChem BioAssay); attribution text updated to mention both sources with Kim et al. 2023 citation
+
+Verification: 63 backend tests pass; frontend lint errors pre-existing (unrelated files).
+
+**Status**: ✅ Complete.

@@ -173,6 +173,8 @@ export interface TargetResult {
   uniprot_id: string
   compound_count: number
   compound_ids: string[]
+  /** Source that identified this target: "chembl" (primary) or "pubchem_bioassay" (fallback) */
+  source: 'chembl' | 'pubchem_bioassay'
 }
 
 export interface Stage3Result {
@@ -180,6 +182,8 @@ export interface Stage3Result {
   /** Backend field name: coverage_pct (renamed from coverage_percent in stage3 output) */
   coverage_pct: number
   targets: TargetResult[]
+  /** Per-compound source tracking: compound_id → list of sources that found targets for it */
+  compound_sources: Record<string, Array<'chembl' | 'pubchem_bioassay'>>
 }
 
 // Stage 4: Disease Targets
