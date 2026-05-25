@@ -22,7 +22,7 @@ const columns: ColumnDef<CompoundRow>[] = [
   },
   {
     key: 'plant_ids',
-    header: 'Plant Count',
+    header: 'Plants',
     sortable: true,
     render: (value) => (value as string[]).length,
   },

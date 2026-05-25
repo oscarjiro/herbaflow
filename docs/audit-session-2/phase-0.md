@@ -272,4 +272,37 @@ Fix: background now reads `stage3.get("target_gene_symbols")`. Updated gprofiler
 
 ---
 
-*Further task: T0.8 (misc fixes)*
+---
+
+## T0.8 — Stage 1, Cytoscape, TargetRanking, Disease Names
+
+**Status**: ✅ Complete  
+**Files touched**: `frontend/src/components/stages/Stage1Panel.tsx`
+
+### Items Verified / Fixed
+
+| Item | Finding | Action |
+|------|---------|--------|
+| Stage 1 "plant_ids" column header | Was "Plant Count" — ambiguous | Renamed to "Plants" |
+| Cytoscape overlap node label contrast | bg=`#1A1A1A`, text=`#F7F5F2` — contrast correct | No action (prior fix confirmed) |
+| TargetRanking null suppression | `ConfigDict(exclude_none=True)` already present on model; `TargetRanking` not used in any router response | No action needed |
+| Disease display names | Stored as-is from Open Targets; lowercase names are display issue | Deferred to T2.7 (UX phase) |
+
+---
+
+## Phase 0 Summary
+
+**8 tasks completed. Scientific methodology verified across all stages.**
+
+| Task | Status | Bugs Fixed |
+|------|--------|-----------|
+| T0.1 Stage 2 ADME | ✅ | 3 bugs: ADME fields missing from output, NP exception label, filter logic |
+| T0.2 Stage 3 Targets | ✅ | 1 bug: coverage_pct field name mismatch; header rename |
+| T0.3 Stage 4 Disease | ✅ | 2 bugs: association_score key inconsistency, raw source labels |
+| T0.4 Stage 5 Overlap | ✅ | 0 bugs — clean |
+| T0.5 Stage 6 PPI | ✅ | 1 bug: edge width invisible (mapData fix); type cleanup |
+| T0.6 Stage 7 Hub Genes | ✅ | 1 critical bug: raw degree used instead of normalized (Freeman 1979) |
+| T0.7 Stage 8 Enrichment | ✅ | 1 scientific bug: wrong background set (overlap genes → compound targets) |
+| T0.8 Misc | ✅ | Stage 1 header rename; all other items already fixed or not applicable |
+
+**Commits**: 7 commits on main branch covering Phase 0 fixes.
