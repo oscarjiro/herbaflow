@@ -47,7 +47,19 @@ async def test_standard_mode_starts_at_stage_1():
     run = _make_run(input_mode=None)
     factory, session = _make_session_factory(run)
 
+    captured_stage_results = {}
+
+    async def fake_update_run_status(session, analysis_id, status, **kwargs):
+        sr = kwargs.get("stage_results")
+        if sr:
+            captured_stage_results.update(sr)
+        mock_run = MagicMock()
+        mock_run.status = status
+        return mock_run
+
     with patch("analysis.pipeline.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
+         patch("analysis.pipeline.analysis_repo.update_run_status",
+               new=AsyncMock(side_effect=fake_update_run_status)), \
          patch("analysis.pipeline.run_stage", new=AsyncMock()) as mock_run_stage:
         from analysis.pipeline import start_pipeline
         await start_pipeline(ANALYSIS_ID, ["pl_1"], ["d_1"], factory)
@@ -56,19 +68,9 @@ async def test_standard_mode_starts_at_stage_1():
     mock_run_stage.assert_called_once_with(ANALYSIS_ID, 1, factory)
 
     # No skipped stages written to stage_results
-    update_calls = [
-        c for c in session.method_calls if "update_run_status" in str(c)
-    ]
-    # update_run_status should NOT have been called with skipped stage dicts
-    # (we verify by checking analysis_repo.update_run_status was not called
-    #  with stage_results containing "skipped" status)
-    from analysis.pipeline import analysis_repo as repo
-    for c in getattr(repo.update_run_status, "call_args_list", []):
-        sr = c.kwargs.get("stage_results") or (c.args[3] if len(c.args) > 3 else None)
-        if sr:
-            for v in sr.values():
-                assert v.get("status") != "skipped", \
-                    "standard mode must not write any skipped stage"
+    for key, entry in captured_stage_results.items():
+        assert entry.get("status") != "skipped", \
+            f"standard mode must not write any skipped stage, but {key} has status='skipped'"
 
 
 # ---------------------------------------------------------------------------
@@ -194,3 +196,39 @@ async def test_skipped_stages_contain_input_mode():
                 f"{key} missing 'input_mode' key for mode={mode}"
             assert entry["input_mode"] == mode, \
                 f"{key} input_mode mismatch: expected {mode!r}, got {entry['input_mode']!r}"
+
+
+# ---------------------------------------------------------------------------
+# Test 5: unknown _input_mode falls back to stage 1 (no skips)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_unknown_input_mode_falls_back_to_stage_1():
+    """Unrecognised _input_mode value falls back to standard — stage 1 runs, no skips."""
+    run = _make_run(input_mode="invalid_mode")
+    factory, session = _make_session_factory(run)
+
+    captured_stage_results = {}
+
+    async def fake_update_run_status(session, analysis_id, status, **kwargs):
+        sr = kwargs.get("stage_results")
+        if sr:
+            captured_stage_results.update(sr)
+        mock_run = MagicMock()
+        mock_run.status = status
+        return mock_run
+
+    with patch("analysis.pipeline.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
+         patch("analysis.pipeline.analysis_repo.update_run_status",
+               new=AsyncMock(side_effect=fake_update_run_status)), \
+         patch("analysis.pipeline.run_stage", new=AsyncMock()) as mock_run_stage:
+        from analysis.pipeline import start_pipeline
+        await start_pipeline(ANALYSIS_ID, ["pl_1"], ["d_1"], factory)
+
+    # run_stage must be called with stage_num=1 (fallback)
+    mock_run_stage.assert_called_once_with(ANALYSIS_ID, 1, factory)
+
+    # No skipped stages must appear in stage_results
+    for key, entry in captured_stage_results.items():
+        assert entry.get("status") != "skipped", \
+            f"unknown mode must not write any skipped stage, but {key} has status='skipped'"
