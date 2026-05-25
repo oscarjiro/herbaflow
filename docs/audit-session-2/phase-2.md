@@ -14,9 +14,9 @@
 | T2.3 | Analysis clear confirmation dialog | ✅ Complete | `0d38ac0` |
 | T2.4 | Analysis TTL 24h expiry | ✅ Complete | `55844e7` |
 | T2.5 | Redo Step button with reset-from endpoint | ✅ Complete | `9d04977` |
-| T2.6 | Data Sources collapsible per stage | 🔲 Next | — |
-| T2.7 | Fuzzy search + disease display names | 🔲 Pending | — |
-| T2.8 | DataTable pagination | 🔲 Pending | — |
+| T2.6 | Data Sources collapsible per stage | ✅ Complete | `112d2b9` |
+| T2.7 | Fuzzy search + disease display names | ✅ Complete | pending |
+| T2.8 | DataTable pagination | 🔲 Next | — |
 
 ---
 
@@ -95,9 +95,39 @@ Added Radix `AlertDialog` to "New Analysis" button in `PipelineSidebar`. On conf
 
 ---
 
+---
+
+## T2.6 — Data Sources Attribution Per Stage
+
+**Commit**: `112d2b9`
+
+Added `DataSources.tsx` shared collapsible component to all 8 stage panels. Each stage shows its data sources with external links. Stage8 had a naming conflict (`SOURCES` already used for pathway sources) — resolved by renaming the new constant to `DATA_SOURCES_MAP`.
+
+**Files**: `shared/DataSources.tsx` (new), all 8 `Stage*Panel.tsx`
+
+---
+
+## T2.7 — Fuzzy Search + Disease Display Names
+
+**Commit**: pending
+
+### Fuzzy search
+- Installed `fuse.js 7.3.0`
+- `PlantSelector`: disabled cmdk built-in filter (`shouldFilter={false}`), added `query` state controlled on `CommandInput`, fuse.js searches `canonical_scientific_name` + `family_name` at threshold 0.4
+- `DiseaseSelector`: same pattern, searches `disease_name` + `ontology_id`
+- Query resets on popover close
+
+### Disease display names
+- `src/lib/format.ts` → `formatDiseaseName(name)`: title-cases each word, preserves 2+ consecutive uppercase acronyms (HIV, COVID, DNA…), keeps minor words (of, the, a, an, in, on, for, with, by, and, or, but, via…) lowercase unless first word
+- Applied in `DiseaseSelector` for both trigger label and dropdown items
+
+**Files**: `src/lib/format.ts` (new), `PlantSelector.tsx`, `DiseaseSelector.tsx`
+
+---
+
 ## Phase 2 Summary
 
-**5 tasks complete. 5 commits on main. 102 tests passing (68 backend + 34 frontend).**
+**7 tasks complete. 102 tests passing (68 backend + 34 frontend).**
 
 | Task | Bugs / Features | Key files |
 |------|----------------|-----------|
@@ -106,3 +136,5 @@ Added Radix `AlertDialog` to "New Analysis" button in `PipelineSidebar`. On conf
 | T2.3 | Delete confirmation | PipelineSidebar.tsx |
 | T2.4 | TTL + expiry enforcement + banner | analysis_repo.py, PipelinePage.tsx |
 | T2.5 | Reset-from + redo button | analysis_repo.py, analyses.py, PipelinePage.tsx |
+| T2.6 | Data sources collapsible per stage | shared/DataSources.tsx, Stage*Panel.tsx × 8 |
+| T2.7 | Fuzzy search + disease title-case | format.ts, PlantSelector.tsx, DiseaseSelector.tsx |

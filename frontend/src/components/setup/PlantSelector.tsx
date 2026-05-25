@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Check, ChevronsUpDown, X } from "lucide-react";
+import Fuse from "fuse.js";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,30 @@ interface PlantSelectorProps {
 
 export function PlantSelector({ value, onChange }: PlantSelectorProps) {
     const [open, setOpen] = React.useState(false);
+    const [query, setQuery] = React.useState("");
     const { data: plants = [], isLoading } = usePlants();
+
+    // Reset query when popover closes
+    React.useEffect(() => {
+        if (!open) setQuery("");
+    }, [open]);
+
+    // Fuse instance — recreated only when the plants list changes
+    const fuse = React.useMemo(
+        () =>
+            new Fuse(plants, {
+                keys: ["canonical_scientific_name", "family_name"],
+                threshold: 0.4,
+                includeScore: true,
+            }),
+        [plants],
+    );
+
+    // Fuzzy-filtered list — if no query, show all plants
+    const filtered = React.useMemo(() => {
+        if (!query.trim()) return plants;
+        return fuse.search(query).map((r) => r.item);
+    }, [fuse, query, plants]);
 
     function toggle(id: string) {
         if (value.includes(id)) {
@@ -68,25 +92,30 @@ export function PlantSelector({ value, onChange }: PlantSelectorProps) {
                     className="w-[var(--radix-popover-trigger-width)] p-0"
                     align="start"
                 >
-                    <Command>
-                        <CommandInput placeholder="Search plants..." />
+                    {/* shouldFilter={false}: fuse.js handles filtering, not cmdk */}
+                    <Command shouldFilter={false}>
+                        <CommandInput
+                            placeholder="Search plants..."
+                            value={query}
+                            onValueChange={setQuery}
+                        />
                         <CommandList className="max-h-64">
                             {isLoading && (
                                 <CommandEmpty>Loading plants...</CommandEmpty>
                             )}
-                            {!isLoading && plants.length === 0 && (
+                            {!isLoading && filtered.length === 0 && (
                                 <CommandEmpty>No plants found.</CommandEmpty>
                             )}
-                            {!isLoading && plants.length > 0 && (
+                            {!isLoading && filtered.length > 0 && (
                                 <CommandGroup>
-                                    {plants.map((plant) => {
+                                    {filtered.map((plant) => {
                                         const selected = value.includes(
                                             plant.plant_id,
                                         );
                                         return (
                                             <CommandItem
                                                 key={plant.plant_id}
-                                                value={`${plant.canonical_scientific_name} ${plant.family_name ?? ""}`}
+                                                value={plant.plant_id}
                                                 onSelect={() =>
                                                     toggle(plant.plant_id)
                                                 }
