@@ -4,6 +4,8 @@ import type {
   CreateAnalysisRequest,
   AnalysisRunResponse,
   AnalysisStatusResponse,
+  ImportTargetsRequest,
+  ImportTargetsResponse,
 } from '@/types/api'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -47,4 +49,10 @@ export const api = {
 
   exportStage: (id: string, stage: number, format: 'csv' | 'json'): Promise<Response> =>
     fetch(`${BASE_URL}/analyses/${id}/export/${stage}?format=${format}`),
+
+  importTargets: (id: string, body: ImportTargetsRequest): Promise<ImportTargetsResponse> =>
+    request(`/analyses/${id}/import-targets`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 }

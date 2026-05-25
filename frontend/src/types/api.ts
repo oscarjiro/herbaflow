@@ -177,13 +177,38 @@ export interface TargetResult {
   source: 'chembl' | 'pubchem_bioassay'
 }
 
+export interface UncoveredCompound {
+  compound_id: string
+  canonical_name: string
+  smiles: string | null
+}
+
 export interface Stage3Result {
   target_count: number
   /** Backend field name: coverage_pct (renamed from coverage_percent in stage3 output) */
   coverage_pct: number
   targets: TargetResult[]
   /** Per-compound source tracking: compound_id → list of sources that found targets for it */
-  compound_sources: Record<string, Array<'chembl' | 'pubchem_bioassay'>>
+  compound_sources: Record<string, Array<'chembl' | 'pubchem_bioassay' | 'user_provided'>>
+  /** Compounds with zero targets after ChEMBL + PubChem; used for STP Coverage section */
+  uncovered_compounds: UncoveredCompound[]
+}
+
+// Stage 3: STP Import
+export interface STPTargetImport {
+  uniprot_id: string
+  gene_symbol: string
+  probability: number
+}
+
+export interface ImportTargetsRequest {
+  compound_id: string
+  targets: STPTargetImport[]
+}
+
+export interface ImportTargetsResponse {
+  imported: number
+  skipped: number
 }
 
 // Stage 4: Disease Targets
