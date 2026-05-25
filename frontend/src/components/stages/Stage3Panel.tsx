@@ -71,10 +71,12 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
   const allCompounds = stage2Result?.compounds ?? []
 
   const uncoveredCompounds: UncoveredCompound[] = result?.uncovered_compounds ?? []
-  // totalCompounds = covered + uncovered
-  const totalCompounds = allCompounds.length || (result ? uncoveredCompounds.length + (result.target_count > 0 ? 1 : 0) : 0)
-  const coveredCount = totalCompounds - uncoveredCompounds.length
+  // Use Stage 2 compounds for total count when available.
+  // If Stage 2 result not loaded, hide the X/Y line (coveredCount = null signals this).
+  const totalCompounds = allCompounds.length
+  const coveredCount = totalCompounds > 0 ? totalCompounds - uncoveredCompounds.length : null
 
+  // Note: _analysisId (from props) is used in Task 6's import handler
   const [showUncovered, setShowUncovered] = useState(false)
   // showImportPanel read in Task 6 (import panel rendering)
   const [showImportPanel, setShowImportPanel] = useState(false)
@@ -88,7 +90,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
     a.href = url
     a.download = 'uncovered_compounds_stp.csv'
     a.click()
-    URL.revokeObjectURL(url)
+    setTimeout(() => URL.revokeObjectURL(url), 100)
   }, [result])
 
   return (
@@ -116,7 +118,9 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 <div>
                   <p className="text-xs font-sans font-medium text-hf-fg2">Coverage Details</p>
                   <p className="text-xs font-sans text-hf-fg3 mt-0.5">
-                    {coveredCount} of {totalCompounds} compounds have targets ·{' '}
+                    {coveredCount !== null
+                      ? <>{coveredCount} of {totalCompounds} compounds have targets · </>
+                      : null}
                     <span className="text-hf-fg2 font-medium">
                       {uncoveredCompounds.length} uncovered
                     </span>
@@ -133,7 +137,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                     onClick={() => setShowImportPanel(prev => !prev)}
                     className="text-xs px-3 py-1 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans"
                   >
-                    ↑ Import STP Results
+                    {showImportPanel ? 'Hide Import Panel' : '↑ Import STP Results'}
                   </button>
                 </div>
               </div>
@@ -174,7 +178,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 onClick={() => setShowImportPanel(prev => !prev)}
                 className="text-xs px-3 py-1 rounded border border-hf-border text-hf-fg2 hover:text-hf-fg1 hover:border-hf-fg3 transition-colors font-sans"
               >
-                ↑ Import STP Results
+                {showImportPanel ? 'Hide Import Panel' : '↑ Import STP Results'}
               </button>
             </div>
           )}
