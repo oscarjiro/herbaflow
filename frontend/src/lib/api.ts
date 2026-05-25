@@ -55,4 +55,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+
+  resetFromStage: (id: string, stage: number): Promise<AnalysisStatusResponse> =>
+    request(`/analyses/${id}/reset-from/${stage}`, { method: 'POST' }),
 }

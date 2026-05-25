@@ -43,6 +43,33 @@ async def list_runs(session: AsyncSession) -> list[AnalysisRun]:
     return list(result.all())
 
 
+async def reset_run_from_stage(
+    session: AsyncSession,
+    analysis_id: UUID,
+    from_stage: int,
+) -> AnalysisRun:
+    """Clear stage results from from_stage onward and reset status."""
+    run = await get_run(session, analysis_id)
+    stage_results = dict(run.stage_results or {})
+    for s in range(from_stage, 9):
+        stage_results.pop(f"stage_{s}", None)
+    run.stage_results = stage_results
+    if from_stage == 1:
+        run.status = "pending"
+        run.current_stage = None
+    else:
+        run.status = f"stage_{from_stage - 1}_awaiting_approval"
+        run.current_stage = from_stage - 1
+    run.updated_at = datetime.utcnow()
+    run.completed_at = None
+    run.expires_at = None
+    run.error_message = None
+    session.add(run)
+    await session.commit()
+    await session.refresh(run)
+    return run
+
+
 async def update_run_status(
     session: AsyncSession,
     analysis_id: UUID,

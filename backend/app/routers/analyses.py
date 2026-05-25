@@ -155,6 +155,50 @@ async def reject_stage(
     return {"status": f"stage_{current_stage}_rejected"}
 
 
+@router.post("/{analysis_id}/reset-from/{stage}", response_model=AnalysisStatusResponse)
+async def reset_from_stage(
+    analysis_id: UUID,
+    stage: int,
+    background_tasks: BackgroundTasks,
+    session: AsyncSession = Depends(get_session),
+):
+    """Clear stage results from `stage` onward and reset to previous approval state.
+
+    After reset:
+    - stage > 1: status becomes ``stage_{stage-1}_awaiting_approval``
+    - stage == 1: pipeline restarts from the beginning (auto-triggered)
+    """
+    from analysis.pipeline import start_pipeline
+    if stage < 1 or stage > TOTAL_STAGES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"stage must be between 1 and {TOTAL_STAGES}",
+        )
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+    run = await analysis_repo.reset_run_from_stage(session, analysis_id, stage)
+
+    if stage == 1:
+        plant_ids = (run.parameters or {}).get("_plant_ids", [])
+        disease_ids = (run.parameters or {}).get("_disease_ids", [])
+        background_tasks.add_task(
+            start_pipeline, run.analysis_id, plant_ids, disease_ids, async_session_factory
+        )
+
+    return AnalysisStatusResponse(
+        analysis_id=run.analysis_id,
+        status=run.status,
+        mode=run.mode,
+        current_stage=run.current_stage,
+        progress={"done": _status_to_done(run.status), "total": TOTAL_STAGES},
+        created_at=run.created_at,
+        updated_at=run.updated_at,
+        expires_at=run.expires_at,
+    )
+
+
 @router.delete("/{analysis_id}")
 async def delete_analysis(analysis_id: UUID, session: AsyncSession = Depends(get_session)):
     run = await analysis_repo.get_run(session, analysis_id)

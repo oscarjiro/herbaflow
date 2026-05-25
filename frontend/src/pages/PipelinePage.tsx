@@ -5,6 +5,8 @@ import { useAnalysisStatus } from '@/hooks/useAnalysisStatus'
 import { useAnalysis } from '@/hooks/useAnalysis'
 import { useApproveStage } from '@/hooks/useApproveStage'
 import { useRejectStage } from '@/hooks/useRejectStage'
+import { useResetFromStage } from '@/hooks/useResetFromStage'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { PipelineSidebar } from '@/components/pipeline/PipelineSidebar'
 import { ApprovalBar } from '@/components/shared/ApprovalBar'
 import { ErrorState } from '@/components/shared/ErrorState'
@@ -56,6 +58,8 @@ interface StagePanelRouterProps {
 function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRouterProps) {
   const approveMutation = useApproveStage(analysisId)
   const rejectMutation = useRejectStage(analysisId)
+  const resetMutation = useResetFromStage(analysisId)
+  const [redoDialogOpen, setRedoDialogOpen] = useState(false)
 
   if (stage === null) {
     return <EmptyState message="Select a stage from the sidebar" />
@@ -95,6 +99,10 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
     status?.mode === 'guided' &&
     status?.status === `stage_${stage}_awaiting_approval`
 
+  // Show Redo button when this stage has results (guided mode only)
+  const stageHasResults = Boolean(analysis?.stage_results?.[`stage_${stage}`])
+  const showRedoButton = status?.mode === 'guided' && stageHasResults
+
   return (
     <div>
       <StageComponent
@@ -109,6 +117,56 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
           onReject={() => rejectMutation.mutate()}
           isLoading={approveMutation.isPending || rejectMutation.isPending}
         />
+      )}
+      {showRedoButton && (
+        <>
+          <div className="mt-4 px-6 pb-6 flex justify-end">
+            <button
+              type="button"
+              className="text-sm font-medium text-hf-fg3 hover:text-hf-fg1 underline underline-offset-2 transition-colors"
+              onClick={() => setRedoDialogOpen(true)}
+            >
+              ↺ Redo Stage {stage}
+            </button>
+          </div>
+          <DialogPrimitive.Root open={redoDialogOpen} onOpenChange={setRedoDialogOpen}>
+            <DialogPrimitive.Portal>
+              <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
+              <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-hf-border bg-hf-surface p-6 shadow-lg focus:outline-none">
+                <DialogPrimitive.Title className="text-base font-semibold text-hf-fg1">
+                  Redo Stage {stage}?
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Description className="mt-2 text-sm text-hf-fg2">
+                  This will clear results for Stage {stage} and all subsequent stages.
+                  {stage < 8 && ` Stages ${stage}–8 will need to be re-run.`}
+                  {' '}This cannot be undone.
+                </DialogPrimitive.Description>
+                <div className="mt-6 flex justify-end gap-3">
+                  <DialogPrimitive.Close asChild>
+                    <button
+                      type="button"
+                      className="rounded-md border border-hf-border px-4 py-2 text-sm font-medium text-hf-fg2 hover:text-hf-fg1 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </DialogPrimitive.Close>
+                  <button
+                    type="button"
+                    disabled={resetMutation.isPending}
+                    className="rounded-md bg-hf-fg1 px-4 py-2 text-sm font-medium text-hf-bg1 hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    onClick={() => {
+                      resetMutation.mutate(stage, {
+                        onSuccess: () => setRedoDialogOpen(false),
+                      })
+                    }}
+                  >
+                    {resetMutation.isPending ? 'Resetting…' : 'Reset & Redo'}
+                  </button>
+                </div>
+              </DialogPrimitive.Content>
+            </DialogPrimitive.Portal>
+          </DialogPrimitive.Root>
+        </>
       )}
     </div>
   )
