@@ -432,3 +432,9 @@ export interface InjectCompoundsResponse {
   injected: number
   failed: string[]
 }
+
+// T4.4: Manual target input
+export interface InjectTargetsResponse {
+  injected: number
+  failed: string[]
+}

@@ -15,6 +15,7 @@ from app.schemas.analysis import (
     ResetFromRequest, ApproveRequest,
     AddUserTargetRequest, AddUserTargetResponse,
     InjectCompoundsRequest, InjectCompoundsResponse,
+    InjectTargetsRequest, InjectTargetsResponse,
 )
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
@@ -888,6 +889,120 @@ async def add_user_disease_target(
         uniprot_id=info.uniprot_accession,
         protein_name=info.protein_name,
     )
+
+
+@router.post("/{analysis_id}/inject-targets", response_model=InjectTargetsResponse, status_code=200)
+async def inject_targets(
+    analysis_id: UUID,
+    body: InjectTargetsRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Validate gene symbols or UniProt accessions via UniProt and inject as stage 3 results.
+
+    Enables manual target input mode (T4.4): stages 1–3 are skipped and stage 4
+    is the first real stage. The synthetic stage_3 result stores the validated targets
+    in the format stage 5 reads (target_gene_symbols) and stage 4 ignores stage 3 entirely.
+
+    After injection the endpoint:
+    1. Stores a synthetic stage_3 result in stage_results.
+    2. Sets _input_mode = "manual_targets" in parameters.
+
+    The frontend is responsible for then starting the pipeline.
+    """
+    import re
+    import asyncio
+
+    UNIPROT_ACCESSION_RE = re.compile(
+        r"^[OPQ][0-9][A-Z0-9]{3}[0-9](?:[A-Z][A-Z0-9]{2}[0-9])?$"
+        r"|^[A-NR-Z][0-9](?:[A-Z][A-Z0-9]{2}[0-9]){1,2}$",
+        re.IGNORECASE,
+    )
+
+    if not body.targets:
+        raise HTTPException(status_code=422, detail="targets list must not be empty")
+    if len(body.targets) > 200:
+        raise HTTPException(status_code=422, detail="targets list must not exceed 200 items")
+
+    run = await analysis_repo.get_run(session, analysis_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    if run.status not in ("pending", "failed"):
+        raise HTTPException(status_code=409, detail="Analysis already running or complete")
+
+    # Validate each target via UniProt
+    injected_targets: list[dict] = []
+    failed: list[str] = []
+
+    async def _validate_one(raw: str):
+        raw_stripped = raw.strip()
+        if not raw_stripped:
+            failed.append(raw)
+            return
+        # Determine if input looks like a UniProt accession
+        is_accession = bool(UNIPROT_ACCESSION_RE.match(raw_stripped))
+        try:
+            info = await validate_human_target(
+                gene_symbol=None if is_accession else raw_stripped,
+                uniprot_id=raw_stripped if is_accession else None,
+            )
+        except ValueError:
+            failed.append(raw_stripped)
+            return
+
+        target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
+        injected_targets.append({
+            "target_id": target_id,
+            "gene_symbol": info.gene_symbol,
+            "uniprot_id": info.uniprot_accession,
+            "protein_name": info.protein_name,
+            "target_score": 1.0,
+            "compound_ids": [],
+            "sources": ["manual"],
+        })
+
+    await asyncio.gather(*[_validate_one(t) for t in body.targets])
+
+    if not injected_targets:
+        return InjectTargetsResponse(injected=0, failed=failed)
+
+    # Deduplicate by gene_symbol (keep first occurrence)
+    seen_genes: set[str] = set()
+    deduped: list[dict] = []
+    for t in injected_targets:
+        gene = t["gene_symbol"].upper()
+        if gene not in seen_genes:
+            seen_genes.add(gene)
+            deduped.append(t)
+
+    # Build synthetic stage_3 result — stage 5 reads target_gene_symbols
+    stage3_result = {
+        "target_count": len(deduped),
+        "target_gene_symbols": [t["gene_symbol"] for t in deduped],
+        "target_compound_map": {t["gene_symbol"]: [] for t in deduped},
+        "targets": deduped,
+        # Coverage fields (not meaningful for manual input)
+        "covered": len(deduped),
+        "no_data": 0,
+        "coverage_pct": 100.0,
+        "compound_sources": {},
+        "uncovered_compounds": [],
+        # Tag so UI can recognise manual injection
+        "_input_mode": "manual_targets",
+    }
+
+    await analysis_repo.update_run_status(
+        session,
+        analysis_id,
+        status=run.status,  # leave status unchanged — pipeline not started yet
+        stage_results={"stage_3": stage3_result},
+    )
+    await analysis_repo.merge_run_parameters(
+        session,
+        analysis_id,
+        {"_input_mode": "manual_targets"},
+    )
+
+    return InjectTargetsResponse(injected=len(deduped), failed=failed)
 
 
 @router.delete("/{analysis_id}/disease-targets/{gene_symbol}", status_code=204)

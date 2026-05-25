@@ -11,6 +11,7 @@ import type {
   AddUserTargetRequest,
   AddUserTargetResponse,
   InjectCompoundsResponse,
+  InjectTargetsResponse,
 } from '@/types/api'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -121,6 +122,14 @@ export const api = {
     return request(`/analyses/${analysisId}/inject-compounds`, {
       method: 'POST',
       body: JSON.stringify({ compounds }),
+    })
+  },
+
+  // T4.4: Inject manually-provided gene symbols or UniProt accessions as stage 3 results
+  injectTargets(analysisId: string, targets: string[]): Promise<InjectTargetsResponse> {
+    return request(`/analyses/${analysisId}/inject-targets`, {
+      method: 'POST',
+      body: JSON.stringify({ targets }),
     })
   },
 }

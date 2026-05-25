@@ -73,3 +73,12 @@ class InjectCompoundsRequest(BaseModel):
 class InjectCompoundsResponse(BaseModel):
     injected: int          # number successfully validated and stored
     failed: list[str]      # raw input strings that failed PubChem validation
+
+
+class InjectTargetsRequest(BaseModel):
+    targets: list[str]  # gene symbols or UniProt accessions, 1–200 items
+
+
+class InjectTargetsResponse(BaseModel):
+    injected: int          # number successfully validated and stored
+    failed: list[str]      # raw input strings that failed UniProt validation

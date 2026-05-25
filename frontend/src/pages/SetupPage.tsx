@@ -28,13 +28,23 @@ function parseCompoundLines(raw: string): string[] {
     .filter(Boolean)
 }
 
+/** Parse a textarea value of gene symbols / UniProt accessions, one per line. */
+function parseTargetLines(raw: string): string[] {
+  return raw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+}
+
 // ============================================================================
-// InputModeToggle — standard vs manual_compounds
+// InputModeToggle — standard vs manual_compounds vs manual_targets
 // ============================================================================
 
+type InputMode = 'standard' | 'manual_compounds' | 'manual_targets'
+
 interface InputModeToggleProps {
-  value: 'standard' | 'manual_compounds'
-  onChange: (v: 'standard' | 'manual_compounds') => void
+  value: InputMode
+  onChange: (v: InputMode) => void
 }
 
 function InputModeToggle({ value, onChange }: InputModeToggleProps) {
@@ -66,6 +76,15 @@ function InputModeToggle({ value, onChange }: InputModeToggleProps) {
       >
         Manual compounds
       </button>
+      <button
+        type="button"
+        className={`${base} ${value === 'manual_targets' ? active : inactive}`}
+        onClick={() => onChange('manual_targets')}
+        aria-pressed={value === 'manual_targets'}
+        data-testid="input-mode-manual-targets"
+      >
+        Manual targets
+      </button>
     </div>
   )
 }
@@ -84,11 +103,15 @@ export default function SetupPage() {
   const [diseaseIds, setDiseaseIds] = useState<string[]>([])
   const [mode, setMode] = useState<'guided' | 'auto'>('guided')
   const [params, setParams] = useState<AdvancedParams>(DEFAULT_PARAMS)
-  const [inputMode, setInputMode] = useState<'standard' | 'manual_compounds'>('standard')
+  const [inputMode, setInputMode] = useState<InputMode>('standard')
   const [compoundsRaw, setCompoundsRaw] = useState('')
+  const [targetsRaw, setTargetsRaw] = useState('')
 
-  const isManual = inputMode === 'manual_compounds'
-  const parsedCompounds = isManual ? parseCompoundLines(compoundsRaw) : []
+  const isManualCompounds = inputMode === 'manual_compounds'
+  const isManualTargets = inputMode === 'manual_targets'
+  const isManual = isManualCompounds || isManualTargets
+  const parsedCompounds = isManualCompounds ? parseCompoundLines(compoundsRaw) : []
+  const parsedTargets = isManualTargets ? parseTargetLines(targetsRaw) : []
 
   // Cache restore: if there's an in-progress analysis, redirect to it
   useEffect(() => {
@@ -109,8 +132,12 @@ export default function SetupPage() {
   }, [navigate])
 
   // Derived validation
-  const hasCompounds = isManual ? parsedCompounds.length > 0 : plantIds.length > 0
-  const isDisabled = !hasCompounds || diseaseIds.length === 0 || mutation.isPending
+  const hasInput = isManualCompounds
+    ? parsedCompounds.length > 0
+    : isManualTargets
+      ? parsedTargets.length > 0
+      : plantIds.length > 0
+  const isDisabled = !hasInput || diseaseIds.length === 0 || mutation.isPending
 
   function handleSubmit() {
     if (isDisabled) return
@@ -118,8 +145,10 @@ export default function SetupPage() {
     const baseParams: Record<string, unknown> = {
       ...(params as unknown as Record<string, unknown>),
     }
-    if (isManual) {
+    if (isManualCompounds) {
       baseParams['_input_mode'] = 'manual_compounds'
+    } else if (isManualTargets) {
+      baseParams['_input_mode'] = 'manual_targets'
     }
 
     mutation.mutate({
@@ -130,7 +159,8 @@ export default function SetupPage() {
         disease_ids: diseaseIds,
         parameters: baseParams,
       },
-      compounds: isManual ? parsedCompounds : undefined,
+      compounds: isManualCompounds ? parsedCompounds : undefined,
+      targets: isManualTargets ? parsedTargets : undefined,
     })
   }
 
@@ -153,10 +183,16 @@ export default function SetupPage() {
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
         <p className="text-sm font-medium text-hf-fg2 mb-2">Input Mode</p>
         <InputModeToggle value={inputMode} onChange={setInputMode} />
-        {isManual && (
+        {isManualCompounds && (
           <p className="text-xs text-hf-fg3 mt-2">
             Stages 1–2 (compound selection and ADME screening) will be skipped.
             Compounds are validated via PubChem; invalid structures are discarded.
+          </p>
+        )}
+        {isManualTargets && (
+          <p className="text-xs text-hf-fg3 mt-2">
+            Stages 1–3 (compound selection, ADME screening, and target identification) will be skipped.
+            Targets are validated via UniProt (human proteome); unrecognised entries are discarded.
           </p>
         )}
       </div>
@@ -170,7 +206,7 @@ export default function SetupPage() {
       )}
 
       {/* Manual compound input */}
-      {isManual && (
+      {isManualCompounds && (
         <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" data-testid="compounds-section">
           <p className="text-sm font-medium text-hf-fg2 mb-2">Compounds</p>
           <textarea
@@ -184,6 +220,26 @@ export default function SetupPage() {
           {parsedCompounds.length > 0 && (
             <p className="text-xs text-hf-fg3 mt-1">
               {parsedCompounds.length} structure{parsedCompounds.length !== 1 ? 's' : ''} entered
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Manual target input */}
+      {isManualTargets && (
+        <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" data-testid="targets-section">
+          <p className="text-sm font-medium text-hf-fg2 mb-2">Targets</p>
+          <textarea
+            value={targetsRaw}
+            onChange={(e) => setTargetsRaw(e.target.value)}
+            placeholder="Enter gene symbols or UniProt accessions, one per line"
+            rows={6}
+            data-testid="targets-textarea"
+            className="w-full rounded-md border border-hf-border bg-hf-bg text-hf-fg1 text-sm p-3 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y font-mono"
+          />
+          {parsedTargets.length > 0 && (
+            <p className="text-xs text-hf-fg3 mt-1">
+              {parsedTargets.length} target{parsedTargets.length !== 1 ? 's' : ''} entered
             </p>
           )}
         </div>
