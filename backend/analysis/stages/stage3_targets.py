@@ -64,7 +64,11 @@ class _ManualCompoundProxy:
 
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:
     stage2 = (run.stage_results or {}).get("stage_2", {})
-    compound_ids = stage2.get("all_active_compound_ids", [])
+    # Coerce to strings: Stage 2 may emit uuid.UUID objects instead of plain strings.
+    # Without this, set(compound_ids) contains UUID objects that never intersect
+    # with all_covered (which holds string compound IDs from the DB), yielding
+    # coverage_pct = 0% even when targets are found.
+    compound_ids = [str(cid) for cid in stage2.get("all_active_compound_ids", [])]
 
     if not compound_ids:
         return {"covered": 0, "no_data": 0, "coverage_pct": 0.0, "targets": []}

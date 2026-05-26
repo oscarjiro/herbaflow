@@ -260,19 +260,58 @@ async def test_stage3_uncovered_compounds_in_output(
     assert not any(u["compound_id"] == covered_cid for u in uncovered)
 
 
-@pytest.mark.asyncio
 async def test_coverage_pct_nonzero_when_targets_found():
-    """Coverage % must be > 0 when target_compound_map is non-empty.
+    """Coverage % must be > 0 when targets are found, even if compound IDs arrive
+    as uuid.UUID objects from Stage 2 instead of plain strings.
 
-    Regression guard: if compound IDs from Stage 2 are UUID objects instead of
-    strings, the set intersection in Stage 3 returns empty → coverage = 0%.
-    This test verifies the calculation is correct when IDs are plain strings.
+    Regression guard: a prior bug caused the set intersection
+        all_covered & set(compound_ids)
+    to return empty when compound_ids contained UUID objects (not strings),
+    because all_covered is built from string compound IDs stored in the DB.
+    Passing UUID objects here confirms stage3 now produces coverage_pct > 0.
     """
-    compound_ids = ["abc123-uuid-string", "def456-uuid-string"]
-    target_compound_map = {"TP53": [compound_ids[0]], "EGFR": [compound_ids[1]]}
+    import uuid
 
-    all_covered = {cid for cids in target_compound_map.values() for cid in cids}
-    covered = len(all_covered & set(compound_ids))
-    coverage_pct = round(covered / len(compound_ids) * 100, 1)
+    # Simulate the pre-fix bug scenario: Stage 2 emits UUID objects, not strings.
+    cid1 = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+    cid2 = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+    # DB compounds are keyed by their string representation (as stored in PostgreSQL)
+    cid1_str = str(cid1)
+    cid2_str = str(cid2)
 
-    assert coverage_pct == 100.0, f"Expected 100.0 but got {coverage_pct}"
+    run = make_run(all_active_compound_ids=[cid1, cid2])
+    config = PipelineConfig()
+    session = make_session()
+
+    fake_c1 = make_fake_compound(cid1_str, chembl_id="CHEMBL_A")
+    fake_c2 = make_fake_compound(cid2_str, chembl_id="CHEMBL_B")
+
+    fake_target_c1 = ChemblTarget(
+        chembl_id="CHEMBL_TGT_1",
+        gene_symbol="TP53",
+        uniprot_accession="P04637",
+        organism="Homo sapiens",
+        pchembl_value=6.0,
+    )
+    fake_target_c2 = ChemblTarget(
+        chembl_id="CHEMBL_TGT_2",
+        gene_symbol="EGFR",
+        uniprot_accession="P00533",
+        organism="Homo sapiens",
+        pchembl_value=7.0,
+    )
+
+    with patch(
+        "analysis.stages.stage3_targets.compound_repo.get_compounds_by_ids",
+        return_value=[fake_c1, fake_c2],
+    ):
+        with patch(
+            "analysis.stages.stage3_targets.get_targets_for_compounds",
+            return_value={"CHEMBL_A": [fake_target_c1], "CHEMBL_B": [fake_target_c2]},
+        ):
+            result = await stage3_targets.run(run, config, session)
+
+    assert result["coverage_pct"] > 0.0, (
+        f"coverage_pct was {result['coverage_pct']} — UUID objects in "
+        "all_active_compound_ids likely broke the set intersection"
+    )
