@@ -110,10 +110,12 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         "failed": result["failed_count"],
         "np_exceptions": result["np_exception_count"],
         # Pipeline chain compatibility (Stage 3 reads these)
-        "passed_compound_ids": [c.compound_id for c in result["passed"]],
-        "np_exception_compound_ids": [c.compound_id for c in result["np_exceptions"]],
+        # str() cast ensures UUID objects from the ORM are serialized as strings,
+        # preventing type mismatches when Stage 3 intersects these IDs with its own sets.
+        "passed_compound_ids": [str(c.compound_id) for c in result["passed"]],
+        "np_exception_compound_ids": [str(c.compound_id) for c in result["np_exceptions"]],
         "all_active_compound_ids": [
-            c.compound_id
+            str(c.compound_id)
             for c in result["passed"] + result["np_exceptions"]
         ],
         "compounds": enriched,

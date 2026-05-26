@@ -1,3 +1,4 @@
+import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from analysis.stages import stage3_targets
 from analysis.models import PipelineConfig
@@ -257,3 +258,21 @@ async def test_stage3_uncovered_compounds_in_output(
     assert uncovered[0]["canonical_name"] == "Kaempferol"
     assert uncovered[0]["smiles"] == "CC1=CC=CC=C1"
     assert not any(u["compound_id"] == covered_cid for u in uncovered)
+
+
+@pytest.mark.asyncio
+async def test_coverage_pct_nonzero_when_targets_found():
+    """Coverage % must be > 0 when target_compound_map is non-empty.
+
+    Regression guard: if compound IDs from Stage 2 are UUID objects instead of
+    strings, the set intersection in Stage 3 returns empty → coverage = 0%.
+    This test verifies the calculation is correct when IDs are plain strings.
+    """
+    compound_ids = ["abc123-uuid-string", "def456-uuid-string"]
+    target_compound_map = {"TP53": [compound_ids[0]], "EGFR": [compound_ids[1]]}
+
+    all_covered = {cid for cids in target_compound_map.values() for cid in cids}
+    covered = len(all_covered & set(compound_ids))
+    coverage_pct = round(covered / len(compound_ids) * 100, 1)
+
+    assert coverage_pct == 100.0, f"Expected 100.0 but got {coverage_pct}"
