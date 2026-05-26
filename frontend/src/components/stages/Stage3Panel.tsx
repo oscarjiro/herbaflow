@@ -87,8 +87,21 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
     },
     {
       key: 'uniprot_id',
-      header: 'UniProt ID',
-      className: 'font-mono text-hf-fg3',
+      header: 'UniProt Accession',
+      render: (value) => {
+        const accession = value as string | null | undefined
+        if (!accession) return <span className="text-hf-fg4">—</span>
+        return (
+          <a
+            href={`https://www.uniprot.org/uniprotkb/${accession}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-xs text-hf-fg2 hover:text-hf-fg1 underline underline-offset-2 transition-colors"
+          >
+            {accession}
+          </a>
+        )
+      },
     },
     {
       key: 'source',
