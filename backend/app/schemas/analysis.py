@@ -4,13 +4,73 @@ from datetime import datetime
 from typing import Any, Literal
 
 
+def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Validate critical numeric parameter bounds in a params/parameters dict.
+
+    Enforces bounds only for params that cause runtime errors when violated:
+    - enrichment.fdr_threshold in (0, 1]  → log(0) in Stage 8
+    - adme.max_mw > 0                     → divide-by-zero / nonsensical filter
+    - target.min_pchembl in [0, 14]       → invalid ChEMBL range
+    - target.min_assay_confidence in [0, 9] → invalid ChEMBL confidence
+    - hub_genes.top_n >= 1               → empty hub list
+    - ppi.min_confidence in (0, 1]        → STRING returns everything
+    """
+    if not params:
+        return params
+
+    errors: list[str] = []
+
+    enrichment = params.get("enrichment", {}) or {}
+    fdr = enrichment.get("fdr_threshold")
+    if fdr is not None and not (0 < fdr <= 1):
+        errors.append("enrichment.fdr_threshold must be in (0, 1]")
+
+    adme = params.get("adme", {}) or {}
+    max_mw = adme.get("max_mw")
+    if max_mw is not None and max_mw <= 0:
+        errors.append("adme.max_mw must be > 0")
+
+    target = params.get("target", {}) or {}
+    min_pchembl = target.get("min_pchembl")
+    if min_pchembl is not None and not (0 <= min_pchembl <= 14):
+        errors.append("target.min_pchembl must be in [0, 14]")
+    min_assay = target.get("min_assay_confidence")
+    if min_assay is not None and not (0 <= min_assay <= 9):
+        errors.append("target.min_assay_confidence must be in [0, 9]")
+
+    hub_genes = params.get("hub_genes", {}) or {}
+    top_n = hub_genes.get("top_n")
+    if top_n is not None and top_n < 1:
+        errors.append("hub_genes.top_n must be >= 1")
+
+    ppi = params.get("ppi", {}) or {}
+    min_conf = ppi.get("min_confidence")
+    if min_conf is not None and not (0 < min_conf <= 1):
+        errors.append("ppi.min_confidence must be in (0, 1]")
+
+    if errors:
+        raise ValueError("; ".join(errors))
+
+    return params
+
+
 class ResetFromRequest(BaseModel):
     params: dict[str, Any] | None = None   # e.g. {"adme": {"max_mw": 600}}
     rerun: bool = False
 
+    @field_validator("params")
+    @classmethod
+    def validate_params(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
+        return _validate_params(v)
+
 
 class ApproveRequest(BaseModel):
     param_overrides: dict[str, Any] | None = None   # e.g. {"target": {"min_pchembl": 6.0}}
+
+    @field_validator("param_overrides")
+    @classmethod
+    def validate_param_overrides(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
+        return _validate_params(v)
 
 
 class CreateAnalysisRequest(BaseModel):
@@ -30,6 +90,11 @@ class CreateAnalysisRequest(BaseModel):
         if not v.strip():
             raise ValueError("name must not be blank")
         return v
+
+    @field_validator("parameters")
+    @classmethod
+    def validate_parameters(cls, v: dict[str, Any]) -> dict[str, Any]:
+        return _validate_params(v) or v
 
 
 class AnalysisStatusResponse(BaseModel):
