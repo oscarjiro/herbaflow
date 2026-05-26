@@ -1,3 +1,4 @@
+import uuid
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from analysis.stages import stage3_targets
@@ -270,8 +271,6 @@ async def test_coverage_pct_nonzero_when_targets_found():
     because all_covered is built from string compound IDs stored in the DB.
     Passing UUID objects here confirms stage3 now produces coverage_pct > 0.
     """
-    import uuid
-
     # Simulate the pre-fix bug scenario: Stage 2 emits UUID objects, not strings.
     cid1 = uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
     cid2 = uuid.UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -311,7 +310,7 @@ async def test_coverage_pct_nonzero_when_targets_found():
         ):
             result = await stage3_targets.run(run, config, session)
 
-    assert result["coverage_pct"] > 0.0, (
+    assert result["coverage_pct"] == 100.0, (
         f"coverage_pct was {result['coverage_pct']} — UUID objects in "
         "all_active_compound_ids likely broke the set intersection"
     )

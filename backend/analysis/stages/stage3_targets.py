@@ -253,6 +253,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     await session.commit()
 
     # ── Output ─────────────────────────────────────────────────────────────────
+    # all_covered: strings from DB ORM; compound_ids: strings (coerced L71) — intersection is type-safe.
     all_covered: set[str] = {
         cid for cids in target_compound_map.values() for cid in cids
     }
