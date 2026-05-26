@@ -96,6 +96,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
             href={`https://www.uniprot.org/uniprotkb/${accession}`}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={`UniProt entry for ${accession} (opens in new tab)`}
             className="font-mono text-xs text-hf-fg2 hover:text-hf-fg1 underline underline-offset-2 transition-colors"
           >
             {accession}
