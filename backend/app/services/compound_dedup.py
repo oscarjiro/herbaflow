@@ -9,10 +9,12 @@ Falls back to lowercased string comparison when PubChem is unavailable.
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
-import httpx
+if TYPE_CHECKING:
+    import httpx
 
-from integrations.pubchem_compound import validate_compound  # noqa: F401 (patched in tests)
+from integrations.pubchem_compound import validate_compound
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +22,7 @@ logger = logging.getLogger(__name__)
 async def deduplicate_compounds(
     submitted: list[str],
     existing_ids: set[str],
+    client: httpx.AsyncClient,
 ) -> tuple[list[str], list[str]]:
     """Deduplicate submitted compound identifiers against each other and existing_ids.
 
@@ -40,6 +43,9 @@ async def deduplicate_compounds(
         submitted: Raw compound identifiers as submitted by the caller.
         existing_ids: Set of compound_id strings already selected in the analysis
                       (from stage_1 results or any other prior selection).
+        client: Shared ``httpx.AsyncClient`` for PubChem lookups (provided by the
+                caller so that a single connection pool is reused across dedup and
+                subsequent batch validation).
 
     Returns:
         (unique_new, duplicates):
@@ -55,41 +61,40 @@ async def deduplicate_compounds(
     # For fallback inputs: normalized raw string.
     seen_in_batch: set[str] = set()
 
-    async with httpx.AsyncClient(timeout=20.0) as client:
-        for raw in submitted:
-            stripped = raw.strip()
-            if not stripped:
-                duplicates.append(raw)
-                continue
+    for raw in submitted:
+        stripped = raw.strip()
+        if not stripped:
+            duplicates.append(raw)
+            continue
 
-            # Attempt PubChem canonicalization
-            compound = None
-            try:
-                compound = await validate_compound(stripped, client)
-            except Exception as exc:
-                logger.warning(
-                    "PubChem lookup failed for %r during dedup (fallback to string): %s",
-                    stripped[:60],
-                    exc,
-                )
+        # Attempt PubChem canonicalization
+        compound = None
+        try:
+            compound = await validate_compound(stripped, client)
+        except Exception as exc:
+            logger.warning(
+                "PubChem lookup failed for %r during dedup (fallback to string): %s",
+                stripped[:60],
+                exc,
+            )
 
-            if compound is not None:
-                canonical_key = compound["compound_id"]
-            else:
-                # Fallback: use normalized string as canonical key
-                canonical_key = stripped.lower()
+        if compound is not None:
+            canonical_key = compound["compound_id"]
+        else:
+            # Fallback: use normalized string as canonical key
+            canonical_key = stripped.lower()
 
-            # Check against existing_ids (cross-analysis dedup)
-            if canonical_key in existing_ids:
-                duplicates.append(raw)
-                continue
+        # Check against existing_ids (cross-analysis dedup)
+        if canonical_key in existing_ids:
+            duplicates.append(raw)
+            continue
 
-            # Check within-batch dedup
-            if canonical_key in seen_in_batch:
-                duplicates.append(raw)
-                continue
+        # Check within-batch dedup
+        if canonical_key in seen_in_batch:
+            duplicates.append(raw)
+            continue
 
-            seen_in_batch.add(canonical_key)
-            unique_new.append(raw)
+        seen_in_batch.add(canonical_key)
+        unique_new.append(raw)
 
     return unique_new, duplicates

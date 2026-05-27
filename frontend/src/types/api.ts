@@ -490,6 +490,8 @@ export interface AddUserCompoundResponse {
 export interface InjectCompoundsResponse {
   injected: number
   failed: string[]
+  duplicates_removed: number
+  duplicate_names: string[]
 }
 
 // T4.4: Manual target input

@@ -686,26 +686,28 @@ async def inject_compounds(
     existing_stage1 = (run.stage_results or {}).get("stage_1") or {}
     existing_ids: set[str] = set(existing_stage1.get("compound_ids", []))
 
-    # Deduplicate submitted inputs against each other and existing stage_1 compounds
-    try:
-        deduped_inputs, dedup_removed = await deduplicate_compounds(
-            submitted=body.compounds,
-            existing_ids=existing_ids,
-        )
-    except Exception as e:
-        logger.warning("Deduplication failed, proceeding with raw inputs: %s", e)
-        deduped_inputs = body.compounds
-        dedup_removed = []
-
-    if not deduped_inputs:
-        return InjectCompoundsResponse(
-            injected=0,
-            failed=[],
-            duplicates_removed=len(dedup_removed),
-            duplicate_names=dedup_removed,
-        )
-
+    # Single shared client for both dedup PubChem lookups and batch validation.
     async with httpx.AsyncClient(timeout=20.0) as client:
+        # Deduplicate submitted inputs against each other and existing stage_1 compounds
+        try:
+            deduped_inputs, dedup_removed = await deduplicate_compounds(
+                submitted=body.compounds,
+                existing_ids=existing_ids,
+                client=client,
+            )
+        except Exception as e:
+            logger.warning("Deduplication failed, proceeding with raw inputs: %s", e, exc_info=True)
+            deduped_inputs = body.compounds
+            dedup_removed = []
+
+        if not deduped_inputs:
+            return InjectCompoundsResponse(
+                injected=0,
+                failed=[],
+                duplicates_removed=len(dedup_removed),
+                duplicate_names=dedup_removed,
+            )
+
         try:
             validated, failed = await validate_compounds_batch(deduped_inputs, client)
         except ServiceUnavailableError as e:

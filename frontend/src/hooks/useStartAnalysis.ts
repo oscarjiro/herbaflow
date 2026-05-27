@@ -19,6 +19,8 @@ export function useStartAnalysis() {
 
       let failedCompounds = 0
       let failedTargets = 0
+      let duplicatesRemoved = 0
+      let duplicateNames: string[] = []
 
       if (compounds && compounds.length > 0) {
         const injectResult = await api.injectCompounds(analysis_id, compounds)
@@ -26,6 +28,8 @@ export function useStartAnalysis() {
           throw new Error('No valid compounds found. Please check your SMILES/InChI strings.')
         }
         failedCompounds = injectResult.failed.length
+        duplicatesRemoved = injectResult.duplicates_removed
+        duplicateNames = injectResult.duplicate_names
       }
 
       if (targets && targets.length > 0) {
@@ -36,7 +40,7 @@ export function useStartAnalysis() {
         failedTargets = injectResult.failed.length
       }
 
-      return { analysis_id, failedCompounds, failedTargets }
+      return { analysis_id, failedCompounds, failedTargets, duplicatesRemoved, duplicateNames }
     },
     onSuccess: (data) => {
       localStorage.setItem('hf_last_analysis_id', data.analysis_id)
@@ -44,6 +48,11 @@ export function useStartAnalysis() {
         console.warn(
           `Analysis started with partial injection failures — ` +
           `${data.failedCompounds} compound(s) and ${data.failedTargets} target(s) discarded.`
+        )
+      }
+      if (data.duplicatesRemoved > 0) {
+        console.warn(
+          `${data.duplicatesRemoved} duplicate compound(s) removed: ${data.duplicateNames.join(', ')}`
         )
       }
       navigate(`/analysis/${data.analysis_id}`)

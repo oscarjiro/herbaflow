@@ -7,6 +7,7 @@ Tests:
 4. POST /analyses/{id}/user-compounds adds a compound to stage_1 results
 5. DELETE /analyses/{id}/user-compounds/{compound_id} removes a compound from stage_1
 """
+import httpx
 import pytest
 from pydantic import ValidationError
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -229,6 +230,7 @@ class TestDeduplicateCompoundsService:
             unique_new, duplicates = await deduplicate_compounds(
                 submitted=["CC(=O)Oc1ccccc1C(=O)O", "aspirin smiles variant"],
                 existing_ids=set(),
+                client=MagicMock(),
             )
 
         assert len(unique_new) == 1
@@ -254,6 +256,7 @@ class TestDeduplicateCompoundsService:
             unique_new, duplicates = await deduplicate_compounds(
                 submitted=["OC1=CC=C(C=C1)O"],
                 existing_ids={"cid-existing"},
+                client=MagicMock(),
             )
 
         assert len(unique_new) == 0
@@ -282,6 +285,7 @@ class TestDeduplicateCompoundsService:
                     "RYYVLZVUVIJVGH-UHFFFAOYSA-N",   # InChIKey (same compound)
                 ],
                 existing_ids=set(),
+                client=MagicMock(),
             )
 
         assert len(unique_new) == 1
@@ -316,8 +320,61 @@ class TestDeduplicateCompoundsService:
             unique_new, duplicates = await deduplicate_compounds(
                 submitted=["Aspirin", "ASPIRIN", "  aspirin  "],
                 existing_ids=set(),
+                client=MagicMock(),
             )
 
         # All three normalize to "aspirin" — keep one
+        assert len(unique_new) == 1
+        assert len(duplicates) == 2
+
+    @pytest.mark.asyncio
+    async def test_timeout_exception_degrades_gracefully(self):
+        """validate_compound raising httpx.TimeoutException → dedup falls back to string key.
+
+        The dedup service must not crash when PubChem times out. Instead it catches
+        the exception, logs a warning, and falls back to lowercased string comparison
+        for the affected compound — keeping the batch alive.
+        """
+        async def mock_validate_timeout(structure, client):
+            raise httpx.TimeoutException("connect timeout")
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate_timeout,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            # Two distinct inputs — both fail PubChem, fall back to string keys
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["aspirin", "quercetin"],
+                existing_ids=set(),
+                client=MagicMock(),
+            )
+
+        # Both are kept (different string keys), no crash
+        assert unique_new == ["aspirin", "quercetin"]
+        assert duplicates == []
+
+    @pytest.mark.asyncio
+    async def test_timeout_exception_with_duplicate_degrades_gracefully(self):
+        """TimeoutException + duplicate string → dedup still removes the duplicate.
+
+        Even when PubChem is down and string fallback is active, within-batch
+        dedup must still work correctly for repeated raw inputs.
+        """
+        async def mock_validate_timeout(structure, client):
+            raise httpx.TimeoutException("connect timeout")
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate_timeout,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["aspirin", "ASPIRIN", "  aspirin  "],
+                existing_ids=set(),
+                client=MagicMock(),
+            )
+
+        # All three normalize to "aspirin" under string fallback — keep one
         assert len(unique_new) == 1
         assert len(duplicates) == 2
