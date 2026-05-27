@@ -83,6 +83,7 @@ def compute_adme(props: dict) -> dict:
     xlogp = xlogp if xlogp is not None else 99.0
     hbd = hbd if hbd is not None else 99
     hba = hba if hba is not None else 99
+    rotatable = rotatable if rotatable is not None else 99
 
     lipinski_pass = mw <= 500 and xlogp <= 5 and hbd <= 5 and hba <= 10
 
@@ -167,10 +168,10 @@ async def validate_compound(
 
     iupac_name = props.get("IUPACName", "") or ""
     molecular_formula = props.get("MolecularFormula", "") or ""
-    molecular_weight = float(props.get("MolecularWeight") or 0)
 
     compound_id = make_compound_id(inchikey)
     adme = compute_adme(props)
+    molecular_weight = adme["mw"] if adme["mw"] is not None else 0.0
 
     return {
         "compound_id": compound_id,
