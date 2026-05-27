@@ -38,19 +38,26 @@ export function StageParamsPanel({
 
   const [open, setOpen] = useState(false)
   const [values, setValues] = useState<Record<string, unknown>>(getEffectiveValues)
+  // Snapshot of params at mount / after each successful rerun — used for dirty detection
+  const [initialValues, setInitialValues] = useState<Record<string, unknown>>(getEffectiveValues)
   const resetMutation = useResetFromStage(analysisId)
 
-  // Sync when analysis.parameters change
+  // isDirty: true when current form values differ from what the stage last ran with
+  const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues)
+
+  // Sync when analysis.parameters change (e.g., after a rerun completes)
   useEffect(() => {
-    setValues(getEffectiveValues())
+    const fresh = getEffectiveValues()
+    setValues(fresh)
+    setInitialValues(fresh)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentParams, paramKey])
 
   const handleRerun = () => {
-    resetMutation.mutate({
-      stage,
-      body: { params: { [paramKey]: values }, rerun: true },
-    })
+    resetMutation.mutate(
+      { stage, body: { params: { [paramKey]: values }, rerun: true } },
+      { onSuccess: () => setInitialValues(values) },
+    )
   }
 
   return (
@@ -176,12 +183,12 @@ export function StageParamsPanel({
             </div>
           )}
 
-          {/* Rerun button (guided mode only) */}
+          {/* Rerun button (guided mode only, enabled when params differ from last run) */}
           {canRerun && (
             <div className="pt-2 flex justify-end">
               <button
                 type="button"
-                disabled={resetMutation.isPending}
+                disabled={!isDirty || resetMutation.isPending}
                 onClick={handleRerun}
                 aria-label={`Rerun stage ${stage} with updated parameters`}
                 className="rounded-md bg-hf-fg1 px-3 py-1.5 text-xs font-medium text-hf-bg hover:opacity-90 disabled:opacity-50 transition-opacity font-sans"
