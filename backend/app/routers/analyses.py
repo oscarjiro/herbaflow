@@ -2,6 +2,7 @@ import copy
 import csv
 import io
 import json
+import logging
 from datetime import datetime
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
@@ -10,6 +11,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session, async_session_factory
+from app.errors import (
+    PUBCHEM_UNAVAILABLE,
+    UNIPROT_UNAVAILABLE,
+    UNIPROT_TARGET_NOT_FOUND,
+    UNIPROT_VALIDATION_FAILED,
+    TARGET_NOT_FOUND,
+    TARGET_ALREADY_EXISTS,
+)
 from app.schemas.analysis import (
     CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse,
     ResetFromRequest, ApproveRequest,
@@ -26,6 +35,7 @@ from analysis.stages.stage3_targets import _make_target_id, _make_ct_id
 from integrations.uniprot import validate_human_target
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
+logger = logging.getLogger(__name__)
 
 TOTAL_STAGES = 8
 
@@ -671,7 +681,8 @@ async def inject_compounds(
         try:
             validated, failed = await validate_compounds_batch(body.compounds, client)
         except Exception as e:
-            raise HTTPException(status_code=502, detail=f"PubChem validation failed: {str(e)}")
+            logger.error("PubChem batch validation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=502, detail=PUBCHEM_UNAVAILABLE)
 
     if not validated:
         return InjectCompoundsResponse(injected=0, failed=failed)
@@ -770,7 +781,8 @@ async def add_user_compound(
         try:
             validated = await validate_compound(structure, client)
         except Exception as e:
-            raise HTTPException(status_code=502, detail=f"PubChem validation failed: {str(e)}")
+            logger.error("PubChem compound validation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=502, detail=PUBCHEM_UNAVAILABLE)
 
     if not validated:
         raise HTTPException(status_code=400, detail="Invalid compound structure: not found in PubChem")
@@ -857,7 +869,13 @@ async def add_user_target(
     try:
         info = await validate_human_target(body.gene_symbol, body.uniprot_id)
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc))
+        msg = str(exc)
+        logger.error("UniProt target validation error: %s", msg)
+        if "request failed" in msg or "returned error" in msg or "invalid JSON" in msg:
+            raise HTTPException(status_code=502, detail=UNIPROT_UNAVAILABLE)
+        if "not found" in msg or "not a human protein" in msg:
+            raise HTTPException(status_code=422, detail=UNIPROT_TARGET_NOT_FOUND)
+        raise HTTPException(status_code=422, detail=UNIPROT_VALIDATION_FAILED)
 
     # Upsert Target row (canonical cache — permanent)
     target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
@@ -878,7 +896,8 @@ async def add_user_target(
     try:
         updated = _add_target_to_stage3(stage3, info.gene_symbol, info.uniprot_accession, info.protein_name)
     except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc))
+        logger.warning("Duplicate target rejected for stage 3: %s", exc)
+        raise HTTPException(status_code=409, detail=TARGET_ALREADY_EXISTS)
 
     await session.commit()
     await analysis_repo.update_run_status(
@@ -911,7 +930,8 @@ async def remove_user_target(
     try:
         updated = _remove_target_from_stage3(stage3, gene_symbol)
     except KeyError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        logger.warning("Target removal rejected for stage 3: %s", exc)
+        raise HTTPException(status_code=404, detail=TARGET_NOT_FOUND)
 
     await analysis_repo.update_run_status(
         session, analysis_id,
@@ -938,7 +958,13 @@ async def add_user_disease_target(
     try:
         info = await validate_human_target(body.gene_symbol, body.uniprot_id)
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc))
+        msg = str(exc)
+        logger.error("UniProt disease-target validation error: %s", msg)
+        if "request failed" in msg or "returned error" in msg or "invalid JSON" in msg:
+            raise HTTPException(status_code=502, detail=UNIPROT_UNAVAILABLE)
+        if "not found" in msg or "not a human protein" in msg:
+            raise HTTPException(status_code=422, detail=UNIPROT_TARGET_NOT_FOUND)
+        raise HTTPException(status_code=422, detail=UNIPROT_VALIDATION_FAILED)
 
     # Upsert Target row (canonical cache — permanent)
     target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
@@ -965,7 +991,8 @@ async def add_user_disease_target(
             stage4, info.gene_symbol, info.uniprot_accession, info.protein_name, disease_name
         )
     except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc))
+        logger.warning("Duplicate target rejected for stage 4: %s", exc)
+        raise HTTPException(status_code=409, detail=TARGET_ALREADY_EXISTS)
 
     await session.commit()
     await analysis_repo.update_run_status(
@@ -1112,7 +1139,8 @@ async def remove_user_disease_target(
     try:
         updated = _remove_target_from_stage4(stage4, gene_symbol)
     except KeyError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        logger.warning("Target removal rejected for stage 4: %s", exc)
+        raise HTTPException(status_code=404, detail=TARGET_NOT_FOUND)
 
     await analysis_repo.update_run_status(
         session, analysis_id,

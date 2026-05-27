@@ -243,3 +243,128 @@ class TestStringConfidencePresets:
     def test_approve_request_enforces_presets(self):
         with pytest.raises(ValidationError, match="min_confidence"):
             _approve({"ppi": {"min_confidence": 0.55}})
+
+
+# ---------------------------------------------------------------------------
+# Error message humanization — app/errors.py constants
+# ---------------------------------------------------------------------------
+
+# Python exception class names that must NEVER appear in an API detail field.
+_FORBIDDEN_EXCEPTION_NAMES = {
+    "TypeError",
+    "ValueError",
+    "AttributeError",
+    "KeyError",
+    "IndexError",
+    "RuntimeError",
+    "Exception",
+    "HTTPError",
+    "HTTPStatusError",
+    "ConnectionError",
+    "TimeoutError",
+}
+
+
+class TestErrorConstants:
+    """Verify that app/errors.py constants are non-empty human-readable strings
+    that do not leak Python exception class names."""
+
+    def _load_constants(self) -> dict:
+        from app.errors import (
+            PUBCHEM_UNAVAILABLE,
+            PUBCHEM_VALIDATION_FAILED,
+            UNIPROT_UNAVAILABLE,
+            UNIPROT_TARGET_NOT_FOUND,
+            UNIPROT_VALIDATION_FAILED,
+            CHEMBL_UNAVAILABLE,
+            STRING_UNAVAILABLE,
+            ANALYSIS_NOT_FOUND,
+            COMPOUND_NOT_FOUND,
+            TARGET_NOT_FOUND,
+            STAGE_NOT_READY,
+            INVALID_STAGE,
+            TARGET_ALREADY_EXISTS,
+        )
+        return {
+            "PUBCHEM_UNAVAILABLE": PUBCHEM_UNAVAILABLE,
+            "PUBCHEM_VALIDATION_FAILED": PUBCHEM_VALIDATION_FAILED,
+            "UNIPROT_UNAVAILABLE": UNIPROT_UNAVAILABLE,
+            "UNIPROT_TARGET_NOT_FOUND": UNIPROT_TARGET_NOT_FOUND,
+            "UNIPROT_VALIDATION_FAILED": UNIPROT_VALIDATION_FAILED,
+            "CHEMBL_UNAVAILABLE": CHEMBL_UNAVAILABLE,
+            "STRING_UNAVAILABLE": STRING_UNAVAILABLE,
+            "ANALYSIS_NOT_FOUND": ANALYSIS_NOT_FOUND,
+            "COMPOUND_NOT_FOUND": COMPOUND_NOT_FOUND,
+            "TARGET_NOT_FOUND": TARGET_NOT_FOUND,
+            "STAGE_NOT_READY": STAGE_NOT_READY,
+            "INVALID_STAGE": INVALID_STAGE,
+            "TARGET_ALREADY_EXISTS": TARGET_ALREADY_EXISTS,
+        }
+
+    def test_all_constants_are_non_empty_strings(self):
+        """Every constant must be a non-empty string."""
+        constants = self._load_constants()
+        for name, value in constants.items():
+            assert isinstance(value, str), f"{name} must be a str"
+            assert value.strip(), f"{name} must not be empty or whitespace"
+
+    def test_no_constant_contains_exception_class_name(self):
+        """No constant may contain a bare Python exception class name."""
+        constants = self._load_constants()
+        for const_name, value in constants.items():
+            for exc_name in _FORBIDDEN_EXCEPTION_NAMES:
+                assert exc_name not in value, (
+                    f"{const_name} leaks exception class name '{exc_name}': {value!r}"
+                )
+
+    def test_service_unavailable_messages_are_actionable(self):
+        """Service-unavailable messages must tell the user to retry."""
+        from app.errors import (
+            PUBCHEM_UNAVAILABLE,
+            UNIPROT_UNAVAILABLE,
+            CHEMBL_UNAVAILABLE,
+            STRING_UNAVAILABLE,
+        )
+        for msg in [PUBCHEM_UNAVAILABLE, UNIPROT_UNAVAILABLE, CHEMBL_UNAVAILABLE, STRING_UNAVAILABLE]:
+            assert any(
+                kw in msg.lower() for kw in ("try again", "unavailable", "retry")
+            ), f"Service-unavailable message should be actionable: {msg!r}"
+
+    def test_not_found_messages_are_concise(self):
+        """Not-found messages must be short user-readable strings, not stack frames."""
+        from app.errors import ANALYSIS_NOT_FOUND, COMPOUND_NOT_FOUND, TARGET_NOT_FOUND
+        for msg in [ANALYSIS_NOT_FOUND, COMPOUND_NOT_FOUND, TARGET_NOT_FOUND]:
+            assert len(msg) < 120, f"Not-found message is unexpectedly long: {msg!r}"
+            assert "Traceback" not in msg
+            assert "File " not in msg
+
+
+class TestRouterErrorsNoRawExceptionStrings:
+    """Whitebox: verify that the analyses router module does not expose raw
+    exception text directly in HTTPException detail fields.
+
+    This complements the constant tests above by checking the source code
+    at import time (no network calls needed).
+    """
+
+    def test_analyses_router_has_no_str_exc_in_http_exception_detail(self):
+        """The analyses router must not pass str(exc) directly as an HTTPException detail.
+
+        We check by inspecting the source code of the router module — the pattern
+        'detail=str(e' or 'detail=str(exc' must not appear.
+        """
+        import inspect
+        import app.routers.analyses as analyses_module
+
+        source = inspect.getsource(analyses_module)
+        # These patterns would leak raw exception text into HTTP responses.
+        forbidden_patterns = [
+            "detail=str(e)",
+            "detail=str(exc)",
+            'detail=f"PubChem validation failed: {str(e)}',
+            'detail=f"PubChem validation failed: {str(exc)}',
+        ]
+        for pattern in forbidden_patterns:
+            assert pattern not in source, (
+                f"Raw exception string found in analyses router detail: {pattern!r}"
+            )
