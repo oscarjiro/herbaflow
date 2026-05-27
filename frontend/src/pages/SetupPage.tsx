@@ -221,7 +221,7 @@ export default function SetupPage() {
           <div className={`relative flex font-mono text-sm rounded-md border bg-hf-bg${formErrors.compounds ? ' border-hf-danger' : ' border-hf-border'}`}>
             {/* Line numbers */}
             <div className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none">
-              {compoundsRaw.split('\n').map((_, i) => (
+              {(compoundsRaw === '' ? [] : compoundsRaw.split('\n')).map((_, i) => (
                 <div key={i} className="leading-6">{i + 1}</div>
               ))}
             </div>
@@ -236,10 +236,6 @@ export default function SetupPage() {
           </div>
           {formErrors.compounds ? (
             <p className="text-xs text-hf-danger mt-1">{formErrors.compounds}</p>
-          ) : mutation.isSuccess && (mutation.data as { failedCompounds?: number }).failedCompounds ? (
-            <p className="text-xs text-hf-danger mt-1">
-              {(mutation.data as { failedCompounds: number }).failedCompounds} invalid entr{(mutation.data as { failedCompounds: number }).failedCompounds !== 1 ? 'ies' : 'y'} discarded. Valid entries are being processed.
-            </p>
           ) : parsedCompounds.length > 0 ? (
             <p className="text-xs text-hf-fg3 mt-1">
               {parsedCompounds.length} structure{parsedCompounds.length !== 1 ? 's' : ''} entered
@@ -256,7 +252,7 @@ export default function SetupPage() {
           <div className={`relative flex font-mono text-sm rounded-md border bg-hf-bg${formErrors.targets ? ' border-hf-danger' : ' border-hf-border'}`}>
             {/* Line numbers */}
             <div className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none">
-              {targetsRaw.split('\n').map((_, i) => (
+              {(targetsRaw === '' ? [] : targetsRaw.split('\n')).map((_, i) => (
                 <div key={i} className="leading-6">{i + 1}</div>
               ))}
             </div>
@@ -271,10 +267,6 @@ export default function SetupPage() {
           </div>
           {formErrors.targets ? (
             <p className="text-xs text-hf-danger mt-1">{formErrors.targets}</p>
-          ) : mutation.isSuccess && (mutation.data as { failedTargets?: number }).failedTargets ? (
-            <p className="text-xs text-hf-danger mt-1">
-              {(mutation.data as { failedTargets: number }).failedTargets} invalid entr{(mutation.data as { failedTargets: number }).failedTargets !== 1 ? 'ies' : 'y'} discarded. Valid entries are being processed.
-            </p>
           ) : parsedTargets.length > 0 ? (
             <p className="text-xs text-hf-fg3 mt-1">
               {parsedTargets.length} target{parsedTargets.length !== 1 ? 's' : ''} entered
