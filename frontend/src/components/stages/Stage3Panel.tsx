@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useMemo } from 'react'
 import { Copy } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { StageHeader } from '@/components/shared/StageHeader'
@@ -147,12 +147,15 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
   const [showImportPanel, setShowImportPanel] = useState(false)
 
   // Build a per-compound target count map for the import dropdown
-  const compoundTargetCounts: Record<string, number> = {}
-  for (const t of result?.targets ?? []) {
-    for (const cid of t.compound_ids ?? []) {
-      compoundTargetCounts[cid] = (compoundTargetCounts[cid] ?? 0) + 1
+  const compoundTargetCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const t of result?.targets ?? []) {
+      for (const cid of t.compound_ids ?? []) {
+        counts[cid] = (counts[cid] ?? 0) + 1
+      }
     }
-  }
+    return counts
+  }, [result?.targets])
 
   const handleExportSTP = useCallback(() => {
     if (!result) return
@@ -340,7 +343,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                           <>
                             <button
                               type="button"
-                              onClick={() => navigator.clipboard.writeText(c.smiles ?? '')}
+                              onClick={() => navigator.clipboard.writeText(c.smiles ?? '').catch(() => {})}
                               className="text-xs text-hf-fg3 hover:text-hf-fg1 transition-colors"
                               title="Copy SMILES to clipboard"
                             >
