@@ -1,5 +1,5 @@
+import { Info } from 'lucide-react'
 import { StageHeader } from '@/components/shared/StageHeader'
-import { StatCard } from '@/components/shared/StatCard'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
 import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
@@ -142,8 +142,28 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <StatCard label="Jaccard Index" value={result.jaccard != null && !Number.isNaN(result.jaccard) ? result.jaccard.toFixed(3) : 'N/A'} />
-        <StatCard label="Fisher's Exact p-value" value={result.p_value != null ? result.p_value.toExponential(2) : 'N/A'} />
+        <div className="rounded-lg bg-hf-surface border border-hf-border p-4 flex flex-col gap-1">
+          <div className="flex items-center gap-1">
+            <span className="text-hf-fg2 text-sm">Jaccard Index</span>
+            <span title="Measures similarity between compound targets and disease targets. Formula: |overlap| / |union|. Range 0–1; higher = more overlap. Values above 0.1 with p < 0.05 are considered meaningful in network pharmacology (Hopkins, 2008).">
+              <Info className="h-3.5 w-3.5 text-hf-fg3 cursor-help" />
+            </span>
+          </div>
+          <span className="text-lg font-semibold text-hf-fg1">
+            {result.jaccard != null && !Number.isNaN(result.jaccard) ? result.jaccard.toFixed(3) : 'N/A'}
+          </span>
+        </div>
+        <div className="rounded-lg bg-hf-surface border border-hf-border p-4 flex flex-col gap-1">
+          <div className="flex items-center gap-1">
+            <span className="text-hf-fg2 text-sm">Fisher's Exact p-value</span>
+            <span title="Tests whether the observed overlap is greater than expected by chance, given ~20,000 human protein-coding genes as the universe. p < 0.05 indicates statistically significant overlap.">
+              <Info className="h-3.5 w-3.5 text-hf-fg3 cursor-help" />
+            </span>
+          </div>
+          <span className="text-lg font-semibold text-hf-fg1">
+            {result.p_value != null ? result.p_value.toExponential(2) : 'N/A'}
+          </span>
+        </div>
         <div className="rounded-lg bg-hf-surface border border-hf-border p-4 flex flex-col gap-1">
           <span className="text-xs text-hf-fg3">Significance</span>
           <span
