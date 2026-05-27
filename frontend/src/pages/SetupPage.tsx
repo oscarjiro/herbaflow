@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { PlantSelector } from '@/components/setup/PlantSelector'
 import { DiseaseSelector } from '@/components/setup/DiseaseSelector'
@@ -99,7 +98,7 @@ export default function SetupPage() {
   const mutation = useStartAnalysis()
 
   // Form state
-  const [name, setName] = useState(() => generateDefaultName())
+  const name = generateDefaultName()
   const [plantIds, setPlantIds] = useState<string[]>([])
   const [diseaseIds, setDiseaseIds] = useState<string[]>([])
   const [mode, setMode] = useState<'guided' | 'auto'>('guided')
@@ -184,20 +183,6 @@ export default function SetupPage() {
   return (
     <div className="max-w-2xl mx-auto py-12 px-6">
       <h1 className="font-display text-3xl text-hf-fg1 mb-8">New Analysis</h1>
-
-      {/* Analysis Name */}
-      <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
-        <p className="text-sm font-medium text-hf-fg2 mb-2">Analysis Name</p>
-        <Input
-          value={name}
-          onChange={(e) => { setName(e.target.value); setFormErrors((prev) => ({ ...prev, name: undefined })) }}
-          placeholder="Enter analysis name"
-          className={`border-hf-border bg-hf-surface text-hf-fg1${formErrors.name ? ' border-hf-danger' : ''}`}
-        />
-        {formErrors.name && (
-          <p className="text-xs text-hf-danger mt-1">{formErrors.name}</p>
-        )}
-      </div>
 
       {/* Input Mode */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">

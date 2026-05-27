@@ -67,7 +67,6 @@ export type AdvancedParamsOutput = z.output<typeof advancedParamsSchema>
 // ---------------------------------------------------------------------------
 
 export const setupFormStandardSchema = z.object({
-  name: analysisNameSchema,
   mode: analysisModeSchema,
   plant_ids: z.array(z.string()).min(1, 'Select at least one plant'),
   disease_ids: z.array(z.string()).min(1, 'Select at least one disease'),
@@ -79,7 +78,6 @@ export const setupFormStandardSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const setupFormManualCompoundsSchema = z.object({
-  name: analysisNameSchema,
   mode: analysisModeSchema,
   disease_ids: z.array(z.string()).min(1, 'Select at least one disease'),
   compounds: z
@@ -94,7 +92,6 @@ export const setupFormManualCompoundsSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const setupFormManualTargetsSchema = z.object({
-  name: analysisNameSchema,
   mode: analysisModeSchema,
   disease_ids: z.array(z.string()).min(1, 'Select at least one disease'),
   targets: z
@@ -131,7 +128,6 @@ export const injectTargetsSchema = z.object({
  * Returns { success, errors } where errors is a flat map of field → message.
  */
 export type SetupFormErrors = Partial<{
-  name: string
   mode: string
   plant_ids: string
   disease_ids: string
