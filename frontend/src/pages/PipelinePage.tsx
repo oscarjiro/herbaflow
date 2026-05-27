@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useAnalysisStatus } from '@/hooks/useAnalysisStatus'
 import { useAnalysis } from '@/hooks/useAnalysis'
 import { useApproveStage } from '@/hooks/useApproveStage'
-import { useRejectStage } from '@/hooks/useRejectStage'
 import { useResetFromStage } from '@/hooks/useResetFromStage'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { PipelineSidebar } from '@/components/pipeline/PipelineSidebar'
@@ -57,7 +56,6 @@ interface StagePanelRouterProps {
 
 function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRouterProps) {
   const approveMutation = useApproveStage(analysisId)
-  const rejectMutation = useRejectStage(analysisId)
   const resetMutation = useResetFromStage(analysisId)
   const [redoDialogOpen, setRedoDialogOpen] = useState(false)
 
@@ -114,8 +112,8 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
       {isAwaitingApproval && (
         <ApprovalBar
           onApprove={(overrides) => approveMutation.mutate(overrides)}
-          onReject={() => rejectMutation.mutate()}
-          isLoading={approveMutation.isPending || rejectMutation.isPending}
+          onRedo={() => resetMutation.mutate({ stage })}
+          isLoading={approveMutation.isPending || resetMutation.isPending}
           nextStage={stage + 1}
           currentParams={analysis?.parameters ?? null}
         />

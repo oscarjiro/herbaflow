@@ -10,7 +10,7 @@ import {
 
 interface ApprovalBarProps {
   onApprove: (paramOverrides?: Record<string, unknown>) => void
-  onReject: () => void
+  onRedo?: () => void
   isLoading?: boolean
   /** The stage that will run after approval (current_stage + 1). */
   nextStage?: number
@@ -20,7 +20,7 @@ interface ApprovalBarProps {
 
 export function ApprovalBar({
   onApprove,
-  onReject,
+  onRedo,
   isLoading,
   nextStage,
   currentParams,
@@ -182,14 +182,16 @@ export function ApprovalBar({
         >
           Approve & Continue
         </button>
-        <button
-          type="button"
-          onClick={onReject}
-          disabled={isLoading}
-          className="rounded-sm border border-hf-border px-5 py-2 text-sm font-medium text-hf-fg2 hover:bg-hf-surface-2 disabled:opacity-45"
-        >
-          Reject
-        </button>
+        {onRedo && (
+          <button
+            type="button"
+            onClick={onRedo}
+            disabled={isLoading}
+            className="rounded-sm border border-hf-border px-5 py-2 text-sm font-medium text-hf-fg2 hover:bg-hf-surface-2 disabled:opacity-45"
+          >
+            Redo Stage
+          </button>
+        )}
       </div>
     </div>
   )
