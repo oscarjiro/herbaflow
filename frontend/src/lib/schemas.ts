@@ -14,12 +14,14 @@ import { z } from 'zod'
 //   Targets:   iPrimeTarget (Luo et al. 2024) and Open Targets dataset scales
 // ---------------------------------------------------------------------------
 
-export const SOFT_CAP_PLANTS = 20
+// Hard caps enforced by backend Pydantic validation (max_length); requests exceeding these return HTTP 422.
 export const HARD_CAP_PLANTS = 50
-export const SOFT_CAP_MANUAL_COMPOUNDS = 100
 export const HARD_CAP_MANUAL_COMPOUNDS = 500
-export const SOFT_CAP_MANUAL_TARGETS = 100
 export const HARD_CAP_MANUAL_TARGETS = 300
+// Soft caps: planned for UI warnings (yellow highlight when approaching the hard cap).
+export const SOFT_CAP_PLANTS = 20
+export const SOFT_CAP_MANUAL_COMPOUNDS = 100
+export const SOFT_CAP_MANUAL_TARGETS = 100
 
 // ---------------------------------------------------------------------------
 // Primitives

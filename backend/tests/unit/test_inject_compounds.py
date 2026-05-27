@@ -51,7 +51,23 @@ def test_inject_compounds_over_limit_raises_validation_error():
 
 
 # ---------------------------------------------------------------------------
-# Test 3: HTTP boundary — FastAPI translates Pydantic ValidationError → 422
+# Test 3: HTTP boundary — over HARD_CAP items → HTTP 422
+# ---------------------------------------------------------------------------
+
+
+def test_inject_compounds_over_hard_cap_returns_422():
+    """POST /analyses/{id}/inject-compounds with > HARD_CAP_MANUAL_COMPOUNDS items returns 422."""
+    too_many = ["CC"] * (HARD_CAP_MANUAL_COMPOUNDS + 1)
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.post(
+        f"/analyses/{ANALYSIS_ID}/inject-compounds",
+        json={"compounds": too_many},
+    )
+    assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Test 4: HTTP boundary — empty list → HTTP 422
 # ---------------------------------------------------------------------------
 
 
@@ -61,6 +77,7 @@ def test_inject_compounds_http_empty_list_returns_422():
     This confirms FastAPI's request/response boundary: the Pydantic
     ValidationError from InjectCompoundsRequest (min_length=1) is
     automatically converted to HTTP 422 before the route handler runs.
+    No mocking required — validation fires before the handler is called.
     """
     client = TestClient(app, raise_server_exceptions=False)
     response = client.post(
