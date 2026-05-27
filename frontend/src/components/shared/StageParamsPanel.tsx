@@ -108,9 +108,10 @@ export function StageParamsPanel({
                     <span className="text-xs font-sans text-hf-fg2 flex-1">{label}</span>
                     <select
                       value={val as number | string}
-                      onChange={(e) =>
-                        setValues((v) => ({ ...v, [key]: Number(e.target.value) }))
-                      }
+                      onChange={(e) => {
+                        const n = Number(e.target.value)
+                        if (!isNaN(n)) setValues((v) => ({ ...v, [key]: n }))
+                      }}
                       className="rounded-sm border border-hf-border bg-hf-bg1 px-2 py-1 text-xs font-sans text-hf-fg1 focus:outline-none focus:ring-1 focus:ring-hf-border"
                     >
                       {selectOpts.map((opt) => (

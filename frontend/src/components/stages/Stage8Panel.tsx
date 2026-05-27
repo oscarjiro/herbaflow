@@ -184,7 +184,7 @@ function EnrichmentBubbleChart({
 }) {
   const allTerms = SOURCES.flatMap((src) =>
     termsBySource[src]
-      .filter((t) => t.p_value != null && t.p_value > 0 && t.term_size > 0)
+      .filter((t) => t.p_value != null && t.p_value > 0 && t.term_size > 0 && t.fdr != null && t.fdr >= 0)
       .slice(0, 15)
       .map((t): BubbleEntry => ({
         x: t.intersection_size / t.term_size,
