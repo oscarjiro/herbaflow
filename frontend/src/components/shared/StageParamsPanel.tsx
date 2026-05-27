@@ -6,6 +6,7 @@ import {
   PARAM_DEFAULTS,
   PARAM_LABELS,
   PARAM_STEP,
+  PARAM_SELECT_OPTIONS,
   ENRICHMENT_SOURCES,
 } from '@/lib/stage-params'
 
@@ -28,6 +29,7 @@ export function StageParamsPanel({
   const defaults = PARAM_DEFAULTS[paramKey] ?? {}
   const labels = PARAM_LABELS[paramKey] ?? {}
   const steps = PARAM_STEP[paramKey] ?? {}
+  const selectOptions = PARAM_SELECT_OPTIONS[paramKey] ?? {}
 
   const getEffectiveValues = () => ({
     ...defaults,
@@ -95,6 +97,28 @@ export function StageParamsPanel({
                       }
                       className="rounded border-hf-border accent-hf-fg1"
                     />
+                  </label>
+                )
+              }
+
+              const selectOpts = selectOptions[key]
+              if (selectOpts) {
+                return (
+                  <label key={key} className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-sans text-hf-fg2 flex-1">{label}</span>
+                    <select
+                      value={val as number | string}
+                      onChange={(e) =>
+                        setValues((v) => ({ ...v, [key]: Number(e.target.value) }))
+                      }
+                      className="rounded-sm border border-hf-border bg-hf-bg1 px-2 py-1 text-xs font-sans text-hf-fg1 focus:outline-none focus:ring-1 focus:ring-hf-border"
+                    >
+                      {selectOpts.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                 )
               }

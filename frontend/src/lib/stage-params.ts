@@ -69,7 +69,7 @@ export const PARAM_LABELS: Record<string, Record<string, string>> = {
     min_score: 'Min Open Targets Score (0–1)',
   },
   ppi: {
-    min_confidence: 'Min STRING Confidence (0–1)',
+    min_confidence: 'STRING Confidence',
   },
   hub_genes: {
     top_n: 'Top N Hub Genes',
@@ -93,9 +93,25 @@ export const PARAM_STEP: Record<string, Record<string, number>> = {
   },
   target: { min_pchembl: 0.5, min_assay_confidence: 1 },
   disease_targets: { min_score: 0.05 },
-  ppi: { min_confidence: 0.05 },
   hub_genes: { top_n: 5 },
   enrichment: { fdr_threshold: 0.01 },
+}
+
+export interface SelectOption {
+  value: number | string
+  label: string
+}
+
+// Select options for params that use preset values instead of free-float inputs
+export const PARAM_SELECT_OPTIONS: Record<string, Record<string, SelectOption[]>> = {
+  ppi: {
+    min_confidence: [
+      { value: 0.15, label: 'Low (0.15)' },
+      { value: 0.40, label: 'Medium (0.40) — default' },
+      { value: 0.70, label: 'High (0.70)' },
+      { value: 0.90, label: 'Very High (0.90)' },
+    ],
+  },
 }
 
 export const ENRICHMENT_SOURCES = ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG']

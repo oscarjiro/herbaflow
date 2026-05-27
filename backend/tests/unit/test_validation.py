@@ -178,9 +178,10 @@ class TestPpiMinConfidence:
         req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.4}}))
         assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.4)
 
-    def test_one_accepted(self):
-        req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 1.0}}))
-        assert req.parameters["ppi"]["min_confidence"] == 1.0
+    def test_non_preset_one_rejected(self):
+        """1.0 is not a STRING-DB preset — must be rejected."""
+        with pytest.raises(ValidationError, match="min_confidence"):
+            CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 1.0}}))
 
 
 # ---------------------------------------------------------------------------
@@ -203,3 +204,42 @@ class TestAbsentSections:
     def test_approve_none_overrides_ok(self):
         req = _approve(None)
         assert req.param_overrides is None
+
+
+# ---------------------------------------------------------------------------
+# ppi.min_confidence — STRING confidence presets: 0.15, 0.40, 0.70, 0.90
+# ---------------------------------------------------------------------------
+
+class TestStringConfidencePresets:
+    def test_non_preset_value_rejected(self):
+        """ppi.min_confidence must be one of the 4 STRING-DB preset values."""
+        with pytest.raises(ValidationError, match="min_confidence"):
+            CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.55}}))
+
+    def test_another_non_preset_rejected(self):
+        with pytest.raises(ValidationError, match="min_confidence"):
+            CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.30}}))
+
+    def test_low_preset_accepted(self):
+        req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.15}}))
+        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.15)
+
+    def test_medium_preset_accepted(self):
+        req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.40}}))
+        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.40)
+
+    def test_high_preset_accepted(self):
+        req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.70}}))
+        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.70)
+
+    def test_very_high_preset_accepted(self):
+        req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.90}}))
+        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.90)
+
+    def test_reset_request_enforces_presets(self):
+        with pytest.raises(ValidationError, match="min_confidence"):
+            _reset({"ppi": {"min_confidence": 0.55}})
+
+    def test_approve_request_enforces_presets(self):
+        with pytest.raises(ValidationError, match="min_confidence"):
+            _approve({"ppi": {"min_confidence": 0.55}})

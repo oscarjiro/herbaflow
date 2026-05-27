@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ScatterChart, Scatter, ZAxis, CartesianGrid, Legend } from 'recharts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
@@ -131,11 +131,131 @@ function PathwayChart({ terms, chartRef }: { terms: PathwayTerm[]; chartRef?: Re
   )
 }
 
+const BUBBLE_COLORS: Record<PathwaySource, string> = {
+  'GO:BP': 'var(--hf-sage)',
+  'GO:MF': 'var(--hf-terracotta)',
+  'GO:CC': 'var(--hf-accent)',
+  'KEGG': 'var(--hf-warning)',
+}
+
+interface BubbleEntry {
+  x: number       // gene_ratio = intersection_size / term_size
+  y: number       // -log10(p_value)
+  z: number       // intersection_size (bubble size)
+  name: string
+  source: PathwaySource
+  p_value: number
+  fdr: number
+  intersection_size: number
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function BubbleTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null
+  const d = payload[0]?.payload as BubbleEntry | undefined
+  if (!d) return null
+  return (
+    <div
+      style={{
+        fontSize: '11px',
+        background: 'var(--hf-surface)',
+        border: '1px solid var(--hf-border)',
+        borderRadius: '4px',
+        padding: '6px 8px',
+        maxWidth: '240px',
+      }}
+    >
+      <p style={{ fontWeight: 600, marginBottom: 2, wordBreak: 'break-word' }}>{d.name}</p>
+      <p>Source: {d.source}</p>
+      <p>p-value: {d.p_value?.toExponential(2)}</p>
+      <p>FDR: {d.fdr?.toExponential(2)}</p>
+      <p>Gene count: {d.intersection_size}</p>
+      <p>Gene ratio: {d.x?.toFixed(3)}</p>
+    </div>
+  )
+}
+
+function EnrichmentBubbleChart({
+  termsBySource,
+  chartRef,
+}: {
+  termsBySource: Record<PathwaySource, PathwayTerm[]>
+  chartRef?: React.RefObject<HTMLDivElement | null>
+}) {
+  const allTerms = SOURCES.flatMap((src) =>
+    termsBySource[src]
+      .filter((t) => t.p_value != null && t.p_value > 0 && t.term_size > 0)
+      .slice(0, 15)
+      .map((t): BubbleEntry => ({
+        x: t.intersection_size / t.term_size,
+        y: -Math.log10(t.p_value),
+        z: t.intersection_size,
+        name: t.term_name,
+        source: src,
+        p_value: t.p_value,
+        fdr: t.fdr,
+        intersection_size: t.intersection_size,
+      }))
+  )
+
+  if (allTerms.length === 0) {
+    return <EmptyState message="No significant pathways available for bubble chart" />
+  }
+
+  const bySource = SOURCES.reduce<Record<PathwaySource, BubbleEntry[]>>(
+    (acc, src) => {
+      acc[src] = allTerms.filter((d) => d.source === src)
+      return acc
+    },
+    { 'GO:BP': [], 'GO:MF': [], 'GO:CC': [], 'KEGG': [] }
+  )
+
+  return (
+    <div ref={chartRef}>
+      <ResponsiveContainer width="100%" height={420}>
+        <ScatterChart margin={{ top: 16, right: 24, bottom: 40, left: 16 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--hf-border)" />
+          <XAxis
+            type="number"
+            dataKey="x"
+            name="Gene Ratio"
+            domain={[0, 'auto']}
+            label={{ value: 'Gene Ratio', position: 'insideBottom', offset: -24, fontSize: 11 }}
+            tick={{ fontSize: 10 }}
+          />
+          <YAxis
+            type="number"
+            dataKey="y"
+            name="−log₁₀(p-value)"
+            label={{ value: '−log₁₀(p-value)', angle: -90, position: 'insideLeft', offset: 10, fontSize: 11 }}
+            tick={{ fontSize: 10 }}
+          />
+          <ZAxis type="number" dataKey="z" range={[30, 300]} name="Gene Count" />
+          <Tooltip content={<BubbleTooltip />} />
+          <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
+          {SOURCES.map((src) =>
+            bySource[src].length > 0 ? (
+              <Scatter
+                key={src}
+                name={SOURCE_LABELS[src]}
+                data={bySource[src]}
+                fill={BUBBLE_COLORS[src]}
+                fillOpacity={0.75}
+              />
+            ) : null
+          )}
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
 export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8PanelProps) {
   const chartRefGoBp = useRef<HTMLDivElement | null>(null)
   const chartRefGoMf = useRef<HTMLDivElement | null>(null)
   const chartRefGoCc = useRef<HTMLDivElement | null>(null)
   const chartRefKegg = useRef<HTMLDivElement | null>(null)
+  const chartRefBubble = useRef<HTMLDivElement | null>(null)
   const chartRefs: Record<PathwaySource, React.RefObject<HTMLDivElement | null>> = {
     'GO:BP': chartRefGoBp,
     'GO:MF': chartRefGoMf,
@@ -200,6 +320,7 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
               )}
             </TabsTrigger>
           ))}
+          <TabsTrigger value="bubble">Bubble</TabsTrigger>
         </TabsList>
 
         {SOURCES.map((src) => (
@@ -219,6 +340,25 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
             </div>
           </TabsContent>
         ))}
+
+        <TabsContent value="bubble">
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-hf-fg2">All Sources — Bubble Chart</h3>
+              <button
+                type="button"
+                onClick={() => exportChartPng(chartRefBubble.current, `enrichment-bubble-${analysisId}.png`)}
+                className="rounded-sm border border-hf-border px-3 py-1.5 text-xs text-hf-fg2 hover:text-hf-fg1"
+              >
+                Export PNG
+              </button>
+            </div>
+            <p className="text-xs text-hf-fg3 mb-3 font-sans">
+              Top 15 terms per source. Bubble size = gene count. Axes: x = gene ratio (intersection / term size), y = −log₁₀(p-value).
+            </p>
+            <EnrichmentBubbleChart termsBySource={termsBySource} chartRef={chartRefBubble} />
+          </div>
+        </TabsContent>
       </Tabs>
 
       <div className="space-y-1 text-xs text-hf-fg3 font-sans">

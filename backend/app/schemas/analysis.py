@@ -4,6 +4,10 @@ from datetime import datetime
 from typing import Any, Literal
 
 
+# STRING-DB standard confidence thresholds (Low / Medium / High / Very High)
+STRING_CONFIDENCE_PRESETS = {0.15, 0.40, 0.70, 0.90}
+
+
 def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
     """Validate critical numeric parameter bounds in a params/parameters dict.
 
@@ -13,7 +17,7 @@ def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
     - target.min_pchembl in [0, 14]       → invalid ChEMBL range
     - target.min_assay_confidence in [0, 9] → invalid ChEMBL confidence
     - hub_genes.top_n >= 1               → empty hub list
-    - ppi.min_confidence in (0, 1]        → STRING returns everything
+    - ppi.min_confidence in STRING_CONFIDENCE_PRESETS → STRING-DB standard levels
     """
     if not params:
         return params
@@ -45,8 +49,11 @@ def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
 
     ppi = params.get("ppi", {}) or {}
     min_conf = ppi.get("min_confidence")
-    if min_conf is not None and not (0 < min_conf <= 1):
-        errors.append("ppi.min_confidence must be in (0, 1]")
+    if min_conf is not None and min_conf not in STRING_CONFIDENCE_PRESETS:
+        errors.append(
+            f"ppi.min_confidence must be one of {sorted(STRING_CONFIDENCE_PRESETS)} "
+            "(STRING-DB standard confidence levels: Low=0.15, Medium=0.40, High=0.70, Very High=0.90)"
+        )
 
     if errors:
         raise ValueError("; ".join(errors))
