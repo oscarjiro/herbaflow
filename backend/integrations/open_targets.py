@@ -1,7 +1,10 @@
+import logging
 import httpx
 from dataclasses import dataclass
 
 from integrations._retry import with_retry, ServiceUnavailableError
+
+logger = logging.getLogger(__name__)
 
 OT_BASE = "https://api.platform.opentargets.org/api/v4"
 
@@ -47,7 +50,11 @@ async def get_disease_targets(
                 return r
 
             resp = await with_retry(_fetch_ot, service_name="Open Targets")
-        except (httpx.HTTPError, ServiceUnavailableError):
+        except ServiceUnavailableError as exc:
+            logger.error("Open Targets unavailable after retries: %s", exc)
+            return []
+        except httpx.HTTPError as exc:
+            logger.error("Open Targets HTTP error for EFO %s: %s", efo_id, exc)
             return []
 
     data = resp.json().get("data", {})

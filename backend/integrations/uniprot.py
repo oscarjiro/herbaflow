@@ -54,8 +54,8 @@ async def _lookup_by_accession(client: httpx.AsyncClient, accession: str) -> Uni
             return r
 
         resp = await with_retry(_fetch, service_name="UniProt")
-    except ServiceUnavailableError as exc:
-        raise ValueError(f"UniProt is temporarily unavailable: {exc}") from exc
+    except ServiceUnavailableError:
+        raise  # let router map to HTTP 503
     except httpx.HTTPError as exc:
         raise ValueError(f"UniProt request failed: {exc}") from exc
     if resp.status_code == 404:
@@ -100,8 +100,8 @@ async def _search_by_gene(client: httpx.AsyncClient, gene_symbol: str) -> UniPro
             return r
 
         resp = await with_retry(_fetch, service_name="UniProt")
-    except ServiceUnavailableError as exc:
-        raise ValueError(f"UniProt is temporarily unavailable: {exc}") from exc
+    except ServiceUnavailableError:
+        raise  # let router map to HTTP 503
     except httpx.HTTPStatusError as exc:
         raise ValueError(f"UniProt search returned error {exc.response.status_code} for '{gene_symbol}'") from exc
     except httpx.HTTPError as exc:

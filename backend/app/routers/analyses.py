@@ -33,6 +33,7 @@ from app.repositories import analysis_repo
 from analysis.pipeline import run_stage
 from analysis.stages.stage3_targets import _make_target_id, _make_ct_id
 from integrations.uniprot import validate_human_target
+from integrations._retry import ServiceUnavailableError
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
 logger = logging.getLogger(__name__)
@@ -680,6 +681,9 @@ async def inject_compounds(
     async with httpx.AsyncClient(timeout=20.0) as client:
         try:
             validated, failed = await validate_compounds_batch(body.compounds, client)
+        except ServiceUnavailableError as e:
+            logger.error("PubChem batch validation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=503, detail=PUBCHEM_UNAVAILABLE)
         except Exception as e:
             logger.error("PubChem batch validation error: %s", e, exc_info=True)
             raise HTTPException(status_code=502, detail=PUBCHEM_UNAVAILABLE)
@@ -780,6 +784,9 @@ async def add_user_compound(
     async with httpx.AsyncClient(timeout=20.0) as client:
         try:
             validated = await validate_compound(structure, client)
+        except ServiceUnavailableError as e:
+            logger.error("PubChem compound validation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=503, detail=PUBCHEM_UNAVAILABLE)
         except Exception as e:
             logger.error("PubChem compound validation error: %s", e, exc_info=True)
             raise HTTPException(status_code=502, detail=PUBCHEM_UNAVAILABLE)
@@ -868,6 +875,9 @@ async def add_user_target(
 
     try:
         info = await validate_human_target(body.gene_symbol, body.uniprot_id)
+    except ServiceUnavailableError as exc:
+        logger.error("UniProt target validation error: %s", exc)
+        raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
     except ValueError as exc:
         msg = str(exc)
         logger.error("UniProt target validation error: %s", msg)
@@ -957,6 +967,9 @@ async def add_user_disease_target(
 
     try:
         info = await validate_human_target(body.gene_symbol, body.uniprot_id)
+    except ServiceUnavailableError as exc:
+        logger.error("UniProt disease-target validation error: %s", exc)
+        raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
     except ValueError as exc:
         msg = str(exc)
         logger.error("UniProt disease-target validation error: %s", msg)
@@ -1057,6 +1070,8 @@ async def inject_targets(
                 gene_symbol=None if is_accession else raw_stripped,
                 uniprot_id=raw_stripped if is_accession else None,
             )
+        except ServiceUnavailableError:
+            raise  # propagate to inject_targets endpoint → 503
         except ValueError:
             failed.append(raw_stripped)
             return
@@ -1072,7 +1087,11 @@ async def inject_targets(
             "sources": ["manual"],
         })
 
-    await asyncio.gather(*[_validate_one(t) for t in body.targets])
+    try:
+        await asyncio.gather(*[_validate_one(t) for t in body.targets])
+    except ServiceUnavailableError as exc:
+        logger.error("UniProt unavailable during inject-targets: %s", exc)
+        raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
 
     if not injected_targets:
         return InjectTargetsResponse(injected=0, failed=failed)

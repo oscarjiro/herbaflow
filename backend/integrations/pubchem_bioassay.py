@@ -15,12 +15,15 @@ Citation:
 """
 
 import asyncio
+import logging
 import re
 from dataclasses import dataclass
 
 import httpx
 
 from integrations._retry import with_retry, ServiceUnavailableError
+
+logger = logging.getLogger(__name__)
 
 PUBCHEM_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 UNIPROT_BASE = "https://rest.uniprot.org/uniprotkb"
@@ -66,7 +69,11 @@ async def _get_cid(client: httpx.AsyncClient, inchikey: str) -> int | None:
             resp = await with_retry(_fetch_cid, service_name="PubChem BioAssay")
             if resp.status_code == 404:
                 return None
-        except (httpx.HTTPError, ServiceUnavailableError):
+        except ServiceUnavailableError as exc:
+            logger.error("PubChem BioAssay unavailable after retries (CID lookup for %s): %s", inchikey, exc)
+            return None
+        except httpx.HTTPError as exc:
+            logger.error("PubChem BioAssay HTTP error (CID lookup for %s): %s", inchikey, exc)
             return None
     cids = resp.json().get("IdentifierList", {}).get("CID", [])
     return cids[0] if cids else None
@@ -93,7 +100,11 @@ async def _get_assay_rows(client: httpx.AsyncClient, cid: int) -> list[dict]:
             resp = await with_retry(_fetch_assay, service_name="PubChem BioAssay")
             if resp.status_code == 404:
                 return []
-        except (httpx.HTTPError, ServiceUnavailableError):
+        except ServiceUnavailableError as exc:
+            logger.error("PubChem BioAssay unavailable after retries (assay rows for CID %s): %s", cid, exc)
+            return []
+        except httpx.HTTPError as exc:
+            logger.error("PubChem BioAssay HTTP error (assay rows for CID %s): %s", cid, exc)
             return []
     table = resp.json().get("Table", {})
     columns = table.get("Columns", {}).get("Column", [])
@@ -126,7 +137,11 @@ async def _resolve_uniprot(
             resp = await with_retry(_fetch_uniprot, service_name="UniProt")
             if resp.status_code == 404:
                 return None, None
-        except (httpx.HTTPError, ServiceUnavailableError):
+        except ServiceUnavailableError as exc:
+            logger.error("UniProt unavailable after retries (resolving accession %s): %s", accession, exc)
+            return None, None
+        except httpx.HTTPError as exc:
+            logger.error("UniProt HTTP error (resolving accession %s): %s", accession, exc)
             return None, None
 
     data = resp.json()
