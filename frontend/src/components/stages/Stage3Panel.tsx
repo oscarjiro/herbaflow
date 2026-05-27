@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
+import { Copy } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { StageHeader } from '@/components/shared/StageHeader'
 import { StatCard } from '@/components/shared/StatCard'
@@ -144,6 +145,14 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
 
   const [showUncovered, setShowUncovered] = useState(false)
   const [showImportPanel, setShowImportPanel] = useState(false)
+
+  // Build a per-compound target count map for the import dropdown
+  const compoundTargetCounts: Record<string, number> = {}
+  for (const t of result?.targets ?? []) {
+    for (const cid of t.compound_ids ?? []) {
+      compoundTargetCounts[cid] = (compoundTargetCounts[cid] ?? 0) + 1
+    }
+  }
 
   const handleExportSTP = useCallback(() => {
     if (!result) return
@@ -322,11 +331,32 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                     {uncoveredCompounds.map(c => (
                       <span
                         key={c.compound_id}
-                        className="bg-hf-bg1 border border-hf-border text-hf-fg3 text-xs px-2 py-0.5 rounded font-mono"
+                        className="inline-flex items-center gap-1 bg-hf-bg1 border border-hf-border text-hf-fg3 text-xs px-2 py-0.5 rounded font-mono"
                         title={c.smiles ?? 'No SMILES available'}
                       >
                         {c.canonical_name}
                         {!c.smiles && <span className="ml-1 text-hf-fg3 opacity-60">(no SMILES)</span>}
+                        {c.smiles && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => navigator.clipboard.writeText(c.smiles ?? '')}
+                              className="text-xs text-hf-fg3 hover:text-hf-fg1 transition-colors"
+                              title="Copy SMILES to clipboard"
+                            >
+                              <Copy className="h-3 w-3" />
+                            </button>
+                            <a
+                              href={`https://www.swisstargetprediction.ch/predict.php?organism=Homo_sapiens&smiles=${encodeURIComponent(c.smiles)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-hf-accent hover:underline font-sans"
+                              title="Predict targets in SwissTargetPrediction"
+                            >
+                              STP →
+                            </a>
+                          </>
+                        )}
                       </span>
                     ))}
                   </div>
@@ -377,10 +407,14 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                 >
                   <option value="">— Select compound —</option>
                   {allCompounds.map(c => {
-                    const isUncovered = uncoveredCompounds.some(u => u.compound_id === c.compound_id)
+                    const targetCount = compoundTargetCounts[c.compound_id] ?? 0
                     return (
-                      <option key={c.compound_id} value={c.compound_id}>
-                        {c.canonical_name}{isUncovered ? ' — ⚠ 0 targets' : ''}
+                      <option
+                        key={c.compound_id}
+                        value={c.compound_id}
+                        style={targetCount === 0 ? { color: 'var(--hf-danger)' } : undefined}
+                      >
+                        {c.canonical_name}{targetCount === 0 ? ' — no targets found' : ` — ${targetCount} targets`}
                       </option>
                     )
                   })}
