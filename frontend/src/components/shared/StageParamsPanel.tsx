@@ -68,6 +68,9 @@ export function StageParamsPanel({
 
       {open && (
         <div className="border-t border-hf-border px-4 pb-4 pt-3 space-y-3">
+          <div className="text-xs text-hf-fg3 mb-2">
+            Rerun Stage {stage} with updated parameters
+          </div>
           {/* Numeric and boolean params */}
           {Object.entries(defaults)
             .filter(([key]) => key !== 'sources')
