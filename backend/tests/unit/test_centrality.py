@@ -46,6 +46,19 @@ def test_empty_graph():
     assert result["ranked"] == []
 
 
+def test_degree_normalized_between_0_and_1():
+    """Degree in HubGeneResult must be normalized 0–1."""
+    G = nx.Graph()
+    G.add_edges_from([('A', 'B'), ('B', 'C'), ('A', 'C'), ('C', 'D')])
+    # A, B, C, D — max degree = 3 (node C)
+    # Normalized: C's degree = 3/(4-1) = 1.0
+
+    result = compute_hub_genes(G, top_n=4, use_hub_bottleneck=False)
+
+    for gene in result['ranked']:
+        assert 0.0 <= gene['degree'] <= 1.0, f"Degree {gene['degree']} out of [0,1]"
+
+
 def test_no_null_score_fields_in_ranked():
     """disease_association_score / compound_support_score / final_score must never
     appear as null keys in the ranked dicts stored inside stage_results JSONB."""
