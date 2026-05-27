@@ -40,6 +40,12 @@ export function useStartAnalysis() {
     },
     onSuccess: (data) => {
       localStorage.setItem('hf_last_analysis_id', data.analysis_id)
+      if (data.failedCompounds > 0 || data.failedTargets > 0) {
+        console.warn(
+          `Analysis started with partial injection failures — ` +
+          `${data.failedCompounds} compound(s) and ${data.failedTargets} target(s) discarded.`
+        )
+      }
       navigate(`/analysis/${data.analysis_id}`)
     },
   })

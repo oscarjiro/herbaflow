@@ -222,7 +222,7 @@ export default function SetupPage() {
             {/* Line numbers */}
             <div className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none">
               {(compoundsRaw === '' ? [] : compoundsRaw.split('\n')).map((_, i) => (
-                <div key={i} className="leading-6">{i + 1}</div>
+                <div key={`line-${i}`} className="leading-6">{i + 1}</div>
               ))}
             </div>
             <textarea
@@ -253,7 +253,7 @@ export default function SetupPage() {
             {/* Line numbers */}
             <div className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none">
               {(targetsRaw === '' ? [] : targetsRaw.split('\n')).map((_, i) => (
-                <div key={i} className="leading-6">{i + 1}</div>
+                <div key={`line-${i}`} className="leading-6">{i + 1}</div>
               ))}
             </div>
             <textarea

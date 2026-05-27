@@ -346,6 +346,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
                               onClick={() => navigator.clipboard.writeText(c.smiles ?? '').catch(() => {})}
                               className="text-xs text-hf-fg3 hover:text-hf-fg1 transition-colors"
                               title="Copy SMILES to clipboard"
+                              aria-label="Copy SMILES to clipboard"
                             >
                               <Copy className="h-3 w-3" />
                             </button>
