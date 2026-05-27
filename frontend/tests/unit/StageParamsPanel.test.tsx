@@ -100,3 +100,51 @@ describe('StageParamsPanel — isDirty detection', () => {
     ).not.toBeInTheDocument()
   })
 })
+
+// Stage 8 uses 'enrichment' params with a sources array — test array-type isDirty
+describe('StageParamsPanel — array param isDirty (Stage 8)', () => {
+  const enrichmentParams = {
+    enrichment: {
+      fdr_threshold: 0.05,
+      min_gene_set_size: 10,
+      max_gene_set_size: 500,
+      sources: ['GO:BP', 'GO:MF'],
+    },
+  }
+
+  function renderStage8(currentParams = enrichmentParams) {
+    renderWithQuery(
+      <StageParamsPanel
+        stage={8}
+        analysisId="test-id"
+        currentParams={currentParams}
+        canRerun={true}
+      />
+    )
+    fireEvent.click(screen.getByText('Stage Parameters'))
+  }
+
+  it('rerun button is disabled when sources array has same elements in different order', () => {
+    // Render with ['GO:BP', 'GO:MF'] — then simulate toggling GO:BP off then on
+    // to produce same logical set; button should remain disabled
+    renderStage8()
+    const rerunBtn = screen.getByRole('button', {
+      name: /rerun stage 8 with updated parameters/i,
+    })
+    // Toggle GO:BP off
+    fireEvent.click(screen.getByText('GO:BP'))
+    // Toggle GO:BP back on — logical sources set is identical to initial
+    fireEvent.click(screen.getByText('GO:BP'))
+    expect(rerunBtn).toBeDisabled()
+  })
+
+  it('rerun button becomes enabled after removing a source from the array', () => {
+    renderStage8()
+    const rerunBtn = screen.getByRole('button', {
+      name: /rerun stage 8 with updated parameters/i,
+    })
+    // Remove GO:MF — sources array shrinks, isDirty should be true
+    fireEvent.click(screen.getByText('GO:MF'))
+    expect(rerunBtn).not.toBeDisabled()
+  })
+})

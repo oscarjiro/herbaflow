@@ -10,6 +10,24 @@ import {
   ENRICHMENT_SOURCES,
 } from '@/lib/stage-params'
 
+/** Deep equality for param objects. Normalizes arrays (sort) to avoid order sensitivity. */
+function paramsEqual(a: Record<string, unknown>, b: Record<string, unknown>): boolean {
+  const aKeys = Object.keys(a).sort()
+  const bKeys = Object.keys(b).sort()
+  if (aKeys.length !== bKeys.length) return false
+  return aKeys.every((key) => {
+    const av = a[key]
+    const bv = b[key]
+    if (Array.isArray(av) && Array.isArray(bv)) {
+      if (av.length !== bv.length) return false
+      const sortedAv = [...av].map(String).sort()
+      const sortedBv = [...bv].map(String).sort()
+      return sortedAv.every((v, i) => v === sortedBv[i])
+    }
+    return av === bv
+  })
+}
+
 interface StageParamsPanelProps {
   stage: number
   analysisId: string
@@ -43,7 +61,7 @@ export function StageParamsPanel({
   const resetMutation = useResetFromStage(analysisId)
 
   // isDirty: true when current form values differ from what the stage last ran with
-  const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues)
+  const isDirty = !paramsEqual(values, initialValues)
 
   // Sync when analysis.parameters change (e.g., after a rerun completes)
   useEffect(() => {
