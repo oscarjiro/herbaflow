@@ -107,6 +107,11 @@ export default function SetupPage() {
   const [compoundsRaw, setCompoundsRaw] = useState('')
   const [targetsRaw, setTargetsRaw] = useState('')
   const [formErrors, setFormErrors] = useState<SetupFormErrors>({})
+  // Disease input mode: select from DB or paste manual gene/accession list
+  type DiseaseInputMode = 'disease' | 'manual_targets'
+  const [diseaseInputMode, setDiseaseInputMode] = useState<DiseaseInputMode>('disease')
+  const [diseaseTargetsRaw, setDiseaseTargetsRaw] = useState('')
+  const parsedDiseaseTargets = diseaseInputMode === 'manual_targets' ? parseTargetLines(diseaseTargetsRaw) : []
 
   const isManualCompounds = inputMode === 'manual_compounds'
   const isManualTargets = inputMode === 'manual_targets'
@@ -143,15 +148,18 @@ export default function SetupPage() {
     const formData: Record<string, unknown> = {
       name,
       mode,
-      disease_ids: diseaseIds,
+      disease_ids: diseaseInputMode === 'manual_targets' ? [] : diseaseIds,
       parameters: params,
       ...(isManualCompounds
         ? { compounds: parsedCompounds }
         : isManualTargets
           ? { targets: parsedTargets }
           : { plant_ids: plantIds }),
+      ...(diseaseInputMode === 'manual_targets'
+        ? { disease_targets: parsedDiseaseTargets }
+        : {}),
     }
-    const { success, errors } = validateSetupForm(inputMode, formData)
+    const { success, errors } = validateSetupForm(inputMode, diseaseInputMode, formData)
     if (!success) {
       setFormErrors(errors)
       return
@@ -166,13 +174,17 @@ export default function SetupPage() {
     } else if (isManualTargets) {
       baseParams['_input_mode'] = 'manual_targets'
     }
+    if (diseaseInputMode === 'manual_targets') {
+      baseParams['_disease_input_mode'] = 'manual_targets'
+      baseParams['_injected_disease_targets'] = parsedDiseaseTargets
+    }
 
     mutation.mutate({
       request: {
         name,
         mode,
         plant_ids: isManual ? [] : plantIds,
-        disease_ids: diseaseIds,
+        disease_ids: diseaseInputMode === 'manual_targets' ? [] : diseaseIds,
         parameters: baseParams,
       },
       compounds: isManualCompounds ? parsedCompounds : undefined,
@@ -277,10 +289,60 @@ export default function SetupPage() {
 
       {/* Disease */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
-        <p className="text-sm font-medium text-hf-fg2 mb-2">Diseases</p>
-        <DiseaseSelector value={diseaseIds} onChange={(v) => { setDiseaseIds(v); setFormErrors((prev) => ({ ...prev, disease_ids: undefined })) }} />
-        {formErrors.disease_ids && (
-          <p className="text-xs text-hf-danger mt-1">{formErrors.disease_ids}</p>
+        <p className="text-sm font-medium text-hf-fg2 mb-2">Disease Targets</p>
+        {/* Disease input mode toggle */}
+        <div className="flex gap-1 bg-hf-bg border border-hf-border rounded-lg p-1 mb-3">
+          <button
+            type="button"
+            className={`flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none ${
+              diseaseInputMode === 'disease' ? 'bg-hf-accent text-white' : 'text-hf-fg2 hover:text-hf-fg1'
+            }`}
+            onClick={() => { setDiseaseInputMode('disease'); setFormErrors((prev) => ({ ...prev, disease_ids: undefined, disease_targets: undefined })) }}
+            aria-pressed={diseaseInputMode === 'disease'}
+          >
+            Select Disease
+          </button>
+          <button
+            type="button"
+            className={`flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none ${
+              diseaseInputMode === 'manual_targets' ? 'bg-hf-accent text-white' : 'text-hf-fg2 hover:text-hf-fg1'
+            }`}
+            onClick={() => { setDiseaseInputMode('manual_targets'); setFormErrors((prev) => ({ ...prev, disease_ids: undefined, disease_targets: undefined })) }}
+            aria-pressed={diseaseInputMode === 'manual_targets'}
+            data-testid="disease-input-mode-manual"
+          >
+            Manual Targets
+          </button>
+        </div>
+
+        {diseaseInputMode === 'disease' ? (
+          <>
+            <DiseaseSelector value={diseaseIds} onChange={(v) => { setDiseaseIds(v); setFormErrors((prev) => ({ ...prev, disease_ids: undefined })) }} />
+            {formErrors.disease_ids && (
+              <p className="text-xs text-hf-danger mt-1">{formErrors.disease_ids}</p>
+            )}
+          </>
+        ) : (
+          <>
+            <p className="text-xs text-hf-fg3 mb-2">
+              One gene symbol or UniProt accession per line. Bypasses Open Targets.
+            </p>
+            <textarea
+              value={diseaseTargetsRaw}
+              onChange={(e) => { setDiseaseTargetsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, disease_targets: undefined })) }}
+              placeholder={"TP53\nBRCA1\nP04637"}
+              rows={6}
+              data-testid="disease-targets-textarea"
+              className="w-full rounded-md border bg-hf-bg text-hf-fg1 text-sm p-3 font-mono placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y border-hf-border"
+            />
+            {formErrors.disease_targets ? (
+              <p className="text-xs text-hf-danger mt-1">{formErrors.disease_targets}</p>
+            ) : parsedDiseaseTargets.length > 0 ? (
+              <p className="text-xs text-hf-fg3 mt-1">
+                {parsedDiseaseTargets.length} target{parsedDiseaseTargets.length !== 1 ? 's' : ''} entered
+              </p>
+            ) : null}
+          </>
         )}
       </div>
 

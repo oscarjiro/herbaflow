@@ -58,7 +58,8 @@ async def create_analysis(
         "_disease_ids": [str(did) for did in body.disease_ids],
     }
     run = await analysis_repo.create_run(
-        session, body.name, body.mode, parameters, disease_id=body.disease_ids[0]
+        session, body.name, body.mode, parameters,
+        disease_id=body.disease_ids[0] if body.disease_ids else None,
     )
     background_tasks.add_task(
         start_pipeline, run.analysis_id, body.plant_ids, body.disease_ids, async_session_factory

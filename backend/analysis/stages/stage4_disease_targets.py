@@ -6,6 +6,35 @@ from app.repositories import disease_repo
 
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:
     params = run.parameters or {}
+
+    # Manual disease targets mode: bypass Open Targets, use injected gene list
+    if params.get("_disease_input_mode") == "manual_targets":
+        injected = params.get("_injected_disease_targets", [])
+        if not injected:
+            return {
+                "disease_target_count": 0,
+                "targets": [],
+                "disease_gene_symbols": [],
+                "disease_gene_symbols_by_disease": {},
+            }
+        targets = [
+            {
+                "gene_symbol": gene.upper(),
+                "uniprot_id": None,
+                "association_score": None,
+                "disease_name": "Manual input",
+                "source": "user_provided",
+            }
+            for gene in injected
+        ]
+        gene_symbols = [t["gene_symbol"] for t in targets]
+        return {
+            "disease_target_count": len(targets),
+            "targets": targets,
+            "disease_gene_symbols": gene_symbols,
+            "disease_gene_symbols_by_disease": {"manual": gene_symbols},
+        }
+
     disease_ids = params.get("_disease_ids", [])
 
     # gene → merged target dict; tracks all source diseases per gene

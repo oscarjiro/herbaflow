@@ -55,43 +55,79 @@ export type AdvancedParamsInput = z.input<typeof advancedParamsSchema>
 export type AdvancedParamsOutput = z.output<typeof advancedParamsSchema>
 
 // ---------------------------------------------------------------------------
+// Disease ID field — conditionally required based on disease input mode
+// ---------------------------------------------------------------------------
+
+/** Require disease_ids when diseaseInputMode is 'disease'; allow empty for 'manual_targets'. */
+function diseaseIdsField(diseaseInputMode: 'disease' | 'manual_targets') {
+  return diseaseInputMode === 'manual_targets'
+    ? z.array(z.string())
+    : z.array(z.string()).min(1, 'Select at least one disease')
+}
+
+/** Require disease_targets when diseaseInputMode is 'manual_targets'. */
+function diseaseTargetsField(diseaseInputMode: 'disease' | 'manual_targets') {
+  return diseaseInputMode === 'manual_targets'
+    ? z.array(z.string().min(1)).min(1, 'Enter at least one disease target').max(200, 'Maximum 200 targets')
+    : z.array(z.string()).optional()
+}
+
+// ---------------------------------------------------------------------------
 // Setup form — standard mode
 // ---------------------------------------------------------------------------
 
-export const setupFormStandardSchema = z.object({
-  mode: analysisModeSchema,
-  plant_ids: z.array(z.string()).min(1, 'Select at least one plant'),
-  disease_ids: z.array(z.string()).min(1, 'Select at least one disease'),
-  parameters: advancedParamsSchema,
-})
+export function makeSetupFormStandardSchema(diseaseInputMode: 'disease' | 'manual_targets' = 'disease') {
+  return z.object({
+    mode: analysisModeSchema,
+    plant_ids: z.array(z.string()).min(1, 'Select at least one plant'),
+    disease_ids: diseaseIdsField(diseaseInputMode),
+    disease_targets: diseaseTargetsField(diseaseInputMode),
+    parameters: advancedParamsSchema,
+  })
+}
+
+/** @deprecated use makeSetupFormStandardSchema() */
+export const setupFormStandardSchema = makeSetupFormStandardSchema('disease')
 
 // ---------------------------------------------------------------------------
 // Setup form — manual_compounds mode
 // ---------------------------------------------------------------------------
 
-export const setupFormManualCompoundsSchema = z.object({
-  mode: analysisModeSchema,
-  disease_ids: z.array(z.string()).min(1, 'Select at least one disease'),
-  compounds: z
-    .array(z.string().min(1))
-    .min(1, 'Enter at least one compound')
-    .max(100, 'Maximum 100 compounds'),
-  parameters: advancedParamsSchema,
-})
+export function makeSetupFormManualCompoundsSchema(diseaseInputMode: 'disease' | 'manual_targets' = 'disease') {
+  return z.object({
+    mode: analysisModeSchema,
+    disease_ids: diseaseIdsField(diseaseInputMode),
+    disease_targets: diseaseTargetsField(diseaseInputMode),
+    compounds: z
+      .array(z.string().min(1))
+      .min(1, 'Enter at least one compound')
+      .max(100, 'Maximum 100 compounds'),
+    parameters: advancedParamsSchema,
+  })
+}
+
+/** @deprecated use makeSetupFormManualCompoundsSchema() */
+export const setupFormManualCompoundsSchema = makeSetupFormManualCompoundsSchema('disease')
 
 // ---------------------------------------------------------------------------
-// Setup form — manual_targets mode
+// Setup form — manual_targets mode (compound targets)
 // ---------------------------------------------------------------------------
 
-export const setupFormManualTargetsSchema = z.object({
-  mode: analysisModeSchema,
-  disease_ids: z.array(z.string()).min(1, 'Select at least one disease'),
-  targets: z
-    .array(z.string().min(1))
-    .min(1, 'Enter at least one target')
-    .max(200, 'Maximum 200 targets'),
-  parameters: advancedParamsSchema,
-})
+export function makeSetupFormManualTargetsSchema(diseaseInputMode: 'disease' | 'manual_targets' = 'disease') {
+  return z.object({
+    mode: analysisModeSchema,
+    disease_ids: diseaseIdsField(diseaseInputMode),
+    disease_targets: diseaseTargetsField(diseaseInputMode),
+    targets: z
+      .array(z.string().min(1))
+      .min(1, 'Enter at least one target')
+      .max(200, 'Maximum 200 targets'),
+    parameters: advancedParamsSchema,
+  })
+}
+
+/** @deprecated use makeSetupFormManualTargetsSchema() */
+export const setupFormManualTargetsSchema = makeSetupFormManualTargetsSchema('disease')
 
 // ---------------------------------------------------------------------------
 // Inject requests (mirrors Pydantic InjectCompoundsRequest / InjectTargetsRequest)
@@ -121,6 +157,7 @@ export type SetupFormErrors = Partial<{
   mode: string
   plant_ids: string
   disease_ids: string
+  disease_targets: string
   compounds: string
   targets: string
   parameters: string
@@ -128,14 +165,15 @@ export type SetupFormErrors = Partial<{
 
 export function validateSetupForm(
   inputMode: 'standard' | 'manual_compounds' | 'manual_targets',
+  diseaseInputMode: 'disease' | 'manual_targets',
   data: Record<string, unknown>,
 ): { success: boolean; errors: SetupFormErrors } {
   const schema =
     inputMode === 'manual_compounds'
-      ? setupFormManualCompoundsSchema
+      ? makeSetupFormManualCompoundsSchema(diseaseInputMode)
       : inputMode === 'manual_targets'
-        ? setupFormManualTargetsSchema
-        : setupFormStandardSchema
+        ? makeSetupFormManualTargetsSchema(diseaseInputMode)
+        : makeSetupFormStandardSchema(diseaseInputMode)
 
   const result = schema.safeParse(data)
   if (result.success) return { success: true, errors: {} }

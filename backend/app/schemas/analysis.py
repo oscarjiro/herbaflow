@@ -81,7 +81,10 @@ class CreateAnalysisRequest(BaseModel):
     )
     mode: Literal["guided", "auto"] = "guided"
     plant_ids: list[str] = Field(default_factory=list)
-    disease_ids: list[str] = Field(min_length=1, description="At least one disease is required")
+    disease_ids: list[str] = Field(
+        default_factory=list,
+        description="At least one disease is required, unless _disease_input_mode is manual_targets",
+    )
     parameters: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("name")
@@ -95,6 +98,18 @@ class CreateAnalysisRequest(BaseModel):
     @classmethod
     def validate_parameters(cls, v: dict[str, Any]) -> dict[str, Any]:
         return _validate_params(v) or v
+
+    @model_validator(mode="after")
+    def disease_ids_required_unless_manual(self) -> "CreateAnalysisRequest":
+        is_manual_disease = (
+            (self.parameters or {}).get("_disease_input_mode") == "manual_targets"
+        )
+        if not is_manual_disease and len(self.disease_ids) == 0:
+            raise ValueError(
+                "disease_ids: at least one disease is required "
+                "(or set _disease_input_mode=manual_targets in parameters)"
+            )
+        return self
 
 
 class AnalysisStatusResponse(BaseModel):

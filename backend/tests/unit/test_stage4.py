@@ -97,3 +97,43 @@ async def test_stage4_skips_unknown_disease():
         result = await stage4_disease_targets.run(run, config, session)
 
     assert result["disease_target_count"] == 0
+
+
+async def test_stage4_manual_targets_mode():
+    """When _disease_input_mode is manual_targets, stage4 uses injected_disease_targets."""
+    mock_run = MagicMock()
+    mock_run.stage_results = {
+        "stage_3": {
+            "target_gene_symbols": ["TP53", "EGFR"],
+        }
+    }
+    mock_run.parameters = {
+        "_disease_input_mode": "manual_targets",
+        "_injected_disease_targets": ["TP53", "BRCA1", "PTEN"],
+    }
+    mock_config = PipelineConfig()
+    mock_session = AsyncMock()
+
+    result = await stage4_disease_targets.run(mock_run, mock_config, mock_session)
+
+    assert result["disease_target_count"] == 3
+    gene_symbols = [t["gene_symbol"] for t in result["targets"]]
+    assert "TP53" in gene_symbols
+    assert "BRCA1" in gene_symbols
+
+
+async def test_stage4_manual_targets_mode_empty_list():
+    """When _disease_input_mode is manual_targets with empty list, returns empty result."""
+    mock_run = MagicMock()
+    mock_run.stage_results = {}
+    mock_run.parameters = {
+        "_disease_input_mode": "manual_targets",
+        "_injected_disease_targets": [],
+    }
+    mock_config = PipelineConfig()
+    mock_session = AsyncMock()
+
+    result = await stage4_disease_targets.run(mock_run, mock_config, mock_session)
+
+    assert result["disease_target_count"] == 0
+    assert result["targets"] == []
