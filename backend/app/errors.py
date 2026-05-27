@@ -33,6 +33,15 @@ CHEMBL_UNAVAILABLE = (
 STRING_UNAVAILABLE = (
     "STRING-DB is temporarily unavailable. Please try again in a few minutes."
 )
+GPROFILER_UNAVAILABLE = (
+    "g:Profiler is temporarily unavailable. Please try again in a few minutes."
+)
+OPEN_TARGETS_UNAVAILABLE = (
+    "Open Targets is temporarily unavailable. Please try again in a few minutes."
+)
+PUBCHEM_BIOASSAY_UNAVAILABLE = (
+    "PubChem BioAssay is temporarily unavailable. Please try again in a few minutes."
+)
 
 # ---------------------------------------------------------------------------
 # Analysis / pipeline entity errors

@@ -2,6 +2,7 @@ import asyncio
 import httpx
 from dataclasses import dataclass
 
+from integrations._retry import with_retry, ServiceUnavailableError
 
 CHEMBL_BASE = "https://www.ebi.ac.uk/chembl/api/data"
 SEMAPHORE = asyncio.Semaphore(10)
@@ -45,9 +46,13 @@ async def get_bioactivities(
 
     async with SEMAPHORE:
         try:
-            resp = await client.get(f"{CHEMBL_BASE}/activity.json", params=params, timeout=30)
-            resp.raise_for_status()
-        except httpx.HTTPError:
+            async def _fetch_bioactivities() -> httpx.Response:
+                r = await client.get(f"{CHEMBL_BASE}/activity.json", params=params, timeout=30)
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_bioactivities, service_name="ChEMBL")
+        except (httpx.HTTPError, ServiceUnavailableError):
             return []
 
     data = resp.json()
@@ -83,14 +88,20 @@ async def resolve_target(
 ) -> ChemblTarget | None:
     async with SEMAPHORE:
         try:
-            resp = await client.get(
-                f"{CHEMBL_BASE}/target/{target_chembl_id}.json",
-                timeout=20,
-            )
+            async def _fetch_target() -> httpx.Response:
+                r = await client.get(
+                    f"{CHEMBL_BASE}/target/{target_chembl_id}.json",
+                    timeout=20,
+                )
+                if r.status_code == 404:
+                    return r  # caller checks 404 — don't raise_for_status
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_target, service_name="ChEMBL")
             if resp.status_code == 404:
                 return None
-            resp.raise_for_status()
-        except httpx.HTTPError:
+        except (httpx.HTTPError, ServiceUnavailableError):
             return None
 
     data = resp.json()

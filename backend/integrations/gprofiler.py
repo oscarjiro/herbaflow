@@ -1,6 +1,8 @@
 import httpx
 from dataclasses import dataclass
 
+from integrations._retry import with_retry, ServiceUnavailableError
+
 GPROFILER_BASE = "https://biit.cs.ut.ee/gprofiler/api"
 
 
@@ -52,13 +54,17 @@ async def run_enrichment(
 
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.post(
-                f"{GPROFILER_BASE}/gost/profile/",
-                json=payload,
-                timeout=60,
-            )
-            resp.raise_for_status()
-        except httpx.HTTPError:
+            async def _fetch_gprofiler() -> httpx.Response:
+                r = await client.post(
+                    f"{GPROFILER_BASE}/gost/profile/",
+                    json=payload,
+                    timeout=60,
+                )
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_gprofiler, service_name="g:Profiler")
+        except (httpx.HTTPError, ServiceUnavailableError):
             return []
 
     data = resp.json()

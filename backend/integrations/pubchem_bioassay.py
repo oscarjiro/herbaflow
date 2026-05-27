@@ -20,6 +20,8 @@ from dataclasses import dataclass
 
 import httpx
 
+from integrations._retry import with_retry, ServiceUnavailableError
+
 PUBCHEM_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 UNIPROT_BASE = "https://rest.uniprot.org/uniprotkb"
 
@@ -54,11 +56,17 @@ async def _get_cid(client: httpx.AsyncClient, inchikey: str) -> int | None:
     url = f"{PUBCHEM_BASE}/compound/inchikey/{inchikey}/cids/JSON"
     async with _SEMAPHORE:
         try:
-            resp = await client.get(url, timeout=20)
+            async def _fetch_cid() -> httpx.Response:
+                r = await client.get(url, timeout=20)
+                if r.status_code == 404:
+                    return r  # caller checks 404
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_cid, service_name="PubChem BioAssay")
             if resp.status_code == 404:
                 return None
-            resp.raise_for_status()
-        except httpx.HTTPError:
+        except (httpx.HTTPError, ServiceUnavailableError):
             return None
     cids = resp.json().get("IdentifierList", {}).get("CID", [])
     return cids[0] if cids else None
@@ -75,11 +83,17 @@ async def _get_assay_rows(client: httpx.AsyncClient, cid: int) -> list[dict]:
     url = f"{PUBCHEM_BASE}/compound/cid/{cid}/assaysummary/JSON"
     async with _SEMAPHORE:
         try:
-            resp = await client.get(url, timeout=30)
+            async def _fetch_assay() -> httpx.Response:
+                r = await client.get(url, timeout=30)
+                if r.status_code == 404:
+                    return r  # caller checks 404
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_assay, service_name="PubChem BioAssay")
             if resp.status_code == 404:
                 return []
-            resp.raise_for_status()
-        except httpx.HTTPError:
+        except (httpx.HTTPError, ServiceUnavailableError):
             return []
     table = resp.json().get("Table", {})
     columns = table.get("Columns", {}).get("Column", [])
@@ -99,14 +113,20 @@ async def _resolve_uniprot(
     """
     async with _SEMAPHORE:
         try:
-            resp = await client.get(
-                f"{UNIPROT_BASE}/{accession}.json",
-                timeout=15,
-            )
+            async def _fetch_uniprot() -> httpx.Response:
+                r = await client.get(
+                    f"{UNIPROT_BASE}/{accession}.json",
+                    timeout=15,
+                )
+                if r.status_code == 404:
+                    return r  # caller checks 404
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_uniprot, service_name="UniProt")
             if resp.status_code == 404:
                 return None, None
-            resp.raise_for_status()
-        except httpx.HTTPError:
+        except (httpx.HTTPError, ServiceUnavailableError):
             return None, None
 
     data = resp.json()

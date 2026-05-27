@@ -11,6 +11,8 @@ from urllib.parse import quote
 
 import httpx
 
+from integrations._retry import with_retry, ServiceUnavailableError
+
 logger = logging.getLogger(__name__)
 
 PUBCHEM_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
@@ -124,13 +126,26 @@ async def validate_compound(
         return None
 
     if _is_inchi(structure):
-        input_type = "inchi"
         # PubChem requires InChI in the path but it can contain slashes — use POST
         # For simplicity, use the URL-encoded GET approach with inchi type
-        encoded = quote(structure, safe="")
         url = f"{PUBCHEM_BASE}/compound/inchi/property/{_PROPERTY_LIST}/JSON"
+
+        async def _post_inchi() -> httpx.Response:
+            r = await client.post(url, data={"inchi": structure})
+            if r.status_code in (400, 404):
+                return r  # caller checks non-retriable client errors
+            r.raise_for_status()
+            return r
+
         try:
-            resp = await client.post(url, data={"inchi": structure})
+            resp = await with_retry(_post_inchi, service_name="PubChem")
+        except ServiceUnavailableError as e:
+            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
+            raise httpx.HTTPStatusError(
+                str(e),
+                request=httpx.Request("POST", url),
+                response=httpx.Response(503),
+            )
         except httpx.HTTPError as e:
             logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
             return None
@@ -138,8 +153,23 @@ async def validate_compound(
         # Treat as SMILES
         encoded = quote(structure, safe="")
         url = f"{PUBCHEM_BASE}/compound/smiles/{encoded}/property/{_PROPERTY_LIST}/JSON"
+
+        async def _get_smiles() -> httpx.Response:
+            r = await client.get(url)
+            if r.status_code in (400, 404):
+                return r  # caller checks non-retriable client errors
+            r.raise_for_status()
+            return r
+
         try:
-            resp = await client.get(url)
+            resp = await with_retry(_get_smiles, service_name="PubChem")
+        except ServiceUnavailableError as e:
+            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
+            raise httpx.HTTPStatusError(
+                str(e),
+                request=httpx.Request("GET", url),
+                response=httpx.Response(503),
+            )
         except httpx.HTTPError as e:
             logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
             return None
@@ -148,12 +178,7 @@ async def validate_compound(
         return None
 
     try:
-        resp.raise_for_status()
         data = resp.json()
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code >= 500:
-            raise  # Propagate PubChem 5xx so callers can return 502
-        return None
     except Exception:
         return None
 
