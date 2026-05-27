@@ -5,6 +5,8 @@ import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
 import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
+import { AddUserCompoundForm } from '@/components/shared/AddUserCompoundForm'
+import { useRemoveUserCompound } from '@/hooks/useRemoveUserCompound'
 import { isSkippedStage } from '@/types/api'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage1Result, CompoundResult } from '@/types/api'
 
@@ -25,23 +27,38 @@ interface Stage1PanelProps {
 
 type CompoundRow = CompoundResult & Record<string, unknown>
 
-const columns: ColumnDef<CompoundRow>[] = [
-  {
-    key: 'canonical_name',
-    header: 'Compound Name',
-    sortable: true,
-  },
-  {
-    key: 'plant_ids',
-    header: 'Plants',
-    sortable: true,
-    render: (value) => (value as string[]).length,
-  },
-]
-
-export function Stage1Panel({ stage, analysis, status }: Stage1PanelProps) {
+export function Stage1Panel({ stage, analysis, status, analysisId }: Stage1PanelProps) {
   const rawResult = analysis?.stage_results[`stage_${stage}`]
-  const result = rawResult as Stage1Result | null | undefined
+  const result = rawResult as (Stage1Result & { user_modified?: boolean }) | null | undefined
+  const removeCompound = useRemoveUserCompound(analysisId)
+
+  const columns: ColumnDef<CompoundRow>[] = [
+    {
+      key: 'canonical_name',
+      header: 'Compound Name',
+      sortable: true,
+    },
+    {
+      key: 'plant_ids',
+      header: 'Plants',
+      sortable: true,
+      render: (value) => (value as string[]).length,
+    },
+    {
+      key: '_remove' as keyof CompoundRow,
+      header: '',
+      render: (_, row) => (
+        <button
+          onClick={() => removeCompound.mutate((row as CompoundRow).compound_id as string)}
+          disabled={removeCompound.isPending}
+          title="Remove compound from this analysis"
+          className="text-xs text-hf-fg3 hover:text-hf-terracotta transition-colors disabled:opacity-40"
+        >
+          ✕
+        </button>
+      ),
+    },
+  ]
 
   return (
     <div className="space-y-6">
@@ -71,12 +88,26 @@ export function Stage1Panel({ stage, analysis, status }: Stage1PanelProps) {
             />
           </div>
 
+          {result.user_modified && (
+            <p className="text-xs font-sans text-hf-fg3 italic">
+              Compound list has been manually curated.
+            </p>
+          )}
+
           <DataTable
             data={result.compounds as CompoundRow[]}
             columns={columns}
             filterPlaceholder="Filter compounds..."
             filterKeys={['canonical_name']}
           />
+
+          <div className="border-t border-hf-border pt-4">
+            <h3 className="text-sm font-medium text-hf-fg2 mb-1">Curate Compound List</h3>
+            <p className="text-xs text-hf-fg3 mb-3">
+              Add compounds by SMILES or InChI string. Remove individual compounds using the ✕ button above.
+            </p>
+            <AddUserCompoundForm analysisId={analysisId} />
+          </div>
 
           <DataSources sources={SOURCES} />
         </>

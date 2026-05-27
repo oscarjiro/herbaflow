@@ -170,6 +170,23 @@ class InjectCompoundsResponse(BaseModel):
     failed: list[str]      # raw input strings that failed PubChem validation
 
 
+class AddUserCompoundRequest(BaseModel):
+    smiles: str | None = None
+    inchi: str | None = None
+
+    @model_validator(mode="after")
+    def at_least_one(self) -> "AddUserCompoundRequest":
+        if not self.smiles and not self.inchi:
+            raise ValueError("Provide at least one of smiles or inchi")
+        return self
+
+
+class AddUserCompoundResponse(BaseModel):
+    compound_id: str
+    canonical_name: str
+    smiles: str | None = None
+
+
 class InjectTargetsRequest(BaseModel):
     targets: list[str] = Field(
         min_length=1,

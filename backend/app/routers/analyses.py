@@ -14,6 +14,7 @@ from app.schemas.analysis import (
     CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse,
     ResetFromRequest, ApproveRequest,
     AddUserTargetRequest, AddUserTargetResponse,
+    AddUserCompoundRequest, AddUserCompoundResponse,
     InjectCompoundsRequest, InjectCompoundsResponse,
     InjectTargetsRequest, InjectTargetsResponse,
 )
@@ -744,6 +745,84 @@ async def inject_compounds(
     )
 
     return InjectCompoundsResponse(injected=len(validated), failed=failed)
+
+
+@router.post("/{analysis_id}/user-compounds", response_model=AddUserCompoundResponse, status_code=200)
+async def add_user_compound(
+    analysis_id: UUID,
+    body: AddUserCompoundRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Add a single compound to Stage 1 results (post-fetch curation). Validates via PubChem."""
+    import httpx
+    from integrations.pubchem_compound import validate_compound
+
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+    structure = body.smiles or body.inchi
+    async with httpx.AsyncClient(timeout=20.0) as client:
+        try:
+            validated = await validate_compound(structure, client)
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"PubChem validation failed: {str(e)}")
+
+    if not validated:
+        raise HTTPException(status_code=400, detail="Invalid compound structure: not found in PubChem")
+
+    # Merge into stage_1 compounds
+    stage1 = dict((run.stage_results or {}).get("stage_1") or {})
+    existing_ids = {c["compound_id"] for c in stage1.get("compounds", [])}
+    if validated["compound_id"] not in existing_ids:
+        stage1.setdefault("compounds", []).append({
+            "compound_id": validated["compound_id"],
+            "canonical_name": validated["canonical_name"],
+            "plant_ids": [],
+        })
+    stage1["compound_ids"] = [c["compound_id"] for c in stage1["compounds"]]
+    stage1["total_compounds"] = len(stage1["compounds"])
+    stage1["compound_count"] = len(stage1["compounds"])
+    stage1["user_modified"] = True
+
+    await analysis_repo.update_run_status(
+        session, analysis_id,
+        status=run.status,
+        stage_results={"stage_1": stage1},
+    )
+    return AddUserCompoundResponse(
+        compound_id=validated["compound_id"],
+        canonical_name=validated["canonical_name"],
+        smiles=validated.get("smiles"),
+    )
+
+
+@router.delete("/{analysis_id}/user-compounds/{compound_id}", status_code=200)
+async def remove_user_compound(
+    analysis_id: UUID,
+    compound_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Remove a compound from Stage 1 results by compound_id."""
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+    stage1 = dict((run.stage_results or {}).get("stage_1") or {})
+    stage1["compounds"] = [
+        c for c in stage1.get("compounds", []) if c["compound_id"] != compound_id
+    ]
+    stage1["compound_ids"] = [c["compound_id"] for c in stage1["compounds"]]
+    stage1["total_compounds"] = len(stage1["compounds"])
+    stage1["compound_count"] = len(stage1["compounds"])
+    stage1["user_modified"] = True
+
+    await analysis_repo.update_run_status(
+        session, analysis_id,
+        status=run.status,
+        stage_results={"stage_1": stage1},
+    )
+    return {"removed": compound_id}
 
 
 @router.post("/{analysis_id}/targets/user", response_model=AddUserTargetResponse, status_code=201)

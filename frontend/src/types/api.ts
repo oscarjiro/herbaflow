@@ -429,6 +429,17 @@ export interface AddUserTargetResponse {
   protein_name: string | null
 }
 
+export interface AddUserCompoundRequest {
+  smiles?: string
+  inchi?: string
+}
+
+export interface AddUserCompoundResponse {
+  compound_id: string
+  canonical_name: string
+  smiles: string | null
+}
+
 // T4.3: Manual compound input
 export interface InjectCompoundsResponse {
   injected: number

@@ -10,6 +10,8 @@ import type {
   ApproveRequest,
   AddUserTargetRequest,
   AddUserTargetResponse,
+  AddUserCompoundRequest,
+  AddUserCompoundResponse,
   InjectCompoundsResponse,
   InjectTargetsResponse,
 } from '@/types/api'
@@ -115,6 +117,30 @@ export const api = {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
       throw new Error(err.detail ?? 'Failed to remove disease target')
     }
+  },
+
+  async addUserCompound(analysisId: string, body: AddUserCompoundRequest): Promise<AddUserCompoundResponse> {
+    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/user-compounds`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail ?? 'Failed to add compound')
+    }
+    return res.json()
+  },
+
+  async removeUserCompound(analysisId: string, compoundId: string): Promise<{ removed: string }> {
+    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/user-compounds/${encodeURIComponent(compoundId)}`, {
+      method: 'DELETE',
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }))
+      throw new Error(err.detail ?? 'Failed to remove compound')
+    }
+    return res.json()
   },
 
   // T4.3: Inject manually-provided SMILES/InChI strings as stage 1+2 results

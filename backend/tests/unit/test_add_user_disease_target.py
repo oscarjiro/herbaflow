@@ -31,7 +31,7 @@ def test_add_disease_target_injects_entry():
     assert "EGFR" in genes
     egfr = next(t for t in result["targets"] if t["gene_symbol"] == "EGFR")
     assert egfr["source"] == "user_provided"
-    assert egfr["association_score"] == 1.0
+    assert egfr["score"] == 1.0
     assert egfr["disease_name"] == "Rheumatoid arthritis"
     assert egfr["protein_name"] is None
 

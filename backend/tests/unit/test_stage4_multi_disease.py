@@ -78,7 +78,7 @@ async def test_highest_score_wins_for_association_score():
         ):
             result = await stage4_disease_targets.run(run, config, session)
 
-    assert result["targets"][0]["association_score"] == 0.9
+    assert result["targets"][0]["score"] == 0.9
 
 
 async def test_disease_gene_symbols_by_disease_populated_correctly():
