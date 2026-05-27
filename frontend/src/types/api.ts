@@ -95,8 +95,12 @@ export type AnalysisStatus =
   | (string & {})
 
 export function isTerminalStatus(s: string): boolean {
-  // Only stop polling on genuinely terminal states.
-  // stage_N_complete is an INTERMEDIATE auto-mode state — do NOT treat as terminal.
+  // Only stop polling on genuinely terminal states:
+  //   - 'complete' or 'failed' (top-level)
+  //   - stage_N_rejected or stage_N_failed (stage-level errors)
+  // All other states (pending, stage_N_running, stage_N_complete,
+  // stage_N_awaiting_approval) are non-terminal — polling must continue.
+  if (!s || typeof s !== 'string') return false
   return (
     s === 'complete' ||
     s === 'failed' ||

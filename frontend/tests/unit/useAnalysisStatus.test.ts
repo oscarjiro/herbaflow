@@ -94,4 +94,16 @@ describe('isTerminalStatus', () => {
     expect(isTerminalStatus('stage_1_failed')).toBe(true)
     expect(isTerminalStatus('stage_8_failed')).toBe(true)
   })
+
+  it('returns false for pending', () => {
+    expect(isTerminalStatus('pending')).toBe(false)
+  })
+
+  it('returns false for empty string or invalid input', () => {
+    expect(isTerminalStatus('')).toBe(false)
+    // @ts-expect-error — testing runtime guard
+    expect(isTerminalStatus(null)).toBe(false)
+    // @ts-expect-error — testing runtime guard
+    expect(isTerminalStatus(undefined)).toBe(false)
+  })
 })
