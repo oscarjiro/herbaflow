@@ -8,7 +8,7 @@ import { DataSources } from '@/components/shared/DataSources'
 import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import { isSkippedStage } from '@/types/api'
-import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, PathwayTerm, PathwaySource, CommunityEnrichment } from '@/types/api'
+import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, Stage8GlobalEnrichment, PathwayTerm, PathwaySource, CommunityEnrichment } from '@/types/api'
 
 const DATA_SOURCES = [
   {
@@ -295,6 +295,15 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
   const communities: CommunityEnrichment[] = result.communities ?? []
   const hasCommunities = communities.length > 0
 
+  const globalEnrichment: Stage8GlobalEnrichment | undefined = result.global_enrichment
+  const globalTermsBySource: Record<PathwaySource, PathwayTerm[]> = {
+    'GO:BP': globalEnrichment?.go_bp ?? [],
+    'GO:MF': globalEnrichment?.go_mf ?? [],
+    'GO:CC': globalEnrichment?.go_cc ?? [],
+    'KEGG': globalEnrichment?.kegg ?? [],
+  }
+  const globalHubGenes = globalEnrichment?.hub_genes_queried ?? []
+
   const commTermsBySource = (comm: CommunityEnrichment): Record<PathwaySource, PathwayTerm[]> => ({
     'GO:BP': comm.go_bp ?? [],
     'GO:MF': comm.go_mf ?? [],
@@ -318,38 +327,65 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
         canRerun={status?.mode === 'guided'}
       />
 
-      <Tabs defaultValue={hasCommunities ? `community-${communities[0].community_id}` : 'GO:BP'}>
+      <Tabs defaultValue="global">
         <TabsList>
-          {hasCommunities ? (
-            <>
-              {communities.map((comm, idx) => (
-                <TabsTrigger key={`community-${comm.community_id}`} value={`community-${comm.community_id}`}>
-                  Community {idx + 1}
-                  <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
-                    {comm.gene_count}g
-                  </span>
-                </TabsTrigger>
-              ))}
-              <TabsTrigger value="overall">Overall</TabsTrigger>
-            </>
-          ) : (
-            <>
-              {SOURCES.map((src) => (
-                <TabsTrigger key={src} value={src}>
-                  {src}
-                  {termsBySource[src].length > 0 && (
-                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
-                      {termsBySource[src].length}
-                    </span>
-                  )}
-                </TabsTrigger>
-              ))}
-              <TabsTrigger value="bubble">Bubble</TabsTrigger>
-            </>
-          )}
+          {/* Global tab is always first and default */}
+          <TabsTrigger value="global">
+            Global
+            {globalEnrichment && (
+              <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                {globalHubGenes.length}g
+              </span>
+            )}
+          </TabsTrigger>
+
+          {/* Per-community tabs */}
+          {communities.map((comm, idx) => (
+            <TabsTrigger key={`community-${comm.community_id}`} value={`community-${comm.community_id}`}>
+              Community {idx + 1}
+              <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                {comm.gene_count}g
+              </span>
+            </TabsTrigger>
+          ))}
+
+          {/* Legacy per-source tabs (no communities) + bubble */}
+          {!hasCommunities && SOURCES.map((src) => (
+            <TabsTrigger key={src} value={src}>
+              {src}
+              {termsBySource[src].length > 0 && (
+                <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                  {termsBySource[src].length}
+                </span>
+              )}
+            </TabsTrigger>
+          ))}
+          {!hasCommunities && <TabsTrigger value="bubble">Bubble</TabsTrigger>}
         </TabsList>
 
-        {/* Community tabs (when communities data present) */}
+        {/* Global tab content */}
+        <TabsContent value="global">
+          {globalEnrichment ? (
+            <div className="mt-4 space-y-4">
+              <p className="text-xs text-hf-fg3 font-sans">
+                All {globalHubGenes.length} hub genes combined across all communities:{' '}
+                {globalHubGenes.join(', ')}
+              </p>
+              {SOURCES.map((src) => (
+                <div key={src}>
+                  <h4 className="text-xs font-medium text-hf-fg2 mb-2">{SOURCE_LABELS[src]}</h4>
+                  <PathwayChart terms={globalTermsBySource[src]} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4">
+              <EmptyState message="Global enrichment results not yet available" />
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Community tabs */}
         {communities.map((comm, idx) => {
           const commSources = commTermsBySource(comm)
           return (
@@ -370,20 +406,6 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
             </TabsContent>
           )
         })}
-
-        {/* Overall tab (shown as fallback when communities present) */}
-        {hasCommunities && (
-          <TabsContent value="overall">
-            <div className="mt-4 space-y-6">
-              {SOURCES.map((src) => (
-                <div key={src}>
-                  <h3 className="text-sm font-medium text-hf-fg2 mb-3">{SOURCE_LABELS[src]}</h3>
-                  <PathwayChart terms={termsBySource[src]} />
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-        )}
 
         {/* Source tabs (when no communities) */}
         {!hasCommunities && SOURCES.map((src) => (

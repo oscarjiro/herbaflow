@@ -412,6 +412,14 @@ export interface CommunityEnrichment {
   kegg: PathwayTerm[]
 }
 
+export interface Stage8GlobalEnrichment {
+  go_bp: PathwayTerm[]
+  go_mf: PathwayTerm[]
+  go_cc: PathwayTerm[]
+  kegg: PathwayTerm[]
+  hub_genes_queried: string[]
+}
+
 export interface Stage8Result {
   total_significant: number
   go_bp: PathwayTerm[]
@@ -420,6 +428,7 @@ export interface Stage8Result {
   kegg: PathwayTerm[]
   hub_genes_queried: string[]
   communities?: CommunityEnrichment[]
+  global_enrichment?: Stage8GlobalEnrichment
 }
 
 // ============================================================================
