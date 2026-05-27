@@ -9,7 +9,17 @@ def filter_compounds(
 ) -> dict:
     passed, failed, np_exceptions = [], [], []
 
+    # Core Lipinski properties that must exist for a compound to be evaluable.
+    # If every one of these is None the compound was never enriched from PubChem
+    # and cannot be shown to satisfy drug-likeness rules — it must fail.
+    _CORE_PROPS = ("molecular_weight", "logp", "hbond_donors", "hbond_acceptors")
+
     for c in compounds:
+        # All core properties absent — insufficient data, cannot pass.
+        if all(getattr(c, p) is None for p in _CORE_PROPS):
+            failed.append(c)
+            continue
+
         violations = []
 
         if c.molecular_weight is not None and c.molecular_weight > params.max_mw:

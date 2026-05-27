@@ -67,7 +67,43 @@ def test_veber_not_applied_when_disabled():
 
 
 def test_missing_mw_skips_mw_filter():
+    # Only MW is None but other properties are present — the compound has
+    # enough data to evaluate and should pass the remaining checks.
     compound = make_compound(molecular_weight=None)
     result = filter_compounds([compound], AdmeParams())
-    # Can't evaluate MW filter — compound passes
     assert len(result["passed"]) == 1
+
+
+def test_adme_compound_all_none_properties_fails():
+    """A compound with no ADME data should not auto-pass screening."""
+    compound = make_compound(
+        molecular_weight=None,
+        logp=None,
+        hbond_donors=None,
+        hbond_acceptors=None,
+        tpsa=None,
+        rotatable_bonds=None,
+        np_likeness_score=None,
+    )
+    result = filter_compounds([compound], AdmeParams())
+    assert result["passed"] == [], "all-None compound must not auto-pass"
+    assert result["np_exceptions"] == []
+    assert len(result["failed"]) == 1
+    assert result["failed"][0].compound_id == compound.compound_id
+
+
+def test_adme_compound_all_none_not_in_active_ids():
+    """All-None compound must not appear in any active (passed/np) ID set."""
+    compound = make_compound(
+        molecular_weight=None,
+        logp=None,
+        hbond_donors=None,
+        hbond_acceptors=None,
+        tpsa=None,
+        rotatable_bonds=None,
+        np_likeness_score=None,
+    )
+    result = filter_compounds([compound], AdmeParams())
+    cid = str(compound.compound_id)
+    active_ids = [str(c.compound_id) for c in result["passed"] + result["np_exceptions"]]
+    assert cid not in active_ids
