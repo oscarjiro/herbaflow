@@ -117,7 +117,7 @@ export function Stage6Panel({ stage, analysis, status, analysisId }: Stage6Panel
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'ppi-network.png'
+        a.download = `ppi-network-${analysisId}.png`
         a.click()
         URL.revokeObjectURL(url)
       })

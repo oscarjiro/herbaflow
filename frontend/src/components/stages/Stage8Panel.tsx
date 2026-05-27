@@ -1,3 +1,4 @@
+import React, { useRef } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StageHeader } from '@/components/shared/StageHeader'
@@ -42,7 +43,33 @@ interface ChartEntry {
   intersection_size: number
 }
 
-function PathwayChart({ terms }: { terms: PathwayTerm[] }) {
+function exportChartPng(containerEl: HTMLDivElement | null, filename: string) {
+  if (!containerEl) return
+  const svg = containerEl.querySelector('svg')
+  if (!svg) return
+  const svgData = new XMLSerializer().serializeToString(svg)
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const img = new Image()
+  img.onload = () => {
+    canvas.width = img.naturalWidth * 2
+    canvas.height = img.naturalHeight * 2
+    ctx.scale(2, 2)
+    ctx.drawImage(img, 0, 0)
+    canvas.toBlob((blob) => {
+      if (!blob) return
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = filename
+      link.click()
+      URL.revokeObjectURL(link.href)
+    })
+  }
+  img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`
+}
+
+function PathwayChart({ terms, chartRef }: { terms: PathwayTerm[]; chartRef?: React.RefObject<HTMLDivElement | null> }) {
   if (terms.length === 0) {
     return <EmptyState message="No significant pathways found for this category" />
   }
@@ -61,48 +88,61 @@ function PathwayChart({ terms }: { terms: PathwayTerm[] }) {
     }))
 
   return (
-    <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 24)}>
-      <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 60, bottom: 24, left: 8 }}>
-        <XAxis
-          type="number"
-          label={{ value: '-log₁₀(FDR)', position: 'insideBottom', offset: -12, fontSize: 11 }}
-          tick={{ fontSize: 10 }}
-        />
-        <YAxis
-          type="category"
-          dataKey="name"
-          width={200}
-          tick={{ fontSize: 10 }}
-        />
-        <ReferenceLine
-          x={1.301}
-          stroke="var(--hf-danger)"
-          strokeDasharray="4 2"
-          label={{ value: 'FDR=0.05', position: 'top', fontSize: 9, fill: 'var(--hf-danger)' }}
-        />
-        <Bar dataKey="value" fill="var(--hf-sage)" radius={[0, 2, 2, 0]} />
-        <Tooltip
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          formatter={(_value: unknown, _name: unknown, props: any) => {
-            const entry = props.payload as ChartEntry | undefined
-            return [
-              `FDR: ${entry?.fdr?.toExponential(2) ?? '—'}  |  genes: ${entry?.intersection_size ?? '—'}`,
-              entry?.term_name ?? '',
-            ]
-          }}
-          contentStyle={{
-            fontSize: '11px',
-            background: 'var(--hf-surface)',
-            border: '1px solid var(--hf-border)',
-            borderRadius: '4px',
-          }}
-        />
-      </BarChart>
-    </ResponsiveContainer>
+    <div ref={chartRef}>
+      <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 24)}>
+        <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 60, bottom: 24, left: 8 }}>
+          <XAxis
+            type="number"
+            label={{ value: '-log₁₀(FDR)', position: 'insideBottom', offset: -12, fontSize: 11 }}
+            tick={{ fontSize: 10 }}
+          />
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={200}
+            tick={{ fontSize: 10 }}
+          />
+          <ReferenceLine
+            x={1.301}
+            stroke="var(--hf-danger)"
+            strokeDasharray="4 2"
+            label={{ value: 'FDR=0.05', position: 'top', fontSize: 9, fill: 'var(--hf-danger)' }}
+          />
+          <Bar dataKey="value" fill="var(--hf-sage)" radius={[0, 2, 2, 0]} />
+          <Tooltip
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            formatter={(_value: unknown, _name: unknown, props: any) => {
+              const entry = props.payload as ChartEntry | undefined
+              return [
+                `FDR: ${entry?.fdr?.toExponential(2) ?? '—'}  |  genes: ${entry?.intersection_size ?? '—'}`,
+                entry?.term_name ?? '',
+              ]
+            }}
+            contentStyle={{
+              fontSize: '11px',
+              background: 'var(--hf-surface)',
+              border: '1px solid var(--hf-border)',
+              borderRadius: '4px',
+            }}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
 
 export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8PanelProps) {
+  const chartRefGoBp = useRef<HTMLDivElement | null>(null)
+  const chartRefGoMf = useRef<HTMLDivElement | null>(null)
+  const chartRefGoCc = useRef<HTMLDivElement | null>(null)
+  const chartRefKegg = useRef<HTMLDivElement | null>(null)
+  const chartRefs: Record<PathwaySource, React.RefObject<HTMLDivElement | null>> = {
+    'GO:BP': chartRefGoBp,
+    'GO:MF': chartRefGoMf,
+    'GO:CC': chartRefGoCc,
+    'KEGG': chartRefKegg,
+  }
+
   const rawResult = analysis?.stage_results[`stage_${stage}`]
   const result = rawResult as Stage8Result | null | undefined
 
@@ -165,8 +205,17 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
         {SOURCES.map((src) => (
           <TabsContent key={src} value={src}>
             <div className="mt-4">
-              <h3 className="text-sm font-medium text-hf-fg2 mb-3">{SOURCE_LABELS[src]}</h3>
-              <PathwayChart terms={termsBySource[src]} />
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-hf-fg2">{SOURCE_LABELS[src]}</h3>
+                <button
+                  type="button"
+                  onClick={() => exportChartPng(chartRefs[src].current, `enrichment-${src.toLowerCase().replace(':', '-')}-${analysisId}.png`)}
+                  className="rounded-sm border border-hf-border px-3 py-1.5 text-xs text-hf-fg2 hover:text-hf-fg1"
+                >
+                  Export PNG
+                </button>
+              </div>
+              <PathwayChart terms={termsBySource[src]} chartRef={chartRefs[src]} />
             </div>
           </TabsContent>
         ))}
