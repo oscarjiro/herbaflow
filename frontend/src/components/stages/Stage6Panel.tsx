@@ -122,7 +122,7 @@ export function Stage6Panel({ stage, analysis, status, analysisId }: Stage6Panel
         URL.revokeObjectURL(url)
       })
       .catch(() => { /* export failed silently */ })
-  }, [])
+  }, [analysisId])
 
   if (isSkippedStage(rawResult)) {
     return (

@@ -66,7 +66,7 @@ function exportChartPng(containerEl: HTMLDivElement | null, filename: string) {
       URL.revokeObjectURL(link.href)
     })
   }
-  img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`
+  img.src = URL.createObjectURL(new Blob([svgData], { type: 'image/svg+xml' }))
 }
 
 function PathwayChart({ terms, chartRef }: { terms: PathwayTerm[]; chartRef?: React.RefObject<HTMLDivElement | null> }) {
