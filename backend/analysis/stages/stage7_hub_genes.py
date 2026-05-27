@@ -29,7 +29,7 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
     try:
         eigenvector = nx.eigenvector_centrality(G, max_iter=1000, tol=1e-6)
     except nx.PowerIterationFailedConvergence:
-        eigenvector = {n: 0.0 for n in G.nodes}
+        eigenvector = nx.degree_centrality(G)
 
     degree_values = list(degree_centrality.values())
     bet_values = list(betweenness.values())
@@ -131,6 +131,8 @@ def compute_community_centrality(
 
         degree = nx.degree_centrality(subgraph)
         betweenness = nx.betweenness_centrality(subgraph, normalized=True)
+        # For disconnected subgraphs, closeness_centrality returns 0.0 for unreachable nodes.
+        # This is acceptable — isolated community members have no meaningful closeness.
         closeness = nx.closeness_centrality(subgraph)
         try:
             eigenvector = nx.eigenvector_centrality(subgraph, max_iter=500)

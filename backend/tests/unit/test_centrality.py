@@ -252,6 +252,22 @@ def test_per_community_centrality_no_community_assignments():
     assert community_hubs == {}
 
 
+def test_community_centrality_eigenvector_fallback():
+    """Bipartite graphs prevent eigenvector convergence — must fall back to degree centrality."""
+    # Complete bipartite graph K3,3 with community assignment
+    G = nx.complete_bipartite_graph(3, 3)
+    # Assign all nodes to community 0
+    gene_to_community = {n: 0 for n in G.nodes}
+
+    # Should NOT raise — must use degree fallback
+    result = compute_community_centrality(G, gene_to_community)
+    assert 0 in result
+    assert len(result[0]) == 6  # all 6 nodes returned
+    # All community_eigenvector values should be > 0 (degree fallback, not zeros)
+    for gene in result[0]:
+        assert gene['community_eigenvector'] > 0, "Fallback should use degree, not zeros"
+
+
 def test_stage7_run_includes_community_hubs():
     """run() result must contain community_hubs key."""
     import asyncio
