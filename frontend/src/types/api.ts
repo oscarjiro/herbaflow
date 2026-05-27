@@ -95,7 +95,13 @@ export type AnalysisStatus =
   | (string & {})
 
 export function isTerminalStatus(s: string): boolean {
-  return /complete$|failed$|rejected$/.test(s)
+  // Only stop polling on genuinely terminal states.
+  // stage_N_complete is an INTERMEDIATE auto-mode state — do NOT treat as terminal.
+  return (
+    s === 'complete' ||
+    s === 'failed' ||
+    /^stage_\d+_(rejected|failed)$/.test(s)
+  )
 }
 
 export interface CreateAnalysisRequest {
