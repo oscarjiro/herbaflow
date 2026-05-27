@@ -145,7 +145,9 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
         <div className="rounded-lg bg-hf-surface border border-hf-border p-4 flex flex-col gap-1">
           <div className="flex items-center gap-1">
             <span className="text-hf-fg2 text-sm">Jaccard Index</span>
-            <Info className="h-3.5 w-3.5 text-hf-fg3 cursor-help" title="Measures similarity between compound targets and disease targets. Formula: |overlap| / |union|. Range 0–1; higher = more overlap. Values above 0.1 with p < 0.05 are considered meaningful in network pharmacology (Hopkins, 2008)." />
+            <span title="Measures similarity between compound targets and disease targets. Formula: |overlap| / |union|. Range 0–1; higher = more overlap. Values above 0.1 with p < 0.05 are considered meaningful in network pharmacology (Hopkins, 2008).">
+              <Info className="h-3.5 w-3.5 text-hf-fg3 cursor-help" />
+            </span>
           </div>
           <span className="text-2xl font-display text-hf-fg1">
             {result.jaccard != null && !Number.isNaN(result.jaccard) ? result.jaccard.toFixed(3) : 'N/A'}
@@ -154,7 +156,9 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
         <div className="rounded-lg bg-hf-surface border border-hf-border p-4 flex flex-col gap-1">
           <div className="flex items-center gap-1">
             <span className="text-hf-fg2 text-sm">Fisher's Exact p-value</span>
-            <Info className="h-3.5 w-3.5 text-hf-fg3 cursor-help" title="Tests whether the observed overlap is greater than expected by chance, given ~20,000 human protein-coding genes as the universe. p < 0.05 indicates statistically significant overlap." />
+            <span title="Tests whether the observed overlap is greater than expected by chance, given ~20,000 human protein-coding genes as the universe. p < 0.05 indicates statistically significant overlap.">
+              <Info className="h-3.5 w-3.5 text-hf-fg3 cursor-help" />
+            </span>
           </div>
           <span className="text-2xl font-display text-hf-fg1">
             {result.p_value != null ? result.p_value.toExponential(2) : 'N/A'}
