@@ -10,14 +10,6 @@ import { z } from 'zod'
 // Primitives
 // ---------------------------------------------------------------------------
 
-/** A non-empty string trimmed to max 200 chars (analysis name). */
-export const analysisNameSchema = z
-  .string()
-  .min(1, 'Analysis name is required')
-  .max(200, 'Analysis name must be 200 characters or fewer')
-  .transform((v) => v.trim())
-  .refine((v) => v.length > 0, 'Analysis name cannot be blank')
-
 /** Analysis run mode (guided = step-by-step approval, auto = fully automated). */
 export const analysisModeSchema = z.enum(['guided', 'auto'])
 
@@ -119,8 +111,6 @@ export const injectTargetsSchema = z.object({
     .max(200, 'Maximum 200 targets allowed'),
 })
 
-// ---------------------------------------------------------------------------
-// Discriminated union for the full setup form
 // ---------------------------------------------------------------------------
 
 /**

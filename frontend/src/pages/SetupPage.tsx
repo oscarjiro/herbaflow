@@ -98,7 +98,7 @@ export default function SetupPage() {
   const mutation = useStartAnalysis()
 
   // Form state
-  const name = generateDefaultName()
+  const [name] = useState(() => generateDefaultName())
   const [plantIds, setPlantIds] = useState<string[]>([])
   const [diseaseIds, setDiseaseIds] = useState<string[]>([])
   const [mode, setMode] = useState<'guided' | 'auto'>('guided')
