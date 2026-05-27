@@ -199,3 +199,125 @@ def test_remove_user_compound_from_stage1():
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["removed"] == "11111111-1111-1111-1111-111111111111"
+
+
+# ---------------------------------------------------------------------------
+# Deduplication service unit tests
+# ---------------------------------------------------------------------------
+
+
+class TestDeduplicateCompoundsService:
+    """Tests for app.services.compound_dedup.deduplicate_compounds()."""
+
+    @pytest.mark.asyncio
+    async def test_same_cid_submitted_twice_keeps_one(self):
+        """Two inputs resolving to the same compound_id → only one in unique_new."""
+        compound = {
+            "compound_id": "cid-aaa",
+            "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "canonical_name": "aspirin",
+        }
+
+        async def mock_validate(structure, client):
+            return dict(compound)
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["CC(=O)Oc1ccccc1C(=O)O", "aspirin smiles variant"],
+                existing_ids=set(),
+            )
+
+        assert len(unique_new) == 1
+        assert len(duplicates) == 1
+
+    @pytest.mark.asyncio
+    async def test_compound_already_in_analysis_excluded(self):
+        """Compound whose compound_id is in existing_ids → in duplicates, not unique_new."""
+        compound = {
+            "compound_id": "cid-existing",
+            "inchikey": "EXISTING-INCHIKEY",
+            "canonical_name": "quercetin",
+        }
+
+        async def mock_validate(structure, client):
+            return dict(compound)
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["OC1=CC=C(C=C1)O"],
+                existing_ids={"cid-existing"},
+            )
+
+        assert len(unique_new) == 0
+        assert len(duplicates) == 1
+
+    @pytest.mark.asyncio
+    async def test_different_formats_same_cid_deduped(self):
+        """SMILES and a second input both resolving to same CID → only one kept."""
+        compound = {
+            "compound_id": "cid-bbb",
+            "inchikey": "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
+            "canonical_name": "caffeine",
+        }
+
+        async def mock_validate(structure, client):
+            return dict(compound)
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=[
+                    "Cn1cnc2c1c(=O)n(C)c(=O)n2C",  # SMILES
+                    "RYYVLZVUVIJVGH-UHFFFAOYSA-N",   # InChIKey (same compound)
+                ],
+                existing_ids=set(),
+            )
+
+        assert len(unique_new) == 1
+        assert len(duplicates) == 1
+
+    @pytest.mark.asyncio
+    async def test_response_always_contains_dedup_keys(self):
+        """InjectCompoundsResponse always exposes injected/duplicates_removed/duplicate_names."""
+        from app.schemas.analysis import InjectCompoundsResponse
+
+        resp = InjectCompoundsResponse(
+            injected=3,
+            failed=[],
+            duplicates_removed=2,
+            duplicate_names=["aspirin", "quercetin"],
+        )
+        assert resp.injected == 3
+        assert resp.duplicates_removed == 2
+        assert resp.duplicate_names == ["aspirin", "quercetin"]
+
+    @pytest.mark.asyncio
+    async def test_pubchem_unavailable_falls_back_to_string_dedup(self):
+        """PubChem returning None → string-based fallback dedup (lowercased, stripped)."""
+        async def mock_validate_unavailable(structure, client):
+            return None
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate_unavailable,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["Aspirin", "ASPIRIN", "  aspirin  "],
+                existing_ids=set(),
+            )
+
+        # All three normalize to "aspirin" — keep one
+        assert len(unique_new) == 1
+        assert len(duplicates) == 2

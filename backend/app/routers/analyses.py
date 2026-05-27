@@ -664,13 +664,17 @@ async def inject_compounds(
     stage 3 uses the inline target-lookup path (ChEMBL/PubChem by InChIKey).
 
     After injection the endpoint:
-    1. Stores stage_1 and stage_2 synthetic results in stage_results.
-    2. Sets _input_mode = "manual_compounds" in parameters.
+    1. Deduplicates submitted compounds by PubChem CID — within batch and against
+       any compounds already in stage_1 results.
+    2. Stores stage_1 and stage_2 synthetic results in stage_results.
+    3. Sets _input_mode = "manual_compounds" in parameters.
 
+    Returns a summary with injected/duplicates_removed/duplicate_names.
     The frontend is responsible for then starting the pipeline.
     """
     import httpx
     from integrations.pubchem_compound import validate_compounds_batch
+    from app.services.compound_dedup import deduplicate_compounds
 
     run = await analysis_repo.get_run(session, analysis_id)
     if run is None:
@@ -678,9 +682,32 @@ async def inject_compounds(
     if run.status not in ("pending", "failed"):
         raise HTTPException(status_code=409, detail="Analysis already running or complete")
 
+    # Collect compound IDs already present in this analysis (stage_1 results)
+    existing_stage1 = (run.stage_results or {}).get("stage_1") or {}
+    existing_ids: set[str] = set(existing_stage1.get("compound_ids", []))
+
+    # Deduplicate submitted inputs against each other and existing stage_1 compounds
+    try:
+        deduped_inputs, dedup_removed = await deduplicate_compounds(
+            submitted=body.compounds,
+            existing_ids=existing_ids,
+        )
+    except Exception as e:
+        logger.warning("Deduplication failed, proceeding with raw inputs: %s", e)
+        deduped_inputs = body.compounds
+        dedup_removed = []
+
+    if not deduped_inputs:
+        return InjectCompoundsResponse(
+            injected=0,
+            failed=[],
+            duplicates_removed=len(dedup_removed),
+            duplicate_names=dedup_removed,
+        )
+
     async with httpx.AsyncClient(timeout=20.0) as client:
         try:
-            validated, failed = await validate_compounds_batch(body.compounds, client)
+            validated, failed = await validate_compounds_batch(deduped_inputs, client)
         except ServiceUnavailableError as e:
             logger.error("PubChem batch validation error: %s", e, exc_info=True)
             raise HTTPException(status_code=503, detail=PUBCHEM_UNAVAILABLE)
@@ -689,7 +716,12 @@ async def inject_compounds(
             raise HTTPException(status_code=502, detail=PUBCHEM_UNAVAILABLE)
 
     if not validated:
-        return InjectCompoundsResponse(injected=0, failed=failed)
+        return InjectCompoundsResponse(
+            injected=0,
+            failed=failed,
+            duplicates_removed=len(dedup_removed),
+            duplicate_names=dedup_removed,
+        )
 
     # Build stage_1 synthetic result — mimics stage1_selection.run() output.
     # Stage 2 reads compound_ids from stage_1; stage 3 reads all_active_compound_ids
@@ -759,7 +791,12 @@ async def inject_compounds(
         {"_input_mode": "manual_compounds"},
     )
 
-    return InjectCompoundsResponse(injected=len(validated), failed=failed)
+    return InjectCompoundsResponse(
+        injected=len(validated),
+        failed=failed,
+        duplicates_removed=len(dedup_removed),
+        duplicate_names=dedup_removed,
+    )
 
 
 @router.post("/{analysis_id}/user-compounds", response_model=AddUserCompoundResponse, status_code=200)

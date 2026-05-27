@@ -211,8 +211,10 @@ class InjectCompoundsRequest(BaseModel):
 
 
 class InjectCompoundsResponse(BaseModel):
-    injected: int          # number successfully validated and stored
-    failed: list[str]      # raw input strings that failed PubChem validation
+    injected: int                           # number successfully validated and stored
+    failed: list[str]                       # raw input strings that failed PubChem validation
+    duplicates_removed: int = 0             # inputs dropped due to deduplication
+    duplicate_names: list[str] = Field(default_factory=list)  # the dropped raw inputs
 
 
 class AddUserCompoundRequest(BaseModel):
