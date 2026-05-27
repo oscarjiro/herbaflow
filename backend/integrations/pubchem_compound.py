@@ -101,6 +101,61 @@ def compute_adme(props: dict) -> dict:
     }
 
 
+async def _fetch_cid(
+    structure: str,
+    client: httpx.AsyncClient,
+) -> int | None:
+    """Resolve a SMILES or InChI string to a numeric PubChem CID.
+
+    Uses /compound/{type}/{structure}/cids/JSON for SMILES and
+    POST /compound/inchi/cids/JSON for InChI.
+
+    Returns the first CID as an integer, or None if not found / on error.
+    """
+    if _is_inchi(structure):
+        url = f"{PUBCHEM_BASE}/compound/inchi/cids/JSON"
+
+        async def _post_cid() -> httpx.Response:
+            r = await client.post(url, data={"inchi": structure})
+            if r.status_code in (400, 404):
+                return r
+            r.raise_for_status()
+            return r
+
+        try:
+            resp = await with_retry(_post_cid, service_name="PubChem")
+        except (ServiceUnavailableError, httpx.HTTPError) as e:
+            logger.warning("PubChem CID lookup failed for InChI input: %s", e)
+            return None
+    else:
+        encoded = quote(structure, safe="")
+        url = f"{PUBCHEM_BASE}/compound/smiles/{encoded}/cids/JSON"
+
+        async def _get_cid() -> httpx.Response:
+            r = await client.get(url)
+            if r.status_code in (400, 404):
+                return r
+            r.raise_for_status()
+            return r
+
+        try:
+            resp = await with_retry(_get_cid, service_name="PubChem")
+        except (ServiceUnavailableError, httpx.HTTPError) as e:
+            logger.warning("PubChem CID lookup failed for SMILES input %r: %s", structure[:50], e)
+            return None
+
+    if resp.status_code in (400, 404):
+        return None
+
+    try:
+        data = resp.json()
+    except Exception:
+        return None
+
+    cids = (data.get("IdentifierList") or {}).get("CID") or []
+    return cids[0] if cids else None
+
+
 async def validate_compound(
     structure: str,
     client: httpx.AsyncClient,
@@ -111,6 +166,7 @@ async def validate_compound(
 
     The returned dict has the following keys:
     - compound_id: deterministic UUID v5 string
+    - pubchem_cid: numeric PubChem CID as a string (e.g. "2244"), used for DB caching
     - inchikey: InChIKey string
     - iupac_name: IUPAC name (may be empty string)
     - molecular_formula: molecular formula
@@ -125,48 +181,34 @@ async def validate_compound(
     if not structure:
         return None
 
-    if _is_inchi(structure):
-        # PubChem requires InChI in the path but it can contain slashes — use POST
-        # For simplicity, use the URL-encoded GET approach with inchi type
-        url = f"{PUBCHEM_BASE}/compound/inchi/property/{_PROPERTY_LIST}/JSON"
+    # Step 1: resolve the numeric CID first.  This gives us a stable identifier
+    # for DB caching and lets us fetch properties by CID (avoiding URL-encoding
+    # issues with complex SMILES strings on the property path).
+    cid = await _fetch_cid(structure, client)
+    if cid is None:
+        # Compound not in PubChem — cannot validate
+        return None
 
-        async def _post_inchi() -> httpx.Response:
-            r = await client.post(url, data={"inchi": structure})
-            if r.status_code in (400, 404):
-                return r  # caller checks non-retriable client errors
-            r.raise_for_status()
+    # Step 2: fetch properties by CID (always succeeds if CID is valid)
+    url = f"{PUBCHEM_BASE}/compound/cid/{cid}/property/{_PROPERTY_LIST}/JSON"
+
+    async def _get_props() -> httpx.Response:
+        r = await client.get(url)
+        if r.status_code in (400, 404):
             return r
+        r.raise_for_status()
+        return r
 
-        try:
-            resp = await with_retry(_post_inchi, service_name="PubChem")
-        except ServiceUnavailableError as e:
-            logger.error("PubChem unavailable during compound validation: %s", e)
-            return None
-        except httpx.HTTPError as e:
-            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
-            return None
-    else:
-        # Treat as SMILES
-        encoded = quote(structure, safe="")
-        url = f"{PUBCHEM_BASE}/compound/smiles/{encoded}/property/{_PROPERTY_LIST}/JSON"
+    try:
+        resp = await with_retry(_get_props, service_name="PubChem")
+    except ServiceUnavailableError as e:
+        logger.error("PubChem unavailable during compound validation: %s", e)
+        return None
+    except httpx.HTTPError as e:
+        logger.warning("PubChem property fetch failed for CID %s: %s", cid, e)
+        return None
 
-        async def _get_smiles() -> httpx.Response:
-            r = await client.get(url)
-            if r.status_code in (400, 404):
-                return r  # caller checks non-retriable client errors
-            r.raise_for_status()
-            return r
-
-        try:
-            resp = await with_retry(_get_smiles, service_name="PubChem")
-        except ServiceUnavailableError as e:
-            logger.error("PubChem unavailable during compound validation: %s", e)
-            return None
-        except httpx.HTTPError as e:
-            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
-            return None
-
-    if resp.status_code == 404 or resp.status_code == 400:
+    if resp.status_code in (400, 404):
         return None
 
     try:
@@ -192,6 +234,7 @@ async def validate_compound(
 
     return {
         "compound_id": compound_id,
+        "pubchem_cid": str(cid),  # string to match existing cache data conventions
         "inchikey": inchikey,
         "iupac_name": iupac_name,
         "molecular_formula": molecular_formula,

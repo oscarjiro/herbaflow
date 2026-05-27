@@ -2,10 +2,16 @@
 
 Tests PubChem validation and ADME computation without real HTTP calls.
 Uses unittest.mock to mock httpx responses (avoids pytest-httpx loop-scope issues).
+
+API flow (two-step):
+  1. GET /compound/smiles/{smiles}/cids/JSON  (or POST /compound/inchi/cids/JSON for InChI)
+     → {"IdentifierList": {"CID": [2244]}}
+  2. GET /compound/cid/{cid}/property/{props}/JSON
+     → {"PropertyTable": {"Properties": [...]}}
 """
 import json
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch, call
 import httpx
 
 from integrations.pubchem_compound import (
@@ -21,12 +27,15 @@ from integrations.pubchem_compound import (
 _ASPIRIN_SMILES = "CC(=O)Oc1ccccc1C(=O)O"
 _ASPIRIN_INCHI = "InChI=1S/C9H8O4/c1-6(10)13-8-5-3-2-4-7(8)9(11)12/h2-5H,1H3,(H,11,12)"
 _ASPIRIN_INCHIKEY = "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+_ASPIRIN_CID = 2244
+
+_PUBCHEM_CIDS = {"IdentifierList": {"CID": [_ASPIRIN_CID]}}
 
 _PUBCHEM_PROPERTIES = {
     "PropertyTable": {
         "Properties": [
             {
-                "CID": 2244,
+                "CID": _ASPIRIN_CID,
                 "IUPACName": "2-acetoxybenzoic acid",
                 "MolecularFormula": "C9H8O4",
                 "MolecularWeight": 180.16,
@@ -71,9 +80,17 @@ def _make_404() -> MagicMock:
 
 @pytest.mark.asyncio
 async def test_smiles_validation_valid_compound():
-    """A valid SMILES string resolves to a compound dict with expected fields."""
+    """A valid SMILES string resolves to a compound dict with expected fields.
+
+    Two GET calls are made:
+      call 1: /compound/smiles/{smiles}/cids/JSON     → CID list
+      call 2: /compound/cid/{cid}/property/{props}/JSON → properties
+    """
     mock_client = AsyncMock(spec=httpx.AsyncClient)
-    mock_client.get = AsyncMock(return_value=_make_response(_PUBCHEM_PROPERTIES))
+    mock_client.get = AsyncMock(side_effect=[
+        _make_response(_PUBCHEM_CIDS),        # CID lookup
+        _make_response(_PUBCHEM_PROPERTIES),  # property fetch by CID
+    ])
 
     result = await validate_compound(_ASPIRIN_SMILES, mock_client)
 
@@ -86,10 +103,14 @@ async def test_smiles_validation_valid_compound():
     assert result["plant_ids"] == []
     # compound_id must be a deterministic UUID v5
     assert result["compound_id"] == make_compound_id(_ASPIRIN_INCHIKEY)
+    # pubchem_cid must be populated (critical for DB caching)
+    assert result["pubchem_cid"] == str(_ASPIRIN_CID)
     # ADME fields present
     assert "adme_pass" in result
     assert "lipinski_pass" in result
     assert result["lipinski_pass"] is True  # MW=180, XLogP=1.2, HBD=1, HBA=4 → pass
+    # Two GET calls were made (CID + properties)
+    assert mock_client.get.call_count == 2
 
 
 # ---------------------------------------------------------------------------
@@ -98,34 +119,41 @@ async def test_smiles_validation_valid_compound():
 
 @pytest.mark.asyncio
 async def test_inchi_validation_valid_compound():
-    """A valid InChI string resolves to a compound dict (uses POST for InChI inputs)."""
+    """A valid InChI string resolves to a compound dict.
+
+    CID lookup uses POST (InChI path); property fetch uses GET (by CID).
+    """
     mock_client = AsyncMock(spec=httpx.AsyncClient)
-    mock_client.post = AsyncMock(return_value=_make_response(_PUBCHEM_PROPERTIES))
+    mock_client.post = AsyncMock(return_value=_make_response(_PUBCHEM_CIDS))
+    mock_client.get = AsyncMock(return_value=_make_response(_PUBCHEM_PROPERTIES))
 
     result = await validate_compound(_ASPIRIN_INCHI, mock_client)
 
     assert result is not None
     assert result["inchikey"] == _ASPIRIN_INCHIKEY
     assert result["compound_id"] == make_compound_id(_ASPIRIN_INCHIKEY)
+    assert result["pubchem_cid"] == str(_ASPIRIN_CID)
     assert result["lipinski_pass"] is True
-    # Confirm POST was called (InChI path), not GET
+    # POST for CID lookup (InChI path), GET for property fetch
     mock_client.post.assert_called_once()
-    mock_client.get.assert_not_called()
+    mock_client.get.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
-# Test 3: HTTP 404 → compound marked as failed (returns None)
+# Test 3: HTTP 404 on CID lookup → compound marked as failed (returns None)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_http_404_returns_none():
-    """A 404 response from PubChem means the compound is invalid — returns None."""
+    """A 404 on the CID lookup means the compound is invalid — returns None immediately."""
     mock_client = AsyncMock(spec=httpx.AsyncClient)
     mock_client.get = AsyncMock(return_value=_make_404())
 
     result = await validate_compound("not_a_real_smiles", mock_client)
 
     assert result is None
+    # Only one GET call (CID lookup) — property fetch is never reached
+    assert mock_client.get.call_count == 1
 
 
 # ---------------------------------------------------------------------------

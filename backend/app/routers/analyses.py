@@ -706,6 +706,7 @@ async def inject_compounds(
                 failed=[],
                 duplicates_removed=len(dedup_removed),
                 duplicate_names=dedup_removed,
+                cached=0,
             )
 
         try:
@@ -723,6 +724,7 @@ async def inject_compounds(
             failed=failed,
             duplicates_removed=len(dedup_removed),
             duplicate_names=dedup_removed,
+            cached=0,
         )
 
     # Cache canonicalized compounds to DB for future pipeline reuse.
