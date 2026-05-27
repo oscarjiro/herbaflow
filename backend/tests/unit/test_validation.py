@@ -18,6 +18,7 @@ from app.schemas.analysis import (
     HARD_CAP_PLANTS,
     HARD_CAP_MANUAL_COMPOUNDS,
     HARD_CAP_MANUAL_TARGETS,
+    HARD_CAP_DISEASE_TARGETS,
 )
 
 
@@ -383,9 +384,9 @@ class TestInputSizeHardCaps:
     """plant_ids / compounds / targets must be rejected above their hard caps.
 
     Hard caps are literature-based (NP study scales):
-      Plants:    max HARD_CAP_PLANTS   (50)
-      Compounds: max HARD_CAP_MANUAL_COMPOUNDS (500)
-      Targets:   max HARD_CAP_MANUAL_TARGETS   (300)
+      Plants:    max HARD_CAP_PLANTS            (20)  — Li S et al. (2014); Jiang Y et al. (2021)
+      Compounds: max HARD_CAP_MANUAL_COMPOUNDS  (5000) — Zhou Y et al. (2019); 20 plants × ~250 cpds
+      Targets:   max HARD_CAP_MANUAL_TARGETS    (5000) — Finan C et al. (2017) druggable proteome
     """
 
     # --- plant_ids ---
@@ -460,3 +461,43 @@ class TestInputSizeHardCaps:
         """Empty targets list must fail (min_length=1)."""
         with pytest.raises(ValidationError):
             InjectTargetsRequest(targets=[])
+
+
+# ---------------------------------------------------------------------------
+# _injected_disease_targets — hard cap via HARD_CAP_DISEASE_TARGETS
+# ---------------------------------------------------------------------------
+
+class TestInjectedDiseaseTargetsCap:
+    """_injected_disease_targets in CreateAnalysisRequest.parameters must be
+    rejected above HARD_CAP_DISEASE_TARGETS.
+
+    Disease targets from manual disease input (diseaseInputMode=manual_targets)
+    are passed as parameters._injected_disease_targets. The cap mirrors the
+    upper range of Open Targets single-disease associations (Ochoa et al. 2021).
+    """
+
+    def test_over_hard_cap_rejected(self):
+        """_injected_disease_targets exceeding HARD_CAP_DISEASE_TARGETS must fail."""
+        too_many = [f"GENE{i}" for i in range(HARD_CAP_DISEASE_TARGETS + 1)]
+        with pytest.raises(ValidationError, match="_injected_disease_targets"):
+            CreateAnalysisRequest(**_create({
+                "_injected_disease_targets": too_many,
+            }))
+
+    def test_at_hard_cap_accepted(self):
+        """_injected_disease_targets exactly at HARD_CAP_DISEASE_TARGETS must pass."""
+        at_cap = [f"GENE{i}" for i in range(HARD_CAP_DISEASE_TARGETS)]
+        req = CreateAnalysisRequest(**_create({
+            "_injected_disease_targets": at_cap,
+        }))
+        assert len(req.parameters["_injected_disease_targets"]) == HARD_CAP_DISEASE_TARGETS
+
+    def test_absent_key_accepted(self):
+        """Missing _injected_disease_targets (standard disease mode) must pass."""
+        req = CreateAnalysisRequest(**_create({}))
+        assert "_injected_disease_targets" not in (req.parameters or {})
+
+    def test_empty_list_accepted(self):
+        """Empty _injected_disease_targets list must pass (validation deferred to Stage 4)."""
+        req = CreateAnalysisRequest(**_create({"_injected_disease_targets": []}))
+        assert req.parameters["_injected_disease_targets"] == []

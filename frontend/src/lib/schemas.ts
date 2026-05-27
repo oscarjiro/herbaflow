@@ -9,19 +9,29 @@ import { z } from 'zod'
 // ---------------------------------------------------------------------------
 // Input size limits — mirrors backend HARD_CAP_* / SOFT_CAP_* constants
 // Based on published network pharmacology study scales:
-//   Plants:    Li S et al. (2014) Evid Based Complement Alternat Med
-//   Compounds: Zhou Y et al. (2019) Evid Based Complement Alternat Med
-//   Targets:   iPrimeTarget (Luo et al. 2024) and Open Targets dataset scales
+//   Plants:    90%+ of NP studies ≤ 20 herbs; Indonesian jamu formulas 3–15 plants.
+//              Li S et al. (2014) Evid Based Complement Alternat Med;
+//              Jiang Y et al. (2021) systematic review of TCM-NP studies.
+//   Compounds: 20 plants × ~250 KNApSAcK compounds/plant ≈ 5,000 pre-ADME ceiling.
+//              Zhou Y et al. (2019) Evid Based Complement Alternat Med.
+//   Targets (compound-side): covers entire human druggable proteome (~4,719 proteins).
+//              Finan C et al. (2017) Sci Transl Med. Targets overlap with disease
+//              targets at Stage 5; STRING-DB receives the intersection only.
+//              Szklarczyk D et al. (2023) STRING v12; Traag VA et al. (2019) Sci Rep.
+//   Targets (disease-side): Open Targets single-disease associations 200–2,000.
+//              Ochoa et al. (2021) Nucleic Acids Res; Piñero et al. (2020) Nucleic Acids Res.
 // ---------------------------------------------------------------------------
 
 // Hard caps enforced by backend Pydantic validation (max_length); requests exceeding these return HTTP 422.
-export const HARD_CAP_PLANTS = 50
-export const HARD_CAP_MANUAL_COMPOUNDS = 500
-export const HARD_CAP_MANUAL_TARGETS = 300
+export const HARD_CAP_PLANTS = 20
+export const HARD_CAP_MANUAL_COMPOUNDS = 5000
+export const HARD_CAP_MANUAL_TARGETS = 5000
+export const HARD_CAP_DISEASE_TARGETS = 2000
 // Soft caps: planned for UI warnings (yellow highlight when approaching the hard cap).
-export const SOFT_CAP_PLANTS = 20
-export const SOFT_CAP_MANUAL_COMPOUNDS = 100
-export const SOFT_CAP_MANUAL_TARGETS = 100
+export const SOFT_CAP_PLANTS = 10
+export const SOFT_CAP_MANUAL_COMPOUNDS = 1000
+export const SOFT_CAP_MANUAL_TARGETS = 500
+export const SOFT_CAP_DISEASE_TARGETS = 500
 
 // ---------------------------------------------------------------------------
 // Primitives
@@ -85,7 +95,7 @@ function diseaseIdsField(diseaseInputMode: 'disease' | 'manual_targets') {
 /** Require disease_targets when diseaseInputMode is 'manual_targets'. */
 function diseaseTargetsField(diseaseInputMode: 'disease' | 'manual_targets') {
   return diseaseInputMode === 'manual_targets'
-    ? z.array(z.string().min(1)).min(1, 'Enter at least one disease target').max(HARD_CAP_MANUAL_TARGETS, `Maximum ${HARD_CAP_MANUAL_TARGETS} targets`)
+    ? z.array(z.string().min(1)).min(1, 'Enter at least one disease target').max(HARD_CAP_DISEASE_TARGETS, `Maximum ${HARD_CAP_DISEASE_TARGETS} targets`)
     : z.array(z.string()).optional()
 }
 

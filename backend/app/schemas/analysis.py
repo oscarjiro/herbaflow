@@ -8,16 +8,28 @@ from typing import Any, Literal
 STRING_CONFIDENCE_PRESETS = {0.15, 0.40, 0.70, 0.90}
 
 # Input size limits — based on published network pharmacology study scales.
-# Most NP studies use 1–20 plants (rarely > 50); compound pools after ADME are
-# typically 10–500; disease target sets from databases are typically 50–500.
-# References: Li S et al. (2014) Evid Based Complement Alternat Med;
-#             Zhou Y et al. (2019) Evid Based Complement Alternat Med.
-SOFT_CAP_PLANTS = 20
-HARD_CAP_PLANTS = 50
-SOFT_CAP_MANUAL_COMPOUNDS = 100
-HARD_CAP_MANUAL_COMPOUNDS = 500
-SOFT_CAP_MANUAL_TARGETS = 100
-HARD_CAP_MANUAL_TARGETS = 300
+# Plants:    90%+ of NP studies use ≤ 20 herbs; Indonesian jamu formulas 3–15 plants.
+#            Li S et al. (2014) Evid Based Complement Alternat Med;
+#            Jiang Y et al. (2021) systematic review of TCM-NP studies.
+# Compounds: 20 plants × ~250 KNApSAcK compounds/plant ≈ 5,000 pre-ADME — internal
+#            consistency ceiling. Zhou Y et al. (2019) Evid Based Complement Alternat Med.
+# Targets (compound-side): Covers the entire human druggable proteome (~4,719 proteins;
+#            Finan C et al. (2017) Sci Transl Med). Compound targets intersect disease
+#            targets at Stage 5 before reaching STRING-DB, so STRING input is the overlap
+#            (typically 50–500 genes), not the raw target count.
+#            Szklarczyk D et al. (2023) STRING v12, Nucleic Acids Res;
+#            Traag VA et al. (2019) Leiden algorithm, Sci Rep.
+# Targets (disease-side): Open Targets single-disease associations 200–2,000;
+#            Ochoa et al. (2021) Nucleic Acids Res (Open Targets Platform);
+#            Piñero et al. (2020) Nucleic Acids Res (DisGeNET v7).
+SOFT_CAP_PLANTS = 10
+HARD_CAP_PLANTS = 20
+SOFT_CAP_MANUAL_COMPOUNDS = 1000
+HARD_CAP_MANUAL_COMPOUNDS = 5000
+SOFT_CAP_MANUAL_TARGETS = 500
+HARD_CAP_MANUAL_TARGETS = 5000
+SOFT_CAP_DISEASE_TARGETS = 500
+HARD_CAP_DISEASE_TARGETS = 2000
 
 
 def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -69,6 +81,13 @@ def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
     comm_res = ppi.get("community_resolution")
     if comm_res is not None and not (0.1 <= comm_res <= 3.0):
         errors.append("ppi.community_resolution must be in [0.1, 3.0]")
+
+    injected_disease = params.get("_injected_disease_targets")
+    if injected_disease is not None and len(injected_disease) > HARD_CAP_DISEASE_TARGETS:
+        errors.append(
+            f"_injected_disease_targets: at most {HARD_CAP_DISEASE_TARGETS} disease targets allowed "
+            f"(OpenTargets dataset scale; Ochoa et al. 2021 Nucleic Acids Res)"
+        )
 
     if errors:
         raise ValueError("; ".join(errors))
