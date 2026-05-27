@@ -1,8 +1,21 @@
 import { render, screen } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { isSkippedStage } from '@/types/api'
 import { Stage1Panel } from '@/components/stages/Stage1Panel'
 import { getStageStatus } from '@/components/pipeline/PipelineSidebar'
 import type { AnalysisRunResponse, AnalysisStatusResponse } from '@/types/api'
+
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
+}
+
+function renderWithQuery(ui: React.ReactElement) {
+  return render(
+    <QueryClientProvider client={makeQueryClient()}>{ui}</QueryClientProvider>
+  )
+}
 
 // ─── isSkippedStage type guard ────────────────────────────────────────────────
 
@@ -61,7 +74,7 @@ describe('Stage1Panel — skipped stage', () => {
   }
 
   it('renders SkippedStageNotice when stage_result is skipped', () => {
-    render(
+    renderWithQuery(
       <Stage1Panel
         stage={1}
         analysis={baseAnalysis}
@@ -75,7 +88,7 @@ describe('Stage1Panel — skipped stage', () => {
   })
 
   it('does not render the normal compound table when stage is skipped', () => {
-    render(
+    renderWithQuery(
       <Stage1Panel
         stage={1}
         analysis={baseAnalysis}
