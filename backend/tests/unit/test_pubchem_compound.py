@@ -189,3 +189,57 @@ def test_compute_adme_lipinski_fail_logp():
 
     assert result["lipinski_pass"] is False
     assert result["adme_pass"] is False
+
+
+# ---------------------------------------------------------------------------
+# Test 7: String properties (as returned by PubChem REST API) — must coerce
+# ---------------------------------------------------------------------------
+
+def test_compute_adme_string_properties():
+    """PubChem REST API returns numeric values as strings — must coerce before comparison."""
+    props = {
+        "MolecularWeight": "342.43",  # string, as returned by PubChem REST
+        "XLogP": "3.2",
+        "HBondDonorCount": "2",
+        "HBondAcceptorCount": "5",
+        "RotatableBondCount": "4",
+    }
+    result = compute_adme(props)
+    assert result["lipinski_pass"] is True
+    assert result["mw"] == pytest.approx(342.43)
+
+
+# ---------------------------------------------------------------------------
+# Test 8: None properties — must return insufficient_data=True, not auto-pass
+# ---------------------------------------------------------------------------
+
+def test_compute_adme_none_properties():
+    """When PubChem returns None for a property, result must be 'insufficient_data'."""
+    props = {
+        "MolecularWeight": None,
+        "XLogP": None,
+        "HBondDonorCount": None,
+        "HBondAcceptorCount": None,
+        "RotatableBondCount": None,
+    }
+    result = compute_adme(props)
+    assert result["adme_pass"] is False
+    assert result["insufficient_data"] is True
+
+
+# ---------------------------------------------------------------------------
+# Test 9: Failing Lipinski with string properties
+# ---------------------------------------------------------------------------
+
+def test_compute_adme_failing_lipinski():
+    """Compound exceeding Lipinski rules must fail."""
+    props = {
+        "MolecularWeight": "600.0",
+        "XLogP": "6.0",
+        "HBondDonorCount": "3",
+        "HBondAcceptorCount": "8",
+        "RotatableBondCount": "5",
+    }
+    result = compute_adme(props)
+    assert result["lipinski_pass"] is False
+    assert result["adme_pass"] is False

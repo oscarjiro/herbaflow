@@ -34,17 +34,55 @@ def make_compound_id(inchikey: str) -> str:
 def compute_adme(props: dict) -> dict:
     """Compute ADME/Lipinski criteria from PubChem property values.
 
-    Uses Lipinski's Rule of Five:
-    - MW <= 500
-    - XLogP <= 5
-    - HBD <= 5
-    - HBA <= 10
+    PubChem REST API returns numeric values as strings. This function
+    coerces all values to float/int before comparison.
+
+    Returns dict with 'insufficient_data: True' when all key properties are None.
+    A compound with no ADME data should NOT automatically pass Lipinski filters.
     """
-    mw = props.get("MolecularWeight", 999)
-    xlogp = props.get("XLogP", 99)
-    hbd = props.get("HBondDonorCount", 99)
-    hba = props.get("HBondAcceptorCount", 99)
-    rotatable = props.get("RotatableBondCount", 99)
+    def _float(val, default: float) -> float | None:
+        if val is None:
+            return None
+        try:
+            return float(val)
+        except (TypeError, ValueError):
+            return default
+
+    def _int(val, default: int) -> int | None:
+        if val is None:
+            return None
+        try:
+            return int(float(val))
+        except (TypeError, ValueError):
+            return default
+
+    mw = _float(props.get("MolecularWeight"), 999.0)
+    xlogp = _float(props.get("XLogP"), 99.0)
+    hbd = _int(props.get("HBondDonorCount"), 99)
+    hba = _int(props.get("HBondAcceptorCount"), 99)
+    rotatable = _int(props.get("RotatableBondCount"), 99)
+
+    # If all key ADME properties are None, compound has no data — do not auto-pass
+    key_props = [mw, xlogp, hbd, hba]
+    insufficient_data = all(v is None for v in key_props)
+
+    if insufficient_data:
+        return {
+            "mw": None,
+            "xlogp": None,
+            "hbd": None,
+            "hba": None,
+            "rotatable_bonds": rotatable,
+            "lipinski_pass": False,
+            "adme_pass": False,
+            "insufficient_data": True,
+        }
+
+    # Use 999/99 as sentinel defaults for missing individual properties
+    mw = mw if mw is not None else 999.0
+    xlogp = xlogp if xlogp is not None else 99.0
+    hbd = hbd if hbd is not None else 99
+    hba = hba if hba is not None else 99
 
     lipinski_pass = mw <= 500 and xlogp <= 5 and hbd <= 5 and hba <= 10
 
@@ -55,7 +93,8 @@ def compute_adme(props: dict) -> dict:
         "hba": hba,
         "rotatable_bonds": rotatable,
         "lipinski_pass": lipinski_pass,
-        "adme_pass": lipinski_pass,  # simplified: ADME pass == Lipinski pass
+        "adme_pass": lipinski_pass,
+        "insufficient_data": False,
     }
 
 
