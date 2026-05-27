@@ -10,9 +10,12 @@ router = APIRouter(prefix="/diseases", tags=["diseases"])
 @router.get("", response_model=list[DiseaseResponse])
 async def list_diseases(session: AsyncSession = Depends(get_session)):
     diseases = await disease_repo.list_diseases(session)
-    aliases = await disease_repo.get_aliases_by_disease_ids(
-        session, [d.disease_id for d in diseases]
-    )
+    try:
+        aliases = await disease_repo.get_aliases_by_disease_ids(
+            session, [d.disease_id for d in diseases]
+        )
+    except Exception:
+        aliases = {}
     return [
         DiseaseResponse(**d.model_dump(), disease_aliases=aliases.get(d.disease_id, []))
         for d in diseases
@@ -24,7 +27,10 @@ async def get_disease(disease_id: str, session: AsyncSession = Depends(get_sessi
     disease = await disease_repo.get_disease_by_id(session, disease_id)
     if not disease:
         raise HTTPException(status_code=404, detail="Disease not found")
-    aliases = await disease_repo.get_aliases_by_disease_ids(session, [disease_id])
+    try:
+        aliases = await disease_repo.get_aliases_by_disease_ids(session, [disease_id])
+    except Exception:
+        aliases = {}
     return DiseaseResponse(
         **disease.model_dump(), disease_aliases=aliases.get(disease_id, [])
     )
