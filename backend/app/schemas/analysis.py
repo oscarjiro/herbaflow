@@ -215,6 +215,7 @@ class InjectCompoundsResponse(BaseModel):
     failed: list[str]                       # raw input strings that failed PubChem validation
     duplicates_removed: int = 0             # inputs dropped due to deduplication
     duplicate_names: list[str] = Field(default_factory=list)  # the dropped raw inputs
+    cached: int = 0                         # compounds persisted to DB cache (have PubChem CID)
 
 
 class AddUserCompoundRequest(BaseModel):

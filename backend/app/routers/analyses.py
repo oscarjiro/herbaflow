@@ -725,6 +725,11 @@ async def inject_compounds(
             duplicate_names=dedup_removed,
         )
 
+    # Cache canonicalized compounds to DB for future pipeline reuse.
+    # Non-fatal: if caching fails, log a warning and continue.
+    from app.services.compound_cache import cache_validated_compounds
+    cached_count = await cache_validated_compounds(validated, session)
+
     # Build stage_1 synthetic result — mimics stage1_selection.run() output.
     # Stage 2 reads compound_ids from stage_1; stage 3 reads all_active_compound_ids
     # from stage_2. We populate both so the chain works unchanged.
@@ -798,6 +803,7 @@ async def inject_compounds(
         failed=failed,
         duplicates_removed=len(dedup_removed),
         duplicate_names=dedup_removed,
+        cached=cached_count,
     )
 
 
