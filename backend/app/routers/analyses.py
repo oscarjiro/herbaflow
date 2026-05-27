@@ -794,10 +794,15 @@ async def inject_compounds(
         status=run.status,  # leave status unchanged — pipeline not started yet
         stage_results={"stage_1": stage1_result, "stage_2": stage2_result},
     )
+    # Persist manual_compound_ids so stage2_adme.run() can identify them and
+    # apply the ADME bypass when apply_adme_to_manual=False.  Merge with any
+    # IDs already present (idempotent — repeated inject calls accumulate IDs).
+    existing_manual_ids: list[str] = (run.parameters or {}).get("manual_compound_ids", [])
+    merged_manual_ids = list(dict.fromkeys(existing_manual_ids + compound_ids))
     await analysis_repo.merge_run_parameters(
         session,
         analysis_id,
-        {"_input_mode": "manual_compounds"},
+        {"_input_mode": "manual_compounds", "manual_compound_ids": merged_manual_ids},
     )
 
     return InjectCompoundsResponse(
@@ -1112,6 +1117,8 @@ async def inject_targets(
         for t in existing_stage3.get("targets", [])
         if t.get("uniprot_id")
     }
+    # Ensure existing_ids is normalized to uppercase for consistent dedup
+    existing_ids = {key.upper() for key in existing_ids if key}
 
     # Convert flat string inputs to dicts for the dedup service.
     # Each input is either a UniProt accession or a gene symbol.
@@ -1147,15 +1154,12 @@ async def inject_targets(
         )
 
     # Validate each deduplicated target via UniProt
-    injected_targets: list[dict] = []
-    failed: list[str] = []
-
-    async def _validate_one(entry: dict):
+    async def _validate_one(entry: dict) -> tuple[dict | None, str | None]:
+        """Validate one target entry. Returns (target_dict, error_label) — one is None."""
         raw = entry.get("_raw", entry.get("gene_symbol") or entry.get("uniprot_id") or "")
         raw_stripped = raw.strip() if isinstance(raw, str) else ""
         if not raw_stripped:
-            failed.append(raw)
-            return
+            return None, raw
         is_accession = bool(UNIPROT_ACCESSION_RE.match(raw_stripped))
         try:
             info = await validate_human_target(
@@ -1165,11 +1169,10 @@ async def inject_targets(
         except ServiceUnavailableError:
             raise  # propagate to inject_targets endpoint → 503
         except ValueError:
-            failed.append(raw_stripped)
-            return
+            return None, raw_stripped
 
         target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
-        injected_targets.append({
+        return {
             "target_id": target_id,
             "gene_symbol": info.gene_symbol,
             "uniprot_id": info.uniprot_accession,
@@ -1177,10 +1180,17 @@ async def inject_targets(
             "target_score": 1.0,
             "compound_ids": [],
             "sources": ["manual"],
-        })
+        }, None
 
+    injected_targets: list[dict] = []
+    failed: list[str] = []
     try:
-        await asyncio.gather(*[_validate_one(e) for e in deduped_dicts])
+        results = await asyncio.gather(*[_validate_one(e) for e in deduped_dicts])
+        for target, error in results:
+            if target:
+                injected_targets.append(target)
+            elif error:
+                failed.append(error)
     except ServiceUnavailableError as exc:
         logger.error("UniProt unavailable during inject-targets: %s", exc)
         raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
@@ -1198,13 +1208,24 @@ async def inject_targets(
     # resolve to the same protein).
     seen_accessions: set[str] = set()
     final_targets: list[dict] = []
+    # Build map of original user inputs for dedup tracking
+    original_inputs: dict[str, str] = {}
+    for e in deduped_dicts:
+        raw = e.get("_raw", e.get("gene_symbol") or e.get("uniprot_id") or "")
+        if e.get("uniprot_id"):
+            original_inputs[e["uniprot_id"].upper()] = raw
+        elif e.get("gene_symbol"):
+            original_inputs[e["gene_symbol"].upper()] = raw
+
     for t in injected_targets:
         acc = t["uniprot_id"].upper()
         if acc not in seen_accessions:
             seen_accessions.add(acc)
             final_targets.append(t)
         else:
-            dedup_removed_labels.append(t["gene_symbol"])
+            # Track original user input, not just gene_symbol
+            user_input = original_inputs.get(acc, t["gene_symbol"])
+            dedup_removed_labels.append(user_input)
 
     validated_targets = [
         {k: v for k, v in t.items() if k != "target_score"}

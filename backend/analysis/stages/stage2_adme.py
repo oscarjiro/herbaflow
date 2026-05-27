@@ -73,6 +73,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 "passed_compound_ids": [], "np_exception_compound_ids": [],
                 "all_active_compound_ids": [], "compounds": []}
 
+    # IDs stored by inject_compounds so the ADME bypass can identify manual compounds.
+    manual_ids: set[str] = set((run.parameters or {}).get("manual_compound_ids", []))
+
     fetched = await compound_repo.get_compounds_by_ids(session, compound_ids)
     db_compounds = []
     for c in fetched:
@@ -91,6 +94,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 np_likeness_score=c.np_likeness_score,
                 is_pains_positive=c.is_pains_positive,
                 num_ro5_violations=c.num_ro5_violations,
+                source="user_provided" if str(c.compound_id) in manual_ids else "plant",
             ))
 
     result = filter_compounds(db_compounds, config.adme)
