@@ -17,22 +17,25 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 "disease_gene_symbols": [],
                 "disease_gene_symbols_by_disease": {},
             }
+        # Deduplicate while preserving order; skip non-string or blank entries
+        unique_genes = list(dict.fromkeys(
+            gene.upper() for gene in injected if isinstance(gene, str) and gene.strip()
+        ))
         targets = [
             {
-                "gene_symbol": gene.upper(),
-                "uniprot_id": None,
-                "association_score": None,
+                "gene_symbol": gene,
+                "uniprot_accession": None,
+                "score": None,
                 "disease_name": "Manual input",
                 "source": "user_provided",
             }
-            for gene in injected
+            for gene in unique_genes
         ]
-        gene_symbols = [t["gene_symbol"] for t in targets]
         return {
             "disease_target_count": len(targets),
             "targets": targets,
-            "disease_gene_symbols": gene_symbols,
-            "disease_gene_symbols_by_disease": {"manual": gene_symbols},
+            "disease_gene_symbols": unique_genes,
+            "disease_gene_symbols_by_disease": {"manual": unique_genes},
         }
 
     disease_ids = params.get("_disease_ids", [])

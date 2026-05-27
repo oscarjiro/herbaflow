@@ -120,6 +120,7 @@ async def test_stage4_manual_targets_mode():
     gene_symbols = [t["gene_symbol"] for t in result["targets"]]
     assert "TP53" in gene_symbols
     assert "BRCA1" in gene_symbols
+    assert "PTEN" in gene_symbols
 
 
 async def test_stage4_manual_targets_mode_empty_list():

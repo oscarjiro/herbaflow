@@ -41,6 +41,7 @@ function parseTargetLines(raw: string): string[] {
 // ============================================================================
 
 type InputMode = 'standard' | 'manual_compounds' | 'manual_targets'
+type DiseaseInputMode = 'disease' | 'manual_targets'
 
 interface InputModeToggleProps {
   value: InputMode
@@ -108,7 +109,6 @@ export default function SetupPage() {
   const [targetsRaw, setTargetsRaw] = useState('')
   const [formErrors, setFormErrors] = useState<SetupFormErrors>({})
   // Disease input mode: select from DB or paste manual gene/accession list
-  type DiseaseInputMode = 'disease' | 'manual_targets'
   const [diseaseInputMode, setDiseaseInputMode] = useState<DiseaseInputMode>('disease')
   const [diseaseTargetsRaw, setDiseaseTargetsRaw] = useState('')
   const parsedDiseaseTargets = diseaseInputMode === 'manual_targets' ? parseTargetLines(diseaseTargetsRaw) : []
@@ -199,7 +199,7 @@ export default function SetupPage() {
       {/* Input Mode */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
         <p className="text-sm font-medium text-hf-fg2 mb-2">Input Mode</p>
-        <InputModeToggle value={inputMode} onChange={(v) => { setInputMode(v); setFormErrors({}) }} />
+        <InputModeToggle value={inputMode} onChange={(v) => { setInputMode(v); setDiseaseInputMode('disease'); setFormErrors({}) }} />
         {isManualCompounds && (
           <p className="text-xs text-hf-fg3 mt-2">
             Stages 1–2 (compound selection and ADME screening) will be skipped.
