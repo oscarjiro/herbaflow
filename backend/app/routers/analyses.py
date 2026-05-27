@@ -761,6 +761,10 @@ async def add_user_compound(
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
 
+    stage1 = (run.stage_results or {}).get("stage_1")
+    if not stage1:
+        raise HTTPException(status_code=400, detail="Stage 1 results not available")
+
     structure = body.smiles or body.inchi
     async with httpx.AsyncClient(timeout=20.0) as client:
         try:
@@ -771,8 +775,13 @@ async def add_user_compound(
     if not validated:
         raise HTTPException(status_code=400, detail="Invalid compound structure: not found in PubChem")
 
-    # Merge into stage_1 compounds
-    stage1 = dict((run.stage_results or {}).get("stage_1") or {})
+    # Populate smiles from request body (PubChem does not return canonical SMILES
+    # via the property endpoint we use, so fall back to what the user provided).
+    if body.smiles:
+        validated["smiles"] = body.smiles
+
+    # Merge into stage_1 compounds (stage1 guard already confirmed it exists above)
+    stage1 = dict(stage1)
     existing_ids = {c["compound_id"] for c in stage1.get("compounds", [])}
     if validated["compound_id"] not in existing_ids:
         stage1.setdefault("compounds", []).append({
@@ -808,10 +817,16 @@ async def remove_user_compound(
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
 
-    stage1 = dict((run.stage_results or {}).get("stage_1") or {})
-    stage1["compounds"] = [
-        c for c in stage1.get("compounds", []) if c["compound_id"] != compound_id
-    ]
+    stage1_raw = (run.stage_results or {}).get("stage_1")
+    if not stage1_raw:
+        raise HTTPException(status_code=400, detail="Stage 1 results not available")
+
+    stage1 = dict(stage1_raw)
+    compounds_before = stage1.get("compounds", [])
+    filtered = [c for c in compounds_before if c["compound_id"] != compound_id]
+    if len(filtered) == len(compounds_before):
+        raise HTTPException(status_code=404, detail="Compound not found in stage 1 results")
+    stage1["compounds"] = filtered
     stage1["compound_ids"] = [c["compound_id"] for c in stage1["compounds"]]
     stage1["total_compounds"] = len(stage1["compounds"])
     stage1["compound_count"] = len(stage1["compounds"])

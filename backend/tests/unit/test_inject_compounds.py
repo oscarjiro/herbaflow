@@ -121,9 +121,23 @@ def _make_mock_run(stage1: dict | None = None):
     return run
 
 
+_STAGE1_EMPTY = {
+    "compound_ids": [],
+    "compound_count": 0,
+    "plant_ids": [],
+    "total_compounds": 0,
+    "plants_covered": 0,
+    "compounds": [],
+}
+
+
 def test_add_user_compound_to_stage1():
-    """POST /analyses/{id}/user-compounds adds a compound to stage_1 results."""
-    mock_run = _make_mock_run()
+    """POST /analyses/{id}/user-compounds adds a compound to stage_1 results.
+
+    The endpoint requires stage_1 results to exist before compounds can be added,
+    so we supply a minimal (empty) stage_1 in the mock run.
+    """
+    mock_run = _make_mock_run(stage1=_STAGE1_EMPTY)
 
     with (
         patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=mock_run)),

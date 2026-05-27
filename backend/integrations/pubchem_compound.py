@@ -110,6 +110,10 @@ async def validate_compound(
     try:
         resp.raise_for_status()
         data = resp.json()
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code >= 500:
+            raise  # Propagate PubChem 5xx so callers can return 502
+        return None
     except Exception:
         return None
 

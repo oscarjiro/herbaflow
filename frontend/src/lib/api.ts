@@ -81,7 +81,10 @@ export const api = {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
-      throw new Error(err.detail ?? 'Failed to add target')
+      const detail = Array.isArray(err?.detail)
+        ? err.detail.map((e: { msg: string }) => e.msg).join('; ')
+        : (err?.detail ?? 'Failed to add target')
+      throw new Error(detail)
     }
     return res.json()
   },
@@ -92,7 +95,10 @@ export const api = {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
-      throw new Error(err.detail ?? 'Failed to remove target')
+      const detail = Array.isArray(err?.detail)
+        ? err.detail.map((e: { msg: string }) => e.msg).join('; ')
+        : (err?.detail ?? 'Failed to remove target')
+      throw new Error(detail)
     }
   },
 
@@ -104,7 +110,10 @@ export const api = {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
-      throw new Error(err.detail ?? 'Failed to add disease target')
+      const detail = Array.isArray(err?.detail)
+        ? err.detail.map((e: { msg: string }) => e.msg).join('; ')
+        : (err?.detail ?? 'Failed to add disease target')
+      throw new Error(detail)
     }
     return res.json()
   },
@@ -115,7 +124,10 @@ export const api = {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
-      throw new Error(err.detail ?? 'Failed to remove disease target')
+      const detail = Array.isArray(err?.detail)
+        ? err.detail.map((e: { msg: string }) => e.msg).join('; ')
+        : (err?.detail ?? 'Failed to remove disease target')
+      throw new Error(detail)
     }
   },
 
@@ -127,7 +139,10 @@ export const api = {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
-      throw new Error(err.detail ?? 'Failed to add compound')
+      const detail = Array.isArray(err?.detail)
+        ? err.detail.map((e: { msg: string }) => e.msg).join('; ')
+        : (err?.detail ?? 'Failed to add compound')
+      throw new Error(detail)
     }
     return res.json()
   },
@@ -138,7 +153,10 @@ export const api = {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }))
-      throw new Error(err.detail ?? 'Failed to remove compound')
+      const detail = Array.isArray(err?.detail)
+        ? err.detail.map((e: { msg: string }) => e.msg).join('; ')
+        : (err?.detail ?? 'Failed to remove compound')
+      throw new Error(detail)
     }
     return res.json()
   },
