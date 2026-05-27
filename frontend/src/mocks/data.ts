@@ -7,12 +7,14 @@ export const plantsFixture: PlantResponse[] = [
     canonical_scientific_name: 'Andrographis paniculata',
     family_name: 'Acanthaceae',
     compound_count: 42,
+    plant_aliases: [],
   },
   {
     plant_id: 'pl_knapsack_C00005678',
     canonical_scientific_name: 'Curcuma longa',
     family_name: 'Zingiberaceae',
     compound_count: 87,
+    plant_aliases: [],
   },
 ]
 
@@ -22,12 +24,14 @@ export const diseasesFixture: DiseaseResponse[] = [
     disease_name: 'type 2 diabetes mellitus',
     ontology_id: 'MONDO:0005148',
     ontology_source: 'mondo',
+    disease_aliases: [],
   },
   {
     disease_id: 'dtg_mondo_0004981',
     disease_name: 'atrial fibrillation',
     ontology_id: 'MONDO:0004981',
     ontology_source: 'mondo',
+    disease_aliases: [],
   },
 ]
 

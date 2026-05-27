@@ -39,7 +39,7 @@ export function PlantSelector({ value, onChange }: PlantSelectorProps) {
     const fuse = React.useMemo(
         () =>
             new Fuse(plants, {
-                keys: ["canonical_scientific_name", "family_name"],
+                keys: ["canonical_scientific_name", "family_name", "plant_aliases"],
                 threshold: 0.4,
                 includeScore: true,
             }),

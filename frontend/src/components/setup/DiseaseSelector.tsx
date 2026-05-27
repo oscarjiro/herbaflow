@@ -39,7 +39,7 @@ export function DiseaseSelector({ value, onChange }: DiseaseSelectorProps) {
   const fuse = React.useMemo(
     () =>
       new Fuse(diseases, {
-        keys: ['disease_name', 'ontology_id'],
+        keys: ['disease_name', 'ontology_id', 'disease_aliases'],
         threshold: 0.4,
         includeScore: true,
       }),

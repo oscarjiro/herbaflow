@@ -1,6 +1,23 @@
+from collections import defaultdict
+
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.models import Disease, DiseaseAlias
+
+
+async def get_aliases_by_disease_ids(
+    session: AsyncSession, disease_ids: list[str]
+) -> dict[str, list[str]]:
+    """Return a mapping of disease_id → list[alias_name] for the given IDs."""
+    if not disease_ids:
+        return {}
+    result = await session.exec(
+        select(DiseaseAlias).where(DiseaseAlias.disease_id.in_(disease_ids))
+    )
+    aliases: dict[str, list[str]] = defaultdict(list)
+    for alias in result.all():
+        aliases[alias.disease_id].append(alias.alias_name)
+    return dict(aliases)
 
 
 async def get_disease_by_id(session: AsyncSession, disease_id: str) -> Disease | None:

@@ -14,6 +14,7 @@ export interface PlantResponse {
   canonical_scientific_name: string
   family_name: string | null
   compound_count: number
+  plant_aliases: string[]
 }
 
 export interface DiseaseResponse {
@@ -21,6 +22,7 @@ export interface DiseaseResponse {
   disease_name: string
   ontology_id: string | null
   ontology_source: string | null
+  disease_aliases: string[]
 }
 
 export interface CompoundResponse {

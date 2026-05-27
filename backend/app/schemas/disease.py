@@ -6,3 +6,4 @@ class DiseaseResponse(BaseModel):
     disease_name: str
     ontology_id: str | None
     ontology_source: str | None
+    disease_aliases: list[str] = []
