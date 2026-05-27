@@ -7,6 +7,21 @@
 import { z } from 'zod'
 
 // ---------------------------------------------------------------------------
+// Input size limits — mirrors backend HARD_CAP_* / SOFT_CAP_* constants
+// Based on published network pharmacology study scales:
+//   Plants:    Li S et al. (2014) Evid Based Complement Alternat Med
+//   Compounds: Zhou Y et al. (2019) Evid Based Complement Alternat Med
+//   Targets:   iPrimeTarget (Luo et al. 2024) and Open Targets dataset scales
+// ---------------------------------------------------------------------------
+
+export const SOFT_CAP_PLANTS = 20
+export const HARD_CAP_PLANTS = 50
+export const SOFT_CAP_MANUAL_COMPOUNDS = 100
+export const HARD_CAP_MANUAL_COMPOUNDS = 500
+export const SOFT_CAP_MANUAL_TARGETS = 100
+export const HARD_CAP_MANUAL_TARGETS = 300
+
+// ---------------------------------------------------------------------------
 // Primitives
 // ---------------------------------------------------------------------------
 
@@ -68,7 +83,7 @@ function diseaseIdsField(diseaseInputMode: 'disease' | 'manual_targets') {
 /** Require disease_targets when diseaseInputMode is 'manual_targets'. */
 function diseaseTargetsField(diseaseInputMode: 'disease' | 'manual_targets') {
   return diseaseInputMode === 'manual_targets'
-    ? z.array(z.string().min(1)).min(1, 'Enter at least one disease target').max(200, 'Maximum 200 targets')
+    ? z.array(z.string().min(1)).min(1, 'Enter at least one disease target').max(HARD_CAP_MANUAL_TARGETS, `Maximum ${HARD_CAP_MANUAL_TARGETS} targets`)
     : z.array(z.string()).optional()
 }
 
@@ -79,7 +94,10 @@ function diseaseTargetsField(diseaseInputMode: 'disease' | 'manual_targets') {
 export function makeSetupFormStandardSchema(diseaseInputMode: 'disease' | 'manual_targets' = 'disease') {
   return z.object({
     mode: analysisModeSchema,
-    plant_ids: z.array(z.string()).min(1, 'Select at least one plant'),
+    plant_ids: z
+      .array(z.string())
+      .min(1, 'Select at least one plant')
+      .max(HARD_CAP_PLANTS, `Maximum ${HARD_CAP_PLANTS} plants per analysis`),
     disease_ids: diseaseIdsField(diseaseInputMode),
     disease_targets: diseaseTargetsField(diseaseInputMode),
     parameters: advancedParamsSchema,
@@ -101,7 +119,7 @@ export function makeSetupFormManualCompoundsSchema(diseaseInputMode: 'disease' |
     compounds: z
       .array(z.string().min(1))
       .min(1, 'Enter at least one compound')
-      .max(100, 'Maximum 100 compounds'),
+      .max(HARD_CAP_MANUAL_COMPOUNDS, `Maximum ${HARD_CAP_MANUAL_COMPOUNDS} compounds per analysis`),
     parameters: advancedParamsSchema,
   })
 }
@@ -121,7 +139,7 @@ export function makeSetupFormManualTargetsSchema(diseaseInputMode: 'disease' | '
     targets: z
       .array(z.string().min(1))
       .min(1, 'Enter at least one target')
-      .max(200, 'Maximum 200 targets'),
+      .max(HARD_CAP_MANUAL_TARGETS, `Maximum ${HARD_CAP_MANUAL_TARGETS} targets per analysis`),
     parameters: advancedParamsSchema,
   })
 }
@@ -137,14 +155,14 @@ export const injectCompoundsSchema = z.object({
   compounds: z
     .array(z.string().min(1))
     .min(1, 'At least one compound is required')
-    .max(100, 'Maximum 100 compounds allowed'),
+    .max(HARD_CAP_MANUAL_COMPOUNDS, `Maximum ${HARD_CAP_MANUAL_COMPOUNDS} compounds allowed`),
 })
 
 export const injectTargetsSchema = z.object({
   targets: z
     .array(z.string().min(1))
     .min(1, 'At least one target is required')
-    .max(200, 'Maximum 200 targets allowed'),
+    .max(HARD_CAP_MANUAL_TARGETS, `Maximum ${HARD_CAP_MANUAL_TARGETS} targets allowed`),
 })
 
 // ---------------------------------------------------------------------------

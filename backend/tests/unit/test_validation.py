@@ -12,7 +12,12 @@ from pydantic import ValidationError
 from app.schemas.analysis import (
     ApproveRequest,
     CreateAnalysisRequest,
+    InjectCompoundsRequest,
+    InjectTargetsRequest,
     ResetFromRequest,
+    HARD_CAP_PLANTS,
+    HARD_CAP_MANUAL_COMPOUNDS,
+    HARD_CAP_MANUAL_TARGETS,
 )
 
 
@@ -368,3 +373,90 @@ class TestRouterErrorsNoRawExceptionStrings:
             assert pattern not in source, (
                 f"Raw exception string found in analyses router detail: {pattern!r}"
             )
+
+
+# ---------------------------------------------------------------------------
+# Input size hard caps — plant_ids, compounds, targets
+# ---------------------------------------------------------------------------
+
+class TestInputSizeHardCaps:
+    """plant_ids / compounds / targets must be rejected above their hard caps.
+
+    Hard caps are literature-based (NP study scales):
+      Plants:    max HARD_CAP_PLANTS   (50)
+      Compounds: max HARD_CAP_MANUAL_COMPOUNDS (500)
+      Targets:   max HARD_CAP_MANUAL_TARGETS   (300)
+    """
+
+    # --- plant_ids ---
+
+    def test_plant_ids_hard_cap_rejected(self):
+        """plant_ids exceeding HARD_CAP_PLANTS should fail Pydantic validation."""
+        import uuid
+
+        too_many = [str(uuid.uuid4()) for _ in range(HARD_CAP_PLANTS + 1)]
+        with pytest.raises(ValidationError):
+            CreateAnalysisRequest(
+                name="test",
+                plant_ids=too_many,
+                disease_ids=["d1"],
+            )
+
+    def test_plant_ids_at_hard_cap_accepted(self):
+        """plant_ids exactly at HARD_CAP_PLANTS should pass validation."""
+        import uuid
+
+        at_cap = [str(uuid.uuid4()) for _ in range(HARD_CAP_PLANTS)]
+        req = CreateAnalysisRequest(
+            name="test",
+            plant_ids=at_cap,
+            disease_ids=["d1"],
+        )
+        assert len(req.plant_ids) == HARD_CAP_PLANTS
+
+    def test_plant_ids_empty_accepted(self):
+        """Empty plant_ids is valid (manual modes don't require plants)."""
+        req = CreateAnalysisRequest(
+            name="test",
+            plant_ids=[],
+            disease_ids=["d1"],
+        )
+        assert req.plant_ids == []
+
+    # --- InjectCompoundsRequest ---
+
+    def test_compounds_hard_cap_rejected(self):
+        """compounds list exceeding HARD_CAP_MANUAL_COMPOUNDS must fail validation."""
+        too_many = ["CC"] * (HARD_CAP_MANUAL_COMPOUNDS + 1)
+        with pytest.raises(ValidationError):
+            InjectCompoundsRequest(compounds=too_many)
+
+    def test_compounds_at_hard_cap_accepted(self):
+        """compounds list exactly at HARD_CAP_MANUAL_COMPOUNDS must pass."""
+        at_cap = ["CC"] * HARD_CAP_MANUAL_COMPOUNDS
+        req = InjectCompoundsRequest(compounds=at_cap)
+        assert len(req.compounds) == HARD_CAP_MANUAL_COMPOUNDS
+
+    def test_compounds_below_min_rejected(self):
+        """Empty compounds list must fail (min_length=1)."""
+        with pytest.raises(ValidationError):
+            InjectCompoundsRequest(compounds=[])
+
+    # --- InjectTargetsRequest ---
+
+    def test_targets_hard_cap_rejected(self):
+        """targets list exceeding HARD_CAP_MANUAL_TARGETS must fail validation."""
+        too_many = ["GENE"] * (HARD_CAP_MANUAL_TARGETS + 1)
+        with pytest.raises(ValidationError):
+            InjectTargetsRequest(targets=too_many)
+
+    def test_targets_at_hard_cap_accepted(self):
+        """targets list exactly at HARD_CAP_MANUAL_TARGETS must pass."""
+        at_cap = ["GENE"] * HARD_CAP_MANUAL_TARGETS
+        req = InjectTargetsRequest(targets=at_cap)
+        assert len(req.targets) == HARD_CAP_MANUAL_TARGETS
+
+    def test_targets_below_min_rejected(self):
+        """Empty targets list must fail (min_length=1)."""
+        with pytest.raises(ValidationError):
+            InjectTargetsRequest(targets=[])

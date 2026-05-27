@@ -2,7 +2,7 @@
 
 Tests:
 1. Empty compounds list → Pydantic ValidationError (min_length=1)
-2. Compounds list exceeding 100 items → Pydantic ValidationError (max_length=100)
+2. Compounds list exceeding HARD_CAP_MANUAL_COMPOUNDS items → Pydantic ValidationError
 3. HTTP boundary: POST /analyses/{id}/inject-compounds with [] → HTTP 422
 4. POST /analyses/{id}/user-compounds adds a compound to stage_1 results
 5. DELETE /analyses/{id}/user-compounds/{compound_id} removes a compound from stage_1
@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from fastapi.testclient import TestClient
 from app.main import app
-from app.schemas.analysis import InjectCompoundsRequest
+from app.schemas.analysis import InjectCompoundsRequest, HARD_CAP_MANUAL_COMPOUNDS
 
 ANALYSIS_ID = "00000000-0000-0000-0000-000000000043"
 
@@ -42,9 +42,9 @@ def test_inject_compounds_empty_list_raises_validation_error():
 
 
 def test_inject_compounds_over_limit_raises_validation_error():
-    """InjectCompoundsRequest with > 100 items must raise a Pydantic ValidationError."""
+    """InjectCompoundsRequest with > HARD_CAP_MANUAL_COMPOUNDS items must raise a Pydantic ValidationError."""
     with pytest.raises(ValidationError) as exc_info:
-        InjectCompoundsRequest(compounds=["CC"] * 101)
+        InjectCompoundsRequest(compounds=["CC"] * (HARD_CAP_MANUAL_COMPOUNDS + 1))
 
     errors = exc_info.value.errors()
     assert any(e["loc"] == ("compounds",) for e in errors)

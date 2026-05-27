@@ -7,6 +7,18 @@ from typing import Any, Literal
 # STRING-DB standard confidence thresholds (Low / Medium / High / Very High)
 STRING_CONFIDENCE_PRESETS = {0.15, 0.40, 0.70, 0.90}
 
+# Input size limits — based on published network pharmacology study scales.
+# Most NP studies use 1–20 plants (rarely > 50); compound pools after ADME are
+# typically 10–500; disease target sets from databases are typically 50–500.
+# References: Li S et al. (2014) Evid Based Complement Alternat Med;
+#             Zhou Y et al. (2019) Evid Based Complement Alternat Med.
+SOFT_CAP_PLANTS = 20
+HARD_CAP_PLANTS = 50
+SOFT_CAP_MANUAL_COMPOUNDS = 100
+HARD_CAP_MANUAL_COMPOUNDS = 500
+SOFT_CAP_MANUAL_TARGETS = 100
+HARD_CAP_MANUAL_TARGETS = 300
+
 
 def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
     """Validate critical numeric parameter bounds in a params/parameters dict.
@@ -90,7 +102,11 @@ class CreateAnalysisRequest(BaseModel):
         description="Human-readable label for the analysis run",
     )
     mode: Literal["guided", "auto"] = "guided"
-    plant_ids: list[str] = Field(default_factory=list)
+    plant_ids: list[str] = Field(
+        default_factory=list,
+        max_length=HARD_CAP_PLANTS,
+        description=f"KNApSAcK plant IDs. Hard limit: {HARD_CAP_PLANTS} plants per analysis.",
+    )
     disease_ids: list[str] = Field(
         default_factory=list,
         description="At least one disease is required, unless _disease_input_mode is manual_targets",
@@ -170,8 +186,8 @@ class AddUserTargetResponse(BaseModel):
 class InjectCompoundsRequest(BaseModel):
     compounds: list[str] = Field(
         min_length=1,
-        max_length=100,
-        description="SMILES or InChI strings, 1–100 items",
+        max_length=HARD_CAP_MANUAL_COMPOUNDS,
+        description=f"SMILES or InChI strings, 1–{HARD_CAP_MANUAL_COMPOUNDS} items",
     )
 
 
@@ -200,8 +216,8 @@ class AddUserCompoundResponse(BaseModel):
 class InjectTargetsRequest(BaseModel):
     targets: list[str] = Field(
         min_length=1,
-        max_length=200,
-        description="Gene symbols or UniProt accessions, 1–200 items",
+        max_length=HARD_CAP_MANUAL_TARGETS,
+        description=f"Gene symbols or UniProt accessions, 1–{HARD_CAP_MANUAL_TARGETS} items",
     )
 
 
