@@ -17,11 +17,15 @@ export function useStartAnalysis() {
     mutationFn: async ({ request, compounds, targets }: StartAnalysisOptions) => {
       const { analysis_id } = await api.createAnalysis(request)
 
+      let failedCompounds = 0
+      let failedTargets = 0
+
       if (compounds && compounds.length > 0) {
         const injectResult = await api.injectCompounds(analysis_id, compounds)
         if (injectResult.injected === 0) {
           throw new Error('No valid compounds found. Please check your SMILES/InChI strings.')
         }
+        failedCompounds = injectResult.failed.length
       }
 
       if (targets && targets.length > 0) {
@@ -29,9 +33,10 @@ export function useStartAnalysis() {
         if (injectResult.injected === 0) {
           throw new Error('No valid targets found. Please check your gene symbols or UniProt accessions.')
         }
+        failedTargets = injectResult.failed.length
       }
 
-      return { analysis_id }
+      return { analysis_id, failedCompounds, failedTargets }
     },
     onSuccess: (data) => {
       localStorage.setItem('hf_last_analysis_id', data.analysis_id)

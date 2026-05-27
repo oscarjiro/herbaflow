@@ -217,16 +217,29 @@ export default function SetupPage() {
       {isManualCompounds && (
         <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" data-testid="compounds-section">
           <p className="text-sm font-medium text-hf-fg2 mb-2">Compounds</p>
-          <textarea
-            value={compoundsRaw}
-            onChange={(e) => { setCompoundsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
-            placeholder="Enter SMILES or InChI strings, one per line"
-            rows={6}
-            data-testid="compounds-textarea"
-            className={`w-full rounded-md border bg-hf-bg text-hf-fg1 text-sm p-3 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y font-mono${formErrors.compounds ? ' border-hf-danger' : ' border-hf-border'}`}
-          />
+          <p className="text-xs text-hf-fg3 mb-2">One SMILES or InChI string per line. Mixed formats accepted.</p>
+          <div className={`relative flex font-mono text-sm rounded-md border bg-hf-bg${formErrors.compounds ? ' border-hf-danger' : ' border-hf-border'}`}>
+            {/* Line numbers */}
+            <div className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none">
+              {compoundsRaw.split('\n').map((_, i) => (
+                <div key={i} className="leading-6">{i + 1}</div>
+              ))}
+            </div>
+            <textarea
+              value={compoundsRaw}
+              onChange={(e) => { setCompoundsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
+              rows={6}
+              data-testid="compounds-textarea"
+              className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y border-0"
+              placeholder={"CC(=O)Oc1ccccc1C(=O)O\nInChI=1S/C9H8O4/..."}
+            />
+          </div>
           {formErrors.compounds ? (
             <p className="text-xs text-hf-danger mt-1">{formErrors.compounds}</p>
+          ) : mutation.isSuccess && (mutation.data as { failedCompounds?: number }).failedCompounds ? (
+            <p className="text-xs text-hf-danger mt-1">
+              {(mutation.data as { failedCompounds: number }).failedCompounds} invalid entr{(mutation.data as { failedCompounds: number }).failedCompounds !== 1 ? 'ies' : 'y'} discarded. Valid entries are being processed.
+            </p>
           ) : parsedCompounds.length > 0 ? (
             <p className="text-xs text-hf-fg3 mt-1">
               {parsedCompounds.length} structure{parsedCompounds.length !== 1 ? 's' : ''} entered
@@ -239,16 +252,29 @@ export default function SetupPage() {
       {isManualTargets && (
         <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" data-testid="targets-section">
           <p className="text-sm font-medium text-hf-fg2 mb-2">Targets</p>
-          <textarea
-            value={targetsRaw}
-            onChange={(e) => { setTargetsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
-            placeholder="Enter gene symbols or UniProt accessions, one per line"
-            rows={6}
-            data-testid="targets-textarea"
-            className={`w-full rounded-md border bg-hf-bg text-hf-fg1 text-sm p-3 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y font-mono${formErrors.targets ? ' border-hf-danger' : ' border-hf-border'}`}
-          />
+          <p className="text-xs text-hf-fg3 mb-2">One gene symbol or UniProt accession per line.</p>
+          <div className={`relative flex font-mono text-sm rounded-md border bg-hf-bg${formErrors.targets ? ' border-hf-danger' : ' border-hf-border'}`}>
+            {/* Line numbers */}
+            <div className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none">
+              {targetsRaw.split('\n').map((_, i) => (
+                <div key={i} className="leading-6">{i + 1}</div>
+              ))}
+            </div>
+            <textarea
+              value={targetsRaw}
+              onChange={(e) => { setTargetsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
+              rows={6}
+              data-testid="targets-textarea"
+              className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y border-0"
+              placeholder={"TP53\nBRCA1\nP04637"}
+            />
+          </div>
           {formErrors.targets ? (
             <p className="text-xs text-hf-danger mt-1">{formErrors.targets}</p>
+          ) : mutation.isSuccess && (mutation.data as { failedTargets?: number }).failedTargets ? (
+            <p className="text-xs text-hf-danger mt-1">
+              {(mutation.data as { failedTargets: number }).failedTargets} invalid entr{(mutation.data as { failedTargets: number }).failedTargets !== 1 ? 'ies' : 'y'} discarded. Valid entries are being processed.
+            </p>
           ) : parsedTargets.length > 0 ? (
             <p className="text-xs text-hf-fg3 mt-1">
               {parsedTargets.length} target{parsedTargets.length !== 1 ? 's' : ''} entered
