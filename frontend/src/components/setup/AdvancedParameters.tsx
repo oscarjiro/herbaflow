@@ -20,6 +20,7 @@ export interface AdvancedParams {
   max_rotatable_bonds: number
   apply_veber: boolean
   np_exception_threshold: number
+  apply_adme_to_manual: boolean
 
   // Targets (Stage 3)
   min_pchembl: number
@@ -50,6 +51,7 @@ export const DEFAULT_PARAMS: AdvancedParams = {
   max_rotatable_bonds: 10,
   apply_veber: true,
   np_exception_threshold: 0.5,
+  apply_adme_to_manual: true,
   min_pchembl: 5.0,
   human_only: true,
   min_assay_confidence: 0,
@@ -200,6 +202,11 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
                 label="Apply Veber rules"
                 value={value.apply_veber}
                 onChange={(v) => set('apply_veber', v)}
+              />
+              <CheckboxField
+                label="Apply ADME screening to manually added compounds"
+                value={value.apply_adme_to_manual}
+                onChange={(v) => set('apply_adme_to_manual', v)}
               />
             </div>
           </AccordionContent>

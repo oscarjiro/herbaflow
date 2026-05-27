@@ -16,6 +16,11 @@ def filter_compounds(
     passed, failed, np_exceptions = [], [], []
 
     for c in compounds:
+        # Bypass: user_provided compounds skip ADME when apply_adme_to_manual=False.
+        if not params.apply_adme_to_manual and getattr(c, "source", "plant") == "user_provided":
+            passed.append(c)
+            continue
+
         # All core properties absent — insufficient data, cannot pass.
         if all(getattr(c, p) is None for p in _CORE_PROPS):
             # No drug-likeness data available — cannot determine NP exception eligibility either.

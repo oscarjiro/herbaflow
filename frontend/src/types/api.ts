@@ -224,6 +224,7 @@ export interface AdmeParamsConfig {
   apply_veber: boolean
   apply_pains: boolean
   np_exception_threshold: number
+  apply_adme_to_manual: boolean
 }
 
 export interface TargetParamsConfig {

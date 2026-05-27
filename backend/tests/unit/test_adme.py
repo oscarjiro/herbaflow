@@ -107,3 +107,43 @@ def test_adme_compound_all_none_not_in_active_ids():
     cid = str(compound.compound_id)
     active_ids = [str(c.compound_id) for c in result["passed"] + result["np_exceptions"]]
     assert cid not in active_ids
+
+
+def test_manual_compound_bypasses_adme_when_flag_disabled():
+    """When apply_adme_to_manual=False, user_provided compounds skip ADME and get adme_pass=True.
+
+    Scientific basis: Lipinski CA et al. Adv Drug Deliv Rev. 2001.
+    Pre-screened compounds from published ADME studies should not be re-filtered.
+    """
+    # A compound that would clearly FAIL Lipinski rules (mw > 500, logp > 5)
+    compound = make_compound(
+        molecular_weight=900.0,  # violates max_mw=500
+        logp=8.0,                # violates max_logp=5
+        source="user_provided",
+    )
+    params = AdmeParams(apply_adme_to_manual=False)
+    result = filter_compounds([compound], params)
+
+    # Must pass unconditionally
+    assert len(result["passed"]) == 1, "user_provided compound must bypass ADME and pass"
+    assert result["failed"] == []
+    assert result["np_exceptions"] == []
+    assert result["passed"][0].compound_id == compound.compound_id
+
+
+def test_manual_compound_screened_when_flag_enabled():
+    """Default: user_provided compounds ARE screened by ADME (apply_adme_to_manual=True)."""
+    # A compound that clearly FAILS Lipinski rules
+    compound = make_compound(
+        molecular_weight=900.0,  # violates max_mw=500
+        logp=8.0,                # violates max_logp=5
+        source="user_provided",
+    )
+    params = AdmeParams(apply_adme_to_manual=True)  # default
+    result = filter_compounds([compound], params)
+
+    # Must fail — default behaviour is unchanged
+    assert result["passed"] == []
+    assert result["np_exceptions"] == []
+    assert len(result["failed"]) == 1
+    assert result["failed"][0].compound_id == compound.compound_id

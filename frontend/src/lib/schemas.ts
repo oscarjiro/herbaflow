@@ -57,6 +57,7 @@ export const advancedParamsSchema = z.object({
   max_rotatable_bonds: z.number().int().min(0, 'Must be ≥ 0').max(50, 'Must be ≤ 50'),
   apply_veber: z.boolean(),
   np_exception_threshold: z.number().min(0, 'Must be ≥ 0').max(1, 'Must be ≤ 1'),
+  apply_adme_to_manual: z.boolean(),
 
   // Targets (Stage 3)
   min_pchembl: z.number().min(0, 'Must be ≥ 0').max(15, 'Must be ≤ 15'),
