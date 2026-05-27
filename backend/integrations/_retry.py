@@ -78,4 +78,7 @@ async def with_retry(
                 continue
             raise
 
-    raise ServiceUnavailableError(service_name) from last_exc
+    last_status = None
+    if isinstance(last_exc, httpx.HTTPStatusError):
+        last_status = last_exc.response.status_code
+    raise ServiceUnavailableError(service_name, last_status=last_status) from last_exc

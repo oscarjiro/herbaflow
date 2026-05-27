@@ -140,12 +140,8 @@ async def validate_compound(
         try:
             resp = await with_retry(_post_inchi, service_name="PubChem")
         except ServiceUnavailableError as e:
-            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
-            raise httpx.HTTPStatusError(
-                str(e),
-                request=httpx.Request("POST", url),
-                response=httpx.Response(503),
-            )
+            logger.error("PubChem unavailable during compound validation: %s", e)
+            return None
         except httpx.HTTPError as e:
             logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
             return None
@@ -164,12 +160,8 @@ async def validate_compound(
         try:
             resp = await with_retry(_get_smiles, service_name="PubChem")
         except ServiceUnavailableError as e:
-            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
-            raise httpx.HTTPStatusError(
-                str(e),
-                request=httpx.Request("GET", url),
-                response=httpx.Response(503),
-            )
+            logger.error("PubChem unavailable during compound validation: %s", e)
+            return None
         except httpx.HTTPError as e:
             logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
             return None
