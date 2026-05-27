@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
@@ -7,6 +8,8 @@ from app.schemas.compound import CompoundResponse
 from app.repositories import compound_repo
 from app.repositories import plant_repo
 from app.models.plant import Plant
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/plants", tags=["plants"])
 
@@ -21,7 +24,8 @@ async def list_plants(session: AsyncSession = Depends(get_session)):
     counts = await compound_repo.count_compounds_per_plant_bulk(session, plant_ids)
     try:
         aliases = await plant_repo.get_aliases_by_plant_ids(session, plant_ids)
-    except Exception:
+    except Exception as e:
+        logger.warning("alias fetch failed: %s", e)
         aliases = {}
     return [
         PlantResponse(
@@ -44,7 +48,8 @@ async def get_plant(plant_id: str, session: AsyncSession = Depends(get_session))
     count = await compound_repo.count_compounds_for_plant(session, plant_id)
     try:
         aliases = await plant_repo.get_aliases_by_plant_ids(session, [plant_id])
-    except Exception:
+    except Exception as e:
+        logger.warning("alias fetch failed: %s", e)
         aliases = {}
     return PlantResponse(
         plant_id=plant.plant_id,
