@@ -17,7 +17,7 @@ const KNOWN_ACRONYMS = new Set([
   'hiv', 'hbv', 'hcv', 'hpv', 'ebv',
   'aml', 'cml', 'cll', 'nhl', 'nsclc', 'sclc',
   'bmi', 'ckd', 'aki', 'gfr',
-  'pcos', 'sle', 'ms', 'als', 'ad', 'pd',
+  'pcos', 'sle',
 ])
 
 /**
