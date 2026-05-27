@@ -4,19 +4,21 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.repositories import compound_repo
 
 
+# Core Lipinski properties that must exist for a compound to be evaluable.
+# If every one of these is None the compound was never enriched from PubChem
+# and cannot be shown to satisfy drug-likeness rules — it must fail.
+_CORE_PROPS = ("molecular_weight", "logp", "hbond_donors", "hbond_acceptors")
+
+
 def filter_compounds(
     compounds: list[CompoundRecord], params: AdmeParams
 ) -> dict:
     passed, failed, np_exceptions = [], [], []
 
-    # Core Lipinski properties that must exist for a compound to be evaluable.
-    # If every one of these is None the compound was never enriched from PubChem
-    # and cannot be shown to satisfy drug-likeness rules — it must fail.
-    _CORE_PROPS = ("molecular_weight", "logp", "hbond_donors", "hbond_acceptors")
-
     for c in compounds:
         # All core properties absent — insufficient data, cannot pass.
         if all(getattr(c, p) is None for p in _CORE_PROPS):
+            # No drug-likeness data available — cannot determine NP exception eligibility either.
             failed.append(c)
             continue
 
