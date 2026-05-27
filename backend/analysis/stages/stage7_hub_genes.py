@@ -93,6 +93,71 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
     }
 
 
+def compute_community_centrality(
+    G: nx.Graph,
+    gene_to_community: dict[str, int],
+) -> dict[int, list[dict]]:
+    """Compute centrality metrics within each Leiden community.
+
+    For each community, extract the subgraph and compute:
+    - degree_centrality (normalized 0-1 within community)
+    - betweenness_centrality
+    - closeness_centrality
+    - eigenvector_centrality (fallback to degree if not convergent)
+
+    Returns dict keyed by community_id → list of gene dicts ranked by
+    community-local degree (descending).
+
+    Communities with fewer than 2 nodes return an empty list — no
+    meaningful centrality can be computed on isolated nodes.
+
+    Scientific basis: Barabási et al. (2011) Nat Rev Genet 12(1):56–68.
+    Hub genes within a community are more pharmacologically actionable
+    than global hubs, which often reflect housekeeping proteins.
+    """
+    communities: dict[int, list] = {}
+    for node in G.nodes:
+        cid = gene_to_community.get(node)
+        if cid is not None:
+            communities.setdefault(cid, []).append(node)
+
+    result = {}
+    for cid, nodes in communities.items():
+        if len(nodes) < 2:
+            result[cid] = []
+            continue
+
+        subgraph = G.subgraph(nodes).copy()
+
+        degree = nx.degree_centrality(subgraph)
+        betweenness = nx.betweenness_centrality(subgraph, normalized=True)
+        closeness = nx.closeness_centrality(subgraph)
+        try:
+            eigenvector = nx.eigenvector_centrality(subgraph, max_iter=500)
+        except nx.PowerIterationFailedConvergence:
+            eigenvector = nx.degree_centrality(subgraph)
+
+        hub_list = sorted(
+            [
+                {
+                    "gene_symbol": n,
+                    "community_id": cid,
+                    "community_degree": round(degree.get(n, 0), 6),
+                    "community_betweenness": round(betweenness.get(n, 0), 6),
+                    "community_closeness": round(closeness.get(n, 0), 6),
+                    "community_eigenvector": round(eigenvector.get(n, 0), 6),
+                    "community_size": len(nodes),
+                }
+                for n in nodes
+            ],
+            key=lambda x: x["community_degree"],
+            reverse=True,
+        )
+        result[cid] = hub_list
+
+    return result
+
+
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:
     stage6 = (run.stage_results or {}).get("stage_6", {})
     # Use raw_edges (flat dicts) if available; edges may be Cytoscape-wrapped {data:{...}}
@@ -124,6 +189,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     # Inject community_id into each hub gene entry
     for entry in result["ranked"]:
         entry["community_id"] = gene_to_community.get(entry["gene_symbol"], 0)
+
+    # Per-community centrality: identify hub genes within each Leiden module
+    result["community_hubs"] = compute_community_centrality(G, gene_to_community)
 
     # Write to target_rankings table
     from uuid import uuid4

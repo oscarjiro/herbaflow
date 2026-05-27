@@ -371,10 +371,22 @@ export interface HubGeneResult {
   community_id?: number
 }
 
+export interface CommunityHubGene {
+  gene_symbol: string
+  community_id: number
+  community_degree: number
+  community_betweenness: number
+  community_closeness: number
+  community_eigenvector: number
+  community_size: number
+}
+
 export interface Stage7Result {
   ranked: HubGeneResult[]
   threshold_degree: number
   threshold_betweenness: number
+  /** Per-community hub genes, keyed by community_id (stringified number from JSON). */
+  community_hubs?: Record<string, CommunityHubGene[]>
 }
 
 // Stage 8: Pathway Enrichment
