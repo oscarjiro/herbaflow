@@ -29,29 +29,28 @@ describe('SetupPage', () => {
     // Heading
     expect(screen.getByText('New Analysis')).toBeInTheDocument()
 
-    // Section labels
+    // Section labels (Analysis Name input was removed — name is auto-generated)
     expect(screen.getByText('Plants')).toBeInTheDocument()
     expect(screen.getByText('Diseases')).toBeInTheDocument()
     expect(screen.getByText('Mode')).toBeInTheDocument()
-    expect(screen.getByText('Analysis Name')).toBeInTheDocument()
     expect(screen.getByText('Advanced Parameters')).toBeInTheDocument()
 
-    // Submit button exists and is disabled (no selection yet)
+    // Submit button exists and is enabled (validation runs on submit via Zod, not pre-disabled)
     const btn = screen.getByRole('button', { name: /start analysis/i })
-    expect(btn).toBeDisabled()
+    expect(btn).toBeEnabled()
   })
 
-  it('submit button is disabled with no plants or disease selected', () => {
+  it('submit button is enabled before submission (Zod validates on submit)', () => {
     render(<SetupPage />, { wrapper })
     const btn = screen.getByRole('button', { name: /start analysis/i })
-    expect(btn).toBeDisabled()
+    // Button is always enabled unless a mutation is in-flight; field errors surface on submit
+    expect(btn).toBeEnabled()
   })
 
-  it('renders analysis name input with a default value', () => {
+  it('does not render an analysis name input (name is auto-generated)', () => {
     render(<SetupPage />, { wrapper })
-    const input = screen.getByPlaceholderText('Enter analysis name')
-    expect(input).toBeInTheDocument()
-    // Default name includes today's date prefix
-    expect((input as HTMLInputElement).value).toMatch(/^Analysis —/)
+    // The Analysis Name field was removed from the UI — name is auto-generated server-side
+    expect(screen.queryByPlaceholderText('Enter analysis name')).not.toBeInTheDocument()
+    expect(screen.queryByText('Analysis Name')).not.toBeInTheDocument()
   })
 })

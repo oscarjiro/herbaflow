@@ -54,10 +54,10 @@ describe('SetupPage — manual target input mode', () => {
     fireEvent.click(manualTargetsBtn)
 
     // Targets textarea should now be visible
-    expect(screen.getByTestId('targets-textarea')).toBeInTheDocument()
-    expect(
-      screen.getByPlaceholderText('Enter gene symbols or UniProt accessions, one per line')
-    ).toBeInTheDocument()
+    const textarea = screen.getByTestId('targets-textarea')
+    expect(textarea).toBeInTheDocument()
+    // Placeholder contains example gene symbols (literal newline in the attribute)
+    expect(textarea.getAttribute('placeholder')).toMatch(/TP53/)
   })
 
   // ---------------------------------------------------------------------------
@@ -88,15 +88,15 @@ describe('SetupPage — manual target input mode', () => {
 
     const submitBtn = screen.getByRole('button', { name: /start analysis/i })
 
-    // Textarea is empty → button must be disabled
-    expect(submitBtn).toBeDisabled()
+    // Button is enabled (validation runs on submit via Zod, not pre-disabled)
+    expect(submitBtn).toBeEnabled()
 
-    // Type a gene symbol → structure count hint appears
+    // Type a gene symbol → target count hint should appear
     fireEvent.change(screen.getByTestId('targets-textarea'), {
       target: { value: 'TP53' },
     })
 
-    // Still disabled because no disease selected, but count hint should appear
+    // Count hint confirms textarea value is tracked
     expect(screen.getByText(/1 target entered/i)).toBeInTheDocument()
   })
 

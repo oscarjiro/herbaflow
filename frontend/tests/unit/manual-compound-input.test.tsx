@@ -56,10 +56,10 @@ describe('SetupPage — manual compound input mode', () => {
     fireEvent.click(manualBtn)
 
     // Textarea should now be visible
-    expect(screen.getByTestId('compounds-textarea')).toBeInTheDocument()
-    expect(
-      screen.getByPlaceholderText('Enter SMILES or InChI strings, one per line')
-    ).toBeInTheDocument()
+    const textarea = screen.getByTestId('compounds-textarea')
+    expect(textarea).toBeInTheDocument()
+    // Placeholder contains example SMILES string (literal newline in the attribute)
+    expect(textarea.getAttribute('placeholder')).toMatch(/CC\(=O\)Oc1ccccc1/)
   })
 
   // ---------------------------------------------------------------------------
@@ -90,17 +90,15 @@ describe('SetupPage — manual compound input mode', () => {
 
     const submitBtn = screen.getByRole('button', { name: /start analysis/i })
 
-    // Textarea is empty → button must be disabled
-    expect(submitBtn).toBeDisabled()
+    // Button is enabled (validation runs on submit via Zod, not pre-disabled)
+    expect(submitBtn).toBeEnabled()
 
-    // Type a SMILES string → button should become enabled (diseases still empty,
-    // so it will still be disabled — this verifies the compound guard specifically
-    // by checking that the textarea value is reflected)
+    // Type a SMILES string → structure count hint should appear
     fireEvent.change(screen.getByTestId('compounds-textarea'), {
       target: { value: 'CC(=O)Oc1ccccc1C(=O)O' },
     })
 
-    // Still disabled because no disease selected, but the structure count hint appears
+    // Structure count hint confirms textarea value is tracked
     expect(screen.getByText(/1 structure entered/i)).toBeInTheDocument()
   })
 })
