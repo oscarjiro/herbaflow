@@ -530,9 +530,9 @@ def _add_target_to_stage4(
         raise ValueError(f"Target {gene_symbol} already in Stage 4 results")
     result.setdefault("targets", []).append({
         "gene_symbol": gene_symbol,
-        "uniprot_id": uniprot_id or "",
+        "uniprot_accession": uniprot_id or "",
         "protein_name": protein_name,
-        "association_score": 1.0,
+        "score": 1.0,
         "disease_name": disease_name,
         "source": "user_provided",
     })

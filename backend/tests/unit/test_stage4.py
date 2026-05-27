@@ -59,7 +59,7 @@ async def test_stage4_uses_db_cache():
     assert result["disease_target_count"] == 1
     assert result["targets"][0]["gene_symbol"] == "AKT1"
     assert result["targets"][0]["source"] == "db_cache"
-    assert result["targets"][0]["association_score"] == 0.7
+    assert result["targets"][0]["score"] == 0.7
 
 
 async def test_stage4_deduplicates_gene_across_diseases():

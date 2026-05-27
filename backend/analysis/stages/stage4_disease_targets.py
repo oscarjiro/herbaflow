@@ -65,8 +65,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 if gene not in all_targets:
                     all_targets[gene] = {
                         "gene_symbol": gene,
-                        "uniprot_id": target.uniprot_accession or "",
-                        "association_score": score,
+                        "uniprot_accession": target.uniprot_accession or "",
+                        "score": score,
                         "disease_name": disease.disease_name,
                         "source": "db_cache",
                         "diseases": [
@@ -87,8 +87,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                                 "association_score": score,
                             }
                         )
-                    if score > existing["association_score"]:
-                        existing["association_score"] = score
+                    if score > existing["score"]:
+                        existing["score"] = score
         else:
             # Fallback: Open Targets API
             from integrations.open_targets import get_disease_targets
@@ -104,8 +104,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 if gene not in all_targets:
                     all_targets[gene] = {
                         "gene_symbol": gene,
-                        "uniprot_id": "",
-                        "association_score": t.score,
+                        "uniprot_accession": "",
+                        "score": t.score,
                         "disease_name": disease.disease_name,
                         "source": "open_targets_api",
                         "diseases": [
@@ -126,8 +126,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                                 "association_score": t.score,
                             }
                         )
-                    if t.score > existing["association_score"]:
-                        existing["association_score"] = t.score
+                    if t.score > existing["score"]:
+                        existing["score"] = t.score
 
     return {
         "disease_target_count": len(all_targets),
