@@ -53,6 +53,10 @@ class DiseaseTargetParams:
 @dataclass
 class PpiParams:
     min_confidence: float = 0.4
+    community_resolution: float = 1.0
+    # Leiden resolution parameter γ. Higher γ = more, smaller communities.
+    # Default 1.0 typically gives 3–8 communities for typical PPI network sizes.
+    # Range [0.1, 3.0] enforced by backend validation.
 
 
 @dataclass

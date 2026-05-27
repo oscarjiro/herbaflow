@@ -54,6 +54,9 @@ def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
             f"ppi.min_confidence must be one of {sorted(STRING_CONFIDENCE_PRESETS)} "
             "(STRING-DB standard confidence levels: Low=0.15, Medium=0.40, High=0.70, Very High=0.90)"
         )
+    comm_res = ppi.get("community_resolution")
+    if comm_res is not None and not (0.1 <= comm_res <= 3.0):
+        errors.append("ppi.community_resolution must be in [0.1, 3.0]")
 
     if errors:
         raise ValueError("; ".join(errors))

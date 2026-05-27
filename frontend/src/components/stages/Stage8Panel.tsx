@@ -8,7 +8,7 @@ import { DataSources } from '@/components/shared/DataSources'
 import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import { isSkippedStage } from '@/types/api'
-import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, PathwayTerm, PathwaySource } from '@/types/api'
+import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, PathwayTerm, PathwaySource, CommunityEnrichment } from '@/types/api'
 
 const DATA_SOURCES = [
   {
@@ -292,6 +292,16 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
   }
   const totalTerms = Object.values(termsBySource).reduce((s, a) => s + a.length, 0)
 
+  const communities: CommunityEnrichment[] = result.communities ?? []
+  const hasCommunities = communities.length > 0
+
+  const commTermsBySource = (comm: CommunityEnrichment): Record<PathwaySource, PathwayTerm[]> => ({
+    'GO:BP': comm.go_bp ?? [],
+    'GO:MF': comm.go_mf ?? [],
+    'GO:CC': comm.go_cc ?? [],
+    'KEGG': comm.kegg ?? [],
+  })
+
   return (
     <div className="space-y-6">
       <StageHeader stage={stage} name="Pathway Enrichment" status={status?.status ?? 'complete'} elapsedSeconds={null} />
@@ -308,22 +318,75 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
         canRerun={status?.mode === 'guided'}
       />
 
-      <Tabs defaultValue="GO:BP">
+      <Tabs defaultValue={hasCommunities ? `community-${communities[0].community_id}` : 'GO:BP'}>
         <TabsList>
-          {SOURCES.map((src) => (
-            <TabsTrigger key={src} value={src}>
-              {src}
-              {termsBySource[src].length > 0 && (
-                <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
-                  {termsBySource[src].length}
-                </span>
-              )}
-            </TabsTrigger>
-          ))}
-          <TabsTrigger value="bubble">Bubble</TabsTrigger>
+          {hasCommunities ? (
+            <>
+              {communities.map((comm, idx) => (
+                <TabsTrigger key={`community-${comm.community_id}`} value={`community-${comm.community_id}`}>
+                  Community {idx + 1}
+                  <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                    {comm.gene_count}g
+                  </span>
+                </TabsTrigger>
+              ))}
+              <TabsTrigger value="overall">Overall</TabsTrigger>
+            </>
+          ) : (
+            <>
+              {SOURCES.map((src) => (
+                <TabsTrigger key={src} value={src}>
+                  {src}
+                  {termsBySource[src].length > 0 && (
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                      {termsBySource[src].length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              ))}
+              <TabsTrigger value="bubble">Bubble</TabsTrigger>
+            </>
+          )}
         </TabsList>
 
-        {SOURCES.map((src) => (
+        {/* Community tabs (when communities data present) */}
+        {communities.map((comm, idx) => {
+          const commSources = commTermsBySource(comm)
+          return (
+            <TabsContent key={`community-${comm.community_id}`} value={`community-${comm.community_id}`}>
+              <div className="mt-4 space-y-4">
+                <p className="text-xs text-hf-fg3 font-sans">
+                  Community {idx + 1} · {comm.gene_count} hub genes: {comm.genes.join(', ')}
+                </p>
+                {SOURCES.map((src) =>
+                  commSources[src].length > 0 ? (
+                    <div key={src}>
+                      <h4 className="text-xs font-medium text-hf-fg2 mb-2">{SOURCE_LABELS[src]}</h4>
+                      <PathwayChart terms={commSources[src]} />
+                    </div>
+                  ) : null
+                )}
+              </div>
+            </TabsContent>
+          )
+        })}
+
+        {/* Overall tab (shown as fallback when communities present) */}
+        {hasCommunities && (
+          <TabsContent value="overall">
+            <div className="mt-4 space-y-6">
+              {SOURCES.map((src) => (
+                <div key={src}>
+                  <h3 className="text-sm font-medium text-hf-fg2 mb-3">{SOURCE_LABELS[src]}</h3>
+                  <PathwayChart terms={termsBySource[src]} />
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        )}
+
+        {/* Source tabs (when no communities) */}
+        {!hasCommunities && SOURCES.map((src) => (
           <TabsContent key={src} value={src}>
             <div className="mt-4">
               <div className="flex items-center justify-between mb-3">
@@ -341,24 +404,27 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
           </TabsContent>
         ))}
 
-        <TabsContent value="bubble">
-          <div className="mt-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-hf-fg2">All Sources — Bubble Chart</h3>
-              <button
-                type="button"
-                onClick={() => exportChartPng(chartRefBubble.current, `enrichment-bubble-${analysisId}.png`)}
-                className="rounded-sm border border-hf-border px-3 py-1.5 text-xs text-hf-fg2 hover:text-hf-fg1"
-              >
-                Export PNG
-              </button>
+        {/* Bubble tab (when no communities) */}
+        {!hasCommunities && (
+          <TabsContent value="bubble">
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-hf-fg2">All Sources — Bubble Chart</h3>
+                <button
+                  type="button"
+                  onClick={() => exportChartPng(chartRefBubble.current, `enrichment-bubble-${analysisId}.png`)}
+                  className="rounded-sm border border-hf-border px-3 py-1.5 text-xs text-hf-fg2 hover:text-hf-fg1"
+                >
+                  Export PNG
+                </button>
+              </div>
+              <p className="text-xs text-hf-fg3 mb-3 font-sans">
+                Top 15 terms per source. Bubble size = gene count. Axes: x = gene ratio (intersection / term size), y = −log₁₀(p-value).
+              </p>
+              <EnrichmentBubbleChart termsBySource={termsBySource} chartRef={chartRefBubble} />
             </div>
-            <p className="text-xs text-hf-fg3 mb-3 font-sans">
-              Top 15 terms per source. Bubble size = gene count. Axes: x = gene ratio (intersection / term size), y = −log₁₀(p-value).
-            </p>
-            <EnrichmentBubbleChart termsBySource={termsBySource} chartRef={chartRefBubble} />
-          </div>
-        </TabsContent>
+          </TabsContent>
+        )}
       </Tabs>
 
       <div className="space-y-1 text-xs text-hf-fg3 font-sans">

@@ -35,7 +35,25 @@ type LayoutName = 'fcose' | 'grid' | 'circle'
 // between @types/cytoscape and react-cytoscapejs typings.
 // Cytoscape renders to canvas — CSS custom properties do not resolve there.
 // Use raw hex values derived from the design system tokens.
-// --hf-fg-4 (#9A958C), --hf-sage (#8FA084), --hf-fg-1 (#1A1A1A), --hf-bg (#F7F5F2)
+
+// Up to 8 distinct community colors (raw hex — CSS vars don't resolve in canvas)
+const COMMUNITY_COLORS = [
+  '#4f8ef7', // blue
+  '#f97316', // orange
+  '#22c55e', // green
+  '#a855f7', // purple
+  '#ec4899', // pink
+  '#14b8a6', // teal
+  '#f59e0b', // amber
+  '#6366f1', // indigo
+]
+
+// Generate community color selectors — 24 selectors, wrapping 8-color palette
+const COMMUNITY_SELECTORS = Array.from({ length: 24 }, (_, i) => ({
+  selector: `node[community_id = ${i}]`,
+  style: { 'background-color': COMMUNITY_COLORS[i % COMMUNITY_COLORS.length] },
+}))
+
 const styleSheet = [
   {
     selector: 'node',
@@ -46,17 +64,14 @@ const styleSheet = [
       'text-halign': 'center',
       width: 30,
       height: 30,
-      'background-color': '#9A958C',
+      'background-color': '#9A958C', // fallback if no community_id
       color: '#1A1A1A',
     },
   },
-  {
-    selector: 'node[type="hub"]',
-    style: { 'background-color': '#8FA084', color: '#1A1A1A', width: 40, height: 40 },
-  },
+  ...COMMUNITY_SELECTORS,
   {
     selector: 'node[type="overlap"]',
-    style: { 'background-color': '#1A1A1A', color: '#F7F5F2' },
+    style: { width: 38, height: 38 }, // larger for overlap genes (color from community)
   },
   {
     selector: 'node.dimmed',
@@ -146,9 +161,10 @@ export function Stage6Panel({ stage, analysis, status, analysisId }: Stage6Panel
     <div className="space-y-6">
       <StageHeader stage={6} name="PPI Network" status={status?.status ?? 'complete'} elapsedSeconds={null} />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <StatCard label="Nodes" value={result.node_count} />
         <StatCard label="Edges" value={result.edge_count} />
+        <StatCard label="Communities" value={result.n_communities ?? '—'} />
       </div>
 
       <StageParamsPanel
@@ -188,21 +204,27 @@ export function Stage6Panel({ stage, analysis, status, analysisId }: Stage6Panel
         </button>
       </div>
 
-      {/* Legend */}
-      <div className="flex gap-4 text-xs text-hf-fg3">
-        <span className="flex items-center gap-1">
-          <span className="inline-block w-3 h-3 rounded-full" style={{ background: 'var(--hf-sage)' }} />
-          Hub gene
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block w-3 h-3 rounded-full" style={{ background: 'var(--hf-fg-1)' }} />
-          Overlap target
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block w-3 h-3 rounded-full bg-hf-fg4" />
-          Other
-        </span>
-      </div>
+      {/* Community legend */}
+      {result.n_communities != null && result.n_communities > 0 && (
+        <div className="space-y-1">
+          <p className="text-xs text-hf-fg3 font-medium">Communities ({result.n_communities})</p>
+          <div className="flex flex-wrap gap-3">
+            {Array.from({ length: result.n_communities }, (_, i) => (
+              <span key={i} className="flex items-center gap-1 text-xs text-hf-fg3">
+                <span
+                  className="inline-block w-3 h-3 rounded-full"
+                  style={{ background: COMMUNITY_COLORS[i % COMMUNITY_COLORS.length] }}
+                />
+                Community {i + 1}
+              </span>
+            ))}
+            <span className="flex items-center gap-1 text-xs text-hf-fg3 ml-2 pl-2 border-l border-hf-border">
+              <span className="inline-block w-4 h-4 rounded-full border-2 border-hf-fg3 bg-transparent" />
+              Larger = overlap gene
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Tooltip */}
       {tooltip && (

@@ -36,6 +36,7 @@ export const PARAM_DEFAULTS: Record<string, Record<string, unknown>> = {
   },
   ppi: {
     min_confidence: 0.4,
+    community_resolution: 1.0,
   },
   hub_genes: {
     top_n: 20,
@@ -70,6 +71,7 @@ export const PARAM_LABELS: Record<string, Record<string, string>> = {
   },
   ppi: {
     min_confidence: 'STRING Confidence',
+    community_resolution: 'Community Resolution (γ)',
   },
   hub_genes: {
     top_n: 'Top N Hub Genes',
@@ -93,6 +95,7 @@ export const PARAM_STEP: Record<string, Record<string, number>> = {
   },
   target: { min_pchembl: 0.5, min_assay_confidence: 1 },
   disease_targets: { min_score: 0.05 },
+  ppi: { community_resolution: 0.1 },
   hub_genes: { top_n: 5 },
   enrichment: { fdr_threshold: 0.01 },
 }

@@ -228,6 +228,7 @@ export interface DiseaseTargetParamsConfig {
 
 export interface PpiParamsConfig {
   min_confidence: number
+  community_resolution?: number
 }
 
 export interface HubGeneParamsConfig {
@@ -319,6 +320,7 @@ export interface CytoscapeNodeData {
   label: string
   type: 'hub' | 'overlap' | 'other'
   degree: number
+  community_id?: number
 }
 
 export interface CytoscapeNode {
@@ -343,6 +345,7 @@ export interface Stage6Result {
   nodes: CytoscapeNode[]
   edges: CytoscapeEdge[]
   min_confidence: number
+  n_communities?: number
 }
 
 // Stage 7: Hub Gene Analysis
@@ -355,6 +358,7 @@ export interface HubGeneResult {
   eigenvector: number
   is_hub: boolean
   is_hub_bottleneck: boolean
+  community_id?: number
 }
 
 export interface Stage7Result {
@@ -376,6 +380,16 @@ export interface PathwayTerm {
   genes: string[]
 }
 
+export interface CommunityEnrichment {
+  community_id: number
+  gene_count: number
+  genes: string[]
+  go_bp: PathwayTerm[]
+  go_mf: PathwayTerm[]
+  go_cc: PathwayTerm[]
+  kegg: PathwayTerm[]
+}
+
 export interface Stage8Result {
   total_significant: number
   go_bp: PathwayTerm[]
@@ -383,6 +397,7 @@ export interface Stage8Result {
   go_cc: PathwayTerm[]
   kegg: PathwayTerm[]
   hub_genes_queried: string[]
+  communities?: CommunityEnrichment[]
 }
 
 // ============================================================================

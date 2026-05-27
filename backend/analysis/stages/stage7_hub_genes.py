@@ -98,6 +98,15 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     # Use raw_edges (flat dicts) if available; edges may be Cytoscape-wrapped {data:{...}}
     raw_edges = stage6.get("raw_edges") or stage6.get("edges", [])
 
+    # Build gene→community lookup from Stage 6 node data
+    gene_to_community: dict[str, int] = {}
+    for node in stage6.get("nodes", []):
+        node_data = node.get("data", {})
+        gene = node_data.get("id", "")
+        comm_id = node_data.get("community_id")
+        if gene and comm_id is not None:
+            gene_to_community[gene] = int(comm_id)
+
     G = nx.Graph()
     for edge in raw_edges:
         src = edge.get("source") or edge.get("data", {}).get("source", "")
@@ -111,6 +120,10 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         top_n=config.hub_genes.top_n,
         use_hub_bottleneck=config.hub_genes.use_hub_bottleneck,
     )
+
+    # Inject community_id into each hub gene entry
+    for entry in result["ranked"]:
+        entry["community_id"] = gene_to_community.get(entry["gene_symbol"], 0)
 
     # Write to target_rankings table
     from uuid import uuid4
