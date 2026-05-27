@@ -89,7 +89,7 @@ CSV export works for **all stages 1–8**. Each stage produces a sensible flat C
 
 ## Tests
 
-132 tests: all must pass before commit.
+180 tests: all must pass before commit.
 
 Unit tests mock all external APIs with `pytest-httpx`. Integration tests hit real DB — use `guided` mode for analysis endpoints to avoid external API calls mid-test.
 

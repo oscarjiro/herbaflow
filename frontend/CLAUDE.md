@@ -17,11 +17,11 @@ pnpm exec playwright test       # E2E tests (requires backend at localhost:8000)
 | Path | Contents |
 |---|---|
 | `src/pages/` | `PipelinePage.tsx`, `SetupPage.tsx`, `DashboardPage.tsx` |
-| `src/components/shared/` | `StatCard`, `DataTable`, `StatusBadge`, `ExportButton`, `StageHeader`, `ApprovalBar`, `EmptyState`, `ErrorState` |
+| `src/components/shared/` | `StatCard`, `DataTable`, `StatusBadge`, `ExportButton`, `StageHeader`, `ApprovalBar`, `EmptyState`, `ErrorState`, `StageSkeletonLoader`, `AddUserCompoundForm`, `AddTargetForm`, `SkippedStageNotice`, `DataSources`, `StageParamsPanel` |
 | `src/components/stages/` | `Stage1Panel` – `Stage8Panel` |
 | `src/components/setup/` | `PlantSelector`, `DiseaseSelector`, `ModeToggle`, `AdvancedParameters` |
 | `src/components/pipeline/` | `PipelineSidebar`, `StageNavItem` |
-| `src/hooks/` | TanStack Query hooks (`useAnalysisStatus`, etc.) |
+| `src/hooks/` | TanStack Query hooks (`useAnalysisStatus`, `useAnalysis`, `useStartAnalysis`, `useApproveStage`, `useResetFromStage`, `useExportStage`, `usePlants`, `useDiseases`, `useAddUserCompound`, `useRemoveUserCompound`, `useAddUserTarget`, `useRemoveUserTarget`, `useAddUserDiseaseTarget`, `useRemoveUserDiseaseTarget`) |
 | `src/types/api.ts` | TypeScript types matching backend schemas |
 | `src/lib/api.ts` | Typed fetch wrappers; base URL from `VITE_API_URL` |
 | `src/mocks/` | MSW fixtures for testing |
