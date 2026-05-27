@@ -501,3 +501,156 @@ class TestInjectedDiseaseTargetsCap:
         """Empty _injected_disease_targets list must pass (validation deferred to Stage 4)."""
         req = CreateAnalysisRequest(**_create({"_injected_disease_targets": []}))
         assert req.parameters["_injected_disease_targets"] == []
+
+
+# ---------------------------------------------------------------------------
+# UniProt accession format validation
+# ---------------------------------------------------------------------------
+
+from app.schemas.analysis import (
+    AddUserTargetRequest,
+    AddUserCompoundRequest,
+    UNIPROT_ACCESSION_RE,
+    GENE_SYMBOL_RE,
+)
+
+
+class TestUniprotAccessionFormat:
+    """UniProt accession regex — HUPO-PSI standard.
+
+    Pattern:
+      ^[OPQ][0-9][A-Z0-9]{3}[0-9]$           (6-char legacy: O/P/Q + digit + 3 alphanums + digit)
+      |^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$  (10-char new format: any non-O/P/Q letter...)
+    """
+
+    def test_valid_p04637(self):
+        """P04637 — TP53 human canonical accession."""
+        assert UNIPROT_ACCESSION_RE.match("P04637") is not None
+
+    def test_valid_q9y6i3(self):
+        """Q9Y6I3 — 6-char Q-type accession."""
+        assert UNIPROT_ACCESSION_RE.match("Q9Y6I3") is not None
+
+    def test_valid_o60341(self):
+        """O60341 — O-type accession."""
+        assert UNIPROT_ACCESSION_RE.match("O60341") is not None
+
+    def test_invalid_all_digits_prefix(self):
+        """123ABC — starts with digit, not a letter."""
+        assert UNIPROT_ACCESSION_RE.match("123ABC") is None
+
+    def test_invalid_gene_name(self):
+        """gene_name — not an accession."""
+        assert UNIPROT_ACCESSION_RE.match("gene_name") is None
+
+    def test_invalid_too_short(self):
+        """P1234 — only 5 chars, one short."""
+        assert UNIPROT_ACCESSION_RE.match("P1234") is None
+
+    def test_invalid_lowercase(self):
+        """p04637 — lowercase first letter must fail."""
+        assert UNIPROT_ACCESSION_RE.match("p04637") is None
+
+    def test_add_user_target_uniprot_field_validates_format(self):
+        """AddUserTargetRequest must reject invalid UniProt accession."""
+        with pytest.raises(ValidationError, match="[Uu]ni[Pp]rot|accession|format"):
+            AddUserTargetRequest(uniprot_id="123ABC")
+
+    def test_add_user_target_uniprot_field_accepts_valid(self):
+        """AddUserTargetRequest must accept a valid UniProt accession."""
+        req = AddUserTargetRequest(uniprot_id="P04637")
+        assert req.uniprot_id == "P04637"
+
+
+# ---------------------------------------------------------------------------
+# HGNC gene symbol validation
+# ---------------------------------------------------------------------------
+
+class TestGeneSymbolFormat:
+    """HGNC gene symbol: uppercase letter start, 1–25 chars, A-Z0-9 and hyphen only.
+
+    Pattern: ^[A-Z][A-Z0-9\\-]{0,24}$
+    """
+
+    def test_valid_tp53(self):
+        assert GENE_SYMBOL_RE.match("TP53") is not None
+
+    def test_valid_egfr(self):
+        assert GENE_SYMBOL_RE.match("EGFR") is not None
+
+    def test_valid_brca1(self):
+        assert GENE_SYMBOL_RE.match("BRCA1") is not None
+
+    def test_valid_hif1a_with_hyphen(self):
+        assert GENE_SYMBOL_RE.match("HIF-1A") is not None
+
+    def test_valid_hla_a(self):
+        assert GENE_SYMBOL_RE.match("HLA-A") is not None
+
+    def test_invalid_lowercase(self):
+        assert GENE_SYMBOL_RE.match("tp53") is None
+
+    def test_invalid_mixed_case(self):
+        assert GENE_SYMBOL_RE.match("gene_lowercase") is None
+
+    def test_invalid_starts_with_digit(self):
+        assert GENE_SYMBOL_RE.match("1BADSTART") is None
+
+    def test_invalid_empty(self):
+        assert GENE_SYMBOL_RE.match("") is None
+
+    def test_add_user_target_gene_symbol_field_validates_format(self):
+        """AddUserTargetRequest must reject lowercase gene symbol."""
+        with pytest.raises(ValidationError, match="[Gg]ene.symbol|[Hh][Gg][Nn][Cc]|format|uppercase"):
+            AddUserTargetRequest(gene_symbol="tp53")
+
+    def test_add_user_target_gene_symbol_field_accepts_valid(self):
+        """AddUserTargetRequest must accept a valid gene symbol."""
+        req = AddUserTargetRequest(gene_symbol="TP53")
+        assert req.gene_symbol == "TP53"
+
+
+# ---------------------------------------------------------------------------
+# SMILES minimum validation
+# ---------------------------------------------------------------------------
+
+class TestSmilesMinimum:
+    """SMILES minimal validator: length >= 3, printable ASCII only.
+
+    Chemical correctness is PubChem's job — we only reject obviously malformed input.
+    """
+
+    def test_valid_ethanol(self):
+        """CCO — ethanol, minimal valid SMILES."""
+        req = AddUserCompoundRequest(smiles="CCO")
+        assert req.smiles == "CCO"
+
+    def test_valid_benzene(self):
+        """c1ccccc1 — benzene aromatic SMILES."""
+        req = AddUserCompoundRequest(smiles="c1ccccc1")
+        assert req.smiles == "c1ccccc1"
+
+    def test_valid_aspirin(self):
+        """Aspirin SMILES — long valid string."""
+        req = AddUserCompoundRequest(smiles="CC(=O)Oc1ccccc1C(=O)O")
+        assert req.smiles == "CC(=O)Oc1ccccc1C(=O)O"
+
+    def test_invalid_empty(self):
+        """Empty string — too short (length < 3)."""
+        with pytest.raises(ValidationError, match="[Ss][Mm][Ii][Ll][Ee][Ss]|[Ll]ength|[Tt]oo short|[Mm]inimum"):
+            AddUserCompoundRequest(smiles="")
+
+    def test_invalid_single_char(self):
+        """'C' — only 1 char, below minimum length of 3."""
+        with pytest.raises(ValidationError, match="[Ss][Mm][Ii][Ll][Ee][Ss]|[Ll]ength|[Tt]oo short|[Mm]inimum"):
+            AddUserCompoundRequest(smiles="C")
+
+    def test_invalid_non_ascii(self):
+        """Null byte in SMILES — non-printable ASCII must be rejected."""
+        with pytest.raises(ValidationError, match="[Ss][Mm][Ii][Ll][Ee][Ss]|[Aa][Ss][Cc][Ii][Ii]|printable"):
+            AddUserCompoundRequest(smiles="\x00toxic")
+
+    def test_invalid_two_chars(self):
+        """'CC' — 2 chars, still below minimum."""
+        with pytest.raises(ValidationError, match="[Ss][Mm][Ii][Ll][Ee][Ss]|[Ll]ength|[Tt]oo short|[Mm]inimum"):
+            AddUserCompoundRequest(smiles="CC")

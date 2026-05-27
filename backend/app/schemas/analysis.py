@@ -1,7 +1,23 @@
+import re
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 from uuid import UUID
 from datetime import datetime
 from typing import Any, Literal
+
+# ---------------------------------------------------------------------------
+# Format validators — UniProt accession and HGNC gene symbol
+# ---------------------------------------------------------------------------
+
+# UniProt accession: HUPO-PSI standard two-pattern format.
+#   6-char legacy:  [OPQ][0-9][A-Z0-9]{3}[0-9]
+#   10-char new:    [A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}
+UNIPROT_ACCESSION_RE = re.compile(
+    r'^[OPQ][0-9][A-Z0-9]{3}[0-9]$|^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$'
+)
+
+# HGNC gene symbol: uppercase letter start, 1–25 chars, A-Z / 0-9 / hyphen only.
+GENE_SYMBOL_RE = re.compile(r'^[A-Z][A-Z0-9\-]{0,24}$')
 
 
 # STRING-DB standard confidence thresholds (Low / Medium / High / Very High)
@@ -188,6 +204,27 @@ class AddUserTargetRequest(BaseModel):
     gene_symbol: str | None = None
     uniprot_id: str | None = None
 
+    @field_validator("uniprot_id")
+    @classmethod
+    def validate_uniprot_format(cls, v: str | None) -> str | None:
+        if v is not None and not UNIPROT_ACCESSION_RE.match(v):
+            raise ValueError(
+                f"Invalid UniProt accession format: {v!r}. "
+                "Expected HUPO-PSI format, e.g. P04637 or Q9Y6I3."
+            )
+        return v
+
+    @field_validator("gene_symbol")
+    @classmethod
+    def validate_gene_symbol_format(cls, v: str | None) -> str | None:
+        if v is not None and not GENE_SYMBOL_RE.match(v):
+            raise ValueError(
+                f"Invalid HGNC gene symbol: {v!r}. "
+                "Gene symbols must be uppercase, start with a letter, "
+                "1–25 characters (A-Z, 0-9, hyphen), e.g. TP53 or HIF-1A."
+            )
+        return v
+
     @model_validator(mode="after")
     def at_least_one(self) -> "AddUserTargetRequest":
         if not self.gene_symbol and not self.uniprot_id:
@@ -221,6 +258,21 @@ class InjectCompoundsResponse(BaseModel):
 class AddUserCompoundRequest(BaseModel):
     smiles: str | None = None
     inchi: str | None = None
+
+    @field_validator("smiles")
+    @classmethod
+    def validate_smiles_minimum(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        if len(v) < 3:
+            raise ValueError(
+                f"SMILES string is too short ({len(v)} chars); minimum length is 3."
+            )
+        if not v.isascii() or not v.isprintable():
+            raise ValueError(
+                "SMILES must contain only printable ASCII characters."
+            )
+        return v
 
     @model_validator(mode="after")
     def at_least_one(self) -> "AddUserCompoundRequest":

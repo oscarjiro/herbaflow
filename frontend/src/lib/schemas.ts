@@ -34,6 +34,47 @@ export const SOFT_CAP_MANUAL_TARGETS = 500
 export const SOFT_CAP_DISEASE_TARGETS = 500
 
 // ---------------------------------------------------------------------------
+// Format validators — UniProt accession, HGNC gene symbol, SMILES
+// ---------------------------------------------------------------------------
+
+/**
+ * UniProt accession: HUPO-PSI standard two-pattern format.
+ *   6-char legacy:  [OPQ][0-9][A-Z0-9]{3}[0-9]
+ *   10-char new:    [A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}
+ * Mirrors UNIPROT_ACCESSION_RE in backend/app/schemas/analysis.py.
+ */
+const UNIPROT_RE =
+  /^[OPQ][0-9][A-Z0-9]{3}[0-9]$|^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$/
+
+export const uniprotAccessionSchema = z
+  .string()
+  .regex(UNIPROT_RE, 'Invalid UniProt accession format (e.g., P04637 or Q9Y6I3)')
+
+/**
+ * HGNC gene symbol: uppercase letter start, 1–25 chars, A-Z / 0-9 / hyphen only.
+ * Mirrors GENE_SYMBOL_RE in backend/app/schemas/analysis.py.
+ */
+export const geneSymbolSchema = z
+  .string()
+  .regex(
+    /^[A-Z][A-Z0-9\-]{0,24}$/,
+    'Gene symbol must be uppercase and follow HGNC format (e.g., TP53 or HIF-1A)',
+  )
+
+/**
+ * SMILES minimum validation: length >= 3, printable ASCII only.
+ * Chemical correctness is delegated to PubChem — we only block obviously malformed input.
+ * Mirrors validate_smiles_minimum in backend/app/schemas/analysis.py.
+ */
+export const smilesSchema = z
+  .string()
+  .min(3, 'SMILES string is too short; minimum length is 3')
+  .refine(
+    (v) => /^[\x20-\x7E]+$/.test(v),
+    'SMILES must contain only printable ASCII characters',
+  )
+
+// ---------------------------------------------------------------------------
 // Primitives
 // ---------------------------------------------------------------------------
 
