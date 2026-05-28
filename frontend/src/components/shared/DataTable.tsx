@@ -10,7 +10,7 @@ import {
   type ColumnDef as TanStackColumnDef,
   type SortingState,
   type PaginationState,
-  type FilterFn,
+  type ColumnFiltersState,
 } from '@tanstack/react-table'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -22,6 +22,7 @@ export interface ColumnDef<T> {
   key: keyof T & string
   header: string
   sortable?: boolean
+  enableColumnFilter?: boolean
   render?: (value: T[keyof T], row: T) => React.ReactNode
   className?: string
 }
@@ -37,36 +38,27 @@ interface DataTableProps<T extends Record<string, unknown>> {
   data: T[]
   columns: ColumnDef<T>[]
   filterPlaceholder?: string
-  filterKeys?: (keyof T & string)[]   // which fields to search in
+  filterKeys?: (keyof T & string)[]   // which fields to search in (used only if filterable is false)
   pageSize?: number                    // initial page size; must be 10 | 25 | 50 — defaults to 25
   className?: string
   rowClassName?: (row: T) => string    // for per-row styling (e.g. hub gene highlight)
-}
-
-// Custom global filter function that respects filterKeys
-function buildGlobalFilter<T extends Record<string, unknown>>(
-  filterKeys: (keyof T & string)[]
-): FilterFn<T> {
-  const fn: FilterFn<T> = (row, _columnId, filterValue: string) => {
-    if (!filterValue || !filterValue.trim()) return true
-    const q = filterValue.toLowerCase()
-    return filterKeys.some(k => String((row.original as T)[k] ?? '').toLowerCase().includes(q))
-  }
-  fn.autoRemove = (val: unknown) => !val || !(val as string).trim()
-  return fn
+  sortable?: boolean                   // when false, disable all column sorting (default: true)
+  filterable?: boolean                 // when true, show per-column filter inputs below each header (default: false)
 }
 
 export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
-  filterPlaceholder = 'Filter...',
-  filterKeys,
+  filterPlaceholder: _filterPlaceholder = 'Filter...',
+  filterKeys: _filterKeys,
   pageSize = 25,
   className,
   rowClassName,
+  sortable = true,
+  filterable = false,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [selectedPageSize, setSelectedPageSize] = useState<PageSizeOption>(
     () => toPageSizeOption(pageSize)
   )
@@ -76,10 +68,6 @@ export function DataTable<T extends Record<string, unknown>>({
   }))
 
   const safeData = useMemo(() => data ?? [], [data])
-  const searchKeys = useMemo(
-    () => filterKeys ?? columns.map(c => c.key),
-    [filterKeys, columns]
-  )
 
   // Build TanStack ColumnDef array from our public ColumnDef interface
   const tanstackColumns = useMemo<TanStackColumnDef<T, unknown>[]>(() => {
@@ -87,19 +75,13 @@ export function DataTable<T extends Record<string, unknown>>({
       id: col.key,
       accessorKey: col.key,
       header: col.header,
-      enableSorting: col.sortable ?? false,
-      enableGlobalFilter: true,
+      enableSorting: sortable && (col.sortable ?? false),
+      enableColumnFilter: filterable && (col.enableColumnFilter ?? true),
       cell: col.render
         ? ({ row }: { row: { original: T } }) => col.render!(row.original[col.key], row.original)
         : ({ getValue }: { getValue: () => unknown }) => String(getValue() ?? ''),
     }))
-  }, [columns])
-
-  const globalFilterFn = useMemo(
-    () => buildGlobalFilter<T>(searchKeys),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [searchKeys.join(',')]
-  )
+  }, [columns, sortable, filterable])
 
   const isPaginated = selectedPageSize !== 'all'
 
@@ -108,7 +90,7 @@ export function DataTable<T extends Record<string, unknown>>({
     columns: tanstackColumns,
     state: {
       sorting,
-      globalFilter,
+      columnFilters,
       pagination,
     },
     // Always sort asc first on first click (consistent regardless of column type)
@@ -118,13 +100,11 @@ export function DataTable<T extends Record<string, unknown>>({
       // reset to first page on sort change
       setPagination(prev => ({ ...prev, pageIndex: 0 }))
     },
-    onGlobalFilterChange: (updater) => {
-      const next = typeof updater === 'function' ? updater(globalFilter) : updater
-      setGlobalFilter(next)
+    onColumnFiltersChange: (updater) => {
+      setColumnFilters(prev => typeof updater === 'function' ? updater(prev) : updater)
       setPagination(prev => ({ ...prev, pageIndex: 0 }))
     },
     onPaginationChange: setPagination,
-    globalFilterFn,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -137,11 +117,6 @@ export function DataTable<T extends Record<string, unknown>>({
   const currentPageSize = isPaginated ? pagination.pageSize : totalRows
   const totalPages = isPaginated ? Math.ceil(totalRows / currentPageSize) : 1
 
-  const rangeStart = totalRows === 0 ? 0 : pageIndex * currentPageSize + 1
-  const rangeEnd = isPaginated
-    ? Math.min((pageIndex + 1) * currentPageSize, totalRows)
-    : totalRows
-
   function handlePageSizeChange(size: PageSizeOption) {
     setSelectedPageSize(size)
     const numericSize = size === 'all' ? 999999 : (size as number)
@@ -152,17 +127,6 @@ export function DataTable<T extends Record<string, unknown>>({
 
   return (
     <div className={cn('space-y-3', className)}>
-      <input
-        type="text"
-        placeholder={filterPlaceholder}
-        value={globalFilter}
-        onChange={e => {
-          setGlobalFilter(e.target.value)
-          setPagination(prev => ({ ...prev, pageIndex: 0 }))
-        }}
-        className="w-full max-w-sm rounded border border-hf-border bg-hf-surface px-3 py-1.5 text-sm text-hf-fg1 placeholder:text-hf-fg4 focus:outline-none focus:ring-1 focus:ring-hf-fg1"
-        aria-label="Filter table"
-      />
       <div className="rounded-lg border border-hf-border bg-hf-surface overflow-hidden">
         <Table>
           <TableHeader>
@@ -171,21 +135,35 @@ export function DataTable<T extends Record<string, unknown>>({
                 {headerGroup.headers.map((header, i) => {
                   const colDef = columns[i]
                   const isSorted = header.column.getIsSorted()
+                  const canSort = sortable && (colDef?.sortable ?? false)
                   return (
                     <TableHead
                       key={header.id}
                       className={cn(
                         'text-xs text-hf-fg3 font-sans font-medium',
-                        colDef?.sortable && 'cursor-pointer select-none hover:text-hf-fg1',
+                        canSort && 'cursor-pointer select-none hover:text-hf-fg1',
                         colDef?.className
                       )}
-                      onClick={colDef?.sortable ? header.column.getToggleSortingHandler() : undefined}
+                      onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                     >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {isSorted && (
-                        <span className="ml-1" data-sort-indicator="">
-                          {isSorted === 'asc' ? '↑' : '↓'}
-                        </span>
+                      <div>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {isSorted && (
+                          <span className="ml-1" data-sort-indicator="">
+                            {isSorted === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </div>
+                      {filterable && header.column.getCanFilter() && (
+                        <input
+                          type="text"
+                          placeholder={`Filter ${typeof header.column.columnDef.header === 'string' ? header.column.columnDef.header : header.column.id}`}
+                          value={(header.column.getFilterValue() as string) ?? ''}
+                          onChange={e => header.column.setFilterValue(e.target.value || undefined)}
+                          onClick={e => e.stopPropagation()}
+                          className="mt-1 w-full rounded border border-hf-border bg-hf-surface px-2 py-0.5 text-xs text-hf-fg1 placeholder:text-hf-fg4 focus:outline-none focus:ring-1 focus:ring-hf-fg1 font-normal cursor-text"
+                          aria-label={`Filter ${header.column.id}`}
+                        />
                       )}
                     </TableHead>
                   )
@@ -240,10 +218,12 @@ export function DataTable<T extends Record<string, unknown>>({
             ))}
           </div>
 
-          {/* Row range + prev/next navigation */}
+          {/* Page X of Y + prev/next navigation */}
           <div className="flex items-center gap-1.5">
             <span className="tabular-nums">
-              {totalRows === 0 ? '0 rows' : `${rangeStart}–${rangeEnd} of ${totalRows}`}
+              {isPaginated
+                ? `Page ${pageIndex + 1} of ${totalPages}`
+                : `${totalRows} rows`}
             </span>
             {isPaginated && totalPages > 1 && (
               <>

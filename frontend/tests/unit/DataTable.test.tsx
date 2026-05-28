@@ -11,8 +11,8 @@ const data = [
 type Row = typeof data[number]
 
 const columns: ColumnDef<Row>[] = [
-  { key: 'name',  header: 'Name',  sortable: true },
-  { key: 'value', header: 'Value', sortable: true },
+  { key: 'name',  header: 'Name',  sortable: true, enableColumnFilter: true },
+  { key: 'value', header: 'Value', sortable: true, enableColumnFilter: true },
 ]
 
 describe('DataTable', () => {
@@ -23,12 +23,26 @@ describe('DataTable', () => {
     expect(screen.getByText('Gamma')).toBeInTheDocument()
   })
 
-  it('filters rows by text', () => {
-    render(<DataTable data={data} columns={columns} />)
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'alp' } })
+  it('filters rows by column when filterable={true}', () => {
+    render(<DataTable data={data} columns={columns} filterable={true} />)
+    // Target the per-column Name filter input specifically
+    const nameFilterInput = screen.getByLabelText('Filter name')
+    fireEvent.change(nameFilterInput, { target: { value: 'alp' } })
     expect(screen.getByText('Alpha')).toBeInTheDocument()
     expect(screen.queryByText('Beta')).not.toBeInTheDocument()
     expect(screen.queryByText('Gamma')).not.toBeInTheDocument()
+  })
+
+  it('does not show filter inputs when filterable is not set', () => {
+    render(<DataTable data={data} columns={columns} />)
+    expect(screen.queryByLabelText('Filter name')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Filter value')).not.toBeInTheDocument()
+  })
+
+  it('shows per-column filter inputs when filterable={true}', () => {
+    render(<DataTable data={data} columns={columns} filterable={true} />)
+    expect(screen.getByLabelText('Filter name')).toBeInTheDocument()
+    expect(screen.getByLabelText('Filter value')).toBeInTheDocument()
   })
 
   it('sorts asc then desc on column click', () => {
@@ -47,11 +61,19 @@ describe('DataTable', () => {
     expect(names2).toEqual(['Alpha', 'Gamma', 'Beta'])
   })
 
-  it('shows pagination controls and range when rows exceed page size', () => {
+  it('disables all sorting when sortable={false}', () => {
+    render(<DataTable data={data} columns={columns} sortable={false} />)
+    const nameHeader = screen.getByText('Name')
+    fireEvent.click(nameHeader)
+    // Sort indicator should NOT appear
+    expect(nameHeader.closest('th')?.querySelector('[data-sort-indicator]')).toBeNull()
+  })
+
+  it('shows Page X of Y pagination label when rows exceed page size', () => {
     const bigData = Array.from({ length: 60 }, (_, i) => ({ name: `Item ${i}`, value: i }))
     render(<DataTable data={bigData} columns={columns} pageSize={50} />)
-    // Range indicator: first page of 50 shows "1–50 of 60"
-    expect(screen.getByText('1–50 of 60')).toBeInTheDocument()
+    // Page label: "Page 1 of 2"
+    expect(screen.getByText('Page 1 of 2')).toBeInTheDocument()
     // Navigation buttons present
     expect(screen.getByLabelText('Previous page')).toBeInTheDocument()
     expect(screen.getByLabelText('Next page')).toBeInTheDocument()
@@ -110,9 +132,9 @@ describe('DataTable', () => {
   it('navigates to next page when Next is clicked', () => {
     const bigData = Array.from({ length: 15 }, (_, i) => ({ name: `Item ${i}`, value: i }))
     render(<DataTable data={bigData} columns={columns} pageSize={10} />)
-    expect(screen.getByText('1–10 of 15')).toBeInTheDocument()
+    expect(screen.getByText('Page 1 of 2')).toBeInTheDocument()
     fireEvent.click(screen.getByLabelText('Next page'))
-    expect(screen.getByText('11–15 of 15')).toBeInTheDocument()
+    expect(screen.getByText('Page 2 of 2')).toBeInTheDocument()
     // Next should now be disabled (last page), Prev enabled
     expect(screen.getByLabelText('Next page')).toBeDisabled()
     expect(screen.getByLabelText('Previous page')).not.toBeDisabled()
@@ -123,7 +145,7 @@ describe('DataTable', () => {
     render(<DataTable data={bigData} columns={columns} pageSize={10} />)
     fireEvent.click(screen.getByLabelText('Next page'))
     fireEvent.click(screen.getByLabelText('Previous page'))
-    expect(screen.getByText('1–10 of 15')).toBeInTheDocument()
+    expect(screen.getByText('Page 1 of 2')).toBeInTheDocument()
   })
 
   it('renders custom cell content via render function', () => {
