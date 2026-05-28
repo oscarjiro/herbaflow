@@ -22,7 +22,7 @@ export const sourceUrls = {
   reactome: (termId: string) =>
     `https://reactome.org/PathwayBrowser/#${termId}`,
 
-  wikpathways: (termId: string) =>
+  wikipathways: (termId: string) =>
     `https://www.wikipathways.org/pathways/${termId}`,
 } as const
 
@@ -31,7 +31,7 @@ export function enrichmentTermUrl(termId: string, source: string): string {
   const s = source.toLowerCase()
   if (s === 'kegg') return sourceUrls.kegg(termId)
   if (s === 'reactome') return sourceUrls.reactome(termId)
-  if (s.includes('wiki')) return sourceUrls.wikpathways(termId)
+  if (s.includes('wiki')) return sourceUrls.wikipathways(termId)
   // Default: GO term (go_bp, go_mf, go_cc, GO:BP, GO:MF, GO:CC)
   return sourceUrls.goTerm(termId)
 }

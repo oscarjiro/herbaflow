@@ -31,7 +31,7 @@ describe('sourceUrls', () => {
   })
 
   it('generates correct WikiPathways URL', () => {
-    expect(sourceUrls.wikpathways('WP195')).toBe('https://www.wikipathways.org/pathways/WP195')
+    expect(sourceUrls.wikipathways('WP195')).toBe('https://www.wikipathways.org/pathways/WP195')
   })
 })
 
