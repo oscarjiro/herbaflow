@@ -1,6 +1,7 @@
 import pytest
 from uuid import uuid4
-from analysis.models import AdmeParams, CompoundRecord
+from unittest.mock import AsyncMock, MagicMock, patch
+from analysis.models import AdmeParams, CompoundRecord, PipelineConfig
 from analysis.stages.stage2_adme import filter_compounds
 
 
@@ -147,3 +148,76 @@ def test_manual_compound_screened_when_flag_enabled():
     assert result["np_exceptions"] == []
     assert len(result["failed"]) == 1
     assert result["failed"][0].compound_id == compound.compound_id
+
+
+# ---------------------------------------------------------------------------
+# Regression: stage2 run() output must include all expected ADME field names
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_stage2_output_includes_all_adme_fields():
+    """stage2_adme.run() compound dicts must include all 7 ADME display fields.
+
+    Regression guard: a prior bug omitted some field names from the enriched
+    compound list, breaking the frontend Stage 2 table display.
+    """
+    from analysis.stages.stage2_adme import run as stage2_run
+    from app.models.analysis import AnalysisRun
+
+    compound_id = str(uuid4())
+
+    # Fake AnalysisRun with stage_1 result pointing to our compound
+    run = MagicMock(spec=AnalysisRun)
+    run.parameters = {}
+    run.stage_results = {
+        "stage_1": {
+            "compound_ids": [compound_id],
+            "compounds": [{"compound_id": compound_id, "plant_ids": ["pl_1"]}],
+        }
+    }
+
+    # Fake DB compound with all ADME fields populated
+    fake_db_compound = MagicMock()
+    fake_db_compound.compound_id = compound_id
+    fake_db_compound.canonical_name = "Test Compound"
+    fake_db_compound.smiles = "CC(=O)O"
+    fake_db_compound.chembl_id = None
+    fake_db_compound.pubchem_cid = None
+    fake_db_compound.molecular_weight = 300.0
+    fake_db_compound.logp = 2.0
+    fake_db_compound.hbond_donors = 1
+    fake_db_compound.hbond_acceptors = 3
+    fake_db_compound.tpsa = 60.0
+    fake_db_compound.rotatable_bonds = 4
+    fake_db_compound.np_likeness_score = 0.3
+    fake_db_compound.is_pains_positive = False
+    fake_db_compound.num_ro5_violations = 0
+
+    session = AsyncMock()
+    config = PipelineConfig()
+
+    with patch(
+        "analysis.stages.stage2_adme.compound_repo.get_compounds_by_ids",
+        return_value=[fake_db_compound],
+    ):
+        result = await stage2_run(run, config, session)
+
+    assert "compounds" in result, "stage2 output must have 'compounds' key"
+    assert len(result["compounds"]) == 1
+
+    compound_out = result["compounds"][0]
+
+    expected_fields = [
+        "molecular_weight",
+        "logp",
+        "tpsa",
+        "hbond_donors",
+        "hbond_acceptors",
+        "np_likeness_score",
+        "rotatable_bonds",
+    ]
+    for field in expected_fields:
+        assert field in compound_out, (
+            f"Stage 2 compound output missing expected ADME field: '{field}'. "
+            f"Available keys: {list(compound_out.keys())}"
+        )
