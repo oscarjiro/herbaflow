@@ -11,6 +11,8 @@ from urllib.parse import quote
 
 import httpx
 
+from integrations._retry import with_retry, ServiceUnavailableError
+
 logger = logging.getLogger(__name__)
 
 PUBCHEM_BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
@@ -34,17 +36,56 @@ def make_compound_id(inchikey: str) -> str:
 def compute_adme(props: dict) -> dict:
     """Compute ADME/Lipinski criteria from PubChem property values.
 
-    Uses Lipinski's Rule of Five:
-    - MW <= 500
-    - XLogP <= 5
-    - HBD <= 5
-    - HBA <= 10
+    PubChem REST API returns numeric values as strings. This function
+    coerces all values to float/int before comparison.
+
+    Returns dict with 'insufficient_data: True' when all key properties are None.
+    A compound with no ADME data should NOT automatically pass Lipinski filters.
     """
-    mw = props.get("MolecularWeight", 999)
-    xlogp = props.get("XLogP", 99)
-    hbd = props.get("HBondDonorCount", 99)
-    hba = props.get("HBondAcceptorCount", 99)
-    rotatable = props.get("RotatableBondCount", 99)
+    def _float(val, default: float) -> float | None:
+        if val is None:
+            return None
+        try:
+            return float(val)
+        except (TypeError, ValueError):
+            return default
+
+    def _int(val, default: int) -> int | None:
+        if val is None:
+            return None
+        try:
+            return int(float(val))
+        except (TypeError, ValueError):
+            return default
+
+    mw = _float(props.get("MolecularWeight"), 999.0)
+    xlogp = _float(props.get("XLogP"), 99.0)
+    hbd = _int(props.get("HBondDonorCount"), 99)
+    hba = _int(props.get("HBondAcceptorCount"), 99)
+    rotatable = _int(props.get("RotatableBondCount"), 99)
+
+    # If all key ADME properties are None, compound has no data — do not auto-pass
+    key_props = [mw, xlogp, hbd, hba]
+    insufficient_data = all(v is None for v in key_props)
+
+    if insufficient_data:
+        return {
+            "mw": None,
+            "xlogp": None,
+            "hbd": None,
+            "hba": None,
+            "rotatable_bonds": rotatable,
+            "lipinski_pass": False,
+            "adme_pass": False,
+            "insufficient_data": True,
+        }
+
+    # Use 999/99 as sentinel defaults for missing individual properties
+    mw = mw if mw is not None else 999.0
+    xlogp = xlogp if xlogp is not None else 99.0
+    hbd = hbd if hbd is not None else 99
+    hba = hba if hba is not None else 99
+    rotatable = rotatable if rotatable is not None else 99
 
     lipinski_pass = mw <= 500 and xlogp <= 5 and hbd <= 5 and hba <= 10
 
@@ -55,8 +96,64 @@ def compute_adme(props: dict) -> dict:
         "hba": hba,
         "rotatable_bonds": rotatable,
         "lipinski_pass": lipinski_pass,
-        "adme_pass": lipinski_pass,  # simplified: ADME pass == Lipinski pass
+        "adme_pass": lipinski_pass,
+        "insufficient_data": False,
     }
+
+
+async def _fetch_cid(
+    structure: str,
+    client: httpx.AsyncClient,
+) -> int | None:
+    """Resolve a SMILES or InChI string to a numeric PubChem CID.
+
+    Uses /compound/{type}/{structure}/cids/JSON for SMILES and
+    POST /compound/inchi/cids/JSON for InChI.
+
+    Returns the first CID as an integer, or None if not found / on error.
+    """
+    if _is_inchi(structure):
+        url = f"{PUBCHEM_BASE}/compound/inchi/cids/JSON"
+
+        async def _post_cid() -> httpx.Response:
+            r = await client.post(url, data={"inchi": structure})
+            if r.status_code in (400, 404):
+                return r
+            r.raise_for_status()
+            return r
+
+        try:
+            resp = await with_retry(_post_cid, service_name="PubChem")
+        except (ServiceUnavailableError, httpx.HTTPError) as e:
+            logger.warning("PubChem CID lookup failed for InChI input: %s", e)
+            return None
+    else:
+        encoded = quote(structure, safe="")
+        url = f"{PUBCHEM_BASE}/compound/smiles/{encoded}/cids/JSON"
+
+        async def _get_cid() -> httpx.Response:
+            r = await client.get(url)
+            if r.status_code in (400, 404):
+                return r
+            r.raise_for_status()
+            return r
+
+        try:
+            resp = await with_retry(_get_cid, service_name="PubChem")
+        except (ServiceUnavailableError, httpx.HTTPError) as e:
+            logger.warning("PubChem CID lookup failed for SMILES input %r: %s", structure[:50], e)
+            return None
+
+    if resp.status_code in (400, 404):
+        return None
+
+    try:
+        data = resp.json()
+    except Exception:
+        return None
+
+    cids = (data.get("IdentifierList") or {}).get("CID") or []
+    return cids[0] if cids else None
 
 
 async def validate_compound(
@@ -69,6 +166,7 @@ async def validate_compound(
 
     The returned dict has the following keys:
     - compound_id: deterministic UUID v5 string
+    - pubchem_cid: numeric PubChem CID as a string (e.g. "2244"), used for DB caching
     - inchikey: InChIKey string
     - iupac_name: IUPAC name (may be empty string)
     - molecular_formula: molecular formula
@@ -83,37 +181,38 @@ async def validate_compound(
     if not structure:
         return None
 
-    if _is_inchi(structure):
-        input_type = "inchi"
-        # PubChem requires InChI in the path but it can contain slashes — use POST
-        # For simplicity, use the URL-encoded GET approach with inchi type
-        encoded = quote(structure, safe="")
-        url = f"{PUBCHEM_BASE}/compound/inchi/property/{_PROPERTY_LIST}/JSON"
-        try:
-            resp = await client.post(url, data={"inchi": structure})
-        except httpx.HTTPError as e:
-            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
-            return None
-    else:
-        # Treat as SMILES
-        encoded = quote(structure, safe="")
-        url = f"{PUBCHEM_BASE}/compound/smiles/{encoded}/property/{_PROPERTY_LIST}/JSON"
-        try:
-            resp = await client.get(url)
-        except httpx.HTTPError as e:
-            logger.warning("PubChem validation failed for input %r: %s", structure[:50], e)
-            return None
+    # Step 1: resolve the numeric CID first.  This gives us a stable identifier
+    # for DB caching and lets us fetch properties by CID (avoiding URL-encoding
+    # issues with complex SMILES strings on the property path).
+    cid = await _fetch_cid(structure, client)
+    if cid is None:
+        # Compound not in PubChem — cannot validate
+        return None
 
-    if resp.status_code == 404 or resp.status_code == 400:
+    # Step 2: fetch properties by CID (always succeeds if CID is valid)
+    url = f"{PUBCHEM_BASE}/compound/cid/{cid}/property/{_PROPERTY_LIST}/JSON"
+
+    async def _get_props() -> httpx.Response:
+        r = await client.get(url)
+        if r.status_code in (400, 404):
+            return r
+        r.raise_for_status()
+        return r
+
+    try:
+        resp = await with_retry(_get_props, service_name="PubChem")
+    except ServiceUnavailableError as e:
+        logger.error("PubChem unavailable during compound validation: %s", e)
+        return None
+    except httpx.HTTPError as e:
+        logger.warning("PubChem property fetch failed for CID %s: %s", cid, e)
+        return None
+
+    if resp.status_code in (400, 404):
         return None
 
     try:
-        resp.raise_for_status()
         data = resp.json()
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code >= 500:
-            raise  # Propagate PubChem 5xx so callers can return 502
-        return None
     except Exception:
         return None
 
@@ -128,13 +227,14 @@ async def validate_compound(
 
     iupac_name = props.get("IUPACName", "") or ""
     molecular_formula = props.get("MolecularFormula", "") or ""
-    molecular_weight = float(props.get("MolecularWeight") or 0)
 
     compound_id = make_compound_id(inchikey)
     adme = compute_adme(props)
+    molecular_weight = adme["mw"] if adme["mw"] is not None else 0.0
 
     return {
         "compound_id": compound_id,
+        "pubchem_cid": str(cid),  # string to match existing cache data conventions
         "inchikey": inchikey,
         "iupac_name": iupac_name,
         "molecular_formula": molecular_formula,

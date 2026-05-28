@@ -2,6 +2,7 @@ import copy
 import csv
 import io
 import json
+import logging
 from datetime import datetime
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
@@ -10,6 +11,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session, async_session_factory
+from app.errors import (
+    PUBCHEM_UNAVAILABLE,
+    UNIPROT_UNAVAILABLE,
+    UNIPROT_TARGET_NOT_FOUND,
+    UNIPROT_VALIDATION_FAILED,
+    TARGET_NOT_FOUND,
+    TARGET_ALREADY_EXISTS,
+)
 from app.schemas.analysis import (
     CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse,
     ResetFromRequest, ApproveRequest,
@@ -24,8 +33,10 @@ from app.repositories import analysis_repo
 from analysis.pipeline import run_stage
 from analysis.stages.stage3_targets import _make_target_id, _make_ct_id
 from integrations.uniprot import validate_human_target
+from integrations._retry import ServiceUnavailableError
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
+logger = logging.getLogger(__name__)
 
 TOTAL_STAGES = 8
 
@@ -653,13 +664,17 @@ async def inject_compounds(
     stage 3 uses the inline target-lookup path (ChEMBL/PubChem by InChIKey).
 
     After injection the endpoint:
-    1. Stores stage_1 and stage_2 synthetic results in stage_results.
-    2. Sets _input_mode = "manual_compounds" in parameters.
+    1. Deduplicates submitted compounds by PubChem CID — within batch and against
+       any compounds already in stage_1 results.
+    2. Stores stage_1 and stage_2 synthetic results in stage_results.
+    3. Sets _input_mode = "manual_compounds" in parameters.
 
+    Returns a summary with injected/duplicates_removed/duplicate_names.
     The frontend is responsible for then starting the pipeline.
     """
     import httpx
     from integrations.pubchem_compound import validate_compounds_batch
+    from app.services.compound_dedup import deduplicate_compounds
 
     run = await analysis_repo.get_run(session, analysis_id)
     if run is None:
@@ -667,14 +682,55 @@ async def inject_compounds(
     if run.status not in ("pending", "failed"):
         raise HTTPException(status_code=409, detail="Analysis already running or complete")
 
+    # Collect compound IDs already present in this analysis (stage_1 results)
+    existing_stage1 = (run.stage_results or {}).get("stage_1") or {}
+    existing_ids: set[str] = set(existing_stage1.get("compound_ids", []))
+
+    # Single shared client for both dedup PubChem lookups and batch validation.
     async with httpx.AsyncClient(timeout=20.0) as client:
+        # Deduplicate submitted inputs against each other and existing stage_1 compounds
         try:
-            validated, failed = await validate_compounds_batch(body.compounds, client)
+            deduped_inputs, dedup_removed = await deduplicate_compounds(
+                submitted=body.compounds,
+                existing_ids=existing_ids,
+                client=client,
+            )
         except Exception as e:
-            raise HTTPException(status_code=502, detail=f"PubChem validation failed: {str(e)}")
+            logger.warning("Deduplication failed, proceeding with raw inputs: %s", e, exc_info=True)
+            deduped_inputs = body.compounds
+            dedup_removed = []
+
+        if not deduped_inputs:
+            return InjectCompoundsResponse(
+                injected=0,
+                failed=[],
+                duplicates_removed=len(dedup_removed),
+                duplicate_names=dedup_removed,
+                cached=0,
+            )
+
+        try:
+            validated, failed = await validate_compounds_batch(deduped_inputs, client)
+        except ServiceUnavailableError as e:
+            logger.error("PubChem batch validation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=503, detail=PUBCHEM_UNAVAILABLE)
+        except Exception as e:
+            logger.error("PubChem batch validation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=502, detail=PUBCHEM_UNAVAILABLE)
 
     if not validated:
-        return InjectCompoundsResponse(injected=0, failed=failed)
+        return InjectCompoundsResponse(
+            injected=0,
+            failed=failed,
+            duplicates_removed=len(dedup_removed),
+            duplicate_names=dedup_removed,
+            cached=0,
+        )
+
+    # Cache canonicalized compounds to DB for future pipeline reuse.
+    # Non-fatal: if caching fails, log a warning and continue.
+    from app.services.compound_cache import cache_validated_compounds
+    cached_count = await cache_validated_compounds(validated, session)
 
     # Build stage_1 synthetic result — mimics stage1_selection.run() output.
     # Stage 2 reads compound_ids from stage_1; stage 3 reads all_active_compound_ids
@@ -738,13 +794,24 @@ async def inject_compounds(
         status=run.status,  # leave status unchanged — pipeline not started yet
         stage_results={"stage_1": stage1_result, "stage_2": stage2_result},
     )
+    # Persist manual_compound_ids so stage2_adme.run() can identify them and
+    # apply the ADME bypass when apply_adme_to_manual=False.  Merge with any
+    # IDs already present (idempotent — repeated inject calls accumulate IDs).
+    existing_manual_ids: list[str] = (run.parameters or {}).get("manual_compound_ids", [])
+    merged_manual_ids = list(dict.fromkeys(existing_manual_ids + compound_ids))
     await analysis_repo.merge_run_parameters(
         session,
         analysis_id,
-        {"_input_mode": "manual_compounds"},
+        {"_input_mode": "manual_compounds", "manual_compound_ids": merged_manual_ids},
     )
 
-    return InjectCompoundsResponse(injected=len(validated), failed=failed)
+    return InjectCompoundsResponse(
+        injected=len(validated),
+        failed=failed,
+        duplicates_removed=len(dedup_removed),
+        duplicate_names=dedup_removed,
+        cached=cached_count,
+    )
 
 
 @router.post("/{analysis_id}/user-compounds", response_model=AddUserCompoundResponse, status_code=200)
@@ -769,8 +836,12 @@ async def add_user_compound(
     async with httpx.AsyncClient(timeout=20.0) as client:
         try:
             validated = await validate_compound(structure, client)
+        except ServiceUnavailableError as e:
+            logger.error("PubChem compound validation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=503, detail=PUBCHEM_UNAVAILABLE)
         except Exception as e:
-            raise HTTPException(status_code=502, detail=f"PubChem validation failed: {str(e)}")
+            logger.error("PubChem compound validation error: %s", e, exc_info=True)
+            raise HTTPException(status_code=502, detail=PUBCHEM_UNAVAILABLE)
 
     if not validated:
         raise HTTPException(status_code=400, detail="Invalid compound structure: not found in PubChem")
@@ -856,8 +927,17 @@ async def add_user_target(
 
     try:
         info = await validate_human_target(body.gene_symbol, body.uniprot_id)
+    except ServiceUnavailableError as exc:
+        logger.error("UniProt target validation error: %s", exc)
+        raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc))
+        msg = str(exc)
+        logger.error("UniProt target validation error: %s", msg)
+        if "request failed" in msg or "returned error" in msg or "invalid JSON" in msg:
+            raise HTTPException(status_code=502, detail=UNIPROT_UNAVAILABLE)
+        if "not found" in msg or "not a human protein" in msg:
+            raise HTTPException(status_code=422, detail=UNIPROT_TARGET_NOT_FOUND)
+        raise HTTPException(status_code=422, detail=UNIPROT_VALIDATION_FAILED)
 
     # Upsert Target row (canonical cache — permanent)
     target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
@@ -878,7 +958,8 @@ async def add_user_target(
     try:
         updated = _add_target_to_stage3(stage3, info.gene_symbol, info.uniprot_accession, info.protein_name)
     except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc))
+        logger.warning("Duplicate target rejected for stage 3: %s", exc)
+        raise HTTPException(status_code=409, detail=TARGET_ALREADY_EXISTS)
 
     await session.commit()
     await analysis_repo.update_run_status(
@@ -911,7 +992,8 @@ async def remove_user_target(
     try:
         updated = _remove_target_from_stage3(stage3, gene_symbol)
     except KeyError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        logger.warning("Target removal rejected for stage 3: %s", exc)
+        raise HTTPException(status_code=404, detail=TARGET_NOT_FOUND)
 
     await analysis_repo.update_run_status(
         session, analysis_id,
@@ -937,8 +1019,17 @@ async def add_user_disease_target(
 
     try:
         info = await validate_human_target(body.gene_symbol, body.uniprot_id)
+    except ServiceUnavailableError as exc:
+        logger.error("UniProt disease-target validation error: %s", exc)
+        raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc))
+        msg = str(exc)
+        logger.error("UniProt disease-target validation error: %s", msg)
+        if "request failed" in msg or "returned error" in msg or "invalid JSON" in msg:
+            raise HTTPException(status_code=502, detail=UNIPROT_UNAVAILABLE)
+        if "not found" in msg or "not a human protein" in msg:
+            raise HTTPException(status_code=422, detail=UNIPROT_TARGET_NOT_FOUND)
+        raise HTTPException(status_code=422, detail=UNIPROT_VALIDATION_FAILED)
 
     # Upsert Target row (canonical cache — permanent)
     target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
@@ -965,7 +1056,8 @@ async def add_user_disease_target(
             stage4, info.gene_symbol, info.uniprot_accession, info.protein_name, disease_name
         )
     except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc))
+        logger.warning("Duplicate target rejected for stage 4: %s", exc)
+        raise HTTPException(status_code=409, detail=TARGET_ALREADY_EXISTS)
 
     await session.commit()
     await analysis_repo.update_run_status(
@@ -994,13 +1086,17 @@ async def inject_targets(
     in the format stage 5 reads (target_gene_symbols) and stage 4 ignores stage 3 entirely.
 
     After injection the endpoint:
-    1. Stores a synthetic stage_3 result in stage_results.
-    2. Sets _input_mode = "manual_targets" in parameters.
+    1. Deduplicates submitted targets by UniProt accession — within batch and
+       against targets already in stage_3 results.
+    2. Stores a synthetic stage_3 result in stage_results.
+    3. Sets _input_mode = "manual_targets" in parameters.
 
+    Returns a summary with injected/failed/duplicates_removed/duplicate_names.
     The frontend is responsible for then starting the pipeline.
     """
     import re
     import asyncio
+    from app.services.target_dedup import deduplicate_targets
 
     UNIPROT_ACCESSION_RE = re.compile(
         r"^[OPQ][0-9][A-Z0-9]{3}[0-9](?:[A-Z][A-Z0-9]{2}[0-9])?$"
@@ -1014,28 +1110,69 @@ async def inject_targets(
     if run.status not in ("pending", "failed"):
         raise HTTPException(status_code=409, detail="Analysis already running or complete")
 
-    # Validate each target via UniProt
-    injected_targets: list[dict] = []
-    failed: list[str] = []
+    # Collect UniProt accessions already in stage_3 results for cross-analysis dedup
+    existing_stage3 = (run.stage_results or {}).get("stage_3") or {}
+    existing_ids: set[str] = {
+        t.get("uniprot_id", "").upper()
+        for t in existing_stage3.get("targets", [])
+        if t.get("uniprot_id")
+    }
+    # Ensure existing_ids is normalized to uppercase for consistent dedup
+    existing_ids = {key.upper() for key in existing_ids if key}
 
-    async def _validate_one(raw: str):
+    # Convert flat string inputs to dicts for the dedup service.
+    # Each input is either a UniProt accession or a gene symbol.
+    submitted_dicts: list[dict] = []
+    for raw in body.targets:
         raw_stripped = raw.strip()
         if not raw_stripped:
-            failed.append(raw)
-            return
-        # Determine if input looks like a UniProt accession
+            submitted_dicts.append({"_raw": raw})
+            continue
+        is_accession = bool(UNIPROT_ACCESSION_RE.match(raw_stripped))
+        if is_accession:
+            submitted_dicts.append({"uniprot_id": raw_stripped, "_raw": raw})
+        else:
+            submitted_dicts.append({"gene_symbol": raw_stripped, "_raw": raw})
+
+    # Deduplicate before validation — removes within-batch and cross-analysis dups
+    try:
+        deduped_dicts, dedup_removed_labels = await deduplicate_targets(
+            submitted=submitted_dicts,
+            existing_ids=existing_ids,
+        )
+    except Exception as exc:
+        logger.warning("Target deduplication failed, proceeding without dedup: %s", exc, exc_info=True)
+        deduped_dicts = submitted_dicts
+        dedup_removed_labels = []
+
+    if not deduped_dicts:
+        return InjectTargetsResponse(
+            injected=0,
+            failed=[],
+            duplicates_removed=len(dedup_removed_labels),
+            duplicate_names=dedup_removed_labels,
+        )
+
+    # Validate each deduplicated target via UniProt
+    async def _validate_one(entry: dict) -> tuple[dict | None, str | None]:
+        """Validate one target entry. Returns (target_dict, error_label) — one is None."""
+        raw = entry.get("_raw", entry.get("gene_symbol") or entry.get("uniprot_id") or "")
+        raw_stripped = raw.strip() if isinstance(raw, str) else ""
+        if not raw_stripped:
+            return None, raw
         is_accession = bool(UNIPROT_ACCESSION_RE.match(raw_stripped))
         try:
             info = await validate_human_target(
                 gene_symbol=None if is_accession else raw_stripped,
                 uniprot_id=raw_stripped if is_accession else None,
             )
+        except ServiceUnavailableError:
+            raise  # propagate to inject_targets endpoint → 503
         except ValueError:
-            failed.append(raw_stripped)
-            return
+            return None, raw_stripped
 
         target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
-        injected_targets.append({
+        return {
             "target_id": target_id,
             "gene_symbol": info.gene_symbol,
             "uniprot_id": info.uniprot_accession,
@@ -1043,25 +1180,56 @@ async def inject_targets(
             "target_score": 1.0,
             "compound_ids": [],
             "sources": ["manual"],
-        })
+        }, None
 
-    await asyncio.gather(*[_validate_one(t) for t in body.targets])
+    injected_targets: list[dict] = []
+    failed: list[str] = []
+    try:
+        results = await asyncio.gather(*[_validate_one(e) for e in deduped_dicts])
+        for target, error in results:
+            if target:
+                injected_targets.append(target)
+            elif error:
+                failed.append(error)
+    except ServiceUnavailableError as exc:
+        logger.error("UniProt unavailable during inject-targets: %s", exc)
+        raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
 
     if not injected_targets:
-        return InjectTargetsResponse(injected=0, failed=failed)
+        return InjectTargetsResponse(
+            injected=0,
+            failed=failed,
+            duplicates_removed=len(dedup_removed_labels),
+            duplicate_names=dedup_removed_labels,
+        )
 
-    # Deduplicate by gene_symbol (keep first occurrence)
-    seen_genes: set[str] = set()
-    deduped: list[dict] = []
+    # Secondary dedup by UniProt accession (catches any remaining gene_symbol collisions
+    # not resolved in the pre-validation pass — e.g. two different gene symbols that
+    # resolve to the same protein).
+    seen_accessions: set[str] = set()
+    final_targets: list[dict] = []
+    # Build map of original user inputs for dedup tracking
+    original_inputs: dict[str, str] = {}
+    for e in deduped_dicts:
+        raw = e.get("_raw", e.get("gene_symbol") or e.get("uniprot_id") or "")
+        if e.get("uniprot_id"):
+            original_inputs[e["uniprot_id"].upper()] = raw
+        elif e.get("gene_symbol"):
+            original_inputs[e["gene_symbol"].upper()] = raw
+
     for t in injected_targets:
-        gene = t["gene_symbol"].upper()
-        if gene not in seen_genes:
-            seen_genes.add(gene)
-            deduped.append(t)
+        acc = t["uniprot_id"].upper()
+        if acc not in seen_accessions:
+            seen_accessions.add(acc)
+            final_targets.append(t)
+        else:
+            # Track original user input, not just gene_symbol
+            user_input = original_inputs.get(acc, t["gene_symbol"])
+            dedup_removed_labels.append(user_input)
 
     validated_targets = [
         {k: v for k, v in t.items() if k != "target_score"}
-        for t in deduped
+        for t in final_targets
     ]
 
     # Build synthetic stage_3 result — stage 5 reads target_gene_symbols
@@ -1092,7 +1260,12 @@ async def inject_targets(
         {"_input_mode": "manual_targets"},
     )
 
-    return InjectTargetsResponse(injected=len(deduped), failed=failed)
+    return InjectTargetsResponse(
+        injected=len(final_targets),
+        failed=failed,
+        duplicates_removed=len(dedup_removed_labels),
+        duplicate_names=dedup_removed_labels,
+    )
 
 
 @router.delete("/{analysis_id}/disease-targets/{gene_symbol}", status_code=204)
@@ -1112,7 +1285,8 @@ async def remove_user_disease_target(
     try:
         updated = _remove_target_from_stage4(stage4, gene_symbol)
     except KeyError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        logger.warning("Target removal rejected for stage 4: %s", exc)
+        raise HTTPException(status_code=404, detail=TARGET_NOT_FOUND)
 
     await analysis_repo.update_run_status(
         session, analysis_id,

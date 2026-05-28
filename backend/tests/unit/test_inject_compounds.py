@@ -2,18 +2,19 @@
 
 Tests:
 1. Empty compounds list → Pydantic ValidationError (min_length=1)
-2. Compounds list exceeding 100 items → Pydantic ValidationError (max_length=100)
+2. Compounds list exceeding HARD_CAP_MANUAL_COMPOUNDS items → Pydantic ValidationError
 3. HTTP boundary: POST /analyses/{id}/inject-compounds with [] → HTTP 422
 4. POST /analyses/{id}/user-compounds adds a compound to stage_1 results
 5. DELETE /analyses/{id}/user-compounds/{compound_id} removes a compound from stage_1
 """
+import httpx
 import pytest
 from pydantic import ValidationError
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from fastapi.testclient import TestClient
 from app.main import app
-from app.schemas.analysis import InjectCompoundsRequest
+from app.schemas.analysis import InjectCompoundsRequest, HARD_CAP_MANUAL_COMPOUNDS
 
 ANALYSIS_ID = "00000000-0000-0000-0000-000000000043"
 
@@ -42,16 +43,32 @@ def test_inject_compounds_empty_list_raises_validation_error():
 
 
 def test_inject_compounds_over_limit_raises_validation_error():
-    """InjectCompoundsRequest with > 100 items must raise a Pydantic ValidationError."""
+    """InjectCompoundsRequest with > HARD_CAP_MANUAL_COMPOUNDS items must raise a Pydantic ValidationError."""
     with pytest.raises(ValidationError) as exc_info:
-        InjectCompoundsRequest(compounds=["CC"] * 101)
+        InjectCompoundsRequest(compounds=["CC"] * (HARD_CAP_MANUAL_COMPOUNDS + 1))
 
     errors = exc_info.value.errors()
     assert any(e["loc"] == ("compounds",) for e in errors)
 
 
 # ---------------------------------------------------------------------------
-# Test 3: HTTP boundary — FastAPI translates Pydantic ValidationError → 422
+# Test 3: HTTP boundary — over HARD_CAP items → HTTP 422
+# ---------------------------------------------------------------------------
+
+
+def test_inject_compounds_over_hard_cap_returns_422():
+    """POST /analyses/{id}/inject-compounds with > HARD_CAP_MANUAL_COMPOUNDS items returns 422."""
+    too_many = ["CC"] * (HARD_CAP_MANUAL_COMPOUNDS + 1)
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.post(
+        f"/analyses/{ANALYSIS_ID}/inject-compounds",
+        json={"compounds": too_many},
+    )
+    assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Test 4: HTTP boundary — empty list → HTTP 422
 # ---------------------------------------------------------------------------
 
 
@@ -61,6 +78,7 @@ def test_inject_compounds_http_empty_list_returns_422():
     This confirms FastAPI's request/response boundary: the Pydantic
     ValidationError from InjectCompoundsRequest (min_length=1) is
     automatically converted to HTTP 422 before the route handler runs.
+    No mocking required — validation fires before the handler is called.
     """
     client = TestClient(app, raise_server_exceptions=False)
     response = client.post(
@@ -182,3 +200,181 @@ def test_remove_user_compound_from_stage1():
     assert response.status_code == 200, response.text
     data = response.json()
     assert data["removed"] == "11111111-1111-1111-1111-111111111111"
+
+
+# ---------------------------------------------------------------------------
+# Deduplication service unit tests
+# ---------------------------------------------------------------------------
+
+
+class TestDeduplicateCompoundsService:
+    """Tests for app.services.compound_dedup.deduplicate_compounds()."""
+
+    @pytest.mark.asyncio
+    async def test_same_cid_submitted_twice_keeps_one(self):
+        """Two inputs resolving to the same compound_id → only one in unique_new."""
+        compound = {
+            "compound_id": "cid-aaa",
+            "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "canonical_name": "aspirin",
+        }
+
+        async def mock_validate(structure, client):
+            return dict(compound)
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["CC(=O)Oc1ccccc1C(=O)O", "aspirin smiles variant"],
+                existing_ids=set(),
+                client=MagicMock(),
+            )
+
+        assert len(unique_new) == 1
+        assert len(duplicates) == 1
+
+    @pytest.mark.asyncio
+    async def test_compound_already_in_analysis_excluded(self):
+        """Compound whose compound_id is in existing_ids → in duplicates, not unique_new."""
+        compound = {
+            "compound_id": "cid-existing",
+            "inchikey": "EXISTING-INCHIKEY",
+            "canonical_name": "quercetin",
+        }
+
+        async def mock_validate(structure, client):
+            return dict(compound)
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["OC1=CC=C(C=C1)O"],
+                existing_ids={"cid-existing"},
+                client=MagicMock(),
+            )
+
+        assert len(unique_new) == 0
+        assert len(duplicates) == 1
+
+    @pytest.mark.asyncio
+    async def test_different_formats_same_cid_deduped(self):
+        """SMILES and a second input both resolving to same CID → only one kept."""
+        compound = {
+            "compound_id": "cid-bbb",
+            "inchikey": "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
+            "canonical_name": "caffeine",
+        }
+
+        async def mock_validate(structure, client):
+            return dict(compound)
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=[
+                    "Cn1cnc2c1c(=O)n(C)c(=O)n2C",  # SMILES
+                    "RYYVLZVUVIJVGH-UHFFFAOYSA-N",   # InChIKey (same compound)
+                ],
+                existing_ids=set(),
+                client=MagicMock(),
+            )
+
+        assert len(unique_new) == 1
+        assert len(duplicates) == 1
+
+    @pytest.mark.asyncio
+    async def test_response_always_contains_dedup_keys(self):
+        """InjectCompoundsResponse always exposes injected/duplicates_removed/duplicate_names."""
+        from app.schemas.analysis import InjectCompoundsResponse
+
+        resp = InjectCompoundsResponse(
+            injected=3,
+            failed=[],
+            duplicates_removed=2,
+            duplicate_names=["aspirin", "quercetin"],
+        )
+        assert resp.injected == 3
+        assert resp.duplicates_removed == 2
+        assert resp.duplicate_names == ["aspirin", "quercetin"]
+
+    @pytest.mark.asyncio
+    async def test_pubchem_unavailable_falls_back_to_string_dedup(self):
+        """PubChem returning None → string-based fallback dedup (lowercased, stripped)."""
+        async def mock_validate_unavailable(structure, client):
+            return None
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate_unavailable,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["Aspirin", "ASPIRIN", "  aspirin  "],
+                existing_ids=set(),
+                client=MagicMock(),
+            )
+
+        # All three normalize to "aspirin" — keep one
+        assert len(unique_new) == 1
+        assert len(duplicates) == 2
+
+    @pytest.mark.asyncio
+    async def test_timeout_exception_degrades_gracefully(self):
+        """validate_compound raising httpx.TimeoutException → dedup falls back to string key.
+
+        The dedup service must not crash when PubChem times out. Instead it catches
+        the exception, logs a warning, and falls back to lowercased string comparison
+        for the affected compound — keeping the batch alive.
+        """
+        async def mock_validate_timeout(structure, client):
+            raise httpx.TimeoutException("connect timeout")
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate_timeout,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            # Two distinct inputs — both fail PubChem, fall back to string keys
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["aspirin", "quercetin"],
+                existing_ids=set(),
+                client=MagicMock(),
+            )
+
+        # Both are kept (different string keys), no crash
+        assert unique_new == ["aspirin", "quercetin"]
+        assert duplicates == []
+
+    @pytest.mark.asyncio
+    async def test_timeout_exception_with_duplicate_degrades_gracefully(self):
+        """TimeoutException + duplicate string → dedup still removes the duplicate.
+
+        Even when PubChem is down and string fallback is active, within-batch
+        dedup must still work correctly for repeated raw inputs.
+        """
+        async def mock_validate_timeout(structure, client):
+            raise httpx.TimeoutException("connect timeout")
+
+        with patch(
+            "app.services.compound_dedup.validate_compound",
+            side_effect=mock_validate_timeout,
+        ):
+            from app.services.compound_dedup import deduplicate_compounds
+            unique_new, duplicates = await deduplicate_compounds(
+                submitted=["aspirin", "ASPIRIN", "  aspirin  "],
+                existing_ids=set(),
+                client=MagicMock(),
+            )
+
+        # All three normalize to "aspirin" under string fallback — keep one
+        assert len(unique_new) == 1
+        assert len(duplicates) == 2

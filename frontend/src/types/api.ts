@@ -95,7 +95,17 @@ export type AnalysisStatus =
   | (string & {})
 
 export function isTerminalStatus(s: string): boolean {
-  return /complete$|failed$|rejected$/.test(s)
+  // Only stop polling on genuinely terminal states:
+  //   - 'complete' or 'failed' (top-level)
+  //   - stage_N_rejected or stage_N_failed (stage-level errors)
+  // All other states (pending, stage_N_running, stage_N_complete,
+  // stage_N_awaiting_approval) are non-terminal — polling must continue.
+  if (!s || typeof s !== 'string') return false
+  return (
+    s === 'complete' ||
+    s === 'failed' ||
+    /^stage_\d+_(rejected|failed)$/.test(s)
+  )
 }
 
 export interface CreateAnalysisRequest {
@@ -214,6 +224,7 @@ export interface AdmeParamsConfig {
   apply_veber: boolean
   apply_pains: boolean
   np_exception_threshold: number
+  apply_adme_to_manual: boolean
 }
 
 export interface TargetParamsConfig {
@@ -361,10 +372,22 @@ export interface HubGeneResult {
   community_id?: number
 }
 
+export interface CommunityHubGene {
+  gene_symbol: string
+  community_id: number
+  community_degree: number
+  community_betweenness: number
+  community_closeness: number
+  community_eigenvector: number
+  community_size: number
+}
+
 export interface Stage7Result {
   ranked: HubGeneResult[]
   threshold_degree: number
   threshold_betweenness: number
+  /** Per-community hub genes, keyed by community_id (stringified number from JSON). */
+  community_hubs?: Record<string, CommunityHubGene[]>
 }
 
 // Stage 8: Pathway Enrichment
@@ -390,6 +413,14 @@ export interface CommunityEnrichment {
   kegg: PathwayTerm[]
 }
 
+export interface Stage8GlobalEnrichment {
+  go_bp: PathwayTerm[]
+  go_mf: PathwayTerm[]
+  go_cc: PathwayTerm[]
+  kegg: PathwayTerm[]
+  hub_genes_queried: string[]
+}
+
 export interface Stage8Result {
   total_significant: number
   go_bp: PathwayTerm[]
@@ -398,6 +429,7 @@ export interface Stage8Result {
   kegg: PathwayTerm[]
   hub_genes_queried: string[]
   communities?: CommunityEnrichment[]
+  global_enrichment?: Stage8GlobalEnrichment
 }
 
 // ============================================================================
@@ -459,6 +491,8 @@ export interface AddUserCompoundResponse {
 export interface InjectCompoundsResponse {
   injected: number
   failed: string[]
+  duplicates_removed: number
+  duplicate_names: string[]
 }
 
 // T4.4: Manual target input

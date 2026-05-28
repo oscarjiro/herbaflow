@@ -20,6 +20,7 @@ export interface AdvancedParams {
   max_rotatable_bonds: number
   apply_veber: boolean
   np_exception_threshold: number
+  apply_adme_to_manual: boolean
 
   // Targets (Stage 3)
   min_pchembl: number
@@ -50,6 +51,7 @@ export const DEFAULT_PARAMS: AdvancedParams = {
   max_rotatable_bonds: 10,
   apply_veber: true,
   np_exception_threshold: 0.5,
+  apply_adme_to_manual: true,
   min_pchembl: 5.0,
   human_only: true,
   min_assay_confidence: 0,
@@ -62,6 +64,14 @@ export const DEFAULT_PARAMS: AdvancedParams = {
 }
 
 const PATHWAY_SOURCES = ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG'] as const
+
+// STRING confidence presets (Szklarczyk et al., Nucleic Acids Res. 2023)
+const STRING_CONFIDENCE_PRESETS = [
+  { label: 'Low', value: 0.15 },
+  { label: 'Medium', value: 0.4 },
+  { label: 'High', value: 0.7 },
+  { label: 'Highest', value: 0.9 },
+] as const
 
 // ============================================================================
 // Sub-components
@@ -116,6 +126,39 @@ function CheckboxField({ label, value, onChange }: CheckboxFieldProps) {
       >
         {label}
       </label>
+    </div>
+  )
+}
+
+interface StringConfidenceSelectorProps {
+  value: number
+  onChange: (v: number) => void
+}
+
+function StringConfidenceSelector({ value, onChange }: StringConfidenceSelectorProps) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <label className="text-sm text-hf-fg2 flex-1">STRING confidence</label>
+      <div className="flex gap-1" role="group" aria-label="STRING confidence preset">
+        {STRING_CONFIDENCE_PRESETS.map((preset) => {
+          const isActive = value === preset.value
+          return (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => onChange(preset.value)}
+              aria-pressed={isActive}
+              className={`px-2 py-1 rounded-sm text-xs border transition-colors ${
+                isActive
+                  ? 'bg-hf-fg1 text-white border-hf-fg1'
+                  : 'bg-hf-surface text-hf-fg2 border-hf-border hover:border-hf-border-strong'
+              }`}
+            >
+              {preset.label}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -201,6 +244,11 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
                 value={value.apply_veber}
                 onChange={(v) => set('apply_veber', v)}
               />
+              <CheckboxField
+                label="Apply ADME screening to manually added compounds"
+                value={value.apply_adme_to_manual}
+                onChange={(v) => set('apply_adme_to_manual', v)}
+              />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -260,12 +308,9 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex flex-col gap-3 pt-1">
-              <NumberField
-                label="Min STRING confidence score"
+              <StringConfidenceSelector
                 value={value.min_confidence}
                 onChange={(v) => set('min_confidence', v)}
-                step={0.05}
-                min={0}
               />
             </div>
           </AccordionContent>

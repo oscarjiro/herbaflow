@@ -10,6 +10,8 @@ from dataclasses import dataclass
 
 import httpx
 
+from integrations._retry import with_retry, ServiceUnavailableError
+
 UNIPROT_BASE = "https://rest.uniprot.org/uniprotkb"
 HUMAN_TAXON_ID = 9606
 
@@ -44,7 +46,16 @@ async def validate_human_target(
 
 async def _lookup_by_accession(client: httpx.AsyncClient, accession: str) -> UniProtTarget:
     try:
-        resp = await client.get(f"{UNIPROT_BASE}/{accession}.json")
+        async def _fetch() -> httpx.Response:
+            r = await client.get(f"{UNIPROT_BASE}/{accession}.json")
+            if r.status_code == 404:
+                return r  # caller checks 404 — not a retriable error
+            r.raise_for_status()
+            return r
+
+        resp = await with_retry(_fetch, service_name="UniProt")
+    except ServiceUnavailableError:
+        raise  # let router map to HTTP 503
     except httpx.HTTPError as exc:
         raise ValueError(f"UniProt request failed: {exc}") from exc
     if resp.status_code == 404:
@@ -75,21 +86,26 @@ async def _lookup_by_accession(client: httpx.AsyncClient, accession: str) -> Uni
 
 async def _search_by_gene(client: httpx.AsyncClient, gene_symbol: str) -> UniProtTarget:
     try:
-        resp = await client.get(
-            f"{UNIPROT_BASE}/search",
-            params={
-                "query": f"gene_exact:{gene_symbol} AND organism_id:{HUMAN_TAXON_ID}",
-                "fields": "accession,gene_names,protein_name,organism",
-                "size": 1,
-                "format": "json",
-            },
-        )
-    except httpx.HTTPError as exc:
-        raise ValueError(f"UniProt request failed: {exc}") from exc
-    try:
-        resp.raise_for_status()
+        async def _fetch() -> httpx.Response:
+            r = await client.get(
+                f"{UNIPROT_BASE}/search",
+                params={
+                    "query": f"gene_exact:{gene_symbol} AND organism_id:{HUMAN_TAXON_ID}",
+                    "fields": "accession,gene_names,protein_name,organism",
+                    "size": 1,
+                    "format": "json",
+                },
+            )
+            r.raise_for_status()
+            return r
+
+        resp = await with_retry(_fetch, service_name="UniProt")
+    except ServiceUnavailableError:
+        raise  # let router map to HTTP 503
     except httpx.HTTPStatusError as exc:
         raise ValueError(f"UniProt search returned error {exc.response.status_code} for '{gene_symbol}'") from exc
+    except httpx.HTTPError as exc:
+        raise ValueError(f"UniProt request failed: {exc}") from exc
     try:
         results = resp.json().get("results", [])
     except Exception as exc:

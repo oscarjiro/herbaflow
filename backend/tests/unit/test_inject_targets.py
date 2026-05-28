@@ -281,7 +281,25 @@ async def test_inject_targets_deduplicates_gene_symbols():
 
 
 # ---------------------------------------------------------------------------
-# Test 8: HTTP boundary — FastAPI translates Pydantic ValidationError → 422
+# Test 8: HTTP boundary — over HARD_CAP items → HTTP 422
+# ---------------------------------------------------------------------------
+
+
+def test_inject_targets_over_hard_cap_returns_422():
+    """POST /analyses/{id}/inject-targets with > HARD_CAP_MANUAL_TARGETS items returns 422."""
+    from app.schemas.analysis import HARD_CAP_MANUAL_TARGETS
+
+    too_many = [f"GENE{i}" for i in range(HARD_CAP_MANUAL_TARGETS + 1)]
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.post(
+        f"/analyses/{ANALYSIS_ID}/inject-targets",
+        json={"targets": too_many},
+    )
+    assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Test 9: HTTP boundary — empty list → HTTP 422
 # ---------------------------------------------------------------------------
 
 

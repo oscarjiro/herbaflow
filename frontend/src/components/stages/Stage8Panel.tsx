@@ -7,8 +7,10 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
 import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
+import { ExternalLink } from '@/components/shared/ExternalLink'
+import { enrichmentTermUrl } from '@/lib/sourceUrls'
 import { isSkippedStage } from '@/types/api'
-import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, PathwayTerm, PathwaySource, CommunityEnrichment } from '@/types/api'
+import type { AnalysisRunResponse, AnalysisStatusResponse, Stage8Result, Stage8GlobalEnrichment, PathwayTerm, PathwaySource, CommunityEnrichment } from '@/types/api'
 
 const DATA_SOURCES = [
   {
@@ -69,7 +71,15 @@ function exportChartPng(containerEl: HTMLDivElement | null, filename: string) {
   img.src = URL.createObjectURL(new Blob([svgData], { type: 'image/svg+xml' }))
 }
 
-function PathwayChart({ terms, chartRef }: { terms: PathwayTerm[]; chartRef?: React.RefObject<HTMLDivElement | null> }) {
+function PathwayChart({
+  terms,
+  chartRef,
+  source,
+}: {
+  terms: PathwayTerm[]
+  chartRef?: React.RefObject<HTMLDivElement | null>
+  source?: PathwaySource
+}) {
   if (terms.length === 0) {
     return <EmptyState message="No significant pathways found for this category" />
   }
@@ -87,46 +97,87 @@ function PathwayChart({ terms, chartRef }: { terms: PathwayTerm[]; chartRef?: Re
       intersection_size: t.intersection_size,
     }))
 
+  // Top terms for the link table (same 20 shown in chart, sorted by FDR)
+  const topTerms = safeTerms.sort((a, b) => a.fdr - b.fdr).slice(0, 20)
+
   return (
-    <div ref={chartRef}>
-      <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 24)}>
-        <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 60, bottom: 24, left: 8 }}>
-          <XAxis
-            type="number"
-            label={{ value: '-log₁₀(FDR)', position: 'insideBottom', offset: -12, fontSize: 11 }}
-            tick={{ fontSize: 10 }}
-          />
-          <YAxis
-            type="category"
-            dataKey="name"
-            width={200}
-            tick={{ fontSize: 10 }}
-          />
-          <ReferenceLine
-            x={1.301}
-            stroke="var(--hf-danger)"
-            strokeDasharray="4 2"
-            label={{ value: 'FDR=0.05', position: 'top', fontSize: 9, fill: 'var(--hf-danger)' }}
-          />
-          <Bar dataKey="value" fill="var(--hf-sage)" radius={[0, 2, 2, 0]} />
-          <Tooltip
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            formatter={(_value: unknown, _name: unknown, props: any) => {
-              const entry = props.payload as ChartEntry | undefined
-              return [
-                `FDR: ${entry?.fdr?.toExponential(2) ?? '—'}  |  genes: ${entry?.intersection_size ?? '—'}`,
-                entry?.term_name ?? '',
-              ]
-            }}
-            contentStyle={{
-              fontSize: '11px',
-              background: 'var(--hf-surface)',
-              border: '1px solid var(--hf-border)',
-              borderRadius: '4px',
-            }}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+    <div>
+      <div ref={chartRef}>
+        <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 24)}>
+          <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 60, bottom: 24, left: 8 }}>
+            <XAxis
+              type="number"
+              label={{ value: '-log₁₀(FDR)', position: 'insideBottom', offset: -12, fontSize: 11 }}
+              tick={{ fontSize: 10 }}
+            />
+            <YAxis
+              type="category"
+              dataKey="name"
+              width={200}
+              tick={{ fontSize: 10 }}
+            />
+            <ReferenceLine
+              x={1.301}
+              stroke="var(--hf-danger)"
+              strokeDasharray="4 2"
+              label={{ value: 'FDR=0.05', position: 'top', fontSize: 9, fill: 'var(--hf-danger)' }}
+            />
+            <Bar dataKey="value" fill="var(--hf-sage)" radius={[0, 2, 2, 0]} />
+            <Tooltip
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(_value: unknown, _name: unknown, props: any) => {
+                const entry = props.payload as ChartEntry | undefined
+                return [
+                  `FDR: ${entry?.fdr?.toExponential(2) ?? '—'}  |  genes: ${entry?.intersection_size ?? '—'}`,
+                  entry?.term_name ?? '',
+                ]
+              }}
+              contentStyle={{
+                fontSize: '11px',
+                background: 'var(--hf-surface)',
+                border: '1px solid var(--hf-border)',
+                borderRadius: '4px',
+              }}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Term link table — only rendered when source is provided */}
+      {source && topTerms.length > 0 && (
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-xs font-sans border-collapse">
+            <thead>
+              <tr className="border-b border-hf-border">
+                <th className="text-left py-1 px-2 text-hf-fg3 font-medium">Term</th>
+                <th className="text-right py-1 px-2 text-hf-fg3 font-medium w-24">FDR</th>
+                <th className="text-right py-1 px-2 text-hf-fg3 font-medium w-16">Genes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topTerms.map((t) => (
+                <tr key={t.term_id} className="border-b border-hf-border last:border-0 hover:bg-hf-bg2 transition-colors">
+                  <td className="py-1 px-2">
+                    {t.term_id?.trim() ? (
+                      <ExternalLink href={enrichmentTermUrl(t.term_id, source)} className="text-xs">
+                        {t.term_name}
+                      </ExternalLink>
+                    ) : (
+                      <span className="text-hf-fg2">{t.term_name}</span>
+                    )}
+                  </td>
+                  <td className="py-1 px-2 text-right text-hf-fg3 font-mono tabular-nums">
+                    {t.fdr.toExponential(2)}
+                  </td>
+                  <td className="py-1 px-2 text-right text-hf-fg3 font-mono tabular-nums">
+                    {t.intersection_size}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
@@ -295,6 +346,15 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
   const communities: CommunityEnrichment[] = result.communities ?? []
   const hasCommunities = communities.length > 0
 
+  const globalEnrichment: Stage8GlobalEnrichment | undefined = result.global_enrichment
+  const globalTermsBySource: Record<PathwaySource, PathwayTerm[]> = {
+    'GO:BP': globalEnrichment?.go_bp ?? [],
+    'GO:MF': globalEnrichment?.go_mf ?? [],
+    'GO:CC': globalEnrichment?.go_cc ?? [],
+    'KEGG': globalEnrichment?.kegg ?? [],
+  }
+  const globalHubGenes = globalEnrichment?.hub_genes_queried ?? []
+
   const commTermsBySource = (comm: CommunityEnrichment): Record<PathwaySource, PathwayTerm[]> => ({
     'GO:BP': comm.go_bp ?? [],
     'GO:MF': comm.go_mf ?? [],
@@ -318,38 +378,65 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
         canRerun={status?.mode === 'guided'}
       />
 
-      <Tabs defaultValue={hasCommunities ? `community-${communities[0].community_id}` : 'GO:BP'}>
+      <Tabs defaultValue="global">
         <TabsList>
-          {hasCommunities ? (
-            <>
-              {communities.map((comm, idx) => (
-                <TabsTrigger key={`community-${comm.community_id}`} value={`community-${comm.community_id}`}>
-                  Community {idx + 1}
-                  <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
-                    {comm.gene_count}g
-                  </span>
-                </TabsTrigger>
-              ))}
-              <TabsTrigger value="overall">Overall</TabsTrigger>
-            </>
-          ) : (
-            <>
-              {SOURCES.map((src) => (
-                <TabsTrigger key={src} value={src}>
-                  {src}
-                  {termsBySource[src].length > 0 && (
-                    <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
-                      {termsBySource[src].length}
-                    </span>
-                  )}
-                </TabsTrigger>
-              ))}
-              <TabsTrigger value="bubble">Bubble</TabsTrigger>
-            </>
-          )}
+          {/* Global tab is always first and default */}
+          <TabsTrigger value="global">
+            Global
+            {globalEnrichment && (
+              <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                {globalHubGenes.length}g
+              </span>
+            )}
+          </TabsTrigger>
+
+          {/* Per-community tabs */}
+          {communities.map((comm, idx) => (
+            <TabsTrigger key={`community-${comm.community_id}`} value={`community-${comm.community_id}`}>
+              Community {idx + 1}
+              <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                {comm.gene_count}g
+              </span>
+            </TabsTrigger>
+          ))}
+
+          {/* Legacy per-source tabs (no communities) + bubble */}
+          {!hasCommunities && SOURCES.map((src) => (
+            <TabsTrigger key={src} value={src}>
+              {src}
+              {termsBySource[src].length > 0 && (
+                <span className="ml-1.5 px-1.5 py-0.5 rounded text-xs bg-hf-sage-soft text-hf-sage-deep font-medium">
+                  {termsBySource[src].length}
+                </span>
+              )}
+            </TabsTrigger>
+          ))}
+          {!hasCommunities && <TabsTrigger value="bubble">Bubble</TabsTrigger>}
         </TabsList>
 
-        {/* Community tabs (when communities data present) */}
+        {/* Global tab content */}
+        <TabsContent value="global">
+          {globalEnrichment ? (
+            <div className="mt-4 space-y-4">
+              <p className="text-xs text-hf-fg3 font-sans">
+                All {globalHubGenes.length} hub genes combined across all communities:{' '}
+                {globalHubGenes.join(', ')}
+              </p>
+              {SOURCES.map((src) => (
+                <div key={src}>
+                  <h4 className="text-xs font-medium text-hf-fg2 mb-2">{SOURCE_LABELS[src]}</h4>
+                  <PathwayChart terms={globalTermsBySource[src]} source={src} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-4">
+              <EmptyState message="Global enrichment results not yet available" />
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Community tabs */}
         {communities.map((comm, idx) => {
           const commSources = commTermsBySource(comm)
           return (
@@ -362,7 +449,7 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
                   commSources[src].length > 0 ? (
                     <div key={src}>
                       <h4 className="text-xs font-medium text-hf-fg2 mb-2">{SOURCE_LABELS[src]}</h4>
-                      <PathwayChart terms={commSources[src]} />
+                      <PathwayChart terms={commSources[src]} source={src} />
                     </div>
                   ) : null
                 )}
@@ -370,20 +457,6 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
             </TabsContent>
           )
         })}
-
-        {/* Overall tab (shown as fallback when communities present) */}
-        {hasCommunities && (
-          <TabsContent value="overall">
-            <div className="mt-4 space-y-6">
-              {SOURCES.map((src) => (
-                <div key={src}>
-                  <h3 className="text-sm font-medium text-hf-fg2 mb-3">{SOURCE_LABELS[src]}</h3>
-                  <PathwayChart terms={termsBySource[src]} />
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-        )}
 
         {/* Source tabs (when no communities) */}
         {!hasCommunities && SOURCES.map((src) => (
@@ -399,7 +472,7 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
                   Export PNG
                 </button>
               </div>
-              <PathwayChart terms={termsBySource[src]} chartRef={chartRefs[src]} />
+              <PathwayChart terms={termsBySource[src]} chartRef={chartRefs[src]} source={src} />
             </div>
           </TabsContent>
         ))}

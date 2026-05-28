@@ -1,7 +1,11 @@
 import asyncio
+import logging
 import httpx
 from dataclasses import dataclass
 
+from integrations._retry import with_retry, ServiceUnavailableError
+
+logger = logging.getLogger(__name__)
 
 CHEMBL_BASE = "https://www.ebi.ac.uk/chembl/api/data"
 SEMAPHORE = asyncio.Semaphore(10)
@@ -45,9 +49,17 @@ async def get_bioactivities(
 
     async with SEMAPHORE:
         try:
-            resp = await client.get(f"{CHEMBL_BASE}/activity.json", params=params, timeout=30)
-            resp.raise_for_status()
-        except httpx.HTTPError:
+            async def _fetch_bioactivities() -> httpx.Response:
+                r = await client.get(f"{CHEMBL_BASE}/activity.json", params=params, timeout=30)
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_bioactivities, service_name="ChEMBL")
+        except ServiceUnavailableError as exc:
+            logger.error("ChEMBL unavailable after retries: %s", exc)
+            return []
+        except httpx.HTTPError as exc:
+            logger.error("ChEMBL HTTP error fetching bioactivities for %s: %s", molecule_chembl_id, exc)
             return []
 
     data = resp.json()
@@ -83,14 +95,24 @@ async def resolve_target(
 ) -> ChemblTarget | None:
     async with SEMAPHORE:
         try:
-            resp = await client.get(
-                f"{CHEMBL_BASE}/target/{target_chembl_id}.json",
-                timeout=20,
-            )
+            async def _fetch_target() -> httpx.Response:
+                r = await client.get(
+                    f"{CHEMBL_BASE}/target/{target_chembl_id}.json",
+                    timeout=20,
+                )
+                if r.status_code == 404:
+                    return r  # caller checks 404 — don't raise_for_status
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_target, service_name="ChEMBL")
             if resp.status_code == 404:
                 return None
-            resp.raise_for_status()
-        except httpx.HTTPError:
+        except ServiceUnavailableError as exc:
+            logger.error("ChEMBL unavailable after retries: %s", exc)
+            return None
+        except httpx.HTTPError as exc:
+            logger.error("ChEMBL HTTP error resolving target %s: %s", target_chembl_id, exc)
             return None
 
     data = resp.json()

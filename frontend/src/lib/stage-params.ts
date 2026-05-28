@@ -25,6 +25,7 @@ export const PARAM_DEFAULTS: Record<string, Record<string, unknown>> = {
     apply_veber: true,
     apply_pains: false,
     np_exception_threshold: 0.5,
+    apply_adme_to_manual: true,
   },
   target: {
     min_pchembl: 5.0,
@@ -60,6 +61,7 @@ export const PARAM_LABELS: Record<string, Record<string, string>> = {
     apply_veber: 'Apply Veber Rules',
     apply_pains: 'Flag PAINS',
     np_exception_threshold: 'NP-likeness Threshold',
+    apply_adme_to_manual: 'Apply ADME to Manual Compounds',
   },
   target: {
     min_pchembl: 'Min pChEMBL Value',

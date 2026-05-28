@@ -34,7 +34,12 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         return {
             "total_significant": 0,
             "go_bp": [], "go_mf": [], "go_cc": [], "kegg": [],
+            "hub_genes_queried": [],
             "communities": [],
+            "global_enrichment": {
+                "go_bp": [], "go_mf": [], "go_cc": [], "kegg": [],
+                "hub_genes_queried": [],
+            },
         }
 
     # Background: ALL compound targets from Stage 3 — the study protein space.
@@ -86,6 +91,24 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "kegg": comm_grouped.get("KEGG", []),
         })
 
+    # Global enrichment — all hub genes combined, deduplicated
+    all_hub_genes = list(dict.fromkeys(
+        gene_symbol
+        for community_genes_list in community_genes.values()
+        for gene_symbol in community_genes_list
+    ))
+
+    if all_hub_genes:
+        global_results = await run_enrichment(
+            gene_symbols=all_hub_genes,
+            sources=config.enrichment.sources,
+            fdr_threshold=config.enrichment.fdr_threshold,
+            background=background,
+        )
+        global_grouped = _group_by_source(global_results)
+    else:
+        global_grouped = {}
+
     return {
         "total_significant": len(results),
         "go_bp": grouped.get("GO:BP", []),
@@ -94,4 +117,11 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         "kegg": grouped.get("KEGG", []),
         "hub_genes_queried": hub_genes,
         "communities": community_results,
+        "global_enrichment": {
+            "go_bp": global_grouped.get("GO:BP", []),
+            "go_mf": global_grouped.get("GO:MF", []),
+            "go_cc": global_grouped.get("GO:CC", []),
+            "kegg": global_grouped.get("KEGG", []),
+            "hub_genes_queried": all_hub_genes,
+        },
     }

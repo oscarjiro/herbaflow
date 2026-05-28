@@ -1,5 +1,10 @@
+import logging
 import httpx
 from dataclasses import dataclass
+
+from integrations._retry import with_retry, ServiceUnavailableError
+
+logger = logging.getLogger(__name__)
 
 STRING_BASE = "https://string-db.org/api/json"
 SPECIES_HUMAN = 9606
@@ -38,13 +43,21 @@ async def get_ppi_network(
 
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.post(
-                f"{STRING_BASE}/network",
-                data=params,
-                timeout=60,
-            )
-            resp.raise_for_status()
-        except httpx.HTTPError:
+            async def _fetch_string() -> httpx.Response:
+                r = await client.post(
+                    f"{STRING_BASE}/network",
+                    data=params,
+                    timeout=60,
+                )
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_string, service_name="STRING-DB")
+        except ServiceUnavailableError as exc:
+            logger.error("STRING-DB unavailable after retries: %s", exc)
+            return []
+        except httpx.HTTPError as exc:
+            logger.error("STRING-DB HTTP error for %d genes: %s", len(gene_symbols), exc)
             return []
 
     edges = []

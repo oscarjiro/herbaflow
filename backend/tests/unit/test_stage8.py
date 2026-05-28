@@ -94,9 +94,77 @@ async def test_stage8_passes_config_params_to_enrichment():
     ) as mock_enrich:
         await stage8_enrichment.run(run, config, session)
 
-    mock_enrich.assert_called_once_with(
-        gene_symbols=["EGFR"],
-        sources=["GO:BP", "KEGG"],
-        fdr_threshold=0.01,
-        background=None,
-    )
+    # run_enrichment called twice (legacy overall + global); per-community skipped
+    # because single-gene communities are below the minimum-gene threshold
+    # Both calls use the same config params — verify the first call
+    assert mock_enrich.call_count == 2
+    first_call_kwargs = mock_enrich.call_args_list[0].kwargs
+    assert first_call_kwargs["gene_symbols"] == ["EGFR"]
+    assert first_call_kwargs["sources"] == ["GO:BP", "KEGG"]
+    assert first_call_kwargs["fdr_threshold"] == 0.01
+    assert first_call_kwargs["background"] is None
+
+
+async def test_stage8_includes_global_enrichment():
+    """Stage 8 result must include global_enrichment with all hub genes combined."""
+    run = make_run(ranked=[
+        {"gene_symbol": "AKT1", "community_id": 0},
+        {"gene_symbol": "TNF", "community_id": 0},
+        {"gene_symbol": "TP53", "community_id": 1},
+        {"gene_symbol": "EGFR", "community_id": 1},
+        {"gene_symbol": "VEGFA", "community_id": 1},
+    ])
+    config = PipelineConfig()
+    session = AsyncMock()
+
+    fake_results = [
+        make_result("GO:BP", "GO:0006915", "apoptotic process", fdr=0.001),
+        make_result("KEGG", "hsa04151", "PI3K-Akt signaling", fdr=0.005),
+    ]
+
+    with patch("analysis.stages.stage8_enrichment.run_enrichment", return_value=fake_results):
+        result = await stage8_enrichment.run(run, config, session)
+
+    assert "global_enrichment" in result
+    ge = result["global_enrichment"]
+    assert isinstance(ge["go_bp"], list)
+    assert isinstance(ge["go_mf"], list)
+    assert isinstance(ge["go_cc"], list)
+    assert isinstance(ge["kegg"], list)
+    assert isinstance(ge["hub_genes_queried"], list)
+    assert set(ge["hub_genes_queried"]) == {"AKT1", "TNF", "TP53", "EGFR", "VEGFA"}
+
+
+async def test_stage8_global_enrichment_empty_when_no_hub_genes():
+    """global_enrichment must be present in the early-return path too."""
+    run = make_run(ranked=[])
+    config = PipelineConfig()
+    session = AsyncMock()
+
+    result = await stage8_enrichment.run(run, config, session)
+
+    assert "global_enrichment" in result
+    ge = result["global_enrichment"]
+    assert ge["go_bp"] == []
+    assert ge["go_mf"] == []
+    assert ge["go_cc"] == []
+    assert ge["kegg"] == []
+    assert ge["hub_genes_queried"] == []
+
+
+async def test_stage8_global_enrichment_deduplicated_genes():
+    """hub_genes_queried in global_enrichment should have no duplicates."""
+    # Same gene in two communities (edge case: shouldn't happen in practice but guard it)
+    run = make_run(ranked=[
+        {"gene_symbol": "AKT1", "community_id": 0},
+        {"gene_symbol": "TNF", "community_id": 0},
+        {"gene_symbol": "AKT1", "community_id": 1},  # duplicate
+    ])
+    config = PipelineConfig()
+    session = AsyncMock()
+
+    with patch("analysis.stages.stage8_enrichment.run_enrichment", return_value=[]):
+        result = await stage8_enrichment.run(run, config, session)
+
+    ge = result["global_enrichment"]
+    assert len(ge["hub_genes_queried"]) == len(set(ge["hub_genes_queried"]))

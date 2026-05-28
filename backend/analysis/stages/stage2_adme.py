@@ -4,12 +4,29 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.repositories import compound_repo
 
 
+# Core Lipinski properties that must exist for a compound to be evaluable.
+# If every one of these is None the compound was never enriched from PubChem
+# and cannot be shown to satisfy drug-likeness rules — it must fail.
+_CORE_PROPS = ("molecular_weight", "logp", "hbond_donors", "hbond_acceptors")
+
+
 def filter_compounds(
     compounds: list[CompoundRecord], params: AdmeParams
 ) -> dict:
     passed, failed, np_exceptions = [], [], []
 
     for c in compounds:
+        # Bypass: user_provided compounds skip ADME when apply_adme_to_manual=False.
+        if not params.apply_adme_to_manual and getattr(c, "source", "plant") == "user_provided":
+            passed.append(c)
+            continue
+
+        # All core properties absent — insufficient data, cannot pass.
+        if all(getattr(c, p) is None for p in _CORE_PROPS):
+            # No drug-likeness data available — cannot determine NP exception eligibility either.
+            failed.append(c)
+            continue
+
         violations = []
 
         if c.molecular_weight is not None and c.molecular_weight > params.max_mw:
@@ -56,6 +73,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 "passed_compound_ids": [], "np_exception_compound_ids": [],
                 "all_active_compound_ids": [], "compounds": []}
 
+    # IDs stored by inject_compounds so the ADME bypass can identify manual compounds.
+    manual_ids: set[str] = set((run.parameters or {}).get("manual_compound_ids", []))
+
     fetched = await compound_repo.get_compounds_by_ids(session, compound_ids)
     db_compounds = []
     for c in fetched:
@@ -74,6 +94,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 np_likeness_score=c.np_likeness_score,
                 is_pains_positive=c.is_pains_positive,
                 num_ro5_violations=c.num_ro5_violations,
+                source="user_provided" if str(c.compound_id) in manual_ids else "plant",
             ))
 
     result = filter_compounds(db_compounds, config.adme)

@@ -1,11 +1,51 @@
+import re
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 from uuid import UUID
 from datetime import datetime
 from typing import Any, Literal
 
+# ---------------------------------------------------------------------------
+# Format validators — UniProt accession and HGNC gene symbol
+# ---------------------------------------------------------------------------
+
+# UniProt accession: HUPO-PSI standard two-pattern format.
+#   6-char legacy:  [OPQ][0-9][A-Z0-9]{3}[0-9]
+#   10-char new:    [A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}
+UNIPROT_ACCESSION_RE = re.compile(
+    r'^[OPQ][0-9][A-Z0-9]{3}[0-9]$|^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$'
+)
+
+# HGNC gene symbol: uppercase letter start, 1–25 chars, A-Z / 0-9 / hyphen only.
+GENE_SYMBOL_RE = re.compile(r'^[A-Z][A-Z0-9\-]{0,24}$')
+
 
 # STRING-DB standard confidence thresholds (Low / Medium / High / Very High)
 STRING_CONFIDENCE_PRESETS = {0.15, 0.40, 0.70, 0.90}
+
+# Input size limits — based on published network pharmacology study scales.
+# Plants:    90%+ of NP studies use ≤ 20 herbs; Indonesian jamu formulas 3–15 plants.
+#            Li S et al. (2014) Evid Based Complement Alternat Med;
+#            Jiang Y et al. (2021) systematic review of TCM-NP studies.
+# Compounds: 20 plants × ~250 KNApSAcK compounds/plant ≈ 5,000 pre-ADME — internal
+#            consistency ceiling. Zhou Y et al. (2019) Evid Based Complement Alternat Med.
+# Targets (compound-side): Covers the entire human druggable proteome (~4,719 proteins;
+#            Finan C et al. (2017) Sci Transl Med). Compound targets intersect disease
+#            targets at Stage 5 before reaching STRING-DB, so STRING input is the overlap
+#            (typically 50–500 genes), not the raw target count.
+#            Szklarczyk D et al. (2023) STRING v12, Nucleic Acids Res;
+#            Traag VA et al. (2019) Leiden algorithm, Sci Rep.
+# Targets (disease-side): Open Targets single-disease associations 200–2,000;
+#            Ochoa et al. (2021) Nucleic Acids Res (Open Targets Platform);
+#            Piñero et al. (2020) Nucleic Acids Res (DisGeNET v7).
+SOFT_CAP_PLANTS = 10
+HARD_CAP_PLANTS = 20
+SOFT_CAP_MANUAL_COMPOUNDS = 1000
+HARD_CAP_MANUAL_COMPOUNDS = 5000
+SOFT_CAP_MANUAL_TARGETS = 500
+HARD_CAP_MANUAL_TARGETS = 5000
+SOFT_CAP_DISEASE_TARGETS = 500
+HARD_CAP_DISEASE_TARGETS = 2000
 
 
 def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -58,6 +98,13 @@ def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
     if comm_res is not None and not (0.1 <= comm_res <= 3.0):
         errors.append("ppi.community_resolution must be in [0.1, 3.0]")
 
+    injected_disease = params.get("_injected_disease_targets")
+    if injected_disease is not None and len(injected_disease) > HARD_CAP_DISEASE_TARGETS:
+        errors.append(
+            f"_injected_disease_targets: at most {HARD_CAP_DISEASE_TARGETS} disease targets allowed "
+            f"(OpenTargets dataset scale; Ochoa et al. 2021 Nucleic Acids Res)"
+        )
+
     if errors:
         raise ValueError("; ".join(errors))
 
@@ -90,7 +137,11 @@ class CreateAnalysisRequest(BaseModel):
         description="Human-readable label for the analysis run",
     )
     mode: Literal["guided", "auto"] = "guided"
-    plant_ids: list[str] = Field(default_factory=list)
+    plant_ids: list[str] = Field(
+        default_factory=list,
+        max_length=HARD_CAP_PLANTS,
+        description=f"KNApSAcK plant IDs. Hard limit: {HARD_CAP_PLANTS} plants per analysis.",
+    )
     disease_ids: list[str] = Field(
         default_factory=list,
         description="At least one disease is required, unless _disease_input_mode is manual_targets",
@@ -153,6 +204,27 @@ class AddUserTargetRequest(BaseModel):
     gene_symbol: str | None = None
     uniprot_id: str | None = None
 
+    @field_validator("uniprot_id")
+    @classmethod
+    def validate_uniprot_format(cls, v: str | None) -> str | None:
+        if v is not None and not UNIPROT_ACCESSION_RE.match(v):
+            raise ValueError(
+                f"Invalid UniProt accession format: {v!r}. "
+                "Expected HUPO-PSI format, e.g. P04637 or Q9Y6I3."
+            )
+        return v
+
+    @field_validator("gene_symbol")
+    @classmethod
+    def validate_gene_symbol_format(cls, v: str | None) -> str | None:
+        if v is not None and not GENE_SYMBOL_RE.match(v):
+            raise ValueError(
+                f"Invalid HGNC gene symbol: {v!r}. "
+                "Gene symbols must be uppercase, start with a letter, "
+                "1–25 characters (A-Z, 0-9, hyphen), e.g. TP53 or HIF-1A."
+            )
+        return v
+
     @model_validator(mode="after")
     def at_least_one(self) -> "AddUserTargetRequest":
         if not self.gene_symbol and not self.uniprot_id:
@@ -170,19 +242,37 @@ class AddUserTargetResponse(BaseModel):
 class InjectCompoundsRequest(BaseModel):
     compounds: list[str] = Field(
         min_length=1,
-        max_length=100,
-        description="SMILES or InChI strings, 1–100 items",
+        max_length=HARD_CAP_MANUAL_COMPOUNDS,
+        description=f"SMILES or InChI strings, 1–{HARD_CAP_MANUAL_COMPOUNDS} items",
     )
 
 
 class InjectCompoundsResponse(BaseModel):
-    injected: int          # number successfully validated and stored
-    failed: list[str]      # raw input strings that failed PubChem validation
+    injected: int                           # number successfully validated and stored
+    failed: list[str]                       # raw input strings that failed PubChem validation
+    duplicates_removed: int = 0             # inputs dropped due to deduplication
+    duplicate_names: list[str] = Field(default_factory=list)  # the dropped raw inputs
+    cached: int = 0                         # compounds persisted to DB cache (have PubChem CID)
 
 
 class AddUserCompoundRequest(BaseModel):
     smiles: str | None = None
     inchi: str | None = None
+
+    @field_validator("smiles")
+    @classmethod
+    def validate_smiles_minimum(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        if len(v) < 3:
+            raise ValueError(
+                f"SMILES string is too short ({len(v)} chars); minimum length is 3."
+            )
+        if not v.isascii() or not v.isprintable():
+            raise ValueError(
+                "SMILES must contain only printable ASCII characters."
+            )
+        return v
 
     @model_validator(mode="after")
     def at_least_one(self) -> "AddUserCompoundRequest":
@@ -200,11 +290,13 @@ class AddUserCompoundResponse(BaseModel):
 class InjectTargetsRequest(BaseModel):
     targets: list[str] = Field(
         min_length=1,
-        max_length=200,
-        description="Gene symbols or UniProt accessions, 1–200 items",
+        max_length=HARD_CAP_MANUAL_TARGETS,
+        description=f"Gene symbols or UniProt accessions, 1–{HARD_CAP_MANUAL_TARGETS} items",
     )
 
 
 class InjectTargetsResponse(BaseModel):
-    injected: int          # number successfully validated and stored
-    failed: list[str]      # raw input strings that failed UniProt validation
+    injected: int                                                    # number successfully validated and stored
+    failed: list[str]                                                # raw input strings that failed UniProt validation
+    duplicates_removed: int = 0                                      # inputs dropped due to deduplication
+    duplicate_names: list[str] = Field(default_factory=list)         # labels for the dropped entries

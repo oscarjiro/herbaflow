@@ -7,6 +7,74 @@
 import { z } from 'zod'
 
 // ---------------------------------------------------------------------------
+// Input size limits — mirrors backend HARD_CAP_* / SOFT_CAP_* constants
+// Based on published network pharmacology study scales:
+//   Plants:    90%+ of NP studies ≤ 20 herbs; Indonesian jamu formulas 3–15 plants.
+//              Li S et al. (2014) Evid Based Complement Alternat Med;
+//              Jiang Y et al. (2021) systematic review of TCM-NP studies.
+//   Compounds: 20 plants × ~250 KNApSAcK compounds/plant ≈ 5,000 pre-ADME ceiling.
+//              Zhou Y et al. (2019) Evid Based Complement Alternat Med.
+//   Targets (compound-side): covers entire human druggable proteome (~4,719 proteins).
+//              Finan C et al. (2017) Sci Transl Med. Targets overlap with disease
+//              targets at Stage 5; STRING-DB receives the intersection only.
+//              Szklarczyk D et al. (2023) STRING v12; Traag VA et al. (2019) Sci Rep.
+//   Targets (disease-side): Open Targets single-disease associations 200–2,000.
+//              Ochoa et al. (2021) Nucleic Acids Res; Piñero et al. (2020) Nucleic Acids Res.
+// ---------------------------------------------------------------------------
+
+// Hard caps enforced by backend Pydantic validation (max_length); requests exceeding these return HTTP 422.
+export const HARD_CAP_PLANTS = 20
+export const HARD_CAP_MANUAL_COMPOUNDS = 5000
+export const HARD_CAP_MANUAL_TARGETS = 5000
+export const HARD_CAP_DISEASE_TARGETS = 2000
+// Soft caps: planned for UI warnings (yellow highlight when approaching the hard cap).
+export const SOFT_CAP_PLANTS = 10
+export const SOFT_CAP_MANUAL_COMPOUNDS = 1000
+export const SOFT_CAP_MANUAL_TARGETS = 500
+export const SOFT_CAP_DISEASE_TARGETS = 500
+
+// ---------------------------------------------------------------------------
+// Format validators — UniProt accession, HGNC gene symbol, SMILES
+// ---------------------------------------------------------------------------
+
+/**
+ * UniProt accession: HUPO-PSI standard two-pattern format.
+ *   6-char legacy:  [OPQ][0-9][A-Z0-9]{3}[0-9]
+ *   10-char new:    [A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}
+ * Mirrors UNIPROT_ACCESSION_RE in backend/app/schemas/analysis.py.
+ */
+const UNIPROT_RE =
+  /^[OPQ][0-9][A-Z0-9]{3}[0-9]$|^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$/
+
+export const uniprotAccessionSchema = z
+  .string()
+  .regex(UNIPROT_RE, 'Invalid UniProt accession format (e.g., P04637 or Q9Y6I3)')
+
+/**
+ * HGNC gene symbol: uppercase letter start, 1–25 chars, A-Z / 0-9 / hyphen only.
+ * Mirrors GENE_SYMBOL_RE in backend/app/schemas/analysis.py.
+ */
+export const geneSymbolSchema = z
+  .string()
+  .regex(
+    /^[A-Z][A-Z0-9\-]{0,24}$/,
+    'Gene symbol must be uppercase and follow HGNC format (e.g., TP53 or HIF-1A)',
+  )
+
+/**
+ * SMILES minimum validation: length >= 3, printable ASCII only.
+ * Chemical correctness is delegated to PubChem — we only block obviously malformed input.
+ * Mirrors validate_smiles_minimum in backend/app/schemas/analysis.py.
+ */
+export const smilesSchema = z
+  .string()
+  .min(3, 'SMILES string is too short; minimum length is 3')
+  .refine(
+    (v) => /^[\x20-\x7E]+$/.test(v),
+    'SMILES must contain only printable ASCII characters',
+  )
+
+// ---------------------------------------------------------------------------
 // Primitives
 // ---------------------------------------------------------------------------
 
@@ -30,6 +98,7 @@ export const advancedParamsSchema = z.object({
   max_rotatable_bonds: z.number().int().min(0, 'Must be ≥ 0').max(50, 'Must be ≤ 50'),
   apply_veber: z.boolean(),
   np_exception_threshold: z.number().min(0, 'Must be ≥ 0').max(1, 'Must be ≤ 1'),
+  apply_adme_to_manual: z.boolean(),
 
   // Targets (Stage 3)
   min_pchembl: z.number().min(0, 'Must be ≥ 0').max(15, 'Must be ≤ 15'),
@@ -68,7 +137,7 @@ function diseaseIdsField(diseaseInputMode: 'disease' | 'manual_targets') {
 /** Require disease_targets when diseaseInputMode is 'manual_targets'. */
 function diseaseTargetsField(diseaseInputMode: 'disease' | 'manual_targets') {
   return diseaseInputMode === 'manual_targets'
-    ? z.array(z.string().min(1)).min(1, 'Enter at least one disease target').max(200, 'Maximum 200 targets')
+    ? z.array(z.string().min(1)).min(1, 'Enter at least one disease target').max(HARD_CAP_DISEASE_TARGETS, `Maximum ${HARD_CAP_DISEASE_TARGETS} targets`)
     : z.array(z.string()).optional()
 }
 
@@ -79,7 +148,10 @@ function diseaseTargetsField(diseaseInputMode: 'disease' | 'manual_targets') {
 export function makeSetupFormStandardSchema(diseaseInputMode: 'disease' | 'manual_targets' = 'disease') {
   return z.object({
     mode: analysisModeSchema,
-    plant_ids: z.array(z.string()).min(1, 'Select at least one plant'),
+    plant_ids: z
+      .array(z.string())
+      .min(1, 'Select at least one plant')
+      .max(HARD_CAP_PLANTS, `Maximum ${HARD_CAP_PLANTS} plants per analysis`),
     disease_ids: diseaseIdsField(diseaseInputMode),
     disease_targets: diseaseTargetsField(diseaseInputMode),
     parameters: advancedParamsSchema,
@@ -101,7 +173,7 @@ export function makeSetupFormManualCompoundsSchema(diseaseInputMode: 'disease' |
     compounds: z
       .array(z.string().min(1))
       .min(1, 'Enter at least one compound')
-      .max(100, 'Maximum 100 compounds'),
+      .max(HARD_CAP_MANUAL_COMPOUNDS, `Maximum ${HARD_CAP_MANUAL_COMPOUNDS} compounds per analysis`),
     parameters: advancedParamsSchema,
   })
 }
@@ -121,7 +193,7 @@ export function makeSetupFormManualTargetsSchema(diseaseInputMode: 'disease' | '
     targets: z
       .array(z.string().min(1))
       .min(1, 'Enter at least one target')
-      .max(200, 'Maximum 200 targets'),
+      .max(HARD_CAP_MANUAL_TARGETS, `Maximum ${HARD_CAP_MANUAL_TARGETS} targets per analysis`),
     parameters: advancedParamsSchema,
   })
 }
@@ -137,14 +209,14 @@ export const injectCompoundsSchema = z.object({
   compounds: z
     .array(z.string().min(1))
     .min(1, 'At least one compound is required')
-    .max(100, 'Maximum 100 compounds allowed'),
+    .max(HARD_CAP_MANUAL_COMPOUNDS, `Maximum ${HARD_CAP_MANUAL_COMPOUNDS} compounds allowed`),
 })
 
 export const injectTargetsSchema = z.object({
   targets: z
     .array(z.string().min(1))
     .min(1, 'At least one target is required')
-    .max(200, 'Maximum 200 targets allowed'),
+    .max(HARD_CAP_MANUAL_TARGETS, `Maximum ${HARD_CAP_MANUAL_TARGETS} targets allowed`),
 })
 
 // ---------------------------------------------------------------------------

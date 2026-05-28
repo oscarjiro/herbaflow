@@ -8,7 +8,7 @@ import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { ExportButton } from '@/components/shared/ExportButton'
 import { StageParamsPanel } from '@/components/shared/StageParamsPanel'
 import { isSkippedStage } from '@/types/api'
-import type { AnalysisRunResponse, AnalysisStatusResponse, Stage7Result, HubGeneResult } from '@/types/api'
+import type { AnalysisRunResponse, AnalysisStatusResponse, Stage7Result, HubGeneResult, CommunityHubGene } from '@/types/api'
 
 const SOURCES = [
   {
@@ -27,6 +27,35 @@ interface Stage7PanelProps {
 }
 
 type HubGeneRow = HubGeneResult & Record<string, unknown>
+type CommunityHubRow = CommunityHubGene & Record<string, unknown>
+
+const communityColumns: ColumnDef<CommunityHubRow>[] = [
+  { key: 'gene_symbol', header: 'Gene', sortable: true },
+  {
+    key: 'community_degree',
+    header: 'Degree',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(4) : '—',
+  },
+  {
+    key: 'community_betweenness',
+    header: 'Betweenness',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(4) : '—',
+  },
+  {
+    key: 'community_closeness',
+    header: 'Closeness',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(4) : '—',
+  },
+  {
+    key: 'community_eigenvector',
+    header: 'Eigenvector',
+    sortable: true,
+    render: (v) => v != null ? (v as number).toFixed(4) : '—',
+  },
+]
 
 const columns: ColumnDef<HubGeneRow>[] = [
   { key: 'rank', header: 'Rank', sortable: true },
@@ -152,6 +181,38 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
           <span className="font-medium text-hf-fg2">Eigenvector</span> — influence weighted by neighbour influence (analogous to PageRank).
         </p>
       </div>
+
+      {result.community_hubs && Object.keys(result.community_hubs).length > 0 && (
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-medium text-hf-fg1 font-sans">Community-Specific Hub Genes</h3>
+            <p className="text-xs text-hf-fg3 font-sans mt-0.5">
+              Centrality ranked within each Leiden module. Community hubs are more
+              disease-specific than global hubs (Barabási et al. 2011, Nat Rev Genet 12:56–68).
+            </p>
+          </div>
+          {Object.entries(result.community_hubs).map(([cidStr, hubs]) => {
+            if (hubs.length === 0) return null
+            const top5 = hubs.slice(0, 5) as CommunityHubRow[]
+            return (
+              <div key={cidStr} className="space-y-1">
+                <p className="text-xs font-medium text-hf-fg2 font-sans">
+                  Community {cidStr}
+                  <span className="text-hf-fg3 font-normal ml-1">
+                    ({hubs[0].community_size} genes)
+                  </span>
+                </p>
+                <DataTable
+                  data={top5}
+                  columns={communityColumns}
+                  filterPlaceholder={`Filter community ${cidStr} genes...`}
+                  filterKeys={['gene_symbol']}
+                />
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       <DataSources sources={SOURCES} />
     </div>

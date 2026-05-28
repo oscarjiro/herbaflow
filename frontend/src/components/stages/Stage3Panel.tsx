@@ -7,6 +7,8 @@ import { DataTable } from '@/components/shared/DataTable'
 import type { ColumnDef } from '@/components/shared/DataTable'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
+import { ExternalLink } from '@/components/shared/ExternalLink'
+import { sourceUrls } from '@/lib/sourceUrls'
 import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { isSkippedStage } from '@/types/api'
 import { AddTargetForm } from '@/components/shared/AddTargetForm'
@@ -93,15 +95,12 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
         const accession = value as string | null | undefined
         if (!accession) return <span className="text-hf-fg4">—</span>
         return (
-          <a
-            href={`https://www.uniprot.org/uniprotkb/${accession}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`UniProt entry for ${accession} (opens in new tab)`}
+          <ExternalLink
+            href={sourceUrls.target(accession)}
             className="font-mono text-xs text-hf-fg2 hover:text-hf-fg1 underline underline-offset-2 transition-colors"
           >
             {accession}
-          </a>
+          </ExternalLink>
         )
       },
     },

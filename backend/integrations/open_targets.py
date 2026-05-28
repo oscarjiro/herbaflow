@@ -1,5 +1,10 @@
+import logging
 import httpx
 from dataclasses import dataclass
+
+from integrations._retry import with_retry, ServiceUnavailableError
+
+logger = logging.getLogger(__name__)
 
 OT_BASE = "https://api.platform.opentargets.org/api/v4"
 
@@ -35,13 +40,21 @@ async def get_disease_targets(
     """
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.post(
-                f"{OT_BASE}/graphql",
-                json={"query": query, "variables": {"efoId": efo_id, "size": limit}},
-                timeout=30,
-            )
-            resp.raise_for_status()
-        except httpx.HTTPError:
+            async def _fetch_ot() -> httpx.Response:
+                r = await client.post(
+                    f"{OT_BASE}/graphql",
+                    json={"query": query, "variables": {"efoId": efo_id, "size": limit}},
+                    timeout=30,
+                )
+                r.raise_for_status()
+                return r
+
+            resp = await with_retry(_fetch_ot, service_name="Open Targets")
+        except ServiceUnavailableError as exc:
+            logger.error("Open Targets unavailable after retries: %s", exc)
+            return []
+        except httpx.HTTPError as exc:
+            logger.error("Open Targets HTTP error for EFO %s: %s", efo_id, exc)
             return []
 
     data = resp.json().get("data", {})

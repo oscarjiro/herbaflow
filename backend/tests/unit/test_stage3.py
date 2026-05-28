@@ -314,3 +314,46 @@ async def test_coverage_pct_nonzero_when_targets_found():
         f"coverage_pct was {result['coverage_pct']} — UUID objects in "
         "all_active_compound_ids likely broke the set intersection"
     )
+
+
+# ---------------------------------------------------------------------------
+# Regression: stage3 output key is coverage_pct not coverage_percent
+# ---------------------------------------------------------------------------
+
+async def test_stage3_output_uses_coverage_pct_field():
+    """Stage 3 result dict must use key 'coverage_pct', not 'coverage_percent'.
+
+    Regression guard: an earlier implementation used 'coverage_percent' which
+    broke the frontend Stage 3 table and downstream stage checks.
+    """
+    run = make_run(all_active_compound_ids=["c1"])
+    config = PipelineConfig()
+    session = make_session()
+    fake_compound = make_fake_compound("c1", chembl_id="CHEMBL_REG")
+
+    fake_target = ChemblTarget(
+        chembl_id="CHEMBL_TGT_REG",
+        gene_symbol="EGFR",
+        uniprot_accession="P00533",
+        organism="Homo sapiens",
+        pchembl_value=6.0,
+    )
+
+    with patch(
+        "analysis.stages.stage3_targets.compound_repo.get_compounds_by_ids",
+        return_value=[fake_compound],
+    ):
+        with patch(
+            "analysis.stages.stage3_targets.get_targets_for_compounds",
+            return_value={"CHEMBL_REG": [fake_target]},
+        ):
+            result = await stage3_targets.run(run, config, session)
+
+    # Must have 'coverage_pct', must NOT have 'coverage_percent'
+    assert "coverage_pct" in result, (
+        f"Stage 3 output missing 'coverage_pct'. Keys found: {list(result.keys())}"
+    )
+    assert "coverage_percent" not in result, (
+        "Stage 3 output must use 'coverage_pct', not the old 'coverage_percent' key"
+    )
+    assert isinstance(result["coverage_pct"], float)
