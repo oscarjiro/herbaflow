@@ -65,6 +65,14 @@ export const DEFAULT_PARAMS: AdvancedParams = {
 
 const PATHWAY_SOURCES = ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG'] as const
 
+// STRING confidence presets (Szklarczyk et al., Nucleic Acids Res. 2023)
+const STRING_CONFIDENCE_PRESETS = [
+  { label: 'Low', value: 0.15 },
+  { label: 'Medium', value: 0.4 },
+  { label: 'High', value: 0.7 },
+  { label: 'Highest', value: 0.9 },
+] as const
+
 // ============================================================================
 // Sub-components
 // ============================================================================
@@ -118,6 +126,39 @@ function CheckboxField({ label, value, onChange }: CheckboxFieldProps) {
       >
         {label}
       </label>
+    </div>
+  )
+}
+
+interface StringConfidenceSelectorProps {
+  value: number
+  onChange: (v: number) => void
+}
+
+function StringConfidenceSelector({ value, onChange }: StringConfidenceSelectorProps) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <label className="text-sm text-hf-fg2 flex-1">STRING confidence</label>
+      <div className="flex gap-1">
+        {STRING_CONFIDENCE_PRESETS.map((preset) => {
+          const isActive = value === preset.value
+          return (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => onChange(preset.value)}
+              aria-pressed={isActive}
+              className={`px-2 py-1 rounded-sm text-xs border transition-colors ${
+                isActive
+                  ? 'bg-hf-fg1 text-white border-hf-fg1'
+                  : 'bg-hf-surface text-hf-fg2 border-hf-border hover:border-hf-border-strong'
+              }`}
+            >
+              {preset.label}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -267,12 +308,9 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex flex-col gap-3 pt-1">
-              <NumberField
-                label="Min STRING confidence score"
+              <StringConfidenceSelector
                 value={value.min_confidence}
                 onChange={(v) => set('min_confidence', v)}
-                step={0.05}
-                min={0}
               />
             </div>
           </AccordionContent>
