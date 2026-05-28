@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { PlantSelector } from '@/components/setup/PlantSelector'
@@ -112,6 +112,12 @@ export default function SetupPage() {
   const [diseaseInputMode, setDiseaseInputMode] = useState<DiseaseInputMode>('disease')
   const [diseaseTargetsRaw, setDiseaseTargetsRaw] = useState('')
   const parsedDiseaseTargets = diseaseInputMode === 'manual_targets' ? parseTargetLines(diseaseTargetsRaw) : []
+
+  // Refs for line-number scroll sync
+  const compoundsTextareaRef = useRef<HTMLTextAreaElement>(null)
+  const compoundsLineNumsRef = useRef<HTMLDivElement>(null)
+  const targetsTextareaRef = useRef<HTMLTextAreaElement>(null)
+  const targetsLineNumsRef = useRef<HTMLDivElement>(null)
 
   const isManualCompounds = inputMode === 'manual_compounds'
   const isManualTargets = inputMode === 'manual_targets'
@@ -232,14 +238,24 @@ export default function SetupPage() {
           <p className="text-xs text-hf-fg3 mb-2">One SMILES or InChI string per line. Mixed formats accepted.</p>
           <div className={`relative flex font-mono text-sm rounded-md border bg-hf-bg${formErrors.compounds ? ' border-hf-danger' : ' border-hf-border'}`}>
             {/* Line numbers */}
-            <div className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none">
+            <div
+              ref={compoundsLineNumsRef}
+              data-testid="compounds-line-nums"
+              className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none overflow-hidden"
+            >
               {(compoundsRaw === '' ? [] : compoundsRaw.split('\n')).map((_, i) => (
                 <div key={`line-${i}`} className="leading-6">{i + 1}</div>
               ))}
             </div>
             <textarea
+              ref={compoundsTextareaRef}
               value={compoundsRaw}
               onChange={(e) => { setCompoundsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
+              onScroll={() => {
+                if (compoundsTextareaRef.current && compoundsLineNumsRef.current) {
+                  compoundsLineNumsRef.current.scrollTop = compoundsTextareaRef.current.scrollTop
+                }
+              }}
               rows={6}
               data-testid="compounds-textarea"
               className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y border-0"
@@ -263,14 +279,24 @@ export default function SetupPage() {
           <p className="text-xs text-hf-fg3 mb-2">One gene symbol or UniProt accession per line.</p>
           <div className={`relative flex font-mono text-sm rounded-md border bg-hf-bg${formErrors.targets ? ' border-hf-danger' : ' border-hf-border'}`}>
             {/* Line numbers */}
-            <div className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none">
+            <div
+              ref={targetsLineNumsRef}
+              data-testid="targets-line-nums"
+              className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none overflow-hidden"
+            >
               {(targetsRaw === '' ? [] : targetsRaw.split('\n')).map((_, i) => (
                 <div key={`line-${i}`} className="leading-6">{i + 1}</div>
               ))}
             </div>
             <textarea
+              ref={targetsTextareaRef}
               value={targetsRaw}
               onChange={(e) => { setTargetsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
+              onScroll={() => {
+                if (targetsTextareaRef.current && targetsLineNumsRef.current) {
+                  targetsLineNumsRef.current.scrollTop = targetsTextareaRef.current.scrollTop
+                }
+              }}
               rows={6}
               data-testid="targets-textarea"
               className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y border-0"
