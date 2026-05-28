@@ -14,6 +14,8 @@ import { useAddUserDiseaseTarget } from '@/hooks/useAddUserDiseaseTarget'
 import { useRemoveUserDiseaseTarget } from '@/hooks/useRemoveUserDiseaseTarget'
 import { useResetFromStage } from '@/hooks/useResetFromStage'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage4Result, DiseaseTargetResult } from '@/types/api'
+import { ExternalLink } from '@/components/shared/ExternalLink'
+import { sourceUrls } from '@/lib/sourceUrls'
 
 const SOURCES = [
   {
@@ -53,7 +55,18 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
     {
       key: 'uniprot_id',
       header: 'UniProt ID',
-      className: 'font-mono text-hf-fg3',
+      render: (value) => {
+        const accession = value as string | null | undefined
+        if (!accession) return <span className="text-hf-fg4">—</span>
+        return (
+          <ExternalLink
+            href={sourceUrls.target(accession)}
+            className="font-mono text-xs"
+          >
+            {accession}
+          </ExternalLink>
+        )
+      },
     },
     {
       key: 'association_score',
