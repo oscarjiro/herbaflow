@@ -1,10 +1,23 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+  type ColumnDef as TanStackColumnDef,
+  type SortingState,
+  type PaginationState,
+  type FilterFn,
+} from '@tanstack/react-table'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
+// Public interface — unchanged so all stage panels work without modification
 export interface ColumnDef<T> {
   key: keyof T & string
   header: string
@@ -30,7 +43,18 @@ interface DataTableProps<T extends Record<string, unknown>> {
   rowClassName?: (row: T) => string    // for per-row styling (e.g. hub gene highlight)
 }
 
-type SortDir = 'asc' | 'desc' | null
+// Custom global filter function that respects filterKeys
+function buildGlobalFilter<T extends Record<string, unknown>>(
+  filterKeys: (keyof T & string)[]
+): FilterFn<T> {
+  const fn: FilterFn<T> = (row, _columnId, filterValue: string) => {
+    if (!filterValue || !filterValue.trim()) return true
+    const q = filterValue.toLowerCase()
+    return filterKeys.some(k => String((row.original as T)[k] ?? '').toLowerCase().includes(q))
+  }
+  fn.autoRemove = (val: unknown) => !val || !(val as string).trim()
+  return fn
+}
 
 export function DataTable<T extends Record<string, unknown>>({
   data,
@@ -41,116 +65,152 @@ export function DataTable<T extends Record<string, unknown>>({
   className,
   rowClassName,
 }: DataTableProps<T>) {
-  const [filter, setFilter] = useState('')
-  const [sortKey, setSortKey] = useState<string | null>(null)
-  const [sortDir, setSortDir] = useState<SortDir>(null)
-  const [page, setPage] = useState(1)
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = useState('')
   const [selectedPageSize, setSelectedPageSize] = useState<PageSizeOption>(
     () => toPageSizeOption(pageSize)
   )
+  const [pagination, setPagination] = useState<PaginationState>(() => ({
+    pageIndex: 0,
+    pageSize: toPageSizeOption(pageSize) === 'all' ? 999999 : (toPageSizeOption(pageSize) as number),
+  }))
 
-  const safeData = data ?? []
-  const searchKeys = filterKeys ?? columns.map(c => c.key)
+  const safeData = useMemo(() => data ?? [], [data])
+  const searchKeys = useMemo(
+    () => filterKeys ?? columns.map(c => c.key),
+    [filterKeys, columns]
+  )
 
-  // Reset to page 1 when filter or sort changes
-  useEffect(() => { setPage(1) }, [filter, sortKey, sortDir])
+  // Build TanStack ColumnDef array from our public ColumnDef interface
+  const tanstackColumns = useMemo<TanStackColumnDef<T, unknown>[]>(() => {
+    return columns.map(col => ({
+      id: col.key,
+      accessorKey: col.key,
+      header: col.header,
+      enableSorting: col.sortable ?? false,
+      enableGlobalFilter: true,
+      cell: col.render
+        ? ({ row }: { row: { original: T } }) => col.render!(row.original[col.key], row.original)
+        : ({ getValue }: { getValue: () => unknown }) => String(getValue() ?? ''),
+    }))
+  }, [columns])
 
-  const filtered = useMemo(() => {
-    if (!filter.trim()) return safeData
-    const q = filter.toLowerCase()
-    return safeData.filter(row =>
-      searchKeys.some(k => String(row[k] ?? '').toLowerCase().includes(q))
-    )
-  }, [safeData, filter, searchKeys])
+  const globalFilterFn = useMemo(
+    () => buildGlobalFilter<T>(searchKeys),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchKeys.join(',')]
+  )
 
-  const sorted = useMemo(() => {
-    if (!sortKey || !sortDir) return filtered ?? []
-    return [...(filtered ?? [])].sort((a, b) => {
-      const av = a[sortKey]
-      const bv = b[sortKey]
-      const cmp = typeof av === 'number' && typeof bv === 'number'
-        ? av - bv
-        : String(av ?? '').localeCompare(String(bv ?? ''))
-      return sortDir === 'asc' ? cmp : -cmp
-    })
-  }, [filtered, sortKey, sortDir])
+  const isPaginated = selectedPageSize !== 'all'
 
-  const totalRows = sorted.length
-  const totalPages = selectedPageSize === 'all' ? 1 : Math.ceil(totalRows / (selectedPageSize as number))
-  // clamp page in case filter shrinks result set
-  const currentPage = Math.min(page, Math.max(1, totalPages))
+  const table = useReactTable({
+    data: safeData,
+    columns: tanstackColumns,
+    state: {
+      sorting,
+      globalFilter,
+      pagination,
+    },
+    // Always sort asc first on first click (consistent regardless of column type)
+    sortDescFirst: false,
+    onSortingChange: (updater) => {
+      setSorting(prev => typeof updater === 'function' ? updater(prev) : updater)
+      // reset to first page on sort change
+      setPagination(prev => ({ ...prev, pageIndex: 0 }))
+    },
+    onGlobalFilterChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(globalFilter) : updater
+      setGlobalFilter(next)
+      setPagination(prev => ({ ...prev, pageIndex: 0 }))
+    },
+    onPaginationChange: setPagination,
+    globalFilterFn,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: true,
+  })
 
-  const paginated = useMemo(() => {
-    if (selectedPageSize === 'all') return sorted
-    const sz = selectedPageSize as number
-    const start = (currentPage - 1) * sz
-    return sorted.slice(start, start + sz)
-  }, [sorted, selectedPageSize, currentPage])
+  const { pageIndex } = table.getState().pagination
+  const totalRows = table.getFilteredRowModel().rows.length
+  const currentPageSize = isPaginated ? pagination.pageSize : totalRows
+  const totalPages = isPaginated ? Math.ceil(totalRows / currentPageSize) : 1
 
-  // "1–25 of 119" range label
-  const rangeStart = totalRows === 0 ? 0 : (selectedPageSize === 'all' ? 1 : (currentPage - 1) * (selectedPageSize as number) + 1)
-  const rangeEnd   = selectedPageSize === 'all' ? totalRows : Math.min(currentPage * (selectedPageSize as number), totalRows)
-
-  function toggleSort(key: string) {
-    if (sortKey !== key) { setSortKey(key); setSortDir('asc') }
-    else if (sortDir === 'asc') setSortDir('desc')
-    else { setSortKey(null); setSortDir(null) }
-  }
+  const rangeStart = totalRows === 0 ? 0 : pageIndex * currentPageSize + 1
+  const rangeEnd = isPaginated
+    ? Math.min((pageIndex + 1) * currentPageSize, totalRows)
+    : totalRows
 
   function handlePageSizeChange(size: PageSizeOption) {
     setSelectedPageSize(size)
-    setPage(1)
+    const numericSize = size === 'all' ? 999999 : (size as number)
+    setPagination({ pageIndex: 0, pageSize: numericSize })
   }
+
+  const rows = table.getPaginationRowModel().rows
 
   return (
     <div className={cn('space-y-3', className)}>
       <input
         type="text"
         placeholder={filterPlaceholder}
-        value={filter}
-        onChange={e => setFilter(e.target.value)}
+        value={globalFilter}
+        onChange={e => {
+          setGlobalFilter(e.target.value)
+          setPagination(prev => ({ ...prev, pageIndex: 0 }))
+        }}
         className="w-full max-w-sm rounded border border-hf-border bg-hf-surface px-3 py-1.5 text-sm text-hf-fg1 placeholder:text-hf-fg4 focus:outline-none focus:ring-1 focus:ring-hf-fg1"
         aria-label="Filter table"
       />
       <div className="rounded-lg border border-hf-border bg-hf-surface overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              {columns.map(col => (
-                <TableHead
-                  key={col.key}
-                  className={cn(
-                    'text-xs text-hf-fg3 font-sans font-medium',
-                    col.sortable && 'cursor-pointer select-none hover:text-hf-fg1',
-                    col.className
-                  )}
-                  onClick={col.sortable ? () => toggleSort(col.key) : undefined}
-                >
-                  {col.header}
-                  {col.sortable && sortKey === col.key && (
-                    <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>
-                  )}
-                </TableHead>
-              ))}
-            </TableRow>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header, i) => {
+                  const colDef = columns[i]
+                  const isSorted = header.column.getIsSorted()
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={cn(
+                        'text-xs text-hf-fg3 font-sans font-medium',
+                        colDef?.sortable && 'cursor-pointer select-none hover:text-hf-fg1',
+                        colDef?.className
+                      )}
+                      onClick={colDef?.sortable ? header.column.getToggleSortingHandler() : undefined}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {isSorted && (
+                        <span className="ml-1" data-sort-indicator="">
+                          {isSorted === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
           </TableHeader>
           <TableBody>
-            {paginated.length === 0 ? (
+            {rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length} className="py-8 text-center text-sm text-hf-fg4">
                   No results
                 </TableCell>
               </TableRow>
             ) : (
-              paginated.map((row, i) => (
-                <TableRow key={i} className={rowClassName?.(row)}>
-                  {columns.map(col => (
-                    <TableCell key={col.key} className={cn('text-sm text-hf-fg2', col.className)}>
-                      {col.render
-                        ? col.render(row[col.key], row)
-                        : String(row[col.key] ?? '')}
-                    </TableCell>
-                  ))}
+              rows.map(row => (
+                <TableRow key={row.id} className={rowClassName?.(row.original)}>
+                  {row.getVisibleCells().map((cell, i) => {
+                    const colDef = columns[i]
+                    return (
+                      <TableCell key={cell.id} className={cn('text-sm text-hf-fg2', colDef?.className)}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    )
+                  })}
                 </TableRow>
               ))
             )}
@@ -185,19 +245,19 @@ export function DataTable<T extends Record<string, unknown>>({
             <span className="tabular-nums">
               {totalRows === 0 ? '0 rows' : `${rangeStart}–${rangeEnd} of ${totalRows}`}
             </span>
-            {selectedPageSize !== 'all' && totalPages > 1 && (
+            {isPaginated && totalPages > 1 && (
               <>
                 <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
+                  onClick={() => setPagination(prev => ({ ...prev, pageIndex: Math.max(0, prev.pageIndex - 1) }))}
+                  disabled={pageIndex === 0}
                   aria-label="Previous page"
                   className="disabled:opacity-30 hover:text-hf-fg1 transition-colors"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
                 <button
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
+                  onClick={() => setPagination(prev => ({ ...prev, pageIndex: Math.min(totalPages - 1, prev.pageIndex + 1) }))}
+                  disabled={pageIndex >= totalPages - 1}
                   aria-label="Next page"
                   className="disabled:opacity-30 hover:text-hf-fg1 transition-colors"
                 >
@@ -211,3 +271,5 @@ export function DataTable<T extends Record<string, unknown>>({
     </div>
   )
 }
+
+export default DataTable
