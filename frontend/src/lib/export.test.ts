@@ -11,19 +11,14 @@ const mockAnchor = {
   click: mockClick,
 }
 
-// ---- URL mocks ----
-const mockCreateObjectURL = vi.fn().mockReturnValue('blob:mock-url')
-const mockRevokeObjectURL = vi.fn()
-
 // ---- fetch mock ----
 const mockFetch = vi.fn()
 
 beforeEach(() => {
+  vi.useFakeTimers()
   vi.stubGlobal('fetch', mockFetch)
-  vi.stubGlobal('URL', {
-    createObjectURL: mockCreateObjectURL,
-    revokeObjectURL: mockRevokeObjectURL,
-  })
+  vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url')
+  vi.spyOn(URL, 'revokeObjectURL').mockReturnValue(undefined)
   vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor as unknown as HTMLAnchorElement)
   vi.spyOn(document.body, 'appendChild').mockImplementation(mockAppendChild)
   vi.spyOn(document.body, 'removeChild').mockImplementation(mockRemoveChild)
@@ -36,12 +31,11 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
   mockClick.mockClear()
   mockAppendChild.mockClear()
   mockRemoveChild.mockClear()
-  mockCreateObjectURL.mockClear()
-  mockRevokeObjectURL.mockClear()
   mockFetch.mockClear()
   mockAnchor.href = ''
   mockAnchor.download = ''
@@ -95,7 +89,8 @@ describe('downloadStageExport', () => {
 
   it('revokes object URL after download', async () => {
     await downloadStageExport({ analysisId: 'my-id', stageNum: 1 })
-    expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
+    vi.runAllTimers()
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
   })
 
   it('throws when response is not ok', async () => {

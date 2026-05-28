@@ -36,5 +36,5 @@ export async function downloadStageExport(config: ExportConfig): Promise<void> {
   document.body.appendChild(anchor)
   anchor.click()
   document.body.removeChild(anchor)
-  URL.revokeObjectURL(objectUrl)
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 100)
 }
