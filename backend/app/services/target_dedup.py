@@ -74,12 +74,12 @@ async def deduplicate_targets(
             )
             canonical_key = info.uniprot_accession.upper()
         except ServiceUnavailableError:
-            # UniProt down — fall back to lowercased gene_symbol for dedup
+            # UniPort down — fall back to uppercased gene_symbol for dedup
             if gene_symbol:
-                canonical_key = gene_symbol.lower()
+                canonical_key = gene_symbol.upper()
             else:
-                # Only accession provided but UniProt is down — use lowercased accession
-                canonical_key = uniprot_id.lower()
+                # Only accession provided but UniProt is down — use uppercased accession
+                canonical_key = uniprot_id.upper()
             logger.warning(
                 "UniProt unavailable during dedup for %r — using fallback key %r",
                 label,

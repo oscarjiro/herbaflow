@@ -5,25 +5,25 @@
 
 export const sourceUrls = {
   plant: (knapsackId: string) =>
-    `https://knapsack.nakatu.com/family.html?id=${knapsackId}`,
+    `https://knapsack.nakatu.com/family.html?id=${encodeURIComponent(knapsackId)}`,
 
   compound: (pubchemCid: string | number) =>
-    `https://pubchem.ncbi.nlm.nih.gov/compound/${pubchemCid}`,
+    `https://pubchem.ncbi.nlm.nih.gov/compound/${encodeURIComponent(pubchemCid)}`,
 
   target: (uniprotAccession: string) =>
-    `https://www.uniprot.org/uniprotkb/${uniprotAccession}`,
+    `https://www.uniprot.org/uniprotkb/${encodeURIComponent(uniprotAccession)}`,
 
   goTerm: (termId: string) =>
-    `https://amigo.geneontology.org/amigo/term/${termId}`,
+    `https://amigo.geneontology.org/amigo/term/${encodeURIComponent(termId)}`,
 
   kegg: (termId: string) =>
-    `https://www.genome.jp/entry/${termId}`,
+    `https://www.genome.jp/entry/${encodeURIComponent(termId)}`,
 
   reactome: (termId: string) =>
-    `https://reactome.org/PathwayBrowser/#${termId}`,
+    `https://reactome.org/PathwayBrowser/#${encodeURIComponent(termId)}`,
 
   wikipathways: (termId: string) =>
-    `https://www.wikipathways.org/pathways/${termId}`,
+    `https://www.wikipathways.org/pathways/${encodeURIComponent(termId)}`,
 } as const
 
 /** Detect which sourceUrls function to call based on term source */

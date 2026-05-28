@@ -19,7 +19,7 @@ describe('sourceUrls', () => {
   })
 
   it('generates correct GO term URL', () => {
-    expect(sourceUrls.goTerm('GO:0008150')).toBe('https://amigo.geneontology.org/amigo/term/GO:0008150')
+    expect(decodeURIComponent(sourceUrls.goTerm('GO:0008150'))).toBe('https://amigo.geneontology.org/amigo/term/GO:0008150')
   })
 
   it('generates correct KEGG URL', () => {
@@ -66,6 +66,6 @@ describe('enrichmentTermUrl', () => {
 
   it('includes the term ID in the URL', () => {
     const url = enrichmentTermUrl('GO:0008150', 'GO:BP')
-    expect(url).toContain('GO:0008150')
+    expect(decodeURIComponent(url)).toContain('GO:0008150')
   })
 })

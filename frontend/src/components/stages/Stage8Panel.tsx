@@ -158,7 +158,7 @@ function PathwayChart({
               {topTerms.map((t) => (
                 <tr key={t.term_id} className="border-b border-hf-border last:border-0 hover:bg-hf-bg2 transition-colors">
                   <td className="py-1 px-2">
-                    {t.term_id ? (
+                    {t.term_id?.trim() ? (
                       <ExternalLink href={enrichmentTermUrl(t.term_id, source)} className="text-xs">
                         {t.term_name}
                       </ExternalLink>
