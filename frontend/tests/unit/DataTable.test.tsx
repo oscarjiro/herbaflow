@@ -114,11 +114,15 @@ describe('DataTable', () => {
     expect(th?.querySelector('[data-sort-indicator]')).toBeNull()
   })
 
-  it('renders correct row count without pagination', () => {
+  it('renders all rows and no pagination UI when pageSize is not provided', () => {
     render(<DataTable data={data} columns={columns} />)
     const rows = screen.getAllByRole('row')
     // 1 header row + 3 data rows
     expect(rows).toHaveLength(4)
+    // No pagination controls
+    expect(screen.queryByLabelText('Previous page')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Next page')).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Page \d+ of \d+$/)).not.toBeInTheDocument()
   })
 
   it('shows only pageSize rows when pageSize is set', () => {
@@ -166,10 +170,13 @@ describe('DataTable', () => {
       />
     )
     const rows = screen.getAllByRole('row')
-    // data rows start at index 1
-    const alphaRow = rows[1] // Alpha has value 30 — first unsorted row
     // find the row with Alpha
     const alphaRowEl = rows.find(r => r.textContent?.includes('Alpha'))
     expect(alphaRowEl?.className).toContain('highlighted')
+  })
+
+  it('renders "No results" text when data is empty', () => {
+    render(<DataTable data={[]} columns={columns} />)
+    expect(screen.getByText('No results')).toBeInTheDocument()
   })
 })

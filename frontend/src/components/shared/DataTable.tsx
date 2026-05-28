@@ -27,19 +27,10 @@ export interface ColumnDef<T> {
   className?: string
 }
 
-type PageSizeOption = 10 | 25 | 50 | 'all'
-const PAGE_SIZE_OPTIONS: PageSizeOption[] = [10, 25, 50, 'all']
-
-function toPageSizeOption(n: number): PageSizeOption {
-  return ([10, 25, 50] as number[]).includes(n) ? (n as PageSizeOption) : 25
-}
-
 interface DataTableProps<T extends Record<string, unknown>> {
   data: T[]
   columns: ColumnDef<T>[]
-  filterPlaceholder?: string
-  filterKeys?: (keyof T & string)[]   // which fields to search in (used only if filterable is false)
-  pageSize?: number                    // initial page size; must be 10 | 25 | 50 — defaults to 25
+  pageSize?: number                    // when set, enables pagination with this page size; omit to show all rows
   className?: string
   rowClassName?: (row: T) => string    // for per-row styling (e.g. hub gene highlight)
   sortable?: boolean                   // when false, disable all column sorting (default: true)
@@ -49,9 +40,7 @@ interface DataTableProps<T extends Record<string, unknown>> {
 export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
-  filterPlaceholder: _filterPlaceholder = 'Filter...',
-  filterKeys: _filterKeys,
-  pageSize = 25,
+  pageSize,
   className,
   rowClassName,
   sortable = true,
@@ -59,13 +48,12 @@ export function DataTable<T extends Record<string, unknown>>({
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [selectedPageSize, setSelectedPageSize] = useState<PageSizeOption>(
-    () => toPageSizeOption(pageSize)
-  )
   const [pagination, setPagination] = useState<PaginationState>(() => ({
     pageIndex: 0,
-    pageSize: toPageSizeOption(pageSize) === 'all' ? 999999 : (toPageSizeOption(pageSize) as number),
+    pageSize: pageSize ?? 999999,
   }))
+
+  const isPaginated = pageSize !== undefined
 
   const safeData = useMemo(() => data ?? [], [data])
 
@@ -83,47 +71,37 @@ export function DataTable<T extends Record<string, unknown>>({
     }))
   }, [columns, sortable, filterable])
 
-  const isPaginated = selectedPageSize !== 'all'
-
   const table = useReactTable({
     data: safeData,
     columns: tanstackColumns,
     state: {
       sorting,
       columnFilters,
-      pagination,
+      ...(isPaginated ? { pagination } : {}),
     },
     // Always sort asc first on first click (consistent regardless of column type)
     sortDescFirst: false,
     onSortingChange: (updater) => {
       setSorting(prev => typeof updater === 'function' ? updater(prev) : updater)
-      // reset to first page on sort change
-      setPagination(prev => ({ ...prev, pageIndex: 0 }))
     },
     onColumnFiltersChange: (updater) => {
       setColumnFilters(prev => typeof updater === 'function' ? updater(prev) : updater)
-      setPagination(prev => ({ ...prev, pageIndex: 0 }))
     },
-    onPaginationChange: setPagination,
+    ...(isPaginated ? { onPaginationChange: setPagination } : {}),
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(isPaginated ? { getPaginationRowModel: getPaginationRowModel() } : {}),
     autoResetPageIndex: true,
   })
 
-  const { pageIndex } = table.getState().pagination
   const totalRows = table.getFilteredRowModel().rows.length
-  const currentPageSize = isPaginated ? pagination.pageSize : totalRows
-  const totalPages = isPaginated ? Math.ceil(totalRows / currentPageSize) : 1
+  const pageIndex = isPaginated ? table.getState().pagination.pageIndex : 0
+  const totalPages = isPaginated ? Math.ceil(totalRows / pageSize) : 1
 
-  function handlePageSizeChange(size: PageSizeOption) {
-    setSelectedPageSize(size)
-    const numericSize = size === 'all' ? 999999 : (size as number)
-    setPagination({ pageIndex: 0, pageSize: numericSize })
-  }
-
-  const rows = table.getPaginationRowModel().rows
+  const rows = isPaginated
+    ? table.getPaginationRowModel().rows
+    : table.getRowModel().rows
 
   return (
     <div className={cn('space-y-3', className)}>
@@ -132,10 +110,11 @@ export function DataTable<T extends Record<string, unknown>>({
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header, i) => {
-                  const colDef = columns[i]
+                {headerGroup.headers.map(header => {
+                  const colDef = columns.find(c => c.key === header.column.id)
                   const isSorted = header.column.getIsSorted()
                   const canSort = sortable && (colDef?.sortable ?? false)
+                  const sortHandler = header.column.getToggleSortingHandler()
                   return (
                     <TableHead
                       key={header.id}
@@ -144,7 +123,18 @@ export function DataTable<T extends Record<string, unknown>>({
                         canSort && 'cursor-pointer select-none hover:text-hf-fg1',
                         colDef?.className
                       )}
-                      onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                      onClick={canSort ? sortHandler : undefined}
+                      {...(canSort ? {
+                        tabIndex: 0,
+                        role: 'button',
+                        'aria-sort': isSorted === 'asc' ? 'ascending' : isSorted === 'desc' ? 'descending' : 'none',
+                        onKeyDown: (e: React.KeyboardEvent) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            sortHandler?.(e as unknown as React.MouseEvent)
+                          }
+                        },
+                      } : {})}
                     >
                       <div>
                         {flexRender(header.column.columnDef.header, header.getContext())}
@@ -181,8 +171,8 @@ export function DataTable<T extends Record<string, unknown>>({
             ) : (
               rows.map(row => (
                 <TableRow key={row.id} className={rowClassName?.(row.original)}>
-                  {row.getVisibleCells().map((cell, i) => {
-                    const colDef = columns[i]
+                  {row.getVisibleCells().map(cell => {
+                    const colDef = columns.find(c => c.key === cell.column.id)
                     return (
                       <TableCell key={cell.id} className={cn('text-sm text-hf-fg2', colDef?.className)}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -196,36 +186,15 @@ export function DataTable<T extends Record<string, unknown>>({
         </Table>
       </div>
 
-      {/* Pagination footer — shown whenever there is data */}
-      {totalRows > 0 && (
-        <div className="flex items-center justify-between gap-4 text-xs text-hf-fg3">
-          {/* Page size selector */}
-          <div className="flex items-center gap-0.5">
-            <span className="mr-1.5">Rows:</span>
-            {PAGE_SIZE_OPTIONS.map(size => (
-              <button
-                key={String(size)}
-                onClick={() => handlePageSizeChange(size)}
-                className={cn(
-                  'px-2 py-0.5 rounded border transition-colors',
-                  selectedPageSize === size
-                    ? 'border-hf-border text-hf-fg1 font-medium'
-                    : 'border-transparent hover:text-hf-fg1'
-                )}
-              >
-                {size === 'all' ? 'All' : size}
-              </button>
-            ))}
-          </div>
-
+      {/* Pagination footer — shown only when pageSize is set and there is data */}
+      {isPaginated && totalRows > 0 && (
+        <div className="flex items-center justify-end gap-4 text-xs text-hf-fg3">
           {/* Page X of Y + prev/next navigation */}
           <div className="flex items-center gap-1.5">
             <span className="tabular-nums">
-              {isPaginated
-                ? `Page ${pageIndex + 1} of ${totalPages}`
-                : `${totalRows} rows`}
+              {`Page ${pageIndex + 1} of ${totalPages}`}
             </span>
-            {isPaginated && totalPages > 1 && (
+            {totalPages > 1 && (
               <>
                 <button
                   onClick={() => setPagination(prev => ({ ...prev, pageIndex: Math.max(0, prev.pageIndex - 1) }))}
