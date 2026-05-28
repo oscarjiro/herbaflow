@@ -317,7 +317,7 @@ export default function SetupPage() {
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
         <p className="text-sm font-medium text-hf-fg2 mb-2">Disease Targets</p>
         {/* Disease input mode toggle */}
-        <div className="flex gap-1 bg-hf-bg border border-hf-border rounded-lg p-1 mb-3">
+        <div className="flex gap-1 bg-hf-bg border border-hf-border rounded-lg p-1 mb-3" role="group" aria-label="Disease input mode">
           <button
             type="button"
             className={`flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none ${

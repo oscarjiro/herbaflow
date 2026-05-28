@@ -5,6 +5,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import SetupPage from '@/pages/SetupPage'
 
 function makeQueryClient() {
   return new QueryClient({
@@ -12,8 +13,7 @@ function makeQueryClient() {
   })
 }
 
-async function renderSetupPage() {
-  const { default: SetupPage } = await import('@/pages/SetupPage')
+function renderSetupPage() {
   const queryClient = makeQueryClient()
   render(
     <QueryClientProvider client={queryClient}>
@@ -25,8 +25,8 @@ async function renderSetupPage() {
 }
 
 describe('SetupPage — line numbers scroll in sync with textarea', () => {
-  it('line numbers scroll in sync with the compounds textarea', async () => {
-    await renderSetupPage()
+  it('line numbers scroll in sync with the compounds textarea', () => {
+    renderSetupPage()
 
     // Switch to manual compounds mode to reveal the textarea
     const manualBtn = screen.getByTestId('input-mode-manual')
@@ -36,15 +36,19 @@ describe('SetupPage — line numbers scroll in sync with textarea', () => {
     const lineNums = screen.getByTestId('compounds-line-nums')
 
     // Simulate the user scrolling the textarea
-    Object.defineProperty(textarea, 'scrollTop', { writable: true, value: 120 })
+    // Use configurable: true to allow jsdom to read the scrollTop value
+    Object.defineProperty(textarea, 'scrollTop', {
+      configurable: true,
+      get: () => 120,
+    })
     fireEvent.scroll(textarea)
 
     // The line-number column's scrollTop must match the textarea
     expect(lineNums.scrollTop).toBe(120)
   })
 
-  it('line numbers scroll in sync with the targets textarea', async () => {
-    await renderSetupPage()
+  it('line numbers scroll in sync with the targets textarea', () => {
+    renderSetupPage()
 
     // Switch to manual targets mode to reveal the targets textarea
     const manualTargetsBtn = screen.getByTestId('input-mode-manual-targets')
@@ -53,7 +57,11 @@ describe('SetupPage — line numbers scroll in sync with textarea', () => {
     const textarea = screen.getByTestId('targets-textarea')
     const lineNums = screen.getByTestId('targets-line-nums')
 
-    Object.defineProperty(textarea, 'scrollTop', { writable: true, value: 80 })
+    // Use configurable: true to allow jsdom to read the scrollTop value
+    Object.defineProperty(textarea, 'scrollTop', {
+      configurable: true,
+      get: () => 80,
+    })
     fireEvent.scroll(textarea)
 
     expect(lineNums.scrollTop).toBe(80)

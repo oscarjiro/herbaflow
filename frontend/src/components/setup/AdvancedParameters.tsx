@@ -139,7 +139,7 @@ function StringConfidenceSelector({ value, onChange }: StringConfidenceSelectorP
   return (
     <div className="flex items-center justify-between gap-4">
       <label className="text-sm text-hf-fg2 flex-1">STRING confidence</label>
-      <div className="flex gap-1">
+      <div className="flex gap-1" role="group" aria-label="STRING confidence preset">
         {STRING_CONFIDENCE_PRESETS.map((preset) => {
           const isActive = value === preset.value
           return (

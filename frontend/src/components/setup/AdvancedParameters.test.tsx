@@ -38,16 +38,9 @@ describe('AdvancedParameters — STRING confidence preset selector', () => {
     const networkTrigger = screen.getByText('Network')
     fireEvent.click(networkTrigger)
 
-    // The selector (select element or button group) should show Medium as selected/active
-    // We look for a <select> with value 0.4, or a button with aria-pressed=true labeled Medium
-    const selector = screen.queryByRole('combobox')
-    if (selector) {
-      expect((selector as HTMLSelectElement).value).toBe('0.4')
-    } else {
-      // Button preset group: Medium button should have aria-pressed="true"
-      const mediumBtn = screen.getByRole('button', { name: 'Medium' })
-      expect(mediumBtn).toHaveAttribute('aria-pressed', 'true')
-    }
+    // Button preset group: Medium button should have aria-pressed="true"
+    const mediumBtn = screen.getByRole('button', { name: 'Medium' })
+    expect(mediumBtn).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('STRING confidence selector emits correct decimal value on change', () => {
@@ -63,13 +56,8 @@ describe('AdvancedParameters — STRING confidence preset selector', () => {
     fireEvent.click(networkTrigger)
 
     // Click "High" preset
-    const selector = screen.queryByRole('combobox')
-    if (selector) {
-      fireEvent.change(selector, { target: { value: '0.7' } })
-    } else {
-      const highBtn = screen.getByRole('button', { name: 'High' })
-      fireEvent.click(highBtn)
-    }
+    const highBtn = screen.getByRole('button', { name: 'High' })
+    fireEvent.click(highBtn)
 
     // onChange must have been called with min_confidence = 0.7
     expect(onChange).toHaveBeenCalledWith(
