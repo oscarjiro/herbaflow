@@ -153,6 +153,8 @@ def run(cfg: dict, canonical_dir: Path, diseases_csv: Path, output_dir: Path) ->
         results.append(_check("score_range_valid", ok,
                                f"{below} below threshold, {above} above 1.0" if not ok else
                                f"range [{dt_df['_score'].min():.3f}, {dt_df['_score'].max():.3f}]"))
+        if not ok:
+            has_fail = True
 
     # ------------------------------------------------------------------
     # UniProt coverage (warn only)
