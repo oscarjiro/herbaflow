@@ -304,3 +304,4 @@ class InjectTargetsResponse(BaseModel):
     failed: list[str]                                                # raw input strings that failed UniProt validation
     duplicates_removed: int = 0                                      # inputs dropped due to deduplication
     duplicate_names: list[str] = Field(default_factory=list)         # labels for the dropped entries
+    cached: int = 0                                                  # targets persisted to DB cache (validated, have UniProt accession)

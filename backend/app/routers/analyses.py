@@ -1312,11 +1312,18 @@ async def inject_targets(
         {"_input_mode": "manual_targets"},
     )
 
+    # Persist the newly validated targets to the canonical targets table (DB cache),
+    # mirroring compound caching on inject-compounds. Only targets with a UniProt
+    # accession are stored; failures are non-fatal and return 0.
+    from app.services.target_cache import cache_validated_targets
+    cached = await cache_validated_targets(new_targets, session)
+
     return InjectTargetsResponse(
         injected=len(new_targets),
         failed=failed,
         duplicates_removed=len(dedup_removed_labels),
         duplicate_names=dedup_removed_labels,
+        cached=cached,
     )
 
 
