@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Input } from '@/components/ui/input'
+import { PARAM_DEFAULTS } from '@/lib/stage-params'
 
 // ============================================================================
 // Types & defaults
@@ -19,6 +20,7 @@ export interface AdvancedParams {
   max_tpsa: number
   max_rotatable_bonds: number
   apply_veber: boolean
+  apply_pains: boolean
   np_exception_threshold: number
   apply_adme_to_manual: boolean
 
@@ -42,25 +44,41 @@ export interface AdvancedParams {
   sources: string[]
 }
 
+// Single source of truth: the flat setup-form defaults are derived field-by-field
+// from the nested PARAM_DEFAULTS (lib/stage-params.ts), which mirror the backend
+// analysis/models.py defaults exactly. Reading from PARAM_DEFAULTS prevents drift
+// (e.g. min_assay_confidence must be 7 — the backend/stage default — not 0).
 export const DEFAULT_PARAMS: AdvancedParams = {
-  max_mw: 500,
-  max_logp: 5,
-  max_hbd: 5,
-  max_hba: 10,
-  max_tpsa: 140,
-  max_rotatable_bonds: 10,
-  apply_veber: true,
-  np_exception_threshold: 0.5,
-  apply_adme_to_manual: true,
-  min_pchembl: 5.0,
-  human_only: true,
-  min_assay_confidence: 0,
-  min_score: 0.3,
-  min_confidence: 0.4,
-  top_n: 20,
-  use_hub_bottleneck: true,
-  fdr_threshold: 0.05,
-  sources: ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG'],
+  // ADME (Stage 2)
+  max_mw: PARAM_DEFAULTS.adme.max_mw as number,
+  max_logp: PARAM_DEFAULTS.adme.max_logp as number,
+  max_hbd: PARAM_DEFAULTS.adme.max_hbd as number,
+  max_hba: PARAM_DEFAULTS.adme.max_hba as number,
+  max_tpsa: PARAM_DEFAULTS.adme.max_tpsa as number,
+  max_rotatable_bonds: PARAM_DEFAULTS.adme.max_rotatable_bonds as number,
+  apply_veber: PARAM_DEFAULTS.adme.apply_veber as boolean,
+  apply_pains: PARAM_DEFAULTS.adme.apply_pains as boolean,
+  np_exception_threshold: PARAM_DEFAULTS.adme.np_exception_threshold as number,
+  apply_adme_to_manual: PARAM_DEFAULTS.adme.apply_adme_to_manual as boolean,
+
+  // Targets (Stage 3)
+  min_pchembl: PARAM_DEFAULTS.target.min_pchembl as number,
+  human_only: PARAM_DEFAULTS.target.human_only as boolean,
+  min_assay_confidence: PARAM_DEFAULTS.target.min_assay_confidence as number,
+
+  // Disease Targets (Stage 4)
+  min_score: PARAM_DEFAULTS.disease_targets.min_score as number,
+
+  // Network (Stage 6)
+  min_confidence: PARAM_DEFAULTS.ppi.min_confidence as number,
+
+  // Hub Genes (Stage 7)
+  top_n: PARAM_DEFAULTS.hub_genes.top_n as number,
+  use_hub_bottleneck: PARAM_DEFAULTS.hub_genes.use_hub_bottleneck as boolean,
+
+  // Enrichment (Stage 8)
+  fdr_threshold: PARAM_DEFAULTS.enrichment.fdr_threshold as number,
+  sources: PARAM_DEFAULTS.enrichment.sources as string[],
 }
 
 const PATHWAY_SOURCES = ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG'] as const
@@ -243,6 +261,11 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
                 label="Apply Veber rules"
                 value={value.apply_veber}
                 onChange={(v) => set('apply_veber', v)}
+              />
+              <CheckboxField
+                label="Flag PAINS (pan-assay interference compounds)"
+                value={value.apply_pains}
+                onChange={(v) => set('apply_pains', v)}
               />
               <CheckboxField
                 label="Apply ADME screening to manually added compounds"

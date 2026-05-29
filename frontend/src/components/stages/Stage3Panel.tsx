@@ -19,6 +19,7 @@ import { useResetFromStage } from '@/hooks/useResetFromStage'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage2Result, Stage3Result, TargetResult, UncoveredCompound, STPTargetImport } from '@/types/api'
 import { parseSTPCsv, generateSTPExportCsv } from '@/lib/stp'
 import { api } from '@/lib/api'
+import { UNIPROT_RE } from '@/lib/schemas'
 
 const SOURCES = [
   {
@@ -237,7 +238,10 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
 
   const handleAddTarget = async (input: string) => {
     setAddError(null)
-    const isAccession = /^[A-Z][0-9][A-Z0-9]{3}[0-9]$/i.test(input.trim())
+    // Use the shared UniProt accession regex so both 6-char (e.g. P04637) and
+    // 10-char (e.g. A0A0A0MRZ8) accessions are classified as UniProt rather
+    // than misread as gene symbols.
+    const isAccession = UNIPROT_RE.test(input.trim().toUpperCase())
     try {
       await addTarget.mutateAsync(
         isAccession ? { uniprot_id: input.trim() } : { gene_symbol: input.trim() }

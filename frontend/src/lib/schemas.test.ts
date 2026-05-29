@@ -9,7 +9,32 @@ import {
   uniprotAccessionSchema,
   geneSymbolSchema,
   smilesSchema,
+  advancedParamsSchema,
 } from './schemas'
+
+// A baseline params object that satisfies advancedParamsSchema; individual
+// tests override single fields to assert bound-by-bound behaviour.
+const VALID_PARAMS = {
+  max_mw: 500,
+  max_logp: 5,
+  max_hbd: 5,
+  max_hba: 10,
+  max_tpsa: 140,
+  max_rotatable_bonds: 10,
+  apply_veber: true,
+  apply_pains: false,
+  np_exception_threshold: 0.5,
+  apply_adme_to_manual: true,
+  min_pchembl: 5,
+  human_only: true,
+  min_assay_confidence: 7,
+  min_score: 0.3,
+  min_confidence: 0.4,
+  top_n: 20,
+  use_hub_bottleneck: true,
+  fdr_threshold: 0.05,
+  sources: ['GO:BP'],
+}
 
 // ---------------------------------------------------------------------------
 // UniProt accession format
@@ -118,5 +143,51 @@ describe('smilesSchema', () => {
 
   it('rejects string with null byte (non-printable ASCII)', () => {
     expect(smilesSchema.safeParse('\x00toxic').success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Advanced params bounds — mirror backend _validate_params in analysis.py
+// ---------------------------------------------------------------------------
+
+describe('advancedParamsSchema — min_pchembl bounds', () => {
+  it('accepts the baseline params object', () => {
+    expect(advancedParamsSchema.safeParse(VALID_PARAMS).success).toBe(true)
+  })
+
+  it('rejects min_pchembl = 15 (backend allows ≤ 14)', () => {
+    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_pchembl: 15 })
+    expect(r.success).toBe(false)
+  })
+
+  it('accepts min_pchembl = 14 (upper bound)', () => {
+    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_pchembl: 14 })
+    expect(r.success).toBe(true)
+  })
+})
+
+describe('advancedParamsSchema — min_confidence STRING presets', () => {
+  it('accepts the 0.40 (Medium) preset', () => {
+    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_confidence: 0.4 })
+    expect(r.success).toBe(true)
+  })
+
+  it.each([0.15, 0.4, 0.7, 0.9])('accepts STRING preset %s', (preset) => {
+    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_confidence: preset })
+    expect(r.success).toBe(true)
+  })
+
+  it('rejects an off-preset confidence like 0.5', () => {
+    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_confidence: 0.5 })
+    expect(r.success).toBe(false)
+  })
+})
+
+describe('advancedParamsSchema — apply_pains', () => {
+  it('requires apply_pains to be present', () => {
+    const { apply_pains: _omit, ...withoutPains } = VALID_PARAMS
+    void _omit
+    const r = advancedParamsSchema.safeParse(withoutPains)
+    expect(r.success).toBe(false)
   })
 })

@@ -43,7 +43,7 @@ export const SOFT_CAP_DISEASE_TARGETS = 500
  *   10-char new:    [A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}
  * Mirrors UNIPROT_ACCESSION_RE in backend/app/schemas/analysis.py.
  */
-const UNIPROT_RE =
+export const UNIPROT_RE =
   /^[OPQ][0-9][A-Z0-9]{3}[0-9]$|^[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$/
 
 export const uniprotAccessionSchema = z
@@ -97,19 +97,26 @@ export const advancedParamsSchema = z.object({
   max_tpsa: z.number().min(0, 'Must be ≥ 0').max(500, 'Must be ≤ 500'),
   max_rotatable_bonds: z.number().int().min(0, 'Must be ≥ 0').max(50, 'Must be ≤ 50'),
   apply_veber: z.boolean(),
+  apply_pains: z.boolean(),
   np_exception_threshold: z.number().min(0, 'Must be ≥ 0').max(1, 'Must be ≤ 1'),
   apply_adme_to_manual: z.boolean(),
 
   // Targets (Stage 3)
-  min_pchembl: z.number().min(0, 'Must be ≥ 0').max(15, 'Must be ≤ 15'),
+  min_pchembl: z.number().min(0, 'Must be ≥ 0').max(14, 'Must be ≤ 14'),
   human_only: z.boolean(),
   min_assay_confidence: z.number().int().min(0, 'Must be 0–9').max(9, 'Must be 0–9'),
 
   // Disease Targets (Stage 4)
   min_score: z.number().min(0, 'Must be ≥ 0').max(1, 'Must be ≤ 1'),
 
-  // Network (Stage 6)
-  min_confidence: z.number().min(0, 'Must be ≥ 0').max(1, 'Must be ≤ 1'),
+  // Network (Stage 6) — STRING-DB standard confidence presets only
+  // (Low=0.15, Medium=0.40, High=0.70, Very High=0.90)
+  min_confidence: z.union([
+    z.literal(0.15),
+    z.literal(0.4),
+    z.literal(0.7),
+    z.literal(0.9),
+  ]),
 
   // Hub Genes (Stage 7)
   top_n: z.number().int().min(1, 'Must be ≥ 1').max(200, 'Must be ≤ 200'),
