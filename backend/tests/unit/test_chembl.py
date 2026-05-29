@@ -305,3 +305,75 @@ async def test_get_targets_for_compounds_deduplicates_same_gene():
     targets = result["CHEMBL_MOL_1"]
     gene_symbols = [t.gene_symbol for t in targets]
     assert gene_symbols.count("AKT1") == 1
+
+
+@pytest.mark.asyncio
+async def test_get_targets_for_compounds_does_not_share_cache_across_calls():
+    """Each call builds a fresh target cache — no state leaks between runs.
+
+    The internal target cache must be a per-call local, not a mutable default
+    argument. If it leaked, a target resolved in one analysis run could
+    cross-contaminate the compound→target evidence of an unrelated later run.
+    This test resolves different targets on two consecutive calls and asserts
+    the second call only sees its own target.
+    """
+    bioact_call1 = ChemblBioactivity(
+        molecule_chembl_id="CHEMBL_MOL_1",
+        target_chembl_id="CHEMBL301",
+        pchembl_value=7.5,
+        target_organism="Homo sapiens",
+        assay_type="B",
+    )
+    target_call1 = ChemblTarget(
+        chembl_id="CHEMBL301",
+        gene_symbol="AKT1",
+        uniprot_accession="P31749",
+        organism="Homo sapiens",
+        pchembl_value=None,
+    )
+
+    bioact_call2 = ChemblBioactivity(
+        molecule_chembl_id="CHEMBL_MOL_2",
+        target_chembl_id="CHEMBL999",
+        pchembl_value=6.0,
+        target_organism="Homo sapiens",
+        assay_type="B",
+    )
+    target_call2 = ChemblTarget(
+        chembl_id="CHEMBL999",
+        gene_symbol="EGFR",
+        uniprot_accession="P00533",
+        organism="Homo sapiens",
+        pchembl_value=None,
+    )
+
+    def _make_cm(client_instance):
+        cm = MagicMock()
+        cm.__aenter__ = AsyncMock(return_value=client_instance)
+        cm.__aexit__ = AsyncMock(return_value=False)
+        return cm
+
+    # Call 1: compound MOL_1 → AKT1 (CHEMBL301)
+    with patch("integrations.chembl.get_bioactivities",
+               AsyncMock(return_value=[bioact_call1])), \
+         patch("integrations.chembl.resolve_target",
+               AsyncMock(return_value=target_call1)), \
+         patch("httpx.AsyncClient",
+               return_value=_make_cm(AsyncMock(spec=httpx.AsyncClient))):
+        result1 = await get_targets_for_compounds(["CHEMBL_MOL_1"])
+
+    # Call 2: compound MOL_2 → EGFR (CHEMBL999). Crucially, the first call's
+    # AKT1/CHEMBL301 target must NOT be visible to this fresh call.
+    with patch("integrations.chembl.get_bioactivities",
+               AsyncMock(return_value=[bioact_call2])), \
+         patch("integrations.chembl.resolve_target",
+               AsyncMock(return_value=target_call2)), \
+         patch("httpx.AsyncClient",
+               return_value=_make_cm(AsyncMock(spec=httpx.AsyncClient))):
+        result2 = await get_targets_for_compounds(["CHEMBL_MOL_2"])
+
+    assert [t.gene_symbol for t in result1["CHEMBL_MOL_1"]] == ["AKT1"]
+    # The second call sees only EGFR — no leaked AKT1 from the first call's cache.
+    call2_genes = [t.gene_symbol for t in result2["CHEMBL_MOL_2"]]
+    assert call2_genes == ["EGFR"]
+    assert "AKT1" not in call2_genes
