@@ -9,7 +9,8 @@ What this script does:
 - Trims obvious outer whitespace only
 - Adds source_batch_id if missing, or fills blanks with the provided batch id
 - Adds raw_hash as a stable hash of the row contents
-- Removes exact duplicate rows only
+- Drops rows that are missing a detail_url (no source page to canonicalize)
+- Removes exact duplicate rows
 - Writes a small extraction log into the same output folder
 
 What this script does not do:

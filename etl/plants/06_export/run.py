@@ -269,13 +269,6 @@ def sort_for_deterministic_export(
     return df.sort_values(by=existing, kind="stable").reset_index(drop=True)
 
 
-def csv_row_count(path: Path) -> int:
-    with path.open("r", encoding="utf-8-sig", newline="") as f:
-        reader = csv.reader(f)
-        next(reader, None)
-        return sum(1 for _ in reader)
-
-
 def write_csv(df: pd.DataFrame, path: Path) -> None:
     ensure_dir(path.parent)
     df.to_csv(path, index=False, encoding="utf-8")

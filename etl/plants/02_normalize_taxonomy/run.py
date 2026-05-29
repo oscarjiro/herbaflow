@@ -81,34 +81,6 @@ RANK_MARKERS = {
     "nothovar",
 }
 
-AUTHORSHIP_MARKERS = {
-    "ex",
-    "in",
-    "et",
-    "and",
-    "&",
-    "sensu",
-    "auct.",
-    "auct",
-    "non",
-    "cf.",
-    "cf",
-    "aff.",
-    "aff",
-}
-
-LIKELY_AUTHOR_ABBREV_RE = re.compile(
-    r"""^(
-        \([^)]+\)|
-        [A-Z][a-zA-Z-]*\.?|
-        [A-Z]\.|
-        [A-Z][a-z]+(?:\s+[A-Z][a-z]+)?|
-        [A-Z][a-z]+(?:-[A-Z][a-z]+)?|
-        \d{4}
-    )$""",
-    re.VERBOSE,
-)
-
 WHITESPACE_RE = re.compile(r"\s+")
 TRAILING_PUNCT_RE = re.compile(r"[,\.;:]+$")
 
@@ -210,36 +182,6 @@ def normalize_scientific_string(value: str) -> str:
     value = re.sub(r"\s+\.", ".", value)
     value = WHITESPACE_RE.sub(" ", value).strip()
     return value
-
-
-def is_likely_author_token(token: str) -> bool:
-    token = clean_token(token)
-    if not token:
-        return False
-
-    low = token.lower().rstrip(".")
-    if low in AUTHORSHIP_MARKERS:
-        return True
-
-    if token in {"(", ")", "×", "x"}:
-        return False
-
-    if token.endswith(","):
-        return True
-
-    if token.isdigit():
-        return True
-
-    if LIKELY_AUTHOR_ABBREV_RE.match(token):
-        return True
-
-    # Common botanical author abbreviations such as "L.", "Benth.", "Miq.", "J.J.Sm."
-    if re.match(r"^[A-Z](?:\.[A-Z])*(?:\.)?$", token):
-        return True
-    if re.match(r"^[A-Z][a-zA-Z]{0,6}\.$", token):
-        return True
-
-    return False
 
 
 def split_scientific_name(scientific_name: str) -> Tuple[str, str, str]:
