@@ -106,7 +106,7 @@ export function StageSkeletonLoader({ stage, progressText }: StageSkeletonLoader
       {/* Running indicator */}
       <p className="flex items-center gap-2 text-xs text-hf-fg3">
         <span
-          className="inline-block h-2 w-2 rounded-full bg-yellow-500 animate-pulse"
+          className="inline-block h-2 w-2 rounded-full bg-hf-warning animate-pulse"
           aria-hidden="true"
         />
         Running {stageName}…

@@ -10,7 +10,7 @@ export function EmptyState({ message, action }: EmptyStateProps) {
       {action && (
         <button
           onClick={action.onClick}
-          className="mt-4 rounded-sm bg-hf-fg1 px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          className="mt-4 rounded-sm bg-hf-fg1 px-4 py-2 text-sm font-medium text-hf-bg hover:opacity-90"
         >
           {action.label}
         </button>

@@ -147,7 +147,7 @@ export function PipelineSidebar({
                 type="button"
                 disabled={deleteMutation.isPending}
                 onClick={() => deleteMutation.mutate()}
-                className="rounded-md bg-hf-danger px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="rounded-md bg-hf-danger px-4 py-2 text-sm font-medium text-hf-bg hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {deleteMutation.isPending ? 'Deleting…' : 'Delete & Start New'}
               </button>

@@ -43,7 +43,7 @@ export function AddTargetForm({
         </button>
       </div>
       {error && (
-        <p className="text-xs font-sans text-hf-terracotta">{error}</p>
+        <p className="text-xs font-sans text-hf-danger">{error}</p>
       )}
     </form>
   )

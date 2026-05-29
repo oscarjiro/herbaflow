@@ -76,7 +76,7 @@ export function ExportButton({ analysisId, stage, hasCsv, availableColumns }: Ex
     <>
       <div className="flex flex-col gap-1">
       {error && (
-        <p role="alert" className="text-xs text-red-500">{error}</p>
+        <p role="alert" className="text-xs text-hf-danger">{error}</p>
       )}
       <div className="flex gap-2">
         <button
