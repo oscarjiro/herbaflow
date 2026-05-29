@@ -293,6 +293,10 @@ class InjectTargetsRequest(BaseModel):
         max_length=HARD_CAP_MANUAL_TARGETS,
         description=f"Gene symbols or UniProt accessions, 1–{HARD_CAP_MANUAL_TARGETS} items",
     )
+    skip_validation: bool = Field(
+        default=False,
+        description="Skip UniProt validation. Stores gene symbols as-is with no UniProt lookup.",
+    )
 
 
 class InjectTargetsResponse(BaseModel):

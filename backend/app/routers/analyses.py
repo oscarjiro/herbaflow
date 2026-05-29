@@ -395,10 +395,11 @@ async def export_stage_results(
             )
 
         output.seek(0)
+        safe_filename = filename.encode("ascii", "replace").decode("ascii").replace("?", "_")
         return StreamingResponse(
             output,
             media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename={filename}"},
+            headers={"Content-Disposition": f"attachment; filename={safe_filename}"},
         )
 
     # Default: return JSON
@@ -1104,17 +1105,21 @@ async def inject_targets(
         re.IGNORECASE,
     )
 
+    import re as _re
+    _INJECT_TARGETS_ALLOWED = _re.compile(r"^(pending|failed|stage_[1-4]_awaiting_approval)$")
+
     run = await analysis_repo.get_run(session, analysis_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
-    if run.status not in ("pending", "failed"):
+    if not _INJECT_TARGETS_ALLOWED.match(run.status or ""):
         raise HTTPException(status_code=409, detail="Analysis already running or complete")
 
     # Collect UniProt accessions already in stage_3 results for cross-analysis dedup
     existing_stage3 = (run.stage_results or {}).get("stage_3") or {}
+    existing_targets_full: list[dict] = list(existing_stage3.get("targets", []))
     existing_ids: set[str] = {
         t.get("uniprot_id", "").upper()
-        for t in existing_stage3.get("targets", [])
+        for t in existing_targets_full
         if t.get("uniprot_id")
     }
     # Ensure existing_ids is normalized to uppercase for consistent dedup
@@ -1134,20 +1139,64 @@ async def inject_targets(
         else:
             submitted_dicts.append({"gene_symbol": raw_stripped, "_raw": raw})
 
-    # Deduplicate before validation — removes within-batch and cross-analysis dups
-    try:
-        deduped_dicts, dedup_removed_labels = await deduplicate_targets(
-            submitted=submitted_dicts,
-            existing_ids=existing_ids,
-        )
-    except Exception as exc:
-        logger.warning("Target deduplication failed, proceeding without dedup: %s", exc, exc_info=True)
+    # skip_validation bypasses UniProt entirely — no dedup needed either
+    if body.skip_validation:
         deduped_dicts = submitted_dicts
         dedup_removed_labels = []
+    else:
+        # Deduplicate before validation — removes within-batch and cross-analysis dups
+        try:
+            deduped_dicts, dedup_removed_labels = await deduplicate_targets(
+                submitted=submitted_dicts,
+                existing_ids=existing_ids,
+            )
+        except Exception as exc:
+            logger.warning("Target deduplication failed, proceeding without dedup: %s", exc, exc_info=True)
+            deduped_dicts = submitted_dicts
+            dedup_removed_labels = []
 
     if not deduped_dicts:
         return InjectTargetsResponse(
             injected=0,
+            failed=[],
+            duplicates_removed=len(dedup_removed_labels),
+            duplicate_names=dedup_removed_labels,
+        )
+
+    # Fast path: skip UniProt validation, store gene symbols directly
+    if body.skip_validation:
+        skip_targets = []
+        for entry in deduped_dicts:
+            raw = entry.get("_raw", entry.get("gene_symbol") or entry.get("uniprot_id") or "")
+            gene = raw.strip().upper() if isinstance(raw, str) else ""
+            if gene:
+                skip_targets.append({
+                    "target_id": f"manual:{gene}",
+                    "gene_symbol": gene,
+                    "uniprot_id": None,
+                    "protein_name": None,
+                    "compound_ids": [],
+                    "sources": ["manual_unvalidated"],
+                })
+        all_targets = existing_targets_full + skip_targets
+        stage3_result = {
+            "target_count": len(all_targets),
+            "target_ids": [t["target_id"] for t in all_targets],
+            "target_gene_symbols": [t["gene_symbol"] for t in all_targets],
+            "target_compound_map": {t["gene_symbol"]: [] for t in all_targets},
+            "targets": all_targets,
+            "covered": len(all_targets),
+            "no_data": 0,
+            "coverage_pct": 100.0,
+            "compound_sources": {},
+            "uncovered_compounds": [],
+        }
+        await analysis_repo.update_run_status(
+            session, analysis_id, status=run.status, stage_results={"stage_3": stage3_result},
+        )
+        await analysis_repo.merge_run_parameters(session, analysis_id, {"_input_mode": "manual_targets"})
+        return InjectTargetsResponse(
+            injected=len(skip_targets),
             failed=[],
             duplicates_removed=len(dedup_removed_labels),
             duplicate_names=dedup_removed_labels,
@@ -1227,21 +1276,24 @@ async def inject_targets(
             user_input = original_inputs.get(acc, t["gene_symbol"])
             dedup_removed_labels.append(user_input)
 
-    validated_targets = [
+    new_targets = [
         {k: v for k, v in t.items() if k != "target_score"}
         for t in final_targets
     ]
 
+    # Merge with existing stage_3 targets so repeated batch calls accumulate
+    all_targets = existing_targets_full + new_targets
+
     # Build synthetic stage_3 result — stage 5 reads target_gene_symbols
     stage3_result = {
-        "target_count": len(validated_targets),
-        "target_ids": [t["target_id"] for t in validated_targets],
-        "target_gene_symbols": [t["gene_symbol"] for t in validated_targets],
+        "target_count": len(all_targets),
+        "target_ids": [t["target_id"] for t in all_targets],
+        "target_gene_symbols": [t["gene_symbol"] for t in all_targets],
         # Manual targets have no associated compounds — empty list is correct
-        "target_compound_map": {t["gene_symbol"]: [] for t in validated_targets},
-        "targets": validated_targets,
+        "target_compound_map": {t["gene_symbol"]: [] for t in all_targets},
+        "targets": all_targets,
         # Coverage fields (not meaningful for manual input)
-        "covered": len(validated_targets),
+        "covered": len(all_targets),
         "no_data": 0,
         "coverage_pct": 100.0,
         "compound_sources": {},
@@ -1261,7 +1313,7 @@ async def inject_targets(
     )
 
     return InjectTargetsResponse(
-        injected=len(final_targets),
+        injected=len(new_targets),
         failed=failed,
         duplicates_removed=len(dedup_removed_labels),
         duplicate_names=dedup_removed_labels,
