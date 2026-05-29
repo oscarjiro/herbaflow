@@ -78,8 +78,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
 
     # Build NetworkX graph for community detection
     G = nx.Graph()
-    for re in raw_edges:
-        G.add_edge(re["source"], re["target"])
+    for edge in raw_edges:
+        G.add_edge(edge["source"], edge["target"])
 
     # Community detection
     community_resolution = config.ppi.community_resolution

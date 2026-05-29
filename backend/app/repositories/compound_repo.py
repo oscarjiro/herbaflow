@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.models import Compound, CompoundAlias, PlantCompound
+from app.models import Compound, PlantCompound
 
 
 async def get_compound_by_id(session: AsyncSession, compound_id: str) -> Compound | None:

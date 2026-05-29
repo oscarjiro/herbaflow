@@ -2,7 +2,6 @@
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
-from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
 

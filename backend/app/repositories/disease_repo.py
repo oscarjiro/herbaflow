@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.models import Disease, DiseaseAlias
+from app.models import Disease, DiseaseAlias, DiseaseTarget, Target
 
 
 async def get_aliases_by_disease_ids(
@@ -42,8 +42,6 @@ async def get_targets_for_disease(
     disease_id: str,
     min_score: float = 0.3,
 ) -> list[tuple]:
-    from app.models.target import DiseaseTarget
-    from app.models.target import Target
     stmt = (
         select(Target, DiseaseTarget.score)
         .join(DiseaseTarget, DiseaseTarget.target_id == Target.target_id)

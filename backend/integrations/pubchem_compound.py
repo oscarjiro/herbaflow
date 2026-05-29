@@ -5,6 +5,7 @@ retrieve canonical properties, and compute Lipinski ADME criteria.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from urllib.parse import quote
@@ -131,7 +132,7 @@ async def _fetch_cid(
     else:
         url = f"{PUBCHEM_BASE}/compound/smiles/cids/JSON"
 
-        async def _get_cid() -> httpx.Response:
+        async def _post_cid() -> httpx.Response:
             r = await client.post(url, data={"smiles": structure})
             if r.status_code in (400, 404):
                 return r
@@ -139,7 +140,7 @@ async def _fetch_cid(
             return r
 
         try:
-            resp = await with_retry(_get_cid, service_name="PubChem")
+            resp = await with_retry(_post_cid, service_name="PubChem")
         except (ServiceUnavailableError, httpx.HTTPError) as e:
             logger.warning("PubChem CID lookup failed for SMILES input %r: %s", structure[:50], e)
             return None
@@ -276,8 +277,6 @@ async def validate_compounds_batch(
     Deduplicates by InChIKey — if two inputs resolve to the same compound,
     only the first occurrence is kept.
     """
-    import asyncio
-
     async def _validate_one(structure: str) -> tuple[str, dict | None]:
         result = await validate_compound(structure, client)
         return (structure, result)

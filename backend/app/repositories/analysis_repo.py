@@ -1,4 +1,4 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 from datetime import datetime, timedelta
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -13,7 +13,6 @@ async def create_run(
     disease_id: str | None = None,
 ) -> AnalysisRun:
     run = AnalysisRun(
-        analysis_id=uuid4(),
         analysis_name=name,
         mode=mode,
         parameters=parameters,

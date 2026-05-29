@@ -5,7 +5,7 @@ Persists canonicalized compounds (those with a confirmed PubChem CID) to the
 semantics to avoid duplicate key errors — effectively an upsert that skips
 already-cached rows.
 
-Design decisions (§2.6):
+Design decisions:
 - Only compounds with a ``pubchem_cid`` are persisted — SMILES-only compounds
   (no CID) are allowed in the pipeline but are NOT cached.
 - No plant–compound or disease–compound links are created here.

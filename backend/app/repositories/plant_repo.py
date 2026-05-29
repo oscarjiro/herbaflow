@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.models.plant import PlantAlias
+from app.models import PlantAlias
 
 
 async def get_aliases_by_plant_ids(
