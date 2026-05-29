@@ -16,6 +16,7 @@ import { useResetFromStage } from '@/hooks/useResetFromStage'
 import type { AnalysisRunResponse, AnalysisStatusResponse, Stage4Result, DiseaseTargetResult } from '@/types/api'
 import { ExternalLink } from '@/components/shared/ExternalLink'
 import { sourceUrls } from '@/lib/sourceUrls'
+import { UNIPROT_RE } from '@/lib/schemas'
 
 const SOURCES = [
   {
@@ -53,7 +54,7 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
       className: 'font-mono',
     },
     {
-      key: 'uniprot_id',
+      key: 'uniprot_accession',
       header: 'UniProt ID',
       render: (value) => {
         const accession = value as string | null | undefined
@@ -69,7 +70,7 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
       },
     },
     {
-      key: 'association_score',
+      key: 'score',
       header: 'Open Targets Score',
       sortable: true,
       render: (value) =>
@@ -129,7 +130,9 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
 
   const handleAddTarget = async (input: string) => {
     setAddError(null)
-    const isAccession = /^[A-Z][0-9][A-Z0-9]{3}[0-9]$/i.test(input.trim())
+    // Use the shared UniProt accession regex so both 6-char and 10-char
+    // accessions are classified as UniProt rather than misread as gene symbols.
+    const isAccession = UNIPROT_RE.test(input.trim().toUpperCase())
     try {
       await addTarget.mutateAsync(
         isAccession ? { uniprot_id: input.trim() } : { gene_symbol: input.trim() }
