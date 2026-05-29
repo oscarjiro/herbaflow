@@ -32,8 +32,8 @@ test.describe('Full auto-mode pipeline', () => {
     // Start analysis in auto mode
     await page.getByRole('button', { name: /start analysis/i }).click()
 
-    // Should navigate to pipeline page
-    await page.waitForURL(/\/pipeline\//, { timeout: 30_000 })
+    // Should navigate to the analysis page
+    await page.waitForURL(/\/analysis\//, { timeout: 30_000 })
 
     // Wait for pipeline to complete (up to 5 minutes)
     await page.waitForSelector('[data-testid="pipeline-complete"]', {

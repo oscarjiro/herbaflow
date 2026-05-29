@@ -15,7 +15,7 @@ const COMPLETED_ANALYSIS_ID =
 
 test.describe('Stage result visibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`/pipeline/${COMPLETED_ANALYSIS_ID}`)
+    await page.goto(`/analysis/${COMPLETED_ANALYSIS_ID}`)
     // Wait for pipeline page to load
     await page.waitForSelector('[data-testid="pipeline-sidebar"]', {
       timeout: 30_000,

@@ -47,18 +47,18 @@ export const analysisFixture = {
   disease_id: 'dtg_mondo_0005148',
   parameters: {},
   stage_results: {
-    '1': {
+    stage_1: {
       total_compounds: 42,
       plants_covered: 1,
       compounds: [],
     },
-    '2': {
+    stage_2: {
       passed: 30,
       failed: 12,
       np_exceptions: 3,
       compounds: [],
     },
-    '3': {
+    stage_3: {
       target_count: 18,
       coverage_pct: 85.7,
       targets: [],
@@ -79,8 +79,8 @@ export const analysisFixture = {
         },
       ],
     },
-    '4': null,
-    '5': {
+    stage_4: null,
+    stage_5: {
       compound_only_count: 24,
       overlap_count: 18,
       disease_only_count: 42,
@@ -93,7 +93,7 @@ export const analysisFixture = {
         'HSP90AA1', 'STAT3', 'NF1'
       ],
     },
-    '6': {
+    stage_6: {
       node_count: 12,
       edge_count: 18,
       nodes: [
@@ -131,7 +131,7 @@ export const analysisFixture = {
         { data: { id: 'e18', source: 'IL6', target: 'MAPK1', weight: 2, combined_score: 0.55 } },
       ],
     },
-    '7': {
+    stage_7: {
       hub_genes: [
         { rank: 1, gene_symbol: 'TP53', degree: 8, betweenness_centrality: 0.4521, closeness_centrality: 0.7234, eigenvector_centrality: 0.9812, is_hub: true, is_bottleneck: true },
         { rank: 2, gene_symbol: 'AKT1', degree: 6, betweenness_centrality: 0.3214, closeness_centrality: 0.6891, eigenvector_centrality: 0.8743, is_hub: true, is_bottleneck: false },
@@ -149,7 +149,7 @@ export const analysisFixture = {
       threshold_degree: 4,
       threshold_betweenness: 0.15,
     },
-    '8': {
+    stage_8: {
       significant_count: 24,
       terms: [
         // GO:BP
