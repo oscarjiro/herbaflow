@@ -158,6 +158,8 @@ export interface Stage1Result {
   total_compounds: number
   plants_covered: number
   compounds: CompoundResult[]
+  /** Set to true when user has added or removed compounds; drives stale banner */
+  user_modified?: boolean
 }
 
 // Stage 2: ADME Screening
@@ -179,6 +181,12 @@ export interface Stage2Result {
   failed: number
   np_exceptions: number
   compounds: AdmeCompoundResult[]
+  /** Compound IDs that passed ADME screening */
+  passed_compound_ids?: string[]
+  /** Compound IDs admitted via the natural-product exception path */
+  np_exception_compound_ids?: string[]
+  /** All active compound IDs consumed by Stage 3 (passed + NP exceptions) */
+  all_active_compound_ids?: string[]
 }
 
 // Stage 3: Target Identification
@@ -287,8 +295,8 @@ export interface DiseaseSourceEntry {
 
 export interface DiseaseTargetResult {
   gene_symbol: string
-  uniprot_id: string
-  association_score: number | null
+  uniprot_accession: string | null
+  score: number | null
   disease_name: string
   source: string
   /** All diseases this gene is associated with (multi-disease analyses) */
@@ -487,16 +495,38 @@ export interface AddUserCompoundResponse {
   smiles: string | null
 }
 
-// T4.3: Manual compound input
+// Manual compound input — inject SMILES/InChI strings as stage 1+2 results
+export interface InjectCompoundsRequest {
+  compounds: string[]
+}
+
 export interface InjectCompoundsResponse {
   injected: number
   failed: string[]
   duplicates_removed: number
   duplicate_names: string[]
+  /** Compounds persisted to the DB cache (those resolved to a PubChem CID) */
+  cached?: number
 }
 
-// T4.4: Manual target input
+// Manual target input — inject gene symbols or UniProt accessions as stage 3 results
+export interface InjectTargetsRequest {
+  targets: string[]
+  /** Lenient mode: skip UniProt validation and normalize gene symbols offline */
+  skip_validation?: boolean
+}
+
 export interface InjectTargetsResponse {
   injected: number
   failed: string[]
+  /** Inputs dropped due to deduplication */
+  duplicates_removed?: number
+  /** Labels for the dropped duplicate entries */
+  duplicate_names?: string[]
+  /** Targets persisted to the DB cache (validated, with a UniProt accession) */
+  cached?: number
+  /** HGNC alias/previous-symbol resolutions: [{ from, to }] */
+  normalized?: Array<{ from: string; to: string }>
+  /** Lenient inputs kept as-is (not found in HGNC / UniProt) */
+  unrecognized?: string[]
 }

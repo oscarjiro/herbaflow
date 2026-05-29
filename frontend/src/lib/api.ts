@@ -12,7 +12,9 @@ import type {
   AddUserTargetResponse,
   AddUserCompoundRequest,
   AddUserCompoundResponse,
+  InjectCompoundsRequest,
   InjectCompoundsResponse,
+  InjectTargetsRequest,
   InjectTargetsResponse,
 } from '@/types/api'
 
@@ -27,7 +29,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const text = await res.text().catch(() => res.statusText)
     throw new Error(`API ${res.status}: ${text}`)
   }
-  return res.json() as Promise<T>
+  // Tolerate empty bodies (e.g. 204 No Content): calling res.json() on an
+  // empty body throws a SyntaxError, so return undefined for void responses.
+  if (res.status === 204) return undefined as T
+  const text = await res.text()
+  if (!text) return undefined as T
+  return JSON.parse(text) as T
 }
 
 export const api = {
@@ -161,19 +168,21 @@ export const api = {
     return res.json()
   },
 
-  // T4.3: Inject manually-provided SMILES/InChI strings as stage 1+2 results
+  // Inject manually-provided SMILES/InChI strings as stage 1+2 results
   injectCompounds(analysisId: string, compounds: string[]): Promise<InjectCompoundsResponse> {
+    const body: InjectCompoundsRequest = { compounds }
     return request(`/analyses/${analysisId}/inject-compounds`, {
       method: 'POST',
-      body: JSON.stringify({ compounds }),
+      body: JSON.stringify(body),
     })
   },
 
-  // T4.4: Inject manually-provided gene symbols or UniProt accessions as stage 3 results
+  // Inject manually-provided gene symbols or UniProt accessions as stage 3 results
   injectTargets(analysisId: string, targets: string[]): Promise<InjectTargetsResponse> {
+    const body: InjectTargetsRequest = { targets }
     return request(`/analyses/${analysisId}/inject-targets`, {
       method: 'POST',
-      body: JSON.stringify({ targets }),
+      body: JSON.stringify(body),
     })
   },
 }
