@@ -6,6 +6,7 @@ import LandingPage from '@/pages/LandingPage'
 import SetupPage from '@/pages/SetupPage'
 import PipelinePage from '@/pages/PipelinePage'
 import AboutPage from '@/pages/AboutPage'
+import NotFoundPage from '@/pages/NotFoundPage'
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
             <Route path="analysis" element={<SetupPage />} />
             <Route path="analysis/:id" element={<PipelinePage />} />
             <Route path="about" element={<AboutPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
