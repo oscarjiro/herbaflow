@@ -222,7 +222,7 @@ def _split_multivalue(value: object) -> list[str]:
     """Split a semicolon-, comma-, slash-, pipe-, or newline-delimited field."""
     raw = safe_str(value)
     if not raw:
-        return ""
+        return []
 
     stripped = raw.strip()
 
@@ -904,16 +904,6 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
     diseases_df = pd.DataFrame(diseases, columns=DISEASE_OUTPUT_COLUMNS)
     aliases_df = pd.DataFrame(aliases, columns=ALIAS_OUTPUT_COLUMNS)
     alias_map_df = pd.DataFrame(alias_map_rows, columns=ALIAS_MAP_COLUMNS)
-
-    for df_out, cols in (
-        (diseases_df, DISEASE_OUTPUT_COLUMNS),
-        (aliases_df, ALIAS_OUTPUT_COLUMNS),
-        (alias_map_df, ALIAS_MAP_COLUMNS),
-    ):
-        for col in cols:
-            if col not in df_out.columns:
-                df_out[col] = ""
-        df_out = df_out[cols]
 
     diseases_df = diseases_df[DISEASE_OUTPUT_COLUMNS]
     aliases_df = aliases_df[ALIAS_OUTPUT_COLUMNS]
