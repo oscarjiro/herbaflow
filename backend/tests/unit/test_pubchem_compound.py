@@ -4,7 +4,7 @@ Tests PubChem validation and ADME computation without real HTTP calls.
 Uses unittest.mock to mock httpx responses (avoids pytest-httpx loop-scope issues).
 
 API flow (two-step):
-  1. GET /compound/smiles/{smiles}/cids/JSON  (or POST /compound/inchi/cids/JSON for InChI)
+  1. POST /compound/smiles/cids/JSON  (or POST /compound/inchi/cids/JSON for InChI)
      → {"IdentifierList": {"CID": [2244]}}
   2. GET /compound/cid/{cid}/property/{props}/JSON
      → {"PropertyTable": {"Properties": [...]}}
@@ -82,15 +82,13 @@ def _make_404() -> MagicMock:
 async def test_smiles_validation_valid_compound():
     """A valid SMILES string resolves to a compound dict with expected fields.
 
-    Two GET calls are made:
-      call 1: /compound/smiles/{smiles}/cids/JSON     → CID list
-      call 2: /compound/cid/{cid}/property/{props}/JSON → properties
+    Two calls are made:
+      call 1: POST /compound/smiles/cids/JSON          → CID list
+      call 2: GET  /compound/cid/{cid}/property/{props}/JSON → properties
     """
     mock_client = AsyncMock(spec=httpx.AsyncClient)
-    mock_client.get = AsyncMock(side_effect=[
-        _make_response(_PUBCHEM_CIDS),        # CID lookup
-        _make_response(_PUBCHEM_PROPERTIES),  # property fetch by CID
-    ])
+    mock_client.post = AsyncMock(return_value=_make_response(_PUBCHEM_CIDS))        # CID lookup (POST)
+    mock_client.get = AsyncMock(return_value=_make_response(_PUBCHEM_PROPERTIES))   # property fetch by CID (GET)
 
     result = await validate_compound(_ASPIRIN_SMILES, mock_client)
 
@@ -109,8 +107,9 @@ async def test_smiles_validation_valid_compound():
     assert "adme_pass" in result
     assert "lipinski_pass" in result
     assert result["lipinski_pass"] is True  # MW=180, XLogP=1.2, HBD=1, HBA=4 → pass
-    # Two GET calls were made (CID + properties)
-    assert mock_client.get.call_count == 2
+    # CID lookup is POST; property fetch is GET
+    mock_client.post.assert_called_once()
+    mock_client.get.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
@@ -147,13 +146,14 @@ async def test_inchi_validation_valid_compound():
 async def test_http_404_returns_none():
     """A 404 on the CID lookup means the compound is invalid — returns None immediately."""
     mock_client = AsyncMock(spec=httpx.AsyncClient)
-    mock_client.get = AsyncMock(return_value=_make_404())
+    mock_client.post = AsyncMock(return_value=_make_404())
 
     result = await validate_compound("not_a_real_smiles", mock_client)
 
     assert result is None
-    # Only one GET call (CID lookup) — property fetch is never reached
-    assert mock_client.get.call_count == 1
+    # CID lookup is POST; 404 short-circuits before the GET property fetch
+    assert mock_client.post.call_count == 1
+    mock_client.get.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

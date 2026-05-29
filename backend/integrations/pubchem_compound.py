@@ -107,8 +107,9 @@ async def _fetch_cid(
 ) -> int | None:
     """Resolve a SMILES or InChI string to a numeric PubChem CID.
 
-    Uses /compound/{type}/{structure}/cids/JSON for SMILES and
-    POST /compound/inchi/cids/JSON for InChI.
+    Uses POST /compound/smiles/cids/JSON for SMILES and
+    POST /compound/inchi/cids/JSON for InChI. POST avoids URL-encoding
+    breakage on SMILES with double-bond/stereo notation.
 
     Returns the first CID as an integer, or None if not found / on error.
     """
@@ -128,11 +129,10 @@ async def _fetch_cid(
             logger.warning("PubChem CID lookup failed for InChI input: %s", e)
             return None
     else:
-        encoded = quote(structure, safe="")
-        url = f"{PUBCHEM_BASE}/compound/smiles/{encoded}/cids/JSON"
+        url = f"{PUBCHEM_BASE}/compound/smiles/cids/JSON"
 
         async def _get_cid() -> httpx.Response:
-            r = await client.get(url)
+            r = await client.post(url, data={"smiles": structure})
             if r.status_code in (400, 404):
                 return r
             r.raise_for_status()
