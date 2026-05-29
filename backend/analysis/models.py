@@ -78,6 +78,19 @@ class HubGeneParams:
 class EnrichmentParams:
     fdr_threshold: float = 0.05
     sources: list[str] = field(default_factory=lambda: ["GO:BP", "GO:MF", "GO:CC", "KEGG"])
+    # Enrichment data sources queried via g:Profiler.
+    # GO:BP/MF/CC = Gene Ontology functional annotation; KEGG = curated pathways.
+    # KEGG is the canonical pathway source in network-pharmacology studies and supplies
+    # the hsa##### pathway IDs reported across the reference literature, so GO+KEGG is
+    # sufficient for our pathway-level conclusions and validation gates.
+    # Reactome (REAC) and WikiPathways (WP) are intentionally NOT queried for now: they
+    # overlap heavily with KEGG (redundant near-duplicate hits) and adding them requires
+    # output-schema, CSV-export, and frontend-rendering changes. Deferred as a separate
+    # feature rather than a methodology gap. (Raudvere et al. 2019, NAR 47:W191)
+    #
+    # Multiple-testing correction is fixed to Benjamini-Hochberg FDR (not g:Profiler's
+    # native g:SCS) — see integrations/gprofiler.py::run_enrichment for the rationale and
+    # citation (Benjamini & Hochberg 1995, J. R. Statist. Soc. B 57:289).
 
 
 @dataclass

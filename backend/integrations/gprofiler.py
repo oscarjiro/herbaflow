@@ -28,6 +28,7 @@ async def run_enrichment(
     fdr_threshold: float = 0.05,
     organism: str = "hsapiens",
     background: list[str] | None = None,
+    significance_threshold_method: str = "fdr",
 ) -> list[EnrichmentResult]:
     """Run GO and KEGG enrichment via g:Profiler. Returns results with fdr <= fdr_threshold.
 
@@ -37,6 +38,13 @@ async def run_enrichment(
             Standard for NP network pharmacology: pass ALL compound targets (Stage 3
             target_gene_symbols) as the study protein space.
             (Rivals et al. 2007, Bioinformatics 23:401)
+        significance_threshold_method: Multiple-testing correction method passed to
+            g:Profiler. Defaults to "fdr" = Benjamini-Hochberg false discovery rate
+            (Benjamini & Hochberg 1995, J. R. Statist. Soc. B 57:289), rather than
+            g:Profiler's native "g_SCS" default. BH is the de-facto standard correction
+            reported across network-pharmacology enrichment studies, so our reported
+            FDRs stay directly comparable to published reference datasets. g:Profiler
+            also accepts "g_SCS" and "bonferroni". (Raudvere et al. 2019, NAR 47:W191)
     """
     if not gene_symbols:
         return []
@@ -49,6 +57,7 @@ async def run_enrichment(
         "query": gene_symbols,
         "sources": sources,
         "user_threshold": fdr_threshold,
+        "significance_threshold_method": significance_threshold_method,
         "domain_scope": "custom_annotated" if background else "annotated",
         "no_evidences": False,
     }
