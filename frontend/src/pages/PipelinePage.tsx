@@ -68,8 +68,7 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
 
   const isStageFailed =
     status?.current_stage === stage &&
-    status?.status?.includes('failed') &&
-    status?.status !== 'failed'
+    status?.status === `stage_${stage}_failed`
 
   if (isStageFailed) {
     return (
@@ -117,6 +116,18 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
       )}
     </div>
   )
+}
+
+// ============================================================================
+// Error helpers
+// ============================================================================
+
+// api.ts throws expired-analysis (HTTP 410 Gone) as a plain Error whose message
+// is formatted `API 410: <body>` (see lib/api.ts). Until that error shape carries
+// a status code, the message prefix is the only reliable signal — this helper
+// keeps the brittle string check in one place.
+function isGoneError(err: unknown): boolean {
+  return err instanceof Error && err.message.startsWith('API 410:')
 }
 
 // ============================================================================
@@ -174,7 +185,7 @@ export default function PipelinePage() {
   }, [status?.status, id, queryClient])
 
   // Expired analysis — 410 Gone
-  if (analysisIsError && analysisError instanceof Error && analysisError.message.startsWith('API 410:')) {
+  if (analysisIsError && isGoneError(analysisError)) {
     return (
       <div className="p-8">
         <div className="rounded-lg border border-hf-border bg-hf-surface p-8 text-center">
