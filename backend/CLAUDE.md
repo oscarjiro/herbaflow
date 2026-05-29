@@ -53,7 +53,7 @@ uv run pytest tests/integration/
 
 ## Conventions
 
-- **IDs**: domain-prefixed strings — `pl_`, `al_`, `tgt_`, `dtg_`
+- **IDs**: bare UUID strings — no type prefixes; the column name (`plant_id`, `target_id`) provides type context (see `docs/database.md`). ETL-created entities (plants, targets, compound/disease targets) use deterministic UUID v5; backend-created rows (analysis runs, target rankings, pathways, PPI edges) use UUID v4
 - **Canonical keys**: `{source}:{id}` — `pubchem:678`, `chembl:CHEMBL1234`
 - **Async**: all DB calls use `AsyncSession`; no sync SQLAlchemy patterns
 - **Layer discipline**: routers call repositories only; pipeline stages are stateless functions

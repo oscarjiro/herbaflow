@@ -1,6 +1,6 @@
 # Herbaflow Frontend
 
-React 18 + TypeScript + Vite SPA for the 8-stage drug-discovery pipeline.
+React 19 + TypeScript + Vite SPA for the 8-stage drug-discovery pipeline.
 
 ## Dev Commands
 
@@ -28,7 +28,7 @@ pnpm exec playwright test       # E2E tests (requires backend at localhost:8000)
 
 ## Key Constraints
 
-- **Stage result guards**: always cast `analysis?.stage_results[String(n)] as StageNResult | null | undefined` and guard `if (!result)` before rendering
+- **Stage result guards**: always cast `analysis?.stage_results[`stage_${n}`] as StageNResult | null | undefined` (keys are `stage_1`..`stage_8`) and guard `if (!result)` before rendering
 - **Cytoscape listeners**: call `cy.removeAllListeners()` in effects to prevent duplicate registration
 - **Cytoscape colors**: CSS vars only — `var(--hf-*)` — never raw hex values
 - **FDR flooring**: clamp `-log10(FDR)` at minimum 1 — `t.fdr > 0 ? Math.max(1, -Math.log10(t.fdr)) : 1`

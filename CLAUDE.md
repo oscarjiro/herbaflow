@@ -6,7 +6,7 @@ relationships from the KNApSAcK database.
 ## Stack
 
 - **Backend**: FastAPI (Python) — `/backend/`
-- **Frontend**: React 18 + TypeScript + Vite — `/frontend/`
+- **Frontend**: React 19 + TypeScript + Vite — `/frontend/`
 - **Database**: PostgreSQL via Supabase — schema reference: `docs/database.md`, always update everytime a schema change is done
 - **ETL**: Python pipelines — `/etl/`
 
@@ -16,7 +16,7 @@ relationships from the KNApSAcK database.
 | ----------------------- | ----------- | ---------------------------------------------------- |
 | `/etl/`                 | Active      | Data ingestion and canonicalization pipelines        |
 | `/backend/`             | Active      | FastAPI REST API — 8-stage pipeline, 180 tests       |
-| `/frontend/`            | Active      | React 18 + TS SPA — 8-stage pipeline UI              |
+| `/frontend/`            | Active      | React 19 + TS SPA — 8-stage pipeline UI              |
 | `/supabase/migrations/` | Active      | All Supabase SQL migrations (single source of truth) |
 
 ## Key Conventions
