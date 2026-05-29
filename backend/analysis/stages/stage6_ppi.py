@@ -16,6 +16,16 @@ def detect_communities(
 
     Returns: dict mapping node_id → community_id (0-indexed int).
     Uses RBConfigurationVertexPartition with fixed seed for reproducibility.
+
+    Optimisation passes: leidenalg's default ``n_iterations=2`` is used (the
+    parameter is intentionally left unset). Each iteration is one full local-move /
+    aggregate sweep; two passes are the package default and are sufficient for the
+    small PPI graphs handled here (tens–low hundreds of nodes), which converge well
+    before extra sweeps would change the partition. A negative ``n_iterations`` would
+    instead iterate to convergence — not needed at this scale, and a fixed count plus
+    the fixed ``seed`` keeps results deterministic across runs.
+    Refs: Traag, Waltman & van Eck 2019, Sci. Rep. 9:5233 (Leiden algorithm);
+    leidenalg.find_partition documentation.
     """
     if G.number_of_nodes() == 0:
         return {}

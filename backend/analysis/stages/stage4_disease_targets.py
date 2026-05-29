@@ -1,3 +1,33 @@
+"""Stage 4 — Disease-associated targets.
+
+Resolves the gene targets associated with the analysis' disease(s). For a single
+disease this is a direct lookup; for multiple diseases the per-disease target
+sets are combined by **union** (a gene is retained if it is associated with
+*any* selected disease), keyed by uppercased gene symbol.
+
+Multi-disease aggregation rules:
+- **Union, not intersection.** Selecting several diseases (e.g. T2DM plus its
+  comorbidities) broadens the target space rather than narrowing it. This
+  matches the standard network-pharmacology treatment of multi-indication /
+  comorbidity studies, where the disease module is the union of each condition's
+  associated genes (Hopkins 2008, Nat Chem Biol 4:682; Li & Zhang 2013, Chin J
+  Nat Med 11:110). Intersection would discard disease-specific targets and is
+  only appropriate when the explicit question is "shared targets across all
+  diseases".
+- **Score = max across diseases.** When a gene is associated with more than one
+  selected disease, the strongest (highest) association score is kept so the
+  gene is represented by its best evidence. Every contributing disease is still
+  recorded in the per-target ``diseases`` list (disease_id, disease_name,
+  association_score) for downstream attribution, and
+  ``disease_gene_symbols_by_disease`` preserves the unmerged per-disease
+  breakdown consumed by Stage 5.
+
+Sources, in priority order: cached ``disease_targets`` rows (min_score filtered)
+first, falling back to the Open Targets API per disease only when the cache is
+empty. A separate ``manual_targets`` input mode bypasses both and uses an
+injected gene list directly.
+"""
+
 from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
 from sqlmodel.ext.asyncio.session import AsyncSession
