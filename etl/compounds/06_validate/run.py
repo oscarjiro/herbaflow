@@ -509,6 +509,8 @@ def load_optional_plant_ids(
 ) -> Tuple[set[str], bool]:
     plant_ids: set[str] = set()
     loaded = False
+    rows: List[Dict[str, str]] = []
+    fields: List[str] = []
 
     try:
         rows, fields = read_csv_rows(settings.plant_export_csv)

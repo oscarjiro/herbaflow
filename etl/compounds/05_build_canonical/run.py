@@ -1352,6 +1352,8 @@ def build_canonical_tables(
     List[Dict[str, Any]],
     List[Dict[str, Any]],
     List[Dict[str, Any]],
+    List[Dict[str, Any]],
+    List[Dict[str, Any]],
     Dict[str, Any],
 ]:
     candidate_rows = load_enrichment_results(settings.enrich_results_file)
@@ -1369,7 +1371,6 @@ def build_canonical_tables(
 
     decision_counts = Counter()
     review_entries: Dict[Tuple[str, str], Dict[str, Any]] = {}
-    candidate_groups: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
 
     candidate_map_index: Dict[str, Dict[str, Any]] = {}
 
