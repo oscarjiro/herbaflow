@@ -49,7 +49,7 @@ async def run_enrichment(
         "query": gene_symbols,
         "sources": sources,
         "user_threshold": fdr_threshold,
-        "domain_scope": "annotated",
+        "domain_scope": "custom_annotated" if background else "annotated",
         "no_evidences": False,
     }
     if background:
@@ -77,6 +77,15 @@ async def run_enrichment(
     data = resp.json()
     results_raw = data.get("result", [])
 
+    # With no_evidences=False, intersections is parallel to the query list:
+    # intersections[i] is non-empty iff gene_symbols[i] hits this term.
+    def _extract_genes(intersections: list) -> list[str]:
+        return [
+            gene_symbols[i]
+            for i, ev in enumerate(intersections)
+            if ev and i < len(gene_symbols)
+        ]
+
     results = []
     for row in results_raw:
         if row.get("significant") is False:
@@ -93,7 +102,7 @@ async def run_enrichment(
             intersection_size=row.get("intersection_size", 0),
             term_size=row.get("term_size", 0),
             query_size=row.get("query_size", 0),
-            genes=row.get("intersections", []),
+            genes=_extract_genes(row.get("intersections", [])),
         ))
 
     return results
