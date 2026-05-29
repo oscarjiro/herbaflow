@@ -195,13 +195,13 @@ python etl/knapsack/main.py
 **Resume an interrupted run (append only, skip already-processed plants):**
 
 ```powershell
-python etl/knapsack/main.py --resume True
+python etl/knapsack/main.py --resume
 ```
 
 **Relax the detail URL requirement (include plants without a KNApSAcK Core link):**
 
 ```powershell
-python etl/knapsack/main.py --require-detail-url False
+python etl/knapsack/main.py --no-require-detail-url
 ```
 
 **Expected console output on a successful run:**
@@ -235,7 +235,7 @@ The scrape takes several minutes depending on plant count and network latency (a
 
 **What to verify after a run:**
 
-- `failed_pages.txt` should be empty or contain only a small number of transient failures — rerun with `--resume True` to retry them
+- `failed_pages.txt` should be empty or contain only a small number of transient failures — rerun with `--resume` to retry them
 - Row count in `plants_compounds.csv` should be substantially larger than `plants.csv` (typically 5–20× more)
 - Spot-check: `plant_id = 1` in both files should correspond to the same species name
 
@@ -245,6 +245,6 @@ The scrape takes several minutes depending on plant count and network latency (a
 
 Running `main.py` without `--resume` is a full overwrite: both `plants.csv` and `plants_compounds.csv` are recreated from scratch, and `failed_pages.txt` is cleared. The `plant_id` counter restarts at 1 on each fresh run. Because these IDs are sequential integers (not UUID v5), they are **not stable across runs** — the canonical stable IDs are assigned by the `plants/` and `compounds/` modules downstream.
 
-Running with `--resume True` appends to the existing `plants_compounds.csv`, skipping any `plant_id` values already present. `plants.csv` is still overwritten on every run (it is written before the resume checkpoint is checked).
+Running with `--resume` appends to the existing `plants_compounds.csv`, skipping any `plant_id` values already present. `plants.csv` is still overwritten on every run (it is written before the resume checkpoint is checked).
 
-There is no HTTP response cache — each run fetches all pages live. To avoid re-scraping, use `--resume True` to continue an interrupted run rather than starting from scratch.
+There is no HTTP response cache — each run fetches all pages live. To avoid re-scraping, use `--resume` to continue an interrupted run rather than starting from scratch.

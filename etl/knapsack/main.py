@@ -48,13 +48,14 @@ def parse_args():
     parser = argparse.ArgumentParser(description="KNApSAcK Indonesia Scraper")
     parser.add_argument(
         "--resume",
+        action=argparse.BooleanOptionalAction,
         default=False,
         help="Skip plants already found in plants_compounds.csv",
     )
     parser.add_argument(
         "--require-detail-url",
+        action=argparse.BooleanOptionalAction,
         default=True,
-        type=bool,
         help="Only process rows with a detail URL for compound mapping.",
     )
     return parser.parse_args()
@@ -294,7 +295,8 @@ def scrape_main_page(session: requests.Session, url: str, require_detail_url: bo
                 plant_counter, species_name,
             )
             continue
-        seen_detail_urls.add(detail_url)
+        else:
+            seen_detail_urls.add(detail_url)
 
         # Construct clean record
         plants.append(
