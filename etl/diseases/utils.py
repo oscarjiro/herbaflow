@@ -15,9 +15,8 @@ from __future__ import annotations
 import re
 import sys
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Sequence
 
 import pandas as pd
 
@@ -29,15 +28,10 @@ DISEASES_DIR = PROJECT_ROOT / "diseases"
 SETTINGS_PATH = DISEASES_DIR / "settings.yml"
 
 DISEASE_NS: uuid.UUID = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.diseases")
-DISEASE_ALIAS_NS: uuid.UUID = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.disease_aliases")
 
 
 def disease_id(ontology_id: str) -> str:
     return stable_id(DISEASE_NS, str(ontology_id))
-
-
-def disease_alias_id(disease_uuid: str, alias_name: str) -> str:
-    return stable_id(DISEASE_ALIAS_NS, f"{disease_uuid}:{alias_name}")
 
 
 _MISSING_STRINGS = {
@@ -110,11 +104,6 @@ def canonical_key(value: object) -> str:
     return make_slug_key(value)
 
 
-def timestamp() -> str:
-    """Return a compact UTC timestamp suitable for filenames or batch tags."""
-    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-
-
 def safe_str(value: object) -> str:
     """Convert a value to a clean string and normalize missing values to ''."""
     if value is None:
@@ -139,39 +128,3 @@ def validate_required_columns(
         )
 
 
-def dedupe_by_key(
-    df: pd.DataFrame,
-    key_column: str,
-    *,
-    keep: str = "first",
-) -> pd.DataFrame:
-    """Return a dataframe with duplicate key rows removed.
-
-    Parameters
-    ----------
-    df:
-        Input dataframe.
-    key_column:
-        Column used for deduplication.
-    keep:
-        Which duplicate to keep, matching pandas.drop_duplicates semantics.
-    """
-    if key_column not in df.columns:
-        raise ValueError(f"Cannot dedupe: missing key column '{key_column}'")
-    return df.drop_duplicates(subset=[key_column], keep=keep).copy()
-
-
-def clean_missing_values(
-    df: pd.DataFrame, columns: Iterable[str] | None = None
-) -> pd.DataFrame:
-    """Normalize missing-like values to empty strings in selected columns.
-
-    If columns is None, all object columns are cleaned.
-    """
-    out = df.copy()
-    target_cols = list(columns) if columns is not None else list(out.columns)
-    for col in target_cols:
-        if col not in out.columns:
-            continue
-        out[col] = out[col].map(safe_str)
-    return out

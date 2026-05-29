@@ -36,7 +36,7 @@ STAGE_SCRIPTS = {
 }
 
 
-def build_cmd(step_key: str, cfg: dict) -> list[str]:
+def build_cmd(step_key: str) -> list[str]:
     script = ETL_ROOT / STAGE_SCRIPTS[step_key]
     return [sys.executable, str(script)]
 
@@ -67,7 +67,7 @@ def main() -> int:
     stop_on_error: bool = cfg.get("runtime", {}).get("stop_on_error", True)
 
     for step_key in active:
-        cmd = build_cmd(step_key, cfg)
+        cmd = build_cmd(step_key)
         log.info("Running stage: %s", step_key)
         if args.dry_run:
             log.info("[DRY-RUN] %s", " ".join(cmd))

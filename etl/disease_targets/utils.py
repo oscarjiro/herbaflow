@@ -6,7 +6,7 @@ import re
 import sys
 import uuid
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Sequence
 
 import pandas as pd
 
@@ -88,24 +88,3 @@ def validate_required_columns(
         raise ValueError(f"{table_name} is missing required columns: {', '.join(missing)}")
 
 
-def dedupe_by_key(
-    df: pd.DataFrame,
-    key_column: str,
-    *,
-    keep: str = "first",
-) -> pd.DataFrame:
-    if key_column not in df.columns:
-        raise ValueError(f"Cannot dedupe: missing key column '{key_column}'")
-    return df.drop_duplicates(subset=[key_column], keep=keep).copy()
-
-
-def clean_missing_values(
-    df: pd.DataFrame, columns: Iterable[str] | None = None
-) -> pd.DataFrame:
-    out = df.copy()
-    target_cols = list(columns) if columns is not None else list(out.columns)
-    for col in target_cols:
-        if col not in out.columns:
-            continue
-        out[col] = out[col].map(safe_str)
-    return out
