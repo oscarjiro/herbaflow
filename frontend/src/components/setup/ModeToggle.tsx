@@ -1,9 +1,8 @@
 import { cn } from '@/lib/utils'
-
-type Mode = 'guided' | 'auto'
+import type { AnalysisMode } from '@/types/api'
 
 interface ModeOption {
-  value: Mode
+  value: AnalysisMode
   label: string
   description: string
 }
@@ -22,8 +21,8 @@ const OPTIONS: ModeOption[] = [
 ]
 
 interface ModeToggleProps {
-  value: Mode
-  onChange: (mode: Mode) => void
+  value: AnalysisMode
+  onChange: (mode: AnalysisMode) => void
 }
 
 export function ModeToggle({ value, onChange }: ModeToggleProps) {

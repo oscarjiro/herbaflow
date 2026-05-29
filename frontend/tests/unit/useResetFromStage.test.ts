@@ -79,7 +79,10 @@ describe('useResetFromStage', () => {
     qc.clear()
   })
 
-  it('on success: invalidates the analysisStatus query', async () => {
+  it('on success: prefix invalidation also refreshes the status query', async () => {
+    // useAnalysisStatus is keyed ['analysis', id, 'status'], so invalidating the
+    // ['analysis', id] prefix covers it. The hook does NOT emit a separate
+    // ['analysisStatus', id] key — no hook registers that key, so it would be dead.
     server.use(
       http.post(`http://localhost:8000/analyses/${ANALYSIS_ID}/reset-from/:stage`, () =>
         HttpResponse.json(mockStatus)
@@ -90,7 +93,13 @@ describe('useResetFromStage', () => {
     const { result } = renderHook(() => useResetFromStage(ANALYSIS_ID), { wrapper })
     result.current.mutate({ stage: 5 })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    // Exactly one invalidation — the prefix — and never the dead analysisStatus key.
+    expect(invalidateSpy).toHaveBeenCalledTimes(1)
     expect(invalidateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: ['analysis', ANALYSIS_ID] })
+    )
+    expect(invalidateSpy).not.toHaveBeenCalledWith(
       expect.objectContaining({ queryKey: ['analysisStatus', ANALYSIS_ID] })
     )
     qc.clear()

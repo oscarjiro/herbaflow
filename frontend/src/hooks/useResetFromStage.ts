@@ -8,8 +8,9 @@ export function useResetFromStage(id: string) {
     mutationFn: ({ stage, body }: { stage: number; body?: ResetFromRequest }) =>
       api.resetFromStage(id, stage, body),
     onSuccess: () => {
+      // Prefix invalidation covers status too: useAnalysisStatus is keyed
+      // ['analysis', id, 'status'], so refetching the prefix refreshes both.
       queryClient.invalidateQueries({ queryKey: ['analysis', id] })
-      queryClient.invalidateQueries({ queryKey: ['analysisStatus', id] })
     },
   })
 }
