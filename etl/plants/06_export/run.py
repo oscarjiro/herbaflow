@@ -39,7 +39,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir
 
 import argparse
-import csv
 import json
 import logging
 import math
