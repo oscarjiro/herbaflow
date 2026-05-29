@@ -42,7 +42,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, normalize_whitespace, to_key, make_run_id, write_csv, write_json, now_iso
+from shared.utils import ETL_ROOT, load_settings, ensure_dir, normalize_whitespace, to_key, make_run_id, write_csv, write_json, now_iso
 
 import argparse
 import csv

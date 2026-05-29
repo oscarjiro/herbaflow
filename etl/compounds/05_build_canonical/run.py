@@ -50,7 +50,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings as shared_load_settings, setup_logging as shared_setup_logging, ensure_dir, normalize_whitespace, make_run_id, now_iso
+from shared.utils import ETL_ROOT, load_settings as shared_load_settings, ensure_dir, normalize_whitespace, make_run_id, now_iso
 from compounds.utils import compound_id as make_compound_uuid, compound_alias_id as make_alias_uuid, COMPOUND_NS
 
 import argparse
