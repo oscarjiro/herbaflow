@@ -39,6 +39,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
 
     # Manual disease targets mode: bypass Open Targets, use injected gene list
     if params.get("_disease_input_mode") == "manual_targets":
+        from app.services import gene_symbols
+
         injected = params.get("_injected_disease_targets", [])
         if not injected:
             return {
@@ -46,11 +48,21 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 "targets": [],
                 "disease_gene_symbols": [],
                 "disease_gene_symbols_by_disease": {},
+                "normalization": {"changed": [], "unrecognized": []},
             }
-        # Deduplicate while preserving order; skip non-string or blank entries
-        unique_genes = list(dict.fromkeys(
-            gene.upper() for gene in injected if isinstance(gene, str) and gene.strip()
-        ))
+
+        results = gene_symbols.normalize_many(
+            g for g in injected if isinstance(g, str) and g.strip()
+        )
+        changed = [
+            {"from": r.input, "to": r.canonical}
+            for r in results
+            if r.status != "unrecognized" and r.canonical != r.input.upper()
+        ]
+        unrecognized = [r.input for r in results if r.status == "unrecognized"]
+
+        # Deduplicate canonical symbols while preserving first-seen order
+        unique_genes = list(dict.fromkeys(r.canonical for r in results if r.canonical))
         targets = [
             {
                 "gene_symbol": gene,
@@ -66,6 +78,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "targets": targets,
             "disease_gene_symbols": unique_genes,
             "disease_gene_symbols_by_disease": {"manual": unique_genes},
+            "normalization": {"changed": changed, "unrecognized": unrecognized},
         }
 
     disease_ids = params.get("_disease_ids", [])

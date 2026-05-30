@@ -138,3 +138,32 @@ async def test_stage4_manual_targets_mode_empty_list():
 
     assert result["disease_target_count"] == 0
     assert result["targets"] == []
+
+
+async def test_stage4_manual_targets_normalized():
+    """Manual disease targets are canonicalized to HGNC and changes are reported."""
+    import app.services.gene_symbols as gs
+    gs._MAP = {
+        "TNFA": {"symbol": "TNF", "kind": "alias"},
+        "TP53": {"symbol": "TP53", "kind": "approved"},
+    }
+
+    mock_run = MagicMock()
+    mock_run.stage_results = {}
+    mock_run.parameters = {
+        "_disease_input_mode": "manual_targets",
+        "_injected_disease_targets": ["TNFA", "TP53", "ZZZ9"],
+    }
+    mock_config = PipelineConfig()
+    mock_session = AsyncMock()
+
+    result = await stage4_disease_targets.run(mock_run, mock_config, mock_session)
+
+    symbols = result["disease_gene_symbols"]
+    assert "TNF" in symbols          # alias canonicalized
+    assert "TP53" in symbols
+    assert "TNFA" not in symbols
+    assert {"from": "TNFA", "to": "TNF"} in result["normalization"]["changed"]
+    assert "ZZZ9" in result["normalization"]["unrecognized"]
+    assert "ZZZ9" in symbols          # unknown kept, not dropped
+    gs._MAP = None

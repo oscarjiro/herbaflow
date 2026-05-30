@@ -295,7 +295,11 @@ class InjectTargetsRequest(BaseModel):
     )
     skip_validation: bool = Field(
         default=False,
-        description="Skip UniProt validation. Stores gene symbols as-is with no UniProt lookup.",
+        description=(
+            "Lenient mode: skip UniProt validation for gene symbols and instead "
+            "normalize them offline to canonical HGNC symbols (unknowns kept and "
+            "flagged). UniProt accessions are still resolved via UniProt."
+        ),
     )
 
 
@@ -305,3 +309,5 @@ class InjectTargetsResponse(BaseModel):
     duplicates_removed: int = 0                                      # inputs dropped due to deduplication
     duplicate_names: list[str] = Field(default_factory=list)         # labels for the dropped entries
     cached: int = 0                                                  # targets persisted to DB cache (validated, have UniProt accession)
+    normalized: list[dict] = Field(default_factory=list)            # [{"from": input, "to": canonical}] HGNC alias/prev resolutions
+    unrecognized: list[str] = Field(default_factory=list)           # lenient inputs kept as-is (not found in HGNC / UniProt)

@@ -1163,22 +1163,80 @@ async def inject_targets(
             duplicate_names=dedup_removed_labels,
         )
 
-    # Fast path: skip UniProt validation, store gene symbols directly
+    # Lenient path: normalize gene symbols offline (HGNC), resolve accessions via UniProt,
+    # never drop inputs (unknowns kept + flagged), normalize-then-dedup by canonical symbol.
     if body.skip_validation:
-        skip_targets = []
+        from app.services import gene_symbols
+        from app.services.target_cache import cache_validated_targets
+
+        normalized_changes: list[dict] = []
+        unrecognized: list[str] = []
+        lenient_targets: list[dict] = []
+
         for entry in deduped_dicts:
             raw = entry.get("_raw", entry.get("gene_symbol") or entry.get("uniprot_id") or "")
-            gene = raw.strip().upper() if isinstance(raw, str) else ""
-            if gene:
-                skip_targets.append({
-                    "target_id": f"manual:{gene}",
-                    "gene_symbol": gene,
+            raw_stripped = raw.strip() if isinstance(raw, str) else ""
+            if not raw_stripped:
+                continue
+
+            if entry.get("uniprot_id"):
+                # Accession -> UniProt (only authority for secondary/obsolete accessions).
+                try:
+                    info = await validate_human_target(gene_symbol=None, uniprot_id=raw_stripped)
+                    lenient_targets.append({
+                        "target_id": _make_target_id(info.uniprot_accession, info.gene_symbol),
+                        "gene_symbol": info.gene_symbol,
+                        "uniprot_id": info.uniprot_accession,
+                        "protein_name": info.protein_name,
+                        "compound_ids": [],
+                        "sources": ["manual"],
+                    })
+                except (ValueError, ServiceUnavailableError):
+                    # Lenient: never block the run on accession resolution — keep + flag.
+                    acc = raw_stripped.upper()
+                    unrecognized.append(raw_stripped)
+                    lenient_targets.append({
+                        "target_id": f"manual:{acc}",
+                        "gene_symbol": acc,
+                        "uniprot_id": None,
+                        "protein_name": None,
+                        "compound_ids": [],
+                        "sources": ["manual_unrecognized"],
+                    })
+            else:
+                res = gene_symbols.normalize(raw_stripped)
+                if res.status == "unrecognized":
+                    unrecognized.append(raw_stripped)
+                    source = "manual_unrecognized"
+                else:
+                    if res.canonical != raw_stripped.upper():
+                        normalized_changes.append({"from": raw_stripped, "to": res.canonical})
+                    source = "manual_normalized"
+                lenient_targets.append({
+                    "target_id": f"manual:{res.canonical}",
+                    "gene_symbol": res.canonical,
                     "uniprot_id": None,
                     "protein_name": None,
                     "compound_ids": [],
-                    "sources": ["manual_unvalidated"],
+                    "sources": [source],
                 })
-        all_targets = existing_targets_full + skip_targets
+
+        # Normalize-then-dedup by canonical gene symbol, including against existing stage_3.
+        seen: set[str] = {
+            (t.get("gene_symbol") or "").upper() for t in existing_targets_full
+        }
+        deduped_new: list[dict] = []
+        dedup_labels: list[str] = []
+        for t in lenient_targets:
+            sym = (t["gene_symbol"] or "").upper()
+            if not sym or sym in seen:
+                if sym:
+                    dedup_labels.append(t["gene_symbol"])
+                continue
+            seen.add(sym)
+            deduped_new.append(t)
+
+        all_targets = existing_targets_full + deduped_new
         stage3_result = {
             "target_count": len(all_targets),
             "target_ids": [t["target_id"] for t in all_targets],
@@ -1195,11 +1253,19 @@ async def inject_targets(
             session, analysis_id, status=run.status, stage_results={"stage_3": stage3_result},
         )
         await analysis_repo.merge_run_parameters(session, analysis_id, {"_input_mode": "manual_targets"})
+
+        # Accession-resolved targets carry a UniProt accession — cache them (symbol-only
+        # targets have uniprot_id=None and are skipped by the cache).
+        cached = await cache_validated_targets(deduped_new, session)
+
         return InjectTargetsResponse(
-            injected=len(skip_targets),
+            injected=len(deduped_new),
             failed=[],
-            duplicates_removed=len(dedup_removed_labels),
-            duplicate_names=dedup_removed_labels,
+            duplicates_removed=len(dedup_labels),
+            duplicate_names=dedup_labels,
+            cached=cached,
+            normalized=normalized_changes,
+            unrecognized=unrecognized,
         )
 
     # Validate each deduplicated target via UniProt
