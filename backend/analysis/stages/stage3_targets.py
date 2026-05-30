@@ -14,11 +14,14 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.repositories import compound_repo
 from integrations.chembl import get_targets_for_compounds, ChemblTarget
 from integrations.pubchem_bioassay import get_targets_by_inchikey, PubChemTarget
+from app.services.canonicalize import (
+    TARGET_NS,
+    make_target_id as _core_make_target_id,
+    target_canonical_key,
+)
 
-# UUID v5 namespaces — TARGET_NS must match etl/disease_targets/utils.py exactly.
-# Replicated here because the backend cannot import from etl/.
-# Derivation: uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.targets")
-TARGET_NS: uuid.UUID = uuid.UUID("421e4557-e00d-533d-ab26-5f7b761b9483")
+# TARGET_NS is imported from the canonicalization core above (re-exported for
+# existing importers: `from analysis.stages.stage3_targets import TARGET_NS`).
 # Derivation: uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.compound_targets")
 # ETL does not produce compound_targets; this namespace is backend-only for
 # the ChEMBL-derived compound–target join table.
@@ -28,15 +31,14 @@ COMPOUND_TARGET_NS: uuid.UUID = uuid.UUID("59a665ef-1743-5e45-98c2-128fe7e345a9"
 def _make_target_id(uniprot_accession: str | None, gene_symbol: str) -> str:
     """Return a bare UUID v5 for a target.
 
-    Uses canonical_key format matching the ETL disease_targets pipeline:
-    'uniprot:{acc}' when a UniProt accession is available, else falls back
-    to 'gene:{symbol}' for ChEMBL-only targets without a UniProt ID.
+    Delegates to the canonicalization core when a UniProt accession is available
+    so isoform suffixes are folded (e.g. 'P04637-2' → 'P04637') and ids stay
+    byte-identical to the ETL pipeline. Falls back to 'gene:{symbol}' for
+    ChEMBL-only targets without a UniProt ID.
     """
     if uniprot_accession:
-        key = f"uniprot:{uniprot_accession.strip()}"
-    else:
-        key = f"gene:{gene_symbol.upper()}"
-    return str(uuid.uuid5(TARGET_NS, key))
+        return _core_make_target_id(uniprot_accession)
+    return str(uuid.uuid5(TARGET_NS, f"gene:{gene_symbol.upper()}"))
 
 
 def _make_ct_id(compound_id: str, target_id: str) -> str:
@@ -173,7 +175,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         existing = await session.exec(select(Target).where(Target.target_id == target_id))
         if not existing.first():
             canonical_key = (
-                f"uniprot:{t.uniprot_accession.strip()}"
+                target_canonical_key(t.uniprot_accession)
                 if t.uniprot_accession
                 else f"gene:{gene}"
             )
@@ -192,7 +194,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         target_id = _make_target_id(t.uniprot_accession, gene)
         existing = await session.exec(select(Target).where(Target.target_id == target_id))
         if not existing.first():
-            canonical_key = f"uniprot:{t.uniprot_accession.strip()}"
+            canonical_key = target_canonical_key(t.uniprot_accession)
             session.add(Target(
                 target_id=target_id,
                 canonical_key=canonical_key,

@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.target import Target
+from app.services.canonicalize import target_canonical_key
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ async def _do_cache(
         session.add(
             Target(
                 target_id=target_id,
-                canonical_key=f"uniprot:{uniprot_accession}",
+                canonical_key=target_canonical_key(uniprot_accession),
                 gene_symbol=gene_symbol,
                 uniprot_accession=uniprot_accession,
                 protein_name=t.get("protein_name"),
