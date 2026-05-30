@@ -80,7 +80,7 @@ async def _do_cache(
         if existing is not None:
             continue  # already cached — skip (upsert/ON CONFLICT DO NOTHING semantics)
 
-        canonical_key = c.get("canonical_key") or f"pubchem:{c['pubchem_cid']}"
+        canonical_key = c["canonical_key"]  # always set by the canonicalization core
 
         session.add(
             Compound(
