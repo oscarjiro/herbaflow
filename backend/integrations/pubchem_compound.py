@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import uuid
 from urllib.parse import quote
 
 import httpx
 
+from app.services.canonicalize import make_compound_id, compound_canonical_key
 from integrations._retry import with_retry, ServiceUnavailableError
 
 logger = logging.getLogger(__name__)
@@ -27,11 +27,6 @@ _PROPERTY_LIST = (
 
 def _is_inchi(s: str) -> bool:
     return s.strip().startswith("InChI=")
-
-
-def make_compound_id(inchikey: str) -> str:
-    """Return a deterministic UUID v5 for a compound, keyed on its InChIKey."""
-    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"inchikey:{inchikey}"))
 
 
 def compute_adme(props: dict) -> dict:
@@ -235,6 +230,7 @@ async def validate_compound(
 
     return {
         "compound_id": compound_id,
+        "canonical_key": compound_canonical_key(inchikey),
         "pubchem_cid": str(cid),  # string to match existing cache data conventions
         "inchikey": inchikey,
         "iupac_name": iupac_name,
