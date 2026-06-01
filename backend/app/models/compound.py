@@ -59,6 +59,5 @@ class PlantCompound(SQLModel, table=True):
     source_plant_raw_id: Optional[str] = None
     source_compound_raw_id: Optional[str] = None
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
-    evidence_type: Optional[str] = None
     confidence: Optional[float] = None
     retrieved_at: Optional[datetime] = None

@@ -30,7 +30,6 @@ class CompoundTarget(SQLModel, table=True):
     target_id: str = Field(foreign_key="targets.target_id")
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     prediction_method: Optional[str] = None
-    evidence_type: Optional[str] = None
     score: Optional[float] = None
     confidence: Optional[float] = None
     pchembl_value: Optional[float] = None

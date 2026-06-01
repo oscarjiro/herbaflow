@@ -621,7 +621,6 @@ async def import_targets(
                     compound_id=body.compound_id,
                     target_id=target_id,
                     prediction_method="stp_import",
-                    evidence_type="computational",
                     pchembl_value=None,
                     retrieved_at=now,
                 ))

@@ -4,6 +4,8 @@ import app.models as models
 from sqlmodel import SQLModel
 
 from analysis.stages import stage7_hub_genes
+from app.models.compound import PlantCompound
+from app.models.target import CompoundTarget
 
 
 def test_stage7_run_has_no_target_rankings_write():
@@ -24,3 +26,9 @@ def test_dead_tables_absent_from_metadata():
     tables = set(SQLModel.metadata.tables)
     for t in ("target_rankings", "pathways", "target_pathways", "ppi_edges"):
         assert t not in tables, f"{t} must not be mapped"
+
+
+def test_evidence_type_removed():
+    assert "evidence_type" not in PlantCompound.model_fields
+    assert "evidence_type" not in CompoundTarget.model_fields
+    assert "prediction_method" in CompoundTarget.model_fields  # kept

@@ -212,7 +212,6 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                     compound_id=cid,
                     target_id=target_id,
                     prediction_method="chembl_bioactivity",
-                    evidence_type="experimental",
                     pchembl_value=t.pchembl_value,
                     retrieved_at=now,
                 ))
@@ -232,7 +231,6 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                     compound_id=cid,
                     target_id=target_id,
                     prediction_method="pubchem_bioassay",
-                    evidence_type="experimental",
                     pchembl_value=None,
                     retrieved_at=now,
                 ))
