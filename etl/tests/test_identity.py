@@ -69,3 +69,28 @@ def test_entity_ids_are_v5_of_canonical_key():
     assert identity.target_id(uniprot="P04637") == identity._v5(identity.TARGET_NS, "uniprot:P04637")
     assert identity.disease_id("Disease Ontology", "DOID_9352", "x") == \
         identity._v5(identity.DISEASE_NS, "doid:9352")
+
+
+def test_alias_ids_key_on_parent_and_slug_only():
+    pid = "11111111-1111-5111-8111-111111111111"
+    assert identity.plant_alias_id(pid, "solanum") == identity._v5(identity.PLANT_ALIAS_NS, f"{pid}:solanum")
+    assert identity.compound_alias_id(pid, "aspirin") == identity._v5(identity.COMPOUND_ALIAS_NS, f"{pid}:aspirin")
+    assert identity.target_alias_id(pid, "tp53") == identity._v5(identity.TARGET_ALIAS_NS, f"{pid}:tp53")
+    assert identity.disease_alias_id(pid, "t2dm") == identity._v5(identity.DISEASE_ALIAS_NS, f"{pid}:t2dm")
+
+
+def test_alias_priority_pick_keeps_highest():
+    # higher-priority type wins on a slug collision
+    chosen = identity.pick_alias(
+        current={"alias_type": "ontology_synonym"},
+        candidate={"alias_type": "canonical_name"},
+    )
+    assert chosen["alias_type"] == "canonical_name"
+    # lower-priority candidate does NOT replace current (replace only on strictly greater)
+    keep = identity.pick_alias(
+        current={"alias_type": "canonical_name"},
+        candidate={"alias_type": "raw_name"},
+    )
+    assert keep["alias_type"] == "canonical_name"
+    # None current -> candidate
+    assert identity.pick_alias(None, {"alias_type": "raw_name"})["alias_type"] == "raw_name"

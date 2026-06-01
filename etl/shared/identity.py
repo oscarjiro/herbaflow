@@ -143,3 +143,46 @@ def target_id_from_key(canonical_key: str) -> str:
 
 def disease_id(ontology_source: object, ontology_id: object, slug_source: object) -> str:
     return _v5(DISEASE_NS, disease_canonical_key(ontology_source, ontology_id, slug_source))
+
+
+# --- Aliases: key on (parent_id, alias_key-slug); alias_type is an attribute ---
+
+# Verbatim from diseases/03_build_canonical (single source now). Higher int = higher priority.
+ALIAS_PRIORITY = {
+    "canonical_name": 100,
+    "ontology_synonym": 90,
+    "ontology_label": 85,
+    "user_alias": 70,
+    "normalized_alias": 60,
+    "seed_name": 50,
+    "raw_name": 40,
+}
+
+
+def _alias_id(namespace: uuid.UUID, parent_id: str, alias_key: str) -> str:
+    return _v5(namespace, f"{parent_id}:{alias_key}")
+
+
+def plant_alias_id(parent_id: str, alias_key: str) -> str:
+    return _alias_id(PLANT_ALIAS_NS, parent_id, alias_key)
+
+
+def compound_alias_id(parent_id: str, alias_key: str) -> str:
+    return _alias_id(COMPOUND_ALIAS_NS, parent_id, alias_key)
+
+
+def target_alias_id(parent_id: str, alias_key: str) -> str:
+    return _alias_id(TARGET_ALIAS_NS, parent_id, alias_key)
+
+
+def disease_alias_id(parent_id: str, alias_key: str) -> str:
+    return _alias_id(DISEASE_ALIAS_NS, parent_id, alias_key)
+
+
+def pick_alias(current: dict, candidate: dict) -> dict:
+    """Return whichever alias has the higher ALIAS_PRIORITY (candidate wins only if strictly >)."""
+    if current is None:
+        return candidate
+    cur_p = ALIAS_PRIORITY.get(current.get("alias_type"), 0)
+    cand_p = ALIAS_PRIORITY.get(candidate.get("alias_type"), 0)
+    return candidate if cand_p > cur_p else current
