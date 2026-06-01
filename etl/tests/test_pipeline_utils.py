@@ -8,8 +8,9 @@ import pytest
 from plants.utils import (
     split_scientific_name,
     build_canonical_lookup_key,
+    plant_canonical_key,
     plant_id,
-    alias_id,
+    plant_alias_id,
     PLANT_NS,
     PLANT_ALIAS_NS,
 )
@@ -36,22 +37,47 @@ def test_build_canonical_lookup_key_lowercases():
 def test_build_canonical_lookup_key_strips():
     assert build_canonical_lookup_key("  Curcuma longa  ") == "curcuma longa"
 
+def test_plant_canonical_key_uses_gbif_when_present():
+    assert plant_canonical_key("3190652", "Curcuma longa L.") == "gbif:3190652"
+
+def test_plant_canonical_key_falls_back_to_slug():
+    assert plant_canonical_key("", "Curcuma longa L.") == "plant:curcuma_longa_l"
+
 def test_plant_id_deterministic():
-    assert plant_id("12345") == plant_id("12345")
+    assert plant_id("3190652") == plant_id("3190652")
 
 def test_plant_id_valid_uuid():
-    uuid.UUID(plant_id("12345"))
+    uuid.UUID(plant_id("3190652"))
+
+def test_plant_id_is_uuid5_of_canonical_key():
+    assert plant_id("3190652") == str(uuid.uuid5(PLANT_NS, "gbif:3190652"))
+
+def test_plant_id_slug_fallback_matches_canonical_key():
+    pid = plant_id("", "Curcuma longa L.")
+    assert pid == str(uuid.uuid5(PLANT_NS, "plant:curcuma_longa_l"))
 
 def test_plant_id_different_keys_differ():
-    assert plant_id("12345") != plant_id("99999")
+    assert plant_id("3190652") != plant_id("99999")
 
-def test_alias_id_deterministic():
-    pid = plant_id("12345")
-    assert alias_id(pid, "synonym", "Turmeric") == alias_id(pid, "synonym", "Turmeric")
+def test_plant_alias_id_deterministic():
+    pid = plant_id("3190652")
+    assert plant_alias_id(pid, "turmeric") == plant_alias_id(pid, "turmeric")
 
-def test_alias_id_different_types_differ():
-    pid = plant_id("12345")
-    assert alias_id(pid, "synonym", "X") != alias_id(pid, "common_name", "X")
+def test_plant_alias_id_is_uuid5_of_parent_and_key():
+    pid = plant_id("3190652")
+    assert plant_alias_id(pid, "turmeric") == str(
+        uuid.uuid5(PLANT_ALIAS_NS, f"{pid}:turmeric")
+    )
+
+def test_plant_alias_id_ignores_alias_type():
+    # alias_id derives from (plant_id, alias_key) only — alias_type is NOT in the
+    # identity, so the same slug collapses to one id regardless of alias_type.
+    pid = plant_id("3190652")
+    assert plant_alias_id(pid, "turmeric") == plant_alias_id(pid, "turmeric")
+
+def test_plant_alias_id_different_keys_differ():
+    pid = plant_id("3190652")
+    assert plant_alias_id(pid, "turmeric") != plant_alias_id(pid, "curcuma_longa")
 
 def test_plant_ns_is_uuid():
     uuid.UUID(str(PLANT_NS))

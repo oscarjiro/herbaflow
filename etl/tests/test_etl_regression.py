@@ -123,3 +123,87 @@ class TestKnapsackBooleanFlags:
         args = self._parse(["--resume"])
         assert isinstance(args.resume, bool)
         assert isinstance(args.require_detail_url, bool)
+
+
+import uuid
+
+import pandas as pd
+
+from shared.identity import PLANT_ALIAS_NS
+
+plants_canonical = _load(
+    "plants_04_build_canonical_part2", "plants/04_build_canonical/run_part2.py"
+)
+
+
+class TestPlantAliasSlugCollapse:
+    """alias_id = uuid5(PLANT_ALIAS_NS, '{plant_id}:{alias_key}') excludes
+    alias_type, so two alias candidates that fold to the same slug but carry
+    different alias_types MUST collapse to a single row per (plant_id, alias_key)
+    — otherwise they would emit duplicate alias_id rows and break
+    UNIQUE(plant_id, alias_key)."""
+
+    def test_same_slug_different_alias_type_collapses_to_one_row(self):
+        # Two input rows for the same accepted species. Row 1 contributes
+        # "Curcuma longa" as exact_scraped_spelling; row 2's matched_name
+        # "Curcuma  longa" folds to the SAME slug but would be a synonym_variant.
+        group = pd.DataFrame(
+            [
+                {
+                    "canonical_scientific_name": "Curcuma zedoaria",
+                    "authorship": "Rosc.",
+                    "gbif_accepted_usage_key": "3190652",
+                    "gbif_usage_key": "3190652",
+                    "original_species_name": "Curcuma longa",
+                    "matched_name": "",
+                    "confidence": "0.99",
+                },
+                {
+                    "canonical_scientific_name": "Curcuma zedoaria",
+                    "authorship": "Rosc.",
+                    "gbif_accepted_usage_key": "3190652",
+                    "gbif_usage_key": "3190652",
+                    "original_species_name": "",
+                    "matched_name": "Curcuma  longa",
+                    "confidence": "0.50",
+                },
+            ]
+        )
+
+        plant_row, aliases = plants_canonical.canonicalize_group(
+            group, "KNApSAcK World"
+        )
+
+        pid = plant_row["plant_id"]
+        rows = [a for a in aliases if a["alias_key"] == "curcuma longa"]
+        assert len(rows) == 1, f"expected one row for slug, got {rows}"
+
+        only = rows[0]
+        expected_alias_id = str(uuid.uuid5(PLANT_ALIAS_NS, f"{pid}:curcuma longa"))
+        assert only["alias_id"] == expected_alias_id
+        # First-seen wins on the priority tie (plant alias types absent from
+        # ALIAS_PRIORITY), so exact_scraped_spelling is the deterministic winner.
+        assert only["alias_type"] == "exact_scraped_spelling"
+
+        # No duplicate alias_id anywhere in the output.
+        ids = [a["alias_id"] for a in aliases]
+        assert len(ids) == len(set(ids))
+
+    def test_plant_id_and_canonical_key_use_gbif(self):
+        group = pd.DataFrame(
+            [
+                {
+                    "canonical_scientific_name": "Curcuma longa",
+                    "authorship": "L.",
+                    "gbif_accepted_usage_key": "3190652",
+                    "gbif_usage_key": "3190652",
+                    "original_species_name": "Curcuma longa",
+                    "confidence": "0.99",
+                }
+            ]
+        )
+        plant_row, _ = plants_canonical.canonicalize_group(group, "KNApSAcK World")
+        assert plant_row["canonical_key"] == "gbif:3190652"
+        assert plant_row["plant_id"] == plants_canonical.make_plant_id(
+            "3190652", "Curcuma longa L."
+        )

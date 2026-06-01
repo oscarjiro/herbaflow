@@ -32,7 +32,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir
-from plants.utils import plant_id as make_plant_id, alias_id as make_alias_id
+from plants.utils import plant_canonical_key, plant_id as make_plant_id, plant_alias_id as make_alias_id
+from shared.identity import pick_alias
 
 import argparse
 import logging
@@ -325,16 +326,8 @@ def build_canonical_key(canonical_scientific_name: str, authorship: str) -> str:
     return name_key
 
 
-def build_plant_id(gbif_usage_key: str) -> str:
-    return make_plant_id(gbif_usage_key)
-
-
 def build_alias_key(alias_name: str) -> str:
     return fold_key_text(alias_name)
-
-
-def build_alias_id(plant_id: str, alias_type: str, alias_name: str) -> str:
-    return make_alias_id(plant_id, alias_type, alias_name)
 
 
 def is_meaningful_alias(alias_name: str) -> bool:
@@ -384,13 +377,13 @@ def canonicalize_group(
 
     canonical_name = canonical_scientific_name_from_row(rep)
     authorship = authorship_from_row(rep)
-    canonical_key = build_canonical_key(canonical_name, authorship)
+    name_slug_source = f"{canonical_name} {authorship}".strip()
     gbif_key = (
         normalize_id_like(rep.get("gbif_accepted_usage_key", ""))
         or normalize_id_like(rep.get("gbif_usage_key", ""))
-        or canonical_key
     )
-    plant_id = build_plant_id(gbif_key)
+    canonical_key = plant_canonical_key(gbif_key, name_slug_source)
+    plant_id = make_plant_id(gbif_key, name_slug_source)
 
     source_name = coalesce_source_name(rep, source_name_fallback)
     source_url = coalesce_source_url(rep)
@@ -415,7 +408,14 @@ def canonicalize_group(
     }
     plant_row.update(normalize_gbif_fields(rep))
 
-    aliases: List[Dict[str, Any]] = []
+    # Collapse aliases to exactly one row per (plant_id, alias_key). The new
+    # alias_id = make_alias_id(plant_id, alias_key) intentionally excludes
+    # alias_type, so two candidates that fold to the same slug but carry
+    # different alias_types must merge into a single deterministic row to
+    # satisfy UNIQUE(plant_id, alias_key). pick_alias keeps the higher-priority
+    # alias_type; plant alias types are absent from ALIAS_PRIORITY, so it is
+    # first-wins (ties keep the current row) — matching the add order below.
+    alias_by_key: Dict[str, Dict[str, Any]] = {}
 
     def add_alias(alias_name: str, alias_type: str, row_source: pd.Series) -> None:
         alias_name = normalize_text(alias_name)
@@ -424,32 +424,18 @@ def canonicalize_group(
         if not is_meaningful_alias(alias_name):
             return
         alias_key = build_alias_key(alias_name)
-        alias_id = build_alias_id(plant_id, alias_type, alias_name)
-        aliases.append(
-            {
-                "alias_id": alias_id,
-                "plant_id": plant_id,
-                "alias_name": alias_name,
-                "alias_key": alias_key,
-                "alias_type": alias_type,
-                "source_name": coalesce_source_name(row_source, source_name_fallback),
-                "source_url": coalesce_source_url(row_source),
-                "source_batch_id": source_batch_id_from_row(row_source),
-                "retrieved_at": coalesce_retrieved_at(row_source),
-            }
-        )
-
-    seen_alias_signatures: set[Tuple[str, str]] = set()
-
-    def maybe_add_alias(
-        alias_name: str, alias_type: str, row_source: pd.Series
-    ) -> None:
-        alias_name = normalize_text(alias_name)
-        signature = (build_alias_key(alias_name), alias_type)
-        if not alias_name or signature in seen_alias_signatures:
-            return
-        seen_alias_signatures.add(signature)
-        add_alias(alias_name, alias_type, row_source)
+        candidate = {
+            "alias_id": make_alias_id(plant_id, alias_key),
+            "plant_id": plant_id,
+            "alias_name": alias_name,
+            "alias_key": alias_key,
+            "alias_type": alias_type,
+            "source_name": coalesce_source_name(row_source, source_name_fallback),
+            "source_url": coalesce_source_url(row_source),
+            "source_batch_id": source_batch_id_from_row(row_source),
+            "retrieved_at": coalesce_retrieved_at(row_source),
+        }
+        alias_by_key[alias_key] = pick_alias(alias_by_key.get(alias_key), candidate)
 
     for _, row in group.iterrows():
         original_name = first_non_empty(
@@ -462,25 +448,25 @@ def canonicalize_group(
         accepted_name = first_non_empty(row.get("accepted_name", ""))
 
         # Exact scraped spelling.
-        maybe_add_alias(original_name, "exact_scraped_spelling", row)
+        add_alias(original_name, "exact_scraped_spelling", row)
 
         # Other normalized variants.
         if canonical_candidate and fold_key_text(canonical_candidate) != fold_key_text(
             original_name
         ):
-            maybe_add_alias(canonical_candidate, "normalized_variant", row)
+            add_alias(canonical_candidate, "normalized_variant", row)
 
         # Author variants: canonical name plus authorship candidate when available.
         if canonical_candidate and authorship_candidate:
             author_variant = f"{canonical_candidate} {authorship_candidate}".strip()
             if fold_key_text(author_variant) != fold_key_text(original_name):
-                maybe_add_alias(author_variant, "author_variant", row)
+                add_alias(author_variant, "author_variant", row)
 
         # Synonym variants: GBIF matched name when it differs from the accepted canonical name.
         if matched_name and fold_key_text(matched_name) != fold_key_text(
             canonical_name
         ):
-            maybe_add_alias(matched_name, "synonym_variant", row)
+            add_alias(matched_name, "synonym_variant", row)
 
         # Accepted name variant can also help preserve a normalized alias when the
         # accepted name differs from the original input spelling.
@@ -488,24 +474,11 @@ def canonicalize_group(
             original_name
         ):
             # Keep this under normalized_variant rather than inventing a new alias_type.
-            maybe_add_alias(accepted_name, "normalized_variant", row)
+            add_alias(accepted_name, "normalized_variant", row)
 
-    # Final alias de-duplication should be stable and deterministic.
+    # One row per (plant_id, alias_key); stable, deterministic ordering.
     aliases = sorted(
-        {
-            (
-                alias["alias_id"],
-                alias["plant_id"],
-                alias["alias_name"],
-                alias["alias_key"],
-                alias["alias_type"],
-                alias["source_name"],
-                alias["source_url"],
-                alias["source_batch_id"],
-                alias["retrieved_at"],
-            ): alias
-            for alias in aliases
-        }.values(),
+        alias_by_key.values(),
         key=lambda r: (r["plant_id"], r["alias_type"], r["alias_key"], r["alias_name"]),
     )
 
@@ -650,7 +623,7 @@ def build_seed_files(
         "",
         "Notes:",
         "- plant_id is a stable hash derived from canonical_key",
-        "- alias_id is a stable hash derived from plant_id, alias_key, and alias_type",
+        "- alias_id is a stable hash derived from plant_id and alias_key",
         "- source_name is treated as the source system name, not the plant name",
         "- alias_name preserves the exact original scraped spelling where available",
         "- GBIF identifier fields are normalized to plain string form",
