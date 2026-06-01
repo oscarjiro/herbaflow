@@ -43,3 +43,77 @@ def slugify(value: object) -> str:
     text = re.sub(r"\s+", " ", str(value or "")).strip().lower()
     text = re.sub(r"[^a-z0-9]+", "_", text)
     return re.sub(r"_+", "_", text).strip("_")
+
+
+# --- Canonical-key cascades ({source}:{id}, single colon) ---
+
+def plant_canonical_key(gbif_usage_key: object, name_slug_source: object = "") -> str:
+    key = str(gbif_usage_key or "").strip()
+    if key:
+        return f"gbif:{key}"
+    return f"plant:{slugify(name_slug_source)}"
+
+
+def fold_isoform(accession: str) -> str:
+    """'P04637-2' -> 'P04637' (uppercased, stripped)."""
+    return _ISOFORM_SUFFIX.sub("", str(accession).strip().upper())
+
+
+def _norm(value: object) -> str:
+    return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+def compound_canonical_key(candidate: dict) -> str:
+    """Port of canonical_identity_for_candidate, single-colon, inchi->inchikey.
+
+    Priority: inchi_key > pubchem_cid > chembl_id > cas_id > name_formula > name > formula.
+    Returns '' when no identity is available.
+    """
+    inchi = _norm(candidate.get("inchi_key"))
+    pubchem = _norm(candidate.get("pubchem_cid"))
+    chembl = _norm(candidate.get("chembl_id"))
+    cas = _norm(candidate.get("cas_id") or candidate.get("representative_cas_id"))
+    name = slugify(candidate.get("preferred_name") or candidate.get("iupac_name")
+                   or candidate.get("representative_name"))
+    formula = slugify(candidate.get("molecular_formula") or candidate.get("representative_formula"))
+    if inchi:
+        return f"inchikey:{inchi.upper()}"
+    if pubchem:
+        return f"pubchem:{pubchem}"
+    if chembl:
+        return f"chembl:{chembl}"
+    if cas:
+        return f"cas:{slugify(cas)}"
+    if name and formula:
+        return f"name_formula:{name}:{formula}"
+    if name:
+        return f"name:{name}"
+    if formula:
+        return f"formula:{formula}"
+    return ""
+
+
+def target_canonical_key(uniprot: object = None, ensembl: object = None, gene: object = None) -> str:
+    acc = str(uniprot or "").strip()
+    if acc:
+        return f"uniprot:{fold_isoform(acc)}"
+    ens = str(ensembl or "").strip()
+    if ens:
+        return f"ensembl:{ens}"
+    sym = str(gene or "").strip()
+    if sym:
+        return f"gene:{sym.upper()}"
+    raise ValueError("target_canonical_key requires uniprot, ensembl, or gene")
+
+
+_ONTOLOGY_PREFIX = {"disease ontology": "doid", "doid": "doid", "mesh": "mesh"}
+
+
+def disease_canonical_key(ontology_source: object, ontology_id: object, slug_source: object) -> str:
+    src = str(ontology_source or "").strip().lower()
+    oid = str(ontology_id or "").strip()
+    prefix = _ONTOLOGY_PREFIX.get(src)
+    if oid and prefix:
+        local = re.sub(rf"^{prefix}[:_]", "", oid, flags=re.IGNORECASE)
+        return f"{prefix}:{local}"
+    return f"disease:{slugify(slug_source)}"
