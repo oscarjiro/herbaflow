@@ -4,9 +4,9 @@ from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
 
 
-def make_run(disease_ids=None):
+def make_run(disease_id=None):
     run = MagicMock(spec=AnalysisRun)
-    run.parameters = {"_disease_ids": disease_ids or []}
+    run.parameters = {"_disease_id": disease_id}
     run.stage_results = {}
     return run
 
@@ -26,20 +26,22 @@ def make_fake_target(gene_symbol: str, uniprot: str = "P00000"):
     return m
 
 
-async def test_stage4_no_disease_ids_returns_empty():
-    run = make_run(disease_ids=[])
+async def test_stage4_no_disease_returns_empty():
+    run = make_run(disease_id=None)
     config = PipelineConfig()
     session = AsyncMock()
 
     result = await stage4_disease_targets.run(run, config, session)
 
+    assert result["disease_id"] is None
+    assert result["disease_name"] is None
     assert result["disease_target_count"] == 0
     assert result["targets"] == []
     assert result["disease_gene_symbols"] == []
 
 
-async def test_stage4_uses_db_cache():
-    run = make_run(disease_ids=["dis_1"])
+async def test_stage4_uses_db_cache_and_emits_stage_level_disease():
+    run = make_run(disease_id="dis_1")
     config = PipelineConfig()
     session = AsyncMock()
 
@@ -49,44 +51,51 @@ async def test_stage4_uses_db_cache():
     with patch(
         "analysis.stages.stage4_disease_targets.disease_repo.get_disease_by_id",
         return_value=fake_disease,
+    ), patch(
+        "analysis.stages.stage4_disease_targets.disease_repo.get_targets_for_disease",
+        return_value=[(fake_target, 0.7)],
     ):
-        with patch(
-            "analysis.stages.stage4_disease_targets.disease_repo.get_targets_for_disease",
-            return_value=[(fake_target, 0.7)],
-        ):
-            result = await stage4_disease_targets.run(run, config, session)
+        result = await stage4_disease_targets.run(run, config, session)
 
+    # Stage-level disease context (emitted once, not per row)
+    assert result["disease_id"] == "dis_1"
+    assert result["disease_name"] == "Type 2 Diabetes"
+    # Lean target row — no per-row disease fields, no diseases[] list
     assert result["disease_target_count"] == 1
-    assert result["targets"][0]["gene_symbol"] == "AKT1"
-    assert result["targets"][0]["source"] == "db_cache"
-    assert result["targets"][0]["score"] == 0.7
+    row = result["targets"][0]
+    assert row == {
+        "gene_symbol": "AKT1",
+        "uniprot_accession": "P31749",
+        "score": 0.7,
+        "source": "db_cache",
+    }
+    assert "diseases" not in row
+    assert "disease_name" not in row
 
 
-async def test_stage4_deduplicates_gene_across_diseases():
-    run = make_run(disease_ids=["dis_1", "dis_2"])
+async def test_stage4_deduplicates_repeated_gene():
+    run = make_run(disease_id="dis_1")
     config = PipelineConfig()
     session = AsyncMock()
 
-    fake_disease1 = make_fake_disease("dis_1", "Diabetes")
-    fake_disease2 = make_fake_disease("dis_2", "Obesity")
-    shared_target = make_fake_target("TP53")
+    fake_disease = make_fake_disease("dis_1", "Diabetes")
+    dup = make_fake_target("TP53")
 
     with patch(
         "analysis.stages.stage4_disease_targets.disease_repo.get_disease_by_id",
-        side_effect=[fake_disease1, fake_disease2],
+        return_value=fake_disease,
+    ), patch(
+        "analysis.stages.stage4_disease_targets.disease_repo.get_targets_for_disease",
+        return_value=[(dup, 0.8), (dup, 0.6)],
     ):
-        with patch(
-            "analysis.stages.stage4_disease_targets.disease_repo.get_targets_for_disease",
-            side_effect=[[(shared_target, 0.8)], [(shared_target, 0.6)]],
-        ):
-            result = await stage4_disease_targets.run(run, config, session)
+        result = await stage4_disease_targets.run(run, config, session)
 
     assert result["disease_target_count"] == 1
-    assert "TP53" in result["disease_gene_symbols"]
+    assert result["disease_gene_symbols"] == ["TP53"]
 
 
-async def test_stage4_skips_unknown_disease():
-    run = make_run(disease_ids=["dis_ghost"])
+async def test_stage4_unknown_disease_returns_empty_with_id():
+    run = make_run(disease_id="dis_ghost")
     config = PipelineConfig()
     session = AsyncMock()
 
@@ -96,52 +105,51 @@ async def test_stage4_skips_unknown_disease():
     ):
         result = await stage4_disease_targets.run(run, config, session)
 
+    assert result["disease_id"] == "dis_ghost"
+    assert result["disease_name"] is None
     assert result["disease_target_count"] == 0
 
 
 async def test_stage4_manual_targets_mode():
-    """When _disease_input_mode is manual_targets, stage4 uses injected_disease_targets."""
+    """manual_targets mode bypasses Open Targets; no disease context."""
     mock_run = MagicMock()
-    mock_run.stage_results = {
-        "stage_3": {
-            "target_gene_symbols": ["TP53", "EGFR"],
-        }
-    }
+    mock_run.stage_results = {}
     mock_run.parameters = {
         "_disease_input_mode": "manual_targets",
         "_injected_disease_targets": ["TP53", "BRCA1", "PTEN"],
     }
-    mock_config = PipelineConfig()
-    mock_session = AsyncMock()
+    config = PipelineConfig()
+    session = AsyncMock()
 
-    result = await stage4_disease_targets.run(mock_run, mock_config, mock_session)
+    result = await stage4_disease_targets.run(mock_run, config, session)
 
+    assert result["disease_id"] is None
+    assert result["disease_name"] is None
     assert result["disease_target_count"] == 3
-    gene_symbols = [t["gene_symbol"] for t in result["targets"]]
-    assert "TP53" in gene_symbols
-    assert "BRCA1" in gene_symbols
-    assert "PTEN" in gene_symbols
+    genes = [t["gene_symbol"] for t in result["targets"]]
+    assert {"TP53", "BRCA1", "PTEN"} <= set(genes)
+    # lean rows
+    assert "disease_name" not in result["targets"][0]
 
 
 async def test_stage4_manual_targets_mode_empty_list():
-    """When _disease_input_mode is manual_targets with empty list, returns empty result."""
     mock_run = MagicMock()
     mock_run.stage_results = {}
     mock_run.parameters = {
         "_disease_input_mode": "manual_targets",
         "_injected_disease_targets": [],
     }
-    mock_config = PipelineConfig()
-    mock_session = AsyncMock()
+    config = PipelineConfig()
+    session = AsyncMock()
 
-    result = await stage4_disease_targets.run(mock_run, mock_config, mock_session)
+    result = await stage4_disease_targets.run(mock_run, config, session)
 
     assert result["disease_target_count"] == 0
     assert result["targets"] == []
 
 
 async def test_stage4_manual_targets_normalized():
-    """Manual disease targets are canonicalized to HGNC and changes are reported."""
+    """Manual disease targets are canonicalized to HGNC and changes reported."""
     import app.services.gene_symbols as gs
     gs._MAP = {
         "TNFA": {"symbol": "TNF", "kind": "alias"},
@@ -154,16 +162,16 @@ async def test_stage4_manual_targets_normalized():
         "_disease_input_mode": "manual_targets",
         "_injected_disease_targets": ["TNFA", "TP53", "ZZZ9"],
     }
-    mock_config = PipelineConfig()
-    mock_session = AsyncMock()
+    config = PipelineConfig()
+    session = AsyncMock()
 
-    result = await stage4_disease_targets.run(mock_run, mock_config, mock_session)
+    result = await stage4_disease_targets.run(mock_run, config, session)
 
     symbols = result["disease_gene_symbols"]
-    assert "TNF" in symbols          # alias canonicalized
+    assert "TNF" in symbols
     assert "TP53" in symbols
     assert "TNFA" not in symbols
     assert {"from": "TNFA", "to": "TNF"} in result["normalization"]["changed"]
     assert "ZZZ9" in result["normalization"]["unrecognized"]
-    assert "ZZZ9" in symbols          # unknown kept, not dropped
+    assert "ZZZ9" in symbols
     gs._MAP = None

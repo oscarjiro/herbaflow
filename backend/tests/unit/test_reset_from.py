@@ -63,11 +63,11 @@ class TestParamMergeLogic:
         assert result["adme"]["max_mw"] == 500.0  # unchanged
 
     def test_internal_keys_preserved_on_deep_merge(self):
-        existing = {"_plant_ids": ["a", "b"], "_disease_ids": ["c"], "adme": {"max_mw": 500.0}}
+        existing = {"_plant_ids": ["a", "b"], "_disease_id": "c", "adme": {"max_mw": 500.0}}
         overrides = {"adme": {"max_mw": 600.0}}
         result = _merge_params(existing, overrides)
         assert result["_plant_ids"] == ["a", "b"]
-        assert result["_disease_ids"] == ["c"]
+        assert result["_disease_id"] == "c"
         assert result["adme"]["max_mw"] == 600.0
 
     def test_empty_overrides_no_change(self):
