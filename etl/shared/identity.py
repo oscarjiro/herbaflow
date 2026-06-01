@@ -117,3 +117,29 @@ def disease_canonical_key(ontology_source: object, ontology_id: object, slug_sou
         local = re.sub(rf"^{prefix}[:_]", "", oid, flags=re.IGNORECASE)
         return f"{prefix}:{local}"
     return f"disease:{slugify(slug_source)}"
+
+
+# --- Entity ids: uuid5(NS, canonical_key) ---
+
+def plant_id(gbif_usage_key: object, name_slug_source: object = "") -> str:
+    return _v5(PLANT_NS, plant_canonical_key(gbif_usage_key, name_slug_source))
+
+
+def compound_id(candidate: dict) -> str:
+    return _v5(COMPOUND_NS, compound_canonical_key(candidate))
+
+
+def compound_id_from_key(canonical_key: str) -> str:
+    return _v5(COMPOUND_NS, canonical_key)
+
+
+def target_id(uniprot: object = None, ensembl: object = None, gene: object = None) -> str:
+    return _v5(TARGET_NS, target_canonical_key(uniprot, ensembl, gene))
+
+
+def target_id_from_key(canonical_key: str) -> str:
+    return _v5(TARGET_NS, canonical_key)
+
+
+def disease_id(ontology_source: object, ontology_id: object, slug_source: object) -> str:
+    return _v5(DISEASE_NS, disease_canonical_key(ontology_source, ontology_id, slug_source))

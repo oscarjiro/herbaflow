@@ -61,3 +61,11 @@ def test_disease_canonical_key_curie_cascade():
     assert f("Disease Ontology", "DOID_0080208", "masld") == "doid:0080208"
     assert f("MeSH", "D001234", "x") == "mesh:D001234"
     assert f("", "", "Type 2 Diabetes Mellitus") == "disease:type_2_diabetes_mellitus"
+
+
+def test_entity_ids_are_v5_of_canonical_key():
+    assert identity.plant_id("3190652") == identity._v5(identity.PLANT_NS, "gbif:3190652")
+    assert identity.compound_id({"inchi_key": "abc"}) == identity._v5(identity.COMPOUND_NS, "inchikey:ABC")
+    assert identity.target_id(uniprot="P04637") == identity._v5(identity.TARGET_NS, "uniprot:P04637")
+    assert identity.disease_id("Disease Ontology", "DOID_9352", "x") == \
+        identity._v5(identity.DISEASE_NS, "doid:9352")
