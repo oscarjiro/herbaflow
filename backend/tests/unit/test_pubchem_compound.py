@@ -271,3 +271,99 @@ def test_compute_adme_failing_lipinski():
     result = compute_adme(props)
     assert result["lipinski_pass"] is False
     assert result["adme_pass"] is False
+
+
+# ---------------------------------------------------------------------------
+# Missing ADME properties must be None, never 0.0 / 999 / 99 sentinels
+# ---------------------------------------------------------------------------
+
+def test_compute_adme_missing_mw_is_none_and_fails():
+    """MW absent (other props present) → mw is None and lipinski fails (999 substitution)."""
+    props = {
+        "XLogP": 2.0,
+        "HBondDonorCount": 1,
+        "HBondAcceptorCount": 3,
+        "RotatableBondCount": 4,
+    }
+    result = compute_adme(props)
+    assert result["mw"] is None
+    assert result["insufficient_data"] is False
+    assert result["lipinski_pass"] is False
+    assert result["adme_pass"] is False
+
+
+def test_compute_adme_missing_individual_props_are_none():
+    """Each missing individual property is None — never a 99 sentinel."""
+    props = {"MolecularWeight": 300.0}  # xlogp / hbd / hba / rotatable all absent
+    result = compute_adme(props)
+    assert result["mw"] == 300.0
+    assert result["xlogp"] is None
+    assert result["hbd"] is None
+    assert result["hba"] is None
+    assert result["rotatable_bonds"] is None
+    # Missing props fail their own checks via local sentinels.
+    assert result["lipinski_pass"] is False
+
+
+def test_compute_adme_all_missing_returns_all_none():
+    """All core props missing → insufficient_data and every numeric is None (no 0.0/999/99)."""
+    props = {
+        "MolecularWeight": None,
+        "XLogP": None,
+        "HBondDonorCount": None,
+        "HBondAcceptorCount": None,
+        "RotatableBondCount": None,
+    }
+    result = compute_adme(props)
+    assert result["insufficient_data"] is True
+    assert result["mw"] is None
+    assert result["xlogp"] is None
+    assert result["hbd"] is None
+    assert result["hba"] is None
+    assert result["rotatable_bonds"] is None
+    assert result["adme_pass"] is False
+
+
+def test_compute_adme_unparseable_value_is_none():
+    """An unparseable numeric (e.g. 'n/a') collapses to None, not a sentinel."""
+    props = {
+        "MolecularWeight": "n/a",
+        "XLogP": 2.0,
+        "HBondDonorCount": 1,
+        "HBondAcceptorCount": 3,
+        "RotatableBondCount": 4,
+    }
+    result = compute_adme(props)
+    assert result["mw"] is None
+    assert result["lipinski_pass"] is False  # missing MW fails ≤500 via 999 substitution
+
+
+@pytest.mark.asyncio
+async def test_validate_compound_missing_mw_persists_none():
+    """Regression: PubChem omits MolecularWeight → molecular_weight is None, not 0.0."""
+    props_no_mw = {
+        "PropertyTable": {
+            "Properties": [
+                {
+                    "CID": _ASPIRIN_CID,
+                    "IUPACName": "2-acetoxybenzoic acid",
+                    "MolecularFormula": "C9H8O4",
+                    "InChIKey": _ASPIRIN_INCHIKEY,
+                    # MolecularWeight intentionally absent
+                    "XLogP": 1.2,
+                    "HBondDonorCount": 1,
+                    "HBondAcceptorCount": 4,
+                    "RotatableBondCount": 3,
+                }
+            ]
+        }
+    }
+    mock_client = AsyncMock(spec=httpx.AsyncClient)
+    mock_client.post = AsyncMock(return_value=_make_response(_PUBCHEM_CIDS))
+    mock_client.get = AsyncMock(return_value=_make_response(props_no_mw))
+
+    result = await validate_compound(_ASPIRIN_SMILES, mock_client)
+
+    assert result is not None
+    assert result["molecular_weight"] is None  # NOT 0.0 and NOT 999.0
+    assert result["mw"] is None

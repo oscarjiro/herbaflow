@@ -32,58 +32,51 @@ def _is_inchi(s: str) -> bool:
 def compute_adme(props: dict) -> dict:
     """Compute ADME/Lipinski criteria from PubChem property values.
 
-    PubChem REST API returns numeric values as strings. This function
-    coerces all values to float/int before comparison.
+    PubChem REST returns numeric values as strings. Parseable values are coerced
+    to float/int; any property that is absent or unparseable is returned as
+    ``None`` — a missing measurement is never represented by a placeholder
+    number. The 999/99 Lipinski-fail sentinels are applied only inside the
+    ``lipinski_pass`` boolean and never appear in the returned numeric fields.
 
-    Returns dict with 'insufficient_data: True' when all key properties are None.
-    A compound with no ADME data should NOT automatically pass Lipinski filters.
+    Returns ``insufficient_data: True`` when all of mw/xlogp/hbd/hba are missing;
+    such a compound must NOT auto-pass Lipinski filters.
     """
-    def _float(val, default: float) -> float | None:
+    def _float(val) -> float | None:
         if val is None:
             return None
         try:
             return float(val)
         except (TypeError, ValueError):
-            return default
+            return None
 
-    def _int(val, default: int) -> int | None:
+    def _int(val) -> int | None:
         if val is None:
             return None
         try:
             return int(float(val))
         except (TypeError, ValueError):
-            return default
+            return None
 
-    mw = _float(props.get("MolecularWeight"), 999.0)
-    xlogp = _float(props.get("XLogP"), 99.0)
-    hbd = _int(props.get("HBondDonorCount"), 99)
-    hba = _int(props.get("HBondAcceptorCount"), 99)
-    rotatable = _int(props.get("RotatableBondCount"), 99)
+    mw = _float(props.get("MolecularWeight"))
+    xlogp = _float(props.get("XLogP"))
+    hbd = _int(props.get("HBondDonorCount"))
+    hba = _int(props.get("HBondAcceptorCount"))
+    rotatable = _int(props.get("RotatableBondCount"))
 
-    # If all key ADME properties are None, compound has no data — do not auto-pass
-    key_props = [mw, xlogp, hbd, hba]
-    insufficient_data = all(v is None for v in key_props)
+    # No core data at all → cannot evaluate drug-likeness; must not auto-pass.
+    insufficient_data = all(v is None for v in (mw, xlogp, hbd, hba))
 
     if insufficient_data:
-        return {
-            "mw": None,
-            "xlogp": None,
-            "hbd": None,
-            "hba": None,
-            "rotatable_bonds": rotatable,
-            "lipinski_pass": False,
-            "adme_pass": False,
-            "insufficient_data": True,
-        }
-
-    # Use 999/99 as sentinel defaults for missing individual properties
-    mw = mw if mw is not None else 999.0
-    xlogp = xlogp if xlogp is not None else 99.0
-    hbd = hbd if hbd is not None else 99
-    hba = hba if hba is not None else 99
-    rotatable = rotatable if rotatable is not None else 99
-
-    lipinski_pass = mw <= 500 and xlogp <= 5 and hbd <= 5 and hba <= 10
+        lipinski_pass = False
+    else:
+        # A missing individual property fails its own check. The 999/99 sentinels
+        # stay local to this boolean and never escape as stored numeric values.
+        lipinski_pass = (
+            (mw if mw is not None else 999) <= 500
+            and (xlogp if xlogp is not None else 99) <= 5
+            and (hbd if hbd is not None else 99) <= 5
+            and (hba if hba is not None else 99) <= 10
+        )
 
     return {
         "mw": mw,
@@ -93,7 +86,7 @@ def compute_adme(props: dict) -> dict:
         "rotatable_bonds": rotatable,
         "lipinski_pass": lipinski_pass,
         "adme_pass": lipinski_pass,
-        "insufficient_data": False,
+        "insufficient_data": insufficient_data,
     }
 
 
@@ -226,7 +219,6 @@ async def validate_compound(
 
     compound_id = make_compound_id(inchikey)
     adme = compute_adme(props)
-    molecular_weight = adme["mw"] if adme["mw"] is not None else 0.0
 
     return {
         "compound_id": compound_id,
@@ -235,7 +227,7 @@ async def validate_compound(
         "inchikey": inchikey,
         "iupac_name": iupac_name,
         "molecular_formula": molecular_formula,
-        "molecular_weight": molecular_weight,
+        "molecular_weight": adme["mw"],
         "canonical_name": iupac_name or structure,
         "plant_ids": [],
         # ADME fields (stage2-compatible keys)
