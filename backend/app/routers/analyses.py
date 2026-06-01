@@ -32,6 +32,7 @@ from app.models.target import Target, CompoundTarget
 from app.repositories import analysis_repo
 from analysis.pipeline import run_stage
 from analysis.stages.stage3_targets import _make_target_id, _make_ct_id
+from app.services.canonicalize import make_target_id, target_canonical_key
 from integrations.uniprot import validate_human_target
 from integrations._retry import ServiceUnavailableError
 
@@ -58,7 +59,7 @@ async def create_analysis(
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
 ):
-    from analysis.pipeline import start_pipeline  # imported here; pipeline.py created in Task 11
+    from analysis.pipeline import start_pipeline  # imported here to avoid a circular import at module load
     # plant_ids is intentionally allowed to be empty here: manual_compounds and
     # manual_targets modes send an empty list because stage 1 is skipped.
     # _input_mode is set later by inject-compounds / inject-targets endpoints,
@@ -596,7 +597,7 @@ async def import_targets(
 
     try:
         for stp_t in body.targets:
-            target_id = _make_target_id(stp_t.uniprot_id, stp_t.gene_symbol)
+            target_id = make_target_id(stp_t.uniprot_id)
 
             # Upsert Target row
             existing_target = (await session.exec(
@@ -605,7 +606,7 @@ async def import_targets(
             if existing_target is None:
                 session.add(Target(
                     target_id=target_id,
-                    canonical_key=f"uniprot:{stp_t.uniprot_id}",
+                    canonical_key=target_canonical_key(stp_t.uniprot_id),
                     gene_symbol=stp_t.gene_symbol.upper(),
                     uniprot_accession=stp_t.uniprot_id,
                     organism_tax_id=9606,
