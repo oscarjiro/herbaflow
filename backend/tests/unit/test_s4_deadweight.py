@@ -32,3 +32,18 @@ def test_evidence_type_removed():
     assert "evidence_type" not in PlantCompound.model_fields
     assert "evidence_type" not in CompoundTarget.model_fields
     assert "prediction_method" in CompoundTarget.model_fields  # kept
+
+
+from app.models.plant import Plant
+from app.models.disease import Disease
+from app.models.compound import Compound
+from app.models.target import Target, DiseaseTarget
+
+
+def test_confidence_removed_everywhere():
+    for m in (Plant, Disease, Compound, PlantCompound, Target, CompoundTarget, DiseaseTarget):
+        assert "confidence" not in m.model_fields, f"{m.__name__}.confidence must be dropped"
+    # meaningful score columns survive
+    assert "score" in CompoundTarget.model_fields
+    assert "score" in DiseaseTarget.model_fields
+    assert "association_type" in DiseaseTarget.model_fields

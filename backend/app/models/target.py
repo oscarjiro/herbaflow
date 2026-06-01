@@ -19,7 +19,6 @@ class Target(SQLModel, table=True):
     source_url: Optional[str] = None
     source_batch_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     retrieved_at: Optional[datetime] = None
-    confidence: Optional[float] = None
 
 
 class CompoundTarget(SQLModel, table=True):
@@ -31,7 +30,6 @@ class CompoundTarget(SQLModel, table=True):
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     prediction_method: Optional[str] = None
     score: Optional[float] = None
-    confidence: Optional[float] = None
     pchembl_value: Optional[float] = None
     retrieved_at: Optional[datetime] = None
 
@@ -45,7 +43,6 @@ class DiseaseTarget(SQLModel, table=True):
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     association_type: Optional[str] = None
     score: Optional[float] = None
-    confidence: Optional[float] = None
     retrieved_at: Optional[datetime] = None
 
 
