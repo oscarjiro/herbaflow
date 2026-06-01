@@ -160,20 +160,31 @@ def test_canonical_identity_for_candidate_cas():
 
 from diseases.utils import (
     disease_id,
-    canonical_key as disease_canonical_key,
+    canonical_key as disease_slug_key,
     DISEASE_NS,
+    disease_canonical_key,
 )
 
 
 def test_disease_id_deterministic():
-    assert disease_id("DOID:9352") == disease_id("DOID:9352")
+    assert disease_id("Disease Ontology", "DOID_9352", "x") == disease_id(
+        "Disease Ontology", "DOID_9352", "x"
+    )
 
 def test_disease_id_valid_uuid():
-    uuid.UUID(disease_id("DOID:9352"))
+    uuid.UUID(disease_id("Disease Ontology", "DOID_9352", "x"))
+
+def test_disease_id_is_uuid5_of_curie():
+    assert disease_id("Disease Ontology", "DOID_9352", "x") == str(
+        uuid.uuid5(DISEASE_NS, "doid:9352")
+    )
 
 def test_disease_ns_differs_from_plant_ns():
     assert DISEASE_NS != PLANT_NS
 
-def test_disease_canonical_key_lowercases():
-    key = disease_canonical_key("Type 2 Diabetes Mellitus")
-    assert key == key.lower()
+def test_disease_canonical_key_curie():
+    assert disease_canonical_key("Disease Ontology", "DOID_9352", "x") == "doid:9352"
+    assert disease_canonical_key("", "", "Type 2 Diabetes") == "disease:type_2_diabetes"
+
+def test_disease_slug_key_lowercases():
+    assert disease_slug_key("Type 2 Diabetes!") == "type_2_diabetes"

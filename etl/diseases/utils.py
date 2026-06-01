@@ -14,24 +14,27 @@ from __future__ import annotations
 
 import re
 import sys
-import uuid
 from pathlib import Path
 from typing import Sequence
 
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, stable_id
+from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso
+from shared.identity import (
+    DISEASE_NS,
+    DISEASE_ALIAS_NS,
+    disease_canonical_key,
+    disease_id,
+    disease_alias_id,
+    slugify,
+    ALIAS_PRIORITY,
+    pick_alias,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DISEASES_DIR = PROJECT_ROOT / "diseases"
 SETTINGS_PATH = DISEASES_DIR / "settings.yml"
-
-DISEASE_NS: uuid.UUID = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.diseases")
-
-
-def disease_id(ontology_id: str) -> str:
-    return stable_id(DISEASE_NS, str(ontology_id))
 
 
 _MISSING_STRINGS = {

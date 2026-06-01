@@ -43,7 +43,6 @@ import csv
 import json
 import re
 import sys
-import uuid
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -58,6 +57,10 @@ from diseases.utils import (
     read_csv,
     safe_str,
     write_csv,
+    disease_canonical_key,
+    disease_id as make_disease_id,
+    disease_alias_id,
+    ALIAS_PRIORITY,
 )
 
 DEFAULT_SETTINGS_PATH = ETL_ROOT / "diseases" / "settings.yml"
@@ -156,17 +159,6 @@ TARGET_TEMPLATE_COLUMNS = [
     "batch_id",
     "created_at",
 ]
-
-ALIAS_PRIORITY = {
-    "canonical_name": 100,
-    "ontology_synonym": 90,
-    "ontology_label": 85,
-    "user_alias": 70,
-    "normalized_alias": 60,
-    "seed_name": 50,
-    "raw_name": 40,
-}
-
 
 def _resolve_path(base_dir: Path, raw_value: str, default_value: str) -> Path:
     """Resolve a configured path relative to the project root."""
@@ -514,29 +506,6 @@ def _choose_canonical_name(row: pd.Series, confident: bool) -> tuple[str, str]:
     return seed_name or label, "seed_disease_name"
 
 
-def _build_disease_id(namespace: uuid.UUID, disease_key: str) -> str:
-    """Generate a deterministic disease ID."""
-    return str(uuid.uuid5(namespace, f"disease::{disease_key}"))
-
-
-def _build_alias_id(
-    namespace: uuid.UUID, disease_key: str, alias_key: str, alias_type: str
-) -> str:
-    """Generate a deterministic alias ID."""
-    return str(
-        uuid.uuid5(namespace, f"alias::{disease_key}::{alias_key}::{alias_type}")
-    )
-
-
-def _build_alias_map_id(
-    namespace: uuid.UUID, disease_key: str, alias_key: str, alias_type: str
-) -> str:
-    """Generate a deterministic alias map ID."""
-    return str(
-        uuid.uuid5(namespace, f"alias_map::{disease_key}::{alias_key}::{alias_type}")
-    )
-
-
 def _merge_alias_candidate(
     bucket: dict[str, dict[str, Any]],
     *,
@@ -553,7 +522,6 @@ def _merge_alias_candidate(
     confidence: float,
     source_reference_clean: str,
     batch_id: str,
-    alias_namespace: uuid.UUID,
 ) -> None:
     """Insert or update an alias candidate using a conservative priority rule."""
     alias_key = canonical_key(alias_name)
@@ -562,9 +530,7 @@ def _merge_alias_candidate(
 
     current = bucket.get(alias_key)
     candidate = {
-        "alias_id": _build_alias_id(
-            alias_namespace, disease_key, alias_key, alias_type
-        ),
+        "alias_id": disease_alias_id(disease_id, alias_key),
         "alias_key": alias_key,
         "alias_name": alias_name,
         "disease_id": disease_id,
@@ -631,16 +597,6 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
     if "canonical_key" not in df.columns:
         df["canonical_key"] = df["disease_key"]
 
-    disease_namespace = uuid.uuid5(
-        uuid.NAMESPACE_URL, f"{settings.get('module_name', 'disease_etl')}::disease"
-    )
-    alias_namespace = uuid.uuid5(
-        uuid.NAMESPACE_URL, f"{settings.get('module_name', 'disease_etl')}::alias"
-    )
-    alias_map_namespace = uuid.uuid5(
-        uuid.NAMESPACE_URL, f"{settings.get('module_name', 'disease_etl')}::alias_map"
-    )
-
     diseases: list[dict[str, Any]] = []
     aliases: list[dict[str, Any]] = []
     alias_map_rows: list[dict[str, Any]] = []
@@ -671,7 +627,10 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
         seed_name_clean = _detect_seed_name_clean(rep)
         ontology_synonyms = _detect_ontology_synonyms(rep)
 
-        disease_id = _build_disease_id(disease_namespace, disease_key)
+        ontology_source = safe_str(rep.get("ontology_source", ""))
+        ontology_id = safe_str(rep.get("ontology_id", ""))
+        canonical_key_value = disease_canonical_key(ontology_source, ontology_id, disease_key)
+        disease_id = make_disease_id(ontology_source, ontology_id, disease_key)
         source_id = (
             safe_str(rep.get("source_id", ""))
             or safe_str(rep.get("seed_id", ""))
@@ -701,15 +660,15 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
         disease_row = {
             "disease_id": disease_id,
             "disease_key": disease_key,
-            "canonical_key": disease_key,
+            "canonical_key": canonical_key_value,
             "disease_name": _clean_name_text(disease_name),
             "disease_name_clean": _clean_name_text(disease_name),
             "canonical_name_source": canonical_name_source,
             "seed_disease_name": seed_name,
             "seed_disease_name_clean": seed_name_clean,
             "standardized_name": ontology_label,
-            "ontology_id": safe_str(rep.get("ontology_id", "")),
-            "ontology_source": safe_str(rep.get("ontology_source", "")),
+            "ontology_id": ontology_id,
+            "ontology_source": ontology_source,
             "ontology_label": ontology_label,
             "ontology_description": _clean_reference_text(
                 rep.get("ontology_description", "")
@@ -749,7 +708,6 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
                 confidence=confidence,
                 source_reference_clean=source_reference_clean,
                 batch_id=batch_id,
-                alias_namespace=alias_namespace,
             )
 
         for _, row in group.iterrows():
@@ -805,7 +763,6 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
                     confidence=row_confidence,
                     source_reference_clean=row_source_reference_clean,
                     batch_id=row_batch_id,
-                    alias_namespace=alias_namespace,
                 )
 
             if (
@@ -828,7 +785,6 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
                     confidence=row_confidence,
                     source_reference_clean=row_source_reference_clean,
                     batch_id=row_batch_id,
-                    alias_namespace=alias_namespace,
                 )
 
         ordered_aliases = sorted(
@@ -847,12 +803,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
         if canonical_alias_name and canonical_alias_key:
             alias_map_rows.append(
                 {
-                    "alias_map_id": _build_alias_map_id(
-                        alias_map_namespace,
-                        disease_key,
-                        canonical_alias_key,
-                        "canonical_name",
-                    ),
+                    "alias_map_id": disease_alias_id(disease_id, canonical_alias_key),
                     "alias": canonical_alias_name,
                     "alias_key": canonical_alias_key,
                     "disease_key": disease_key,
@@ -879,9 +830,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
 
             alias_map_rows.append(
                 {
-                    "alias_map_id": _build_alias_map_id(
-                        alias_map_namespace, disease_key, alias_key, alias_type
-                    ),
+                    "alias_map_id": disease_alias_id(disease_id, alias_key),
                     "alias": alias_name,
                     "alias_key": alias_key,
                     "disease_key": disease_key,
