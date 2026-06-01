@@ -23,14 +23,14 @@ from disease_targets.utils import read_csv, validate_required_columns
 
 TARGETS_REQUIRED = [
     "target_id", "canonical_key", "gene_symbol", "protein_name",
-    "uniprot_accession", "organism_tax_id", "source_id", "source_batch_id", "retrieved_at",
+    "uniprot_accession", "organism_tax_id", "source_name", "source_batch_id", "retrieved_at",
 ]
 ALIASES_REQUIRED = [
     "target_alias_id", "target_id", "alias_name", "alias_key", "alias_type",
-    "source_id", "source_batch_id", "retrieved_at",
+    "source_name", "source_batch_id", "retrieved_at",
 ]
 DT_REQUIRED = [
-    "disease_target_id", "disease_id", "target_id", "source_id",
+    "disease_target_id", "disease_id", "target_id", "source_name",
     "association_type", "score", "confidence", "retrieved_at",
 ]
 

@@ -39,16 +39,16 @@ def _write_minimal_canonical(canonical_dir: Path, diseases_csv: Path, score: str
         "target_id": "t1", "canonical_key": "uniprot:P31749",
         "gene_symbol": "AKT1", "protein_name": "RAC-alpha",
         "uniprot_accession": "P31749", "organism_tax_id": "9606",
-        "source_id": "s1", "source_batch_id": "b1", "retrieved_at": "2026-01-01",
+        "source_name": "s1", "source_batch_id": "b1", "retrieved_at": "2026-01-01",
     }])
     aliases = pd.DataFrame([{
         "target_alias_id": "ta1", "target_id": "t1", "alias_name": "AKT1",
         "alias_key": "akt1", "alias_type": "symbol",
-        "source_id": "s1", "source_batch_id": "b1", "retrieved_at": "2026-01-01",
+        "source_name": "s1", "source_batch_id": "b1", "retrieved_at": "2026-01-01",
     }])
     dts = pd.DataFrame([{
         "disease_target_id": "dt1", "disease_id": "d1", "target_id": "t1",
-        "source_id": "s1", "association_type": "ot_overall", "score": score,
+        "source_name": "s1", "association_type": "ot_overall", "score": score,
         "confidence": "0.9", "retrieved_at": "2026-01-01",
     }])
     diseases = pd.DataFrame([{"disease_id": "d1", "disease_name": "diabetes"}])
