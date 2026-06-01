@@ -67,14 +67,14 @@ async def create_analysis(
     parameters = {
         **body.parameters,
         "_plant_ids": [str(pid) for pid in body.plant_ids],
-        "_disease_ids": [str(did) for did in body.disease_ids],
+        "_disease_id": str(body.disease_id) if body.disease_id else None,
     }
     run = await analysis_repo.create_run(
         session, body.name, body.mode, parameters,
-        disease_id=body.disease_ids[0] if body.disease_ids else None,
+        disease_id=body.disease_id,
     )
     background_tasks.add_task(
-        start_pipeline, run.analysis_id, body.plant_ids, body.disease_ids, async_session_factory
+        start_pipeline, run.analysis_id, body.plant_ids, body.disease_id, async_session_factory
     )
     return AnalysisStatusResponse(
         analysis_id=run.analysis_id,
@@ -213,9 +213,9 @@ async def reset_from_stage(
 
     if stage == 1:
         plant_ids = (run.parameters or {}).get("_plant_ids", [])
-        disease_ids = (run.parameters or {}).get("_disease_ids", [])
+        disease_id = (run.parameters or {}).get("_disease_id")
         background_tasks.add_task(
-            start_pipeline, run.analysis_id, plant_ids, disease_ids, async_session_factory
+            start_pipeline, run.analysis_id, plant_ids, disease_id, async_session_factory
         )
     elif body and body.rerun:
         background_tasks.add_task(run_stage, analysis_id, stage, async_session_factory)
