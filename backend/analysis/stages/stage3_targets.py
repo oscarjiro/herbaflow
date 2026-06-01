@@ -17,34 +17,22 @@ from integrations.pubchem_bioassay import get_targets_by_inchikey, PubChemTarget
 from app.services.canonicalize import (
     TARGET_NS,
     make_target_id as _core_make_target_id,
+    make_compound_target_id,
     target_canonical_key,
 )
 from app.services.target_persist import persist_canonical_target
 
 # TARGET_NS is imported from the canonicalization core above (re-exported for
 # existing importers: `from analysis.stages.stage3_targets import TARGET_NS`).
-# Derivation: uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.compound_targets")
-# ETL does not produce compound_targets; this namespace is backend-only for
-# the ChEMBL-derived compound–target join table.
-COMPOUND_TARGET_NS: uuid.UUID = uuid.UUID("59a665ef-1743-5e45-98c2-128fe7e345a9")
 
 
 def _make_target_id(uniprot_accession: str | None, gene_symbol: str) -> str:
     """Return a bare UUID v5 for a target.
 
-    Delegates to the canonicalization core when a UniProt accession is available
-    so isoform suffixes are folded (e.g. 'P04637-2' → 'P04637') and ids stay
-    byte-identical to the ETL pipeline. Falls back to 'gene:{symbol}' for
-    ChEMBL-only targets without a UniProt ID.
+    Delegates to the canonicalization core: a UniProt accession (isoform-folded)
+    wins, else falls back to 'gene:{symbol}'. Byte-identical to the ETL pipeline.
     """
-    if uniprot_accession:
-        return _core_make_target_id(uniprot_accession)
-    return str(uuid.uuid5(TARGET_NS, f"gene:{gene_symbol.upper()}"))
-
-
-def _make_ct_id(compound_id: str, target_id: str) -> str:
-    """Return a bare UUID v5 for a compound–target association."""
-    return str(uuid.uuid5(COMPOUND_TARGET_NS, f"{compound_id}:{target_id}"))
+    return _core_make_target_id(accession=uniprot_accession, gene=gene_symbol)
 
 
 class _ManualCompoundProxy:
@@ -214,7 +202,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         for cid in set(compound_id_list):
             if cid in (pubchem_ct.get(gene) or set()):
                 continue  # This compound+target came from PubChem, not ChEMBL
-            ct_id = _make_ct_id(cid, target_id)
+            ct_id = make_compound_target_id(cid, target_id)
             existing = await session.exec(
                 select(CompoundTarget).where(CompoundTarget.compound_target_id == ct_id)
             )
@@ -234,7 +222,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         t = pubchem_target_info[gene]
         target_id = _make_target_id(t.uniprot_accession, gene)
         for cid in cid_set:
-            ct_id = _make_ct_id(cid, target_id)
+            ct_id = make_compound_target_id(cid, target_id)
             existing = await session.exec(
                 select(CompoundTarget).where(CompoundTarget.compound_target_id == ct_id)
             )

@@ -31,8 +31,8 @@ from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsRespon
 from app.models.target import Target, CompoundTarget
 from app.repositories import analysis_repo
 from analysis.pipeline import run_stage
-from analysis.stages.stage3_targets import _make_target_id, _make_ct_id
-from app.services.canonicalize import make_target_id, target_canonical_key
+from analysis.stages.stage3_targets import _make_target_id
+from app.services.canonicalize import make_target_id, make_compound_target_id, target_canonical_key
 from app.services.target_persist import persist_canonical_target
 from integrations.uniprot import validate_human_target
 from integrations._retry import ServiceUnavailableError
@@ -611,7 +611,7 @@ async def import_targets(
             )], session)
 
             # Upsert CompoundTarget row
-            ct_id = _make_ct_id(body.compound_id, target_id)
+            ct_id = make_compound_target_id(body.compound_id, target_id)
             existing_ct = (await session.exec(
                 select(CompoundTarget).where(CompoundTarget.compound_target_id == ct_id)
             )).one_or_none()
