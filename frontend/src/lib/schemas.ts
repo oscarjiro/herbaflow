@@ -134,11 +134,11 @@ export type AdvancedParamsOutput = z.output<typeof advancedParamsSchema>
 // Disease ID field — conditionally required based on disease input mode
 // ---------------------------------------------------------------------------
 
-/** Require disease_ids when diseaseInputMode is 'disease'; allow empty for 'manual_targets'. */
-function diseaseIdsField(diseaseInputMode: 'disease' | 'manual_targets') {
+/** Require disease_id when diseaseInputMode is 'disease'; allow absent for 'manual_targets'. */
+function diseaseIdField(diseaseInputMode: 'disease' | 'manual_targets') {
   return diseaseInputMode === 'manual_targets'
-    ? z.array(z.string())
-    : z.array(z.string()).min(1, 'Select at least one disease')
+    ? z.string().nullish()
+    : z.string().min(1, 'Select a disease')
 }
 
 /** Require disease_targets when diseaseInputMode is 'manual_targets'. */
@@ -159,7 +159,7 @@ export function makeSetupFormStandardSchema(diseaseInputMode: 'disease' | 'manua
       .array(z.string())
       .min(1, 'Select at least one plant')
       .max(HARD_CAP_PLANTS, `Maximum ${HARD_CAP_PLANTS} plants per analysis`),
-    disease_ids: diseaseIdsField(diseaseInputMode),
+    disease_id: diseaseIdField(diseaseInputMode),
     disease_targets: diseaseTargetsField(diseaseInputMode),
     parameters: advancedParamsSchema,
   })
@@ -175,7 +175,7 @@ export const setupFormStandardSchema = makeSetupFormStandardSchema('disease')
 export function makeSetupFormManualCompoundsSchema(diseaseInputMode: 'disease' | 'manual_targets' = 'disease') {
   return z.object({
     mode: analysisModeSchema,
-    disease_ids: diseaseIdsField(diseaseInputMode),
+    disease_id: diseaseIdField(diseaseInputMode),
     disease_targets: diseaseTargetsField(diseaseInputMode),
     compounds: z
       .array(z.string().min(1))
@@ -195,7 +195,7 @@ export const setupFormManualCompoundsSchema = makeSetupFormManualCompoundsSchema
 export function makeSetupFormManualTargetsSchema(diseaseInputMode: 'disease' | 'manual_targets' = 'disease') {
   return z.object({
     mode: analysisModeSchema,
-    disease_ids: diseaseIdsField(diseaseInputMode),
+    disease_id: diseaseIdField(diseaseInputMode),
     disease_targets: diseaseTargetsField(diseaseInputMode),
     targets: z
       .array(z.string().min(1))
@@ -235,7 +235,7 @@ export const injectTargetsSchema = z.object({
 export type SetupFormErrors = Partial<{
   mode: string
   plant_ids: string
-  disease_ids: string
+  disease_id: string
   disease_targets: string
   compounds: string
   targets: string
