@@ -101,7 +101,7 @@ export default function SetupPage() {
   // Form state
   const [name] = useState(() => generateDefaultName())
   const [plantIds, setPlantIds] = useState<string[]>([])
-  const [diseaseIds, setDiseaseIds] = useState<string[]>([])
+  const [diseaseId, setDiseaseId] = useState<string | null>(null)
   const [mode, setMode] = useState<'guided' | 'auto'>('guided')
   const [params, setParams] = useState<AdvancedParams>(DEFAULT_PARAMS)
   const [inputMode, setInputMode] = useState<InputMode>('standard')
@@ -154,7 +154,7 @@ export default function SetupPage() {
     const formData: Record<string, unknown> = {
       name,
       mode,
-      disease_ids: diseaseInputMode === 'manual_targets' ? [] : diseaseIds,
+      disease_id: diseaseInputMode === 'manual_targets' ? null : diseaseId,
       parameters: params,
       ...(isManualCompounds
         ? { compounds: parsedCompounds }
@@ -190,7 +190,7 @@ export default function SetupPage() {
         name,
         mode,
         plant_ids: isManual ? [] : plantIds,
-        disease_ids: diseaseInputMode === 'manual_targets' ? [] : diseaseIds,
+        disease_id: diseaseInputMode === 'manual_targets' ? null : diseaseId,
         parameters: baseParams,
       },
       compounds: isManualCompounds ? parsedCompounds : undefined,
@@ -323,7 +323,7 @@ export default function SetupPage() {
             className={`flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none ${
               diseaseInputMode === 'disease' ? 'bg-hf-accent text-white' : 'text-hf-fg2 hover:text-hf-fg1'
             }`}
-            onClick={() => { setDiseaseInputMode('disease'); setFormErrors((prev) => ({ ...prev, disease_ids: undefined, disease_targets: undefined })) }}
+            onClick={() => { setDiseaseInputMode('disease'); setFormErrors((prev) => ({ ...prev, disease_id: undefined, disease_targets: undefined })) }}
             aria-pressed={diseaseInputMode === 'disease'}
           >
             Select Disease
@@ -333,7 +333,7 @@ export default function SetupPage() {
             className={`flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none ${
               diseaseInputMode === 'manual_targets' ? 'bg-hf-accent text-white' : 'text-hf-fg2 hover:text-hf-fg1'
             }`}
-            onClick={() => { setDiseaseInputMode('manual_targets'); setFormErrors((prev) => ({ ...prev, disease_ids: undefined, disease_targets: undefined })) }}
+            onClick={() => { setDiseaseInputMode('manual_targets'); setFormErrors((prev) => ({ ...prev, disease_id: undefined, disease_targets: undefined })) }}
             aria-pressed={diseaseInputMode === 'manual_targets'}
             data-testid="disease-input-mode-manual"
           >
@@ -343,9 +343,9 @@ export default function SetupPage() {
 
         {diseaseInputMode === 'disease' ? (
           <>
-            <DiseaseSelector value={diseaseIds} onChange={(v) => { setDiseaseIds(v); setFormErrors((prev) => ({ ...prev, disease_ids: undefined })) }} />
-            {formErrors.disease_ids && (
-              <p className="text-xs text-hf-danger mt-1">{formErrors.disease_ids}</p>
+            <DiseaseSelector value={diseaseId} onChange={(v) => { setDiseaseId(v); setFormErrors((prev) => ({ ...prev, disease_id: undefined })) }} />
+            {formErrors.disease_id && (
+              <p className="text-xs text-hf-danger mt-1">{formErrors.disease_id}</p>
             )}
           </>
         ) : (
