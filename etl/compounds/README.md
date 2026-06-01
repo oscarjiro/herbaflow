@@ -345,14 +345,10 @@ Matches the `plant_compounds` database table. One row per canonical plant-compou
 
 | Column                   | Type     | Description                                                          |
 | ------------------------ | -------- | -------------------------------------------------------------------- |
-| `plant_compound_id`      | UUID v5  | Deterministic from `(plant_id, compound_id, source_compound_raw_id)` |
+| `plant_compound_id`      | UUID v5  | Deterministic from `(plant_id, compound_id)` pair grain              |
 | `plant_id`               | UUID v5  | FK → plants                                                          |
 | `compound_id`            | UUID v5  | FK → compounds                                                       |
-| `source_plant_raw_id`    | text     | Original KNApSAcK plant identifier                                   |
-| `source_compound_raw_id` | text     | Original KNApSAcK compound identifier (`c_id`)                       |
 | `source_name`            | text     | `KNApSAcK`                                                           |
-| `evidence_type`          | text     | `metabolite_occurrence`                                              |
-| `confidence`             | float    | Compound match confidence propagated from `05_build_canonical`       |
 | `retrieved_at`           | ISO 8601 | UTC timestamp                                                        |
 
 ### `compound_candidate_map.csv` (12,593 rows)

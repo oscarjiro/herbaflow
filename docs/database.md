@@ -37,7 +37,6 @@ IDs are deterministic: same input always produces the same UUID. At the bundled 
 | `source_name`     | External system name (e.g. `KNApSAcK World`), never an entity name |
 | `retrieved_at`    | When the record was fetched from the source                        |
 | `source_batch_id` | Which ETL run produced it                                          |
-| `confidence`      | Numeric match quality (0–1 float)                                  |
 ---
 
 ## 1. Provenance
@@ -49,7 +48,7 @@ One row per external data source.
 | Column        | Type | Notes                                                                     |
 | ------------- | ---- | ------------------------------------------------------------------------- |
 | `source_id`   | PK   |                                                                           |
-| `source_name` | text | e.g. `KNApSAcK World`, `GBIF`, `PubChem`, `UniProt`, `STRING`, `DisGeNET` |
+| `source_name` | text | e.g. `KNApSAcK World`, `GBIF`, `PubChem`, `UniProt`, `STRING` |
 | `source_type` | enum | `scrape` / `api` / `download` / `manual`                                  |
 | `base_url`    | text |                                                                           |
 | `notes`       | text |                                                                           |
@@ -95,7 +94,6 @@ One canonical row per accepted plant taxon.
 | `source_url`                | text                  |                                           |
 | `source_batch_id`           | FK → `import_batches` |                                           |
 | `retrieved_at`              | timestamptz           |                                           |
-| `confidence`                | float                 |                                           |
 
 ### `plant_aliases`
 
@@ -149,7 +147,6 @@ One canonical row per chemical entity.
 | `source_url`        | text                  |        |
 | `source_batch_id`   | FK → `import_batches` |        |
 | `retrieved_at`      | timestamptz           |        |
-| `confidence`        | float                 |        |
 
 ### `compound_aliases`
 
@@ -176,11 +173,7 @@ m:m join. Answers: which compounds were found in which plants?
 | `plant_compound_id`      | PK                                 |                       |
 | `plant_id`               | FK → `plants`                      |                       |
 | `compound_id`            | FK → `compounds`                   |                       |
-| `source_plant_raw_id`    | text                               | optional traceability |
-| `source_compound_raw_id` | text                               | optional              |
 | `source_id`              | FK → `source_systems`              |                       |
-| `evidence_type`          | text                               |                       |
-| `confidence`             | float                              |                       |
 | `retrieved_at`           | timestamptz                        |                       |
 
 Unique constraint: `(plant_id, compound_id)` — pair grain; `source_id` is an attribute, not part of the key.
@@ -205,7 +198,6 @@ Canonical protein/gene entities.
 | `source_url`        | text                  |        |
 | `source_batch_id`   | FK → `import_batches` |        |
 | `retrieved_at`      | timestamptz           |        |
-| `confidence`        | float                 |        |
 
 Indexes: `idx_targets_uniprot_accession` on `uniprot_accession`; `idx_targets_gene_symbol` on `gene_symbol`.
 
@@ -235,10 +227,8 @@ m:m join. Answers: which targets are linked to which compounds?
 | `compound_id`        | FK → `compounds`      |       |
 | `target_id`          | FK → `targets`        |       |
 | `source_id`          | FK → `source_systems` |       |
-| `prediction_method`  | text                  |       |
-| `evidence_type`      | text                  |       |
+| `prediction_method`  | text                  | sole compound-target link provenance (chembl_bioactivity / pubchem_bioassay / stp_import) |
 | `score`              | float                 |       |
-| `confidence`         | float                 |       |
 | `pchembl_value`      | float                 | −log₁₀(IC50 in molar) from ChEMBL; ≥ 5.0 means IC50 ≤ 10µM (active binder); null for STITCH-sourced or unassayed interactions |
 | `retrieved_at`       | timestamptz           |       |
 
@@ -255,13 +245,12 @@ Unique constraint: `(compound_id, target_id)` — pair grain; `source_id` is an 
 | `disease_id`      | PK                    |                                         |
 | `canonical_key`   | text                  | unique                                  |
 | `disease_name`    | text                  |                                         |
-| `ontology_id`     | text                  | MeSH / DOID / UMLS / OMIM / DisGeNET ID |
+| `ontology_id`     | text                  | MeSH / DOID / UMLS / OMIM ID |
 | `ontology_source` | text                  |                                         |
 | `source_id`       | FK → `source_systems` |                                         |
 | `source_url`      | text                  |                                         |
 | `source_batch_id` | FK → `import_batches` |                                         |
 | `retrieved_at`    | timestamptz           |                                         |
-| `confidence`      | float                 |                                         |
 
 ### `disease_aliases`
 
@@ -291,7 +280,6 @@ m:m join. Answers: which targets are implicated in which diseases?
 | `source_id`         | FK → `source_systems` |       |
 | `association_type`  | text                  |       |
 | `score`             | float                 |       |
-| `confidence`        | float                 |       |
 | `retrieved_at`      | timestamptz           |       |
 
 Unique constraint: `(disease_id, target_id)` — pair grain; `source_id` is an attribute, not part of the key.
@@ -300,35 +288,7 @@ Index: `idx_disease_targets_score` on `score`.
 
 ---
 
-## 6. PPI / network
-
-### `ppi_edges`
-
-Protein-protein interaction edges. Nodes are in `targets` — no separate `ppi_nodes` table.
-
-| Column               | Type                    | Notes                                                         |
-| -------------------- | ----------------------- | ------------------------------------------------------------- |
-| `ppi_edge_id`        | PK                      |                                                               |
-| `target_a_id`        | FK → `targets`          | always `target_a_id < target_b_id` to prevent duplicate pairs |
-| `target_b_id`        | FK → `targets`          |                                                               |
-| `source_id`          | FK → `source_systems`   |                                                               |
-| `combined_score`     | float                   |                                                               |
-| `experimental_score` | float                   |                                                               |
-| `database_score`     | float                   |                                                               |
-| `textmining_score`   | float                   |                                                               |
-| `coexpression_score` | float                   |                                                               |
-| `neighborhood_score` | float                   |                                                               |
-| `fusion_score`       | float                   |                                                               |
-| `cooccurrence_score` | float                   |                                                               |
-| `retrieved_at`       | timestamptz             |                                                               |
-
-Unique constraint: `(target_a_id, target_b_id, source_id)`
-
-> Always insert pairs in sorted order so A–B and B–A are never stored as separate rows.
-
----
-
-## 7. Analysis runs
+## 6. Analysis runs
 
 ### `analysis_runs`
 
@@ -344,83 +304,13 @@ Unique constraint: `(target_a_id, target_b_id, source_id)`
 | `stage_results`   | jsonb NOT NULL  | per-stage intermediate results `{stage_1: {...}}`; default `{}` |
 | `mode`            | text NOT NULL   | `auto` (end-to-end) or `guided` (pauses for approval per stage); default `auto` |
 | `completed_at`    | timestamptz     |          |
-| `expires_at`      | timestamptz     | null until complete; set to `completed_at + 24h`; GET returns 410 Gone after expiry |
+| `expires_at`      | timestamptz     | null until complete; set to `completed_at + 24h`; GET returns 410 Gone after expiry; an hourly `pg_cron` job `purge-expired-analysis-runs` hard-deletes rows where `expires_at < now()` |
 | `error_message`   | text            |          |
 | `updated_at`      | timestamptz NOT NULL | last write timestamp; default `now()` |
 | `created_at`      | timestamptz     |          |
 | `created_by`      | text            |          |
 
 Index: `idx_analysis_runs_status` on `status`.
-
-### `analysis_run_plants`
-
-Unique: `(analysis_id, plant_id)`
-
-### `analysis_run_compounds`
-
-Unique: `(analysis_id, compound_id)`
-
-### `analysis_run_targets`
-
-Unique: `(analysis_id, target_id)`
-
-### `analysis_run_diseases`
-
-Unique: `(analysis_id, disease_id)`
-
-### `analysis_run_ppi_edges`
-
-Snapshot of network edges used in a run. Optional.
-Unique: `(analysis_id, ppi_edge_id)`
-
----
-
-## 8. Derived outputs
-
-### `target_rankings`
-
-| Column                      | Type                 | Notes |
-| --------------------------- | -------------------- | ----- |
-| `ranking_id`                | PK                   |       |
-| `analysis_id`               | FK → `analysis_runs` |       |
-| `target_id`                 | FK → `targets`       |       |
-| `degree_centrality`         | float                |       |
-| `betweenness_centrality`    | float                |       |
-| `closeness_centrality`      | float                |       |
-| `eigenvector_centrality`    | float                |       |
-| `disease_association_score` | float                |       |
-| `compound_support_score`    | float                |       |
-| `final_score`               | float                |       |
-| `rank_position`             | int                  |       |
-| `created_at`                | timestamptz          |       |
-
-Unique: `(analysis_id, target_id)`
-
-### `pathways`
-
-| Column         | Type | Notes |
-| -------------- | ---- | ----- |
-| `pathway_id`   | PK   |       |
-| `pathway_code` | text |       |
-| `pathway_name` | text |       |
-| `source_name`  | text |       |
-| `source_url`   | text |       |
-
-### `target_pathways`
-
-m:m join between targets and pathways.
-
-| Column              | Type                  | Notes |
-| ------------------- | --------------------- | ----- |
-| `target_pathway_id` | PK                    |       |
-| `target_id`         | FK → `targets`        |       |
-| `pathway_id`        | FK → `pathways`       |       |
-| `source_id`         | FK → `source_systems` |       |
-| `p_value`           | float                 |       |
-| `fdr`               | float                 |       |
-| `confidence`        | float                 |       |
-
-Unique: `(target_id, pathway_id, source_id)`
 
 ---
 
@@ -456,7 +346,5 @@ Phase 4 (diseases)
   disease_targets
 
 Phase 5 (network + analysis)
-  ppi_edges
-  analysis_runs, analysis_run_*
-  target_rankings, pathways, target_pathways
+  analysis_runs
 ```
