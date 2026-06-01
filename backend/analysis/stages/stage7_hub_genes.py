@@ -195,31 +195,4 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     # Per-community centrality: identify hub genes within each Leiden module
     result["community_hubs"] = compute_community_centrality(G, gene_to_community)
 
-    # Write to target_rankings table
-    from uuid import uuid4
-    from datetime import datetime
-    from app.models.analysis import TargetRanking
-    from app.models.target import Target
-    from sqlmodel import select
-
-    for entry in result["ranked"]:
-        gene = entry["gene_symbol"]
-        target_result = await session.exec(select(Target).where(Target.gene_symbol == gene))
-        target = target_result.first()
-        if not target:
-            continue
-        ranking = TargetRanking(
-            ranking_id=uuid4(),
-            analysis_id=run.analysis_id,
-            target_id=target.target_id,
-            degree_centrality=float(entry["degree"]),
-            betweenness_centrality=entry["betweenness"],
-            closeness_centrality=entry["closeness"],
-            eigenvector_centrality=entry["eigenvector"],
-            rank_position=entry["rank"],
-            created_at=datetime.utcnow(),
-        )
-        session.add(ranking)
-
-    await session.commit()
     return result
