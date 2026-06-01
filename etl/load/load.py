@@ -102,7 +102,7 @@ def load_plants(cur, source_map, batch_id, upsert=False):
         "family_name", "taxonomic_status", "rank",
         "gbif_usage_key", "gbif_accepted_usage_key", "gbif_species_key",
         "gbif_genus_key", "gbif_family_key", "gbif_kingdom_key",
-        "source_id", "source_url", "source_batch_id", "retrieved_at", "confidence",
+        "source_id", "source_url", "source_batch_id", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into plants (
@@ -110,7 +110,7 @@ def load_plants(cur, source_map, batch_id, upsert=False):
             family_name, taxonomic_status, rank,
             gbif_usage_key, gbif_accepted_usage_key, gbif_species_key,
             gbif_genus_key, gbif_family_key, gbif_kingdom_key,
-            source_id, source_url, source_batch_id, retrieved_at, confidence
+            source_id, source_url, source_batch_id, retrieved_at
         ) values %s {conflict}
     """
     data = [(
@@ -120,7 +120,7 @@ def load_plants(cur, source_map, batch_id, upsert=False):
         _i(r.get("gbif_species_key")), _i(r.get("gbif_genus_key")),
         _i(r.get("gbif_family_key")), _i(r.get("gbif_kingdom_key")),
         resolve_src(r, source_map), r.get("source_url"), batch_id,
-        _ts(r.get("retrieved_at")), _f(r.get("confidence")),
+        _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
@@ -157,7 +157,7 @@ def load_compounds(cur, source_map, batch_id, upsert=False):
         "tpsa", "logp", "hbond_donors", "hbond_acceptors",
         "rotatable_bonds", "qed_score", "np_likeness_score", "num_ro5_violations",
         "lipinski_source", "is_pains_positive",
-        "source_id", "source_url", "source_batch_id", "retrieved_at", "confidence",
+        "source_id", "source_url", "source_batch_id", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into compounds (
@@ -166,7 +166,7 @@ def load_compounds(cur, source_map, batch_id, upsert=False):
             tpsa, logp, hbond_donors, hbond_acceptors,
             rotatable_bonds, qed_score, np_likeness_score, num_ro5_violations,
             lipinski_source, is_pains_positive,
-            source_id, source_url, source_batch_id, retrieved_at, confidence
+            source_id, source_url, source_batch_id, retrieved_at
         ) values %s {conflict}
     """
     data = [(
@@ -181,7 +181,7 @@ def load_compounds(cur, source_map, batch_id, upsert=False):
         r.get("lipinski_source") or None,
         str(r.get("is_pains_positive", "")).lower() == "true",
         resolve_src(r, source_map), r.get("source_url"), batch_id,
-        _ts(r.get("retrieved_at")), _f(r.get("confidence")),
+        _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
@@ -214,21 +214,17 @@ def load_plant_compounds(cur, source_map, batch_id, upsert=False):
     rows = read_csv(PLANT_COMPOUNDS_CSV)
     conflict = _conflict("plant_compound_id", [
         "plant_id", "compound_id",
-        "source_plant_raw_id", "source_compound_raw_id",
-        "source_id", "evidence_type", "confidence", "retrieved_at",
+        "source_id", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into plant_compounds (
             plant_compound_id, plant_id, compound_id,
-            source_plant_raw_id, source_compound_raw_id,
-            source_id, evidence_type, confidence, retrieved_at
+            source_id, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["plant_compound_id"], r["plant_id"], r["compound_id"],
-        r.get("source_plant_raw_id"), r.get("source_compound_raw_id"),
-        resolve_src(r, source_map), r.get("evidence_type"),
-        _f(r.get("confidence")), _ts(r.get("retrieved_at")),
+        resolve_src(r, source_map), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
@@ -239,19 +235,19 @@ def load_diseases(cur, source_map, batch_id, upsert=False):
     rows = read_csv(DISEASES_CSV)
     conflict = _conflict("disease_id", [
         "canonical_key", "disease_name", "ontology_id", "ontology_source",
-        "source_id", "source_url", "source_batch_id", "retrieved_at", "confidence",
+        "source_id", "source_url", "source_batch_id", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into diseases (
             disease_id, canonical_key, disease_name, ontology_id, ontology_source,
-            source_id, source_url, source_batch_id, retrieved_at, confidence
+            source_id, source_url, source_batch_id, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["disease_id"], r.get("canonical_key"), r.get("disease_name"),
         r.get("ontology_id"), r.get("ontology_source"),
         resolve_src(r, source_map), r.get("source_url"), batch_id,
-        _ts(r.get("retrieved_at")), _f(r.get("confidence")),
+        _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
@@ -285,20 +281,20 @@ def load_targets(cur, source_map, batch_id, upsert=False):
     conflict = _conflict("target_id", [
         "canonical_key", "gene_symbol", "protein_name",
         "uniprot_accession", "organism_tax_id",
-        "source_id", "source_url", "source_batch_id", "retrieved_at", "confidence",
+        "source_id", "source_url", "source_batch_id", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into targets (
             target_id, canonical_key, gene_symbol, protein_name,
             uniprot_accession, organism_tax_id,
-            source_id, source_url, source_batch_id, retrieved_at, confidence
+            source_id, source_url, source_batch_id, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["target_id"], r.get("canonical_key"), r.get("gene_symbol"), r.get("protein_name"),
         r.get("uniprot_accession"), _i(r.get("organism_tax_id")),
         resolve_src(r, source_map), r.get("source_url"), batch_id,
-        _ts(r.get("retrieved_at")), _f(r.get("confidence")),
+        _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
@@ -330,19 +326,17 @@ def load_disease_targets(cur, source_map, batch_id, upsert=False):
     print("Loading disease_targets...", end=" ", flush=True)
     rows = read_csv(DISEASE_TARGETS_CSV)
     conflict = _conflict("disease_target_id", [
-        "disease_id", "target_id",
-        "source_id", "association_type", "score", "confidence", "retrieved_at",
+        "disease_id", "target_id", "source_id", "association_type", "score", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into disease_targets (
-            disease_target_id, disease_id, target_id,
-            source_id, association_type, score, confidence, retrieved_at
+            disease_target_id, disease_id, target_id, source_id, association_type, score, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["disease_target_id"], r["disease_id"], r["target_id"],
         resolve_src(r, source_map), r.get("association_type"),
-        _f(r.get("score")), _f(r.get("confidence")), _ts(r.get("retrieved_at")),
+        _f(r.get("score")), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
