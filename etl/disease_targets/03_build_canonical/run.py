@@ -131,9 +131,17 @@ def build_disease_targets(
 
     df = pd.DataFrame(rows)
     if not df.empty:
-        # Enforce uniqueness on (disease_id, target_id)
+        # Enforce uniqueness on (disease_id, target_id), keeping the highest-score
+        # association so dedup reflects best evidence, not source row order.
+        # score is stored as a string, so sort on a numeric copy then drop it.
         before = len(df)
-        df = df.drop_duplicates(subset=["disease_id", "target_id"], keep="first")
+        df = (
+            df.assign(_score_num=df["score"].astype(float))
+            .sort_values("_score_num", ascending=False, kind="stable")
+            .drop_duplicates(subset=["disease_id", "target_id"], keep="first")
+            .drop(columns="_score_num")
+            .reset_index(drop=True)
+        )
         if len(df) < before:
             pass  # logged in manifest
 
