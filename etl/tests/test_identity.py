@@ -94,3 +94,15 @@ def test_alias_priority_pick_keeps_highest():
     assert keep["alias_type"] == "canonical_name"
     # None current -> candidate
     assert identity.pick_alias(None, {"alias_type": "raw_name"})["alias_type"] == "raw_name"
+
+
+def test_bridge_ids_pair_grain_single_colon_no_source():
+    p = "aaaaaaaa-aaaa-5aaa-8aaa-aaaaaaaaaaaa"
+    c = "bbbbbbbb-bbbb-5bbb-8bbb-bbbbbbbbbbbb"
+    t = "cccccccc-cccc-5ccc-8ccc-cccccccccccc"
+    d = "dddddddd-dddd-5ddd-8ddd-dddddddddddd"
+    assert identity.plant_compound_id(p, c) == identity._v5(identity.PLANT_COMPOUND_NS, f"{p}:{c}")
+    assert identity.compound_target_id(c, t) == identity._v5(identity.COMPOUND_TARGET_NS, f"{c}:{t}")
+    assert identity.disease_target_id(d, t) == identity._v5(identity.DISEASE_TARGET_NS, f"{d}:{t}")
+    # no 'cmppl_' prefix, no source component
+    assert not identity.plant_compound_id(p, c).startswith("cmppl_")

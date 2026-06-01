@@ -186,3 +186,17 @@ def pick_alias(current: dict, candidate: dict) -> dict:
     cur_p = ALIAS_PRIORITY.get(current.get("alias_type"), 0)
     cand_p = ALIAS_PRIORITY.get(candidate.get("alias_type"), 0)
     return candidate if cand_p > cur_p else current
+
+
+# --- Bridges: pair grain; uuid5(NS, "{left_id}:{right_id}"); source NOT in identity ---
+
+def plant_compound_id(plant_id: str, compound_id: str) -> str:
+    return _v5(PLANT_COMPOUND_NS, f"{plant_id}:{compound_id}")
+
+
+def compound_target_id(compound_id: str, target_id: str) -> str:
+    return _v5(COMPOUND_TARGET_NS, f"{compound_id}:{target_id}")
+
+
+def disease_target_id(disease_id: str, target_id: str) -> str:
+    return _v5(DISEASE_TARGET_NS, f"{disease_id}:{target_id}")
