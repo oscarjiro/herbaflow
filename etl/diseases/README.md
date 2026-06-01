@@ -108,14 +108,14 @@ Ontology lookups are cached to `02_map_ontology/out/ontology_cache.csv` after th
 
 1. Groups rows by `disease_key` and picks a representative row per group (highest ontology confidence → best status rank → label availability)
 2. Chooses the canonical `disease_name`: if confidence ≥ threshold (default 0.8) and the mapping status is `matched`, `seed_provided`, `cache`, or `ambiguous`, uses the ontology label as the display name; otherwise falls back to the seed disease name
-3. Generates deterministic `disease_id` via UUID v5: `uuid5(disease_namespace, "disease::{disease_key}")` where `disease_namespace = uuid5(NAMESPACE_URL, "disease_etl::disease")`
+3. Generates deterministic `disease_id` via UUID v5: `uuid5(DISEASE_NS, canonical_key)`, where `canonical_key` is the ontology CURIE (`doid:{id}` preferred, then `mesh:{id}`, falling back to `disease:{slug}`) and `DISEASE_NS = uuid5(NAMESPACE_DNS, "herbaflow.diseases")` — all from `etl/shared/identity.py`
 4. Builds `disease_aliases.csv` by harvesting synonyms from ontology returns, user-provided aliases in the seed, and the seed name itself; deduplicates by alias key with a priority ladder (ontology_synonym > ontology_label > user_alias > seed_name)
 5. Builds `disease_alias_map.csv` as a flat search table: one row per (alias, disease_key) pair, covering primary name + all alias types
 6. Writes a header-only `disease_targets_template.csv` for use by `disease_targets/`
 
 **Output:** `03_build_canonical/out/diseases.csv`, `disease_aliases.csv`, `disease_alias_map.csv`, `disease_targets_template.csv`, `run_manifest.json`
 
-**UUID v5 derivation:** The `disease_id` is seeded from the `disease_key` slug (e.g., `type_2_diabetes_mellitus`), not the ontology ID. This ensures stability even if the ontology mapping is updated: the canonical disease entity retains its primary key as long as its normalized name does not change.
+**UUID v5 derivation:** The `disease_id` is `uuid5(DISEASE_NS, canonical_key)`, where `canonical_key` is the ontology CURIE — `doid:{id}` preferred, then `mesh:{id}`, falling back to `disease:{slug}` when no ontology id is mapped. The `disease_key` slug stays the internal join/grouping key. Identity is shared with the rest of the pipeline via `etl/shared/identity.py`, so the same key always yields the same id.
 
 ---
 
@@ -165,9 +165,9 @@ One row per canonical disease. Matches the `diseases` database table. Current da
 
 | Column                    | Description                                                                                                        |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `disease_id`              | UUID v5 primary key — deterministic from `disease_key` slug                                                        |
+| `disease_id`              | UUID v5 primary key — `uuid5(DISEASE_NS, canonical_key)`                                                        |
 | `disease_key`             | Internal slug key (e.g., `type_2_diabetes_mellitus`); used for all joins                                           |
-| `canonical_key`           | Same as `disease_key`; retained for schema symmetry with other canonical tables                                    |
+| `canonical_key`           | Ontology CURIE — `doid:{id}` / `mesh:{id}`, or `disease:{slug}` fallback; the uuid5 input for `disease_id`                                    |
 | `disease_name`            | Display name — ontology label when confidence ≥ threshold, else seed name                                          |
 | `disease_name_clean`      | Normalized lowercase display name (same as `disease_name` after normalization)                                     |
 | `canonical_name_source`   | Either `ontology_label` or `seed_disease_name` — explains how `disease_name` was chosen                            |
