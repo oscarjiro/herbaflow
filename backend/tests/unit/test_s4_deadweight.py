@@ -47,3 +47,8 @@ def test_confidence_removed_everywhere():
     assert "score" in CompoundTarget.model_fields
     assert "score" in DiseaseTarget.model_fields
     assert "association_type" in DiseaseTarget.model_fields
+
+
+def test_source_raw_ids_removed():
+    assert "source_plant_raw_id" not in PlantCompound.model_fields
+    assert "source_compound_raw_id" not in PlantCompound.model_fields

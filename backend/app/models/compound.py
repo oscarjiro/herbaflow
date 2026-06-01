@@ -55,7 +55,5 @@ class PlantCompound(SQLModel, table=True):
     plant_compound_id: str = Field(primary_key=True)
     plant_id: str = Field(foreign_key="plants.plant_id")
     compound_id: str = Field(foreign_key="compounds.compound_id")
-    source_plant_raw_id: Optional[str] = None
-    source_compound_raw_id: Optional[str] = None
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     retrieved_at: Optional[datetime] = None
