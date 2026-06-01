@@ -142,9 +142,9 @@ class CreateAnalysisRequest(BaseModel):
         max_length=HARD_CAP_PLANTS,
         description=f"KNApSAcK plant IDs. Hard limit: {HARD_CAP_PLANTS} plants per analysis.",
     )
-    disease_ids: list[str] = Field(
-        default_factory=list,
-        description="At least one disease is required, unless _disease_input_mode is manual_targets",
+    disease_id: str | None = Field(
+        default=None,
+        description="Exactly one disease per analysis. Required unless _disease_input_mode is manual_targets.",
     )
     parameters: dict[str, Any] = Field(default_factory=dict)
 
@@ -161,13 +161,13 @@ class CreateAnalysisRequest(BaseModel):
         return _validate_params(v) or v
 
     @model_validator(mode="after")
-    def disease_ids_required_unless_manual(self) -> "CreateAnalysisRequest":
+    def disease_id_required_unless_manual(self) -> "CreateAnalysisRequest":
         is_manual_disease = (
             (self.parameters or {}).get("_disease_input_mode") == "manual_targets"
         )
-        if not is_manual_disease and len(self.disease_ids) == 0:
+        if not is_manual_disease and not self.disease_id:
             raise ValueError(
-                "disease_ids: at least one disease is required "
+                "disease_id: a disease is required "
                 "(or set _disease_input_mode=manual_targets in parameters)"
             )
         return self

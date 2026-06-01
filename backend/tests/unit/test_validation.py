@@ -30,7 +30,7 @@ def _create(parameters: dict | None = None) -> dict:
     """Minimal valid CreateAnalysisRequest payload."""
     return {
         "name": "Test run",
-        "disease_ids": ["disease-1"],
+        "disease_id": "disease-1",
         "parameters": parameters or {},
     }
 
@@ -400,7 +400,7 @@ class TestInputSizeHardCaps:
             CreateAnalysisRequest(
                 name="test",
                 plant_ids=too_many,
-                disease_ids=["d1"],
+                disease_id="d1",
             )
 
     def test_plant_ids_at_hard_cap_accepted(self):
@@ -411,7 +411,7 @@ class TestInputSizeHardCaps:
         req = CreateAnalysisRequest(
             name="test",
             plant_ids=at_cap,
-            disease_ids=["d1"],
+            disease_id="d1",
         )
         assert len(req.plant_ids) == HARD_CAP_PLANTS
 
@@ -420,7 +420,7 @@ class TestInputSizeHardCaps:
         req = CreateAnalysisRequest(
             name="test",
             plant_ids=[],
-            disease_ids=["d1"],
+            disease_id="d1",
         )
         assert req.plant_ids == []
 
@@ -501,6 +501,28 @@ class TestInjectedDiseaseTargetsCap:
         """Empty _injected_disease_targets list must pass (validation deferred to Stage 4)."""
         req = CreateAnalysisRequest(**_create({"_injected_disease_targets": []}))
         assert req.parameters["_injected_disease_targets"] == []
+
+
+def test_create_analysis_requires_disease_id_unless_manual():
+    from app.schemas.analysis import CreateAnalysisRequest
+    import pytest
+    from pydantic import ValidationError
+
+    # Missing disease_id in standard mode → error
+    with pytest.raises(ValidationError):
+        CreateAnalysisRequest(name="x", plant_ids=["p1"], parameters={})
+
+    # Manual disease-targets mode → disease_id may be None
+    ok = CreateAnalysisRequest(
+        name="x",
+        plant_ids=["p1"],
+        parameters={"_disease_input_mode": "manual_targets"},
+    )
+    assert ok.disease_id is None
+
+    # Standard mode with disease_id → valid
+    ok2 = CreateAnalysisRequest(name="x", plant_ids=["p1"], disease_id="d1", parameters={})
+    assert ok2.disease_id == "d1"
 
 
 # ---------------------------------------------------------------------------
