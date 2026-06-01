@@ -38,7 +38,7 @@ async def test_create_analysis_returns_pending(client):
         "name": "Integration Test Run",
         "mode": "guided",
         "plant_ids": [plant_id],
-        "disease_ids": [disease_id],
+        "disease_id": disease_id,
         "parameters": {},
     })
     assert resp.status_code == 201
@@ -149,7 +149,7 @@ async def test_get_analysis_detail(client):
         "name": "Detail Test",
         "mode": "guided",
         "plant_ids": [plant_id],
-        "disease_ids": [disease_id],
+        "disease_id": disease_id,
         "parameters": {},
     })
     assert create_resp.status_code == 201
@@ -172,7 +172,7 @@ async def test_get_analysis_status(client):
         "name": "Status Test",
         "mode": "guided",
         "plant_ids": [plant_id],
-        "disease_ids": [disease_id],
+        "disease_id": disease_id,
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]
@@ -201,7 +201,7 @@ async def test_approve_when_not_awaiting_returns_400(client):
         "name": "Approve 400 Test",
         "mode": "guided",
         "plant_ids": [plant_id],
-        "disease_ids": [disease_id],
+        "disease_id": disease_id,
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]
@@ -224,7 +224,7 @@ async def test_delete_analysis(client):
         "name": "Delete Test",
         "mode": "guided",
         "plant_ids": [plant_id],
-        "disease_ids": [disease_id],
+        "disease_id": disease_id,
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]
@@ -249,7 +249,7 @@ async def test_reject_when_not_awaiting_returns_400(client):
         "name": "Reject 400 Test",
         "mode": "guided",
         "plant_ids": [plant_id],
-        "disease_ids": [disease_id],
+        "disease_id": disease_id,
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]
@@ -272,7 +272,7 @@ async def test_export_stage_not_run_returns_404(client):
         "name": "Export 404 Test",
         "mode": "guided",
         "plant_ids": [plant_id],
-        "disease_ids": [disease_id],
+        "disease_id": disease_id,
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]

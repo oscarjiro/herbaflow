@@ -24,7 +24,7 @@ const baseRequest = {
   name: 'Test Analysis',
   mode: 'guided' as const,
   plant_ids: ['plant-1'],
-  disease_ids: ['disease-1'],
+  disease_id: 'disease-1',
   parameters: {},
 }
 
