@@ -112,7 +112,7 @@ export interface CreateAnalysisRequest {
   name: string
   mode: AnalysisMode
   plant_ids: string[]
-  disease_ids: string[]
+  disease_id: string | null
   parameters: Record<string, unknown>
 }
 
@@ -287,27 +287,19 @@ export interface ImportTargetsResponse {
 }
 
 // Stage 4: Disease Targets
-export interface DiseaseSourceEntry {
-  disease_id: string
-  disease_name: string
-  association_score: number
-}
-
 export interface DiseaseTargetResult {
   gene_symbol: string
   uniprot_accession: string | null
   score: number | null
-  disease_name: string
   source: string
-  /** All diseases this gene is associated with (multi-disease analyses) */
-  diseases?: DiseaseSourceEntry[]
 }
 
 export interface Stage4Result {
+  disease_id: string | null
+  disease_name: string | null
   disease_target_count: number
+  disease_gene_symbols?: string[]
   targets: DiseaseTargetResult[]
-  /** Per-disease gene symbol lists for Stage 5 per-disease overlap */
-  disease_gene_symbols_by_disease?: Record<string, string[]>
   /** Set to true when user has added or removed targets; drives stale banner */
   user_modified?: boolean
 }
@@ -328,10 +320,7 @@ export interface OverlapStats {
   }
 }
 
-export interface Stage5Result extends OverlapStats {
-  /** Per-disease overlap breakdown keyed by disease_id */
-  per_disease?: Record<string, OverlapStats>
-}
+export type Stage5Result = OverlapStats
 
 // Stage 6: PPI Network (Cytoscape.js format)
 export interface CytoscapeNodeData {
