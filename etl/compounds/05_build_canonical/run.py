@@ -51,7 +51,12 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings as shared_load_settings, ensure_dir, normalize_whitespace, make_run_id, now_iso
-from compounds.utils import compound_id as make_compound_uuid, compound_alias_id as make_alias_uuid, COMPOUND_NS
+from compounds.utils import (
+    compound_id_from_key as make_compound_id,
+    compound_alias_id,
+    compound_canonical_key,
+)
+from shared.identity import plant_compound_id
 
 import argparse
 import csv
@@ -608,21 +613,8 @@ def build_candidate_member_join(
     return grouped
 
 
-def make_compound_id(canonical_key: str) -> str:
-    """UUID v5 compound entity ID (replaces SHA256 prefix format)."""
-    return make_compound_uuid(canonical_key)
-
-
-def make_alias_id(compound_uuid: str, alias_key: str, alias_type: str) -> str:
-    """UUID v5 alias entity ID (replaces SHA256 prefix format).
-
-    alias_name is constructed from alias_key + alias_type to stay deterministic.
-    """
-    return make_alias_uuid(compound_uuid, f"{alias_key}:{alias_type}")
-
-
 def make_bridge_id(plant_id: str, compound_id: str) -> str:
-    return f"cmppl_{hashlib.sha256(f'{plant_id}|{compound_id}'.encode('utf-8')).hexdigest()[:16]}"
+    return plant_compound_id(plant_id, compound_id)
 
 
 def make_review_id(seed: str) -> str:
@@ -637,33 +629,18 @@ def most_common_nonempty(values: Iterable[str]) -> str:
 
 
 def canonical_identity_for_candidate(candidate: Dict[str, str]) -> Tuple[str, str]:
-    inchi = normalize_whitespace(candidate.get("inchi_key", ""))
-    pubchem_cid = normalize_whitespace(candidate.get("pubchem_cid", ""))
-    chembl_id = normalize_whitespace(candidate.get("chembl_id", ""))
-    cas_id = normalize_cas(candidate.get("representative_cas_id", ""))
-    name_key = normalize_key(
-        candidate.get("preferred_name")
-        or candidate.get("iupac_name")
-        or candidate.get("representative_name")
-    )
-    formula_key = normalize_key(
-        candidate.get("molecular_formula") or candidate.get("representative_formula")
-    )
-    if inchi:
-        return f"inchi::{inchi}", "inchi_key"
-    if pubchem_cid:
-        return f"pubchem::{pubchem_cid}", "pubchem_cid"
-    if chembl_id:
-        return f"chembl::{chembl_id}", "chembl_id"
-    if cas_id:
-        return f"cas::{normalize_key(cas_id)}", "cas_id"
-    if name_key and formula_key:
-        return f"name_formula::{name_key}::{formula_key}", "name_formula"
-    if name_key:
-        return f"name::{name_key}", "name"
-    if formula_key:
-        return f"formula::{formula_key}", "formula"
-    return "", ""
+    key = compound_canonical_key(candidate)
+    prefix = key.split(":", 1)[0] if key else ""
+    strategy = {
+        "inchikey": "inchi_key",
+        "pubchem": "pubchem_cid",
+        "chembl": "chembl_id",
+        "cas": "cas_id",
+        "name_formula": "name_formula",
+        "name": "name",
+        "formula": "formula",
+    }.get(prefix, prefix)
+    return key, strategy
 
 
 def candidate_name(
@@ -1154,9 +1131,7 @@ def collect_alias_items(
         seen_alias_keys.add(item["alias_key"])
         out.append(
             {
-                "compound_alias_id": make_alias_id(
-                    compound_id, item["alias_key"], item["alias_type"]
-                ),
+                "compound_alias_id": compound_alias_id(compound_id, item["alias_key"]),
                 "compound_id": compound_id,
                 "alias_name": item["alias_name"],
                 "alias_key": item["alias_key"],
@@ -1635,9 +1610,7 @@ def build_canonical_tables(
         alias_seen.add(key)
         aliases_deduped.append(
             {
-                "compound_alias_id": make_alias_id(
-                    row["compound_id"], row["alias_key"], row["alias_type"]
-                ),
+                "compound_alias_id": compound_alias_id(row["compound_id"], row["alias_key"]),
                 "compound_id": row["compound_id"],
                 "alias_name": row["alias_name"],
                 "alias_key": row["alias_key"],

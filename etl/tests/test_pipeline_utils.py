@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import importlib.util
 import uuid
 import pytest
 from plants.utils import (
@@ -88,10 +89,23 @@ def test_plant_alias_ns_differs_from_plant_ns():
 
 from compounds.utils import (
     normalize_cas,
-    compound_id,
+    compound_canonical_key,
+    compound_id_from_key,
     compound_alias_id,
     COMPOUND_NS,
 )
+
+# Load the real build module to test canonical_identity_for_candidate against the
+# live function (mirrors the _load pattern in test_etl_regression.py — the step dir
+# has a numeric prefix so it can't be imported normally).
+_ETL_ROOT = Path(__file__).resolve().parents[1]
+_spec = importlib.util.spec_from_file_location(
+    "compounds_05_build_canonical", _ETL_ROOT / "compounds/05_build_canonical/run.py"
+)
+_compounds_build = importlib.util.module_from_spec(_spec)
+sys.modules["compounds_05_build_canonical"] = _compounds_build
+_spec.loader.exec_module(_compounds_build)
+_canonical_identity_for_candidate = _compounds_build.canonical_identity_for_candidate
 
 
 def test_normalize_cas_valid():
@@ -110,17 +124,38 @@ def test_normalize_cas_empty():
     assert is_valid is False
 
 def test_compound_id_deterministic():
-    assert compound_id("INCHIKEY123") == compound_id("INCHIKEY123")
+    assert compound_id_from_key("INCHIKEY123") == compound_id_from_key("INCHIKEY123")
 
 def test_compound_id_valid_uuid():
-    uuid.UUID(compound_id("INCHIKEY123"))
+    uuid.UUID(compound_id_from_key("INCHIKEY123"))
+
+def test_compound_canonical_key_inchikey_single_colon():
+    assert compound_canonical_key({"inchi_key": "abc"}) == "inchikey:ABC"
+
+def test_compound_id_from_key_is_uuid5():
+    assert compound_id_from_key("inchikey:ABC") == str(
+        uuid.uuid5(COMPOUND_NS, "inchikey:ABC")
+    )
 
 def test_compound_alias_id_deterministic():
-    cid = compound_id("INCHIKEY123")
+    cid = compound_id_from_key("INCHIKEY123")
     assert compound_alias_id(cid, "Curcumin") == compound_alias_id(cid, "Curcumin")
 
 def test_compound_ns_differs_from_plant_ns():
     assert COMPOUND_NS != PLANT_NS
+
+def test_canonical_identity_for_candidate_inchikey():
+    assert _canonical_identity_for_candidate({"inchi_key": "abc"}) == (
+        "inchikey:ABC",
+        "inchi_key",
+    )
+
+def test_canonical_identity_for_candidate_cas():
+    key, strategy = _canonical_identity_for_candidate(
+        {"representative_cas_id": "50-00-0"}
+    )
+    assert key.startswith("cas:")
+    assert strategy == "cas_id"
 
 
 from diseases.utils import (
