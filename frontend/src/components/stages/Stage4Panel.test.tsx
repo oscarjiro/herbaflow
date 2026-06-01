@@ -65,12 +65,13 @@ function renderPanel(stage4: Stage4Result) {
 describe('Stage4Panel — disease-target field mapping', () => {
   const fixture: Stage4Result = {
     disease_target_count: 1,
+    disease_id: null,
+    disease_name: null,
     targets: [
       {
         gene_symbol: 'TP53',
         uniprot_accession: 'P04637',
         score: 0.873,
-        disease_name: 'Breast carcinoma',
         source: 'db_cache',
       },
     ],
