@@ -22,8 +22,8 @@ async def test_cache_stores_inchi_canonical_key_not_pubchem():
     await _do_persist(
         [
             {
-                "compound_id": "7373585f-6e71-532a-8e3e-330defb8fbe8",
-                "canonical_key": "inchi::REFJWTPEDVJJIY-UHFFFAOYSA-N",
+                "compound_id": "21d75a4d-8ff2-527e-876c-ba5ef28a68e8",
+                "canonical_key": "inchikey:REFJWTPEDVJJIY-UHFFFAOYSA-N",
                 "canonical_name": "quercetin",
                 "pubchem_cid": "5280343",
                 "inchikey": "REFJWTPEDVJJIY-UHFFFAOYSA-N",
@@ -33,4 +33,4 @@ async def test_cache_stores_inchi_canonical_key_not_pubchem():
     )
 
     assert len(added) == 1
-    assert added[0].canonical_key == "inchi::REFJWTPEDVJJIY-UHFFFAOYSA-N"
+    assert added[0].canonical_key == "inchikey:REFJWTPEDVJJIY-UHFFFAOYSA-N"

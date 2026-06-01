@@ -81,7 +81,7 @@ async def test_validate_compound_emits_etl_aligned_identity():
 
     # Identity asserts: compound_id and canonical_key must be ETL-aligned
     assert result["compound_id"] == make_compound_id(QUERCETIN_IK)
-    assert result["compound_id"] == "7373585f-6e71-532a-8e3e-330defb8fbe8"
+    assert result["compound_id"] == "21d75a4d-8ff2-527e-876c-ba5ef28a68e8"
     # canonical_key must be present and ETL-aligned
     assert result["canonical_key"] == compound_canonical_key(QUERCETIN_IK)
-    assert result["canonical_key"] == "inchi::REFJWTPEDVJJIY-UHFFFAOYSA-N"
+    assert result["canonical_key"] == "inchikey:REFJWTPEDVJJIY-UHFFFAOYSA-N"
