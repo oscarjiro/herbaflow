@@ -4,7 +4,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { DataSources } from '@/components/shared/DataSources'
 import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { isSkippedStage } from '@/types/api'
-import type { AnalysisRunResponse, AnalysisStatusResponse, Stage5Result, OverlapStats } from '@/types/api'
+import type { AnalysisRunResponse, AnalysisStatusResponse, Stage5Result } from '@/types/api'
 
 const SOURCES = [
   {
@@ -20,53 +20,6 @@ interface Stage5PanelProps {
   analysis: AnalysisRunResponse | undefined
   status: AnalysisStatusResponse | undefined
   analysisId: string
-}
-
-interface OverlapSectionProps {
-  label: string
-  stats: OverlapStats
-}
-
-function OverlapSection({ label, stats }: OverlapSectionProps) {
-  return (
-    <div className="rounded-lg border border-hf-border bg-hf-surface p-4 space-y-3">
-      <h4 className="text-sm font-medium text-hf-fg1">{label}</h4>
-      <div className="grid grid-cols-3 gap-3">
-        <div className="text-center">
-          <span className="block text-lg font-semibold text-hf-fg1">{stats.overlap_count}</span>
-          <span className="text-xs text-hf-fg3">Overlap</span>
-        </div>
-        <div className="text-center">
-          <span className="block text-lg font-semibold text-hf-fg1">{stats.jaccard.toFixed(3)}</span>
-          <span className="text-xs text-hf-fg3">Jaccard</span>
-        </div>
-        <div className="text-center">
-          <span
-            className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-              stats.significant
-                ? 'bg-hf-success-soft text-hf-success'
-                : 'bg-hf-warning-soft text-hf-warning'
-            }`}
-          >
-            {stats.significant ? 'Significant' : 'Not Significant'}
-          </span>
-          <span className="block text-xs text-hf-fg3 mt-1">p = {stats.p_value != null ? stats.p_value.toExponential(2) : 'N/A'}</span>
-        </div>
-      </div>
-      {stats.overlap.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {stats.overlap.map((gene) => (
-            <span
-              key={gene}
-              className="px-2 py-0.5 rounded text-xs font-mono bg-hf-surface-2 text-hf-fg2 border border-hf-border"
-            >
-              {gene}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  )
 }
 
 interface VennProps {
@@ -215,22 +168,6 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
           </div>
         )}
       </div>
-
-      {result.per_disease && Object.keys(result.per_disease).length > 1 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-hf-fg1">Per-Disease Overlap</h3>
-          {Object.entries(result.per_disease).map(([diseaseId, stats]) => {
-            if (stats.overlap_count == null || stats.p_value == null) return null
-            return (
-              <OverlapSection
-                key={diseaseId}
-                label={diseaseId}
-                stats={stats}
-              />
-            )
-          })}
-        </div>
-      )}
 
       <DataSources sources={SOURCES} />
     </div>
