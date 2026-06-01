@@ -317,3 +317,28 @@ def test_inject_targets_http_empty_list_returns_422():
         json={"targets": []},
     )
     assert response.status_code == 422
+
+
+# ---------------------------------------------------------------------------
+# Test 10: Regression — lean stage-4 rows (no per-row disease_name) must not crash
+# ---------------------------------------------------------------------------
+
+
+def test_add_target_to_stage4_with_lean_rows_no_disease_name():
+    """Injecting into a single-disease (lean) stage-4 result must not require per-row disease_name."""
+    from app.routers.analyses import _add_target_to_stage4
+    stage4 = {
+        "disease_id": "dis_1",
+        "disease_name": "Type 2 Diabetes",
+        "disease_target_count": 1,
+        "disease_gene_symbols": ["AKT1"],
+        "targets": [
+            {"gene_symbol": "AKT1", "uniprot_accession": "P31749", "score": 0.7, "source": "db_cache"},
+        ],
+    }
+    updated = _add_target_to_stage4(stage4, "TP53", "P04637", "Cellular tumor antigen p53")
+    new_row = next(t for t in updated["targets"] if t["gene_symbol"] == "TP53")
+    assert "disease_name" not in new_row
+    assert new_row["source"] == "user_provided"
+    assert updated["disease_target_count"] == 2
+    assert "TP53" in updated["disease_gene_symbols"]

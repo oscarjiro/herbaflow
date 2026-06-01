@@ -11,7 +11,6 @@ def _make_stage4(targets=None):
             "gene_symbol": "TNF",
             "uniprot_id": "P01375",
             "association_score": 0.85,
-            "disease_name": "Rheumatoid arthritis",
             "source": "db_cache",
         }
     ]
@@ -26,41 +25,41 @@ def _make_stage4(targets=None):
 
 def test_add_disease_target_injects_entry():
     stage4 = _make_stage4()
-    result = _add_target_to_stage4(stage4, "EGFR", "P00533", None, "Rheumatoid arthritis")
+    result = _add_target_to_stage4(stage4, "EGFR", "P00533", None)
     genes = [t["gene_symbol"] for t in result["targets"]]
     assert "EGFR" in genes
     egfr = next(t for t in result["targets"] if t["gene_symbol"] == "EGFR")
     assert egfr["source"] == "user_provided"
     assert egfr["score"] == 1.0
-    assert egfr["disease_name"] == "Rheumatoid arthritis"
+    assert "disease_name" not in egfr
     assert egfr["protein_name"] is None
 
 
 def test_add_disease_target_increments_count():
-    result = _add_target_to_stage4(_make_stage4(), "EGFR", "P00533", None, "RA")
+    result = _add_target_to_stage4(_make_stage4(), "EGFR", "P00533", None)
     assert result["disease_target_count"] == 2
     assert "EGFR" in result["disease_gene_symbols"]
 
 
 def test_add_disease_target_sets_user_modified():
-    result = _add_target_to_stage4(_make_stage4(), "EGFR", "P00533", None, "RA")
+    result = _add_target_to_stage4(_make_stage4(), "EGFR", "P00533", None)
     assert result["user_modified"] is True
 
 
 def test_add_disease_target_rejects_duplicate():
     with pytest.raises(ValueError, match="already in Stage 4"):
-        _add_target_to_stage4(_make_stage4(), "TNF", "P01375", None, "RA")
+        _add_target_to_stage4(_make_stage4(), "TNF", "P01375", None)
 
 
 def test_add_disease_target_case_insensitive_duplicate():
     with pytest.raises(ValueError, match="already in Stage 4"):
-        _add_target_to_stage4(_make_stage4(), "tnf", "P01375", None, "RA")
+        _add_target_to_stage4(_make_stage4(), "tnf", "P01375", None)
 
 
 def test_add_disease_target_does_not_mutate_input():
     stage4 = _make_stage4()
     original_count = stage4["disease_target_count"]
-    _add_target_to_stage4(stage4, "EGFR", "P00533", None, "RA")
+    _add_target_to_stage4(stage4, "EGFR", "P00533", None)
     assert stage4["disease_target_count"] == original_count
 
 

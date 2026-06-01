@@ -308,7 +308,7 @@ async def export_stage_results(
             # One row per disease target
             targets = stage_data.get("targets", [])
             if targets:
-                fieldnames = ["gene_symbol", "uniprot_accession", "score", "disease_name", "source"]
+                fieldnames = ["gene_symbol", "uniprot_accession", "score", "source"]
                 writer = csv.DictWriter(output, fieldnames=fieldnames)
                 writer.writeheader()
                 for t in targets:
@@ -316,11 +316,10 @@ async def export_stage_results(
                         "gene_symbol": t.get("gene_symbol", ""),
                         "uniprot_accession": t.get("uniprot_accession", ""),
                         "score": t.get("score", ""),
-                        "disease_name": t.get("disease_name", ""),
                         "source": t.get("source", ""),
                     })
             else:
-                writer = csv.DictWriter(output, fieldnames=["gene_symbol", "uniprot_accession", "score", "disease_name", "source"])
+                writer = csv.DictWriter(output, fieldnames=["gene_symbol", "uniprot_accession", "score", "source"])
                 writer.writeheader()
             filename = f"{run.analysis_name}_stage4_disease_targets.csv"
 
@@ -534,7 +533,6 @@ def _add_target_to_stage4(
     gene_symbol: str,
     uniprot_id: str | None,
     protein_name: str | None,
-    disease_name: str,
 ) -> dict:
     """Inject a user-provided target into a stage_4 result dict (deep copy — no mutation)."""
     result = copy.deepcopy(stage4)
@@ -546,7 +544,6 @@ def _add_target_to_stage4(
         "uniprot_accession": uniprot_id or "",
         "protein_name": protein_name,
         "score": 1.0,
-        "disease_name": disease_name,
         "source": "user_provided",
     })
     result["disease_target_count"] = len(result["targets"])
@@ -1048,13 +1045,9 @@ async def add_user_disease_target(
             retrieved_at=datetime.utcnow(),
         ))
 
-    # Use disease_name from first existing target (stage 4 always has a disease context)
-    existing_targets = stage4.get("targets", [])
-    disease_name = existing_targets[0]["disease_name"] if existing_targets else ""
-
     try:
         updated = _add_target_to_stage4(
-            stage4, info.gene_symbol, info.uniprot_accession, info.protein_name, disease_name
+            stage4, info.gene_symbol, info.uniprot_accession, info.protein_name
         )
     except ValueError as exc:
         logger.warning("Duplicate target rejected for stage 4: %s", exc)
