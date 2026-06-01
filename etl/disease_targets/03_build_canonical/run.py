@@ -23,9 +23,10 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
 from disease_targets.utils import (
-    read_csv, write_csv, safe_str, validate_required_columns,
-    target_id, target_alias_id, disease_target_id,
+    read_csv, write_csv, safe_str, validate_required_columns, make_slug_key,
+    target_id_from_key, target_alias_id, disease_target_id,
 )
+from shared.identity import pick_alias
 
 SOURCE_URL_TEMPLATE = "https://platform.opentargets.org/target/{ensembl_id}"
 
@@ -34,7 +35,7 @@ def build_targets(targets_raw: pd.DataFrame, cfg: dict, retrieved_at: str) -> pd
     src = cfg["source"]
     rows = []
     for _, r in targets_raw.iterrows():
-        tid = target_id(r["canonical_key"])
+        tid = target_id_from_key(r["canonical_key"])
         ensembl = safe_str(r.get("ensembl_id"))
         rows.append({
             "target_id":          tid,
@@ -66,11 +67,14 @@ def build_target_aliases(targets_df: pd.DataFrame, cfg: dict, retrieved_at: str)
         def _alias(alias_name: str, alias_type: str) -> dict | None:
             if not alias_name:
                 return None
+            alias_key = make_slug_key(alias_name)
+            if not alias_key:
+                return None
             return {
-                "target_alias_id": target_alias_id(tid, alias_name),
+                "target_alias_id": target_alias_id(tid, alias_key),
                 "target_id":       tid,
                 "alias_name":      alias_name,
-                "alias_key":       alias_name.lower().replace(" ", "_"),
+                "alias_key":       alias_key,
                 "alias_type":      alias_type,
                 "source_name":     src["name"],
                 "source_url":      src_url,
@@ -78,13 +82,20 @@ def build_target_aliases(targets_df: pd.DataFrame, cfg: dict, retrieved_at: str)
                 "retrieved_at":    retrieved_at,
             }
 
+        # Collapse aliases that slugify to the same alias_key (the new
+        # target_alias_id excludes alias_type), keyed by alias_key. Add order
+        # ensembl_id → approved_symbol → approved_name makes first-wins
+        # deterministic on ties (target alias types are not in ALIAS_PRIORITY).
+        by_key: dict[str, dict] = {}
         for row in [
             _alias(ensembl, "ensembl_id"),
             _alias(symbol,  "approved_symbol"),
             _alias(name,    "approved_name"),
         ]:
             if row:
-                alias_rows.append(row)
+                by_key[row["alias_key"]] = pick_alias(by_key.get(row["alias_key"]), row)
+
+        alias_rows.extend(by_key.values())
 
     return pd.DataFrame(alias_rows)
 

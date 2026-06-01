@@ -4,38 +4,29 @@ from __future__ import annotations
 
 import re
 import sys
-import uuid
 from pathlib import Path
 from typing import Sequence
 
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, stable_id  # noqa: F401
-
-TARGET_NS: uuid.UUID = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.targets")
-TARGET_ALIAS_NS: uuid.UUID = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.target_aliases")
-DISEASE_TARGET_NS: uuid.UUID = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.disease_targets")
-
-
-def target_id(canonical_key: str) -> str:
-    return stable_id(TARGET_NS, str(canonical_key))
-
-
-def target_alias_id(target_uuid: str, alias_name: str) -> str:
-    return stable_id(TARGET_ALIAS_NS, f"{target_uuid}:{alias_name}")
-
-
-def disease_target_id(disease_uuid: str, target_uuid: str) -> str:
-    return stable_id(DISEASE_TARGET_NS, f"{disease_uuid}:{target_uuid}")
+from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso  # noqa: F401
+from shared.identity import (  # noqa: F401
+    TARGET_NS,
+    TARGET_ALIAS_NS,
+    DISEASE_TARGET_NS,
+    target_canonical_key,
+    target_id,
+    target_id_from_key,
+    target_alias_id,
+    disease_target_id,
+    fold_isoform,
+)
 
 
 def canonical_key_for_target(uniprot_accession: str | None, ensembl_id: str) -> str:
-    """Build canonical_key: 'uniprot:{acc}' if available, else 'ensembl:{id}'."""
-    acc = (uniprot_accession or "").strip()
-    if acc:
-        return f"uniprot:{acc}"
-    return f"ensembl:{ensembl_id.strip()}"
+    """canonical_key: 'uniprot:{folded acc}' if available, else 'ensembl:{id}'."""
+    return target_canonical_key(uniprot=uniprot_accession, ensembl=ensembl_id)
 
 
 _MISSING_STRINGS = {"", "na", "n/a", "none", "null", "nan", "-", "unknown", "unspecified"}

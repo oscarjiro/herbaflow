@@ -9,7 +9,7 @@ from disease_targets.utils import (
     TARGET_NS,
     TARGET_ALIAS_NS,
     DISEASE_TARGET_NS,
-    target_id,
+    target_id_from_key,
     target_alias_id,
     disease_target_id,
     canonical_key_for_target,
@@ -21,48 +21,52 @@ from disease_targets.utils import (
 
 class TestTargetId:
     def test_deterministic(self):
-        assert target_id("uniprot:P31749") == target_id("uniprot:P31749")
+        assert target_id_from_key("uniprot:P31749") == target_id_from_key("uniprot:P31749")
 
     def test_different_keys_differ(self):
-        assert target_id("uniprot:P31749") != target_id("uniprot:P12345")
+        assert target_id_from_key("uniprot:P31749") != target_id_from_key("uniprot:P12345")
 
     def test_returns_string(self):
-        result = target_id("uniprot:P31749")
+        result = target_id_from_key("uniprot:P31749")
         assert isinstance(result, str)
         assert len(result) == 36  # UUID v5 format
+
+    def test_target_id_from_key_is_uuid5(self):
+        import uuid
+        assert target_id_from_key("uniprot:P31749") == str(uuid.uuid5(TARGET_NS, "uniprot:P31749"))
 
 
 class TestTargetAliasId:
     def test_deterministic(self):
-        tid = target_id("uniprot:P31749")
+        tid = target_id_from_key("uniprot:P31749")
         assert target_alias_id(tid, "AKT1") == target_alias_id(tid, "AKT1")
 
     def test_different_names_differ(self):
-        tid = target_id("uniprot:P31749")
+        tid = target_id_from_key("uniprot:P31749")
         assert target_alias_id(tid, "AKT1") != target_alias_id(tid, "AKT2")
 
     def test_different_targets_differ(self):
-        tid1 = target_id("uniprot:P31749")
-        tid2 = target_id("uniprot:P12345")
+        tid1 = target_id_from_key("uniprot:P31749")
+        tid2 = target_id_from_key("uniprot:P12345")
         assert target_alias_id(tid1, "AKT1") != target_alias_id(tid2, "AKT1")
 
 
 class TestDiseaseTargetId:
     def test_deterministic(self):
         did = "a4fd1b5c-ac3a-594a-9023-cd30f10fb5f6"
-        tid = target_id("uniprot:P31749")
+        tid = target_id_from_key("uniprot:P31749")
         assert disease_target_id(did, tid) == disease_target_id(did, tid)
 
     def test_different_pairs_differ(self):
         did = "a4fd1b5c-ac3a-594a-9023-cd30f10fb5f6"
-        tid1 = target_id("uniprot:P31749")
-        tid2 = target_id("uniprot:P12345")
+        tid1 = target_id_from_key("uniprot:P31749")
+        tid2 = target_id_from_key("uniprot:P12345")
         assert disease_target_id(did, tid1) != disease_target_id(did, tid2)
 
     def test_different_diseases_differ(self):
         did1 = "a4fd1b5c-ac3a-594a-9023-cd30f10fb5f6"
         did2 = "d3ec7fe7-08d5-55a8-9fc3-9f4328342828"
-        tid = target_id("uniprot:P31749")
+        tid = target_id_from_key("uniprot:P31749")
         assert disease_target_id(did1, tid) != disease_target_id(did2, tid)
 
 
@@ -86,6 +90,9 @@ class TestCanonicalKeyForTarget:
     def test_uniprot_stripped(self):
         result = canonical_key_for_target("  P31749  ", "ENSG00000145675")
         assert result == "uniprot:P31749"
+
+    def test_isoform_folded(self):
+        assert canonical_key_for_target("P31749-2", "ENSG00000145675") == "uniprot:P31749"
 
 
 class TestNormalizeText:
