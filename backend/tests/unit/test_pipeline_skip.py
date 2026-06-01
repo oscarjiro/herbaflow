@@ -62,7 +62,7 @@ async def test_standard_mode_starts_at_stage_1():
                new=AsyncMock(side_effect=fake_update_run_status)), \
          patch("analysis.pipeline.run_stage", new=AsyncMock()) as mock_run_stage:
         from analysis.pipeline import start_pipeline
-        await start_pipeline(ANALYSIS_ID, ["pl_1"], ["d_1"], factory)
+        await start_pipeline(ANALYSIS_ID, ["pl_1"], "d_1", factory)
 
     # run_stage must be called with stage_num=1
     mock_run_stage.assert_called_once_with(ANALYSIS_ID, 1, factory)
@@ -98,7 +98,7 @@ async def test_manual_compounds_skips_stages_1_2():
                new=AsyncMock(side_effect=fake_update_run_status)), \
          patch("analysis.pipeline.run_stage", new=AsyncMock()) as mock_run_stage:
         from analysis.pipeline import start_pipeline
-        await start_pipeline(ANALYSIS_ID, ["pl_1"], ["d_1"], factory)
+        await start_pipeline(ANALYSIS_ID, ["pl_1"], "d_1", factory)
 
     # run_stage must be called with stage_num=3
     mock_run_stage.assert_called_once_with(ANALYSIS_ID, 3, factory)
@@ -138,7 +138,7 @@ async def test_manual_targets_skips_stages_1_2_3():
                new=AsyncMock(side_effect=fake_update_run_status)), \
          patch("analysis.pipeline.run_stage", new=AsyncMock()) as mock_run_stage:
         from analysis.pipeline import start_pipeline
-        await start_pipeline(ANALYSIS_ID, ["pl_1"], ["d_1"], factory)
+        await start_pipeline(ANALYSIS_ID, ["pl_1"], "d_1", factory)
 
     # run_stage must be called with stage_num=4
     mock_run_stage.assert_called_once_with(ANALYSIS_ID, 4, factory)
@@ -185,7 +185,7 @@ async def test_skipped_stages_contain_input_mode():
                    new=AsyncMock(side_effect=fake_update_run_status)), \
              patch("analysis.pipeline.run_stage", new=AsyncMock()):
             from analysis.pipeline import start_pipeline
-            await start_pipeline(ANALYSIS_ID, ["pl_1"], ["d_1"], factory)
+            await start_pipeline(ANALYSIS_ID, ["pl_1"], "d_1", factory)
 
         for n in expected_skipped:
             key = f"stage_{n}"
@@ -223,7 +223,7 @@ async def test_unknown_input_mode_falls_back_to_stage_1():
                new=AsyncMock(side_effect=fake_update_run_status)), \
          patch("analysis.pipeline.run_stage", new=AsyncMock()) as mock_run_stage:
         from analysis.pipeline import start_pipeline
-        await start_pipeline(ANALYSIS_ID, ["pl_1"], ["d_1"], factory)
+        await start_pipeline(ANALYSIS_ID, ["pl_1"], "d_1", factory)
 
     # run_stage must be called with stage_num=1 (fallback)
     mock_run_stage.assert_called_once_with(ANALYSIS_ID, 1, factory)

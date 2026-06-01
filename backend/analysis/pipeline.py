@@ -122,14 +122,14 @@ _FIRST_REAL_STAGE = {
 async def start_pipeline(
     analysis_id: UUID,
     plant_ids: list[str],
-    disease_ids: list[str],
+    disease_id: str | None,
     session_factory: sessionmaker,
 ) -> None:
     async with session_factory() as session:
         run = await analysis_repo.get_run(session, analysis_id)
         params = run.parameters or {}
         params["_plant_ids"] = plant_ids
-        params["_disease_ids"] = disease_ids
+        params["_disease_id"] = disease_id
         run.parameters = params
         session.add(run)
         await session.commit()
