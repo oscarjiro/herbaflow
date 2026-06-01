@@ -1,13 +1,13 @@
-"""Compound DB caching service.
+"""Compound DB persistence service.
 
 Persists canonicalized compounds (those with a confirmed PubChem CID) to the
 ``compounds`` table after successful batch validation. Uses SELECT-then-INSERT
 semantics to avoid duplicate key errors — effectively an upsert that skips
-already-cached rows.
+already-persisted rows.
 
 Design decisions:
 - Only compounds with a ``pubchem_cid`` are persisted — SMILES-only compounds
-  (no CID) are allowed in the pipeline but are NOT cached.
+  (no CID) are allowed in the pipeline but are NOT persisted.
 - No plant–compound or disease–compound links are created here.
 - DB errors are non-fatal: a warning is logged and 0 is returned so that the
   inject_compounds endpoint continues and returns a valid response.
@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 from sqlmodel import select
 
@@ -28,7 +28,38 @@ from app.models.compound import Compound
 logger = logging.getLogger(__name__)
 
 
-async def cache_validated_compounds(
+async def persist_canonical_compound(
+    compounds: Iterable[Compound],
+    session: AsyncSession,
+) -> int:
+    """Insert pre-built ``Compound`` rows that are not already present.
+
+    Canonical persist primitive: for each ``Compound``, SELECT by ``compound_id``;
+    if absent, ``session.add`` it and count it; if present, skip. Creates no
+    PlantCompound / DiseaseCompound link rows and does NOT commit — the caller
+    controls commit granularity.
+
+    Args:
+        compounds: Pre-built ``Compound`` instances to insert if absent.
+        session: Async SQLModel/SQLAlchemy session.
+
+    Returns:
+        Number of compound rows added to the session (already-present rows skipped).
+    """
+    inserted = 0
+    for compound in compounds:
+        result = await session.exec(
+            select(Compound).where(Compound.compound_id == compound.compound_id)
+        )
+        existing = result.first()
+        if existing is not None:
+            continue  # already persisted — skip (ON CONFLICT DO NOTHING semantics)
+        session.add(compound)
+        inserted += 1
+    return inserted
+
+
+async def persist_validated_compounds(
     validated_compounds: list[dict],
     session: AsyncSession,
 ) -> int:
@@ -47,44 +78,34 @@ async def cache_validated_compounds(
         all had no CID, or on DB error).
     """
     try:
-        return await _do_cache(validated_compounds, session)
+        return await _do_persist(validated_compounds, session)
     except Exception as exc:
         logger.warning(
-            "Compound caching failed — proceeding without cache: %s",
+            "Compound persistence failed — proceeding without persist: %s",
             exc,
             exc_info=True,
         )
         return 0
 
 
-async def _do_cache(
+async def _do_persist(
     validated_compounds: list[dict],
     session: AsyncSession,
 ) -> int:
     """Inner implementation — raises on DB error (caller handles)."""
     now = datetime.utcnow()
-    inserted = 0
 
+    compounds: list[Compound] = []
     for c in validated_compounds:
         # Only persist compounds that were successfully canonicalized via PubChem
         if not c.get("pubchem_cid"):
             continue
 
-        compound_id: str = c["compound_id"]
-
-        # Check whether this compound is already cached
-        result = await session.exec(
-            select(Compound).where(Compound.compound_id == compound_id)
-        )
-        existing = result.first()
-        if existing is not None:
-            continue  # already cached — skip (upsert/ON CONFLICT DO NOTHING semantics)
-
         canonical_key = c["canonical_key"]  # always set by the canonicalization core
 
-        session.add(
+        compounds.append(
             Compound(
-                compound_id=compound_id,
+                compound_id=c["compound_id"],
                 canonical_key=canonical_key,
                 canonical_name=c["canonical_name"],
                 pubchem_cid=c.get("pubchem_cid"),
@@ -101,7 +122,8 @@ async def _do_cache(
                 retrieved_at=now,
             )
         )
-        inserted += 1
+
+    inserted = await persist_canonical_compound(compounds, session)
 
     if inserted > 0:
         await session.commit()

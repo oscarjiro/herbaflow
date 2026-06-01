@@ -1,14 +1,14 @@
-"""Target DB caching service.
+"""Target DB persistence service.
 
 Persists UniProt-validated targets to the ``targets`` table after successful
-manual target injection. Symmetric to ``compound_cache``: uses SELECT-then-INSERT
+manual target injection. Symmetric to ``compound_persist``: uses SELECT-then-INSERT
 semantics to avoid duplicate key errors — effectively an upsert that skips
-already-cached rows.
+already-persisted rows.
 
-Design decisions (mirrors compound_cache §2.6):
+Design decisions:
 - Only targets with a confirmed ``uniprot_id`` (UniProt accession) are persisted.
   skip_validation fast-path targets (``target_id="manual:{GENE}"``, no accession)
-  are intentionally NOT cached — they are unvalidated gene symbols and must not
+  are intentionally NOT persisted — they are unvalidated gene symbols and must not
   pollute the canonical ``targets`` table.
 - No CompoundTarget or DiseaseTarget link rows are created here — manual targets
   carry no compound/disease associations.
@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 from sqlmodel import select
 
@@ -32,7 +32,37 @@ from app.services.canonicalize import target_canonical_key
 logger = logging.getLogger(__name__)
 
 
-async def cache_validated_targets(
+async def persist_canonical_target(
+    targets: Iterable[Target],
+    session: AsyncSession,
+) -> int:
+    """Insert pre-built ``Target`` rows that are not already present.
+
+    Canonical persist primitive: for each ``Target``, SELECT by ``target_id``;
+    if absent, ``session.add`` it and count it; if present, skip. Creates no
+    CompoundTarget / DiseaseTarget / PlantCompound link rows and does NOT commit
+    — the caller controls commit granularity.
+
+    Args:
+        targets: Pre-built ``Target`` instances to insert if absent.
+        session: Async SQLModel/SQLAlchemy session.
+
+    Returns:
+        Number of target rows added to the session (already-present rows skipped).
+    """
+    inserted = 0
+    for target in targets:
+        existing = (await session.exec(
+            select(Target).where(Target.target_id == target.target_id)
+        )).one_or_none()
+        if existing is not None:
+            continue  # already persisted — skip (ON CONFLICT DO NOTHING semantics)
+        session.add(target)
+        inserted += 1
+    return inserted
+
+
+async def persist_validated_targets(
     validated_targets: list[dict],
     session: AsyncSession,
 ) -> int:
@@ -51,44 +81,35 @@ async def cache_validated_targets(
         unvalidated, or on DB error).
     """
     try:
-        return await _do_cache(validated_targets, session)
+        return await _do_persist(validated_targets, session)
     except Exception as exc:
         logger.warning(
-            "Target caching failed — proceeding without cache: %s",
+            "Target persistence failed — proceeding without persist: %s",
             exc,
             exc_info=True,
         )
         return 0
 
 
-async def _do_cache(
+async def _do_persist(
     validated_targets: list[dict],
     session: AsyncSession,
 ) -> int:
     """Inner implementation — raises on DB error (caller handles)."""
     now = datetime.utcnow()
-    inserted = 0
 
+    targets: list[Target] = []
     for t in validated_targets:
         # Only persist targets that were validated against UniProt (have an accession)
         uniprot_accession = t.get("uniprot_id")
         if not uniprot_accession:
             continue
 
-        target_id: str = t["target_id"]
-
-        # Check whether this target is already cached
-        existing = (await session.exec(
-            select(Target).where(Target.target_id == target_id)
-        )).one_or_none()
-        if existing is not None:
-            continue  # already cached — skip (ON CONFLICT DO NOTHING semantics)
-
         gene_symbol = (t.get("gene_symbol") or "").upper() or None
 
-        session.add(
+        targets.append(
             Target(
-                target_id=target_id,
+                target_id=t["target_id"],
                 canonical_key=target_canonical_key(uniprot_accession),
                 gene_symbol=gene_symbol,
                 uniprot_accession=uniprot_accession,
@@ -97,7 +118,8 @@ async def _do_cache(
                 retrieved_at=now,
             )
         )
-        inserted += 1
+
+    inserted = await persist_canonical_target(targets, session)
 
     if inserted > 0:
         await session.commit()

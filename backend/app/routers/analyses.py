@@ -33,6 +33,7 @@ from app.repositories import analysis_repo
 from analysis.pipeline import run_stage
 from analysis.stages.stage3_targets import _make_target_id, _make_ct_id
 from app.services.canonicalize import make_target_id, target_canonical_key
+from app.services.target_persist import persist_canonical_target
 from integrations.uniprot import validate_human_target
 from integrations._retry import ServiceUnavailableError
 
@@ -599,19 +600,15 @@ async def import_targets(
         for stp_t in body.targets:
             target_id = make_target_id(stp_t.uniprot_id)
 
-            # Upsert Target row
-            existing_target = (await session.exec(
-                select(Target).where(Target.target_id == target_id)
-            )).one_or_none()
-            if existing_target is None:
-                session.add(Target(
-                    target_id=target_id,
-                    canonical_key=target_canonical_key(stp_t.uniprot_id),
-                    gene_symbol=stp_t.gene_symbol.upper(),
-                    uniprot_accession=stp_t.uniprot_id,
-                    organism_tax_id=9606,
-                    retrieved_at=now,
-                ))
+            # Upsert Target row (insert-if-absent; no commit — see commit below)
+            await persist_canonical_target([Target(
+                target_id=target_id,
+                canonical_key=target_canonical_key(stp_t.uniprot_id),
+                gene_symbol=stp_t.gene_symbol.upper(),
+                uniprot_accession=stp_t.uniprot_id,
+                organism_tax_id=9606,
+                retrieved_at=now,
+            )], session)
 
             # Upsert CompoundTarget row
             ct_id = _make_ct_id(body.compound_id, target_id)
@@ -726,10 +723,10 @@ async def inject_compounds(
             cached=0,
         )
 
-    # Cache canonicalized compounds to DB for future pipeline reuse.
-    # Non-fatal: if caching fails, log a warning and continue.
-    from app.services.compound_cache import cache_validated_compounds
-    cached_count = await cache_validated_compounds(validated, session)
+    # Persist canonicalized compounds to DB for future pipeline reuse.
+    # Non-fatal: if persistence fails, log a warning and continue.
+    from app.services.compound_persist import persist_validated_compounds
+    cached_count = await persist_validated_compounds(validated, session)
 
     # Build stage_1 synthetic result — mimics stage1_selection.run() output.
     # Stage 2 reads compound_ids from stage_1; stage 3 reads all_active_compound_ids
@@ -940,19 +937,15 @@ async def add_user_target(
 
     # Upsert Target row (canonical cache — permanent)
     target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
-    existing = (await session.exec(
-        select(Target).where(Target.target_id == target_id)
-    )).one_or_none()
-    if existing is None:
-        session.add(Target(
-            target_id=target_id,
-            canonical_key=f"uniprot:{info.uniprot_accession}",
-            gene_symbol=info.gene_symbol,
-            uniprot_accession=info.uniprot_accession,
-            protein_name=info.protein_name,
-            organism_tax_id=9606,
-            retrieved_at=datetime.utcnow(),
-        ))
+    await persist_canonical_target([Target(
+        target_id=target_id,
+        canonical_key=f"uniprot:{info.uniprot_accession}",
+        gene_symbol=info.gene_symbol,
+        uniprot_accession=info.uniprot_accession,
+        protein_name=info.protein_name,
+        organism_tax_id=9606,
+        retrieved_at=datetime.utcnow(),
+    )], session)
 
     try:
         updated = _add_target_to_stage3(stage3, info.gene_symbol, info.uniprot_accession, info.protein_name)
@@ -1032,19 +1025,15 @@ async def add_user_disease_target(
 
     # Upsert Target row (canonical cache — permanent)
     target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
-    existing = (await session.exec(
-        select(Target).where(Target.target_id == target_id)
-    )).one_or_none()
-    if existing is None:
-        session.add(Target(
-            target_id=target_id,
-            canonical_key=f"uniprot:{info.uniprot_accession}",
-            gene_symbol=info.gene_symbol,
-            uniprot_accession=info.uniprot_accession,
-            protein_name=info.protein_name,
-            organism_tax_id=9606,
-            retrieved_at=datetime.utcnow(),
-        ))
+    await persist_canonical_target([Target(
+        target_id=target_id,
+        canonical_key=f"uniprot:{info.uniprot_accession}",
+        gene_symbol=info.gene_symbol,
+        uniprot_accession=info.uniprot_accession,
+        protein_name=info.protein_name,
+        organism_tax_id=9606,
+        retrieved_at=datetime.utcnow(),
+    )], session)
 
     try:
         updated = _add_target_to_stage4(
@@ -1161,7 +1150,7 @@ async def inject_targets(
     # never drop inputs (unknowns kept + flagged), normalize-then-dedup by canonical symbol.
     if body.skip_validation:
         from app.services import gene_symbols
-        from app.services.target_cache import cache_validated_targets
+        from app.services.target_persist import persist_validated_targets
 
         normalized_changes: list[dict] = []
         unrecognized: list[str] = []
@@ -1248,9 +1237,9 @@ async def inject_targets(
         )
         await analysis_repo.merge_run_parameters(session, analysis_id, {"_input_mode": "manual_targets"})
 
-        # Accession-resolved targets carry a UniProt accession — cache them (symbol-only
-        # targets have uniprot_id=None and are skipped by the cache).
-        cached = await cache_validated_targets(deduped_new, session)
+        # Accession-resolved targets carry a UniProt accession — persist them (symbol-only
+        # targets have uniprot_id=None and are skipped by the persist service).
+        cached = await persist_validated_targets(deduped_new, session)
 
         return InjectTargetsResponse(
             injected=len(deduped_new),
@@ -1372,11 +1361,11 @@ async def inject_targets(
         {"_input_mode": "manual_targets"},
     )
 
-    # Persist the newly validated targets to the canonical targets table (DB cache),
-    # mirroring compound caching on inject-compounds. Only targets with a UniProt
+    # Persist the newly validated targets to the canonical targets table,
+    # mirroring compound persistence on inject-compounds. Only targets with a UniProt
     # accession are stored; failures are non-fatal and return 0.
-    from app.services.target_cache import cache_validated_targets
-    cached = await cache_validated_targets(new_targets, session)
+    from app.services.target_persist import persist_validated_targets
+    cached = await persist_validated_targets(new_targets, session)
 
     return InjectTargetsResponse(
         injected=len(new_targets),

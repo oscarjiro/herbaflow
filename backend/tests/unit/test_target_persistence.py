@@ -1,13 +1,14 @@
-"""Tests for target DB caching after successful UniProt validation.
+"""Tests for target DB persistence after successful UniProt validation.
 
 Symmetric to test_compound_persistence.py. Covers:
 1. Validated target (has UniProt accession) -> persisted to targets table
 2. Unvalidated target (skip_validation, uniprot_id=None) -> NOT persisted
 3. Already-existing target (same target_id) -> upsert skips insert (no crash)
-4. No CompoundTarget / DiseaseTarget link rows are created during caching
+4. No CompoundTarget / DiseaseTarget link rows are created during persistence
 5. InjectTargetsResponse exposes a 'cached' count field (defaults to 0)
-6. DB error during caching -> logs warning and returns 0 (does not raise)
-7. inject-targets endpoint (validated path) wires caching and reports 'cached'
+6. DB error during persistence -> logs warning and returns 0 (does not raise)
+7. inject-targets endpoint (validated path) wires persistence and reports 'cached'
+8. persist_canonical_target primitive: insert-if-absent, no links, no commit
 """
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -48,9 +49,9 @@ UNVALIDATED_TARGETS = [
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_targets_persists_validated():
+async def test_persist_validated_targets_persists_validated():
     """Targets with a UniProt accession are inserted into the targets table."""
-    from app.services.target_cache import cache_validated_targets
+    from app.services.target_persist import persist_validated_targets
     from app.models.target import Target
 
     mock_session = AsyncMock()
@@ -58,7 +59,7 @@ async def test_cache_validated_targets_persists_validated():
     mock_result.one_or_none.return_value = None  # not yet in DB
     mock_session.exec.return_value = mock_result
 
-    count = await cache_validated_targets(VALIDATED_TARGETS, mock_session)
+    count = await persist_validated_targets(VALIDATED_TARGETS, mock_session)
 
     assert count == 2
     assert mock_session.add.call_count == 2
@@ -69,25 +70,25 @@ async def test_cache_validated_targets_persists_validated():
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_targets_skips_unvalidated():
+async def test_persist_validated_targets_skips_unvalidated():
     """Targets without a UniProt accession (skip_validation) are not persisted."""
-    from app.services.target_cache import cache_validated_targets
+    from app.services.target_persist import persist_validated_targets
 
     mock_session = AsyncMock()
     mock_result = MagicMock()
     mock_result.one_or_none.return_value = None
     mock_session.exec.return_value = mock_result
 
-    count = await cache_validated_targets(UNVALIDATED_TARGETS, mock_session)
+    count = await persist_validated_targets(UNVALIDATED_TARGETS, mock_session)
 
     assert count == 0
     mock_session.add.assert_not_called()
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_targets_skips_existing():
+async def test_persist_validated_targets_skips_existing():
     """If a target_id already exists in DB, it is not inserted again."""
-    from app.services.target_cache import cache_validated_targets
+    from app.services.target_persist import persist_validated_targets
     from app.models.target import Target
 
     mock_session = AsyncMock()
@@ -96,16 +97,16 @@ async def test_cache_validated_targets_skips_existing():
     mock_result.one_or_none.return_value = existing
     mock_session.exec.return_value = mock_result
 
-    count = await cache_validated_targets(VALIDATED_TARGETS, mock_session)
+    count = await persist_validated_targets(VALIDATED_TARGETS, mock_session)
 
     assert count == 0
     mock_session.add.assert_not_called()
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_targets_no_link_rows():
+async def test_persist_validated_targets_no_link_rows():
     """Caching must never create CompoundTarget or DiseaseTarget association rows."""
-    from app.services.target_cache import cache_validated_targets
+    from app.services.target_persist import persist_validated_targets
     from app.models.target import CompoundTarget, DiseaseTarget
 
     mock_session = AsyncMock()
@@ -113,12 +114,54 @@ async def test_cache_validated_targets_no_link_rows():
     mock_result.one_or_none.return_value = None
     mock_session.exec.return_value = mock_result
 
-    await cache_validated_targets(VALIDATED_TARGETS, mock_session)
+    await persist_validated_targets(VALIDATED_TARGETS, mock_session)
 
     for added_call in mock_session.add.call_args_list:
         obj = added_call.args[0]
         assert not isinstance(obj, (CompoundTarget, DiseaseTarget)), \
             "Must NOT add link rows during caching"
+
+
+@pytest.mark.asyncio
+async def test_persist_canonical_target_inserts_absent_skips_present_no_commit():
+    """Primitive inserts an absent target, skips a present one, creates no link
+    rows, and never commits (the caller owns commit granularity)."""
+    from app.services.target_persist import persist_canonical_target
+    from app.models.target import Target, CompoundTarget, DiseaseTarget
+
+    absent = Target(
+        target_id="uniprot:P04637",
+        canonical_key="uniprot:P04637",
+        gene_symbol="TP53",
+        uniprot_accession="P04637",
+        organism_tax_id=9606,
+    )
+    present = Target(
+        target_id="uniprot:P00533",
+        canonical_key="uniprot:P00533",
+        gene_symbol="EGFR",
+        uniprot_accession="P00533",
+        organism_tax_id=9606,
+    )
+
+    # First SELECT (absent) -> None; second SELECT (present) -> an existing row.
+    miss = MagicMock()
+    miss.one_or_none.return_value = None
+    hit = MagicMock()
+    hit.one_or_none.return_value = MagicMock(spec=Target)
+
+    mock_session = AsyncMock()
+    mock_session.exec.side_effect = [miss, hit]
+
+    count = await persist_canonical_target([absent, present], mock_session)
+
+    assert count == 1
+    mock_session.add.assert_called_once()
+    added = mock_session.add.call_args.args[0]
+    assert added is absent
+    assert not isinstance(added, (CompoundTarget, DiseaseTarget))
+    # Primitive must NOT commit — commit granularity is the caller's.
+    mock_session.commit.assert_not_called()
 
 
 def test_inject_targets_response_includes_cached_field():
@@ -144,14 +187,14 @@ def test_inject_targets_response_cached_defaults_to_zero():
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_targets_db_error_returns_zero():
+async def test_persist_validated_targets_db_error_returns_zero():
     """If the DB raises during caching, the function returns 0 (does not re-raise)."""
-    from app.services.target_cache import cache_validated_targets
+    from app.services.target_persist import persist_validated_targets
 
     mock_session = AsyncMock()
     mock_session.exec.side_effect = Exception("DB connection lost")
 
-    count = await cache_validated_targets(VALIDATED_TARGETS, mock_session)
+    count = await persist_validated_targets(VALIDATED_TARGETS, mock_session)
     assert count == 0
 
 
@@ -176,7 +219,7 @@ async def test_inject_targets_endpoint_reports_cached():
          patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.routers.analyses.validate_human_target", new=AsyncMock(return_value=tp53)), \
-         patch("app.services.target_cache.cache_validated_targets", new=AsyncMock(return_value=1)) as mock_cache:
+         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=1)) as mock_cache:
 
         mock_session = AsyncMock()
         request = InjectTargetsRequest(targets=["TP53"])
@@ -231,7 +274,7 @@ async def test_inject_targets_lenient_normalizes_symbols():
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
          patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(side_effect=_capture_status)), \
          patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.target_cache.cache_validated_targets", new=AsyncMock(return_value=0)):
+         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["TNFA", "TP53"], skip_validation=True)
         result = await inject_targets(ANALYSIS_UUID, request, AsyncMock())
 
@@ -259,7 +302,7 @@ async def test_inject_targets_lenient_dedups_alias_and_canonical():
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
          patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.target_cache.cache_validated_targets", new=AsyncMock(return_value=0)):
+         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["TNF", "TNFA"], skip_validation=True)
         result = await inject_targets(UUID("00000000-0000-0000-0000-000000000056"), request, AsyncMock())
 
@@ -284,7 +327,7 @@ async def test_inject_targets_lenient_unknown_kept_and_flagged():
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
          patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.target_cache.cache_validated_targets", new=AsyncMock(return_value=0)):
+         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["ZZZ9"], skip_validation=True)
         result = await inject_targets(UUID("00000000-0000-0000-0000-000000000057"), request, AsyncMock())
 
@@ -315,7 +358,7 @@ async def test_inject_targets_lenient_accession_routes_to_uniprot():
          patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.routers.analyses.validate_human_target", new=AsyncMock(return_value=info)) as mock_val, \
-         patch("app.services.target_cache.cache_validated_targets", new=AsyncMock(return_value=1)):
+         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=1)):
         request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
         result = await inject_targets(UUID("00000000-0000-0000-0000-000000000058"), request, AsyncMock())
 
@@ -342,7 +385,7 @@ async def test_inject_targets_lenient_accession_uniprot_down_kept_no_503():
          patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.routers.analyses.validate_human_target", new=AsyncMock(side_effect=ServiceUnavailableError("down"))), \
-         patch("app.services.target_cache.cache_validated_targets", new=AsyncMock(return_value=0)):
+         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
         result = await inject_targets(UUID("00000000-0000-0000-0000-000000000059"), request, AsyncMock())
 

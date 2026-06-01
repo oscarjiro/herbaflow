@@ -19,6 +19,7 @@ from app.services.canonicalize import (
     make_target_id as _core_make_target_id,
     target_canonical_key,
 )
+from app.services.target_persist import persist_canonical_target
 
 # TARGET_NS is imported from the canonicalization core above (re-exported for
 # existing importers: `from analysis.stages.stage3_targets import TARGET_NS`).
@@ -172,38 +173,34 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
 
     for gene, t in target_info.items():  # ChEMBL targets
         target_id = _make_target_id(t.uniprot_accession, gene)
-        existing = await session.exec(select(Target).where(Target.target_id == target_id))
-        if not existing.first():
-            canonical_key = (
-                target_canonical_key(t.uniprot_accession)
-                if t.uniprot_accession
-                else f"gene:{gene}"
-            )
-            session.add(Target(
-                target_id=target_id,
-                canonical_key=canonical_key,
-                gene_symbol=gene,
-                uniprot_accession=t.uniprot_accession,
-                organism_tax_id=9606,
-                retrieved_at=now,
-            ))
+        canonical_key = (
+            target_canonical_key(t.uniprot_accession)
+            if t.uniprot_accession
+            else f"gene:{gene}"
+        )
+        await persist_canonical_target([Target(
+            target_id=target_id,
+            canonical_key=canonical_key,
+            gene_symbol=gene,
+            uniprot_accession=t.uniprot_accession,
+            organism_tax_id=9606,
+            retrieved_at=now,
+        )], session)
 
     for gene, t in pubchem_target_info.items():  # PubChem targets (not in ChEMBL)
         if gene in target_info:
             continue  # Target row already upserted above
         target_id = _make_target_id(t.uniprot_accession, gene)
-        existing = await session.exec(select(Target).where(Target.target_id == target_id))
-        if not existing.first():
-            canonical_key = target_canonical_key(t.uniprot_accession)
-            session.add(Target(
-                target_id=target_id,
-                canonical_key=canonical_key,
-                gene_symbol=gene,
-                protein_name=t.protein_name,
-                uniprot_accession=t.uniprot_accession,
-                organism_tax_id=9606,
-                retrieved_at=now,
-            ))
+        canonical_key = target_canonical_key(t.uniprot_accession)
+        await persist_canonical_target([Target(
+            target_id=target_id,
+            canonical_key=canonical_key,
+            gene_symbol=gene,
+            protein_name=t.protein_name,
+            uniprot_accession=t.uniprot_accession,
+            organism_tax_id=9606,
+            retrieved_at=now,
+        )], session)
 
     await session.commit()
 

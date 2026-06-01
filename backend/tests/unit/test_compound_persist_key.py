@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from app.services.compound_cache import _do_cache
+from app.services.compound_persist import _do_persist
 
 
 class _FakeResult:
@@ -19,7 +19,7 @@ async def test_cache_stores_inchi_canonical_key_not_pubchem():
     added = []
     session.add.side_effect = lambda obj: added.append(obj)
 
-    await _do_cache(
+    await _do_persist(
         [
             {
                 "compound_id": "7373585f-6e71-532a-8e3e-330defb8fbe8",

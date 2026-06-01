@@ -84,9 +84,9 @@ VALIDATED_NO_CID = [
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_compounds_persists_cid_compounds():
+async def test_persist_validated_compounds_persists_cid_compounds():
     """Compounds with a pubchem_cid are inserted into the compounds table."""
-    from app.services.compound_cache import cache_validated_compounds
+    from app.services.compound_persist import persist_validated_compounds
     from app.models.compound import Compound
 
     mock_session = AsyncMock()
@@ -95,7 +95,7 @@ async def test_cache_validated_compounds_persists_cid_compounds():
     mock_result.first.return_value = None
     mock_session.exec.return_value = mock_result
 
-    count = await cache_validated_compounds(VALIDATED_WITH_CID, mock_session)
+    count = await persist_validated_compounds(VALIDATED_WITH_CID, mock_session)
 
     assert count == 2
     # session.add should be called once per new compound
@@ -114,16 +114,16 @@ async def test_cache_validated_compounds_persists_cid_compounds():
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_compounds_skips_no_cid():
+async def test_persist_validated_compounds_skips_no_cid():
     """Compounds with pubchem_cid=None are not inserted — they are user_provided/unvalidated."""
-    from app.services.compound_cache import cache_validated_compounds
+    from app.services.compound_persist import persist_validated_compounds
 
     mock_session = AsyncMock()
     mock_result = MagicMock()
     mock_result.first.return_value = None
     mock_session.exec.return_value = mock_result
 
-    count = await cache_validated_compounds(VALIDATED_NO_CID, mock_session)
+    count = await persist_validated_compounds(VALIDATED_NO_CID, mock_session)
 
     assert count == 0
     mock_session.add.assert_not_called()
@@ -137,9 +137,9 @@ async def test_cache_validated_compounds_skips_no_cid():
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_compounds_skips_existing():
+async def test_persist_validated_compounds_skips_existing():
     """If a compound_id already exists in DB, it is not inserted again."""
-    from app.services.compound_cache import cache_validated_compounds
+    from app.services.compound_persist import persist_validated_compounds
     from app.models.compound import Compound
 
     mock_session = AsyncMock()
@@ -149,7 +149,7 @@ async def test_cache_validated_compounds_skips_existing():
     mock_result.first.return_value = existing
     mock_session.exec.return_value = mock_result
 
-    count = await cache_validated_compounds(VALIDATED_WITH_CID, mock_session)
+    count = await persist_validated_compounds(VALIDATED_WITH_CID, mock_session)
 
     assert count == 0
     mock_session.add.assert_not_called()
@@ -161,9 +161,9 @@ async def test_cache_validated_compounds_skips_existing():
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_compounds_no_plant_links():
+async def test_persist_validated_compounds_no_plant_links():
     """Caching must never create PlantCompound associations."""
-    from app.services.compound_cache import cache_validated_compounds
+    from app.services.compound_persist import persist_validated_compounds
     from app.models.compound import PlantCompound
 
     mock_session = AsyncMock()
@@ -171,7 +171,7 @@ async def test_cache_validated_compounds_no_plant_links():
     mock_result.first.return_value = None
     mock_session.exec.return_value = mock_result
 
-    await cache_validated_compounds(VALIDATED_WITH_CID, mock_session)
+    await persist_validated_compounds(VALIDATED_WITH_CID, mock_session)
 
     for added_call in mock_session.add.call_args_list:
         obj = added_call.args[0]
@@ -214,15 +214,15 @@ def test_inject_compounds_response_cached_defaults_to_zero():
 
 
 @pytest.mark.asyncio
-async def test_cache_validated_compounds_db_error_returns_zero():
+async def test_persist_validated_compounds_db_error_returns_zero():
     """If the DB raises an exception during caching, the function returns 0 (not re-raises)."""
-    from app.services.compound_cache import cache_validated_compounds
+    from app.services.compound_persist import persist_validated_compounds
 
     mock_session = AsyncMock()
     mock_session.exec.side_effect = Exception("DB connection lost")
 
     # Must not raise — must return 0 (soft failure)
-    count = await cache_validated_compounds(VALIDATED_WITH_CID, mock_session)
+    count = await persist_validated_compounds(VALIDATED_WITH_CID, mock_session)
     assert count == 0
 
 
@@ -276,7 +276,7 @@ def test_inject_compounds_endpoint_returns_cached_field():
             new=AsyncMock(return_value=(["CC(=O)Oc1ccccc1C(=O)O"], [])),
         ),
         patch(
-            "app.services.compound_cache.cache_validated_compounds",
+            "app.services.compound_persist.persist_validated_compounds",
             new=AsyncMock(return_value=1),
         ),
         patch("app.database.get_session"),
