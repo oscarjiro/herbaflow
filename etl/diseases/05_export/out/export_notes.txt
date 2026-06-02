@@ -1,4 +1,4 @@
-Export completed at 2026-06-02T11:19:37+00:00
+Export completed at 2026-06-02T14:43:55+00:00
 Source directory: C:\code\web\herbaflow\etl\diseases\03_build_canonical\out
 Validation passed: True
 Exported files:

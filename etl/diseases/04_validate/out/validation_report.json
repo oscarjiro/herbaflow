@@ -7,7 +7,7 @@
   "canonical_file": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\diseases.csv",
   "aliases_file": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_aliases.csv",
   "alias_map_file": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_alias_map.csv",
-  "timestamp": "2026-06-02T11:19:36+00:00",
+  "timestamp": "2026-06-02T14:43:54+00:00",
   "canonical_row_count": 10,
   "canonical_unique_disease_keys": 10,
   "canonical_unique_disease_ids": 10,
@@ -17,15 +17,11 @@
   "alias_empty_alias_key_count": 0,
   "alias_map_row_count": 24,
   "alias_map_orphan_count": 0,
-  "issue_count": 24,
+  "issue_count": 0,
   "critical_issue_count": 0,
-  "warning_issue_count": 24,
+  "warning_issue_count": 0,
   "notice_issue_count": 0,
-  "severity_counts": {
-    "warning": 24
-  },
-  "issue_type_counts": {
-    "missing_provenance_value": 24
-  },
+  "severity_counts": {},
+  "issue_type_counts": {},
   "passed": true
 }
