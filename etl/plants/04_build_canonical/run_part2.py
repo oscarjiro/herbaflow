@@ -31,7 +31,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir
+from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, now_iso
 from plants.utils import plant_canonical_key, plant_id as make_plant_id, plant_alias_id as make_alias_id
 from shared.identity import pick_alias
 from shared.provenance import gbif_species_url
@@ -270,7 +270,9 @@ def coalesce_source_url(row: pd.Series) -> str:
 
 
 def coalesce_retrieved_at(row: pd.Series) -> str:
-    return first_non_empty(row.get("retrieved_at", ""))
+    # Upstream KNApSAcK scrape carries no fetch timestamp; stamp build time so the
+    # canonical row records when it was derived rather than loading a NULL.
+    return first_non_empty(row.get("retrieved_at", "")) or now_iso()
 
 
 def coalesce_source_name(row: pd.Series, fallback: str) -> str:

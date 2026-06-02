@@ -12,14 +12,26 @@ _spec.loader.exec_module(_mod)
 CFG = {"source": {"name": "Open Targets", "url": "https://platform.opentargets.org", "batch_id": "b1"}}
 
 
-def test_build_targets_source_url_is_ot_target_deep_link():
+def test_build_targets_source_url_is_uniprot_when_accession_present():
     raw = pd.DataFrame([{
         "canonical_key": "uniprot:P04637", "ensembl_id": "ENSG00000141510",
         "gene_symbol": "TP53", "approved_name": "Cellular tumor antigen p53",
         "uniprot_accession": "P04637", "organism_tax_id": "9606",
     }])
     out = _mod.build_targets(raw, CFG, "2026-01-01T00:00:00Z")
+    assert out.iloc[0]["source_url"] == "https://www.uniprot.org/uniprotkb/P04637/entry"
+    assert out.iloc[0]["source_name"] == "UniProt"
+
+
+def test_build_targets_source_url_falls_back_to_ot_when_ensembl_only():
+    raw = pd.DataFrame([{
+        "canonical_key": "ensembl:ENSG00000141510", "ensembl_id": "ENSG00000141510",
+        "gene_symbol": "TP53", "approved_name": "Cellular tumor antigen p53",
+        "uniprot_accession": "", "organism_tax_id": "9606",
+    }])
+    out = _mod.build_targets(raw, CFG, "2026-01-01T00:00:00Z")
     assert out.iloc[0]["source_url"] == "https://platform.opentargets.org/target/ENSG00000141510"
+    assert out.iloc[0]["source_name"] == "Open Targets"
 
 
 def test_build_disease_targets_link_source_url():

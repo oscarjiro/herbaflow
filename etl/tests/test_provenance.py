@@ -24,7 +24,7 @@ def test_chembl_compound_url():
 
 
 def test_uniprot_url():
-    assert p.uniprot_url("P04637") == "https://www.uniprot.org/uniprotkb/P04637"
+    assert p.uniprot_url("P04637") == "https://www.uniprot.org/uniprotkb/P04637/entry"
     assert p.uniprot_url("") is None
 
 
@@ -61,6 +61,11 @@ def test_disease_ontology_url():
     assert p.disease_ontology_url("DOID", "DOID:1612") == "https://disease-ontology.org/?id=DOID:1612"
     assert p.disease_ontology_url("Disease Ontology", "DOID:1612") == \
         "https://disease-ontology.org/?id=DOID:1612"
+    # Stored OBO underscore form normalizes to the colon CURIE the DO site expects.
+    assert p.disease_ontology_url("Disease Ontology", "DOID_1612") == \
+        "https://disease-ontology.org/?id=DOID:1612"
+    assert p.disease_ontology_url("DOID", "DOID_0080208") == \
+        "https://disease-ontology.org/?id=DOID:0080208"
     assert p.disease_ontology_url("MeSH", "D001943") == \
         "https://meshb.nlm.nih.gov/record/ui?ui=D001943"
     assert p.disease_ontology_url("Unknown", "X") is None
@@ -73,6 +78,8 @@ def test_build_source_url_dispatch():
         "https://pubchem.ncbi.nlm.nih.gov/compound/2244"
     assert p.build_source_url("Open Targets", ensembl_id="ENSG1") == \
         "https://platform.opentargets.org/target/ENSG1"
+    assert p.build_source_url("UniProt", uniprot_accession="P04637") == \
+        "https://www.uniprot.org/uniprotkb/P04637/entry"
     assert p.build_source_url("KNApSAcK", c_id="C1") == \
         "http://www.knapsackfamily.com/knapsack_core/information.php?word=C1"
     assert p.build_source_url("nonsense") is None

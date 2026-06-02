@@ -38,7 +38,7 @@ def chembl_compound_url(chembl_id: object) -> str | None:
 
 def uniprot_url(accession: object) -> str | None:
     acc = _clean(accession)
-    return f"https://www.uniprot.org/uniprotkb/{acc}" if acc else None
+    return f"https://www.uniprot.org/uniprotkb/{acc}/entry" if acc else None
 
 
 def opentargets_target_url(ensembl_id: object) -> str | None:
@@ -78,7 +78,12 @@ def disease_ontology_url(ontology_source: object, ontology_id: object) -> str | 
     src = _clean(ontology_source).lower()
     oid = _clean(ontology_id)
     template = _DISEASE_ONTOLOGY.get(src)
-    return template.format(id=oid) if (template and oid) else None
+    if not (template and oid):
+        return None
+    if src in ("doid", "disease ontology"):
+        # DO site needs the colon CURIE (DOID:9352); stored ids use the OBO underscore form.
+        oid = oid.replace("_", ":")
+    return template.format(id=oid)
 
 
 # --- Dispatcher + fallback (used by tests and the backend twin) ---

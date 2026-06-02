@@ -646,8 +646,10 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
             or clean_str(rep.get("batch_id", ""))
             or clean_str(settings.get("batch_id", ""))
         )
-        retrieved_at = clean_str(rep.get("retrieved_at", "")) or clean_str(
-            settings.get("retrieved_at", "")
+        retrieved_at = (
+            clean_str(rep.get("retrieved_at", ""))
+            or clean_str(settings.get("retrieved_at", ""))
+            or now_iso()  # curated seed has no fetch time; stamp build time, not NULL
         )
         source_reference_clean = clean_str(
             rep.get("source_reference_clean", "")

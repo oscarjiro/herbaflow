@@ -1,9 +1,12 @@
 """Tests for disease_targets.03_build_canonical.
 
 Provenance contract: the canonical CSVs must carry a ``source_name`` column
-(the key the loader's ``resolve_src`` reads), holding the source display name
-``OpenTargets`` — a real row in ``source_systems`` (supabase/seed.sql). The old
-``source_id`` column name caused the loader to write null source FKs.
+(the key the loader's ``resolve_src`` reads), holding a source display name that is
+a real row in ``source_systems`` (supabase/seed.sql). Target entity rows resolve
+per-row: ``UniProt`` when a UniProt accession exists (the protein authority), else
+``OpenTargets`` for Ensembl-only fallback targets. disease_target LINK rows always
+carry ``OpenTargets`` — the source of the association. The old ``source_id`` column
+name caused the loader to write null source FKs.
 """
 
 import importlib.util
@@ -40,6 +43,22 @@ def test_build_targets_emits_source_name():
 
     assert "source_name" in df.columns
     assert "source_id" not in df.columns
+    # UniProt accession present → protein authority.
+    assert df.iloc[0]["source_name"] == "UniProt"
+
+
+def test_build_targets_ensembl_only_keeps_opentargets():
+    targets_raw = pd.DataFrame([{
+        "canonical_key": "ensembl:ENSG00000142208",
+        "ensembl_id": "ENSG00000142208",
+        "gene_symbol": "AKT1",
+        "approved_name": "RAC-alpha serine/threonine-protein kinase",
+        "uniprot_accession": "",
+        "organism_tax_id": "9606",
+    }])
+
+    df = bc.build_targets(targets_raw, _cfg(), "2026-01-01")
+
     assert df.iloc[0]["source_name"] == "OpenTargets"
 
 

@@ -27,7 +27,7 @@ from disease_targets.utils import (
     target_id_from_key, target_alias_id, disease_target_id,
 )
 from shared.identity import pick_alias
-from shared.provenance import opentargets_target_url, opentargets_evidence_url
+from shared.provenance import opentargets_target_url, opentargets_evidence_url, uniprot_url
 
 
 def build_targets(targets_raw: pd.DataFrame, cfg: dict, retrieved_at: str) -> pd.DataFrame:
@@ -36,15 +36,25 @@ def build_targets(targets_raw: pd.DataFrame, cfg: dict, retrieved_at: str) -> pd
     for _, r in targets_raw.iterrows():
         tid = target_id_from_key(r["canonical_key"])
         ensembl = clean_str(r.get("ensembl_id"))
+        accession = clean_str(r.get("uniprot_accession"))
+        # Protein entity → its UniProt home page is the standardized authority.
+        # Ensembl-only fallback targets (no SwissProt/TrEMBL accession) keep the
+        # Open Targets deep link, where we discovered them.
+        if accession:
+            source_name = "UniProt"
+            source_url = uniprot_url(accession)
+        else:
+            source_name = src["name"]
+            source_url = opentargets_target_url(ensembl) or src["url"]
         rows.append({
             "target_id":          tid,
             "canonical_key":      r["canonical_key"],
             "gene_symbol":        clean_str(r.get("gene_symbol")),
             "protein_name":       clean_str(r.get("approved_name")),
-            "uniprot_accession":  clean_str(r.get("uniprot_accession")),
+            "uniprot_accession":  accession,
             "organism_tax_id":    clean_str(r.get("organism_tax_id", "9606")),
-            "source_name":        src["name"],
-            "source_url":         opentargets_target_url(ensembl) or src["url"],
+            "source_name":        source_name,
+            "source_url":         source_url,
             "retrieved_at":       retrieved_at,
         })
     return pd.DataFrame(rows)
@@ -59,6 +69,8 @@ def build_target_aliases(targets_df: pd.DataFrame, cfg: dict, retrieved_at: str)
         ensembl = clean_str(r.get("ensembl_id", ""))
         symbol  = clean_str(r.get("gene_symbol", ""))
         name    = clean_str(r.get("protein_name", ""))
+        # Aliases inherit the parent target's resolved source (UniProt or Open Targets).
+        src_name = clean_str(r.get("source_name")) or src["name"]
         src_url = r.get("source_url", "")
 
         def _alias(alias_name: str, alias_type: str) -> dict | None:
@@ -73,7 +85,7 @@ def build_target_aliases(targets_df: pd.DataFrame, cfg: dict, retrieved_at: str)
                 "alias_name":      alias_name,
                 "alias_key":       alias_key,
                 "alias_type":      alias_type,
-                "source_name":     src["name"],
+                "source_name":     src_name,
                 "source_url":      src_url,
                 "retrieved_at":    retrieved_at,
             }
