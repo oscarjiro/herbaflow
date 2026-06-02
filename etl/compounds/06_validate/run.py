@@ -93,9 +93,7 @@ COMPOUNDS_COLUMNS = [
     "is_pains_positive",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
-    "confidence",
     "canonical_status",
     "canonical_strategy",
     "canonical_reason",
@@ -111,7 +109,6 @@ ALIASES_COLUMNS = [
     "alias_type",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
 ]
 
@@ -166,12 +163,8 @@ PLANT_COMPOUNDS_COLUMNS = [
     "plant_compound_id",
     "plant_id",
     "compound_id",
-    "source_plant_raw_id",
-    "source_compound_raw_id",
     "source_name",
     "source_url",
-    "evidence_type",
-    "confidence",
     "retrieved_at",
 ]
 
@@ -555,7 +548,6 @@ def validate_compounds(
         canonical_key = normalize_whitespace(row.get("canonical_key", ""))
         name = normalize_whitespace(row.get("canonical_name", ""))
         status = normalize_whitespace(row.get("canonical_status", ""))
-        conf = parse_float(row.get("confidence", ""))
         evidence_count = parse_int(row.get("evidence_count", ""))
         plant_count = parse_int(row.get("plant_count", ""))
         inchi = normalize_whitespace(row.get("inchi_key", ""))
@@ -606,27 +598,6 @@ def validate_compounds(
                 rid,
                 "invalid_canonical_status",
                 f"canonical_status={status!r}",
-                "error",
-                source_file,
-            )
-
-        if conf is None:
-            add_issue(
-                issues,
-                "compounds.csv",
-                rid,
-                "invalid_confidence",
-                "confidence is not numeric",
-                "error",
-                source_file,
-            )
-        elif not (0.0 <= conf <= 1.0):
-            add_issue(
-                issues,
-                "compounds.csv",
-                rid,
-                "confidence_out_of_bounds",
-                f"confidence={conf}",
                 "error",
                 source_file,
             )
@@ -817,7 +788,6 @@ def validate_aliases(
         alias_type = normalize_whitespace(row.get("alias_type", ""))
         source_name = normalize_whitespace(row.get("source_name", ""))
         source_url = normalize_whitespace(row.get("source_url", ""))
-        source_batch_id = normalize_whitespace(row.get("source_batch_id", ""))
 
         alias_ids[alias_id] += 1
         if compound_id:
@@ -889,7 +859,7 @@ def validate_aliases(
                 source_file,
             )
 
-        if not source_name or not source_batch_id or not source_url:
+        if not source_name or not source_url:
             add_issue(
                 issues,
                 "compound_aliases.csv",
@@ -1280,25 +1250,14 @@ def validate_plant_compounds(
 ) -> Dict[str, Any]:
     ids: Counter[str] = Counter()
     pair_keys: set[Tuple[str, str]] = set()
-    evidence_types = Counter()
-    confidence_values: List[float] = []
 
     for i, row in enumerate(rows, start=1):
         rid = normalize_whitespace(row.get("plant_compound_id", "")) or f"row_{i}"
         bridge_id = normalize_whitespace(row.get("plant_compound_id", ""))
         plant_id = normalize_whitespace(row.get("plant_id", ""))
         compound_id = normalize_whitespace(row.get("compound_id", ""))
-        source_plant_raw_id = normalize_whitespace(row.get("source_plant_raw_id", ""))
-        source_compound_raw_id = normalize_whitespace(
-            row.get("source_compound_raw_id", "")
-        )
-        evidence_type = normalize_whitespace(row.get("evidence_type", ""))
-        confidence = parse_float(row.get("confidence", ""))
-        evidence_types[evidence_type] += 1
 
         ids[bridge_id] += 1
-        if confidence is not None:
-            confidence_values.append(confidence)
 
         if not bridge_id:
             add_issue(
@@ -1357,47 +1316,6 @@ def validate_plant_compounds(
                 source_file,
             )
 
-        if source_plant_raw_id == "":
-            add_issue(
-                issues,
-                "plant_compounds.csv",
-                rid,
-                "missing_source_plant_raw_id",
-                "source_plant_raw_id is blank",
-                "warning",
-                source_file,
-            )
-        if source_compound_raw_id == "":
-            add_issue(
-                issues,
-                "plant_compounds.csv",
-                rid,
-                "missing_source_compound_raw_id",
-                "source_compound_raw_id is blank",
-                "warning",
-                source_file,
-            )
-        if evidence_type not in {"canonicalized_candidate"}:
-            add_issue(
-                issues,
-                "plant_compounds.csv",
-                rid,
-                "unexpected_evidence_type",
-                f"evidence_type={evidence_type!r}",
-                "warning",
-                source_file,
-            )
-        if confidence is None or not (0.0 <= confidence <= 1.0):
-            add_issue(
-                issues,
-                "plant_compounds.csv",
-                rid,
-                "invalid_confidence",
-                f"confidence={row.get('confidence', '')!r}",
-                "error",
-                source_file,
-            )
-
         pair = (plant_id, compound_id)
         if plant_id and compound_id:
             if pair in pair_keys:
@@ -1428,9 +1346,6 @@ def validate_plant_compounds(
         "row_count": len(rows),
         "unique_bridge_ids": len(ids),
         "unique_pairs": len(pair_keys),
-        "evidence_type_counts": dict(evidence_types),
-        "confidence_min": min(confidence_values) if confidence_values else None,
-        "confidence_max": max(confidence_values) if confidence_values else None,
     }
 
 

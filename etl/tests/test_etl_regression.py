@@ -145,6 +145,16 @@ def test_plants_loaded_export_columns_have_no_dead_columns():
     assert {"source_batch_id", "confidence"}.isdisjoint(plants), f"plants still: {plants}"
     assert {"source_batch_id"}.isdisjoint(aliases), f"aliases still: {aliases}"
 
+
+def test_compounds_loaded_export_columns_have_no_dead_columns():
+    import pathlib
+    dead = {"source_batch_id", "confidence", "evidence_type",
+            "source_plant_raw_id", "source_compound_raw_id"}
+    text = pathlib.Path("etl/compounds/07_export/run.py").read_text(encoding="utf-8")
+    for const in ("COMPOUNDS_COLUMNS", "ALIASES_COLUMNS", "PLANT_COMPOUNDS_COLUMNS"):
+        block = _extract_list_literal(text, const)
+        assert dead.isdisjoint(block), f"{const} still lists {dead & block}"
+
 from shared.identity import PLANT_ALIAS_NS
 
 plants_canonical = _load(

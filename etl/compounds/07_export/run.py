@@ -86,9 +86,7 @@ COMPOUNDS_COLUMNS = [
     "lipinski_source",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
-    "confidence",
     "canonical_status",
     "canonical_strategy",
     "canonical_reason",
@@ -105,7 +103,6 @@ ALIASES_COLUMNS = [
     "alias_type",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
 ]
 
@@ -128,12 +125,8 @@ PLANT_COMPOUNDS_COLUMNS = [
     "plant_compound_id",
     "plant_id",
     "compound_id",
-    "source_plant_raw_id",
-    "source_compound_raw_id",
     "source_name",
     "source_url",
-    "evidence_type",
-    "confidence",
     "retrieved_at",
 ]
 

@@ -227,9 +227,7 @@ COMPOUNDS_COLUMNS = [
     "is_pains_positive",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
-    "confidence",
     "canonical_status",
     "canonical_strategy",
     "canonical_reason",
@@ -245,7 +243,6 @@ ALIASES_COLUMNS = [
     "alias_type",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
 ]
 
@@ -253,11 +250,7 @@ PLANT_COMPOUNDS_COLUMNS = [
     "plant_compound_id",
     "plant_id",
     "compound_id",
-    "source_plant_raw_id",
-    "source_compound_raw_id",
     "source_name",
-    "evidence_type",
-    "confidence",
     "retrieved_at",
 ]
 
@@ -1517,9 +1510,7 @@ def build_canonical_tables(
                 "is_pains_positive": is_pains_positive,
                 "source_name": source_name,
                 "source_url": source_url,
-                "source_batch_id": source_batch_id,
                 "retrieved_at": retrieved_at,
-                "confidence": f"{best_conf:.4f}",
                 "canonical_status": selected_status,
                 "canonical_strategy": best_entry["decision"]["canonical_strategy"],
                 "canonical_reason": combined_group_reason(
@@ -1566,9 +1557,6 @@ def build_canonical_tables(
             )
             if not canonical_plant_id:
                 continue
-            raw_plant_id = normalize_whitespace(
-                member.get("plant_id", "")
-            ) or normalize_whitespace(member.get("raw_plant_key", ""))
             raw_compound_id = normalize_whitespace(member.get("c_id", ""))
             bridge_key = (canonical_plant_id, compound_id)
             if bridge_key in bridge_seen:
@@ -1581,8 +1569,6 @@ def build_canonical_tables(
                     ),
                     "plant_id": canonical_plant_id,
                     "compound_id": compound_id,
-                    "source_plant_raw_id": raw_plant_id,
-                    "source_compound_raw_id": raw_compound_id,
                     "source_name": normalize_whitespace(
                         member.get("source_name", source_name)
                     ),
@@ -1590,8 +1576,6 @@ def build_canonical_tables(
                         knapsack_metabolite_url(raw_compound_id)
                         or normalize_whitespace(member.get("source_url", settings.source_url))
                     ),
-                    "evidence_type": "canonicalized_candidate",
-                    "confidence": f"{best_conf:.4f}",
                     "retrieved_at": normalize_whitespace(
                         member.get("retrieved_at", retrieved_at)
                     )
@@ -1624,7 +1608,6 @@ def build_canonical_tables(
                 "alias_type": row["alias_type"],
                 "source_name": row["source_name"],
                 "source_url": row["source_url"],
-                "source_batch_id": row["source_batch_id"],
                 "retrieved_at": row["retrieved_at"],
             }
         )
