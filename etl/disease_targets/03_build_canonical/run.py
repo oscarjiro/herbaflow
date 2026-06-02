@@ -45,9 +45,7 @@ def build_targets(targets_raw: pd.DataFrame, cfg: dict, retrieved_at: str) -> pd
             "organism_tax_id":    clean_str(r.get("organism_tax_id", "9606")),
             "source_name":        src["name"],
             "source_url":         opentargets_target_url(ensembl) or src["url"],
-            "source_batch_id":    src["batch_id"],
             "retrieved_at":       retrieved_at,
-            "confidence":         "1.0",
         })
     return pd.DataFrame(rows)
 
@@ -77,7 +75,6 @@ def build_target_aliases(targets_df: pd.DataFrame, cfg: dict, retrieved_at: str)
                 "alias_type":      alias_type,
                 "source_name":     src["name"],
                 "source_url":      src_url,
-                "source_batch_id": src["batch_id"],
                 "retrieved_at":    retrieved_at,
             }
 
@@ -143,7 +140,6 @@ def build_disease_targets(
             "source_url":        link_url,
             "association_type":  "open_targets_overall",
             "score":             str(score),
-            "confidence":        str(round(score, 4)),
             "retrieved_at":      retrieved_at,
         })
 

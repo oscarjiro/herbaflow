@@ -164,6 +164,13 @@ def test_diseases_loaded_export_columns_have_no_dead_columns():
         block = _extract_list_literal(text, const)
         assert dead.isdisjoint(block), f"{const} still lists {dead & block}"
 
+
+def test_disease_targets_build_emits_no_dead_columns():
+    import pathlib
+    text = pathlib.Path("etl/disease_targets/03_build_canonical/run.py").read_text(encoding="utf-8")
+    assert '"source_batch_id":' not in text, "disease_targets build still emits source_batch_id"
+    assert '"confidence":' not in text, "disease_targets build still emits confidence"
+
 from shared.identity import PLANT_ALIAS_NS
 
 plants_canonical = _load(
