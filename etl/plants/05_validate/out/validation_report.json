@@ -6,7 +6,7 @@
       "warning": 6
     }
   },
-  "generated_at": "2026-05-24T14:55:36.067159+00:00",
+  "generated_at": "2026-06-02T11:23:35.402120+00:00",
   "output_files": {
     "report_csv": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\validation_report.csv",
     "report_json": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\validation_report.json",

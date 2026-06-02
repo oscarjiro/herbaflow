@@ -1,13 +1,13 @@
 disease_key,query_key,ontology_id,ontology_source,standardized_name,ontology_confidence,ontology_match_method,retrieved_at
 copd,chronic_obstructive_pulmonary_disease,DOID_3083,Disease Ontology,chronic obstructive pulmonary disease,0.9,online_exact,2026-05-06T21:55:27+00:00
 masld,metabolic_dysfunction_associated_steatotic_liver_disease,DOID_0080208,Disease Ontology,metabolic dysfunction-associated steatotic liver disease,0.9,online_exact,2026-05-06T21:55:30+00:00
-type_2_diabetes_mellitus,type_2_diabetes_mellitus,DOID_9352,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-hypertension,hypertension,DOID_10763,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-obesity,obesity,DOID_9970,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-osteoarthritis,osteoarthritis,DOID_8398,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-rheumatoid_arthritis,rheumatoid_arthritis,DOID_7148,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-asthma,asthma,DOID_2841,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-copd,copd,DOID_3083,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-masld,masld,DOID_0080208,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-breast_cancer,breast_cancer,DOID_1612,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
-colorectal_cancer,colorectal_cancer,DOID_9256,Disease Ontology,,0.9,cache,2026-05-17T04:19:47+00:00
+type_2_diabetes_mellitus,type_2_diabetes_mellitus,DOID_9352,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+hypertension,hypertension,DOID_10763,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+obesity,obesity,DOID_9970,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+osteoarthritis,osteoarthritis,DOID_8398,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+rheumatoid_arthritis,rheumatoid_arthritis,DOID_7148,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+asthma,asthma,DOID_2841,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+copd,copd,DOID_3083,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+masld,masld,DOID_0080208,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+breast_cancer,breast_cancer,DOID_1612,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00
+colorectal_cancer,colorectal_cancer,DOID_9256,Disease Ontology,,0.9,cache,2026-06-02T11:19:34+00:00

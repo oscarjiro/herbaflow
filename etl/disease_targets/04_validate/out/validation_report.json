@@ -1,6 +1,6 @@
 {
-  "run_id": "validate_20260516_110729",
-  "validated_at": "2026-05-16T11:07:29+00:00",
+  "run_id": "validate_20260602_112033",
+  "validated_at": "2026-06-02T11:20:33+00:00",
   "summary": {
     "pass": 13,
     "warn": 0,
@@ -8,7 +8,7 @@
   },
   "counts": {
     "targets": 7589,
-    "target_aliases": 22767,
+    "target_aliases": 22739,
     "disease_targets": 14736,
     "diseases_covered": 10
   },

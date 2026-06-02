@@ -1,7 +1,7 @@
 {
   "dry_run": false,
   "emit_sql": false,
-  "generated_at": "2026-05-24T14:55:42.712452+00:00",
+  "generated_at": "2026-06-02T11:23:36.383510+00:00",
   "input_dir": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out",
   "outputs": {
     "plant_aliases_csv": "C:\\code\\web\\herbaflow\\etl\\plants\\06_export\\out\\plant_aliases.csv",
@@ -24,7 +24,6 @@
       "alias_type",
       "source_name",
       "source_url",
-      "source_batch_id",
       "retrieved_at"
     ],
     "plants_columns": [
@@ -44,9 +43,7 @@
       "gbif_kingdom_key",
       "source_name",
       "source_url",
-      "source_batch_id",
-      "retrieved_at",
-      "confidence"
+      "retrieved_at"
     ]
   },
   "sources": {
