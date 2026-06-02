@@ -4,6 +4,7 @@ Dropped columns:
 - 4 alias loaders (plant, compound, disease, target): source_id, source_url
 - load_targets: organism_tax_id
 - load_compounds: lipinski_source
+- load_plants: authorship, taxonomic_status, rank, gbif_*_key
 """
 from pathlib import Path
 
@@ -37,3 +38,15 @@ def test_compounds_insert_drops_lipinski_source():
     start = SRC.index("into compounds (")
     block = SRC[start : start + 800]
     assert "lipinski_source" not in block, "load_compounds still inserts lipinski_source"
+
+
+def test_plants_insert_drops_trimmed_entity_columns():
+    # load_plants must not insert the dropped plant entity columns.
+    start = SRC.index("into plants (")
+    block = SRC[start : start + 600]
+    for col in ("authorship", "taxonomic_status", "rank", "gbif_usage_key",
+                "gbif_accepted_usage_key", "gbif_species_key", "gbif_genus_key",
+                "gbif_family_key", "gbif_kingdom_key"):
+        assert col not in block, f"load_plants still inserts {col}"
+    # over-keep guard: family_name and source columns remain
+    assert "family_name" in block and "source_url" in block

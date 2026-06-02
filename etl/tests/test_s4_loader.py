@@ -20,7 +20,7 @@ def test_loader_drops_dead_columns():
     assert "source_compound_raw_id" not in pc
     # kept columns survive in their loaders
     assert "cas_id" in _func_src("load_compounds")
-    assert "gbif_usage_key" in _func_src("load_plants")
+    assert "family_name" in _func_src("load_plants")
     dt = _func_src("load_disease_targets")
     assert "association_type" in dt
     assert "score" in dt

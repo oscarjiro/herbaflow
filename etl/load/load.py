@@ -91,27 +91,18 @@ def load_plants(cur, source_map, upsert=False):
     print("Loading plants...", end=" ", flush=True)
     rows = read_csv(PLANTS_CSV)
     conflict = _conflict("plant_id", [
-        "canonical_key", "canonical_scientific_name", "authorship",
-        "family_name", "taxonomic_status", "rank",
-        "gbif_usage_key", "gbif_accepted_usage_key", "gbif_species_key",
-        "gbif_genus_key", "gbif_family_key", "gbif_kingdom_key",
+        "canonical_key", "canonical_scientific_name", "family_name",
         "source_id", "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into plants (
-            plant_id, canonical_key, canonical_scientific_name, authorship,
-            family_name, taxonomic_status, rank,
-            gbif_usage_key, gbif_accepted_usage_key, gbif_species_key,
-            gbif_genus_key, gbif_family_key, gbif_kingdom_key,
+            plant_id, canonical_key, canonical_scientific_name, family_name,
             source_id, source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["plant_id"], r["canonical_key"], r.get("canonical_scientific_name"),
-        r.get("authorship"), r.get("family_name"), r.get("taxonomic_status"), r.get("rank"),
-        _i(r.get("gbif_usage_key")), _i(r.get("gbif_accepted_usage_key")),
-        _i(r.get("gbif_species_key")), _i(r.get("gbif_genus_key")),
-        _i(r.get("gbif_family_key")), _i(r.get("gbif_kingdom_key")),
+        r.get("family_name"),
         resolve_src(r, source_map), r.get("source_url"),
         _ts(r.get("retrieved_at")),
     ) for r in rows]
