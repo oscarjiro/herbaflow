@@ -1,3 +1,5 @@
+from collections import Counter
+
 import igraph as ig
 import leidenalg
 import networkx as nx
@@ -64,6 +66,12 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         all_genes.add(e.gene_a)
         all_genes.add(e.gene_b)
 
+    # STRING returns edges, not a node list — overlap genes with no surviving interaction
+    # would otherwise be silently dropped from the network, node_count, and every
+    # downstream stage. Seed them so the node set represents every overlap gene; isolated
+    # ones become degree-0 nodes (degree_map defaults to 0 for them below).
+    all_genes |= overlap_set
+
     # Compute node degree for tooltip
     degree_map: dict[str, int] = {}
     raw_edges = []
@@ -81,9 +89,19 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     for edge in raw_edges:
         G.add_edge(edge["source"], edge["target"])
 
-    # Community detection
+    # Community detection on the connected graph only. Isolated overlap genes are NOT
+    # added to G, so Leiden's partition of the connected component is byte-for-byte
+    # unchanged; they receive their own singleton ids next.
     community_resolution = config.ppi.community_resolution
     community_map = detect_communities(G, resolution=community_resolution, seed=42)
+
+    # Each isolated overlap gene (no STRING edge) belongs to no module → give it its own
+    # singleton community id, continuing after the max connected id.
+    isolated_genes = sorted(overlap_set - set(community_map.keys()))
+    next_community_id = (max(community_map.values()) + 1) if community_map else 0
+    for gene in isolated_genes:
+        community_map[gene] = next_community_id
+        next_community_id += 1
 
     # Cytoscape element format: {data: {...}}
     nodes = [
@@ -109,7 +127,10 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         for e in raw_edges
     ]
 
-    n_communities = len(set(community_map.values())) if community_map else 0
+    # Count only real modules (>=2 members); singleton (isolated) communities are excluded
+    # so the headline metric reflects actual biology, not trivial one-gene clusters.
+    community_sizes = Counter(community_map.values())
+    n_communities = sum(1 for size in community_sizes.values() if size >= 2)
 
     return {
         "node_count": len(nodes),

@@ -135,3 +135,64 @@ async def test_stage6_nodes_have_community_id():
     for node in result["nodes"]:
         assert "community_id" in node["data"], f"Node {node['data']['id']} missing community_id"
         assert isinstance(node["data"]["community_id"], int)
+
+
+async def test_stage6_includes_isolated_overlap_genes():
+    """Overlap genes with no STRING edge must still appear as degree-0 nodes."""
+    run = make_run(overlap=["AKT1", "TNF", "LONELY"])
+    config = PipelineConfig()
+    session = AsyncMock()
+
+    fake_edges = [
+        PpiEdgeData(gene_a="AKT1", gene_b="TNF", combined_score=0.7,
+                    experimental_score=0.5, textmining_score=0.3, coexpression_score=0.2),
+    ]
+
+    with patch("analysis.stages.stage6_ppi.get_ppi_network", return_value=fake_edges):
+        result = await stage6_ppi.run(run, config, session)
+
+    node_ids = [n["data"]["id"] for n in result["nodes"]]
+    assert "LONELY" in node_ids
+    assert result["node_count"] == 3
+    lonely = next(n for n in result["nodes"] if n["data"]["id"] == "LONELY")
+    assert lonely["data"]["degree"] == 0
+    assert lonely["data"]["type"] == "overlap"
+
+
+async def test_stage6_isolated_genes_get_singleton_community_not_counted():
+    """Isolated genes get their own community id; singletons excluded from n_communities."""
+    config = PipelineConfig()
+    session = AsyncMock()
+    fake_edges = [
+        PpiEdgeData(gene_a="AKT1", gene_b="TNF", combined_score=0.7,
+                    experimental_score=0.5, textmining_score=0.3, coexpression_score=0.2),
+        PpiEdgeData(gene_a="TNF", gene_b="MDM2", combined_score=0.6,
+                    experimental_score=0.4, textmining_score=0.2, coexpression_score=0.1),
+    ]
+
+    base_run = make_run(overlap=["AKT1", "TNF", "MDM2"])
+    iso_run = make_run(overlap=["AKT1", "TNF", "MDM2", "LONELY"])
+
+    with patch("analysis.stages.stage6_ppi.get_ppi_network", return_value=fake_edges):
+        base = await stage6_ppi.run(base_run, config, session)
+    with patch("analysis.stages.stage6_ppi.get_ppi_network", return_value=fake_edges):
+        iso = await stage6_ppi.run(iso_run, config, session)
+
+    # LONELY's community id differs from every connected node's community id
+    connected_ids = {n["data"]["community_id"] for n in iso["nodes"]
+                     if n["data"]["id"] in {"AKT1", "TNF", "MDM2"}}
+    lonely = next(n for n in iso["nodes"] if n["data"]["id"] == "LONELY")
+    assert lonely["data"]["community_id"] not in connected_ids
+
+    # Singleton does not inflate the count, and connected grouping is unchanged
+    assert iso["n_communities"] == base["n_communities"]
+
+    def grouping(res):
+        from collections import defaultdict
+        groups = defaultdict(set)
+        for n in res["nodes"]:
+            if n["data"]["id"] in {"AKT1", "TNF", "MDM2"}:
+                groups[n["data"]["community_id"]].add(n["data"]["id"])
+        return sorted(tuple(sorted(s)) for s in groups.values())
+
+    assert grouping(iso) == grouping(base)
