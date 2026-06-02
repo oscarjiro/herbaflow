@@ -18,6 +18,7 @@ relationships from the KNApSAcK database.
 | `/backend/`             | Active      | FastAPI REST API — 8-stage pipeline, 180 tests       |
 | `/frontend/`            | Active      | React 19 + TS SPA — 8-stage pipeline UI              |
 | `/supabase/migrations/` | Active      | All Supabase SQL migrations (single source of truth) |
+| `/shared/contracts/`    | Active      | Language-neutral contracts read by backend + frontend |
 
 ## Key Conventions
 
