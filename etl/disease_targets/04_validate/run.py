@@ -27,7 +27,7 @@ TARGETS_REQUIRED = [
 ]
 ALIASES_REQUIRED = [
     "target_alias_id", "target_id", "alias_name", "alias_key", "alias_type",
-    "source_name", "retrieved_at",
+    "retrieved_at",
 ]
 DT_REQUIRED = [
     "disease_target_id", "disease_id", "target_id", "source_name",

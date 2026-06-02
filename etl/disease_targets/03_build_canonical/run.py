@@ -85,8 +85,6 @@ def build_target_aliases(targets_df: pd.DataFrame, cfg: dict, retrieved_at: str)
                 "alias_name":      alias_name,
                 "alias_key":       alias_key,
                 "alias_type":      alias_type,
-                "source_name":     src_name,
-                "source_url":      src_url,
                 "retrieved_at":    retrieved_at,
             }
 

@@ -99,8 +99,6 @@ ALIASES_OUTPUT_COLUMNS = [
     "alias_name",
     "alias_key",
     "alias_type",
-    "source_name",
-    "source_url",
     "retrieved_at",
 ]
 
@@ -418,8 +416,6 @@ def canonicalize_group(
             "alias_name": alias_name,
             "alias_key": alias_key,
             "alias_type": alias_type,
-            "source_name": coalesce_source_name(row_source, source_name_fallback),
-            "source_url": gbif_species_url(gbif_key) or coalesce_source_url(row_source),
             "retrieved_at": coalesce_retrieved_at(row_source),
         }
         alias_by_key[alias_key] = pick_alias(alias_by_key.get(alias_key), candidate)

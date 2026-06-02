@@ -241,8 +241,6 @@ ALIASES_COLUMNS = [
     "alias_name",
     "alias_key",
     "alias_type",
-    "source_name",
-    "source_url",
     "retrieved_at",
 ]
 
@@ -994,8 +992,6 @@ def collect_alias_items(
                 "alias_name": text,
                 "alias_key": alias_key,
                 "alias_type": alias_type,
-                "source_name": source_name,
-                "source_url": url,
                 "retrieved_at": retrieved_at,
                 "priority": priority,
             }
@@ -1119,8 +1115,6 @@ def collect_alias_items(
                 "alias_name": item["alias_name"],
                 "alias_key": item["alias_key"],
                 "alias_type": item["alias_type"],
-                "source_name": item["source_name"],
-                "source_url": item["source_url"],
                 "retrieved_at": item["retrieved_at"],
             }
         )
@@ -1593,8 +1587,6 @@ def build_canonical_tables(
                 "alias_name": row["alias_name"],
                 "alias_key": row["alias_key"],
                 "alias_type": row["alias_type"],
-                "source_name": row["source_name"],
-                "source_url": row["source_url"],
                 "retrieved_at": row["retrieved_at"],
             }
         )

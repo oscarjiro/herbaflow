@@ -101,8 +101,6 @@ ALIASES_COLUMNS = [
     "alias_name",
     "alias_key",
     "alias_type",
-    "source_name",
-    "source_url",
     "retrieved_at",
 ]
 
