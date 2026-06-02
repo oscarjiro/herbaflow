@@ -15,4 +15,3 @@ class CompoundResponse(BaseModel):
     rotatable_bonds: int | None
     np_likeness_score: float | None
     num_ro5_violations: int | None
-    lipinski_source: str | None

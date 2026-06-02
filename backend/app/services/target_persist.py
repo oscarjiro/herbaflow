@@ -114,7 +114,6 @@ async def _do_persist(
                 gene_symbol=gene_symbol,
                 uniprot_accession=uniprot_accession,
                 protein_name=t.get("protein_name"),
-                organism_tax_id=9606,
                 retrieved_at=now,
             )
         )

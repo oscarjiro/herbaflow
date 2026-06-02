@@ -606,7 +606,6 @@ async def import_targets(
                 canonical_key=target_canonical_key(stp_t.uniprot_id),
                 gene_symbol=stp_t.gene_symbol.upper(),
                 uniprot_accession=stp_t.uniprot_id,
-                organism_tax_id=9606,
                 retrieved_at=now,
             )], session)
 
@@ -942,7 +941,6 @@ async def add_user_target(
         gene_symbol=info.gene_symbol,
         uniprot_accession=info.uniprot_accession,
         protein_name=info.protein_name,
-        organism_tax_id=9606,
         retrieved_at=datetime.utcnow(),
     )], session)
 
@@ -1030,7 +1028,6 @@ async def add_user_disease_target(
         gene_symbol=info.gene_symbol,
         uniprot_accession=info.uniprot_accession,
         protein_name=info.protein_name,
-        organism_tax_id=9606,
         retrieved_at=datetime.utcnow(),
     )], session)
 

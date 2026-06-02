@@ -171,7 +171,6 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             canonical_key=canonical_key,
             gene_symbol=gene,
             uniprot_accession=t.uniprot_accession,
-            organism_tax_id=9606,
             retrieved_at=now,
         )], session)
 
@@ -186,7 +185,6 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             gene_symbol=gene,
             protein_name=t.protein_name,
             uniprot_accession=t.uniprot_accession,
-            organism_tax_id=9606,
             retrieved_at=now,
         )], session)
 
