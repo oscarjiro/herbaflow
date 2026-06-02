@@ -423,23 +423,12 @@ def validate_aliases(
         normalize_text(v)
         for v in plants_df.get("plant_id", pd.Series(dtype=str)).tolist()
     )
-    canonical_names = set(
-        normalize_text(v).lower()
-        for v in plants_df.get(
-            "canonical_scientific_name", pd.Series(dtype=str)
-        ).tolist()
-    )
-    alias_names = set(
-        normalize_text(v).lower()
-        for v in df.get("alias_name", pd.Series(dtype=str)).tolist()
-    )
 
     for idx, row in df.iterrows():
         alias_id = row.get("alias_id", "")
         plant_id = row.get("plant_id", "")
         alias_name = row.get("alias_name", "")
         alias_type = normalize_text(row.get("alias_type", ""))
-        source_name = row.get("source_name", "")
 
         if normalize_text(plant_id) not in valid_plant_ids:
             add_issue(
@@ -481,20 +470,6 @@ def validate_aliases(
                 column_name="alias_type",
                 value=alias_type,
                 details=f"Alias type '{alias_type}' is not in the allowed set.",
-            )
-
-        if source_name_looks_like_plant_name(source_name, canonical_names, alias_names):
-            add_issue(
-                issues,
-                severity="critical",
-                check_name="source_name_looks_like_plant_name",
-                table_name="plant_aliases",
-                row_index=int(idx),
-                plant_id=plant_id,
-                alias_id=alias_id,
-                column_name="source_name",
-                value=source_name,
-                details="source_name appears to contain a plant name rather than a source system name.",
             )
 
 

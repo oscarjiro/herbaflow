@@ -167,3 +167,14 @@ def test_plants_build_part2_has_no_dead_gbif_id_fields_constant():
     assert not re.search(r"^GBIF_ID_FIELDS\s*=", text, re.MULTILINE), (
         "dead GBIF_ID_FIELDS constant still defined in run_part2.py"
     )
+
+
+def test_plants_validate_aliases_does_not_read_dropped_source_name():
+    # plant_aliases dropped source_name; validate_aliases must not check it, or every
+    # alias row trips source_name_looks_like_plant_name on the now-empty column.
+    text = (ETL / "plants/05_validate/run.py").read_text(encoding="utf-8")
+    m = re.search(r"def validate_aliases\b(.+?)(?=\ndef )", text, re.DOTALL)
+    assert m, "could not locate validate_aliases in plants/05_validate/run.py"
+    assert "source_name" not in m.group(1), (
+        "validate_aliases still references source_name (dropped from plant_aliases)"
+    )
