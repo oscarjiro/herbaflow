@@ -90,10 +90,20 @@ def test_write_and_read_csv(tmp_path):
     result = read_csv(path)
     assert result == rows
 
-def test_write_csv_empty(tmp_path):
+def test_write_csv_empty_with_fieldnames_writes_header(tmp_path):
+    # Empty rows + explicit fieldnames must still emit the header so downstream
+    # DictReader-based stages don't choke on a missing-header file.
     path = tmp_path / "empty.csv"
-    write_csv([], path, fieldnames=["name"])
-    assert path.exists()
+    write_csv([], path, fieldnames=["name", "id"])
+    lines = path.read_text(encoding="utf-8").splitlines()
+    assert lines == ["name,id"]
+
+
+def test_write_csv_empty_without_fieldnames_is_blank(tmp_path):
+    # No rows and no fieldnames: columns are unknowable, so a blank file stays blank.
+    path = tmp_path / "blank.csv"
+    write_csv([], path)
+    assert path.read_text(encoding="utf-8") == ""
 
 def test_write_json(tmp_path):
     import json

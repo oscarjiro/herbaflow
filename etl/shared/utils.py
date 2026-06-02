@@ -85,7 +85,17 @@ def write_csv(
     path = Path(path)
     ensure_dir(path.parent)
     if not rows:
-        path.write_text("", encoding="utf-8")
+        # No data rows: still emit the header when columns are known, so
+        # downstream DictReader-based stages get a valid (header-only) file
+        # instead of choking on a missing header. Columns are unknowable
+        # without fieldnames, so only then fall back to a blank file.
+        if fieldnames:
+            with open(path, "w", encoding="utf-8", newline="") as f:
+                csv.DictWriter(
+                    f, fieldnames=fieldnames, extrasaction="ignore"
+                ).writeheader()
+        else:
+            path.write_text("", encoding="utf-8")
         return
     if fieldnames is None:
         fieldnames = list(rows[0].keys())
