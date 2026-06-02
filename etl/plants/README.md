@@ -264,9 +264,7 @@ These are the files used for PostgreSQL import into the `plants` table.
 | `gbif_kingdom_key` | text | Kingdom-rank GBIF key |
 | `source_name` | text | Source system name: `KNApSAcK World` |
 | `source_url` | text | KNApSAcK detail page URL for this plant; centralized deep link produced by `etl/shared/provenance.py` |
-| `source_batch_id` | text | Batch identifier from settings (`source.batch_id`) (CSV column; DB column dropped) |
 | `retrieved_at` | ISO 8601 | UTC timestamp when the scrape row was retrieved |
-| `confidence` | text | GBIF match confidence score (0–100); `100` for manual overrides |
 
 ### `plant_aliases.csv`
 
@@ -281,7 +279,6 @@ Matches the `plant_aliases` database table. Each plant has one or more alias row
 | `alias_type` | text | One of: `exact_scraped_spelling`, `normalized_variant`, `author_variant`, `synonym_variant` |
 | `source_name` | text | Source system name for this alias row |
 | `source_url` | text | KNApSAcK detail page URL; centralized deep link produced by `etl/shared/provenance.py` |
-| `source_batch_id` | text | Batch identifier (CSV column; DB column dropped) |
 | `retrieved_at` | ISO 8601 | UTC timestamp |
 
 ---

@@ -178,9 +178,7 @@ Matches the `targets` database table.
 | `organism_tax_id`   | text     | NCBI taxonomy ID — always `9606` (Homo sapiens)        |
 | `source_id`         | text     | `OpenTargets`                                                                         |
 | `source_url`        | text     | `https://platform.opentargets.org/target/{ensembl_id}`; centralized deep link via `etl/shared/provenance.py` |
-| `source_batch_id`   | text     | `DT001` (from settings.yml) (CSV column; DB column dropped)                           |
 | `retrieved_at`      | ISO 8601 | UTC timestamp of fetch                                 |
-| `confidence`        | float    | `1.0` — target identity is known, not inferred         |
 
 ### `target_aliases.csv`
 
@@ -195,7 +193,6 @@ Matches the `target_aliases` database table.
 | `alias_type`      | text     | `ensembl_id` / `approved_symbol` / `approved_name` |
 | `source_id`       | text     | `OpenTargets`                                                                    |
 | `source_url`      | text     | Target page URL; centralized deep link via `etl/shared/provenance.py`            |
-| `source_batch_id` | text     | `DT001` (CSV column; DB column dropped)                                          |
 | `retrieved_at`    | ISO 8601 | UTC timestamp                                      |
 
 ### `disease_targets.csv`
@@ -211,7 +208,6 @@ Matches the `disease_targets` database table.
 | `source_url`        | text     | Per-row Open Targets disease-target page; centralized deep link via `etl/shared/provenance.py` |
 | `association_type`  | text     | `open_targets_overall`                                                               |
 | `score`             | float    | Open Targets overall association score (0.1–1.0)                                     |
-| `confidence`        | float    | Same as score                                                                        |
 | `retrieved_at`      | ISO 8601 | UTC timestamp                                                                        |
 
 Unique constraint enforced: `(disease_id, target_id)`.

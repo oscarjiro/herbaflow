@@ -310,9 +310,7 @@ Matches the `compounds` database table.
 | `lipinski_source`    | text     | How ADME descriptors were obtained: `chembl_api`, `rdkit_computed`, or empty (unresolved)                                 |
 | `source_name`        | text     | `PubChem` (primary enrichment source)                                                                                     |
 | `source_url`         | text     | PubChem compound page URL; centralized deep link produced by `etl/shared/provenance.py`                                   |
-| `source_batch_id`    | text     | Run ID timestamp of the enrichment run (CSV column; DB column dropped)                                                    |
 | `retrieved_at`       | ISO 8601 | UTC timestamp of enrichment                                                                                               |
-| `confidence`         | float    | Final match confidence (0.0–1.0)                                                                                          |
 | `canonical_status`   | text     | `accepted`, `provisional`, `review`, or `unresolved`                                                                      |
 | `canonical_strategy` | text     | Matching strategy used: `inchi_key`, `pubchem_cid_only`, `chembl_id_only`, etc.                                           |
 | `canonical_reason`   | text     | Pipe-delimited evidence chain explaining the canonical decision                                                           |
@@ -336,7 +334,6 @@ Matches the `compound_aliases` database table.
 | `alias_type`        | text     | `iupac_name`, `common_name`, `cas_id`, `inchi_key`, `smiles`, `pubchem_synonym`, etc.  |
 | `source_name`       | text     | Source that provided this alias                                                        |
 | `source_url`        | text     | PubChem or ChEMBL URL; centralized deep link produced by `etl/shared/provenance.py`    |
-| `source_batch_id`   | text     | Run ID (CSV column; DB column dropped)                                                 |
 | `retrieved_at`      | ISO 8601 | UTC timestamp                                                                          |
 
 ### `plant_compounds.csv` (20,891 rows)

@@ -179,11 +179,9 @@ One row per canonical disease. Matches the `diseases` database table. Current da
 | `ontology_label`          | Preferred label from the matched ontology term                                                                     |
 | `ontology_description`    | Definition text from the ontology                                                                                  |
 | `ontology_synonyms`       | Semicolon-delimited synonyms from OLS4                                                                             |
-| `confidence`              | Mapping confidence (1.00 = seed-provided, 0.90 = online exact, 0.85 = ambiguous)                                   |
 | `source_id`               | Original seed row identifier (e.g., `D001`)                                                                        |
 | `source_name`             | Source display name (`curated_disease_seed`)                                                                       |
 | `source_url`              | Source URL (empty for manual seed); when populated, a centralized deep link via `etl/shared/provenance.py`         |
-| `source_batch_id`         | Batch identifier from `settings.yml` (e.g., `D001`) (CSV column; DB column dropped)                               |
 | `retrieved_at`            | ISO 8601 UTC timestamp of ontology fetch                                                                           |
 | `source_reference_clean`  | Cleaned citation from the seed (e.g., `WHO / IDF`)                                                                 |
 | `ontology_status`         | `matched`, `ambiguous`, or `unmapped`                                                                              |
