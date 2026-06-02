@@ -217,11 +217,11 @@ class TestPlantAliasSlugCollapse:
         )
 
         pid = plant_row["plant_id"]
-        rows = [a for a in aliases if a["alias_key"] == "curcuma longa"]
+        rows = [a for a in aliases if a["alias_key"] == "curcuma_longa"]
         assert len(rows) == 1, f"expected one row for slug, got {rows}"
 
         only = rows[0]
-        expected_alias_id = str(uuid.uuid5(PLANT_ALIAS_NS, f"{pid}:curcuma longa"))
+        expected_alias_id = str(uuid.uuid5(PLANT_ALIAS_NS, f"{pid}:curcuma_longa"))
         assert only["alias_id"] == expected_alias_id
         # First-seen wins on the priority tie (plant alias types absent from
         # ALIAS_PRIORITY), so exact_scraped_spelling is the deterministic winner.

@@ -33,7 +33,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, now_iso
 from plants.utils import plant_canonical_key, plant_id as make_plant_id, plant_alias_id as make_alias_id
-from shared.identity import pick_alias
+from shared.identity import pick_alias, slugify
 from shared.provenance import gbif_species_url
 
 import argparse
@@ -319,7 +319,7 @@ def build_canonical_key(canonical_scientific_name: str, authorship: str) -> str:
 
 
 def build_alias_key(alias_name: str) -> str:
-    return fold_key_text(alias_name)
+    return slugify(alias_name)
 
 
 def is_meaningful_alias(alias_name: str) -> bool:
