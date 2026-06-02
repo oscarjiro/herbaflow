@@ -50,6 +50,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, now_iso
+from shared.provenance import disease_ontology_url
 
 from diseases.utils import (
     canonical_key,
@@ -639,8 +640,10 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
         source_name = safe_str(rep.get("source_name", "")) or safe_str(
             settings.get("source_name", "")
         )
-        source_url = safe_str(rep.get("source_url", "")) or safe_str(
-            settings.get("source_url", "")
+        source_url = (
+            disease_ontology_url(ontology_source, ontology_id)
+            or safe_str(rep.get("source_url", ""))
+            or safe_str(settings.get("source_url", ""))
         )
         source_batch_id = (
             safe_str(rep.get("source_batch_id", ""))
