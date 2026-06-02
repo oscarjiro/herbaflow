@@ -133,6 +133,42 @@ def safe_str(v: Any) -> str:
     return str(v).strip()
 
 
+_MISSING = {
+    "",
+    "na",
+    "n/a",
+    "none",
+    "null",
+    "nan",
+    "-",
+    "unknown",
+    "unspecified",
+}
+
+
+def clean_str(v: Any) -> str:
+    """Like safe_str, but maps known missing-markers (and NaN) to ''."""
+    if v is None:
+        return ""
+    try:
+        # pandas float NaN guard without importing pandas
+        if isinstance(v, float) and v != v:
+            return ""
+    except Exception:
+        pass
+    text = str(v).strip()
+    return "" if text.lower() in _MISSING else text
+
+
+def normalize_text(v: Any) -> str:
+    """Lowercase, collapse internal whitespace, fold missing-markers to ''."""
+    text = clean_str(v)
+    if not text:
+        return ""
+    text = re.sub(r"\s+", " ", text).strip().lower()
+    return "" if text in _MISSING else text
+
+
 def stable_id(namespace: uuid.UUID, key: str) -> str:
     """Return a deterministic UUID v5 string for the given namespace and key."""
     return str(uuid.uuid5(namespace, key))
