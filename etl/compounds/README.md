@@ -290,7 +290,7 @@ Matches the `compounds` database table.
 | Column               | Type     | Description                                                                                                               |
 | -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `compound_id`        | UUID v5  | Primary key — deterministic from the compound's InChIKey or best canonical key, using namespace `herbaflow.compounds`     |
-| `canonical_key`      | text     | `inchi::{InChIKey}` — unique chemical identity key used to derive the UUID                                                |
+| `canonical_key`      | text     | `inchikey:{InChIKey}` — unique chemical identity key used to derive the UUID                                              |
 | `canonical_name`     | text     | Preferred IUPAC or common name (PubChem preferred over ChEMBL over KNApSAcK)                                              |
 | `inchi_key`          | text     | Standard 27-character InChIKey (e.g., `VHBFFQKBGNRLFZ-UHFFFAOYSA-N`)                                                      |
 | `smiles`             | text     | Canonical SMILES string from PubChem                                                                                      |
@@ -317,7 +317,7 @@ Matches the `compounds` database table.
 | `evidence_count`     | int      | Number of raw KNApSAcK evidence rows supporting this compound                                                             |
 | `plant_count`        | int      | Number of distinct canonical plants this compound is linked to                                                            |
 
-**UUID derivation:** `compound_id = uuid5(uuid5(DNS, "herbaflow.compounds"), canonical_key)`. For compounds with an InChIKey, `canonical_key = "inchi::{InChIKey}"`. Given the same InChIKey, the same UUID is always produced — re-running the pipeline never changes existing IDs.
+**UUID derivation:** `compound_id = uuid5(uuid5(DNS, "herbaflow.compounds"), canonical_key)`. For compounds with an InChIKey, `canonical_key = "inchikey:{InChIKey}"`. Given the same InChIKey, the same UUID is always produced — re-running the pipeline never changes existing IDs.
 
 **Lipinski descriptors:** The four classic Lipinski Ro5 properties (`molecular_weight`, `logp`, `hbond_donors`, `hbond_acceptors`) describe oral bioavailability potential. In network pharmacology, compounds with 0 violations (`num_ro5_violations = 0`) are prioritized as candidate drug-like leads. `tpsa` and `rotatable_bonds` extend the profile with absorption and conformational flexibility data. `qed_score` provides a composite drug-likeness estimate on a 0–1 scale.
 
