@@ -169,6 +169,7 @@ PLANT_COMPOUNDS_COLUMNS = [
     "source_plant_raw_id",
     "source_compound_raw_id",
     "source_name",
+    "source_url",
     "evidence_type",
     "confidence",
     "retrieved_at",

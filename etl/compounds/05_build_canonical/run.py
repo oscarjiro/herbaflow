@@ -57,6 +57,7 @@ from compounds.utils import (
     compound_canonical_key,
 )
 from shared.identity import plant_compound_id
+from shared.provenance import pubchem_compound_url, chembl_compound_url, knapsack_metabolite_url
 
 import argparse
 import csv
@@ -1450,8 +1451,10 @@ def build_canonical_tables(
         source_name = normalize_whitespace(
             best_candidate.get("source_name", settings.source_name)
         )
-        source_url = normalize_whitespace(
-            best_candidate.get("source_url", settings.source_url)
+        source_url = (
+            pubchem_compound_url(pubchem_cid)
+            or chembl_compound_url(chembl_id)
+            or normalize_whitespace(best_candidate.get("source_url", settings.source_url))
         )
         source_batch_id = normalize_whitespace(
             best_candidate.get("source_batch_id", settings.batch_id)
@@ -1582,6 +1585,10 @@ def build_canonical_tables(
                     "source_compound_raw_id": raw_compound_id,
                     "source_name": normalize_whitespace(
                         member.get("source_name", source_name)
+                    ),
+                    "source_url": (
+                        knapsack_metabolite_url(raw_compound_id)
+                        or normalize_whitespace(member.get("source_url", settings.source_url))
                     ),
                     "evidence_type": "canonicalized_candidate",
                     "confidence": f"{best_conf:.4f}",
