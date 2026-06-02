@@ -27,8 +27,7 @@ from disease_targets.utils import (
     target_id_from_key, target_alias_id, disease_target_id,
 )
 from shared.identity import pick_alias
-
-SOURCE_URL_TEMPLATE = "https://platform.opentargets.org/target/{ensembl_id}"
+from shared.provenance import opentargets_target_url, opentargets_evidence_url
 
 
 def build_targets(targets_raw: pd.DataFrame, cfg: dict, retrieved_at: str) -> pd.DataFrame:
@@ -45,7 +44,7 @@ def build_targets(targets_raw: pd.DataFrame, cfg: dict, retrieved_at: str) -> pd
             "uniprot_accession":  safe_str(r.get("uniprot_accession")),
             "organism_tax_id":    safe_str(r.get("organism_tax_id", "9606")),
             "source_name":        src["name"],
-            "source_url":         SOURCE_URL_TEMPLATE.format(ensembl_id=ensembl),
+            "source_url":         opentargets_target_url(ensembl) or src["url"],
             "source_batch_id":    src["batch_id"],
             "retrieved_at":       retrieved_at,
             "confidence":         "1.0",
@@ -106,11 +105,15 @@ def build_disease_targets(
     diseases_df: pd.DataFrame,
     cfg: dict,
     retrieved_at: str,
+    targets_raw: pd.DataFrame,
 ) -> pd.DataFrame:
     src = cfg["source"]
 
     # canonical_key → target_id lookup
     key_to_tid = targets_df.set_index("canonical_key")["target_id"].to_dict()
+
+    # canonical_key → ensembl_id lookup (for link source_url)
+    key_to_ensembl = targets_raw.set_index("canonical_key")["ensembl_id"].astype(str).to_dict()
 
     # disease_key → disease_id lookup (handle both canonical_key and disease_key columns)
     if "disease_key" in diseases_df.columns:
@@ -129,11 +132,15 @@ def build_disease_targets(
             continue
 
         score = float(r["association_score"])
+        ensembl = key_to_ensembl.get(r["canonical_key"], "")
+        efo = safe_str(r.get("efo_id", ""))
+        link_url = opentargets_evidence_url(ensembl, efo) or src["url"]
         rows.append({
             "disease_target_id": disease_target_id(did, tid),
             "disease_id":        did,
             "target_id":         tid,
             "source_name":       src["name"],
+            "source_url":        link_url,
             "association_type":  "open_targets_overall",
             "score":             str(score),
             "confidence":        str(round(score, 4)),
@@ -189,7 +196,7 @@ def run(cfg: dict, normalize_dir: Path, diseases_csv: Path, output_dir: Path) ->
     write_csv(aliases_df, output_dir / "target_aliases.csv")
     log.info("target_aliases.csv: %d rows", len(aliases_df))
 
-    dt_df, skipped = build_disease_targets(dt_raw, targets_df, diseases_df, cfg, retrieved_at)
+    dt_df, skipped = build_disease_targets(dt_raw, targets_df, diseases_df, cfg, retrieved_at, targets_raw)
     write_csv(dt_df, output_dir / "disease_targets.csv")
     log.info("disease_targets.csv: %d rows (%d skipped)", len(dt_df), skipped)
 

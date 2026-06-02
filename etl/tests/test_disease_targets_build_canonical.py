@@ -23,7 +23,7 @@ _spec.loader.exec_module(bc)
 
 
 def _cfg():
-    return {"source": {"name": "OpenTargets", "batch_id": "DT001"}}
+    return {"source": {"name": "OpenTargets", "url": "https://platform.opentargets.org", "batch_id": "DT001"}}
 
 
 def test_build_targets_emits_source_name():
@@ -45,6 +45,7 @@ def test_build_targets_emits_source_name():
 
 def test_build_disease_targets_emits_source_name():
     cfg = _cfg()
+    targets_raw = pd.DataFrame([{"canonical_key": "uniprot:P31749", "ensembl_id": "ENSG00000142208"}])
     targets_df = pd.DataFrame([{"canonical_key": "uniprot:P31749", "target_id": "t1"}])
     diseases_df = pd.DataFrame([{"disease_key": "d1", "disease_id": "d1"}])
     dt_raw = pd.DataFrame([{
@@ -53,7 +54,7 @@ def test_build_disease_targets_emits_source_name():
         "association_score": "0.8",
     }])
 
-    df, _skipped = bc.build_disease_targets(dt_raw, targets_df, diseases_df, cfg, "2026-01-01")
+    df, _skipped = bc.build_disease_targets(dt_raw, targets_df, diseases_df, cfg, "2026-01-01", targets_raw)
 
     assert "source_name" in df.columns
     assert "source_id" not in df.columns
@@ -64,6 +65,7 @@ def test_dedup_keeps_highest_score():
     """Duplicate (disease_id, target_id) pairs collapse to the highest-score row,
     regardless of source row order."""
     cfg = _cfg()
+    targets_raw = pd.DataFrame([{"canonical_key": "uniprot:P31749", "ensembl_id": "ENSG00000142208"}])
     targets_df = pd.DataFrame([{"canonical_key": "uniprot:P31749", "target_id": "t1"}])
     diseases_df = pd.DataFrame([{"disease_key": "d1", "disease_id": "d1"}])
     # Lower score FIRST so an order-based keep="first" would wrongly keep 0.2.
@@ -72,7 +74,7 @@ def test_dedup_keeps_highest_score():
         {"canonical_key": "uniprot:P31749", "disease_id": "d1", "association_score": "0.8"},
     ])
 
-    df, _skipped = bc.build_disease_targets(dt_raw, targets_df, diseases_df, cfg, "2026-01-01")
+    df, _skipped = bc.build_disease_targets(dt_raw, targets_df, diseases_df, cfg, "2026-01-01", targets_raw)
 
     assert len(df) == 1
     assert float(df.iloc[0]["score"]) == 0.8
