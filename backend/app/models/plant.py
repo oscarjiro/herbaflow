@@ -24,7 +24,6 @@ class Plant(SQLModel, table=True):
     gbif_kingdom_key: Optional[int] = None
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
-    source_batch_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     retrieved_at: Optional[datetime] = None
 
 
@@ -38,5 +37,4 @@ class PlantAlias(SQLModel, table=True):
     alias_type: Optional[str] = None
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
-    source_batch_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     retrieved_at: Optional[datetime] = None
