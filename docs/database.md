@@ -68,16 +68,7 @@ One canonical row per accepted plant taxon.
 | `plant_id`                  | uuid PK               |                                           |
 | `canonical_key`             | text                  | unique                                    |
 | `canonical_scientific_name` | text                  | cleaned accepted name only, no authorship |
-| `authorship`                | text                  | separate from name                        |
 | `family_name`               | text                  |                                           |
-| `taxonomic_status`          | text                  |                                           |
-| `rank`                      | text                  |                                           |
-| `gbif_usage_key`            | int                   |                                           |
-| `gbif_accepted_usage_key`   | int                   |                                           |
-| `gbif_species_key`          | int                   |                                           |
-| `gbif_genus_key`            | int                   |                                           |
-| `gbif_family_key`           | int                   |                                           |
-| `gbif_kingdom_key`          | int                   |                                           |
 | `source_id`                 | FK → `source_systems` | the system, not a plant name              |
 | `source_url`                | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`              | timestamptz           |                                           |
@@ -93,8 +84,6 @@ All alternate names for a canonical plant. Each alias belongs to exactly one pla
 | `alias_name`      | text                  |                                                                                                   |
 | `alias_key`       | text                  |                                                                                                   |
 | `alias_type`      | text                  | free text; per-table vocab: `normalized_variant`, `synonym_variant` (no CHECK — disjoint per-table, ETL-internal) |
-| `source_id`       | FK → `source_systems` |                                                                                                   |
-| `source_url`      | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback                    |
 | `retrieved_at`    | timestamptz           |                                                                                                   |
 
 Unique constraint: `(plant_id, alias_key)` — one row per plant + slug; `alias_type` is an attribute. Index: `plant_aliases(alias_key)`.
@@ -128,7 +117,6 @@ One canonical row per chemical entity.
 | `qed_score`         | float                 | Quantitative Estimate of Drug-likeness (0–1, higher = more drug-like); computed by RDKit |
 | `np_likeness_score` | float                 | Natural product-likeness score (RDKit); ≥ 0.5 triggers NP exception in ADME filtering |
 | `is_pains_positive` | boolean NOT NULL DEFAULT false | PAINS flag (Baell & Holloway 2010); true = matches pan-assay interference pattern. Reporting only — not a filter. Populated by ETL `patch_missing_lipinski.py` Pass 3. |
-| `lipinski_source`   | text                  | Provenance of ADME descriptors; null = unresolved. CHECK (nullable) one of `chembl_api`, `rdkit_computed`, `rdkit_computed+rdkit_np`, `chembl_api+rdkit_np`, `rdkit_np` — base source optionally suffixed `+rdkit_np` when NP-likeness came from the RDKit scorer. Set by ETL `patch_missing_lipinski.py`. |
 | `source_id`         | FK → `source_systems` |        |
 | `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`      | timestamptz           |        |
@@ -142,8 +130,6 @@ One canonical row per chemical entity.
 | `alias_name`        | text                      |       |
 | `alias_key`         | text                      |       |
 | `alias_type`        | text                      | free text; per-table vocab: `enrichment_synonym`, `source_compound_id`, `cas_id`, `canonical_name`, `raw_metabolite_name`, `iupac_name` (no CHECK — disjoint per-table, ETL-internal) |
-| `source_id`         | FK → `source_systems` |       |
-| `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`      | timestamptz           |       |
 
 Unique constraint: `(compound_id, alias_key)` — one row per compound + slug; `alias_type` is an attribute. Index: `compound_aliases(alias_key)`.
@@ -169,7 +155,7 @@ Unique constraint: `(plant_id, compound_id)` — pair grain; `source_id` is an a
 
 ### `targets`
 
-Canonical protein/gene entities.
+Canonical protein/gene entities. All targets are human (NCBI taxonomy 9606) — organism taxon is a pipeline invariant and is not stored as a column.
 
 | Column              | Type                  | Notes  |
 | ------------------- | --------------------- | ------ |
@@ -178,7 +164,6 @@ Canonical protein/gene entities.
 | `gene_symbol`       | text                  |        |
 | `protein_name`      | text                  |        |
 | `uniprot_accession` | text                  |        |
-| `organism_tax_id`   | int                   |        |
 | `source_id`         | FK → `source_systems` |        |
 | `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`      | timestamptz           |        |
@@ -194,8 +179,6 @@ Indexes: `idx_targets_uniprot_accession` on `uniprot_accession`; `idx_targets_ge
 | `alias_name`      | text                  |       |
 | `alias_key`       | text                  |       |
 | `alias_type`      | text                  | free text; per-table vocab: `ensembl_id`, `approved_symbol`, `approved_name` (no CHECK — disjoint per-table, ETL-internal) |
-| `source_id`       | FK → `source_systems` |       |
-| `source_url`      | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`    | timestamptz           |       |
 
 Unique constraint: `(target_id, alias_key)` — one row per target + slug; `alias_type` is an attribute. Index: `target_aliases(alias_key)`.
@@ -244,8 +227,6 @@ Unique constraint: `(compound_id, target_id)` — pair grain; `source_id` is an 
 | `alias_name`       | text                  |       |
 | `alias_key`        | text                  |       |
 | `alias_type`       | text                  | free text; per-table vocab: `user_alias` (no CHECK — disjoint per-table, ETL-internal) |
-| `source_id`        | FK → `source_systems` |       |
-| `source_url`       | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`     | timestamptz           |       |
 
 Unique constraint: `(disease_id, alias_key)` — one row per disease + slug; `alias_type` is an attribute. Index: `idx_disease_aliases_alias_key` on `alias_key`.
@@ -275,8 +256,6 @@ The following columns hold controlled values that are **not** enforced by a DB C
 
 | Column | Table | Known values | Reason for no CHECK |
 | ------ | ----- | ------------ | ------------------- |
-| `taxonomic_status` | `plants` | `ACCEPTED`, `SYNONYM` | GBIF-owned vocab |
-| `rank` | `plants` | `SPECIES` | GBIF-owned vocab |
 | `association_type` | `disease_targets` | `open_targets_overall` | Open Targets-owned vocab |
 | `ontology_source` | `diseases` | `Disease Ontology`, `MeSH` | inferred/fuzzy; multi-source |
 
@@ -293,7 +272,6 @@ The following columns hold controlled values that are **not** enforced by a DB C
 | `analysis_id`   | PK              |          |
 | `analysis_name` | text            |          |
 | `disease_id`    | uuid FK → `diseases` | optional |
-| `notes`         | text            |          |
 | `parameters`    | jsonb NOT NULL  | CHECK `jsonb_typeof = 'object'` |
 | `status`          | text            | dynamic stage-derived string set by the backend (`pending`, `failed`, `complete`, `stage_{N}_running`, `stage_{N}_awaiting_approval`, `stage_{N}_starting`, `stage_{N}_rejected`) — no fixed-vocab CHECK |
 | `current_stage`   | int             | null = not started, 1–8 during pipeline; CHECK 1–8 |
@@ -304,7 +282,6 @@ The following columns hold controlled values that are **not** enforced by a DB C
 | `error_message`   | text            |          |
 | `updated_at`      | timestamptz NOT NULL | last write timestamp; default `now()` |
 | `created_at`      | timestamptz     |          |
-| `created_by`      | text            |          |
 
 Index: `idx_analysis_runs_status` on `status`.
 
