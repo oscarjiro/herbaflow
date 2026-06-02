@@ -49,10 +49,10 @@ from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_
 
 from diseases.utils import (
     normalize_text,
-    read_csv,
-    safe_str,
+    read_frame,
+    clean_str,
     validate_required_columns,
-    write_csv,
+    write_frame,
 )
 
 DEFAULT_SETTINGS_PATH = ETL_ROOT / "diseases" / "settings.yml"
@@ -134,7 +134,7 @@ def _load_csv_if_exists(path: Path) -> pd.DataFrame:
     """Load a CSV if it exists, otherwise return an empty dataframe."""
     if not path.exists():
         return pd.DataFrame()
-    return read_csv(path)
+    return read_frame(path)
 
 
 def _issue(
@@ -176,24 +176,24 @@ def _allowed_null_fields(settings: dict[str, Any]) -> set[str]:
 
 def _is_blank(value: object) -> bool:
     """Return True when a value is blank or missing."""
-    return safe_str(value) == ""
+    return clean_str(value) == ""
 
 
 def _is_valid_disease_key(value: object) -> bool:
     """Validate the internal disease_key format."""
-    text = safe_str(value)
+    text = clean_str(value)
     return bool(text and DISEASE_KEY_RE.fullmatch(text))
 
 
 def _is_valid_uuid(value: object) -> bool:
     """Validate a UUID string."""
-    text = safe_str(value)
+    text = clean_str(value)
     return bool(text and UUID_RE.fullmatch(text))
 
 
 def _is_valid_ontology_id(value: object) -> bool:
     """Validate ontology identifier format conservatively."""
-    text = safe_str(value)
+    text = clean_str(value)
     return bool(text and ONTOLOGY_ID_RE.fullmatch(text))
 
 
@@ -203,8 +203,8 @@ def _canonical_lookup(df: pd.DataFrame) -> dict[str, str]:
         return {}
     lookup: dict[str, str] = {}
     for _, row in df.iterrows():
-        disease_id = safe_str(row.get("disease_id", ""))
-        disease_key = safe_str(row.get("disease_key", ""))
+        disease_id = clean_str(row.get("disease_id", ""))
+        disease_key = clean_str(row.get("disease_key", ""))
         if disease_id and disease_key:
             lookup[disease_id] = disease_key
     return lookup
@@ -277,9 +277,9 @@ def _validate_canonical(
         )
         return issues, summary
 
-    disease_keys = df.get("disease_key", pd.Series(dtype=str)).map(safe_str)
-    disease_ids = df.get("disease_id", pd.Series(dtype=str)).map(safe_str)
-    disease_names = df.get("disease_name", pd.Series(dtype=str)).map(safe_str)
+    disease_keys = df.get("disease_key", pd.Series(dtype=str)).map(clean_str)
+    disease_ids = df.get("disease_id", pd.Series(dtype=str)).map(clean_str)
+    disease_names = df.get("disease_name", pd.Series(dtype=str)).map(clean_str)
 
     summary["canonical_unique_disease_keys"] = int(
         disease_keys[disease_keys != ""].nunique()
@@ -381,7 +381,7 @@ def _validate_canonical(
                 )
 
     # Ontology checks
-    unmapped_mask = df.get("ontology_id", pd.Series(dtype=str)).map(safe_str) == ""
+    unmapped_mask = df.get("ontology_id", pd.Series(dtype=str)).map(clean_str) == ""
     summary["canonical_unmapped_count"] = int(unmapped_mask.sum())
     for idx in df.index[unmapped_mask]:
         issues.append(
@@ -398,7 +398,7 @@ def _validate_canonical(
 
     if "ontology_id" in df.columns:
         for idx, value in df["ontology_id"].items():
-            ontology_id = safe_str(value)
+            ontology_id = clean_str(value)
             if ontology_id and not _is_valid_ontology_id(ontology_id):
                 issues.append(
                     _issue(
@@ -512,9 +512,9 @@ def _validate_alias_table(
 
     disease_key_lookup = set(disease_lookup_by_id.values())
 
-    alias_keys = df.get("alias_key", pd.Series(dtype=str)).map(safe_str)
-    disease_ids = df.get("disease_id", pd.Series(dtype=str)).map(safe_str)
-    disease_keys = df.get("disease_key", pd.Series(dtype=str)).map(safe_str)
+    alias_keys = df.get("alias_key", pd.Series(dtype=str)).map(clean_str)
+    disease_ids = df.get("disease_id", pd.Series(dtype=str)).map(clean_str)
+    disease_keys = df.get("disease_key", pd.Series(dtype=str)).map(clean_str)
 
     # alias_key presence and format
     for idx, alias_key in alias_keys.items():
@@ -705,7 +705,7 @@ def _validate_alias_map(
         return issues, summary
 
     for idx, alias_key in (
-        df.get("alias_key", pd.Series(dtype=str)).map(safe_str).items()
+        df.get("alias_key", pd.Series(dtype=str)).map(clean_str).items()
     ):
         if _is_blank(alias_key):
             issues.append(
@@ -733,11 +733,11 @@ def _validate_alias_map(
             )
 
     for idx, disease_id in (
-        df.get("disease_id", pd.Series(dtype=str)).map(safe_str).items()
+        df.get("disease_id", pd.Series(dtype=str)).map(clean_str).items()
     ):
         row_number = int(idx) + 2
         disease_key = (
-            safe_str(df.at[idx, "disease_key"]) if "disease_key" in df.columns else ""
+            clean_str(df.at[idx, "disease_key"]) if "disease_key" in df.columns else ""
         )
 
         if _is_blank(disease_id) and _is_blank(disease_key):
@@ -814,8 +814,8 @@ def _validate_alias_map(
     if "alias_key" in df.columns and "disease_key" in df.columns:
         alias_pairs = list(
             zip(
-                df["alias_key"].map(safe_str).tolist(),
-                df["disease_key"].map(safe_str).tolist(),
+                df["alias_key"].map(clean_str).tolist(),
+                df["disease_key"].map(clean_str).tolist(),
                 strict=False,
             )
         )
@@ -823,8 +823,8 @@ def _validate_alias_map(
         for (alias_key, disease_key), count in pair_counts.items():
             if count > 1:
                 for idx in df.index[
-                    (df["alias_key"].map(safe_str) == alias_key)
-                    & (df["disease_key"].map(safe_str) == disease_key)
+                    (df["alias_key"].map(clean_str) == alias_key)
+                    & (df["disease_key"].map(clean_str) == disease_key)
                 ]:
                     issues.append(
                         _issue(
@@ -865,7 +865,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
     summary: dict[str, Any] = {
         "module_name": settings.get("module_name", "disease_etl"),
         "step": "04_validate",
-        "batch_id": safe_str(settings.get("batch_id", "")),
+        "batch_id": clean_str(settings.get("batch_id", "")),
         "input_dir": str(canonical_out),
         "validate_out": str(validate_out),
         "canonical_file": str(diseases_path),
@@ -945,8 +945,8 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
     issues_csv = validate_out / "issues.csv"
     report_json = validate_out / "validation_report.json"
 
-    write_csv(issues_df, report_csv)
-    write_csv(issues_df, issues_csv)
+    write_frame(issues_df, report_csv)
+    write_frame(issues_df, issues_csv)
 
     with report_json.open("w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)

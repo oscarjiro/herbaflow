@@ -45,9 +45,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, now_iso
 
 from diseases.utils import (
-    read_csv,
-    safe_str,
-    write_csv,
+    read_frame,
+    clean_str,
+    write_frame,
 )
 
 DEFAULT_SETTINGS_PATH = ETL_ROOT / "diseases" / "settings.yml"
@@ -155,10 +155,10 @@ def _copy_table(
     if source_path is None:
         return None
 
-    df = read_csv(source_path)
+    df = read_frame(source_path)
     ordered = _column_order_for(table_key, df, export_cfg)
     out_path = export_dir / filename
-    write_csv(df[ordered], out_path)
+    write_frame(df[ordered], out_path)
 
     return str(out_path), int(len(df))
 

@@ -42,9 +42,9 @@ from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_
 from diseases.utils import (
     canonical_key,
     normalize_text,
-    read_csv,
-    safe_str,
-    write_csv,
+    read_frame,
+    clean_str,
+    write_frame,
     SETTINGS_PATH,
 )
 
@@ -86,7 +86,7 @@ def _normalize_name_value(value: object) -> str:
 
 
 def _normalize_synonym_value(value: object) -> str:
-    text = safe_str(value)
+    text = clean_str(value)
     if not text:
         return ""
     parts = [part.strip() for part in re.split(r"[;|,/]", text) if part.strip()]
@@ -98,7 +98,7 @@ def _normalize_synonym_value(value: object) -> str:
 
 
 def _normalize_reference_value(value: object) -> str:
-    text = safe_str(value)
+    text = clean_str(value)
     if not text:
         return ""
     text = re.sub(r"\s+", " ", text).strip()
@@ -124,7 +124,7 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
                 f"Could not resolve normalized input CSV in {normalize_in}. Expected disease_seed.csv or a single CSV file."
             )
 
-    df = read_csv(normalize_in)
+    df = read_frame(normalize_in)
     df_out = df.copy()
 
     name_col = _pick_first_existing(df_out.columns, NAME_COLUMNS)
@@ -153,16 +153,16 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
     # Keep row-level provenance available for later steps.
     source_cfg = settings.get("source", {})
     if "batch_id" not in df_out.columns:
-        df_out["batch_id"] = safe_str(source_cfg.get("batch_id", ""))
+        df_out["batch_id"] = clean_str(source_cfg.get("batch_id", ""))
     if "source_name" not in df_out.columns:
-        df_out["source_name"] = safe_str(source_cfg.get("name", ""))
+        df_out["source_name"] = clean_str(source_cfg.get("name", ""))
     if "source_url" not in df_out.columns:
-        df_out["source_url"] = safe_str(source_cfg.get("url", ""))
+        df_out["source_url"] = clean_str(source_cfg.get("url", ""))
     if "retrieved_at" not in df_out.columns:
-        df_out["retrieved_at"] = safe_str(source_cfg.get("retrieved_at", ""))
+        df_out["retrieved_at"] = clean_str(source_cfg.get("retrieved_at", ""))
 
     output_path = normalize_out / normalize_in.name
-    write_csv(df_out, output_path)
+    write_frame(df_out, output_path)
 
     manifest = {
         "module_name": settings.get("module", {}).get("name", "diseases"),

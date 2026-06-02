@@ -50,9 +50,9 @@ from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_
 from diseases.utils import (
     canonical_key,
     normalize_text,
-    read_csv,
-    safe_str,
-    write_csv,
+    read_frame,
+    clean_str,
+    write_frame,
     SETTINGS_PATH,
 )
 
@@ -169,7 +169,7 @@ def _infer_source_from_column_name(column_name: str) -> str | None:
 
 def _infer_source_from_curie(value: str) -> str | None:
     """Infer a source name from a CURIE-like identifier."""
-    curie = safe_str(value)
+    curie = clean_str(value)
     if not curie:
         return None
 
@@ -202,12 +202,12 @@ def _get_search_terms(row: pd.Series) -> list[str]:
     terms = []
 
     # 1. Primary Name (Highest Priority)
-    primary = safe_str(row.get("disease_name_clean"))
+    primary = clean_str(row.get("disease_name_clean"))
     if primary:
         terms.append(primary)
 
     # 2. Aliases (Secondary Priority)
-    aliases_raw = safe_str(row.get("synonym_clean"))
+    aliases_raw = clean_str(row.get("synonym_clean"))
     if aliases_raw:
         # Split by semicolon and add unique terms not already in the list
         for alias in aliases_raw.split(";"):
@@ -228,7 +228,7 @@ def _extract_seed_candidates(row: pd.Series) -> list[dict[str, str]]:
     ontology_label = ""
 
     for col in columns:
-        value = safe_str(row[col])
+        value = clean_str(row[col])
         if not value:
             continue
 
@@ -304,7 +304,7 @@ def _preferred_source_order(preferred_sources: list[str]) -> list[str]:
     ordered: list[str] = []
     seen: set[str] = set()
     for source in preferred_sources:
-        cleaned = safe_str(source)
+        cleaned = clean_str(source)
         if not cleaned:
             continue
         key = cleaned.strip().lower()
@@ -370,7 +370,7 @@ def _load_cache(cache_path: Path) -> pd.DataFrame:
                 "retrieved_at",
             ]
         )
-    return read_csv(cache_path)
+    return read_frame(cache_path)
 
 
 def _lookup_cache(
@@ -424,7 +424,7 @@ def _ols_search_exact(
     max_results: int = 10,
 ) -> dict[str, Any] | None:
     """Perform a conservative exact-label lookup against OLS search results."""
-    query_clean = safe_str(query)
+    query_clean = clean_str(query)
     if not query_clean:
         return None
 
@@ -461,8 +461,8 @@ def _ols_search_exact(
     for doc in docs:
         if not isinstance(doc, dict):
             continue
-        label = safe_str(doc.get("label", ""))
-        short_form = safe_str(doc.get("short_form", ""))
+        label = clean_str(doc.get("label", ""))
+        short_form = clean_str(doc.get("short_form", ""))
         if query_norm and query_norm == _normalize_for_match(label):
             exact_hits.append(doc)
         elif query_norm and query_norm == _normalize_for_match(short_form):
@@ -474,17 +474,17 @@ def _ols_search_exact(
     # Keep the first exact hit only to avoid over-mapping.
     doc = exact_hits[0]
     ontology_id = (
-        safe_str(doc.get("short_form", ""))
-        or safe_str(doc.get("obo_id", ""))
-        or safe_str(doc.get("iri", ""))
+        clean_str(doc.get("short_form", ""))
+        or clean_str(doc.get("obo_id", ""))
+        or clean_str(doc.get("iri", ""))
     )
-    ontology_label = safe_str(doc.get("label", ""))
+    ontology_label = clean_str(doc.get("label", ""))
 
     # Extract Description (OLS returns a list, we want a single string)
     desc_list = doc.get("description", [])
     description = ""
     for desc in desc_list:
-        cleaned_desc = safe_str(desc)
+        cleaned_desc = clean_str(desc)
         if any(x in cleaned_desc for x in ["[SN].", "Xref MGI."]):
             continue
         description = cleaned_desc
@@ -544,9 +544,9 @@ def _mapping_from_seed_candidate(
     confidence = 0.85 if ambiguous else 1.00
     status = "ambiguous" if ambiguous else "matched"
     return {
-        "ontology_id": safe_str(candidate.get("ontology_id", "")),
-        "ontology_source": safe_str(candidate.get("ontology_source", "")),
-        "standardized_name": safe_str(candidate.get("standardized_name", "")),
+        "ontology_id": clean_str(candidate.get("ontology_id", "")),
+        "ontology_source": clean_str(candidate.get("ontology_source", "")),
+        "standardized_name": clean_str(candidate.get("standardized_name", "")),
         "ontology_confidence": confidence,
         "ontology_status": status,
         "ontology_match_method": "seed_provided",
@@ -579,11 +579,11 @@ def _build_cache_row(
     return {
         "disease_key": disease_key,
         "query_key": query_key,
-        "ontology_id": safe_str(mapping.get("ontology_id", "")),
-        "ontology_source": safe_str(mapping.get("ontology_source", "")),
-        "standardized_name": safe_str(mapping.get("standardized_name", "")),
+        "ontology_id": clean_str(mapping.get("ontology_id", "")),
+        "ontology_source": clean_str(mapping.get("ontology_source", "")),
+        "standardized_name": clean_str(mapping.get("standardized_name", "")),
         "ontology_confidence": float(mapping.get("ontology_confidence", 0.0) or 0.0),
-        "ontology_match_method": safe_str(mapping.get("ontology_match_method", "")),
+        "ontology_match_method": clean_str(mapping.get("ontology_match_method", "")),
         "retrieved_at": now_iso(),
     }
 
@@ -633,14 +633,14 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
     ensure_dir(cache_path.parent)
 
     input_path = _resolve_input_path(normalize_out)
-    df = read_csv(input_path)
+    df = read_frame(input_path)
     df_out = df.copy()
 
     if "disease_name_clean" not in df_out.columns:
         df_out["disease_name_clean"] = df_out.get(
             "disease_name", df_out.get("name", df_out.get("disease", ""))
         )
-        df_out["disease_name_clean"] = df_out["disease_name_clean"].map(safe_str)
+        df_out["disease_name_clean"] = df_out["disease_name_clean"].map(clean_str)
 
     if "disease_key" not in df_out.columns:
         df_out["disease_key"] = df_out["disease_name_clean"].map(canonical_key)
@@ -657,7 +657,7 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
         # 1. Harvest all possible search terms (Primary Name + Aliases)
         search_terms = _get_search_terms(row)
         primary_query = search_terms[0] if search_terms else ""
-        disease_key = safe_str(row.get("disease_key", "")) or canonical_key(
+        disease_key = clean_str(row.get("disease_key", "")) or canonical_key(
             primary_query
         )
 
@@ -688,9 +688,9 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
                 )
                 if cached is not None:
                     mapping = {
-                        "ontology_id": safe_str(cached.get("ontology_id", "")),
-                        "ontology_source": safe_str(cached.get("ontology_source", "")),
-                        "ontology_label": safe_str(cached.get("ontology_label", "")),
+                        "ontology_id": clean_str(cached.get("ontology_id", "")),
+                        "ontology_source": clean_str(cached.get("ontology_source", "")),
+                        "ontology_label": clean_str(cached.get("ontology_label", "")),
                         "ontology_confidence": float(
                             cached.get("ontology_confidence", 0.0) or 0.0
                         ),
@@ -724,7 +724,7 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
             mapping["ontology_cache_hit"] = "yes"
 
         # Update global counters
-        if mapping["ontology_status"] in {"matched", "ambiguous"} and safe_str(
+        if mapping["ontology_status"] in {"matched", "ambiguous"} and clean_str(
             mapping.get("ontology_id", "")
         ):
             matched_count += 1
@@ -736,21 +736,21 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
         # Build the final mapping record for this row
         mapping_result = {
             "disease_key": disease_key,
-            "disease_name_clean": safe_str(row.get("disease_name_clean", "")),
-            "ontology_id": safe_str(mapping.get("ontology_id", "")),
-            "ontology_source": safe_str(mapping.get("ontology_source", "")),
+            "disease_name_clean": clean_str(row.get("disease_name_clean", "")),
+            "ontology_id": clean_str(mapping.get("ontology_id", "")),
+            "ontology_source": clean_str(mapping.get("ontology_source", "")),
             "ontology_confidence": float(
                 mapping.get("ontology_confidence", 0.0) or 0.0
             ),
-            "standardized_name": safe_str(
+            "standardized_name": clean_str(
                 mapping.get("standardized_name", "")
             ),  # alias for label
-            "ontology_description": safe_str(mapping.get("ontology_description", "")),
-            "ontology_synonyms": safe_str(mapping.get("ontology_synonyms", "")),
-            "ontology_status": safe_str(mapping.get("ontology_status", "")),
-            "ontology_match_method": safe_str(mapping.get("ontology_match_method", "")),
+            "ontology_description": clean_str(mapping.get("ontology_description", "")),
+            "ontology_synonyms": clean_str(mapping.get("ontology_synonyms", "")),
+            "ontology_status": clean_str(mapping.get("ontology_status", "")),
+            "ontology_match_method": clean_str(mapping.get("ontology_match_method", "")),
             "ontology_query": final_query_used,
-            "ontology_cache_hit": safe_str(mapping.get("ontology_cache_hit", "no")),
+            "ontology_cache_hit": clean_str(mapping.get("ontology_cache_hit", "no")),
         }
         mapping_rows.append(mapping_result)
 
@@ -767,7 +767,7 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
             )
 
         # Queue successful new matches for the cache update
-        if mapping["ontology_status"] in {"matched", "ambiguous"} and safe_str(
+        if mapping["ontology_status"] in {"matched", "ambiguous"} and clean_str(
             mapping.get("ontology_id", "")
         ):
             # We cache based on the canonical key of the term that actually worked
@@ -792,14 +792,14 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
     df_out = df_out[ordered_columns]
 
     normalized_out_path = ontology_out / input_path.name
-    write_csv(df_out, normalized_out_path)
+    write_frame(df_out, normalized_out_path)
 
     mapping_df = pd.DataFrame(mapping_rows)
     mapping_path = ontology_out / "ontology_mapping.csv"
-    write_csv(mapping_df, mapping_path)
+    write_frame(mapping_df, mapping_path)
 
     report_path = ontology_out / "mapping_report.csv"
-    write_csv(mapping_df, report_path)
+    write_frame(mapping_df, report_path)
 
     # Generate the flattened search map (Alias -> Disease Key)
     # This is what your App will use for the search bar!
@@ -817,7 +817,7 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
         )
 
         # 2. Add User-provided Aliases
-        if safe_str(row.get("synonym_clean")):
+        if clean_str(row.get("synonym_clean")):
             for s in str(row["synonym_clean"]).split(";"):
                 if s.strip():
                     alias_map_rows.append(
@@ -829,7 +829,7 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
                     )
 
         # 3. Add Ontology-provided medical synonyms (the new "gold")
-        if safe_str(row.get("ontology_synonyms")):
+        if clean_str(row.get("ontology_synonyms")):
             for s in str(row["ontology_synonyms"]).split(";"):
                 if s.strip():
                     alias_map_rows.append(
@@ -840,7 +840,7 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
                         }
                     )
 
-    write_csv(pd.DataFrame(alias_map_rows), ontology_out / "disease_alias_map.csv")
+    write_frame(pd.DataFrame(alias_map_rows), ontology_out / "disease_alias_map.csv")
 
     report_json = {
         "module_name": settings.get("module_name", "disease_etl"),
@@ -866,7 +866,7 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
 
     if cache_updates:
         cache_df = _update_cache(cache_df, cache_updates)
-        write_csv(cache_df, cache_path)
+        write_frame(cache_df, cache_path)
 
     log_path = ontology_out / "run.log"
     with log_path.open("w", encoding="utf-8") as f:

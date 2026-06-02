@@ -55,9 +55,9 @@ from shared.provenance import disease_ontology_url
 from diseases.utils import (
     canonical_key,
     normalize_text,
-    read_csv,
-    safe_str,
-    write_csv,
+    read_frame,
+    clean_str,
+    write_frame,
     disease_canonical_key,
     disease_id as make_disease_id,
     disease_alias_id,
@@ -203,7 +203,7 @@ def _clean_name_text(value: object) -> str:
 
 def _clean_reference_text(value: object) -> str:
     """Clean provenance or description text without forcing lowercase."""
-    text = safe_str(value)
+    text = clean_str(value)
     if not text:
         return ""
     text = re.sub(r"\s+", " ", text).strip()
@@ -213,7 +213,7 @@ def _clean_reference_text(value: object) -> str:
 
 def _split_multivalue(value: object) -> list[str]:
     """Split a semicolon-, comma-, slash-, pipe-, or newline-delimited field."""
-    raw = safe_str(value)
+    raw = clean_str(value)
     if not raw:
         return []
 
@@ -244,7 +244,7 @@ def _split_multivalue(value: object) -> list[str]:
 
 def _safe_float(value: object, default: float = 0.0) -> float:
     """Convert a value to float safely."""
-    text = safe_str(value)
+    text = clean_str(value)
     if not text:
         return default
     try:
@@ -444,7 +444,7 @@ def _detect_alias_sources(
 
 def _status_rank(status: str) -> int:
     """Rank ontology status values so better matches sort first."""
-    value = safe_str(status).lower()
+    value = clean_str(status).lower()
     if value == "matched":
         return 3
     if value == "ambiguous":
@@ -476,7 +476,7 @@ def _pick_representative_row(group: pd.DataFrame) -> pd.Series:
 
     if "ontology_label" in temp.columns:
         temp["_label_score"] = temp["ontology_label"].map(
-            lambda v: 1 if safe_str(v) else 0
+            lambda v: 1 if clean_str(v) else 0
         )
     else:
         temp["_label_score"] = 0
@@ -572,7 +572,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
     ensure_dir(output_dir)
 
     input_path = _resolve_input_path(input_dir)
-    df = read_csv(input_path)
+    df = read_frame(input_path)
 
     canonical_cfg = settings.get("canonical", {})
     export_cfg = settings.get("export", {})
@@ -589,7 +589,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
         df["disease_key"] = df.apply(_group_disease_key, axis=1)
     else:
         df["disease_key"] = df["disease_key"].map(canonical_key)
-        missing_keys = df["disease_key"].map(lambda v: safe_str(v) == "")
+        missing_keys = df["disease_key"].map(lambda v: clean_str(v) == "")
         if missing_keys.any():
             df.loc[missing_keys, "disease_key"] = df.loc[missing_keys].apply(
                 _group_disease_key, axis=1
@@ -611,14 +611,14 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
         confidence = _safe_float(
             rep.get("ontology_confidence", rep.get("confidence", 0.0))
         )
-        ontology_status = safe_str(rep.get("ontology_status", ""))
+        ontology_status = clean_str(rep.get("ontology_status", ""))
         ontology_label = _clean_name_text(
             rep.get("ontology_label", "")
         ) or _clean_name_text(rep.get("standardized_name", ""))
         is_confident = bool(
             ontology_label
             and confidence >= confidence_threshold
-            and safe_str(ontology_status).lower()
+            and clean_str(ontology_status).lower()
             in {"matched", "seed_provided", "cache", "ambiguous"}
         )
 
@@ -628,35 +628,35 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
         seed_name_clean = _detect_seed_name_clean(rep)
         ontology_synonyms = _detect_ontology_synonyms(rep)
 
-        ontology_source = safe_str(rep.get("ontology_source", ""))
-        ontology_id = safe_str(rep.get("ontology_id", ""))
+        ontology_source = clean_str(rep.get("ontology_source", ""))
+        ontology_id = clean_str(rep.get("ontology_id", ""))
         canonical_key_value = disease_canonical_key(ontology_source, ontology_id, disease_key)
         disease_id = make_disease_id(ontology_source, ontology_id, disease_key)
         source_id = (
-            safe_str(rep.get("source_id", ""))
-            or safe_str(rep.get("seed_id", ""))
+            clean_str(rep.get("source_id", ""))
+            or clean_str(rep.get("seed_id", ""))
             or disease_key
         )
-        source_name = safe_str(rep.get("source_name", "")) or safe_str(
+        source_name = clean_str(rep.get("source_name", "")) or clean_str(
             settings.get("source_name", "")
         )
         source_url = (
             disease_ontology_url(ontology_source, ontology_id)
-            or safe_str(rep.get("source_url", ""))
-            or safe_str(settings.get("source_url", ""))
+            or clean_str(rep.get("source_url", ""))
+            or clean_str(settings.get("source_url", ""))
         )
         source_batch_id = (
-            safe_str(rep.get("source_batch_id", ""))
-            or safe_str(rep.get("batch_id", ""))
-            or safe_str(settings.get("batch_id", ""))
+            clean_str(rep.get("source_batch_id", ""))
+            or clean_str(rep.get("batch_id", ""))
+            or clean_str(settings.get("batch_id", ""))
         )
-        retrieved_at = safe_str(rep.get("retrieved_at", "")) or safe_str(
+        retrieved_at = clean_str(rep.get("retrieved_at", "")) or clean_str(
             settings.get("retrieved_at", "")
         )
-        source_reference_clean = safe_str(
+        source_reference_clean = clean_str(
             rep.get("source_reference_clean", "")
-        ) or safe_str(rep.get("source_reference", ""))
-        batch_id = safe_str(rep.get("batch_id", "")) or safe_str(
+        ) or clean_str(rep.get("source_reference", ""))
+        batch_id = clean_str(rep.get("batch_id", "")) or clean_str(
             settings.get("batch_id", "")
         )
 
@@ -685,8 +685,8 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
             "retrieved_at": retrieved_at,
             "source_reference_clean": source_reference_clean,
             "ontology_status": ontology_status,
-            "ontology_match_method": safe_str(rep.get("ontology_match_method", "")),
-            "ontology_query": safe_str(rep.get("ontology_query", "")),
+            "ontology_match_method": clean_str(rep.get("ontology_match_method", "")),
+            "ontology_query": clean_str(rep.get("ontology_query", "")),
             "batch_id": batch_id,
             "created_at": now_iso(),
         }
@@ -718,31 +718,31 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
                 row.get("ontology_confidence", row.get("confidence", confidence))
             )
             row_source_id = (
-                safe_str(row.get("source_id", ""))
-                or safe_str(row.get("seed_id", ""))
+                clean_str(row.get("source_id", ""))
+                or clean_str(row.get("seed_id", ""))
                 or disease_key
             )
-            row_source_name = safe_str(row.get("source_name", "")) or source_name
-            row_source_url = safe_str(row.get("source_url", "")) or source_url
+            row_source_name = clean_str(row.get("source_name", "")) or source_name
+            row_source_url = clean_str(row.get("source_url", "")) or source_url
             row_source_batch_id = (
-                safe_str(row.get("source_batch_id", ""))
-                or safe_str(row.get("batch_id", ""))
+                clean_str(row.get("source_batch_id", ""))
+                or clean_str(row.get("batch_id", ""))
                 or source_batch_id
             )
-            row_retrieved_at = safe_str(row.get("retrieved_at", "")) or retrieved_at
+            row_retrieved_at = clean_str(row.get("retrieved_at", "")) or retrieved_at
             row_source_reference_clean = (
-                safe_str(row.get("source_reference_clean", ""))
+                clean_str(row.get("source_reference_clean", ""))
                 or source_reference_clean
             )
-            row_batch_id = safe_str(row.get("batch_id", "")) or batch_id
-            row_ontology_status = safe_str(row.get("ontology_status", ""))
+            row_batch_id = clean_str(row.get("batch_id", "")) or batch_id
+            row_ontology_status = clean_str(row.get("ontology_status", ""))
             row_ontology_label = _clean_name_text(
                 row.get("ontology_label", "")
             ) or _clean_name_text(row.get("standardized_name", ""))
             row_confident = bool(
                 row_ontology_label
                 and row_confidence >= confidence_threshold
-                and safe_str(row_ontology_status).lower()
+                and clean_str(row_ontology_status).lower()
                 in {"matched", "seed_provided", "cache", "ambiguous"}
             )
 
@@ -794,7 +794,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
             alias_bucket.values(),
             key=lambda item: (
                 -int(item["_priority"]),
-                safe_str(item["alias_name"]).lower(),
+                clean_str(item["alias_name"]).lower(),
             ),
         )
 
@@ -824,9 +824,9 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
 
         seen_map_aliases: set[str] = {canonical_alias_key}
         for alias in ordered_aliases:
-            alias_key = safe_str(alias.get("alias_key", ""))
+            alias_key = clean_str(alias.get("alias_key", ""))
             alias_name = _clean_name_text(alias.get("alias_name", ""))
-            alias_type = safe_str(alias.get("alias_type", "")) or "user_alias"
+            alias_type = clean_str(alias.get("alias_type", "")) or "user_alias"
             if not alias_key or not alias_name or alias_key in seen_map_aliases:
                 continue
             seen_map_aliases.add(alias_key)
@@ -839,17 +839,17 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
                     "disease_key": disease_key,
                     "disease_id": disease_id,
                     "type": alias_type,
-                    "source_id": safe_str(alias.get("source_id", source_id)),
-                    "source_name": safe_str(alias.get("source_name", source_name)),
-                    "source_url": safe_str(alias.get("source_url", source_url)),
-                    "source_batch_id": safe_str(
+                    "source_id": clean_str(alias.get("source_id", source_id)),
+                    "source_name": clean_str(alias.get("source_name", source_name)),
+                    "source_url": clean_str(alias.get("source_url", source_url)),
+                    "source_batch_id": clean_str(
                         alias.get("source_batch_id", source_batch_id)
                     ),
-                    "retrieved_at": safe_str(alias.get("retrieved_at", retrieved_at)),
+                    "retrieved_at": clean_str(alias.get("retrieved_at", retrieved_at)),
                     "confidence": _safe_float(
                         alias.get("confidence", confidence), confidence
                     ),
-                    "created_at": safe_str(alias.get("created_at", now_iso())),
+                    "created_at": clean_str(alias.get("created_at", now_iso())),
                 }
             )
 
@@ -866,9 +866,9 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
     alias_map_path = output_dir / "disease_alias_map.csv"
     template_path = output_dir / "disease_targets_template.csv"
 
-    write_csv(diseases_df, diseases_path)
-    write_csv(aliases_df, aliases_path)
-    write_csv(alias_map_df, alias_map_path)
+    write_frame(diseases_df, diseases_path)
+    write_frame(aliases_df, aliases_path)
+    write_frame(alias_map_df, alias_map_path)
 
     if bool(
         canonical_cfg.get(
@@ -881,7 +881,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
     manifest = {
         "module_name": settings.get("module_name", "disease_etl"),
         "step": "03_build_canonical",
-        "batch_id": safe_str(settings.get("batch_id", "")),
+        "batch_id": clean_str(settings.get("batch_id", "")),
         "input_path": str(input_path),
         "output_dir": str(output_dir),
         "diseases_output": str(diseases_path),
