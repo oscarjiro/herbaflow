@@ -128,7 +128,7 @@ One canonical row per chemical entity.
 | `qed_score`         | float                 | Quantitative Estimate of Drug-likeness (0–1, higher = more drug-like); computed by RDKit |
 | `np_likeness_score` | float                 | Natural product-likeness score (RDKit); ≥ 0.5 triggers NP exception in ADME filtering |
 | `is_pains_positive` | boolean NOT NULL DEFAULT false | PAINS flag (Baell & Holloway 2010); true = matches pan-assay interference pattern. Reporting only — not a filter. Populated by ETL `patch_missing_lipinski.py` Pass 3. |
-| `lipinski_source`   | text                  | `chembl_api` = from ChEMBL molecule_properties; `rdkit_computed` = computed from SMILES; null = unresolved; CHECK `chembl_api` / `rdkit_computed` (nullable) |
+| `lipinski_source`   | text                  | Provenance of ADME descriptors; null = unresolved. CHECK (nullable) one of `chembl_api`, `rdkit_computed`, `rdkit_computed+rdkit_np`, `chembl_api+rdkit_np`, `rdkit_np` — base source optionally suffixed `+rdkit_np` when NP-likeness came from the RDKit scorer. Set by ETL `patch_missing_lipinski.py`. |
 | `source_id`         | FK → `source_systems` |        |
 | `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`      | timestamptz           |        |
@@ -295,7 +295,7 @@ The following columns hold controlled values that are **not** enforced by a DB C
 | `disease_id`    | uuid FK → `diseases` | optional |
 | `notes`         | text            |          |
 | `parameters`    | jsonb NOT NULL  | CHECK `jsonb_typeof = 'object'` |
-| `status`          | text            | CHECK `pending` / `running` / `complete` / `failed` (nullable) |
+| `status`          | text            | dynamic stage-derived string set by the backend (`pending`, `failed`, `complete`, `stage_{N}_running`, `stage_{N}_awaiting_approval`, `stage_{N}_starting`, `stage_{N}_rejected`) — no fixed-vocab CHECK |
 | `current_stage`   | int             | null = not started, 1–8 during pipeline; CHECK 1–8 |
 | `stage_results`   | jsonb NOT NULL  | per-stage intermediate results `{stage_1: {...}}`; default `{}`; CHECK `jsonb_typeof = 'object'` |
 | `mode`            | text NOT NULL   | `auto` (end-to-end) or `guided` (pauses for approval per stage); default `auto`; CHECK `auto` / `guided` — single source: `shared/contracts/analysis.json` |
