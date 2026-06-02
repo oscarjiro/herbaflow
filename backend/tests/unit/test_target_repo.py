@@ -31,7 +31,6 @@ def make_target(
         gene_symbol=gene_symbol,
         protein_name="RAC-alpha serine/threonine-protein kinase",
         uniprot_accession="P31749",
-        organism_tax_id=9606,
     )
     return t
 

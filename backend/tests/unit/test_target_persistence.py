@@ -134,14 +134,12 @@ async def test_persist_canonical_target_inserts_absent_skips_present_no_commit()
         canonical_key="uniprot:P04637",
         gene_symbol="TP53",
         uniprot_accession="P04637",
-        organism_tax_id=9606,
     )
     present = Target(
         target_id="uniprot:P00533",
         canonical_key="uniprot:P00533",
         gene_symbol="EGFR",
         uniprot_accession="P00533",
-        organism_tax_id=9606,
     )
 
     # First SELECT (absent) -> None; second SELECT (present) -> an existing row.
