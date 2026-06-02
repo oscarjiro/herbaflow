@@ -249,3 +249,25 @@ class TestPlantAliasSlugCollapse:
         assert plant_row["plant_id"] == plants_canonical.make_plant_id(
             "3190652", "Curcuma longa L."
         )
+
+
+compounds_canonical = _load(
+    "compounds_05_build_canonical", "compounds/05_build_canonical/run.py"
+)
+
+
+def test_collect_alias_items_drops_dead_source_batch_id():
+    """Alias rows never reach the loaded CSV with a source_batch_id:
+    ALIASES_COLUMNS omits it and the dedup pass rebuilds each row without it.
+    The collect_alias_items plumbing that threads source_batch_id is therefore
+    dead — guard that the parameter and the schema constant stay free of it so
+    it cannot silently rot back in."""
+    import inspect
+
+    params = inspect.signature(
+        compounds_canonical.collect_alias_items
+    ).parameters
+    assert "source_batch_id" not in params, (
+        f"collect_alias_items still threads source_batch_id: {list(params)}"
+    )
+    assert "source_batch_id" not in set(compounds_canonical.ALIASES_COLUMNS)

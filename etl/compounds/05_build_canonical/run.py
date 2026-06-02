@@ -955,7 +955,6 @@ def collect_alias_items(
     best_entry: Dict[str, Any],
     canonical_name: str,
     source_url: str,
-    source_batch_id: str,
     retrieved_at: str,
 ) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
@@ -965,7 +964,6 @@ def collect_alias_items(
         alias_type: str,
         source_name: str,
         url: str,
-        batch_id: str,
         priority: int,
     ) -> None:
         text = normalize_whitespace(name)
@@ -998,7 +996,6 @@ def collect_alias_items(
                 "alias_type": alias_type,
                 "source_name": source_name,
                 "source_url": url,
-                "source_batch_id": batch_id,
                 "retrieved_at": retrieved_at,
                 "priority": priority,
             }
@@ -1016,7 +1013,6 @@ def collect_alias_items(
         "canonical_name",
         candidate.get("source_name", source_url),
         source_url,
-        source_batch_id,
         1,
     )
     add(
@@ -1024,7 +1020,6 @@ def collect_alias_items(
         "preferred_name",
         candidate.get("source_name", source_url),
         source_url,
-        source_batch_id,
         2,
     )
     add(
@@ -1032,7 +1027,6 @@ def collect_alias_items(
         "iupac_name",
         candidate.get("source_name", source_url),
         source_url,
-        source_batch_id,
         3,
     )
     add(
@@ -1040,7 +1034,6 @@ def collect_alias_items(
         "representative_name",
         candidate.get("source_name", source_url),
         source_url,
-        source_batch_id,
         4,
     )
     add(
@@ -1048,7 +1041,6 @@ def collect_alias_items(
         "cas_id",
         candidate.get("source_name", source_url),
         source_url,
-        source_batch_id,
         5,
     )
 
@@ -1072,7 +1064,6 @@ def collect_alias_items(
             "raw_metabolite_name",
             best_entry["candidate"].get("source_name", source_url),
             source_url,
-            source_batch_id,
             idx,
         )
 
@@ -1082,7 +1073,6 @@ def collect_alias_items(
             "source_compound_id",
             best_entry["candidate"].get("source_name", source_url),
             source_url,
-            source_batch_id,
             idx,
         )
 
@@ -1092,7 +1082,6 @@ def collect_alias_items(
             "cas_id",
             best_entry["candidate"].get("source_name", source_url),
             source_url,
-            source_batch_id,
             idx,
         )
 
@@ -1108,7 +1097,6 @@ def collect_alias_items(
             "enrichment_synonym",
             best_hit.get("source_name", candidate.get("source_name", source_url)),
             best_hit.get("source_url", source_url),
-            source_batch_id,
             idx,
         )
 
@@ -1133,7 +1121,6 @@ def collect_alias_items(
                 "alias_type": item["alias_type"],
                 "source_name": item["source_name"],
                 "source_url": item["source_url"],
-                "source_batch_id": item["source_batch_id"],
                 "retrieved_at": item["retrieved_at"],
             }
         )
@@ -1529,7 +1516,6 @@ def build_canonical_tables(
                 best_entry=best_entry,
                 canonical_name=canonical_name,
                 source_url=source_url,
-                source_batch_id=source_batch_id,
                 retrieved_at=retrieved_at,
             )
         )
