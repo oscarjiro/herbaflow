@@ -34,6 +34,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir
 from plants.utils import plant_canonical_key, plant_id as make_plant_id, plant_alias_id as make_alias_id
 from shared.identity import pick_alias
+from shared.provenance import gbif_species_url
 
 import argparse
 import logging
@@ -386,7 +387,7 @@ def canonicalize_group(
     plant_id = make_plant_id(gbif_key, name_slug_source)
 
     source_name = coalesce_source_name(rep, source_name_fallback)
-    source_url = coalesce_source_url(rep)
+    source_url = gbif_species_url(gbif_key) or coalesce_source_url(rep)
     source_batch_id = source_batch_id_from_row(rep)
     retrieved_at = coalesce_retrieved_at(rep)
     confidence = confidence_value(rep)
