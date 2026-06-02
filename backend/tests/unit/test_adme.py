@@ -150,6 +150,12 @@ def test_manual_compound_screened_when_flag_enabled():
     assert result["failed"][0].compound_id == compound.compound_id
 
 
+def test_apply_pains_removed_from_adme_params():
+    """PAINS is reported as an annotation, never a filter param."""
+    params = AdmeParams()
+    assert not hasattr(params, "apply_pains")
+
+
 # ---------------------------------------------------------------------------
 # Regression: stage2 run() output must include all expected ADME field names
 # ---------------------------------------------------------------------------

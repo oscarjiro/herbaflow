@@ -19,9 +19,7 @@ class AdmeParams:
       Compounds with NP-likeness score >= threshold bypass RO5/Veber filters.
       Threshold 0.5 captures compounds with strong natural-product character.
 
-    PAINS (Baell & Holloway, J. Med. Chem. 53:2719-2740, 2010):
-      Not applied as a hard filter (apply_pains=False); NP pipeline targets
-      computational target prediction, not biochemical assay screening.
+    PAINS substructures are reported per compound as an annotation (is_pains_positive), not applied as a filter — natural products legitimately trip PAINS alerts.
     """
     max_mw: float = 500.0
     max_logp: float = 5.0
@@ -30,7 +28,6 @@ class AdmeParams:
     max_tpsa: float = 140.0
     max_rotatable_bonds: int = 10
     apply_veber: bool = True
-    apply_pains: bool = False
     np_exception_threshold: float = 0.5
     apply_adme_to_manual: bool = True
     # When False, compounds with source="user_provided" bypass Lipinski/Veber
@@ -116,7 +113,7 @@ class PipelineConfig:
         _ADME_FIELDS = {
             "max_mw", "max_logp", "max_hbd", "max_hba",
             "max_tpsa", "max_rotatable_bonds",
-            "apply_veber", "apply_pains", "np_exception_threshold",
+            "apply_veber", "np_exception_threshold",
             "apply_adme_to_manual",
         }
         return {k: d[k] for k in _ADME_FIELDS if k in d}

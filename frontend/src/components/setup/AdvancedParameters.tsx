@@ -20,7 +20,6 @@ export interface AdvancedParams {
   max_tpsa: number
   max_rotatable_bonds: number
   apply_veber: boolean
-  apply_pains: boolean
   np_exception_threshold: number
   apply_adme_to_manual: boolean
 
@@ -57,7 +56,6 @@ export const DEFAULT_PARAMS: AdvancedParams = {
   max_tpsa: PARAM_DEFAULTS.adme.max_tpsa as number,
   max_rotatable_bonds: PARAM_DEFAULTS.adme.max_rotatable_bonds as number,
   apply_veber: PARAM_DEFAULTS.adme.apply_veber as boolean,
-  apply_pains: PARAM_DEFAULTS.adme.apply_pains as boolean,
   np_exception_threshold: PARAM_DEFAULTS.adme.np_exception_threshold as number,
   apply_adme_to_manual: PARAM_DEFAULTS.adme.apply_adme_to_manual as boolean,
 
@@ -261,11 +259,6 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
                 label="Apply Veber rules"
                 value={value.apply_veber}
                 onChange={(v) => set('apply_veber', v)}
-              />
-              <CheckboxField
-                label="Flag PAINS (pan-assay interference compounds)"
-                value={value.apply_pains}
-                onChange={(v) => set('apply_pains', v)}
               />
               <CheckboxField
                 label="Apply ADME screening to manually added compounds"

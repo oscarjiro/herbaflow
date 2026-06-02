@@ -100,7 +100,6 @@ export const advancedParamsSchema = z.object({
   max_tpsa: z.number().min(0, 'Must be ≥ 0').max(500, 'Must be ≤ 500'),
   max_rotatable_bonds: z.number().int().min(0, 'Must be ≥ 0').max(50, 'Must be ≤ 50'),
   apply_veber: z.boolean(),
-  apply_pains: z.boolean(),
   np_exception_threshold: z.number().min(0, 'Must be ≥ 0').max(1, 'Must be ≤ 1'),
   apply_adme_to_manual: z.boolean(),
 

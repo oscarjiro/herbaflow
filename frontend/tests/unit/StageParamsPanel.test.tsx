@@ -33,7 +33,6 @@ describe('StageParamsPanel — isDirty detection', () => {
       max_tpsa: 140.0,
       max_rotatable_bonds: 10,
       apply_veber: true,
-      apply_pains: false,
       np_exception_threshold: 0.5,
     },
   }

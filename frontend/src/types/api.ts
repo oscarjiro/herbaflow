@@ -229,7 +229,6 @@ export interface AdmeParamsConfig {
   max_tpsa: number
   max_rotatable_bonds: number
   apply_veber: boolean
-  apply_pains: boolean
   np_exception_threshold: number
   apply_adme_to_manual: boolean
 }

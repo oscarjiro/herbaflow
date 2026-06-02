@@ -22,7 +22,6 @@ const VALID_PARAMS = {
   max_tpsa: 140,
   max_rotatable_bonds: 10,
   apply_veber: true,
-  apply_pains: false,
   np_exception_threshold: 0.5,
   apply_adme_to_manual: true,
   min_pchembl: 5,
@@ -183,11 +182,3 @@ describe('advancedParamsSchema — min_confidence STRING presets', () => {
   })
 })
 
-describe('advancedParamsSchema — apply_pains', () => {
-  it('requires apply_pains to be present', () => {
-    const { apply_pains: _omit, ...withoutPains } = VALID_PARAMS
-    void _omit
-    const r = advancedParamsSchema.safeParse(withoutPains)
-    expect(r.success).toBe(false)
-  })
-})
