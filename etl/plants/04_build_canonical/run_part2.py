@@ -291,14 +291,6 @@ def clean_family_name(row: pd.Series) -> str:
     return first_non_empty(row.get("family_name", ""))
 
 
-def clean_taxonomic_status(row: pd.Series) -> str:
-    return first_non_empty(row.get("taxonomic_status", "")).upper()
-
-
-def clean_rank(row: pd.Series) -> str:
-    return first_non_empty(row.get("rank", "")).upper()
-
-
 def build_canonical_key(canonical_scientific_name: str, authorship: str) -> str:
     name_key = fold_key_text(canonical_scientific_name)
     author_key = fold_key_text(authorship)
@@ -313,13 +305,6 @@ def build_alias_key(alias_name: str) -> str:
 
 def is_meaningful_alias(alias_name: str) -> bool:
     return bool(fold_key_text(alias_name))
-
-
-def normalize_gbif_fields(row: pd.Series) -> Dict[str, str]:
-    out: Dict[str, str] = {}
-    for field in GBIF_ID_FIELDS:
-        out[field] = normalize_id_like(row.get(field, ""))
-    return out
 
 
 def pick_representative_row(group: pd.DataFrame) -> pd.Series:
