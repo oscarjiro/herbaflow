@@ -364,7 +364,9 @@ def _load_cache(cache_path: Path) -> pd.DataFrame:
                 "query_key",
                 "ontology_id",
                 "ontology_source",
-                "ontology_label",
+                "standardized_name",
+                "ontology_description",
+                "ontology_synonyms",
                 "ontology_confidence",
                 "ontology_match_method",
                 "retrieved_at",
@@ -582,6 +584,8 @@ def _build_cache_row(
         "ontology_id": clean_str(mapping.get("ontology_id", "")),
         "ontology_source": clean_str(mapping.get("ontology_source", "")),
         "standardized_name": clean_str(mapping.get("standardized_name", "")),
+        "ontology_description": clean_str(mapping.get("ontology_description", "")),
+        "ontology_synonyms": clean_str(mapping.get("ontology_synonyms", "")),
         "ontology_confidence": float(mapping.get("ontology_confidence", 0.0) or 0.0),
         "ontology_match_method": clean_str(mapping.get("ontology_match_method", "")),
         "retrieved_at": now_iso(),
@@ -690,7 +694,15 @@ def run(settings_path: str | Path = SETTINGS_PATH) -> dict[str, Any]:
                     mapping = {
                         "ontology_id": clean_str(cached.get("ontology_id", "")),
                         "ontology_source": clean_str(cached.get("ontology_source", "")),
-                        "ontology_label": clean_str(cached.get("ontology_label", "")),
+                        "standardized_name": clean_str(
+                            cached.get("standardized_name", "")
+                        ),
+                        "ontology_description": clean_str(
+                            cached.get("ontology_description", "")
+                        ),
+                        "ontology_synonyms": clean_str(
+                            cached.get("ontology_synonyms", "")
+                        ),
                         "ontology_confidence": float(
                             cached.get("ontology_confidence", 0.0) or 0.0
                         ),
