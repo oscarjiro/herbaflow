@@ -309,8 +309,8 @@ Matches the `compounds` database table.
 | `num_ro5_violations` | int      | Number of Lipinski Rule of Five violations (0 = fully compliant)                                                          |
 | `lipinski_source`    | text     | How ADME descriptors were obtained: `chembl_api`, `rdkit_computed`, or empty (unresolved)                                 |
 | `source_name`        | text     | `PubChem` (primary enrichment source)                                                                                     |
-| `source_url`         | text     | PubChem compound page URL                                                                                                 |
-| `source_batch_id`    | text     | Run ID timestamp of the enrichment run                                                                                    |
+| `source_url`         | text     | PubChem compound page URL; centralized deep link produced by `etl/shared/provenance.py`                                   |
+| `source_batch_id`    | text     | Run ID timestamp of the enrichment run (CSV column; DB column dropped)                                                    |
 | `retrieved_at`       | ISO 8601 | UTC timestamp of enrichment                                                                                               |
 | `confidence`         | float    | Final match confidence (0.0–1.0)                                                                                          |
 | `canonical_status`   | text     | `accepted`, `provisional`, `review`, or `unresolved`                                                                      |
@@ -335,8 +335,8 @@ Matches the `compound_aliases` database table.
 | `alias_key`         | text     | Lowercased, whitespace-collapsed lookup key                                            |
 | `alias_type`        | text     | `iupac_name`, `common_name`, `cas_id`, `inchi_key`, `smiles`, `pubchem_synonym`, etc.  |
 | `source_name`       | text     | Source that provided this alias                                                        |
-| `source_url`        | text     | PubChem or ChEMBL URL                                                                  |
-| `source_batch_id`   | text     | Run ID                                                                                 |
+| `source_url`        | text     | PubChem or ChEMBL URL; centralized deep link produced by `etl/shared/provenance.py`    |
+| `source_batch_id`   | text     | Run ID (CSV column; DB column dropped)                                                 |
 | `retrieved_at`      | ISO 8601 | UTC timestamp                                                                          |
 
 ### `plant_compounds.csv` (20,891 rows)
@@ -349,6 +349,7 @@ Matches the `plant_compounds` database table. One row per canonical plant-compou
 | `plant_id`               | UUID v5  | FK → plants                                                          |
 | `compound_id`            | UUID v5  | FK → compounds                                                       |
 | `source_name`            | text     | `KNApSAcK`                                                           |
+| `source_url`             | text     | Per-row KNApSAcK deep link produced by `etl/shared/provenance.py`    |
 | `retrieved_at`           | ISO 8601 | UTC timestamp                                                        |
 
 ### `compound_candidate_map.csv` (12,593 rows)

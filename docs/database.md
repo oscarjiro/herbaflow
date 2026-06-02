@@ -36,7 +36,7 @@ IDs are deterministic: same input always produces the same UUID. At the bundled 
 | `*_aliases`       | All non-canonical names for an entity                              |
 | `source_name`     | External system name (e.g. `KNApSAcK World`), never an entity name |
 | `retrieved_at`    | When the record was fetched from the source                        |
-| `source_batch_id` | Which ETL run produced it                                          |
+| `source_url`      | Per-row deep link to the exact source record; authoritative provenance |
 ---
 
 ## 1. Provenance
@@ -53,19 +53,7 @@ One row per external data source.
 | `base_url`    | text |                                                                           |
 | `notes`       | text |                                                                           |
 
-### `import_batches`
-
-One row per ETL run.
-
-| Column        | Type        | Notes |
-| ------------- | ----------- | ----- |
-| `batch_id`    | PK          |       |
-| `step_name`   | text        |       |
-| `status`      | text        |       |
-| `started_at`  | timestamptz |       |
-| `finished_at` | timestamptz |       |
-| `params`      | jsonb       | pipeline parameters passed to this run |
-| `log_path`    | text        | filesystem path to the ETL log file |
+**Provenance policy:** Every entity and link row carries `source_id` (FK → `source_systems`) and `source_url` (exact record deep link). These two columns are the authoritative provenance for each row. `source_systems.base_url` is a reference/fallback field only. An unknown `source_name` fails the load — there is no silent NULL fallback.
 
 ---
 
@@ -91,8 +79,7 @@ One canonical row per accepted plant taxon.
 | `gbif_family_key`           | int                   |                                           |
 | `gbif_kingdom_key`          | int                   |                                           |
 | `source_id`                 | FK → `source_systems` | the system, not a plant name              |
-| `source_url`                | text                  |                                           |
-| `source_batch_id`           | FK → `import_batches` |                                           |
+| `source_url`                | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`              | timestamptz           |                                           |
 
 ### `plant_aliases`
@@ -107,8 +94,7 @@ All alternate names for a canonical plant. Each alias belongs to exactly one pla
 | `alias_key`       | text                  |                                                                                                   |
 | `alias_type`      | enum                  | `scraped_spelling` / `synonym` / `author_variant` / `orthographic_variant` / `normalized_variant` |
 | `source_id`       | FK → `source_systems` |                                                                                                   |
-| `source_url`      | text                  |                                                                                                   |
-| `source_batch_id` | FK → `import_batches` |                                                                                                   |
+| `source_url`      | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback                    |
 | `retrieved_at`    | timestamptz           |                                                                                                   |
 
 Unique constraint: `(plant_id, alias_key)` — one row per plant + slug; `alias_type` is an attribute. Index: `plant_aliases(alias_key)`.
@@ -144,8 +130,7 @@ One canonical row per chemical entity.
 | `is_pains_positive` | boolean NOT NULL DEFAULT false | PAINS flag (Baell & Holloway 2010); true = matches pan-assay interference pattern. Reporting only — not a filter. Populated by ETL `patch_missing_lipinski.py` Pass 3. |
 | `lipinski_source`   | text                  | `chembl_api` = from ChEMBL molecule_properties; `rdkit_computed` = computed from SMILES; null = unresolved |
 | `source_id`         | FK → `source_systems` |        |
-| `source_url`        | text                  |        |
-| `source_batch_id`   | FK → `import_batches` |        |
+| `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`      | timestamptz           |        |
 
 ### `compound_aliases`
@@ -158,8 +143,7 @@ One canonical row per chemical entity.
 | `alias_key`         | text                  |       |
 | `alias_type`        | text                  |       |
 | `source_id`         | FK → `source_systems` |       |
-| `source_url`        | text                  |       |
-| `source_batch_id`   | FK → `import_batches` |       |
+| `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`      | timestamptz           |       |
 
 Unique constraint: `(compound_id, alias_key)` — one row per compound + slug; `alias_type` is an attribute. Index: `compound_aliases(alias_key)`.
@@ -174,6 +158,7 @@ m:m join. Answers: which compounds were found in which plants?
 | `plant_id`               | FK → `plants`                      |                       |
 | `compound_id`            | FK → `compounds`                   |                       |
 | `source_id`              | FK → `source_systems`              |                       |
+| `source_url`             | text                               | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`           | timestamptz                        |                       |
 
 Unique constraint: `(plant_id, compound_id)` — pair grain; `source_id` is an attribute, not part of the key.
@@ -195,8 +180,7 @@ Canonical protein/gene entities.
 | `uniprot_accession` | text                  |        |
 | `organism_tax_id`   | int                   |        |
 | `source_id`         | FK → `source_systems` |        |
-| `source_url`        | text                  |        |
-| `source_batch_id`   | FK → `import_batches` |        |
+| `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`      | timestamptz           |        |
 
 Indexes: `idx_targets_uniprot_accession` on `uniprot_accession`; `idx_targets_gene_symbol` on `gene_symbol`.
@@ -211,8 +195,7 @@ Indexes: `idx_targets_uniprot_accession` on `uniprot_accession`; `idx_targets_ge
 | `alias_key`       | text                  |       |
 | `alias_type`      | text                  |       |
 | `source_id`       | FK → `source_systems` |       |
-| `source_url`      | text                  |       |
-| `source_batch_id` | FK → `import_batches` |       |
+| `source_url`      | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`    | timestamptz           |       |
 
 Unique constraint: `(target_id, alias_key)` — one row per target + slug; `alias_type` is an attribute. Index: `target_aliases(alias_key)`.
@@ -227,6 +210,7 @@ m:m join. Answers: which targets are linked to which compounds?
 | `compound_id`        | FK → `compounds`      |       |
 | `target_id`          | FK → `targets`        |       |
 | `source_id`          | FK → `source_systems` |       |
+| `source_url`         | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `prediction_method`  | text                  | sole compound-target link provenance (chembl_bioactivity / pubchem_bioassay / stp_import) |
 | `score`              | float                 |       |
 | `pchembl_value`      | float                 | −log₁₀(IC50 in molar) from ChEMBL; ≥ 5.0 means IC50 ≤ 10µM (active binder); null for STITCH-sourced or unassayed interactions |
@@ -248,8 +232,7 @@ Unique constraint: `(compound_id, target_id)` — pair grain; `source_id` is an 
 | `ontology_id`     | text                  | MeSH / DOID / UMLS / OMIM ID |
 | `ontology_source` | text                  |                                         |
 | `source_id`       | FK → `source_systems` |                                         |
-| `source_url`      | text                  |                                         |
-| `source_batch_id` | FK → `import_batches` |                                         |
+| `source_url`      | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`    | timestamptz           |                                         |
 
 ### `disease_aliases`
@@ -262,8 +245,7 @@ Unique constraint: `(compound_id, target_id)` — pair grain; `source_id` is an 
 | `alias_key`        | text                  |       |
 | `alias_type`       | text                  |       |
 | `source_id`        | FK → `source_systems` |       |
-| `source_url`       | text                  |       |
-| `source_batch_id`  | FK → `import_batches` |       |
+| `source_url`       | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `retrieved_at`     | timestamptz           |       |
 
 Unique constraint: `(disease_id, alias_key)` — one row per disease + slug; `alias_type` is an attribute. Index: `idx_disease_aliases_alias_key` on `alias_key`.
@@ -278,6 +260,7 @@ m:m join. Answers: which targets are implicated in which diseases?
 | `disease_id`        | FK → `diseases`       |       |
 | `target_id`         | FK → `targets`        |       |
 | `source_id`         | FK → `source_systems` |       |
+| `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
 | `association_type`  | text                  |       |
 | `score`             | float                 |       |
 | `retrieved_at`      | timestamptz           |       |
@@ -330,7 +313,7 @@ The pipeline is: `plants → compounds → targets → diseases → PPI`
 
 ```
 Phase 1 (plants)
-  source_systems, import_batches
+  source_systems
   plants, plant_aliases
 
 Phase 2 (compounds)

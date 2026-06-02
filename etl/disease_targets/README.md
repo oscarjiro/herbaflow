@@ -176,9 +176,9 @@ Matches the `targets` database table.
 | `protein_name`      | text     | Full approved protein name                             |
 | `uniprot_accession` | text     | UniProt ID; empty if not available                     |
 | `organism_tax_id`   | text     | NCBI taxonomy ID — always `9606` (Homo sapiens)        |
-| `source_id`         | text     | `OpenTargets`                                          |
-| `source_url`        | text     | `https://platform.opentargets.org/target/{ensembl_id}` |
-| `source_batch_id`   | text     | `DT001` (from settings.yml)                            |
+| `source_id`         | text     | `OpenTargets`                                                                         |
+| `source_url`        | text     | `https://platform.opentargets.org/target/{ensembl_id}`; centralized deep link via `etl/shared/provenance.py` |
+| `source_batch_id`   | text     | `DT001` (from settings.yml) (CSV column; DB column dropped)                           |
 | `retrieved_at`      | ISO 8601 | UTC timestamp of fetch                                 |
 | `confidence`        | float    | `1.0` — target identity is known, not inferred         |
 
@@ -193,9 +193,9 @@ Matches the `target_aliases` database table.
 | `alias_name`      | text     | The alias value                                    |
 | `alias_key`       | text     | Lowercased slug of alias_name                      |
 | `alias_type`      | text     | `ensembl_id` / `approved_symbol` / `approved_name` |
-| `source_id`       | text     | `OpenTargets`                                      |
-| `source_url`      | text     | Target page URL                                    |
-| `source_batch_id` | text     | `DT001`                                            |
+| `source_id`       | text     | `OpenTargets`                                                                    |
+| `source_url`      | text     | Target page URL; centralized deep link via `etl/shared/provenance.py`            |
+| `source_batch_id` | text     | `DT001` (CSV column; DB column dropped)                                          |
 | `retrieved_at`    | ISO 8601 | UTC timestamp                                      |
 
 ### `disease_targets.csv`
@@ -204,14 +204,15 @@ Matches the `disease_targets` database table.
 
 | Column              | Type     | Description                                      |
 | ------------------- | -------- | ------------------------------------------------ |
-| `disease_target_id` | UUID v5  | Deterministic from `(disease_id, target_id)`     |
-| `disease_id`        | UUID v5  | FK → diseases                                    |
-| `target_id`         | UUID v5  | FK → targets                                     |
-| `source_id`         | text     | `OpenTargets`                                    |
-| `association_type`  | text     | `open_targets_overall`                           |
-| `score`             | float    | Open Targets overall association score (0.1–1.0) |
-| `confidence`        | float    | Same as score                                    |
-| `retrieved_at`      | ISO 8601 | UTC timestamp                                    |
+| `disease_target_id` | UUID v5  | Deterministic from `(disease_id, target_id)`                                        |
+| `disease_id`        | UUID v5  | FK → diseases                                                                        |
+| `target_id`         | UUID v5  | FK → targets                                                                         |
+| `source_id`         | text     | `OpenTargets`                                                                        |
+| `source_url`        | text     | Per-row Open Targets disease-target page; centralized deep link via `etl/shared/provenance.py` |
+| `association_type`  | text     | `open_targets_overall`                                                               |
+| `score`             | float    | Open Targets overall association score (0.1–1.0)                                     |
+| `confidence`        | float    | Same as score                                                                        |
+| `retrieved_at`      | ISO 8601 | UTC timestamp                                                                        |
 
 Unique constraint enforced: `(disease_id, target_id)`.
 
