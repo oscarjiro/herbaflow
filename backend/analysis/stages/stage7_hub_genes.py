@@ -9,6 +9,15 @@ def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = T
     if len(G.nodes) == 0:
         return {"ranked": [], "threshold_degree": 0, "threshold_betweenness": 0}
 
+    # Methodology — unweighted centrality (deliberate, field-standard):
+    # STRING combined_score is applied as a confidence THRESHOLD filter upstream in Stage 6
+    # (edges below min_confidence are dropped). Centrality is then computed on the resulting
+    # UNWEIGHTED topology — the dominant convention in network pharmacology (cytoHubba-style
+    # analysis). combined_score is intentionally NOT used as an edge weight here: networkx
+    # treats `weight` as DISTANCE for betweenness/closeness, which would invert a similarity
+    # score (strong interaction read as a long path). Unweighted-on-thresholded-graph is the
+    # chosen, defensible method; weighting remains a possible future opt-in.
+    #
     # Degree centrality: Freeman 1979 normalized form C_D(v) = deg(v)/(n-1), range 0-1.
     # nx.degree_centrality() implements this directly. Do NOT use G.degree() (raw count).
     degree_centrality = nx.degree_centrality(G)
