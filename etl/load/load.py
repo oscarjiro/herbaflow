@@ -123,19 +123,16 @@ def load_plant_aliases(cur, source_map, upsert=False):
     print("Loading plant_aliases...", end=" ", flush=True)
     rows = read_csv(PLANT_ALIASES_CSV)
     conflict = _conflict("alias_id", [
-        "plant_id", "alias_name", "alias_key", "alias_type",
-        "source_id", "source_url", "retrieved_at",
+        "plant_id", "alias_name", "alias_key", "alias_type", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into plant_aliases (
-            alias_id, plant_id, alias_name, alias_key, alias_type,
-            source_id, source_url, retrieved_at
+            alias_id, plant_id, alias_name, alias_key, alias_type, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["alias_id"], r["plant_id"], r.get("alias_name"), r.get("alias_key"),
-        r.get("alias_type"), resolve_src(r, source_map),
-        r.get("source_url"), _ts(r.get("retrieved_at")),
+        r.get("alias_type"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
@@ -149,7 +146,7 @@ def load_compounds(cur, source_map, upsert=False):
         "cas_id", "pubchem_cid", "chembl_id", "molecular_formula", "molecular_weight",
         "tpsa", "logp", "hbond_donors", "hbond_acceptors",
         "rotatable_bonds", "qed_score", "np_likeness_score", "num_ro5_violations",
-        "lipinski_source", "is_pains_positive",
+        "is_pains_positive",
         "source_id", "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
@@ -158,7 +155,7 @@ def load_compounds(cur, source_map, upsert=False):
             cas_id, pubchem_cid, chembl_id, molecular_formula, molecular_weight,
             tpsa, logp, hbond_donors, hbond_acceptors,
             rotatable_bonds, qed_score, np_likeness_score, num_ro5_violations,
-            lipinski_source, is_pains_positive,
+            is_pains_positive,
             source_id, source_url, retrieved_at
         ) values %s {conflict}
     """
@@ -171,7 +168,6 @@ def load_compounds(cur, source_map, upsert=False):
         _i(r.get("hbond_donors")), _i(r.get("hbond_acceptors")),
         _i(r.get("rotatable_bonds")), _f(r.get("qed_score")),
         _f(r.get("np_likeness_score")), _i(r.get("num_ro5_violations")),
-        r.get("lipinski_source") or None,
         str(r.get("is_pains_positive", "")).lower() == "true",
         resolve_src(r, source_map), r.get("source_url"),
         _ts(r.get("retrieved_at")),
@@ -184,19 +180,17 @@ def load_compound_aliases(cur, source_map, upsert=False):
     print("Loading compound_aliases...", end=" ", flush=True)
     rows = read_csv(COMPOUND_ALIASES_CSV)
     conflict = _conflict("compound_alias_id", [
-        "compound_id", "alias_name", "alias_key", "alias_type",
-        "source_id", "source_url", "retrieved_at",
+        "compound_id", "alias_name", "alias_key", "alias_type", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into compound_aliases (
             compound_alias_id, compound_id, alias_name, alias_key, alias_type,
-            source_id, source_url, retrieved_at
+            retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["compound_alias_id"], r["compound_id"], r.get("alias_name"), r.get("alias_key"),
-        r.get("alias_type"), resolve_src(r, source_map),
-        r.get("source_url"), _ts(r.get("retrieved_at")),
+        r.get("alias_type"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
@@ -250,19 +244,18 @@ def load_disease_aliases(cur, source_map, upsert=False):
     print("Loading disease_aliases...", end=" ", flush=True)
     rows = read_csv(DISEASE_ALIASES_CSV)
     conflict = _conflict("disease_alias_id", [
-        "disease_id", "alias_name", "alias_key", "alias_type",
-        "source_id", "source_url", "retrieved_at",
+        "disease_id", "alias_name", "alias_key", "alias_type", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into disease_aliases (
             disease_alias_id, disease_id, alias_name, alias_key, alias_type,
-            source_id, source_url, retrieved_at
+            retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r.get("disease_alias_id") or r.get("alias_id"),
         r["disease_id"], r.get("alias_name"), r.get("alias_key"), r.get("alias_type"),
-        resolve_src(r, source_map), r.get("source_url"), _ts(r.get("retrieved_at")),
+        _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
@@ -273,19 +266,19 @@ def load_targets(cur, source_map, upsert=False):
     rows = read_csv(TARGETS_CSV)
     conflict = _conflict("target_id", [
         "canonical_key", "gene_symbol", "protein_name",
-        "uniprot_accession", "organism_tax_id",
+        "uniprot_accession",
         "source_id", "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into targets (
             target_id, canonical_key, gene_symbol, protein_name,
-            uniprot_accession, organism_tax_id,
+            uniprot_accession,
             source_id, source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["target_id"], r.get("canonical_key"), r.get("gene_symbol"), r.get("protein_name"),
-        r.get("uniprot_accession"), _i(r.get("organism_tax_id")),
+        r.get("uniprot_accession"),
         resolve_src(r, source_map), r.get("source_url"),
         _ts(r.get("retrieved_at")),
     ) for r in rows]
@@ -297,19 +290,17 @@ def load_target_aliases(cur, source_map, upsert=False):
     print("Loading target_aliases...", end=" ", flush=True)
     rows = read_csv(TARGET_ALIASES_CSV)
     conflict = _conflict("target_alias_id", [
-        "target_id", "alias_name", "alias_key", "alias_type",
-        "source_id", "source_url", "retrieved_at",
+        "target_id", "alias_name", "alias_key", "alias_type", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into target_aliases (
             target_alias_id, target_id, alias_name, alias_key, alias_type,
-            source_id, source_url, retrieved_at
+            retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["target_alias_id"], r["target_id"], r.get("alias_name"), r.get("alias_key"),
-        r.get("alias_type"), resolve_src(r, source_map),
-        r.get("source_url"), _ts(r.get("retrieved_at")),
+        r.get("alias_type"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
