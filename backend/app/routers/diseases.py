@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session
@@ -28,6 +29,10 @@ async def list_diseases(session: AsyncSession = Depends(get_session)):
 
 @router.get("/{disease_id}", response_model=DiseaseResponse)
 async def get_disease(disease_id: str, session: AsyncSession = Depends(get_session)):
+    try:
+        UUID(disease_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Disease not found")
     disease = await disease_repo.get_disease_by_id(session, disease_id)
     if not disease:
         raise HTTPException(status_code=404, detail="Disease not found")

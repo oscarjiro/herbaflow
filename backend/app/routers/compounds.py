@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database import get_session
@@ -23,6 +24,10 @@ async def list_compounds(
 
 @router.get("/{compound_id}", response_model=CompoundResponse)
 async def get_compound(compound_id: str, session: AsyncSession = Depends(get_session)):
+    try:
+        UUID(compound_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Compound not found")
     compound = await compound_repo.get_compound_by_id(session, compound_id)
     if not compound:
         raise HTTPException(status_code=404, detail="Compound not found")

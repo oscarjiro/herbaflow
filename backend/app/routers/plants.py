@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
@@ -41,6 +42,10 @@ async def list_plants(session: AsyncSession = Depends(get_session)):
 
 @router.get("/{plant_id}", response_model=PlantResponse)
 async def get_plant(plant_id: str, session: AsyncSession = Depends(get_session)):
+    try:
+        UUID(plant_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Plant not found")
     result = await session.exec(select(Plant).where(Plant.plant_id == plant_id))
     plant = result.first()
     if not plant:
