@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
-from disease_targets.utils import read_csv, validate_required_columns
+from disease_targets.utils import read_frame, validate_required_columns
 
 TARGETS_REQUIRED = [
     "target_id", "canonical_key", "gene_symbol", "protein_name",
@@ -53,10 +53,10 @@ def run(cfg: dict, canonical_dir: Path, diseases_csv: Path, output_dir: Path) ->
     warn_threshold = float(cfg["filtering"]["uniprot_coverage_warn_threshold"])
     fail_on: list[str] = cfg.get("validation", {}).get("fail_on", [])
 
-    targets_df = read_csv(canonical_dir / "targets.csv")
-    aliases_df = read_csv(canonical_dir / "target_aliases.csv")
-    dt_df      = read_csv(canonical_dir / "disease_targets.csv")
-    diseases_df = read_csv(diseases_csv)
+    targets_df = read_frame(canonical_dir / "targets.csv")
+    aliases_df = read_frame(canonical_dir / "target_aliases.csv")
+    dt_df      = read_frame(canonical_dir / "disease_targets.csv")
+    diseases_df = read_frame(diseases_csv)
 
     results: list[dict] = []
     has_fail = False

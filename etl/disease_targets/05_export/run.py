@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
-from disease_targets.utils import read_csv, write_csv
+from disease_targets.utils import read_frame, write_frame
 
 EXPORT_FILES = [
     "targets.csv",
@@ -34,15 +34,15 @@ def run(cfg: dict, canonical_dir: Path, output_dir: Path) -> int:
         if not src_path.exists():
             log.error("Missing canonical file: %s", src_path)
             return 1
-        df = read_csv(src_path)
-        write_csv(df, output_dir / filename)
+        df = read_frame(src_path)
+        write_frame(df, output_dir / filename)
         counts[filename.replace(".csv", "")] = len(df)
         log.info("Exported %s: %d rows", filename, len(df))
 
     diseases_covered = 0
     dt_path = canonical_dir / "disease_targets.csv"
     if dt_path.exists():
-        dt_df = read_csv(dt_path)
+        dt_df = read_frame(dt_path)
         if "disease_id" in dt_df.columns:
             diseases_covered = int(dt_df["disease_id"].nunique())
 

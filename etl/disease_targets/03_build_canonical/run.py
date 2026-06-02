@@ -23,7 +23,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
 from disease_targets.utils import (
-    read_csv, write_csv, safe_str, validate_required_columns, make_slug_key,
+    read_frame, write_frame, clean_str, validate_required_columns, make_slug_key,
     target_id_from_key, target_alias_id, disease_target_id,
 )
 from shared.identity import pick_alias
@@ -35,14 +35,14 @@ def build_targets(targets_raw: pd.DataFrame, cfg: dict, retrieved_at: str) -> pd
     rows = []
     for _, r in targets_raw.iterrows():
         tid = target_id_from_key(r["canonical_key"])
-        ensembl = safe_str(r.get("ensembl_id"))
+        ensembl = clean_str(r.get("ensembl_id"))
         rows.append({
             "target_id":          tid,
             "canonical_key":      r["canonical_key"],
-            "gene_symbol":        safe_str(r.get("gene_symbol")),
-            "protein_name":       safe_str(r.get("approved_name")),
-            "uniprot_accession":  safe_str(r.get("uniprot_accession")),
-            "organism_tax_id":    safe_str(r.get("organism_tax_id", "9606")),
+            "gene_symbol":        clean_str(r.get("gene_symbol")),
+            "protein_name":       clean_str(r.get("approved_name")),
+            "uniprot_accession":  clean_str(r.get("uniprot_accession")),
+            "organism_tax_id":    clean_str(r.get("organism_tax_id", "9606")),
             "source_name":        src["name"],
             "source_url":         opentargets_target_url(ensembl) or src["url"],
             "source_batch_id":    src["batch_id"],
@@ -58,9 +58,9 @@ def build_target_aliases(targets_df: pd.DataFrame, cfg: dict, retrieved_at: str)
 
     for _, r in targets_df.iterrows():
         tid = r["target_id"]
-        ensembl = safe_str(r.get("ensembl_id", ""))
-        symbol  = safe_str(r.get("gene_symbol", ""))
-        name    = safe_str(r.get("protein_name", ""))
+        ensembl = clean_str(r.get("ensembl_id", ""))
+        symbol  = clean_str(r.get("gene_symbol", ""))
+        name    = clean_str(r.get("protein_name", ""))
         src_url = r.get("source_url", "")
 
         def _alias(alias_name: str, alias_type: str) -> dict | None:
@@ -125,7 +125,7 @@ def build_disease_targets(
     skipped = 0
     for _, r in dt_raw.iterrows():
         tid = key_to_tid.get(r["canonical_key"])
-        did = safe_str(r.get("disease_id")) or key_to_did.get(r.get("disease_key", ""), "")
+        did = clean_str(r.get("disease_id")) or key_to_did.get(r.get("disease_key", ""), "")
 
         if not tid or not did:
             skipped += 1
@@ -133,7 +133,7 @@ def build_disease_targets(
 
         score = float(r["association_score"])
         ensembl = key_to_ensembl.get(r["canonical_key"], "")
-        efo = safe_str(r.get("efo_id", ""))
+        efo = clean_str(r.get("efo_id", ""))
         link_url = opentargets_evidence_url(ensembl, efo) or src["url"]
         rows.append({
             "disease_target_id": disease_target_id(did, tid),
@@ -170,9 +170,9 @@ def run(cfg: dict, normalize_dir: Path, diseases_csv: Path, output_dir: Path) ->
     log = setup_logging("disease_targets.03_build_canonical", cfg)
     ensure_dir(output_dir)
 
-    targets_raw = read_csv(normalize_dir / "targets_raw.csv")
-    dt_raw      = read_csv(normalize_dir / "disease_targets_raw.csv")
-    diseases_df = read_csv(diseases_csv)
+    targets_raw = read_frame(normalize_dir / "targets_raw.csv")
+    dt_raw      = read_frame(normalize_dir / "disease_targets_raw.csv")
+    diseases_df = read_frame(diseases_csv)
 
     log.info("targets_raw: %d rows", len(targets_raw))
     log.info("disease_targets_raw: %d rows", len(dt_raw))
@@ -186,18 +186,18 @@ def run(cfg: dict, normalize_dir: Path, diseases_csv: Path, output_dir: Path) ->
     retrieved_at = now_iso()
 
     targets_df = build_targets(targets_raw, cfg, retrieved_at)
-    write_csv(targets_df, output_dir / "targets.csv")
+    write_frame(targets_df, output_dir / "targets.csv")
     log.info("targets.csv: %d rows", len(targets_df))
 
     # Build aliases (need ensembl_id from raw)
     targets_with_raw = targets_df.copy()
     targets_with_raw["ensembl_id"] = targets_raw["ensembl_id"].values
     aliases_df = build_target_aliases(targets_with_raw, cfg, retrieved_at)
-    write_csv(aliases_df, output_dir / "target_aliases.csv")
+    write_frame(aliases_df, output_dir / "target_aliases.csv")
     log.info("target_aliases.csv: %d rows", len(aliases_df))
 
     dt_df, skipped = build_disease_targets(dt_raw, targets_df, diseases_df, cfg, retrieved_at, targets_raw)
-    write_csv(dt_df, output_dir / "disease_targets.csv")
+    write_frame(dt_df, output_dir / "disease_targets.csv")
     log.info("disease_targets.csv: %d rows (%d skipped)", len(dt_df), skipped)
 
     diseases_covered = dt_df["disease_id"].nunique() if not dt_df.empty else 0

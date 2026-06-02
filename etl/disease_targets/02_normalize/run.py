@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
 from disease_targets.utils import (
-    read_csv, write_csv, normalize_text, safe_str, validate_required_columns,
+    read_frame, write_frame, normalize_text, clean_str, validate_required_columns,
     canonical_key_for_target,
 )
 
@@ -35,7 +35,7 @@ def run(cfg: dict, input_dir: Path, output_dir: Path) -> int:
         log.error("Input not found: %s", raw_csv)
         return 1
 
-    df = read_csv(raw_csv)
+    df = read_frame(raw_csv)
     log.info("Loaded %d rows from raw_associations.csv", len(df))
     validate_required_columns(df, REQUIRED_INPUT_COLS, table_name="raw_associations")
 
@@ -74,7 +74,7 @@ def run(cfg: dict, input_dir: Path, output_dir: Path) -> int:
     )
     targets_df["organism_tax_id"] = str(cfg["filtering"]["organism_tax_id"])
 
-    write_csv(targets_df, output_dir / "targets_raw.csv")
+    write_frame(targets_df, output_dir / "targets_raw.csv")
     log.info("targets_raw.csv: %d unique targets", len(targets_df))
 
     # ---------------------------------------------------------------------------
@@ -88,7 +88,7 @@ def run(cfg: dict, input_dir: Path, output_dir: Path) -> int:
     dt_df["association_score"] = dt_df["association_score"].astype(str)
     dt_df["retrieved_at"] = now_iso()
 
-    write_csv(dt_df, output_dir / "disease_targets_raw.csv")
+    write_frame(dt_df, output_dir / "disease_targets_raw.csv")
     log.info("disease_targets_raw.csv: %d pairs", len(dt_df))
 
     # UniProt coverage stat

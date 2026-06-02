@@ -20,7 +20,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
-from disease_targets.utils import read_csv, write_csv, make_slug_key, safe_str
+from disease_targets.utils import read_frame, write_frame, make_slug_key, clean_str
 
 # ---------------------------------------------------------------------------
 # GraphQL queries
@@ -161,13 +161,13 @@ def _flatten(disease_row: dict, efo_id: str, associations: list[dict], retrieved
         tgt = assoc["target"]
         uniprot_acc, uniprot_src = _best_uniprot(tgt.get("proteinIds", []))
         flat.append({
-            "disease_key":       safe_str(disease_row.get("disease_key") or disease_row.get("canonical_key")),
-            "disease_id":        safe_str(disease_row.get("disease_id")),
-            "disease_name":      safe_str(disease_row.get("disease_name")),
+            "disease_key":       clean_str(disease_row.get("disease_key") or disease_row.get("canonical_key")),
+            "disease_id":        clean_str(disease_row.get("disease_id")),
+            "disease_name":      clean_str(disease_row.get("disease_name")),
             "efo_id":            efo_id,
             "ensembl_id":        tgt["id"],
-            "gene_symbol":       safe_str(tgt.get("approvedSymbol")),
-            "approved_name":     safe_str(tgt.get("approvedName")),
+            "gene_symbol":       clean_str(tgt.get("approvedSymbol")),
+            "approved_name":     clean_str(tgt.get("approvedName")),
             "uniprot_accession": uniprot_acc,
             "uniprot_source":    uniprot_src,
             "association_score": str(assoc["score"]),
@@ -177,7 +177,7 @@ def _flatten(disease_row: dict, efo_id: str, associations: list[dict], retrieved
 
 
 def _load_diseases(path: Path) -> list[dict]:
-    df = read_csv(path)
+    df = read_frame(path)
     if "disease_key" not in df.columns and "canonical_key" in df.columns:
         df["disease_key"] = df["canonical_key"]
     elif "disease_key" not in df.columns:
@@ -247,7 +247,7 @@ def run(cfg: dict, args) -> int:
     if all_rows:
         import pandas as pd
         df = pd.DataFrame(all_rows)
-        write_csv(df, fetch_out / "raw_associations.csv")
+        write_frame(df, fetch_out / "raw_associations.csv")
         log.info("Wrote %d rows to raw_associations.csv", len(df))
     else:
         log.warning("No associations fetched — raw_associations.csv not written.")
