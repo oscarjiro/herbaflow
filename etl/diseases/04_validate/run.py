@@ -68,7 +68,6 @@ CANONICAL_REQUIRED_COLUMNS = (
     "source_id",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
 )
 ALIAS_REQUIRED_COLUMNS = (
@@ -81,7 +80,6 @@ ALIAS_REQUIRED_COLUMNS = (
     "source_id",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
 )
 ALIAS_MAP_REQUIRED_COLUMNS = (
@@ -165,7 +163,7 @@ def _required_provenance_fields(settings: dict[str, Any]) -> list[str]:
     configured = list(validation_cfg.get("required_provenance_fields", []))
     if configured:
         return configured
-    return ["source_id", "source_name", "source_url", "source_batch_id", "retrieved_at"]
+    return ["source_id", "source_name", "source_url", "retrieved_at"]
 
 
 def _allowed_null_fields(settings: dict[str, Any]) -> set[str]:

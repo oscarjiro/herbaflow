@@ -155,6 +155,15 @@ def test_compounds_loaded_export_columns_have_no_dead_columns():
         block = _extract_list_literal(text, const)
         assert dead.isdisjoint(block), f"{const} still lists {dead & block}"
 
+
+def test_diseases_loaded_export_columns_have_no_dead_columns():
+    import pathlib
+    dead = {"source_batch_id", "confidence"}
+    text = pathlib.Path("etl/diseases/03_build_canonical/run.py").read_text(encoding="utf-8")
+    for const in ("DISEASE_OUTPUT_COLUMNS", "ALIAS_OUTPUT_COLUMNS"):
+        block = _extract_list_literal(text, const)
+        assert dead.isdisjoint(block), f"{const} still lists {dead & block}"
+
 from shared.identity import PLANT_ALIAS_NS
 
 plants_canonical = _load(
