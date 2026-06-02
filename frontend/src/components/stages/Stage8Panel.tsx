@@ -504,7 +504,7 @@ export function Stage8Panel({ stage, analysis, status, analysisId }: Stage8Panel
         <p>Showing top 20 terms per category by -log₁₀(FDR). Dashed line = FDR 0.05 significance threshold.</p>
         <p>
           <span className="font-medium text-hf-fg2">Method:</span> g:Profiler ORA (over-representation analysis) ·{' '}
-          <span className="font-medium text-hf-fg2">Background:</span> human proteome ·{' '}
+          <span className="font-medium text-hf-fg2">Background:</span> compound targets (Stage 3) ·{' '}
           <span className="font-medium text-hf-fg2">Correction:</span> Benjamini–Hochberg FDR
         </p>
       </div>
