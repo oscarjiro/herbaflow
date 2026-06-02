@@ -3,7 +3,9 @@ import re
 from pydantic import BaseModel, Field, field_validator, model_validator
 from uuid import UUID
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any
+
+from app.contracts import ANALYSIS_MODES
 
 # ---------------------------------------------------------------------------
 # Format validators — UniProt accession and HGNC gene symbol
@@ -136,7 +138,10 @@ class CreateAnalysisRequest(BaseModel):
         max_length=200,
         description="Human-readable label for the analysis run",
     )
-    mode: Literal["guided", "auto"] = "guided"
+    mode: str = Field(
+        default="guided",
+        json_schema_extra={"enum": list(ANALYSIS_MODES)},
+    )
     plant_ids: list[str] = Field(
         default_factory=list,
         max_length=HARD_CAP_PLANTS,
@@ -147,6 +152,13 @@ class CreateAnalysisRequest(BaseModel):
         description="Exactly one disease per analysis. Required unless _disease_input_mode is manual_targets.",
     )
     parameters: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("mode")
+    @classmethod
+    def mode_in_contract(cls, v: str) -> str:
+        if v not in ANALYSIS_MODES:
+            raise ValueError(f"mode must be one of {sorted(ANALYSIS_MODES)}")
+        return v
 
     @field_validator("name")
     @classmethod
