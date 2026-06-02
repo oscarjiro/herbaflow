@@ -271,3 +271,24 @@ def test_collect_alias_items_drops_dead_source_batch_id():
         f"collect_alias_items still threads source_batch_id: {list(params)}"
     )
     assert "source_batch_id" not in set(compounds_canonical.ALIASES_COLUMNS)
+
+
+class TestCompoundsOrchestratorBuildCmd:
+    """The compounds orchestrator must invoke every stage with no path flags.
+
+    Each stage script resolves its inputs and outputs from compounds/settings.yml
+    (via load_settings) and its argparse accepts only --settings plus optional
+    --input overrides. If main.py passes legacy --input/--plants-csv/--output-dir/
+    --input-dir flags, argparse rejects them (exit 2) and the pipeline halts at
+    the first offending stage. Guard that build_cmd emits a bare [python, script]
+    command for every stage so the stale flags cannot rot back in.
+    """
+
+    def test_build_cmd_emits_no_path_flags(self):
+        compounds_main = _load("compounds_main", "compounds/main.py")
+        for step in compounds_main.STAGE_KEYS:
+            cmd = compounds_main.build_cmd(step)
+            assert cmd == [
+                sys.executable,
+                str(ETL_ROOT / compounds_main.STAGE_SCRIPTS[step]),
+            ], f"stage {step} produced unexpected args: {cmd}"

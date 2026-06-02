@@ -40,45 +40,17 @@ STAGE_SCRIPTS = {
 }
 
 
-def build_cmd(step_key: str, cfg: dict) -> list[str]:
-    """Build the subprocess command list for a compound pipeline stage."""
+def build_cmd(step_key: str) -> list[str]:
+    """Build the subprocess command for a compound pipeline stage.
+
+    Every stage resolves its own inputs and outputs from compounds/settings.yml
+    via load_settings("compounds"); each stage's argparse accepts only --settings
+    plus optional --input overrides. The orchestrator therefore invokes the stage
+    script with no path arguments — passing stage-specific path flags would be
+    rejected by argparse and halt the pipeline.
+    """
     script = ETL_ROOT / STAGE_SCRIPTS[step_key]
-    step_dirs = cfg["paths"]["step_dirs"]
-    cmd = [sys.executable, str(script)]
-
-    if step_key == "extract":
-        cmd += [
-            "--input",
-            str(ETL_ROOT / cfg["paths"]["raw"]["plants_compounds_csv"]),
-            "--plants-csv",
-            str(ETL_ROOT / cfg["paths"]["plant_etl"]["canonical_plants_csv"]),
-            "--output-dir",
-            str(ETL_ROOT / step_dirs["extract_out"]),
-        ]
-    elif step_key == "normalize":
-        cmd += [
-            "--input-dir",
-            str(ETL_ROOT / step_dirs["extract_out"]),
-            "--output-dir",
-            str(ETL_ROOT / step_dirs["normalize_out"]),
-        ]
-    elif step_key == "dedupe_candidates":
-        cmd += [
-            "--input-dir",
-            str(ETL_ROOT / step_dirs["normalize_out"]),
-            "--output-dir",
-            str(ETL_ROOT / step_dirs["dedupe_candidates_out"]),
-        ]
-    elif step_key == "enrich":
-        pass  # enrich reads paths from settings.yml; no extra args needed
-    elif step_key == "build_canonical":
-        pass  # reads paths from settings.yml; no extra args needed
-    elif step_key == "validate":
-        pass  # reads paths from settings.yml; no extra args needed
-    elif step_key == "export":
-        pass  # reads paths from settings.yml; no extra args needed
-
-    return cmd
+    return [sys.executable, str(script)]
 
 
 def main() -> int:
@@ -107,7 +79,7 @@ def main() -> int:
     stop_on_error: bool = cfg.get("runtime", {}).get("stop_on_error", True)
 
     for step_key in active:
-        cmd = build_cmd(step_key, cfg)
+        cmd = build_cmd(step_key)
         log.info("Running stage: %s", step_key)
         if args.dry_run:
             log.info("[DRY-RUN] %s", " ".join(cmd))
