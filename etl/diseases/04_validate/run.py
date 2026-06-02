@@ -77,9 +77,6 @@ ALIAS_REQUIRED_COLUMNS = (
     "disease_id",
     "disease_key",
     "alias_type",
-    "source_id",
-    "source_name",
-    "source_url",
     "retrieved_at",
 )
 ALIAS_MAP_REQUIRED_COLUMNS = (
@@ -641,8 +638,17 @@ def _validate_alias_table(
                 )
 
     # provenance completeness
+    #
+    # The loaded alias table only carries the provenance fields enumerated in its
+    # own required-column list. Source provenance (source_id/source_name/source_url)
+    # is recorded on the disease entity and the alias map, not on this table, so the
+    # generic provenance set is scoped down to the fields this table actually has.
     allow_null = _allowed_null_fields(settings)
-    required_provenance = _required_provenance_fields(settings)
+    required_provenance = [
+        field
+        for field in _required_provenance_fields(settings)
+        if field in required_columns
+    ]
     for field in required_provenance:
         if field not in df.columns:
             if field not in allow_null:

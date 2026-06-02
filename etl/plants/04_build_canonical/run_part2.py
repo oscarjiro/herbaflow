@@ -64,15 +64,6 @@ ALIAS_TYPES = {
     "normalized_variant",
 }
 
-GBIF_ID_FIELDS = [
-    "gbif_usage_key",
-    "gbif_accepted_usage_key",
-    "gbif_species_key",
-    "gbif_genus_key",
-    "gbif_family_key",
-    "gbif_kingdom_key",
-]
-
 PLANTS_OUTPUT_COLUMNS = [
     "plant_id",
     "raw_plant_id",

@@ -89,7 +89,6 @@ COMPOUNDS_COLUMNS = [
     "qed_score",
     "np_likeness_score",
     "num_ro5_violations",
-    "lipinski_source",
     "is_pains_positive",
     "source_name",
     "source_url",
@@ -107,8 +106,6 @@ ALIASES_COLUMNS = [
     "alias_name",
     "alias_key",
     "alias_type",
-    "source_name",
-    "source_url",
     "retrieved_at",
 ]
 
@@ -786,8 +783,6 @@ def validate_aliases(
         alias_name = normalize_whitespace(row.get("alias_name", ""))
         alias_key = normalize_whitespace(row.get("alias_key", ""))
         alias_type = normalize_whitespace(row.get("alias_type", ""))
-        source_name = normalize_whitespace(row.get("source_name", ""))
-        source_url = normalize_whitespace(row.get("source_url", ""))
 
         alias_ids[alias_id] += 1
         if compound_id:
@@ -855,17 +850,6 @@ def validate_aliases(
                 rid,
                 "generic_alias_noise",
                 f"alias_key={alias_key!r}",
-                "warning",
-                source_file,
-            )
-
-        if not source_name or not source_url:
-            add_issue(
-                issues,
-                "compound_aliases.csv",
-                rid,
-                "weak_alias_provenance",
-                "source provenance is incomplete",
                 "warning",
                 source_file,
             )

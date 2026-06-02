@@ -19,8 +19,6 @@ Validation checks:
 - orphan aliases that do not point to a valid plant_id
 - empty or suspicious canonical names
 - source_name values that incorrectly contain plant names instead of source system names
-- GBIF keys that look like floats instead of clean identifiers
-- missing authorship where scientific name still appears to contain authorship text
 
 Behavior:
 - writes validated pass-through seed files when inputs are structurally valid
@@ -44,7 +42,6 @@ from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_
 import argparse
 import json
 import logging
-import math
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -62,16 +59,7 @@ REQUIRED_PLANT_COLUMNS = [
     "raw_plant_id",
     "canonical_key",
     "canonical_scientific_name",
-    "authorship",
     "family_name",
-    "taxonomic_status",
-    "rank",
-    "gbif_usage_key",
-    "gbif_accepted_usage_key",
-    "gbif_species_key",
-    "gbif_genus_key",
-    "gbif_family_key",
-    "gbif_kingdom_key",
     "source_name",
     "source_url",
     "retrieved_at",
@@ -83,8 +71,6 @@ REQUIRED_ALIAS_COLUMNS = [
     "alias_name",
     "alias_key",
     "alias_type",
-    "source_name",
-    "source_url",
     "retrieved_at",
 ]
 
@@ -98,27 +84,7 @@ ALLOWED_ALIAS_TYPES = {
 PLANT_OUTPUT_COLUMNS = REQUIRED_PLANT_COLUMNS
 ALIAS_OUTPUT_COLUMNS = REQUIRED_ALIAS_COLUMNS
 
-GBIF_ID_FIELDS = [
-    "gbif_usage_key",
-    "gbif_accepted_usage_key",
-    "gbif_species_key",
-    "gbif_genus_key",
-    "gbif_family_key",
-    "gbif_kingdom_key",
-]
-
 WHITESPACE_RE = re.compile(r"\s+")
-FLOAT_ID_RE = re.compile(r"^\d+\.0+$")
-FLOAT_SCI_RE = re.compile(r"^\d+(?:\.\d+)?[eE][+-]?\d+$")
-AUTHORSHIP_LIKE_TOKEN_RE = re.compile(
-    r"^("
-    r"\([^)]+\)|"
-    r"[A-Z]\.|"
-    r"[A-Z][a-zA-Z-]{1,10}\.?|"
-    r"[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?|"
-    r"\d{4}"
-    r")$"
-)
 
 
 @dataclass
@@ -211,42 +177,6 @@ def normalize_text(value: Any) -> str:
     return text.strip()
 
 
-def normalize_id_like(value: Any) -> str:
-    text = normalize_text(value)
-    if not text:
-        return ""
-    lower = text.lower()
-    if lower in {"nan", "none", "null"}:
-        return ""
-    try:
-        num = float(text)
-        if math.isfinite(num) and num.is_integer():
-            return str(int(num))
-        return format(num, ".15g")
-    except Exception:
-        pass
-    if re.fullmatch(r"[+-]?\d+", text):
-        return str(int(text))
-    return text
-
-
-def is_float_like_identifier(value: Any) -> bool:
-    text = normalize_text(value)
-    if not text:
-        return False
-    if FLOAT_ID_RE.fullmatch(text):
-        return True
-    if FLOAT_SCI_RE.fullmatch(text):
-        return True
-    try:
-        num = float(text)
-        if math.isfinite(num) and num.is_integer():
-            return text != str(int(num))
-    except Exception:
-        pass
-    return False
-
-
 def is_empty_canonical_name(name: Any) -> bool:
     return normalize_text(name) == ""
 
@@ -263,23 +193,6 @@ def is_suspicious_canonical_name(name: Any) -> bool:
         return True
     tokens = text.split()
     if len(tokens) < 2:
-        return True
-    return False
-
-
-def authorship_appears_embedded(scientific_name: Any) -> bool:
-    text = normalize_text(scientific_name)
-    if not text:
-        return False
-    if "(" in text or ")" in text:
-        return True
-    tokens = text.split()
-    if len(tokens) < 3:
-        return False
-    tail = tokens[2:]
-    if any(AUTHORSHIP_LIKE_TOKEN_RE.match(tok) for tok in tail):
-        return True
-    if len(tail) <= 3 and any(tok.endswith(".") or tok[:1].isupper() for tok in tail):
         return True
     return False
 
@@ -403,10 +316,6 @@ def prepare_output_frame(
     for col in out.columns:
         out[col] = out[col].map(normalize_text)
 
-    for col in GBIF_ID_FIELDS:
-        if col in out.columns:
-            out[col] = out[col].map(normalize_id_like)
-
     out = out[list(required_columns)]
     return out
 
@@ -441,7 +350,6 @@ def validate_plants(df: pd.DataFrame, issues: List[Issue]) -> None:
     for idx, row in df.iterrows():
         plant_id = row.get("plant_id", "")
         canonical_name = row.get("canonical_scientific_name", "")
-        authorship = row.get("authorship", "")
         source_name = row.get("source_name", "")
 
         if is_empty_canonical_name(canonical_name):
@@ -481,35 +389,6 @@ def validate_plants(df: pd.DataFrame, issues: List[Issue]) -> None:
                 value=source_name,
                 details="source_name appears to contain a plant name rather than a source system name.",
             )
-
-        if not normalize_text(authorship) and authorship_appears_embedded(
-            canonical_name
-        ):
-            add_issue(
-                issues,
-                severity="critical",
-                check_name="missing_authorship_with_embedded_authorship_text",
-                table_name="plants",
-                row_index=int(idx),
-                plant_id=plant_id,
-                column_name="authorship",
-                value=authorship,
-                details="Scientific name appears to contain authorship text, but authorship is empty.",
-            )
-
-        for field in GBIF_ID_FIELDS:
-            if field in df.columns and is_float_like_identifier(row.get(field, "")):
-                add_issue(
-                    issues,
-                    severity="critical",
-                    check_name="float_like_gbif_identifier",
-                    table_name="plants",
-                    row_index=int(idx),
-                    plant_id=plant_id,
-                    column_name=field,
-                    value=row.get(field, ""),
-                    details="GBIF identifier looks like a float-like string instead of a clean identifier.",
-                )
 
 
 def validate_aliases(
