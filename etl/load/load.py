@@ -55,9 +55,14 @@ def load_source_map(cur) -> dict:
     return {row[0]: str(row[1]) for row in cur.fetchall()}
 
 
-def resolve_src(row: dict, source_map: dict) -> str | None:
+def resolve_src(row: dict, source_map: dict) -> str:
     val = row.get("source_name", "")
-    return source_map[val] if val and val in source_map else None
+    if not val or val not in source_map:
+        raise ValueError(
+            f"Unknown source_name {val!r} not in source_systems catalog "
+            f"(keys: {sorted(source_map)}). Seed the source before loading."
+        )
+    return source_map[val]
 
 
 def create_batch(cur, step_name: str) -> str:
