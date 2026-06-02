@@ -78,16 +78,7 @@ PLANTS_OUTPUT_COLUMNS = [
     "raw_plant_id",
     "canonical_key",
     "canonical_scientific_name",
-    "authorship",
     "family_name",
-    "taxonomic_status",
-    "rank",
-    "gbif_usage_key",
-    "gbif_accepted_usage_key",
-    "gbif_species_key",
-    "gbif_genus_key",
-    "gbif_family_key",
-    "gbif_kingdom_key",
     "source_name",
     "source_url",
     "retrieved_at",
@@ -384,15 +375,11 @@ def canonicalize_group(
         "raw_plant_id": normalize_text(rep.get("raw_plant_id", "")),
         "canonical_key": canonical_key,
         "canonical_scientific_name": canonical_name,
-        "authorship": authorship,
         "family_name": clean_family_name(rep),
-        "taxonomic_status": clean_taxonomic_status(rep),
-        "rank": clean_rank(rep),
         "source_name": source_name,
         "source_url": source_url,
         "retrieved_at": retrieved_at,
     }
-    plant_row.update(normalize_gbif_fields(rep))
 
     # Collapse aliases to exactly one row per (plant_id, alias_key). The new
     # alias_id = make_alias_id(plant_id, alias_key) intentionally excludes

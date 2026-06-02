@@ -23,7 +23,7 @@ from disease_targets.utils import read_frame, validate_required_columns
 
 TARGETS_REQUIRED = [
     "target_id", "canonical_key", "gene_symbol", "protein_name",
-    "uniprot_accession", "organism_tax_id", "source_name", "retrieved_at",
+    "uniprot_accession", "source_name", "retrieved_at",
 ]
 ALIASES_REQUIRED = [
     "target_alias_id", "target_id", "alias_name", "alias_key", "alias_type",

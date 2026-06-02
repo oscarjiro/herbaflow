@@ -223,7 +223,6 @@ COMPOUNDS_COLUMNS = [
     "qed_score",
     "np_likeness_score",
     "num_ro5_violations",
-    "lipinski_source",
     "is_pains_positive",
     "source_name",
     "source_url",
@@ -1416,7 +1415,6 @@ def build_canonical_tables(
         qed_score = normalize_whitespace(best_candidate.get("qed_score", ""))
         np_likeness_score = normalize_whitespace(best_candidate.get("np_likeness_score", ""))
         num_ro5_violations = normalize_whitespace(best_candidate.get("num_ro5_violations", ""))
-        lipinski_source = normalize_whitespace(best_candidate.get("lipinski_source", ""))
         is_pains_positive = normalize_whitespace(best_candidate.get("is_pains_positive", ""))
         inchi_key = candidate_inchi(best_candidate)
         smiles = candidate_smiles(best_candidate)
@@ -1488,7 +1486,6 @@ def build_canonical_tables(
                 "qed_score": qed_score,
                 "np_likeness_score": np_likeness_score,
                 "num_ro5_violations": num_ro5_violations,
-                "lipinski_source": lipinski_source,
                 "is_pains_positive": is_pains_positive,
                 "source_name": source_name,
                 "source_url": source_url,
