@@ -1,7 +1,7 @@
 {
   "dry_run": false,
   "emit_sql": false,
-  "generated_at": "2026-06-02T14:47:03.759145+00:00",
+  "generated_at": "2026-06-02T16:45:54.155886+00:00",
   "input_dir": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out",
   "outputs": {
     "plant_aliases_csv": "C:\\code\\web\\herbaflow\\etl\\plants\\06_export\\out\\plant_aliases.csv",
@@ -22,8 +22,6 @@
       "alias_name",
       "alias_key",
       "alias_type",
-      "source_name",
-      "source_url",
       "retrieved_at"
     ],
     "plants_columns": [
@@ -31,16 +29,7 @@
       "raw_plant_id",
       "canonical_key",
       "canonical_scientific_name",
-      "authorship",
       "family_name",
-      "taxonomic_status",
-      "rank",
-      "gbif_usage_key",
-      "gbif_accepted_usage_key",
-      "gbif_species_key",
-      "gbif_genus_key",
-      "gbif_family_key",
-      "gbif_kingdom_key",
       "source_name",
       "source_url",
       "retrieved_at"

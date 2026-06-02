@@ -52,7 +52,7 @@ report_path=C:\code\web\herbaflow\etl\plants\04_build_canonical\out\build_canoni
 status=success
 
 Plant columns written:
-plant_id, raw_plant_id, canonical_key, canonical_scientific_name, authorship, family_name, taxonomic_status, rank, gbif_usage_key, gbif_accepted_usage_key, gbif_species_key, gbif_genus_key, gbif_family_key, gbif_kingdom_key, source_name, source_url, retrieved_at
+plant_id, raw_plant_id, canonical_key, canonical_scientific_name, family_name, source_name, source_url, retrieved_at
 
 Alias columns written:
-alias_id, plant_id, alias_name, alias_key, alias_type, source_name, source_url, retrieved_at
+alias_id, plant_id, alias_name, alias_key, alias_type, retrieved_at

@@ -7,8 +7,6 @@
         "alias_name",
         "alias_key",
         "alias_type",
-        "source_name",
-        "source_url",
         "retrieved_at"
       ],
       "kind": "core",
@@ -90,7 +88,6 @@
         "qed_score",
         "np_likeness_score",
         "num_ro5_violations",
-        "lipinski_source",
         "source_name",
         "source_url",
         "retrieved_at",
@@ -162,12 +159,12 @@
       "row_count": 1
     }
   },
-  "generated_at": "2026-06-02T13:34:30.978571+00:00",
+  "generated_at": "2026-06-02T16:42:11.053064+00:00",
   "include_audit_exports": true,
   "include_validation_artifacts": true,
   "module": "compounds",
   "note": "export_pass_through_only",
-  "run_id": "compounds_20260602_133430",
+  "run_id": "compounds_20260602_164211",
   "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
   "source_validated_dir": "C:\\code\\web\\herbaflow\\etl\\compounds\\06_validate\\out",
   "sql_enabled": false,
