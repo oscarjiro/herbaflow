@@ -39,7 +39,6 @@ export interface CompoundResponse {
   rotatable_bonds: number | null
   np_likeness_score: number | null
   num_ro5_violations: number | null
-  lipinski_source: string | null
 }
 
 // ============================================================================
