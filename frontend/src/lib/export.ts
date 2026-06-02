@@ -5,6 +5,8 @@
  * This utility handles the download trigger and column selection.
  */
 
+import { BASE_URL } from './api'
+
 export interface ExportConfig {
   analysisId: string
   stageNum: number
@@ -24,7 +26,7 @@ export async function downloadStageExport(config: ExportConfig): Promise<void> {
   if (config.includeHeaders === false) params.set('headers', 'false')
   if (config.includeMetadata) params.set('metadata', 'true')
 
-  const url = `/api/analyses/${config.analysisId}/export/${config.stageNum}?${params}`
+  const url = `${BASE_URL}/analyses/${config.analysisId}/export/${config.stageNum}?${params}`
   const response = await fetch(url)
   if (!response.ok) throw new Error(`Export failed: ${response.status} ${response.statusText}`)
 

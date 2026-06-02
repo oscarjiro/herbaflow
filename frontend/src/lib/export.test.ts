@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { downloadStageExport } from './export'
+import { BASE_URL } from './api'
 
 // ---- DOM mocks ----
 const mockClick = vi.fn()
@@ -46,8 +47,15 @@ describe('downloadStageExport', () => {
     await downloadStageExport({ analysisId: 'abc-123', stageNum: 2 })
     expect(mockFetch).toHaveBeenCalledOnce()
     const calledUrl: string = mockFetch.mock.calls[0][0]
-    expect(calledUrl).toContain('/api/analyses/abc-123/export/2')
+    expect(calledUrl).toContain('/analyses/abc-123/export/2')
     expect(calledUrl).toContain('format=csv')
+  })
+
+  it('builds the export URL from the API base, not a raw /api/ path', async () => {
+    await downloadStageExport({ analysisId: 'abc-123', stageNum: 2 })
+    const calledUrl: string = mockFetch.mock.calls[0][0]
+    expect(calledUrl.startsWith(BASE_URL)).toBe(true)
+    expect(calledUrl).not.toContain('/api/analyses')
   })
 
   it('includes columns param when provided', async () => {
