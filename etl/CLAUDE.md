@@ -121,10 +121,17 @@ IDs are deterministic: same input always produces the same UUID. No prefixes —
 
 ## Shared vs Pipeline-Level Utils
 
-**`shared/utils.py`** — generic, used by all pipelines:
-`ETL_ROOT`, `load_settings`, `setup_logging`, `ensure_dir`, `now_iso`, `make_run_id`, `read_csv`, `write_csv`, `write_json`, `normalize_whitespace`, `normalize_unicode`, `to_key`, `safe_str`, `stable_id`
+**`shared/utils.py`** — generic stdlib helpers (`list[dict]` CSV I/O), used by all pipelines:
+`ETL_ROOT`, `load_settings`, `setup_logging`, `ensure_dir`, `now_iso`, `make_run_id`, `read_csv`, `write_csv`, `write_json`, `normalize_whitespace`, `normalize_unicode`, `to_key`, `safe_str`, `clean_str`, `normalize_text`, `stable_id`
 
-**Pipeline `utils.py`** — entity-specific only. If a function is generic, it belongs in shared.
+**`shared/frames.py`** — pandas DataFrame I/O for the pandas-native modules (`diseases`, `disease_targets`):
+`read_frame`, `write_frame`, `validate_required_columns`. Kept separate from `shared/utils.py` so the stdlib (`list[dict]`) and pandas (`DataFrame`) I/O idioms never collide under one name.
+
+**`shared/identity.py`** — single source of truth for every canonical key and UUID (`slugify`, the `*_canonical_key`/`*_id` builders, namespace constants). Stdlib-only; module helpers never pre-normalize an identity input.
+
+**Text helpers — two honest names:** `safe_str` strips only (used by `plants`, `compounds`); `clean_str` strips **and** folds missing-markers (`na`/`none`/`-`/`unknown`/… → `""`) — used by `diseases`, `disease_targets`. `normalize_text` = lowercase + collapse whitespace + fold.
+
+**Pipeline `utils.py`** — entity-specific only (e.g. `canonical_key_for_target`). If a function is generic, it belongs in shared. The `diseases` and `disease_targets` `utils.py` are thin re-export facades over the shared modules.
 
 ## Path Resolution
 
