@@ -2,6 +2,7 @@
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
 
@@ -9,7 +10,7 @@ from sqlmodel import Field, SQLModel
 class Compound(SQLModel, table=True):
     __tablename__ = "compounds"
 
-    compound_id: str = Field(primary_key=True)
+    compound_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), primary_key=True))
     canonical_key: str = Field(unique=True)
     canonical_name: str
     inchi_key: Optional[str] = None
@@ -37,8 +38,8 @@ class Compound(SQLModel, table=True):
 class CompoundAlias(SQLModel, table=True):
     __tablename__ = "compound_aliases"
 
-    compound_alias_id: str = Field(primary_key=True)
-    compound_id: str = Field(foreign_key="compounds.compound_id")
+    compound_alias_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), primary_key=True))
+    compound_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), ForeignKey("compounds.compound_id")))
     alias_name: str
     alias_key: Optional[str] = None
     alias_type: Optional[str] = None
@@ -50,8 +51,9 @@ class CompoundAlias(SQLModel, table=True):
 class PlantCompound(SQLModel, table=True):
     __tablename__ = "plant_compounds"
 
-    plant_compound_id: str = Field(primary_key=True)
-    plant_id: str = Field(foreign_key="plants.plant_id")
-    compound_id: str = Field(foreign_key="compounds.compound_id")
+    plant_compound_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), primary_key=True))
+    plant_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), ForeignKey("plants.plant_id")))
+    compound_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), ForeignKey("compounds.compound_id")))
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
+    source_url: Optional[str] = None
     retrieved_at: Optional[datetime] = None

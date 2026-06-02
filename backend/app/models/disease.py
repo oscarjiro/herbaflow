@@ -2,6 +2,7 @@
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
 
@@ -9,7 +10,7 @@ from sqlmodel import Field, SQLModel
 class Disease(SQLModel, table=True):
     __tablename__ = "diseases"
 
-    disease_id: str = Field(primary_key=True)
+    disease_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), primary_key=True))
     canonical_key: str = Field(unique=True)
     disease_name: str
     ontology_id: Optional[str] = None
@@ -22,8 +23,8 @@ class Disease(SQLModel, table=True):
 class DiseaseAlias(SQLModel, table=True):
     __tablename__ = "disease_aliases"
 
-    disease_alias_id: str = Field(primary_key=True)
-    disease_id: str = Field(foreign_key="diseases.disease_id")
+    disease_alias_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), primary_key=True))
+    disease_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), ForeignKey("diseases.disease_id")))
     alias_name: str
     alias_key: Optional[str] = None
     alias_type: Optional[str] = None

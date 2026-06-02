@@ -2,6 +2,7 @@
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
+from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
 
@@ -9,7 +10,7 @@ from sqlmodel import Field, SQLModel
 class Plant(SQLModel, table=True):
     __tablename__ = "plants"
 
-    plant_id: str = Field(primary_key=True)
+    plant_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), primary_key=True))
     canonical_key: str = Field(unique=True)
     canonical_scientific_name: str
     authorship: Optional[str] = None
@@ -30,8 +31,8 @@ class Plant(SQLModel, table=True):
 class PlantAlias(SQLModel, table=True):
     __tablename__ = "plant_aliases"
 
-    alias_id: str = Field(primary_key=True)
-    plant_id: str = Field(foreign_key="plants.plant_id")
+    alias_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), primary_key=True))
+    plant_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), ForeignKey("plants.plant_id")))
     alias_name: str
     alias_key: Optional[str] = None
     alias_type: Optional[str] = None

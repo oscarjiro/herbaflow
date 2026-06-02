@@ -2,7 +2,7 @@
 from typing import Optional, Any
 from uuid import UUID, uuid4
 from datetime import datetime
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
 
@@ -15,7 +15,10 @@ class AnalysisRun(SQLModel, table=True):
         sa_column=Column(PGUUID(as_uuid=True), primary_key=True)
     )
     analysis_name: str
-    disease_id: Optional[str] = Field(default=None, foreign_key="diseases.disease_id")
+    disease_id: Optional[str] = Field(
+        default=None,
+        sa_column=Column(PGUUID(as_uuid=False), ForeignKey("diseases.disease_id"), nullable=True),
+    )
     notes: Optional[str] = None
     parameters: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     stage_results: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
