@@ -1,10 +1,9 @@
 """Stage 4 — Disease-associated targets.
 
-Resolves the gene targets associated with the analysis' single disease via a
-direct lookup. Sources, in priority order: cached ``disease_targets`` rows
-(``min_score`` filtered) first, falling back to the Open Targets API only when
-the cache is empty. A separate ``manual_targets`` input mode bypasses both and
-uses an injected gene list directly (no disease).
+Resolves the gene targets associated with the analysis' single disease from the
+cached ``disease_targets`` rows (``min_score`` filtered). A separate
+``manual_targets`` input mode bypasses the lookup and uses an injected gene list
+directly (no disease).
 
 Exactly one disease per analysis: the disease id/name are emitted once at the
 stage level; each target row carries only ``gene_symbol``, ``uniprot_accession``,
@@ -102,24 +101,6 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 "uniprot_accession": target.uniprot_accession or "",
                 "score": score,
                 "source": "db_cache",
-            })
-    else:
-        from integrations.open_targets import get_disease_targets
-
-        ontology_id = disease.ontology_id or ""
-        ot_targets = await get_disease_targets(
-            ontology_id, min_score=config.disease_targets.min_score
-        )
-        for t in ot_targets:
-            gene = (t.gene_symbol or "").upper()
-            if not gene or gene in seen:
-                continue
-            seen.add(gene)
-            targets.append({
-                "gene_symbol": gene,
-                "uniprot_accession": "",
-                "score": t.score,
-                "source": "open_targets_api",
             })
 
     return {

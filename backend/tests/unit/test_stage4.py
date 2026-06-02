@@ -175,3 +175,34 @@ async def test_stage4_manual_targets_normalized():
     assert "ZZZ9" in result["normalization"]["unrecognized"]
     assert "ZZZ9" in symbols
     gs._MAP = None
+
+
+def test_open_targets_module_removed():
+    """The dead live Open Targets fallback must be deleted entirely."""
+    import importlib
+    import pytest
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("integrations.open_targets")
+
+
+async def test_stage4_empty_cache_returns_empty_targets():
+    """When the disease exists but has no cached targets, return empty — no live fallback."""
+    run = make_run(disease_id="dis_1")
+    config = PipelineConfig()
+    session = AsyncMock()
+
+    fake_disease = make_fake_disease("dis_1", "Diabetes")
+    with patch(
+        "analysis.stages.stage4_disease_targets.disease_repo.get_disease_by_id",
+        return_value=fake_disease,
+    ), patch(
+        "analysis.stages.stage4_disease_targets.disease_repo.get_targets_for_disease",
+        return_value=[],
+    ):
+        result = await stage4_disease_targets.run(run, config, session)
+
+    assert result["disease_id"] == "dis_1"
+    assert result["disease_name"] == "Diabetes"
+    assert result["disease_target_count"] == 0
+    assert result["targets"] == []
+    assert result["disease_gene_symbols"] == []
