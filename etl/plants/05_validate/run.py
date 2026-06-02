@@ -74,9 +74,7 @@ REQUIRED_PLANT_COLUMNS = [
     "gbif_kingdom_key",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
-    "confidence",
 ]
 
 REQUIRED_ALIAS_COLUMNS = [
@@ -87,7 +85,6 @@ REQUIRED_ALIAS_COLUMNS = [
     "alias_type",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
 ]
 

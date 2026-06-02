@@ -75,9 +75,7 @@ PLANTS_SCHEMA_COLUMNS = [
     "gbif_kingdom_key",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
-    "confidence",
 ]
 
 ALIASES_SCHEMA_COLUMNS = [
@@ -88,7 +86,6 @@ ALIASES_SCHEMA_COLUMNS = [
     "alias_type",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
 ]
 

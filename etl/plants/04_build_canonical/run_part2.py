@@ -16,7 +16,7 @@ This script:
   and other normalized name variants
 - generates stable plant_id, alias_id, and canonical_key values
 - preserves source provenance columns
-- keeps retrieved_at and source_batch_id
+- keeps retrieved_at
 - avoids confusing source_name with the plant name
 - writes deterministic outputs suitable for Supabase/PostgreSQL import
 
@@ -90,9 +90,7 @@ PLANTS_OUTPUT_COLUMNS = [
     "gbif_kingdom_key",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
-    "confidence",
 ]
 
 ALIASES_OUTPUT_COLUMNS = [
@@ -103,7 +101,6 @@ ALIASES_OUTPUT_COLUMNS = [
     "alias_type",
     "source_name",
     "source_url",
-    "source_batch_id",
     "retrieved_at",
 ]
 
@@ -299,14 +296,6 @@ def authorship_from_row(row: pd.Series) -> str:
     )
 
 
-def source_batch_id_from_row(row: pd.Series) -> str:
-    return first_non_empty(row.get("source_batch_id", ""))
-
-
-def confidence_value(row: pd.Series) -> str:
-    return normalize_text(row.get("confidence", ""))
-
-
 def clean_family_name(row: pd.Series) -> str:
     return first_non_empty(row.get("family_name", ""))
 
@@ -388,9 +377,7 @@ def canonicalize_group(
 
     source_name = coalesce_source_name(rep, source_name_fallback)
     source_url = gbif_species_url(gbif_key) or coalesce_source_url(rep)
-    source_batch_id = source_batch_id_from_row(rep)
     retrieved_at = coalesce_retrieved_at(rep)
-    confidence = confidence_value(rep)
 
     plant_row: Dict[str, Any] = {
         "plant_id": plant_id,
@@ -403,9 +390,7 @@ def canonicalize_group(
         "rank": clean_rank(rep),
         "source_name": source_name,
         "source_url": source_url,
-        "source_batch_id": source_batch_id,
         "retrieved_at": retrieved_at,
-        "confidence": confidence,
     }
     plant_row.update(normalize_gbif_fields(rep))
 
@@ -433,7 +418,6 @@ def canonicalize_group(
             "alias_type": alias_type,
             "source_name": coalesce_source_name(row_source, source_name_fallback),
             "source_url": coalesce_source_url(row_source),
-            "source_batch_id": source_batch_id_from_row(row_source),
             "retrieved_at": coalesce_retrieved_at(row_source),
         }
         alias_by_key[alias_key] = pick_alias(alias_by_key.get(alias_key), candidate)

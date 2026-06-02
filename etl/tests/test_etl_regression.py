@@ -129,6 +129,22 @@ import uuid
 
 import pandas as pd
 
+
+def _extract_list_literal(text, name):
+    import re
+    start = text.index(f"{name} = [")
+    end = text.index("]", start)
+    return set(re.findall(r'"([^"]+)"', text[start:end]))
+
+
+def test_plants_loaded_export_columns_have_no_dead_columns():
+    import pathlib
+    text = pathlib.Path("etl/plants/06_export/run.py").read_text(encoding="utf-8")
+    plants = _extract_list_literal(text, "PLANTS_SCHEMA_COLUMNS")
+    aliases = _extract_list_literal(text, "ALIASES_SCHEMA_COLUMNS")
+    assert {"source_batch_id", "confidence"}.isdisjoint(plants), f"plants still: {plants}"
+    assert {"source_batch_id"}.isdisjoint(aliases), f"aliases still: {aliases}"
+
 from shared.identity import PLANT_ALIAS_NS
 
 plants_canonical = _load(
