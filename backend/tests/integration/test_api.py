@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import pytest
 
 pytestmark = pytest.mark.asyncio(loop_scope="session")
@@ -287,3 +289,13 @@ async def test_export_stage_not_run_returns_404(client):
 async def test_create_analysis_missing_fields_returns_422(client):
     resp = await client.post("/analyses", json={})
     assert resp.status_code == 422
+
+
+# ── Post-reload uuid round-trip ──────────────────────────────────────────────────
+
+async def test_entity_ids_roundtrip_as_uuid_strings(client):
+    resp = await client.get("/plants?limit=1")
+    assert resp.status_code == 200
+    plant_id = resp.json()[0]["plant_id"]
+    assert isinstance(plant_id, str)
+    UUID(plant_id)  # raises if not a valid uuid
