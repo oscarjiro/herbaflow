@@ -15,7 +15,6 @@ class Target(SQLModel, table=True):
     gene_symbol: Optional[str] = None
     protein_name: Optional[str] = None
     uniprot_accession: Optional[str] = None
-    organism_tax_id: Optional[int] = None
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
     retrieved_at: Optional[datetime] = None

@@ -29,7 +29,6 @@ class Compound(SQLModel, table=True):
     qed_score: Optional[float] = None
     np_likeness_score: Optional[float] = None
     is_pains_positive: bool = False
-    lipinski_source: Optional[str] = None
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
     retrieved_at: Optional[datetime] = None
@@ -43,8 +42,6 @@ class CompoundAlias(SQLModel, table=True):
     alias_name: str
     alias_key: Optional[str] = None
     alias_type: Optional[str] = None
-    source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
-    source_url: Optional[str] = None
     retrieved_at: Optional[datetime] = None
 
 

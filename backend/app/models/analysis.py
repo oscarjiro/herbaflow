@@ -19,7 +19,6 @@ class AnalysisRun(SQLModel, table=True):
         default=None,
         sa_column=Column(PGUUID(as_uuid=False), ForeignKey("diseases.disease_id"), nullable=True),
     )
-    notes: Optional[str] = None
     parameters: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     stage_results: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     status: str = "pending"
@@ -30,4 +29,3 @@ class AnalysisRun(SQLModel, table=True):
     expires_at: Optional[datetime] = None
     error_message: Optional[str] = None
     updated_at: Optional[datetime] = None
-    created_by: Optional[str] = None

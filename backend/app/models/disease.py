@@ -28,5 +28,4 @@ class DiseaseAlias(SQLModel, table=True):
     alias_name: str
     alias_key: Optional[str] = None
     alias_type: Optional[str] = None
-    source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     retrieved_at: Optional[datetime] = None
