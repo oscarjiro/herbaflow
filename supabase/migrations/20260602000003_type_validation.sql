@@ -65,11 +65,13 @@ alter table analysis_runs    add constraint analysis_runs_disease_id_fkey     fo
 -- 2. Control-only vocab CHECKs (only columns our own code sets).
 -- ============================================================
 alter table compounds        add constraint compounds_lipinski_source_check
-  check (lipinski_source is null or lipinski_source in ('chembl_api','rdkit_computed'));
+  check (lipinski_source is null or lipinski_source in ('chembl_api','rdkit_computed','rdkit_computed+rdkit_np','chembl_api+rdkit_np','rdkit_np'));
 alter table compound_targets add constraint compound_targets_prediction_method_check
   check (prediction_method is null or prediction_method in ('chembl_bioactivity','pubchem_bioassay','stp_import'));
-alter table analysis_runs    add constraint analysis_runs_status_check
-  check (status is null or status in ('pending','running','complete','failed'));
+-- NOTE: analysis_runs.status is a dynamic, stage-derived string the backend manages
+-- (pending/failed/complete plus stage_{N}_running / stage_{N}_awaiting_approval /
+-- stage_{N}_starting / stage_{N}_rejected). It is not a fixed control vocab, so no
+-- IN (...) CHECK is enforced on it.
 alter table analysis_runs    add constraint analysis_runs_mode_check
   check (mode in ('auto','guided'));
 

@@ -43,9 +43,13 @@ def test_fks_dropped_and_readded():
 
 def test_control_only_checks_present():
     sql = _norm()
-    assert "lipinski_source in ('chembl_api','rdkit_computed')" in sql
+    assert (
+        "lipinski_source in ('chembl_api','rdkit_computed',"
+        "'rdkit_computed+rdkit_np','chembl_api+rdkit_np','rdkit_np')"
+    ) in sql
     assert "prediction_method in ('chembl_bioactivity','pubchem_bioassay','stp_import')" in sql
-    assert "status in ('pending','running','complete','failed')" in sql
+    # status is a dynamic stage-derived string (no fixed-vocab CHECK) — see migration note.
+    assert "status in (" not in sql
     assert "mode in ('auto','guided')" in sql
 
 
