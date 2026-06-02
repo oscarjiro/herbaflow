@@ -5,6 +5,7 @@
  * so that invalid payloads are rejected on both sides.
  */
 import { z } from 'zod'
+import analysisContract from '@shared/contracts/analysis.json'
 
 // ---------------------------------------------------------------------------
 // Input size limits — mirrors backend HARD_CAP_* / SOFT_CAP_* constants
@@ -79,7 +80,9 @@ export const smilesSchema = z
 // ---------------------------------------------------------------------------
 
 /** Analysis run mode (guided = step-by-step approval, auto = fully automated). */
-export const analysisModeSchema = z.enum(['guided', 'auto'])
+export const analysisModeSchema = z.enum(
+  analysisContract.analysis_mode as [string, ...string[]],
+)
 
 /** Input mode for the setup form. */
 export const inputModeSchema = z.enum(['standard', 'manual_compounds', 'manual_targets'])
