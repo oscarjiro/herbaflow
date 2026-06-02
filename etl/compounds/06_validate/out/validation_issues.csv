@@ -1,18 +1,18 @@
 table_name,row_identifier,issue_type,issue_reason,severity,source_file,detail_json
 build_canonical_summary.json,summary,unresolved_candidates_present,8 unresolved candidates remain,warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\build_canonical_summary.json,{}
-compounds.csv,02cb070a-2b3c-5965-980d-2b0bee03650e,invalid_cas_format,cas_id='66957-75-7',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,073a7e4c-ea06-5e49-9552-e15bfa152d57,invalid_cas_format,cas_id='495-78-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,0c507900-50be-5493-99e9-f6d6edf746e4,invalid_cas_format,cas_id='714361-22-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,0fbe4a21-52f4-516f-810f-1f034580e488,invalid_cas_format,cas_id='1035606-13-2',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,26a1c0ea-d773-5925-9fb5-3cd4b725282d,invalid_cas_format,cas_id='6756-5-4',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,2da86017-2d2d-5331-bd5a-604b93452959,invalid_cas_format,cas_id='10334-25-35-2',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,4a6ea002-d968-5200-a870-ffe7ee346e74,invalid_cas_format,cas_id='84897-03-2',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,4c87293a-bdf0-5a62-a7f4-18fcf61eed21,invalid_cas_format,cas_id='1942-3-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,4fb79db6-c9d0-586d-bdae-30ce9bda5b00,invalid_cas_format,cas_id='126321-89-1',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,5e84eaae-1e4a-5589-8e97-2f5908c0550b,invalid_cas_format,cas_id='4802-01-0',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,abc49dfe-eeb2-51e9-affb-6baf1aeb6089,invalid_cas_format,cas_id='103947-71-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,accfb502-7f0e-584f-9f55-a03b5fe3f06c,invalid_cas_format,cas_id='5692-4-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,b48807ea-1a67-5d44-85fb-50b79ea6b5cd,invalid_cas_format,cas_id='62929-65-7',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,d7ea1a08-2ea1-59d2-af50-18a2269d011c,invalid_cas_format,cas_id='87402-97-8',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
-compounds.csv,d971ca16-70da-5414-a761-ee5cc0ffe828,invalid_cas_format,cas_id='37687--34-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,03e6b07a-76f5-5ba1-a5e5-2c988944560c,invalid_cas_format,cas_id='714361-22-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,0e0479e8-2883-5ac0-b1a0-ddad5728e335,invalid_cas_format,cas_id='1942-3-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,4a986dcd-e551-59cc-a03f-ec0fd171cb37,invalid_cas_format,cas_id='37687--34-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,699b7cf6-3269-5559-b664-03afb7c48e14,invalid_cas_format,cas_id='126321-89-1',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,73cb5f56-3ab8-5080-b4a6-8c01647ca540,invalid_cas_format,cas_id='5692-4-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,745d345d-41e1-5e97-b1a6-33821a4c95be,invalid_cas_format,cas_id='495-78-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,75dc2e98-19eb-5375-9756-4a0d3f3b7366,invalid_cas_format,cas_id='84897-03-2',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,84b53b00-367f-5084-87a8-dfe4806b9785,invalid_cas_format,cas_id='6756-5-4',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,8c166c3f-739f-5f80-9052-a46d772fefbd,invalid_cas_format,cas_id='1035606-13-2',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,9be9cb2a-1de5-5ba7-a9a7-b3b1a65a1136,invalid_cas_format,cas_id='103947-71-6',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,a1e222b2-40ab-588f-af49-8f025233475e,invalid_cas_format,cas_id='87402-97-8',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,af20055a-a945-503a-97a7-70901739b485,invalid_cas_format,cas_id='66957-75-7',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,bc21d5bc-5c99-5e74-a7b7-1a30ce30b7e9,invalid_cas_format,cas_id='62929-65-7',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,c9f0a977-fcc5-57af-8bee-5ca3ef1ea515,invalid_cas_format,cas_id='4802-01-0',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
+compounds.csv,fb721ed2-1d3b-5eed-8fff-1d9a9f3b1721,invalid_cas_format,cas_id='10334-25-35-2',warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}
 compounds.csv,table,high_provisional_ratio,provisional compounds are unusually high,warning,C:\code\web\herbaflow\etl\compounds\05_build_canonical\out\compounds.csv,{}

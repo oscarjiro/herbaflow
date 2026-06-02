@@ -5,8 +5,8 @@ project:
     project_root: ".."
 
 source:
-    name: KNApSAcK World
-    url: https://www.knapsackfamily.com/KNApSAcK_World/
+    name: KNApSAcK
+    url: https://www.knapsackfamily.com/KNApSAcK/
     batch_id: auto
 
 paths:
