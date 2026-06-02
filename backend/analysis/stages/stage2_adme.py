@@ -13,12 +13,13 @@ _CORE_PROPS = ("molecular_weight", "logp", "hbond_donors", "hbond_acceptors")
 def filter_compounds(
     compounds: list[CompoundRecord], params: AdmeParams
 ) -> dict:
-    passed, failed, np_exceptions = [], [], []
+    passed, failed, np_exceptions, bypassed = [], [], [], []
 
     for c in compounds:
         # Bypass: user_provided compounds skip ADME when apply_adme_to_manual=False.
+        # They stay in the active set but are reported as bypassed, not as having passed.
         if not params.apply_adme_to_manual and getattr(c, "source", "plant") == "user_provided":
-            passed.append(c)
+            bypassed.append(c)
             continue
 
         # All core properties absent — insufficient data, cannot pass.
@@ -58,9 +59,11 @@ def filter_compounds(
         "passed": passed,
         "failed": failed,
         "np_exceptions": np_exceptions,
+        "bypassed": bypassed,
         "passed_count": len(passed),
         "failed_count": len(failed),
         "np_exception_count": len(np_exceptions),
+        "bypassed_count": len(bypassed),
     }
 
 
@@ -69,7 +72,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     compound_ids = stage1.get("compound_ids", [])
 
     if not compound_ids:
-        return {"passed": 0, "failed": 0, "np_exceptions": 0,
+        return {"passed": 0, "failed": 0, "np_exceptions": 0, "bypassed": 0,
                 "passed_compound_ids": [], "np_exception_compound_ids": [],
                 "all_active_compound_ids": [], "compounds": []}
 
@@ -105,12 +108,25 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
 
     passed_set = {str(c.compound_id) for c in result["passed"]}
     np_set = {str(c.compound_id) for c in result["np_exceptions"]}
+    bypassed_set = {str(c.compound_id) for c in result["bypassed"]}
+
+    def _status(cid: str) -> str:
+        if cid in passed_set:
+            return "passed"
+        if cid in np_set:
+            return "np_exception"
+        if cid in bypassed_set:
+            return "bypassed"
+        return "failed"
+
     enriched = [
         {
             "compound_id": str(c.compound_id),
             "canonical_name": c.canonical_name or str(c.compound_id),
             "plant_ids": plant_ids_map.get(str(c.compound_id), []),
+            "status": _status(str(c.compound_id)),
             "adme_pass": str(c.compound_id) in passed_set,
+            "adme_bypassed": str(c.compound_id) in bypassed_set,
             "is_np_exception": str(c.compound_id) in np_set,
             "is_pains_positive": c.is_pains_positive,
             # ADME property values for frontend display
@@ -122,7 +138,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "np_likeness_score": c.np_likeness_score,
             "rotatable_bonds": c.rotatable_bonds,
         }
-        for c in result["passed"] + result["np_exceptions"] + result["failed"]
+        for c in result["passed"] + result["np_exceptions"] + result["bypassed"] + result["failed"]
     ]
 
     return {
@@ -130,6 +146,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         "passed": result["passed_count"],
         "failed": result["failed_count"],
         "np_exceptions": result["np_exception_count"],
+        "bypassed": result["bypassed_count"],
         # Pipeline chain compatibility (Stage 3 reads these)
         # str() cast ensures UUID objects from the ORM are serialized as strings,
         # preventing type mismatches when Stage 3 intersects these IDs with its own sets.
@@ -137,7 +154,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         "np_exception_compound_ids": [str(c.compound_id) for c in result["np_exceptions"]],
         "all_active_compound_ids": [
             str(c.compound_id)
-            for c in result["passed"] + result["np_exceptions"]
+            for c in result["passed"] + result["np_exceptions"] + result["bypassed"]
         ],
         "compounds": enriched,
     }

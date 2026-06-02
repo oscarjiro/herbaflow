@@ -164,6 +164,8 @@ export interface Stage1Result {
 // Stage 2: ADME Screening
 export interface AdmeCompoundResult extends CompoundResult {
   adme_pass: boolean
+  status?: 'passed' | 'np_exception' | 'bypassed' | 'failed'
+  adme_bypassed?: boolean
   is_np_exception: boolean
   molecular_weight: number | null
   logp: number | null
@@ -179,6 +181,7 @@ export interface Stage2Result {
   passed: number
   failed: number
   np_exceptions: number
+  bypassed: number
   compounds: AdmeCompoundResult[]
   /** Compound IDs that passed ADME screening */
   passed_compound_ids?: string[]

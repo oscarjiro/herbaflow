@@ -85,6 +85,9 @@ const columns: ColumnDef<AdmeRow>[] = [
       if (row.is_np_exception) {
         return <StatusBadge status="stage_1_awaiting_approval" label="Pass (NP)" />
       }
+      if (row.adme_bypassed) {
+        return <StatusBadge status="neutral" label="Bypassed" />
+      }
       return (
         <StatusBadge
           status={value ? 'complete' : 'failed'}
@@ -120,15 +123,15 @@ export function Stage2Panel({ stage, analysis, status, analysisId }: Stage2Panel
   const result = rawResult as Stage2Result | null | undefined
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
 
-  const total = result ? result.passed + result.failed + result.np_exceptions : 0
+  const total = result ? result.passed + result.failed + result.np_exceptions + (result.bypassed ?? 0) : 0
   const passedPct = total > 0 ? (((result?.passed ?? 0) / total) * 100).toFixed(1) : '0.0'
   const failedPct = total > 0 ? (((result?.failed ?? 0) / total) * 100).toFixed(1) : '0.0'
 
   const filteredCompounds: AdmeRow[] = result
     ? (filterMode === 'passed'
-      ? result.compounds.filter(c => c.adme_pass || c.is_np_exception)
+      ? result.compounds.filter(c => c.adme_pass || c.is_np_exception || c.adme_bypassed)
       : filterMode === 'failed'
-        ? result.compounds.filter(c => !c.adme_pass && !c.is_np_exception)
+        ? result.compounds.filter(c => !c.adme_pass && !c.is_np_exception && !c.adme_bypassed)
         : result.compounds) as AdmeRow[]
     : []
 
@@ -176,6 +179,12 @@ export function Stage2Panel({ stage, analysis, status, analysisId }: Stage2Panel
               <p className="text-xs font-sans text-hf-warning">NP Exceptions</p>
               <p className="mt-1 text-xl font-display text-hf-warning">{result.np_exceptions}</p>
             </div>
+            {(result.bypassed ?? 0) > 0 && (
+              <div className="rounded-lg bg-hf-surface border border-hf-border px-5 py-3 flex-1">
+                <p className="text-xs font-sans text-hf-fg2">Bypassed (manual)</p>
+                <p className="mt-1 text-xl font-display text-hf-fg1">{result.bypassed}</p>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">

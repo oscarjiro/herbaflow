@@ -111,10 +111,11 @@ def test_adme_compound_all_none_not_in_active_ids():
 
 
 def test_manual_compound_bypasses_adme_when_flag_disabled():
-    """When apply_adme_to_manual=False, user_provided compounds skip ADME and get adme_pass=True.
+    """When apply_adme_to_manual=False, user_provided compounds skip ADME and land in 'bypassed'.
 
     Scientific basis: Lipinski CA et al. Adv Drug Deliv Rev. 2001.
-    Pre-screened compounds from published ADME studies should not be re-filtered.
+    Pre-screened compounds from published ADME studies should not be re-filtered,
+    but they must be reported honestly as bypassed, not as having passed screening.
     """
     # A compound that would clearly FAIL Lipinski rules (mw > 500, logp > 5)
     compound = make_compound(
@@ -125,11 +126,11 @@ def test_manual_compound_bypasses_adme_when_flag_disabled():
     params = AdmeParams(apply_adme_to_manual=False)
     result = filter_compounds([compound], params)
 
-    # Must pass unconditionally
-    assert len(result["passed"]) == 1, "user_provided compound must bypass ADME and pass"
+    # Bypassed manual compound goes to its own bucket, not "passed"
+    assert result["bypassed"][0].compound_id == compound.compound_id
+    assert result["passed"] == []
     assert result["failed"] == []
     assert result["np_exceptions"] == []
-    assert result["passed"][0].compound_id == compound.compound_id
 
 
 def test_manual_compound_screened_when_flag_enabled():
@@ -227,3 +228,55 @@ async def test_stage2_output_includes_all_adme_fields():
             f"Stage 2 compound output missing expected ADME field: '{field}'. "
             f"Available keys: {list(compound_out.keys())}"
         )
+
+
+@pytest.mark.asyncio
+async def test_stage2_bypassed_manual_compound_status():
+    """A bypassed manual compound reports status='bypassed', adme_pass=False, still active."""
+    from analysis.stages.stage2_adme import run as stage2_run
+    from app.models.analysis import AnalysisRun
+
+    compound_id = str(uuid4())
+    run = MagicMock(spec=AnalysisRun)
+    run.parameters = {"manual_compound_ids": [compound_id]}
+    run.stage_results = {
+        "stage_1": {
+            "compound_ids": [compound_id],
+            "compounds": [{"compound_id": compound_id, "plant_ids": []}],
+        }
+    }
+
+    fake = MagicMock()
+    fake.compound_id = compound_id
+    fake.canonical_name = "User Mol"
+    fake.smiles = None
+    fake.chembl_id = None
+    fake.pubchem_cid = None
+    fake.molecular_weight = 900.0   # would fail Lipinski if screened
+    fake.logp = 8.0
+    fake.hbond_donors = 1
+    fake.hbond_acceptors = 2
+    fake.tpsa = 40.0
+    fake.rotatable_bonds = 3
+    fake.np_likeness_score = 0.1
+    fake.is_pains_positive = False
+    fake.num_ro5_violations = 2
+
+    session = AsyncMock()
+    config = PipelineConfig()
+    # Reassign the whole adme config (don't mutate a field — AdmeParams may be frozen).
+    config.adme = AdmeParams(apply_adme_to_manual=False)  # opt into bypass
+
+    with patch(
+        "analysis.stages.stage2_adme.compound_repo.get_compounds_by_ids",
+        return_value=[fake],
+    ):
+        result = await stage2_run(run, config, session)
+
+    out = result["compounds"][0]
+    assert out["status"] == "bypassed"
+    assert out["adme_pass"] is False
+    assert out["adme_bypassed"] is True
+    assert result["bypassed"] == 1
+    assert result["passed"] == 0
+    assert compound_id in result["all_active_compound_ids"]
