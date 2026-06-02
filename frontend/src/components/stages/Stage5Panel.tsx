@@ -132,6 +132,11 @@ export function Stage5Panel({ stage, analysis, status }: Stage5PanelProps) {
               : significanceState === 'not_significant' ? 'Not Significant'
               : 'N/A'}
           </span>
+          {result.exploratory && (
+            <span className="text-[10px] text-hf-fg3 mt-0.5">
+              single uncorrected test · exploratory
+            </span>
+          )}
         </div>
       </div>
 

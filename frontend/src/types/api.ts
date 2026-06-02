@@ -312,6 +312,9 @@ export interface OverlapStats {
   jaccard: number
   p_value: number | null
   significant: boolean
+  n_tests?: number
+  correction?: 'none'
+  exploratory?: boolean
   venn?: {
     overlap: number
     disease_only: number

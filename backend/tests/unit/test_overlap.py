@@ -35,3 +35,13 @@ def test_p_value_significant():
 def test_empty_inputs():
     result = compute_overlap(set(), {"BRCA1"})
     assert result["overlap_count"] == 0
+
+
+def test_overlap_marks_single_uncorrected_test():
+    result = compute_overlap({"TP53", "AKT1"}, {"AKT1", "BRCA1"})
+    assert result["n_tests"] == 1
+    assert result["correction"] == "none"
+    assert result["exploratory"] is True
+    # existing semantics unchanged
+    assert "significant" in result
+    assert "p_value" in result
