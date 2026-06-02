@@ -40,6 +40,47 @@ from integrations._retry import ServiceUnavailableError
 router = APIRouter(prefix="/analyses", tags=["analyses"])
 logger = logging.getLogger(__name__)
 
+
+def _stage6_csv(stage_data: dict) -> tuple[list[str], list[dict]]:
+    """Stage 6 PPI edges → flat CSV rows. Reads the flat raw_edges (not Cytoscape-nested edges)."""
+    fieldnames = ["source", "target", "combined_score"]
+    rows = [
+        {
+            "source": e.get("source", ""),
+            "target": e.get("target", ""),
+            "combined_score": e.get("combined_score", ""),
+        }
+        for e in stage_data.get("raw_edges", [])
+    ]
+    return fieldnames, rows
+
+
+def _stage2_csv(stage_data: dict) -> tuple[list[str], list[dict]]:
+    """Stage 2 ADME → one row per compound (all statuses) with property columns."""
+    fieldnames = [
+        "compound_id", "canonical_name", "status",
+        "molecular_weight", "logp", "tpsa",
+        "hbond_donors", "hbond_acceptors",
+        "np_likeness_score", "rotatable_bonds", "is_pains_positive",
+    ]
+    rows = [
+        {
+            "compound_id": c.get("compound_id", ""),
+            "canonical_name": c.get("canonical_name", ""),
+            "status": c.get("status", ""),
+            "molecular_weight": c.get("molecular_weight", ""),
+            "logp": c.get("logp", ""),
+            "tpsa": c.get("tpsa", ""),
+            "hbond_donors": c.get("hbond_donors", ""),
+            "hbond_acceptors": c.get("hbond_acceptors", ""),
+            "np_likeness_score": c.get("np_likeness_score", ""),
+            "rotatable_bonds": c.get("rotatable_bonds", ""),
+            "is_pains_positive": c.get("is_pains_positive", ""),
+        }
+        for c in stage_data.get("compounds", [])
+    ]
+    return fieldnames, rows
+
 TOTAL_STAGES = 8
 
 
@@ -282,14 +323,10 @@ async def export_stage_results(
             filename = f"{run.analysis_name}_stage1_compounds.csv"
 
         elif stage_key == "stage_2":
-            # One row per group showing compound IDs and their ADME status
-            fieldnames = ["status", "compound_id"]
-            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            fieldnames, rows = _stage2_csv(stage_data)
+            writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
             writer.writeheader()
-            for cid in stage_data.get("passed_compound_ids", []):
-                writer.writerow({"status": "passed", "compound_id": cid})
-            for cid in stage_data.get("np_exception_compound_ids", []):
-                writer.writerow({"status": "np_exception", "compound_id": cid})
+            writer.writerows(rows)
             filename = f"{run.analysis_name}_stage2_adme.csv"
 
         elif stage_key == "stage_3":
@@ -342,18 +379,10 @@ async def export_stage_results(
             filename = f"{run.analysis_name}_stage5_overlap.csv"
 
         elif stage_key == "stage_6":
-            # One row per edge (most useful for network analysis)
-            edges = stage_data.get("edges", [])
-            fieldnames = ["source", "target", "combined_score", "experimental_score"]
-            writer = csv.DictWriter(output, fieldnames=fieldnames)
+            fieldnames, rows = _stage6_csv(stage_data)
+            writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
             writer.writeheader()
-            for e in edges:
-                writer.writerow({
-                    "source": e.get("source", ""),
-                    "target": e.get("target", ""),
-                    "combined_score": e.get("combined_score", ""),
-                    "experimental_score": e.get("experimental_score", ""),
-                })
+            writer.writerows(rows)
             filename = f"{run.analysis_name}_stage6_ppi_edges.csv"
 
         elif stage_key == "stage_7":
