@@ -251,6 +251,7 @@ PLANT_COMPOUNDS_COLUMNS = [
     "plant_id",
     "compound_id",
     "source_name",
+    "source_url",
     "retrieved_at",
 ]
 

@@ -43,6 +43,28 @@ def test_no_dead_columns_in_loaded_export_constants():
         assert DEAD.isdisjoint(block), f"{name} in {path} still lists {DEAD & block}"
 
 
+def test_plant_compounds_source_url_parity_across_stages():
+    # 05_build_canonical emits a deep-link source_url on every plant_compound
+    # row, and 06_validate + 07_export both require it. The three stages must
+    # agree on the plant_compounds column set, or the source_url is silently
+    # dropped at write time (DictWriter extrasaction="ignore") and 06's
+    # ensure_columns fails on re-derive.
+    stages = [
+        "etl/compounds/05_build_canonical/run.py",
+        "etl/compounds/06_validate/run.py",
+        "etl/compounds/07_export/run.py",
+    ]
+    cols = [
+        _extract_list_literal(
+            pathlib.Path(p).read_text(encoding="utf-8"), "PLANT_COMPOUNDS_COLUMNS"
+        )
+        for p in stages
+    ]
+    for path, block in zip(stages, cols):
+        assert "source_url" in block, f"{path} PLANT_COMPOUNDS_COLUMNS omits source_url"
+    assert cols[0] == cols[1] == cols[2], f"plant_compounds columns diverge: {cols}"
+
+
 def test_no_dead_columns_in_disease_targets_dicts():
     # disease_targets/03_build_canonical writes row dicts directly (no column
     # constant); assert none of the emitted dict keys are dead columns.
