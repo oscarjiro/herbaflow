@@ -1,25 +1,62 @@
 alias,disease_key,type
 type 2 diabetes mellitus,type_2_diabetes_mellitus,primary
 t2dm,type_2_diabetes_mellitus,user_alias
+insulin resistance,type_2_diabetes_mellitus,ontology_synonym
+non-insulin-dependent diabetes mellitus,type_2_diabetes_mellitus,ontology_synonym
+type 2 diabetes,type_2_diabetes_mellitus,ontology_synonym
+type ii diabetes mellitus,type_2_diabetes_mellitus,ontology_synonym
+niddm,type_2_diabetes_mellitus,ontology_synonym
 hypertension,hypertension,primary
 high blood pressure,hypertension,user_alias
+hyperpiesia,hypertension,ontology_synonym
+vascular hypertensive disorder,hypertension,ontology_synonym
+htn,hypertension,ontology_synonym
 obesity,obesity,primary
 overweight and obesity,obesity,user_alias
 osteoarthritis,osteoarthritis,primary
 oa,osteoarthritis,user_alias
+osteoarthrosis and allied disorder,osteoarthritis,ontology_synonym
+degenerative arthritis,osteoarthritis,ontology_synonym
+degenerative joint disease,osteoarthritis,ontology_synonym
+hypertrophic arthritis,osteoarthritis,ontology_synonym
+osteoarthrosis,osteoarthritis,ontology_synonym
 rheumatoid arthritis,rheumatoid_arthritis,primary
 ra,rheumatoid_arthritis,user_alias
+"arthritis or polyarthritis, rheumatic",rheumatoid_arthritis,ontology_synonym
+atrophic arthritis,rheumatoid_arthritis,ontology_synonym
 asthma,asthma,primary
 bronchial asthma,asthma,user_alias
+bronchial hyperreactivity,asthma,ontology_synonym
+chronic obstructive asthma with acute exacerbation,asthma,ontology_synonym
+chronic obstructive asthma with status asthmaticus,asthma,ontology_synonym
+chronic obstructive asthma,asthma,ontology_synonym
 copd,copd,primary
 chronic obstructive pulmonary disease,copd,user_alias
+chronic obstructive airway disease,copd,ontology_synonym
+chronic obstructive lung disease,copd,ontology_synonym
+cold,copd,ontology_synonym
+copd,copd,ontology_synonym
 masld,masld,primary
 metabolic dysfunction-associated steatotic liver disease,masld,user_alias
 nafld,masld,user_alias
 non-alcoholic fatty liver disease,masld,user_alias
 fatty liver,masld,user_alias
+metabolic dysfunction-associated fatty liver disease,masld,ontology_synonym
+metabolic dysfunction-related steatotic liver disease,masld,ontology_synonym
+metabolic-associated fatty liver disease,masld,ontology_synonym
+non-alcoholic fatty liver disease,masld,ontology_synonym
+nonalcoholic fatty liver disease,masld,ontology_synonym
+mafld,masld,ontology_synonym
+masld,masld,ontology_synonym
+nafld,masld,ontology_synonym
 breast cancer,breast_cancer,primary
 mammary carcinoma,breast_cancer,user_alias
+breast tumor,breast_cancer,ontology_synonym
+malignant neoplasm of breast,breast_cancer,ontology_synonym
+malignant tumor of the breast,breast_cancer,ontology_synonym
+mammary cancer,breast_cancer,ontology_synonym
+mammary tumor,breast_cancer,ontology_synonym
+primary breast cancer,breast_cancer,ontology_synonym
 colorectal cancer,colorectal_cancer,primary
 colon cancer,colorectal_cancer,user_alias
 rectal cancer,colorectal_cancer,user_alias
