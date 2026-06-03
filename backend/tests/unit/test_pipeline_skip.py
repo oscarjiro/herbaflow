@@ -74,12 +74,12 @@ async def test_standard_mode_starts_at_stage_1():
 
 
 # ---------------------------------------------------------------------------
-# Test 2: manual_compounds → stages 1–2 skipped, run_stage called with 3
+# Test 2: manual_compounds → empty stage 1 marked not_applicable, stage 2 runs
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-async def test_manual_compounds_skips_stages_1_2():
-    """input_mode=manual_compounds: stages 1 and 2 are skipped, stage 3 runs."""
+async def test_manual_compounds_marks_empty_stage_1():
+    """input_mode=manual_compounds: empty stage 1 is not_applicable, stage 2 runs live."""
     run = _make_run(input_mode="manual_compounds")
     factory, session = _make_session_factory(run)
 
@@ -100,26 +100,24 @@ async def test_manual_compounds_skips_stages_1_2():
         from analysis.pipeline import start_pipeline
         await start_pipeline(ANALYSIS_ID, ["pl_1"], "d_1", factory)
 
-    # run_stage must be called with stage_num=3
-    mock_run_stage.assert_called_once_with(ANALYSIS_ID, 3, factory)
+    # run_stage must be called with stage_num=2 (ADME runs live for manual compounds)
+    mock_run_stage.assert_called_once_with(ANALYSIS_ID, 2, factory)
 
-    # stages 1 and 2 must be in stage_results with status="skipped"
+    # stage 1 was empty → marked not_applicable
     assert "stage_1" in captured_stage_results, "stage_1 missing from stage_results"
-    assert "stage_2" in captured_stage_results, "stage_2 missing from stage_results"
-    assert captured_stage_results["stage_1"]["status"] == "skipped"
-    assert captured_stage_results["stage_2"]["status"] == "skipped"
+    assert captured_stage_results["stage_1"]["state"] == "not_applicable"
 
-    # stage_3 must NOT be in stage_results (it was run, not skipped)
-    assert "stage_3" not in captured_stage_results
+    # stage_2 must NOT be in stage_results (it was run, not marked)
+    assert "stage_2" not in captured_stage_results
 
 
 # ---------------------------------------------------------------------------
-# Test 3: manual_targets → stages 1–3 skipped, run_stage called with 4
+# Test 3: manual_targets → empty stages 1–3 not_applicable, run_stage called with 4
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-async def test_manual_targets_skips_stages_1_2_3():
-    """input_mode=manual_targets: stages 1, 2, and 3 are skipped, stage 4 runs."""
+async def test_manual_targets_marks_empty_stages_1_2_3():
+    """input_mode=manual_targets: empty stages 1, 2, 3 are not_applicable, stage 4 runs."""
     run = _make_run(input_mode="manual_targets")
     factory, session = _make_session_factory(run)
 
@@ -143,27 +141,60 @@ async def test_manual_targets_skips_stages_1_2_3():
     # run_stage must be called with stage_num=4
     mock_run_stage.assert_called_once_with(ANALYSIS_ID, 4, factory)
 
-    # stages 1, 2, 3 must be in stage_results with status="skipped"
+    # stages 1, 2, 3 were empty → all marked not_applicable
     assert "stage_1" in captured_stage_results, "stage_1 missing from stage_results"
     assert "stage_2" in captured_stage_results, "stage_2 missing from stage_results"
     assert "stage_3" in captured_stage_results, "stage_3 missing from stage_results"
-    assert captured_stage_results["stage_1"]["status"] == "skipped"
-    assert captured_stage_results["stage_2"]["status"] == "skipped"
-    assert captured_stage_results["stage_3"]["status"] == "skipped"
+    assert captured_stage_results["stage_1"]["state"] == "not_applicable"
+    assert captured_stage_results["stage_2"]["state"] == "not_applicable"
+    assert captured_stage_results["stage_3"]["state"] == "not_applicable"
 
-    # stage_4 must NOT be in stage_results (it was run, not skipped)
+    # stage_4 must NOT be in stage_results (it was run, not marked)
     assert "stage_4" not in captured_stage_results
 
 
+@pytest.mark.asyncio
+async def test_manual_targets_spares_injected_stage_3():
+    """A stage already populated by inject (stage_3 user_provided) is never clobbered."""
+    run = _make_run(input_mode="manual_targets")
+    run.stage_results = {"stage_3": {"state": "user_provided"}}
+    factory, session = _make_session_factory(run)
+
+    captured_stage_results = {}
+
+    async def fake_update_run_status(session, analysis_id, status, **kwargs):
+        sr = kwargs.get("stage_results")
+        if sr:
+            captured_stage_results.update(sr)
+        mock_run = MagicMock()
+        mock_run.status = status
+        return mock_run
+
+    with patch("analysis.pipeline.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
+         patch("analysis.pipeline.analysis_repo.update_run_status",
+               new=AsyncMock(side_effect=fake_update_run_status)), \
+         patch("analysis.pipeline.run_stage", new=AsyncMock()) as mock_run_stage:
+        from analysis.pipeline import start_pipeline
+        await start_pipeline(ANALYSIS_ID, ["pl_1"], "d_1", factory)
+
+    mock_run_stage.assert_called_once_with(ANALYSIS_ID, 4, factory)
+
+    # only the genuinely-empty pre-entry stages were marked
+    assert captured_stage_results["stage_1"]["state"] == "not_applicable"
+    assert captured_stage_results["stage_2"]["state"] == "not_applicable"
+    # stage_3 must NOT be overwritten — the injected user_provided entry is spared
+    assert "stage_3" not in captured_stage_results
+
+
 # ---------------------------------------------------------------------------
-# Test 4: skipped stage dicts contain the input_mode key
+# Test 4: empty pre-entry stage dicts carry state="not_applicable"
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-async def test_skipped_stages_contain_input_mode():
-    """Each skipped stage dict must contain input_mode matching the mode string."""
-    for mode, expected_skipped in [
-        ("manual_compounds", [1, 2]),
+async def test_empty_preentry_stages_marked_not_applicable():
+    """Each genuinely-empty pre-entry stage dict must carry state='not_applicable'."""
+    for mode, expected_marked in [
+        ("manual_compounds", [1]),
         ("manual_targets", [1, 2, 3]),
     ]:
         run = _make_run(input_mode=mode)
@@ -187,15 +218,13 @@ async def test_skipped_stages_contain_input_mode():
             from analysis.pipeline import start_pipeline
             await start_pipeline(ANALYSIS_ID, ["pl_1"], "d_1", factory)
 
-        for n in expected_skipped:
+        for n in expected_marked:
             key = f"stage_{n}"
             assert key in captured_stage_results, \
                 f"{key} missing for mode={mode}"
             entry = captured_stage_results[key]
-            assert "input_mode" in entry, \
-                f"{key} missing 'input_mode' key for mode={mode}"
-            assert entry["input_mode"] == mode, \
-                f"{key} input_mode mismatch: expected {mode!r}, got {entry['input_mode']!r}"
+            assert entry.get("state") == "not_applicable", \
+                f"{key} expected state='not_applicable' for mode={mode}, got {entry!r}"
 
 
 # ---------------------------------------------------------------------------

@@ -116,7 +116,7 @@ async def advance_pipeline(
 
 _FIRST_REAL_STAGE = {
     "standard": 1,
-    "manual_compounds": 3,
+    "manual_compounds": 2,
     "manual_targets": 4,
 }
 
@@ -144,17 +144,24 @@ async def start_pipeline(
     first_real = _FIRST_REAL_STAGE.get(input_mode, 1)
 
     if first_real > 1:
-        skipped = {
-            f"stage_{n}": {"status": "skipped", "input_mode": input_mode}
-            for n in range(1, first_real)
-        }
+        async with session_factory() as session:
+            run = await analysis_repo.get_run(session, analysis_id)
+            existing = run.stage_results or {}
+            # Mark only the genuinely-empty pre-entry stages as not_applicable.
+            # Stages the inject step already populated (user_provided entries) are
+            # left untouched — overwriting them would discard the user's input.
+            na_states = {
+                f"stage_{n}": {"state": stage_state.NOT_APPLICABLE}
+                for n in range(1, first_real)
+                if f"stage_{n}" not in existing
+            }
         async with session_factory() as session:
             await analysis_repo.update_run_status(
                 session,
                 analysis_id,
                 status=f"stage_{first_real}_running",
                 current_stage=first_real,
-                stage_results=skipped,
+                stage_results=na_states,  # may be empty (manual_compounds): harmless merge
             )
 
     await run_stage(analysis_id, first_real, session_factory)

@@ -157,6 +157,28 @@ def test_apply_pains_removed_from_adme_params():
     assert not hasattr(params, "apply_pains")
 
 
+def _manual_compound(**kw):
+    base = dict(compound_id="c1", canonical_name="x", smiles="C", chembl_id=None,
+                pubchem_cid=1, molecular_weight=900.0, logp=9.0, hbond_donors=0,
+                hbond_acceptors=0, tpsa=0.0, rotatable_bonds=0, np_likeness_score=0.0,
+                is_pains_positive=False, num_ro5_violations=0, source="user_provided")
+    base.update(kw)
+    return CompoundRecord(**base)
+
+
+def test_manual_bypassed_when_toggle_off():
+    params = AdmeParams(apply_adme_to_manual=False)
+    out = filter_compounds([_manual_compound()], params)
+    assert out["bypassed_count"] == 1 and out["failed_count"] == 0
+
+
+def test_manual_filtered_when_toggle_on():
+    # MW 900 violates default max → not bypassed, lands in failed.
+    params = AdmeParams(apply_adme_to_manual=True)
+    out = filter_compounds([_manual_compound()], params)
+    assert out["bypassed_count"] == 0 and out["failed_count"] == 1
+
+
 # ---------------------------------------------------------------------------
 # Regression: stage2 run() output must include all expected ADME field names
 # ---------------------------------------------------------------------------
