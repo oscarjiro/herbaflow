@@ -46,3 +46,47 @@ def client_error_message(stage_num: int) -> str:
         f"{label} (stage {stage_num}) could not be completed, so the analysis "
         f"was stopped at this step. Please try again or adjust your inputs."
     )
+
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import PlainTextResponse
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+from app.config import get_settings
+
+_settings = get_settings()
+
+# Per-IP limiter. Global default applies to every route via SlowAPIMiddleware
+# (registered in main.py). In-memory store -> per-worker; documented caveat.
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[_settings.rate_limit_default],
+    enabled=_settings.rate_limit_enabled,
+)
+
+
+class MaxRequestSizeMiddleware(BaseHTTPMiddleware):
+    """Reject requests whose Content-Length exceeds ``max_bytes`` with 413.
+
+    Covers the realistic JSON-body path (uvicorn/httpx/TestClient always set
+    Content-Length). Chunked/streamed bodies without the header are bounded at
+    the reverse-proxy layer (out of app scope).
+    """
+
+    def __init__(self, app, max_bytes: int):
+        super().__init__(app)
+        self.max_bytes = max_bytes
+
+    async def dispatch(self, request: Request, call_next):
+        cl = request.headers.get("content-length")
+        if cl is not None:
+            try:
+                if int(cl) > self.max_bytes:
+                    return PlainTextResponse(
+                        "Request payload too large.", status_code=413
+                    )
+            except ValueError:
+                return PlainTextResponse("Invalid Content-Length.", status_code=400)
+        return await call_next(request)
