@@ -10,6 +10,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.schemas.analysis import (
+    AnalysisParameters,
     ApproveRequest,
     CreateAnalysisRequest,
     InjectCompoundsRequest,
@@ -63,16 +64,16 @@ class TestFdrThreshold:
 
     def test_valid_typical(self):
         req = CreateAnalysisRequest(**_create({"enrichment": {"fdr_threshold": 0.05}}))
-        assert req.parameters["enrichment"]["fdr_threshold"] == 0.05
+        assert req.parameters.enrichment.fdr_threshold == 0.05
 
     def test_boundary_one_accepted(self):
         """Upper bound is inclusive — fdr_threshold=1 is valid."""
         req = CreateAnalysisRequest(**_create({"enrichment": {"fdr_threshold": 1.0}}))
-        assert req.parameters["enrichment"]["fdr_threshold"] == 1.0
+        assert req.parameters.enrichment.fdr_threshold == 1.0
 
     def test_boundary_near_zero_accepted(self):
         req = CreateAnalysisRequest(**_create({"enrichment": {"fdr_threshold": 0.001}}))
-        assert req.parameters["enrichment"]["fdr_threshold"] == pytest.approx(0.001)
+        assert req.parameters.enrichment.fdr_threshold == pytest.approx(0.001)
 
     def test_reset_request_enforces_bound(self):
         with pytest.raises(ValidationError, match="fdr_threshold"):
@@ -98,7 +99,7 @@ class TestAdmeMaxMw:
 
     def test_valid(self):
         req = CreateAnalysisRequest(**_create({"adme": {"max_mw": 500}}))
-        assert req.parameters["adme"]["max_mw"] == 500
+        assert req.parameters.adme.max_mw == 500
 
 
 # ---------------------------------------------------------------------------
@@ -116,11 +117,11 @@ class TestTargetMinPchembl:
 
     def test_zero_accepted(self):
         req = CreateAnalysisRequest(**_create({"target": {"min_pchembl": 0.0}}))
-        assert req.parameters["target"]["min_pchembl"] == 0.0
+        assert req.parameters.target.min_pchembl == 0.0
 
     def test_fourteen_accepted(self):
         req = CreateAnalysisRequest(**_create({"target": {"min_pchembl": 14.0}}))
-        assert req.parameters["target"]["min_pchembl"] == 14.0
+        assert req.parameters.target.min_pchembl == 14.0
 
 
 # ---------------------------------------------------------------------------
@@ -138,11 +139,11 @@ class TestTargetMinAssayConfidence:
 
     def test_zero_accepted(self):
         req = CreateAnalysisRequest(**_create({"target": {"min_assay_confidence": 0}}))
-        assert req.parameters["target"]["min_assay_confidence"] == 0
+        assert req.parameters.target.min_assay_confidence == 0
 
     def test_nine_accepted(self):
         req = CreateAnalysisRequest(**_create({"target": {"min_assay_confidence": 9}}))
-        assert req.parameters["target"]["min_assay_confidence"] == 9
+        assert req.parameters.target.min_assay_confidence == 9
 
 
 # ---------------------------------------------------------------------------
@@ -160,7 +161,7 @@ class TestHubGenesTopN:
 
     def test_one_accepted(self):
         req = CreateAnalysisRequest(**_create({"hub_genes": {"top_n": 1}}))
-        assert req.parameters["hub_genes"]["top_n"] == 1
+        assert req.parameters.hub_genes.top_n == 1
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +183,7 @@ class TestPpiMinConfidence:
 
     def test_typical_valid(self):
         req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.4}}))
-        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.4)
+        assert req.parameters.ppi.min_confidence == pytest.approx(0.4)
 
     def test_non_preset_one_rejected(self):
         """1.0 is not a STRING-DB preset — must be rejected."""
@@ -197,11 +198,12 @@ class TestPpiMinConfidence:
 class TestAbsentSections:
     def test_empty_parameters_ok(self):
         req = CreateAnalysisRequest(**_create({}))
-        assert req.parameters == {}
+        assert req.parameters == AnalysisParameters()
 
-    def test_unrelated_keys_pass_through(self):
-        req = CreateAnalysisRequest(**_create({"_input_mode": "manual_compounds"}))
-        assert req.parameters["_input_mode"] == "manual_compounds"
+    def test_unrelated_keys_rejected(self):
+        """Unknown / flat parameter keys are forbidden by the strict nested model."""
+        with pytest.raises(ValidationError):
+            CreateAnalysisRequest(**_create({"_input_mode": "manual_compounds"}))
 
     def test_reset_none_params_ok(self):
         req = _reset(None)
@@ -228,19 +230,19 @@ class TestStringConfidencePresets:
 
     def test_low_preset_accepted(self):
         req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.15}}))
-        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.15)
+        assert req.parameters.ppi.min_confidence == pytest.approx(0.15)
 
     def test_medium_preset_accepted(self):
         req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.40}}))
-        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.40)
+        assert req.parameters.ppi.min_confidence == pytest.approx(0.40)
 
     def test_high_preset_accepted(self):
         req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.70}}))
-        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.70)
+        assert req.parameters.ppi.min_confidence == pytest.approx(0.70)
 
     def test_very_high_preset_accepted(self):
         req = CreateAnalysisRequest(**_create({"ppi": {"min_confidence": 0.90}}))
-        assert req.parameters["ppi"]["min_confidence"] == pytest.approx(0.90)
+        assert req.parameters.ppi.min_confidence == pytest.approx(0.90)
 
     def test_reset_request_enforces_presets(self):
         with pytest.raises(ValidationError, match="min_confidence"):
@@ -468,39 +470,44 @@ class TestInputSizeHardCaps:
 # ---------------------------------------------------------------------------
 
 class TestInjectedDiseaseTargetsCap:
-    """_injected_disease_targets in CreateAnalysisRequest.parameters must be
-    rejected above HARD_CAP_DISEASE_TARGETS.
+    """manual_disease_targets in CreateAnalysisRequest must be rejected above
+    HARD_CAP_DISEASE_TARGETS.
 
     Disease targets from manual disease input (diseaseInputMode=manual_targets)
-    are passed as parameters._injected_disease_targets. The cap mirrors the
+    are now a top-level request field (bypasses Open Targets). The cap mirrors the
     upper range of Open Targets single-disease associations (Ochoa et al. 2021).
     """
 
     def test_over_hard_cap_rejected(self):
-        """_injected_disease_targets exceeding HARD_CAP_DISEASE_TARGETS must fail."""
+        """manual_disease_targets exceeding HARD_CAP_DISEASE_TARGETS must fail."""
         too_many = [f"GENE{i}" for i in range(HARD_CAP_DISEASE_TARGETS + 1)]
-        with pytest.raises(ValidationError, match="_injected_disease_targets"):
-            CreateAnalysisRequest(**_create({
-                "_injected_disease_targets": too_many,
-            }))
+        with pytest.raises(ValidationError):
+            CreateAnalysisRequest(
+                name="Test run", disease_id="disease-1",
+                manual_disease_targets=too_many,
+            )
 
     def test_at_hard_cap_accepted(self):
-        """_injected_disease_targets exactly at HARD_CAP_DISEASE_TARGETS must pass."""
+        """manual_disease_targets exactly at HARD_CAP_DISEASE_TARGETS must pass."""
         at_cap = [f"GENE{i}" for i in range(HARD_CAP_DISEASE_TARGETS)]
-        req = CreateAnalysisRequest(**_create({
-            "_injected_disease_targets": at_cap,
-        }))
-        assert len(req.parameters["_injected_disease_targets"]) == HARD_CAP_DISEASE_TARGETS
+        req = CreateAnalysisRequest(
+            name="Test run", disease_id="disease-1",
+            manual_disease_targets=at_cap,
+        )
+        assert len(req.manual_disease_targets) == HARD_CAP_DISEASE_TARGETS
 
     def test_absent_key_accepted(self):
-        """Missing _injected_disease_targets (standard disease mode) must pass."""
+        """Missing manual_disease_targets (standard disease mode) must pass."""
         req = CreateAnalysisRequest(**_create({}))
-        assert "_injected_disease_targets" not in (req.parameters or {})
+        assert req.manual_disease_targets is None
 
     def test_empty_list_accepted(self):
-        """Empty _injected_disease_targets list must pass (validation deferred to Stage 4)."""
-        req = CreateAnalysisRequest(**_create({"_injected_disease_targets": []}))
-        assert req.parameters["_injected_disease_targets"] == []
+        """Empty manual_disease_targets list must pass (validation deferred to Stage 4)."""
+        req = CreateAnalysisRequest(
+            name="Test run", disease_id="disease-1",
+            manual_disease_targets=[],
+        )
+        assert req.manual_disease_targets == []
 
 
 def test_create_analysis_requires_disease_id_unless_manual():
@@ -516,7 +523,7 @@ def test_create_analysis_requires_disease_id_unless_manual():
     ok = CreateAnalysisRequest(
         name="x",
         plant_ids=["p1"],
-        parameters={"_disease_input_mode": "manual_targets"},
+        manual_disease_targets=["TP53"],
     )
     assert ok.disease_id is None
 

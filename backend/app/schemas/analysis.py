@@ -119,86 +119,13 @@ SOFT_CAP_DISEASE_TARGETS = 500
 HARD_CAP_DISEASE_TARGETS = 2000
 
 
-def _validate_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
-    """Validate critical numeric parameter bounds in a params/parameters dict.
-
-    Enforces bounds only for params that cause runtime errors when violated:
-    - enrichment.fdr_threshold in (0, 1]  → log(0) in Stage 8
-    - adme.max_mw > 0                     → divide-by-zero / nonsensical filter
-    - target.min_pchembl in [0, 14]       → invalid ChEMBL range
-    - target.min_assay_confidence in [0, 9] → invalid ChEMBL confidence
-    - hub_genes.top_n >= 1               → empty hub list
-    - ppi.min_confidence in STRING_CONFIDENCE_PRESETS → STRING-DB standard levels
-    """
-    if not params:
-        return params
-
-    errors: list[str] = []
-
-    enrichment = params.get("enrichment", {}) or {}
-    fdr = enrichment.get("fdr_threshold")
-    if fdr is not None and not (0 < fdr <= 1):
-        errors.append("enrichment.fdr_threshold must be in (0, 1]")
-
-    adme = params.get("adme", {}) or {}
-    max_mw = adme.get("max_mw")
-    if max_mw is not None and max_mw <= 0:
-        errors.append("adme.max_mw must be > 0")
-
-    target = params.get("target", {}) or {}
-    min_pchembl = target.get("min_pchembl")
-    if min_pchembl is not None and not (0 <= min_pchembl <= 14):
-        errors.append("target.min_pchembl must be in [0, 14]")
-    min_assay = target.get("min_assay_confidence")
-    if min_assay is not None and not (0 <= min_assay <= 9):
-        errors.append("target.min_assay_confidence must be in [0, 9]")
-
-    hub_genes = params.get("hub_genes", {}) or {}
-    top_n = hub_genes.get("top_n")
-    if top_n is not None and top_n < 1:
-        errors.append("hub_genes.top_n must be >= 1")
-
-    ppi = params.get("ppi", {}) or {}
-    min_conf = ppi.get("min_confidence")
-    if min_conf is not None and min_conf not in STRING_CONFIDENCE_PRESETS:
-        errors.append(
-            f"ppi.min_confidence must be one of {sorted(STRING_CONFIDENCE_PRESETS)} "
-            "(STRING-DB standard confidence levels: Low=0.15, Medium=0.40, High=0.70, Very High=0.90)"
-        )
-    comm_res = ppi.get("community_resolution")
-    if comm_res is not None and not (0.1 <= comm_res <= 3.0):
-        errors.append("ppi.community_resolution must be in [0.1, 3.0]")
-
-    injected_disease = params.get("_injected_disease_targets")
-    if injected_disease is not None and len(injected_disease) > HARD_CAP_DISEASE_TARGETS:
-        errors.append(
-            f"_injected_disease_targets: at most {HARD_CAP_DISEASE_TARGETS} disease targets allowed "
-            f"(OpenTargets dataset scale; Ochoa et al. 2021 Nucleic Acids Res)"
-        )
-
-    if errors:
-        raise ValueError("; ".join(errors))
-
-    return params
-
-
 class ResetFromRequest(BaseModel):
-    params: dict[str, Any] | None = None   # e.g. {"adme": {"max_mw": 600}}
+    params: AnalysisParameters | None = None
     rerun: bool = False
-
-    @field_validator("params")
-    @classmethod
-    def validate_params(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
-        return _validate_params(v)
 
 
 class ApproveRequest(BaseModel):
-    param_overrides: dict[str, Any] | None = None   # e.g. {"target": {"min_pchembl": 6.0}}
-
-    @field_validator("param_overrides")
-    @classmethod
-    def validate_param_overrides(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
-        return _validate_params(v)
+    param_overrides: AnalysisParameters | None = None
 
 
 class CreateAnalysisRequest(BaseModel):
@@ -214,13 +141,24 @@ class CreateAnalysisRequest(BaseModel):
     plant_ids: list[str] = Field(
         default_factory=list,
         max_length=HARD_CAP_PLANTS,
-        description=f"KNApSAcK plant IDs. Hard limit: {HARD_CAP_PLANTS} plants per analysis.",
+        description=f"KNApSAcK plant IDs. Hard limit: {HARD_CAP_PLANTS}.",
     )
     disease_id: str | None = Field(
         default=None,
-        description="Exactly one disease per analysis. Required unless _disease_input_mode is manual_targets.",
+        description="Exactly one disease per analysis. Required unless manual_disease_targets is provided.",
     )
-    parameters: dict[str, Any] = Field(default_factory=dict)
+    parameters: AnalysisParameters = Field(default_factory=AnalysisParameters)
+
+    # Manual input modes — provided inline so creation is atomic (no separate inject call).
+    compounds: list[str] | None = Field(
+        default=None, max_length=HARD_CAP_MANUAL_COMPOUNDS,
+        description="Manual SMILES/InChI strings (manual_compounds mode).")
+    targets: list[str] | None = Field(
+        default=None, max_length=HARD_CAP_MANUAL_TARGETS,
+        description="Manual gene symbols / UniProt accessions (manual_targets mode).")
+    manual_disease_targets: list[str] | None = Field(
+        default=None, max_length=HARD_CAP_DISEASE_TARGETS,
+        description="Manual disease-side gene symbols / UniProt accessions (bypasses Open Targets).")
 
     @field_validator("mode")
     @classmethod
@@ -236,20 +174,13 @@ class CreateAnalysisRequest(BaseModel):
             raise ValueError("name must not be blank")
         return v
 
-    @field_validator("parameters")
-    @classmethod
-    def validate_parameters(cls, v: dict[str, Any]) -> dict[str, Any]:
-        return _validate_params(v) or v
-
     @model_validator(mode="after")
-    def disease_id_required_unless_manual(self) -> "CreateAnalysisRequest":
-        is_manual_disease = (
-            (self.parameters or {}).get("_disease_input_mode") == "manual_targets"
-        )
-        if not is_manual_disease and not self.disease_id:
+    def validate_inputs(self) -> "CreateAnalysisRequest":
+        if self.compounds and self.targets:
+            raise ValueError("compounds and targets are mutually exclusive input modes")
+        if not self.manual_disease_targets and not self.disease_id:
             raise ValueError(
-                "disease_id: a disease is required "
-                "(or set _disease_input_mode=manual_targets in parameters)"
+                "disease_id: a disease is required (or provide manual_disease_targets)"
             )
         return self
 

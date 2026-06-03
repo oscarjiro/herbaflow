@@ -108,7 +108,7 @@ async def create_analysis(
     # so we cannot enforce plant_ids ≥ 1 at the schema level for standard mode.
     # The frontend Zod schema enforces plant_ids ≥ 1 for standard mode before submit.
     parameters = {
-        **body.parameters,
+        **body.parameters.model_dump(exclude_none=True),
         "_plant_ids": [str(pid) for pid in body.plant_ids],
         "_disease_id": str(body.disease_id) if body.disease_id else None,
     }
