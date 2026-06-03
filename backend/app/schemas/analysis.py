@@ -1,6 +1,6 @@
 import re
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from uuid import UUID
 from datetime import datetime
 from typing import Any
@@ -24,6 +24,75 @@ GENE_SYMBOL_RE = re.compile(r'^[A-Z][A-Z0-9\-]{0,24}$')
 
 # STRING-DB standard confidence thresholds (Low / Medium / High / Very High)
 STRING_CONFIDENCE_PRESETS = {0.15, 0.40, 0.70, 0.90}
+
+
+# ---------------------------------------------------------------------------
+# Strict nested pipeline-parameter contract.
+# Every group and field is OPTIONAL (overrides on top of backend defaults), so the
+# same model serves create (full set), approve.param_overrides, and reset.params
+# (partial). extra="forbid" makes a flat or unknown-key payload a 422 instead of a
+# silent drop. Field names/ranges mirror shared/contracts/analysis.json and the
+# PipelineConfig dataclass (analysis/models.py); test_contract_param_agreement guards drift.
+# ---------------------------------------------------------------------------
+
+class _StrictParams(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class AdmeParamsIn(_StrictParams):
+    max_mw: float | None = Field(default=None, gt=0)
+    max_logp: float | None = None
+    max_hbd: int | None = Field(default=None, ge=0)
+    max_hba: int | None = Field(default=None, ge=0)
+    max_tpsa: float | None = Field(default=None, ge=0)
+    max_rotatable_bonds: int | None = Field(default=None, ge=0)
+    apply_veber: bool | None = None
+    np_exception_threshold: float | None = Field(default=None, ge=0, le=1)
+    apply_adme_to_manual: bool | None = None
+
+
+class TargetParamsIn(_StrictParams):
+    min_pchembl: float | None = Field(default=None, ge=0, le=14)
+    human_only: bool | None = None
+    min_assay_confidence: int | None = Field(default=None, ge=0, le=9)
+
+
+class DiseaseTargetParamsIn(_StrictParams):
+    min_score: float | None = Field(default=None, ge=0, le=1)
+
+
+class PpiParamsIn(_StrictParams):
+    min_confidence: float | None = None
+    community_resolution: float | None = Field(default=None, ge=0.1, le=3.0)
+
+    @field_validator("min_confidence")
+    @classmethod
+    def confidence_in_presets(cls, v: float | None) -> float | None:
+        if v is not None and v not in STRING_CONFIDENCE_PRESETS:
+            raise ValueError(
+                f"ppi.min_confidence must be one of {sorted(STRING_CONFIDENCE_PRESETS)} "
+                "(STRING-DB standard levels: Low=0.15, Medium=0.40, High=0.70, Very High=0.90)"
+            )
+        return v
+
+
+class HubGeneParamsIn(_StrictParams):
+    top_n: int | None = Field(default=None, ge=1)
+    use_hub_bottleneck: bool | None = None
+
+
+class EnrichmentParamsIn(_StrictParams):
+    fdr_threshold: float | None = Field(default=None, gt=0, le=1)
+    sources: list[str] | None = Field(default=None, min_length=1)
+
+
+class AnalysisParameters(_StrictParams):
+    adme: AdmeParamsIn | None = None
+    target: TargetParamsIn | None = None
+    disease_targets: DiseaseTargetParamsIn | None = None
+    ppi: PpiParamsIn | None = None
+    hub_genes: HubGeneParamsIn | None = None
+    enrichment: EnrichmentParamsIn | None = None
 
 # Input size limits — based on published network pharmacology study scales.
 # Plants:    90%+ of NP studies use ≤ 20 herbs; Indonesian jamu formulas 3–15 plants.
