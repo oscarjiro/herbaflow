@@ -1,3 +1,36 @@
 {
-  "analysis_mode": ["auto", "guided"]
+  "analysis_mode": ["auto", "guided"],
+  "pipeline_parameters": {
+    "adme": {
+      "max_mw":               { "type": "number",  "exclusiveMin": 0 },
+      "max_logp":             { "type": "number" },
+      "max_hbd":              { "type": "integer", "min": 0 },
+      "max_hba":              { "type": "integer", "min": 0 },
+      "max_tpsa":             { "type": "number",  "min": 0 },
+      "max_rotatable_bonds":  { "type": "integer", "min": 0 },
+      "apply_veber":          { "type": "boolean" },
+      "np_exception_threshold": { "type": "number", "min": 0, "max": 1 },
+      "apply_adme_to_manual": { "type": "boolean" }
+    },
+    "target": {
+      "min_pchembl":          { "type": "number",  "min": 0, "max": 14 },
+      "human_only":           { "type": "boolean" },
+      "min_assay_confidence": { "type": "integer", "min": 0, "max": 9 }
+    },
+    "disease_targets": {
+      "min_score":            { "type": "number",  "min": 0, "max": 1 }
+    },
+    "ppi": {
+      "min_confidence":       { "type": "number",  "enum": [0.15, 0.4, 0.7, 0.9] },
+      "community_resolution": { "type": "number",  "min": 0.1, "max": 3.0 }
+    },
+    "hub_genes": {
+      "top_n":                { "type": "integer", "min": 1 },
+      "use_hub_bottleneck":   { "type": "boolean" }
+    },
+    "enrichment": {
+      "fdr_threshold":        { "type": "number",  "exclusiveMin": 0, "max": 1 },
+      "sources":              { "type": "array", "items": "string", "minItems": 1 }
+    }
+  }
 }
