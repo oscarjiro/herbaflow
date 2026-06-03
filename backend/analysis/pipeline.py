@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.repositories import analysis_repo
 from analysis.models import PipelineConfig
+from analysis import stage_state
 from analysis.stages import (
     stage1_selection,
     stage2_adme,
@@ -53,6 +54,7 @@ async def run_stage(
         async with session_factory() as session:
             run = await analysis_repo.get_run(session, analysis_id)
             stage_result = await stage_fn(run, config, session)
+            stage_result.setdefault("state", stage_state.COMPUTED)
 
         async with session_factory() as session:
             run = await analysis_repo.get_run(session, analysis_id)
