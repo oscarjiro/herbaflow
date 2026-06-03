@@ -107,12 +107,24 @@ export function isTerminalStatus(s: string): boolean {
   )
 }
 
+export interface NestedPipelineParams {
+  adme: Record<string, number | boolean>
+  target: Record<string, number | boolean>
+  disease_targets: Record<string, number>
+  ppi: Record<string, number>
+  hub_genes: Record<string, number | boolean>
+  enrichment: { fdr_threshold: number; sources: string[] }
+}
+
 export interface CreateAnalysisRequest {
   name: string
   mode: AnalysisMode
   plant_ids: string[]
   disease_id: string | null
-  parameters: Record<string, unknown>
+  parameters: NestedPipelineParams
+  compounds?: string[]
+  targets?: string[]
+  manual_disease_targets?: string[]
 }
 
 export interface AnalysisStatusResponse {

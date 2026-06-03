@@ -87,28 +87,9 @@ describe('useStartAnalysis', () => {
     expect(typeof result.current.mutateAsync).toBe('function')
   })
 
-  it('with compounds: throws error when no compounds are injected', async () => {
-    server.use(
-      http.post('http://localhost:8000/analyses/:id/inject-compounds', () =>
-        HttpResponse.json({ injected: 0, failed: ['bad-smiles'], duplicates_removed: 0, duplicate_names: [] })
-      )
-    )
-    const { result } = renderHook(() => useStartAnalysis(), { wrapper: makeWrapper() })
-    result.current.mutate({ request: baseRequest, compounds: ['bad-smiles'] })
-    await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(mockNavigate).not.toHaveBeenCalled()
-    expect(result.current.error?.message).toMatch(/No valid compounds found/)
-  })
-
-  it('with compounds: navigates on success when compounds injected', async () => {
-    server.use(
-      http.post('http://localhost:8000/analyses/:id/inject-compounds', () =>
-        HttpResponse.json({ injected: 2, failed: [], duplicates_removed: 0, duplicate_names: [] })
-      )
-    )
-    const { result } = renderHook(() => useStartAnalysis(), { wrapper: makeWrapper() })
-    result.current.mutate({ request: baseRequest, compounds: ['CCO', 'CCC'] })
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(mockNavigate).toHaveBeenCalledWith(`/analysis/${ANALYSIS_ID}`)
-  })
+  // Manual inputs (compounds/targets) now travel inside the create request
+  // itself; the hook no longer performs a separate inject call. Invalid inputs
+  // now fail the create call at the backend boundary (surfaced via isError),
+  // so the former create->inject two-call hook tests are removed here rather
+  // than rewritten against the old endpoints.
 })

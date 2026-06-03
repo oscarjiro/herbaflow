@@ -9,7 +9,8 @@ import type { AdvancedParams } from '@/components/setup/AdvancedParameters'
 import { useStartAnalysis } from '@/hooks/useStartAnalysis'
 import { api } from '@/lib/api'
 import { isTerminalStatus } from '@/types/api'
-import { validateSetupForm, type SetupFormErrors } from '@/lib/schemas'
+import type { CreateAnalysisRequest } from '@/types/api'
+import { validateSetupForm, nestAdvancedParams, type SetupFormErrors } from '@/lib/schemas'
 
 // ============================================================================
 // Helpers
@@ -88,6 +89,47 @@ function InputModeToggle({ value, onChange }: InputModeToggleProps) {
       </button>
     </div>
   )
+}
+
+// ============================================================================
+// Request builder
+// ============================================================================
+
+export interface BuildCreateArgs {
+  name: string
+  mode: 'guided' | 'auto'
+  plantIds: string[]
+  diseaseId: string | null
+  params: AdvancedParams
+  inputMode: 'standard' | 'manual_compounds' | 'manual_targets'
+  diseaseInputMode: 'disease' | 'manual_targets'
+  parsedCompounds: string[]
+  parsedTargets: string[]
+  parsedDiseaseTargets: string[]
+}
+
+/**
+ * Build the create-analysis request from setup-form state.
+ *
+ * Pure: emits nested pipeline params plus inline manual inputs. Control keys
+ * (`_input_mode`, `_disease_input_mode`, `_injected_disease_targets`) are NOT
+ * sent — the server derives input/disease modes from the presence of the
+ * top-level `compounds` / `targets` / `manual_disease_targets` fields.
+ */
+export function buildCreateRequest(a: BuildCreateArgs): CreateAnalysisRequest {
+  const isManual = a.inputMode !== 'standard'
+  return {
+    name: a.name,
+    mode: a.mode,
+    plant_ids: isManual ? [] : a.plantIds,
+    disease_id: a.diseaseInputMode === 'manual_targets' ? null : a.diseaseId,
+    parameters: nestAdvancedParams(a.params),
+    ...(a.inputMode === 'manual_compounds' ? { compounds: a.parsedCompounds } : {}),
+    ...(a.inputMode === 'manual_targets' ? { targets: a.parsedTargets } : {}),
+    ...(a.diseaseInputMode === 'manual_targets'
+      ? { manual_disease_targets: a.parsedDiseaseTargets }
+      : {}),
+  }
 }
 
 // ============================================================================
@@ -172,29 +214,19 @@ export default function SetupPage() {
     }
     setFormErrors({})
 
-    const baseParams: Record<string, unknown> = {
-      ...(params as unknown as Record<string, unknown>),
-    }
-    if (isManualCompounds) {
-      baseParams['_input_mode'] = 'manual_compounds'
-    } else if (isManualTargets) {
-      baseParams['_input_mode'] = 'manual_targets'
-    }
-    if (diseaseInputMode === 'manual_targets') {
-      baseParams['_disease_input_mode'] = 'manual_targets'
-      baseParams['_injected_disease_targets'] = parsedDiseaseTargets
-    }
-
     mutation.mutate({
-      request: {
+      request: buildCreateRequest({
         name,
         mode,
-        plant_ids: isManual ? [] : plantIds,
-        disease_id: diseaseInputMode === 'manual_targets' ? null : diseaseId,
-        parameters: baseParams,
-      },
-      compounds: isManualCompounds ? parsedCompounds : undefined,
-      targets: isManualTargets ? parsedTargets : undefined,
+        plantIds,
+        diseaseId,
+        params,
+        inputMode,
+        diseaseInputMode,
+        parsedCompounds,
+        parsedTargets,
+        parsedDiseaseTargets,
+      }),
     })
   }
 
