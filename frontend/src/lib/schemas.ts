@@ -6,6 +6,8 @@
  */
 import { z } from 'zod'
 import analysisContract from '@shared/contracts/analysis.json'
+import { FLAT_FIELD_GROUP } from '@/lib/stage-params'
+import type { AdvancedParams } from '@/components/setup/AdvancedParameters'
 
 // ---------------------------------------------------------------------------
 // Input size limits — mirrors backend HARD_CAP_* / SOFT_CAP_* constants
@@ -91,46 +93,61 @@ export const inputModeSchema = z.enum(['standard', 'manual_compounds', 'manual_t
 // Advanced parameters
 // ---------------------------------------------------------------------------
 
-export const advancedParamsSchema = z.object({
-  // ADME (Stage 2)
-  max_mw: z.number().min(0, 'Must be ≥ 0').max(2000, 'Must be ≤ 2000'),
-  max_logp: z.number().min(-10, 'Must be ≥ -10').max(20, 'Must be ≤ 20'),
-  max_hbd: z.number().int().min(0, 'Must be ≥ 0').max(20, 'Must be ≤ 20'),
-  max_hba: z.number().int().min(0, 'Must be ≥ 0').max(30, 'Must be ≤ 30'),
-  max_tpsa: z.number().min(0, 'Must be ≥ 0').max(500, 'Must be ≤ 500'),
-  max_rotatable_bonds: z.number().int().min(0, 'Must be ≥ 0').max(50, 'Must be ≤ 50'),
+// ---------------------------------------------------------------------------
+// Nested pipeline-parameter schemas — mirror backend AnalysisParameters and
+// shared/contracts/analysis.json. We send only known groups so the backend's
+// extra="forbid" never trips.
+// ---------------------------------------------------------------------------
+
+export const admeGroupSchema = z.object({
+  max_mw: z.number().gt(0),
+  max_logp: z.number(),
+  max_hbd: z.number().int().min(0),
+  max_hba: z.number().int().min(0),
+  max_tpsa: z.number().min(0),
+  max_rotatable_bonds: z.number().int().min(0),
   apply_veber: z.boolean(),
-  np_exception_threshold: z.number().min(0, 'Must be ≥ 0').max(1, 'Must be ≤ 1'),
+  np_exception_threshold: z.number().min(0).max(1),
   apply_adme_to_manual: z.boolean(),
-
-  // Targets (Stage 3)
-  min_pchembl: z.number().min(0, 'Must be ≥ 0').max(14, 'Must be ≤ 14'),
+})
+export const targetGroupSchema = z.object({
+  min_pchembl: z.number().min(0).max(14),
   human_only: z.boolean(),
-  min_assay_confidence: z.number().int().min(0, 'Must be 0–9').max(9, 'Must be 0–9'),
-
-  // Disease Targets (Stage 4)
-  min_score: z.number().min(0, 'Must be ≥ 0').max(1, 'Must be ≤ 1'),
-
-  // Network (Stage 6) — STRING-DB standard confidence presets only
-  // (Low=0.15, Medium=0.40, High=0.70, Very High=0.90)
-  min_confidence: z.union([
-    z.literal(0.15),
-    z.literal(0.4),
-    z.literal(0.7),
-    z.literal(0.9),
-  ]),
-
-  // Hub Genes (Stage 7)
-  top_n: z.number().int().min(1, 'Must be ≥ 1').max(200, 'Must be ≤ 200'),
+  min_assay_confidence: z.number().int().min(0).max(9),
+})
+export const diseaseTargetsGroupSchema = z.object({ min_score: z.number().min(0).max(1) })
+export const ppiGroupSchema = z.object({
+  min_confidence: z.union([z.literal(0.15), z.literal(0.4), z.literal(0.7), z.literal(0.9)]),
+})
+export const hubGenesGroupSchema = z.object({
+  top_n: z.number().int().min(1).max(200),
   use_hub_bottleneck: z.boolean(),
-
-  // Enrichment (Stage 8)
-  fdr_threshold: z.number().gt(0, 'Must be > 0').max(1, 'Must be ≤ 1'),
-  sources: z.array(z.string()).min(1, 'At least one pathway source required'),
+})
+export const enrichmentGroupSchema = z.object({
+  fdr_threshold: z.number().gt(0).max(1),
+  sources: z.array(z.string()).min(1),
 })
 
-export type AdvancedParamsInput = z.input<typeof advancedParamsSchema>
-export type AdvancedParamsOutput = z.output<typeof advancedParamsSchema>
+export const nestedParamsSchema = z.object({
+  adme: admeGroupSchema,
+  target: targetGroupSchema,
+  disease_targets: diseaseTargetsGroupSchema,
+  ppi: ppiGroupSchema,
+  hub_genes: hubGenesGroupSchema,
+  enrichment: enrichmentGroupSchema,
+})
+export type NestedParams = z.infer<typeof nestedParamsSchema>
+
+/** Group the flat accordion state into the nested PipelineConfig shape. */
+export function nestAdvancedParams(flat: AdvancedParams): NestedParams {
+  const out: Record<string, Record<string, unknown>> = {
+    adme: {}, target: {}, disease_targets: {}, ppi: {}, hub_genes: {}, enrichment: {},
+  }
+  for (const [key, group] of Object.entries(FLAT_FIELD_GROUP)) {
+    out[group][key] = (flat as unknown as Record<string, unknown>)[key]
+  }
+  return out as unknown as NestedParams
+}
 
 // ---------------------------------------------------------------------------
 // Disease ID field — conditionally required based on disease input mode
@@ -163,7 +180,7 @@ export function makeSetupFormStandardSchema(diseaseInputMode: 'disease' | 'manua
       .max(HARD_CAP_PLANTS, `Maximum ${HARD_CAP_PLANTS} plants per analysis`),
     disease_id: diseaseIdField(diseaseInputMode),
     disease_targets: diseaseTargetsField(diseaseInputMode),
-    parameters: advancedParamsSchema,
+    parameters: nestedParamsSchema,
   })
 }
 
@@ -183,7 +200,7 @@ export function makeSetupFormManualCompoundsSchema(diseaseInputMode: 'disease' |
       .array(z.string().min(1))
       .min(1, 'Enter at least one compound')
       .max(HARD_CAP_MANUAL_COMPOUNDS, `Maximum ${HARD_CAP_MANUAL_COMPOUNDS} compounds per analysis`),
-    parameters: advancedParamsSchema,
+    parameters: nestedParamsSchema,
   })
 }
 
@@ -203,7 +220,7 @@ export function makeSetupFormManualTargetsSchema(diseaseInputMode: 'disease' | '
       .array(z.string().min(1))
       .min(1, 'Enter at least one target')
       .max(HARD_CAP_MANUAL_TARGETS, `Maximum ${HARD_CAP_MANUAL_TARGETS} targets per analysis`),
-    parameters: advancedParamsSchema,
+    parameters: nestedParamsSchema,
   })
 }
 

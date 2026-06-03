@@ -9,31 +9,14 @@ import {
   uniprotAccessionSchema,
   geneSymbolSchema,
   smilesSchema,
-  advancedParamsSchema,
+  nestedParamsSchema,
+  nestAdvancedParams,
 } from './schemas'
+import { DEFAULT_PARAMS } from '@/components/setup/AdvancedParameters'
 
-// A baseline params object that satisfies advancedParamsSchema; individual
+// A baseline nested params object that satisfies nestedParamsSchema; individual
 // tests override single fields to assert bound-by-bound behaviour.
-const VALID_PARAMS = {
-  max_mw: 500,
-  max_logp: 5,
-  max_hbd: 5,
-  max_hba: 10,
-  max_tpsa: 140,
-  max_rotatable_bonds: 10,
-  apply_veber: true,
-  np_exception_threshold: 0.5,
-  apply_adme_to_manual: true,
-  min_pchembl: 5,
-  human_only: true,
-  min_assay_confidence: 7,
-  min_score: 0.3,
-  min_confidence: 0.4,
-  top_n: 20,
-  use_hub_bottleneck: true,
-  fdr_threshold: 0.05,
-  sources: ['GO:BP'],
-}
+const VALID_PARAMS = nestAdvancedParams(DEFAULT_PARAMS)
 
 // ---------------------------------------------------------------------------
 // UniProt accession format
@@ -149,35 +132,40 @@ describe('smilesSchema', () => {
 // Advanced params bounds — mirror backend _validate_params in analysis.py
 // ---------------------------------------------------------------------------
 
-describe('advancedParamsSchema — min_pchembl bounds', () => {
-  it('accepts the baseline params object', () => {
-    expect(advancedParamsSchema.safeParse(VALID_PARAMS).success).toBe(true)
+describe('nestedParamsSchema — min_pchembl bounds', () => {
+  it('accepts the baseline nested params object', () => {
+    expect(nestedParamsSchema.safeParse(VALID_PARAMS).success).toBe(true)
   })
 
   it('rejects min_pchembl = 15 (backend allows ≤ 14)', () => {
-    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_pchembl: 15 })
+    const bad = nestAdvancedParams({ ...DEFAULT_PARAMS, min_pchembl: 15 })
+    const r = nestedParamsSchema.safeParse(bad)
     expect(r.success).toBe(false)
   })
 
   it('accepts min_pchembl = 14 (upper bound)', () => {
-    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_pchembl: 14 })
+    const ok = nestAdvancedParams({ ...DEFAULT_PARAMS, min_pchembl: 14 })
+    const r = nestedParamsSchema.safeParse(ok)
     expect(r.success).toBe(true)
   })
 })
 
-describe('advancedParamsSchema — min_confidence STRING presets', () => {
+describe('nestedParamsSchema — min_confidence STRING presets', () => {
   it('accepts the 0.40 (Medium) preset', () => {
-    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_confidence: 0.4 })
+    const ok = nestAdvancedParams({ ...DEFAULT_PARAMS, min_confidence: 0.4 })
+    const r = nestedParamsSchema.safeParse(ok)
     expect(r.success).toBe(true)
   })
 
   it.each([0.15, 0.4, 0.7, 0.9])('accepts STRING preset %s', (preset) => {
-    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_confidence: preset })
+    const ok = nestAdvancedParams({ ...DEFAULT_PARAMS, min_confidence: preset })
+    const r = nestedParamsSchema.safeParse(ok)
     expect(r.success).toBe(true)
   })
 
   it('rejects an off-preset confidence like 0.5', () => {
-    const r = advancedParamsSchema.safeParse({ ...VALID_PARAMS, min_confidence: 0.5 })
+    const bad = nestAdvancedParams({ ...DEFAULT_PARAMS, min_confidence: 0.5 as never })
+    const r = nestedParamsSchema.safeParse(bad)
     expect(r.success).toBe(false)
   })
 })

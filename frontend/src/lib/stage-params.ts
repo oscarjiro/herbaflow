@@ -118,3 +118,15 @@ export const PARAM_SELECT_OPTIONS: Record<string, Record<string, SelectOption[]>
 }
 
 export const ENRICHMENT_SOURCES = ['GO:BP', 'GO:MF', 'GO:CC', 'KEGG']
+
+// Flat AdvancedParams field → nested PipelineConfig group. Drives nestAdvancedParams.
+export const FLAT_FIELD_GROUP: Record<string, string> = {
+  max_mw: 'adme', max_logp: 'adme', max_hbd: 'adme', max_hba: 'adme',
+  max_tpsa: 'adme', max_rotatable_bonds: 'adme', apply_veber: 'adme',
+  np_exception_threshold: 'adme', apply_adme_to_manual: 'adme',
+  min_pchembl: 'target', human_only: 'target', min_assay_confidence: 'target',
+  min_score: 'disease_targets',
+  min_confidence: 'ppi',
+  top_n: 'hub_genes', use_hub_bottleneck: 'hub_genes',
+  fdr_threshold: 'enrichment', sources: 'enrichment',
+}
