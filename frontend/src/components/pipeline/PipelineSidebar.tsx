@@ -8,7 +8,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { StageNavItem } from './StageNavItem'
 import type { StageNavItemProps } from './StageNavItem'
 import type { AnalysisStatusResponse, AnalysisRunResponse } from '@/types/api'
-import { isSkippedStage } from '@/types/api'
+import { getStageState } from '@/types/api'
 
 const STAGE_NAMES = [
   'Compound Selection',
@@ -26,9 +26,11 @@ export function getStageStatus(
   statusData: AnalysisStatusResponse | undefined,
   analysis: AnalysisRunResponse | undefined,
 ): StageNavItemProps['status'] {
-  // Check for skipped stage first — overrides all other status logic
+  // State field overrides all current_stage logic
   const stageResult = analysis?.stage_results[`stage_${stageNum}`]
-  if (isSkippedStage(stageResult)) return 'skipped'
+  const state = getStageState(stageResult)
+  if (state === 'not_applicable') return 'skipped'
+  if (state === 'user_provided') return 'completed'
 
   if (!statusData) return 'future'
   const s = statusData.status
