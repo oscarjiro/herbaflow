@@ -5,7 +5,7 @@ import json
 import logging
 from datetime import datetime
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
@@ -27,8 +27,9 @@ from app.schemas.analysis import (
 )
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
+from app.config import get_settings
 from app.repositories import analysis_repo
-from app.security import sanitize_filename
+from app.security import limiter, sanitize_filename
 from analysis.pipeline import run_stage
 from analysis.stages.stage3_targets import _make_target_id
 from app.services.canonicalize import make_target_id, make_compound_target_id, target_canonical_key
@@ -95,7 +96,9 @@ def _status_to_done(status: str) -> int:
 
 
 @router.post("", response_model=AnalysisStatusResponse, status_code=201)
+@limiter.limit(get_settings().rate_limit_create)
 async def create_analysis(
+    request: Request,
     body: CreateAnalysisRequest,
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
@@ -319,7 +322,9 @@ async def delete_analysis(analysis_id: UUID, session: AsyncSession = Depends(get
 
 
 @router.get("/{analysis_id}/export/{stage}")
+@limiter.limit(get_settings().rate_limit_export)
 async def export_stage_results(
+    request: Request,
     analysis_id: UUID,
     stage: str,
     format: str = "json",  # 'json' | 'csv'

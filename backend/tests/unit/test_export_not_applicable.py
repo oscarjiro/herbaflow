@@ -24,6 +24,7 @@ async def test_export_not_applicable_stage_returns_422(monkeypatch):
 
     with pytest.raises(HTTPException) as exc:
         await export_stage_results(
+            None,  # request placeholder (unused; rate limiter disabled in tests)
             UUID("00000000-0000-0000-0000-0000000000aa"),
             "1",
             format="csv",

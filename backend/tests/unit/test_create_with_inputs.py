@@ -38,7 +38,7 @@ async def test_create_injects_before_scheduling_pipeline():
         body = CreateAnalysisRequest.model_validate(
             {"name": "n", "mode": "guided", "plant_ids": [], "disease_id": "d1",
              "compounds": ["CCO"], "parameters": {}})
-        await analyses.create_analysis(body, FakeBG(), session=AsyncMock())
+        await analyses.create_analysis(None, body, FakeBG(), session=AsyncMock())
 
     assert order == ["inject", "schedule"]
 
@@ -55,7 +55,7 @@ async def test_standard_mode_schedules_without_inject():
         body = CreateAnalysisRequest.model_validate(
             {"name": "n", "mode": "guided", "plant_ids": ["p1"], "disease_id": "d1",
              "parameters": {}})
-        await analyses.create_analysis(body, FakeBG(), session=AsyncMock())
+        await analyses.create_analysis(None, body, FakeBG(), session=AsyncMock())
 
     assert len(scheduled) == 1
 
@@ -78,7 +78,7 @@ async def test_manual_disease_targets_persisted_into_stored_parameters():
         body = CreateAnalysisRequest.model_validate(
             {"name": "n", "mode": "guided", "plant_ids": ["p1"], "disease_id": None,
              "manual_disease_targets": ["TP53", "EGFR"], "parameters": {}})
-        await analyses.create_analysis(body, FakeBG(), session=AsyncMock())
+        await analyses.create_analysis(None, body, FakeBG(), session=AsyncMock())
 
     p = captured["parameters"]
     assert p["_disease_input_mode"] == "manual_targets"
@@ -110,7 +110,7 @@ async def test_all_invalid_compounds_deletes_run_and_422_no_schedule():
             {"name": "n", "mode": "guided", "plant_ids": [], "disease_id": "d1",
              "compounds": ["bad"], "parameters": {}})
         with pytest.raises(HTTPException) as ei:
-            await analyses.create_analysis(body, FakeBG(), session=AsyncMock())
+            await analyses.create_analysis(None, body, FakeBG(), session=AsyncMock())
     assert ei.value.status_code == 422
     assert deleted == [run.analysis_id]
     assert scheduled == []
