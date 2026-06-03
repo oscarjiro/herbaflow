@@ -295,6 +295,12 @@ async def inject_targets_service(
             "coverage_pct": 100.0,
             "compound_sources": {},
             "uncovered_compounds": [],
+            "state": "user_provided",
+            "inputs": {
+                "rejected": [],
+                "normalized": normalized_changes,
+                "unrecognized": unrecognized,
+            },
         }
         await analysis_repo.update_run_status(
             session, analysis_id, status=run.status, stage_results={"stage_3": stage3_result},
@@ -412,6 +418,8 @@ async def inject_targets_service(
         "coverage_pct": 100.0,
         "compound_sources": {},
         "uncovered_compounds": [],
+        "state": "user_provided",
+        "inputs": {"rejected": failed, "normalized": [], "unrecognized": []},
     }
 
     await analysis_repo.update_run_status(

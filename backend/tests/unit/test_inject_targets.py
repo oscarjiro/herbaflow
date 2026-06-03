@@ -252,3 +252,88 @@ def test_add_target_to_stage4_with_lean_rows_no_disease_name():
     assert new_row["source"] == "user_provided"
     assert updated["disease_target_count"] == 2
     assert "TP53" in updated["disease_gene_symbols"]
+
+
+# ---------------------------------------------------------------------------
+# Test 8: STRICT path stamps state=user_provided + inputs.rejected
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_inject_targets_strict_user_provided_state():
+    """STRICT path: valid accession + invalid raw → stage_3 carries state/inputs."""
+    run = _make_run(status="pending")
+    captured_stage_results = {}
+
+    async def fake_update(session, analysis_id, status, **kwargs):
+        if "stage_results" in kwargs:
+            captured_stage_results.update(kwargs["stage_results"])
+        return run
+
+    async def fake_validate(gene_symbol=None, uniprot_id=None):
+        if uniprot_id == "P04637":
+            return _make_uniprot_target("TP53", "P04637")
+        raise ValueError("not found")
+
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(side_effect=fake_validate)), \
+         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
+
+        from app.schemas.analysis import InjectTargetsRequest
+
+        mock_session = AsyncMock()
+        # P04637 is a real accession pattern; BADINPUT is not a valid accession → fails
+        request = InjectTargetsRequest(targets=["P04637", "BADINPUT"])
+        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+
+    assert "stage_3" in captured_stage_results
+    stage3 = captured_stage_results["stage_3"]
+    assert stage3["state"] == "user_provided"
+    assert stage3["inputs"]["rejected"] == ["BADINPUT"]
+    assert stage3["inputs"]["normalized"] == []
+    assert stage3["inputs"]["unrecognized"] == []
+
+
+# ---------------------------------------------------------------------------
+# Test 9: LENIENT path stamps state=user_provided + inputs.normalized/unrecognized
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_inject_targets_lenient_user_provided_state():
+    """LENIENT path (skip_validation=True): rename + unknown → stage_3 carries inputs."""
+    run = _make_run(status="pending")
+    captured_stage_results = {}
+
+    async def fake_update(session, analysis_id, status, **kwargs):
+        if "stage_results" in kwargs:
+            captured_stage_results.update(kwargs["stage_results"])
+        return run
+
+    # gene_symbols.normalize: BRCA → canonical "BRCA1", UNKNOWN → unrecognized
+    def fake_normalize(symbol):
+        result = MagicMock()
+        if symbol.upper() == "BRCA":
+            result.status = "normalized"
+            result.canonical = "BRCA1"
+        else:
+            result.status = "unrecognized"
+            result.canonical = symbol.upper()
+        return result
+
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.gene_symbols.normalize", side_effect=fake_normalize), \
+         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
+
+        from app.schemas.analysis import InjectTargetsRequest
+
+        mock_session = AsyncMock()
+        request = InjectTargetsRequest(targets=["BRCA", "UNKNOWN_XYZ"], skip_validation=True)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+
+    assert "stage_3" in captured_stage_results
+    stage3 = captured_stage_results["stage_3"]
+    assert stage3["state"] == "user_provided"
+    assert stage3["inputs"]["normalized"] == [{"from": "BRCA", "to": "BRCA1"}]
+    assert stage3["inputs"]["unrecognized"] == ["UNKNOWN_XYZ"]
+    assert stage3["inputs"]["rejected"] == []
