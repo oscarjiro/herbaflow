@@ -28,6 +28,7 @@ from app.schemas.analysis import (
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
 from app.repositories import analysis_repo
+from app.security import sanitize_filename
 from analysis.pipeline import run_stage
 from analysis.stages.stage3_targets import _make_target_id
 from app.services.canonicalize import make_target_id, make_compound_target_id, target_canonical_key
@@ -339,12 +340,14 @@ async def export_stage_results(
             detail=f"Stage {stage} not applicable for this analysis mode",
         )
 
+    safe_name = sanitize_filename(run.analysis_name)
+
     if format == "json":
         content = json.dumps(stage_data, indent=2)
         return StreamingResponse(
             io.StringIO(content),
             media_type="application/json",
-            headers={"Content-Disposition": f"attachment; filename={run.analysis_name}_{stage_key}.json"},
+            headers={"Content-Disposition": f"attachment; filename={safe_name}_{stage_key}.json"},
         )
 
     # CSV: flatten stage data into a tabular representation
@@ -358,14 +361,14 @@ async def export_stage_results(
             writer.writeheader()
             for cid in compound_ids:
                 writer.writerow({"compound_id": cid})
-            filename = f"{run.analysis_name}_stage1_compounds.csv"
+            filename = f"{safe_name}_stage1_compounds.csv"
 
         elif stage_key == "stage_2":
             fieldnames, rows = _stage2_csv(stage_data)
             writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
             writer.writeheader()
             writer.writerows(rows)
-            filename = f"{run.analysis_name}_stage2_adme.csv"
+            filename = f"{safe_name}_stage2_adme.csv"
 
         elif stage_key == "stage_3":
             # One row per target — gene_symbol, compound_count, compound_ids (joined)
@@ -379,7 +382,7 @@ async def export_stage_results(
                     "compound_count": len(cids),
                     "compound_ids": "|".join(cids),
                 })
-            filename = f"{run.analysis_name}_stage3_targets.csv"
+            filename = f"{safe_name}_stage3_targets.csv"
 
         elif stage_key == "stage_4":
             # One row per disease target
@@ -398,7 +401,7 @@ async def export_stage_results(
             else:
                 writer = csv.DictWriter(output, fieldnames=["gene_symbol", "uniprot_accession", "score", "source"])
                 writer.writeheader()
-            filename = f"{run.analysis_name}_stage4_disease_targets.csv"
+            filename = f"{safe_name}_stage4_disease_targets.csv"
 
         elif stage_key == "stage_5":
             # Overlap gene list rows plus a summary stats block
@@ -414,14 +417,14 @@ async def export_stage_results(
             writer.writerow({"type": "significant", "value": stage_data.get("significant", "")})
             for gene in overlap_genes:
                 writer.writerow({"type": "overlap_gene", "value": gene})
-            filename = f"{run.analysis_name}_stage5_overlap.csv"
+            filename = f"{safe_name}_stage5_overlap.csv"
 
         elif stage_key == "stage_6":
             fieldnames, rows = _stage6_csv(stage_data)
             writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
             writer.writeheader()
             writer.writerows(rows)
-            filename = f"{run.analysis_name}_stage6_ppi_edges.csv"
+            filename = f"{safe_name}_stage6_ppi_edges.csv"
 
         elif stage_key == "stage_7":
             rows = stage_data.get("ranked", [])
@@ -432,7 +435,7 @@ async def export_stage_results(
             else:
                 writer = csv.DictWriter(output, fieldnames=["gene_symbol", "degree", "betweenness", "closeness", "eigenvector", "is_hub", "is_hub_bottleneck", "rank"])
                 writer.writeheader()
-            filename = f"{run.analysis_name}_stage7_hub_genes.csv"
+            filename = f"{safe_name}_stage7_hub_genes.csv"
 
         elif stage_key == "stage_8":
             # One row per pathway term across all sources
@@ -451,7 +454,7 @@ async def export_stage_results(
                         "term_size": term.get("term_size", ""),
                         "genes": "|".join(term.get("genes", [])),
                     })
-            filename = f"{run.analysis_name}_stage8_enrichment.csv"
+            filename = f"{safe_name}_stage8_enrichment.csv"
 
         else:
             # Unknown stage — fall back to JSON with a comment header
@@ -459,15 +462,14 @@ async def export_stage_results(
             return StreamingResponse(
                 io.StringIO(content),
                 media_type="application/json",
-                headers={"Content-Disposition": f"attachment; filename={run.analysis_name}_{stage_key}.json"},
+                headers={"Content-Disposition": f"attachment; filename={safe_name}_{stage_key}.json"},
             )
 
         output.seek(0)
-        safe_filename = filename.encode("ascii", "replace").decode("ascii").replace("?", "_")
         return StreamingResponse(
             output,
             media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename={safe_filename}"},
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
         )
 
     # Default: return JSON
@@ -475,7 +477,7 @@ async def export_stage_results(
     return StreamingResponse(
         io.StringIO(content),
         media_type="application/json",
-        headers={"Content-Disposition": f"attachment; filename={run.analysis_name}_{stage_key}.json"},
+        headers={"Content-Disposition": f"attachment; filename={safe_name}_{stage_key}.json"},
     )
 
 
