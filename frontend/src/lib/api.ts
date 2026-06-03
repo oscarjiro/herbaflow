@@ -44,40 +44,40 @@ export const api = {
     request('/analyses', { method: 'POST', body: JSON.stringify(body) }),
 
   getAnalysis: (id: string): Promise<AnalysisRunResponse> =>
-    request(`/analyses/${id}`),
+    request(`/analyses/${encodeURIComponent(id)}`),
 
   getAnalysisStatus: (id: string): Promise<AnalysisStatusResponse> =>
-    request(`/analyses/${id}/status`),
+    request(`/analyses/${encodeURIComponent(id)}/status`),
 
   approveStage: (id: string, body?: ApproveRequest): Promise<void> =>
-    request(`/analyses/${id}/approve`, {
+    request(`/analyses/${encodeURIComponent(id)}/approve`, {
       method: 'POST',
       ...(body ? { body: JSON.stringify(body) } : {}),
     }),
 
   rejectStage: (id: string): Promise<void> =>
-    request(`/analyses/${id}/reject`, { method: 'POST' }),
+    request(`/analyses/${encodeURIComponent(id)}/reject`, { method: 'POST' }),
 
   deleteAnalysis: (id: string): Promise<void> =>
-    request(`/analyses/${id}`, { method: 'DELETE' }),
+    request(`/analyses/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 
   exportStage: (id: string, stage: number, format: 'csv' | 'json'): Promise<Response> =>
-    fetch(`${BASE_URL}/analyses/${id}/export/${stage}?format=${format}`),
+    fetch(`${BASE_URL}/analyses/${encodeURIComponent(id)}/export/${stage}?format=${format}`),
 
   importTargets: (id: string, body: ImportTargetsRequest): Promise<ImportTargetsResponse> =>
-    request(`/analyses/${id}/import-targets`, {
+    request(`/analyses/${encodeURIComponent(id)}/import-targets`, {
       method: 'POST',
       body: JSON.stringify(body),
     }),
 
   resetFromStage: (id: string, stage: number, body?: ResetFromRequest): Promise<AnalysisStatusResponse> =>
-    request(`/analyses/${id}/reset-from/${stage}`, {
+    request(`/analyses/${encodeURIComponent(id)}/reset-from/${stage}`, {
       method: 'POST',
       ...(body ? { body: JSON.stringify(body) } : {}),
     }),
 
   async addUserTarget(analysisId: string, body: AddUserTargetRequest): Promise<AddUserTargetResponse> {
-    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/targets/user`, {
+    const res = await fetch(`${BASE_URL}/analyses/${encodeURIComponent(analysisId)}/targets/user`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -93,7 +93,7 @@ export const api = {
   },
 
   async removeUserTarget(analysisId: string, geneSymbol: string): Promise<void> {
-    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/targets/${encodeURIComponent(geneSymbol)}`, {
+    const res = await fetch(`${BASE_URL}/analyses/${encodeURIComponent(analysisId)}/targets/${encodeURIComponent(geneSymbol)}`, {
       method: 'DELETE',
     })
     if (!res.ok) {
@@ -106,7 +106,7 @@ export const api = {
   },
 
   async addUserDiseaseTarget(analysisId: string, body: AddUserTargetRequest): Promise<AddUserTargetResponse> {
-    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/disease-targets/user`, {
+    const res = await fetch(`${BASE_URL}/analyses/${encodeURIComponent(analysisId)}/disease-targets/user`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -122,7 +122,7 @@ export const api = {
   },
 
   async removeUserDiseaseTarget(analysisId: string, geneSymbol: string): Promise<void> {
-    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/disease-targets/${encodeURIComponent(geneSymbol)}`, {
+    const res = await fetch(`${BASE_URL}/analyses/${encodeURIComponent(analysisId)}/disease-targets/${encodeURIComponent(geneSymbol)}`, {
       method: 'DELETE',
     })
     if (!res.ok) {
@@ -135,7 +135,7 @@ export const api = {
   },
 
   async addUserCompound(analysisId: string, body: AddUserCompoundRequest): Promise<AddUserCompoundResponse> {
-    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/user-compounds`, {
+    const res = await fetch(`${BASE_URL}/analyses/${encodeURIComponent(analysisId)}/user-compounds`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -151,7 +151,7 @@ export const api = {
   },
 
   async removeUserCompound(analysisId: string, compoundId: string): Promise<{ removed: string }> {
-    const res = await fetch(`${BASE_URL}/analyses/${analysisId}/user-compounds/${encodeURIComponent(compoundId)}`, {
+    const res = await fetch(`${BASE_URL}/analyses/${encodeURIComponent(analysisId)}/user-compounds/${encodeURIComponent(compoundId)}`, {
       method: 'DELETE',
     })
     if (!res.ok) {

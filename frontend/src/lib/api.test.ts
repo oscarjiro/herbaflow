@@ -4,12 +4,20 @@
  * Focus: void endpoints (approve / reject / delete) return 204 No Content with
  * an empty body. Calling res.json() on an empty body throws a SyntaxError, so
  * `request` must tolerate empty responses and resolve rather than reject.
+ *
+ * Also covers: raw string id path-args are wrapped in encodeURIComponent so a
+ * hostile id can't break out of the URL path.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { api } from './api'
 
 function mockFetchOnce(response: Response) {
   vi.stubGlobal('fetch', vi.fn(async () => response))
+}
+
+function lastFetchUrl(): string {
+  const calls = (globalThis.fetch as any).mock.calls
+  return calls[calls.length - 1][0] as string
 }
 
 afterEach(() => {
@@ -54,5 +62,21 @@ describe('api void endpoints with empty/204 bodies', () => {
   it('throws a descriptive error on a non-2xx response', async () => {
     mockFetchOnce(new Response('boom', { status: 500 }))
     await expect(api.rejectStage('a1')).rejects.toThrow('API 500: boom')
+  })
+})
+
+describe('api path encoding', () => {
+  it('encodes the analysis id in getAnalysis', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(
+      new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } }),
+    )
+    await api.getAnalysis('a/b c')
+    expect(lastFetchUrl()).toContain('/analyses/a%2Fb%20c')
+  })
+
+  it('encodes the id and stage in exportStage', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(new Response('', { status: 200 }))
+    await api.exportStage('x/y', 3, 'json')
+    expect(lastFetchUrl()).toContain('/analyses/x%2Fy/export/3')
   })
 })
