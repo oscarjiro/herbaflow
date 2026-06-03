@@ -1,9 +1,10 @@
 import asyncio
-import traceback
+import logging
 from uuid import UUID
 from sqlalchemy.orm import sessionmaker
 
 from app.repositories import analysis_repo
+from app.security import client_error_message
 from analysis.models import PipelineConfig
 from analysis import stage_state
 from analysis.stages import (
@@ -16,6 +17,8 @@ from analysis.stages import (
     stage7_hub_genes,
     stage8_enrichment,
 )
+
+logger = logging.getLogger(__name__)
 
 STAGE_RUNNERS = {
     1: stage1_selection.run,
@@ -83,11 +86,14 @@ async def run_stage(
                 )
 
     except Exception:
+        logger.exception(
+            "Stage %s failed for analysis %s", stage_num, analysis_id
+        )
         async with session_factory() as session:
             await analysis_repo.update_run_status(
                 session, analysis_id,
                 status="failed",
-                error_message=f"Stage {stage_num} failed: {traceback.format_exc()}",
+                error_message=client_error_message(stage_num),
             )
 
 
