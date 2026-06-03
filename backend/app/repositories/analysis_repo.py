@@ -35,6 +35,15 @@ async def get_run(session: AsyncSession, analysis_id: UUID) -> AnalysisRun | Non
     return result.first()
 
 
+async def delete_run(session: AsyncSession, analysis_id: UUID) -> None:
+    """Delete an analysis run row (used to roll back a create whose manual-input
+    injection failed, so no orphan 'pending' run is left behind)."""
+    run = await get_run(session, analysis_id)
+    if run is not None:
+        await session.delete(run)
+        await session.commit()
+
+
 async def list_runs(session: AsyncSession) -> list[AnalysisRun]:
     result = await session.exec(
         select(AnalysisRun).order_by(AnalysisRun.created_at.desc())

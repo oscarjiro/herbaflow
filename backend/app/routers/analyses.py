@@ -102,20 +102,54 @@ async def create_analysis(
     session: AsyncSession = Depends(get_session),
 ):
     from analysis.pipeline import start_pipeline  # imported here to avoid a circular import at module load
+    from app.services.manual_inputs import inject_compounds_service, inject_targets_service
+
     # plant_ids is intentionally allowed to be empty here: manual_compounds and
     # manual_targets modes send an empty list because stage 1 is skipped.
-    # _input_mode is set later by inject-compounds / inject-targets endpoints,
-    # so we cannot enforce plant_ids ≥ 1 at the schema level for standard mode.
     # The frontend Zod schema enforces plant_ids ≥ 1 for standard mode before submit.
-    parameters = {
+    #
+    # Control state is derived server-side from the input fields and written into the
+    # STORED parameters; the inbound `parameters` payload is pure pipeline config.
+    # Compounds/targets injection sets `_input_mode` via the services below; the
+    # disease-side keys have no service, so we write them here directly.
+    input_mode = (
+        "manual_compounds" if body.compounds
+        else "manual_targets" if body.targets
+        else "standard"
+    )
+    parameters: dict = {
         **body.parameters.model_dump(exclude_none=True),
         "_plant_ids": [str(pid) for pid in body.plant_ids],
         "_disease_id": str(body.disease_id) if body.disease_id else None,
     }
+    if input_mode != "standard":
+        parameters["_input_mode"] = input_mode
+    if body.manual_disease_targets:
+        parameters["_disease_input_mode"] = "manual_targets"
+        parameters["_injected_disease_targets"] = body.manual_disease_targets
+
     run = await analysis_repo.create_run(
         session, body.name, body.mode, parameters,
         disease_id=body.disease_id,
     )
+
+    # Inject manual inputs synchronously BEFORE scheduling the pipeline (atomic
+    # create-with-inputs — closes the old create → schedule → inject 409 race). If
+    # injection fails (all inputs invalid, or PubChem/UniProt unreachable), roll the
+    # create back so no orphan 'pending' run is left behind.
+    try:
+        if body.compounds:
+            result = await inject_compounds_service(body.compounds, run, session)
+            if result.injected == 0:
+                raise HTTPException(status_code=422, detail="No valid compounds could be injected")
+        if body.targets:
+            result = await inject_targets_service(body.targets, False, run, session)
+            if result.injected == 0:
+                raise HTTPException(status_code=422, detail="No valid targets could be injected")
+    except HTTPException:
+        await analysis_repo.delete_run(session, run.analysis_id)
+        raise
+
     background_tasks.add_task(
         start_pipeline, run.analysis_id, body.plant_ids, body.disease_id, async_session_factory
     )
