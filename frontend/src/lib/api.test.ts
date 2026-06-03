@@ -46,7 +46,7 @@ describe('api void endpoints with empty/204 bodies', () => {
         mode: 'guided',
         plant_ids: [],
         disease_id: null,
-        parameters: {},
+        parameters: {} as never,
       }),
     ).resolves.toEqual({ analysis_id: 'a1' })
   })
