@@ -23,7 +23,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ETL_ROOT = Path(__file__).parent.parent
-DB_URL = os.environ["DATABASE_URL"]
 
 PLANTS_CSV           = ETL_ROOT / "plants/06_export/out/plants.csv"
 PLANT_ALIASES_CSV    = ETL_ROOT / "plants/06_export/out/plant_aliases.csv"
@@ -38,7 +37,8 @@ DISEASE_TARGETS_CSV  = ETL_ROOT / "disease_targets/05_export/out/disease_targets
 
 
 def connect():
-    return psycopg2.connect(DB_URL)
+    db_url = os.environ["DATABASE_URL"]
+    return psycopg2.connect(db_url)
 
 
 def _conflict(pk: str, update_cols: list[str], upsert: bool) -> str:
