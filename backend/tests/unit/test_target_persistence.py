@@ -214,9 +214,9 @@ async def test_inject_targets_endpoint_reports_cached():
     tp53.protein_name = "Cellular tumor antigen p53"
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.routers.analyses.validate_human_target", new=AsyncMock(return_value=tp53)), \
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53)), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=1)) as mock_cache:
 
         mock_session = AsyncMock()
@@ -270,8 +270,8 @@ async def test_inject_targets_lenient_normalizes_symbols():
         return run
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(side_effect=_capture_status)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=_capture_status)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["TNFA", "TP53"], skip_validation=True)
         result = await inject_targets(ANALYSIS_UUID, request, AsyncMock())
@@ -298,8 +298,8 @@ async def test_inject_targets_lenient_dedups_alias_and_canonical():
     run.stage_results = {}
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["TNF", "TNFA"], skip_validation=True)
         result = await inject_targets(UUID("00000000-0000-0000-0000-000000000056"), request, AsyncMock())
@@ -323,8 +323,8 @@ async def test_inject_targets_lenient_unknown_kept_and_flagged():
     run.stage_results = {}
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["ZZZ9"], skip_validation=True)
         result = await inject_targets(UUID("00000000-0000-0000-0000-000000000057"), request, AsyncMock())
@@ -353,9 +353,9 @@ async def test_inject_targets_lenient_accession_routes_to_uniprot():
     run.stage_results = {}
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.routers.analyses.validate_human_target", new=AsyncMock(return_value=info)) as mock_val, \
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=info)) as mock_val, \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=1)):
         request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
         result = await inject_targets(UUID("00000000-0000-0000-0000-000000000058"), request, AsyncMock())
@@ -380,9 +380,9 @@ async def test_inject_targets_lenient_accession_uniprot_down_kept_no_503():
     run.stage_results = {}
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.routers.analyses.validate_human_target", new=AsyncMock(side_effect=ServiceUnavailableError("down"))), \
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(side_effect=ServiceUnavailableError("down"))), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
         result = await inject_targets(UUID("00000000-0000-0000-0000-000000000059"), request, AsyncMock())

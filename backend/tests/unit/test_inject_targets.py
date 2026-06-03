@@ -64,9 +64,9 @@ async def test_inject_valid_gene_symbol():
     tp53_target = _make_uniprot_target("TP53", "P04637", "Cellular tumor antigen p53")
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock(side_effect=fake_merge)), \
-         patch("app.routers.analyses.validate_human_target", new=AsyncMock(return_value=tp53_target)):
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock(side_effect=fake_merge)), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53_target)):
 
         from app.routers.analyses import inject_targets
         from app.schemas.analysis import InjectTargetsRequest
@@ -106,9 +106,9 @@ async def test_inject_valid_uniprot_accession():
     egfr_target = _make_uniprot_target("EGFR", "P00533", "Epidermal growth factor receptor")
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.routers.analyses.validate_human_target", new=AsyncMock(return_value=egfr_target)) as mock_validate:
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=egfr_target)) as mock_validate:
 
         from app.routers.analyses import inject_targets
         from app.schemas.analysis import InjectTargetsRequest
@@ -141,9 +141,9 @@ async def test_inject_unknown_gene_symbol_in_failed():
         return _make_uniprot_target("TP53", "P04637")
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.routers.analyses.validate_human_target", new=AsyncMock(side_effect=fake_validate)):
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(side_effect=fake_validate)):
 
         from app.routers.analyses import inject_targets
         from app.schemas.analysis import InjectTargetsRequest
@@ -209,9 +209,9 @@ async def test_inject_targets_sets_input_mode():
     tp53_target = _make_uniprot_target("TP53", "P04637")
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock(side_effect=fake_merge)), \
-         patch("app.routers.analyses.validate_human_target", new=AsyncMock(return_value=tp53_target)):
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock(side_effect=fake_merge)), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53_target)):
 
         from app.routers.analyses import inject_targets
         from app.schemas.analysis import InjectTargetsRequest
@@ -262,9 +262,9 @@ async def test_inject_targets_deduplicates_gene_symbols():
     tp53_target = _make_uniprot_target("TP53", "P04637")
 
     with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.routers.analyses.validate_human_target", new=AsyncMock(return_value=tp53_target)):
+         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53_target)):
 
         from app.routers.analyses import inject_targets
         from app.schemas.analysis import InjectTargetsRequest
