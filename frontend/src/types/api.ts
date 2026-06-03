@@ -460,20 +460,47 @@ export type StageResult =
   | Stage8Result
 
 // ============================================================================
-// Skipped Stage
+// Stage state contract (mirrors shared/contracts/analysis.json "stage_state")
 // ============================================================================
 
-export interface SkippedStageResult {
-  status: 'skipped'
-  input_mode: string
+export const STAGE_STATES = ['computed', 'user_provided', 'not_applicable'] as const
+export type StageState = (typeof STAGE_STATES)[number]
+
+export interface StageInputs {
+  rejected: string[]
+  normalized: { from: string; to: string }[]
+  unrecognized: string[]
 }
 
-export function isSkippedStage(result: unknown): result is SkippedStageResult {
-  return (
+export function getStageState(result: unknown): StageState {
+  if (
     typeof result === 'object' &&
     result !== null &&
-    (result as SkippedStageResult).status === 'skipped'
-  )
+    typeof (result as { state?: unknown }).state === 'string' &&
+    (STAGE_STATES as readonly string[]).includes((result as { state: string }).state)
+  ) {
+    return (result as { state: StageState }).state
+  }
+  return 'computed'
+}
+
+export function getStageInputs(result: unknown): StageInputs | null {
+  if (typeof result === 'object' && result !== null && 'inputs' in result) {
+    const i = (result as { inputs?: Partial<StageInputs> }).inputs
+    if (i) {
+      return {
+        rejected: i.rejected ?? [],
+        normalized: i.normalized ?? [],
+        unrecognized: i.unrecognized ?? [],
+      }
+    }
+  }
+  return null
+}
+
+// Back-compat shim: a "skipped" stage is now state === 'not_applicable'.
+export function isSkippedStage(result: unknown): boolean {
+  return getStageState(result) === 'not_applicable'
 }
 
 // T3.3: User-added targets

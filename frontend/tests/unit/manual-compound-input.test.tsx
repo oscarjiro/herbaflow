@@ -109,7 +109,7 @@ describe('SetupPage — manual compound input mode', () => {
 
 describe('isSkippedStage type guard', () => {
   it('returns true for a stage_1 skipped sentinel object', () => {
-    const skippedResult = { status: 'skipped', input_mode: 'manual_compounds' }
+    const skippedResult = { state: 'not_applicable' }
     expect(isSkippedStage(skippedResult)).toBe(true)
   })
 

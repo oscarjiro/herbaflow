@@ -21,7 +21,7 @@ function renderWithQuery(ui: React.ReactElement) {
 
 describe('isSkippedStage', () => {
   it('returns true for a skipped stage result', () => {
-    expect(isSkippedStage({ status: 'skipped', input_mode: 'manual_compounds' })).toBe(true)
+    expect(isSkippedStage({ state: 'not_applicable' })).toBe(true)
   })
 
   it('returns false for a normal stage result', () => {
@@ -52,7 +52,7 @@ describe('Stage1Panel — skipped stage', () => {
     disease_id: null,
     current_stage: 2,
     stage_results: {
-      stage_1: { status: 'skipped', input_mode: 'manual_compounds' },
+      stage_1: { state: 'not_applicable' },
     },
     parameters: null,
     created_at: null,
@@ -123,7 +123,7 @@ describe('getStageStatus — skipped stages', () => {
     disease_id: null,
     current_stage: 2,
     stage_results: {
-      stage_1: { status: 'skipped', input_mode: 'manual_compounds' },
+      stage_1: { state: 'not_applicable' },
     },
     parameters: null,
     created_at: null,
