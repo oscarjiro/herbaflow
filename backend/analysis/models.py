@@ -100,30 +100,11 @@ class PipelineConfig:
     enrichment: EnrichmentParams = field(default_factory=EnrichmentParams)
 
     @classmethod
-    def _extract_adme(cls, d: dict[str, Any]) -> dict[str, Any]:
-        """Extract AdmeParams kwargs from either nested {"adme": {...}} or flat top-level dict.
-
-        The setup form sends all params flat (e.g. max_mw at top level); the reset-from /
-        approve endpoints send them nested under "adme". Support both formats so that ADME
-        overrides from the setup form actually reach the pipeline.
-        """
-        if "adme" in d and isinstance(d["adme"], dict):
-            return d["adme"]
-        # Flat format — collect known AdmeParams fields from top level
-        _ADME_FIELDS = {
-            "max_mw", "max_logp", "max_hbd", "max_hba",
-            "max_tpsa", "max_rotatable_bonds",
-            "apply_veber", "np_exception_threshold",
-            "apply_adme_to_manual",
-        }
-        return {k: d[k] for k in _ADME_FIELDS if k in d}
-
-    @classmethod
     def from_dict(cls, d: dict[str, Any] | None) -> "PipelineConfig":
         if not d:
             return cls()
         return cls(
-            adme=AdmeParams(**cls._extract_adme(d)),
+            adme=AdmeParams(**d.get("adme", {})),
             target=TargetParams(**d.get("target", {})),
             disease_targets=DiseaseTargetParams(**d.get("disease_targets", {})),
             ppi=PpiParams(**d.get("ppi", {})),
