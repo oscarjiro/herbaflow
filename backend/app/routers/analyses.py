@@ -674,7 +674,7 @@ async def import_targets(
         for stp_t in body.targets:
             target_id = make_target_id(stp_t.uniprot_id)
 
-            # Upsert Target row (insert-if-absent; no commit — see commit below)
+            # Upsert Target row (insert-if-absent; no commit — merged below)
             await persist_canonical_target([Target(
                 target_id=target_id,
                 canonical_key=target_canonical_key(stp_t.uniprot_id),
@@ -701,18 +701,23 @@ async def import_targets(
             else:
                 skipped += 1
 
-        await session.commit()
+        # Re-aggregate Stage 3 under the row lock (re-reads the CURRENT stage_3,
+        # not the snapshot above) and commit targets + stage_results atomically.
+        def _merge(current: dict) -> dict:
+            cur_stage3 = current.get("stage_3") or stage3
+            return {
+                **current,
+                "stage_3": _merge_stp_targets(cur_stage3, body.compound_id, body.targets),
+            }
+
+        updated = await analysis_repo.merge_stage_results_locked(
+            session, analysis_id, _merge
+        )
+        if updated is None:
+            raise HTTPException(status_code=404, detail="Analysis not found")
     except IntegrityError:
         await session.rollback()
         raise HTTPException(status_code=409, detail="Conflict: one or more targets already exist")
-
-    # Re-aggregate Stage 3 results and persist
-    updated_stage3 = _merge_stp_targets(stage3, body.compound_id, body.targets)
-    await analysis_repo.update_run_status(
-        session, analysis_id,
-        status=run.status,
-        stage_results={"stage_3": updated_stage3},
-    )
 
     return ImportTargetsResponse(imported=imported, skipped=skipped)
 
