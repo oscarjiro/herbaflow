@@ -121,7 +121,7 @@ def test_add_user_compound_to_stage1():
     mock_run = _make_mock_run(stage1=_STAGE1_EMPTY)
 
     with (
-        patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=mock_run)),
+        patch("app.repositories.analysis_repo.get_run_locked", new=AsyncMock(return_value=mock_run)),
         patch("app.repositories.analysis_repo.update_run_status", new=AsyncMock()),
         patch(
             "integrations.pubchem_compound.validate_compound",
@@ -151,7 +151,7 @@ def test_remove_user_compound_from_stage1():
     mock_run = _make_mock_run(stage1=_STAGE1_WITH_COMPOUND)
 
     with (
-        patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=mock_run)),
+        patch("app.repositories.analysis_repo.get_run_locked", new=AsyncMock(return_value=mock_run)),
         patch("app.repositories.analysis_repo.update_run_status", new=AsyncMock()),
         patch("app.database.get_session"),
     ):

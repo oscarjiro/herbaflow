@@ -203,7 +203,7 @@ async def approve_stage(
     body: ApproveRequest | None = None,
     session: AsyncSession = Depends(get_session),
 ):
-    run = await analysis_repo.get_run(session, analysis_id)
+    run = await analysis_repo.get_run_locked(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
 
@@ -237,7 +237,7 @@ async def reject_stage(
     analysis_id: UUID,
     session: AsyncSession = Depends(get_session),
 ):
-    run = await analysis_repo.get_run(session, analysis_id)
+    run = await analysis_repo.get_run_locked(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
 
@@ -714,7 +714,7 @@ async def add_user_compound(
     import httpx
     from integrations.pubchem_compound import validate_compound
 
-    run = await analysis_repo.get_run(session, analysis_id)
+    run = await analysis_repo.get_run_locked(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
 
@@ -774,7 +774,7 @@ async def remove_user_compound(
     session: AsyncSession = Depends(get_session),
 ):
     """Remove a compound from Stage 1 results by compound_id."""
-    run = await analysis_repo.get_run(session, analysis_id)
+    run = await analysis_repo.get_run_locked(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
 
@@ -808,7 +808,7 @@ async def add_user_target(
     session: AsyncSession = Depends(get_session),
 ):
     """Add a user-provided target to Stage 3 results. Validates via UniProt."""
-    run = await analysis_repo.get_run(session, analysis_id)
+    run = await analysis_repo.get_run_locked(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
     stage3 = (run.stage_results or {}).get("stage_3")
@@ -867,7 +867,7 @@ async def remove_user_target(
     session: AsyncSession = Depends(get_session),
 ):
     """Remove any target from Stage 3 results by gene symbol."""
-    run = await analysis_repo.get_run(session, analysis_id)
+    run = await analysis_repo.get_run_locked(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
     stage3 = (run.stage_results or {}).get("stage_3")
@@ -895,7 +895,7 @@ async def add_user_disease_target(
     session: AsyncSession = Depends(get_session),
 ):
     """Add a user-provided target to Stage 4 (disease targets) results. Validates via UniProt."""
-    run = await analysis_repo.get_run(session, analysis_id)
+    run = await analysis_repo.get_run_locked(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
     stage4 = (run.stage_results or {}).get("stage_4")
@@ -956,7 +956,7 @@ async def remove_user_disease_target(
     session: AsyncSession = Depends(get_session),
 ):
     """Remove any target from Stage 4 results by gene symbol."""
-    run = await analysis_repo.get_run(session, analysis_id)
+    run = await analysis_repo.get_run_locked(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
     stage4 = (run.stage_results or {}).get("stage_4")
