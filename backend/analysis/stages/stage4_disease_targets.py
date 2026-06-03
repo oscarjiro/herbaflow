@@ -31,7 +31,8 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 "disease_target_count": 0,
                 "disease_gene_symbols": [],
                 "targets": [],
-                "normalization": {"changed": [], "unrecognized": []},
+                "state": "user_provided",
+                "inputs": {"rejected": [], "normalized": [], "unrecognized": []},
             }
 
         results = gene_symbols.normalize_many(
@@ -60,7 +61,12 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "disease_target_count": len(targets),
             "disease_gene_symbols": unique_genes,
             "targets": targets,
-            "normalization": {"changed": changed, "unrecognized": unrecognized},
+            "state": "user_provided",
+            "inputs": {
+                "rejected": [],
+                "normalized": changed,
+                "unrecognized": unrecognized,
+            },
         }
 
     disease_id = params.get("_disease_id")
@@ -71,6 +77,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "disease_target_count": 0,
             "disease_gene_symbols": [],
             "targets": [],
+            "state": "computed",
         }
 
     disease = await disease_repo.get_disease_by_id(session, disease_id)
@@ -81,6 +88,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "disease_target_count": 0,
             "disease_gene_symbols": [],
             "targets": [],
+            "state": "computed",
         }
 
     targets: list[dict] = []
@@ -109,4 +117,5 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         "disease_target_count": len(targets),
         "disease_gene_symbols": [t["gene_symbol"] for t in targets],
         "targets": targets,
+        "state": "computed",
     }

@@ -171,8 +171,8 @@ async def test_stage4_manual_targets_normalized():
     assert "TNF" in symbols
     assert "TP53" in symbols
     assert "TNFA" not in symbols
-    assert {"from": "TNFA", "to": "TNF"} in result["normalization"]["changed"]
-    assert "ZZZ9" in result["normalization"]["unrecognized"]
+    assert {"from": "TNFA", "to": "TNF"} in result["inputs"]["normalized"]
+    assert "ZZZ9" in result["inputs"]["unrecognized"]
     assert "ZZZ9" in symbols
     gs._MAP = None
 
@@ -206,3 +206,37 @@ async def test_stage4_empty_cache_returns_empty_targets():
     assert result["disease_target_count"] == 0
     assert result["targets"] == []
     assert result["disease_gene_symbols"] == []
+
+
+import pytest
+from analysis.stages import stage4_disease_targets as s4
+
+
+class _Run:
+    def __init__(self, params):
+        self.parameters = params
+        self.stage_results = {}
+
+
+@pytest.mark.asyncio
+async def test_stage4_manual_branch_is_user_provided_with_inputs(monkeypatch):
+    # Force HGNC normalize_many to a deterministic result.
+    class _R:
+        def __init__(self, inp, canonical, status):
+            self.input, self.canonical, self.status = inp, canonical, status
+
+    def fake_normalize_many(genes):
+        return [_R("AKT", "AKT1", "ok"), _R("EGFR", "EGFR", "ok"), _R("QWZ", "QWZ", "unrecognized")]
+
+    from app.services import gene_symbols
+    monkeypatch.setattr(gene_symbols, "normalize_many", fake_normalize_many)
+
+    run = _Run({"_disease_input_mode": "manual_targets",
+                "_injected_disease_targets": ["AKT", "EGFR", "QWZ"]})
+    result = await s4.run(run, config=None, session=None)
+
+    assert result["state"] == "user_provided"
+    assert result["inputs"]["normalized"] == [{"from": "AKT", "to": "AKT1"}]
+    assert result["inputs"]["unrecognized"] == ["QWZ"]
+    assert result["inputs"]["rejected"] == []
+    assert "normalization" not in result  # old key removed
