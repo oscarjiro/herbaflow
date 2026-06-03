@@ -1,3 +1,4 @@
+from typing import Callable
 from uuid import UUID
 from datetime import datetime, timedelta
 from sqlmodel import select
@@ -150,6 +151,37 @@ async def update_run_status(
     if completed:
         run.completed_at = datetime.utcnow()
         run.expires_at = datetime.utcnow() + timedelta(hours=24)
+    session.add(run)
+    await session.commit()
+    await session.refresh(run)
+    return run
+
+
+async def merge_stage_results_locked(
+    session: AsyncSession,
+    analysis_id: UUID,
+    mutate: Callable[[dict], dict],
+    status: str | None = None,
+) -> AnalysisRun | None:
+    """Atomically read-modify-write stage_results under a row-level write lock.
+
+    Acquires SELECT ... FOR UPDATE on the run, passes a copy of the CURRENT
+    stage_results to ``mutate``, stores the dict ``mutate`` returns, optionally
+    updates status, and commits — so the whole read-modify-write is serialized
+    against concurrent mutators (closes the lost-update race on the JSONB blob).
+
+    Any rows already staged on ``session`` (e.g. Target / CompoundTarget upserts)
+    are committed together with the stage_results change in this one transaction.
+    Returns None if the run no longer exists.
+    """
+    run = await get_run_locked(session, analysis_id)
+    if run is None:
+        return None
+    current = dict(run.stage_results or {})
+    run.stage_results = mutate(current)
+    if status is not None:
+        run.status = status
+    run.updated_at = datetime.utcnow()
     session.add(run)
     await session.commit()
     await session.refresh(run)
