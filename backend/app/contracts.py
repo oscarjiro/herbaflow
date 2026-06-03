@@ -18,3 +18,7 @@ PIPELINE_PARAM_FIELDS: dict[str, set[str]] = {
     group: set(fields)
     for group, fields in _analysis["pipeline_parameters"].items()
 }
+
+# Allowed values for a stage result's `state` field. Single source of truth shared
+# with the frontend and verified against the analysis.stage_state constants by tests.
+STAGE_STATES: tuple[str, ...] = tuple(_analysis["stage_state"])

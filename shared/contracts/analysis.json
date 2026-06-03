@@ -1,5 +1,6 @@
 {
   "analysis_mode": ["auto", "guided"],
+  "stage_state": ["computed", "user_provided", "not_applicable"],
   "pipeline_parameters": {
     "adme": {
       "max_mw":               { "type": "number",  "exclusiveMin": 0 },
