@@ -17,6 +17,7 @@ from pathlib import Path
 
 import psycopg2
 import psycopg2.extras
+from psycopg2 import sql
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -339,9 +340,11 @@ RESET_TABLES = [
 
 def reset_all_tables(cur) -> None:
     """Truncate all ETL-managed tables in dependency order + CASCADE."""
-    tables_sql = ", ".join(RESET_TABLES)
-    print(f"Resetting: {tables_sql}")
-    cur.execute(f"TRUNCATE {tables_sql} CASCADE")
+    print(f"Resetting: {', '.join(RESET_TABLES)}")
+    stmt = sql.SQL("TRUNCATE {} CASCADE").format(
+        sql.SQL(", ").join(sql.Identifier(t) for t in RESET_TABLES)
+    )
+    cur.execute(stmt)
     print("All tables cleared.")
 
 
