@@ -227,20 +227,22 @@ async def test_persist_validated_compounds_db_error_returns_zero():
 
 
 # ---------------------------------------------------------------------------
-# Test 7: inject-compounds endpoint wires caching (integration through HTTP layer)
+# Test 7: inject_compounds_service wires caching and surfaces the cached count
 # ---------------------------------------------------------------------------
 
 
-def test_inject_compounds_endpoint_returns_cached_field():
-    """POST /analyses/{id}/inject-compounds response JSON includes 'cached' key."""
-    from fastapi.testclient import TestClient
-    from app.main import app
-
-    ANALYSIS_ID = "00000000-0000-0000-0000-000000000099"
+@pytest.mark.asyncio
+async def test_inject_compounds_service_reports_cached():
+    """inject_compounds_service surfaces the persistence cache count in its response."""
+    from uuid import UUID
+    from app.services.manual_inputs import inject_compounds_service
+    from app.schemas.analysis import InjectCompoundsRequest
 
     mock_run = MagicMock()
+    mock_run.analysis_id = UUID("00000000-0000-0000-0000-000000000099")
     mock_run.status = "pending"
     mock_run.stage_results = {}
+    mock_run.parameters = {}
 
     mock_validated = [
         {
@@ -264,30 +266,24 @@ def test_inject_compounds_endpoint_returns_cached_field():
     ]
 
     with (
-        patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=mock_run)),
-        patch("app.repositories.analysis_repo.update_run_status", new=AsyncMock()),
-        patch("app.repositories.analysis_repo.merge_run_parameters", new=AsyncMock()),
+        patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock()),
+        patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()),
         patch(
-            "integrations.pubchem_compound.validate_compounds_batch",
+            "app.services.manual_inputs.validate_compounds_batch",
             new=AsyncMock(return_value=(mock_validated, [])),
         ),
         patch(
-            "app.services.compound_dedup.deduplicate_compounds",
+            "app.services.manual_inputs.deduplicate_compounds",
             new=AsyncMock(return_value=(["CC(=O)Oc1ccccc1C(=O)O"], [])),
         ),
         patch(
             "app.services.compound_persist.persist_validated_compounds",
             new=AsyncMock(return_value=1),
         ),
-        patch("app.database.get_session"),
     ):
-        client = TestClient(app, raise_server_exceptions=False)
-        response = client.post(
-            f"/analyses/{ANALYSIS_ID}/inject-compounds",
-            json={"compounds": ["CC(=O)Oc1ccccc1C(=O)O"]},
-        )
+        mock_session = AsyncMock()
+        request = InjectCompoundsRequest(compounds=["CC(=O)Oc1ccccc1C(=O)O"])
+        result = await inject_compounds_service(request.compounds, mock_run, mock_session)
 
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert "cached" in data, f"Response missing 'cached' key: {data}"
-    assert data["cached"] == 1
+    assert result.cached == 1
+    assert result.injected == 1

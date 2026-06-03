@@ -24,8 +24,6 @@ from app.schemas.analysis import (
     ResetFromRequest, ApproveRequest,
     AddUserTargetRequest, AddUserTargetResponse,
     AddUserCompoundRequest, AddUserCompoundResponse,
-    InjectCompoundsRequest, InjectCompoundsResponse,
-    InjectTargetsRequest, InjectTargetsResponse,
 )
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
@@ -706,39 +704,6 @@ async def import_targets(
     return ImportTargetsResponse(imported=imported, skipped=skipped)
 
 
-@router.post("/{analysis_id}/inject-compounds", response_model=InjectCompoundsResponse, status_code=200)
-async def inject_compounds(
-    analysis_id: UUID,
-    body: InjectCompoundsRequest,
-    session: AsyncSession = Depends(get_session),
-):
-    """Validate SMILES/InChI strings via PubChem and inject as stage 1+2 results.
-
-    Enables manual compound input mode (T4.3): stage 3 will read the injected
-    compounds from stage_results["stage_2"]["all_active_compound_ids"] as usual,
-    but those compound IDs belong to manually-provided structures rather than
-    plant-sourced ones. Because manual compounds are not in the compounds table,
-    stage 3 uses the inline target-lookup path (ChEMBL/PubChem by InChIKey).
-
-    After injection the endpoint:
-    1. Deduplicates submitted compounds by PubChem CID — within batch and against
-       any compounds already in stage_1 results.
-    2. Stores stage_1 and stage_2 synthetic results in stage_results.
-    3. Sets _input_mode = "manual_compounds" in parameters.
-
-    Returns a summary with injected/duplicates_removed/duplicate_names.
-    The frontend is responsible for then starting the pipeline.
-    """
-    run = await analysis_repo.get_run(session, analysis_id)
-    if run is None:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-    if run.status not in ("pending", "failed"):
-        raise HTTPException(status_code=409, detail="Analysis already running or complete")
-
-    from app.services.manual_inputs import inject_compounds_service
-    return await inject_compounds_service(body.compounds, run, session)
-
-
 @router.post("/{analysis_id}/user-compounds", response_model=AddUserCompoundResponse, status_code=200)
 async def add_user_compound(
     analysis_id: UUID,
@@ -982,40 +947,6 @@ async def add_user_disease_target(
         uniprot_id=info.uniprot_accession,
         protein_name=info.protein_name,
     )
-
-
-@router.post("/{analysis_id}/inject-targets", response_model=InjectTargetsResponse, status_code=200)
-async def inject_targets(
-    analysis_id: UUID,
-    body: InjectTargetsRequest,
-    session: AsyncSession = Depends(get_session),
-):
-    """Validate gene symbols or UniProt accessions via UniProt and inject as stage 3 results.
-
-    Enables manual target input mode (T4.4): stages 1–3 are skipped and stage 4
-    is the first real stage. The synthetic stage_3 result stores the validated targets
-    in the format stage 5 reads (target_gene_symbols) and stage 4 ignores stage 3 entirely.
-
-    After injection the endpoint:
-    1. Deduplicates submitted targets by UniProt accession — within batch and
-       against targets already in stage_3 results.
-    2. Stores a synthetic stage_3 result in stage_results.
-    3. Sets _input_mode = "manual_targets" in parameters.
-
-    Returns a summary with injected/failed/duplicates_removed/duplicate_names.
-    The frontend is responsible for then starting the pipeline.
-    """
-    import re as _re
-    _INJECT_TARGETS_ALLOWED = _re.compile(r"^(pending|failed|stage_[1-4]_awaiting_approval)$")
-
-    run = await analysis_repo.get_run(session, analysis_id)
-    if run is None:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-    if not _INJECT_TARGETS_ALLOWED.match(run.status or ""):
-        raise HTTPException(status_code=409, detail="Analysis already running or complete")
-
-    from app.services.manual_inputs import inject_targets_service
-    return await inject_targets_service(body.targets, body.skip_validation, run, session)
 
 
 @router.delete("/{analysis_id}/disease-targets/{gene_symbol}", status_code=204)

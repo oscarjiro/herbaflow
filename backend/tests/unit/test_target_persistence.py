@@ -197,13 +197,13 @@ async def test_persist_validated_targets_db_error_returns_zero():
 
 
 @pytest.mark.asyncio
-async def test_inject_targets_endpoint_reports_cached():
-    """inject_targets validated path calls the cache and surfaces its count."""
-    from app.routers.analyses import inject_targets
+async def test_inject_targets_validated_path_reports_cached():
+    """inject_targets_service validated path calls the cache and surfaces its count."""
+    from app.services.manual_inputs import inject_targets_service
     from app.schemas.analysis import InjectTargetsRequest
 
-    ANALYSIS_UUID = UUID("00000000-0000-0000-0000-000000000044")
     run = MagicMock()
+    run.analysis_id = UUID("00000000-0000-0000-0000-000000000044")
     run.status = "pending"
     run.parameters = {}
     run.stage_results = {}
@@ -213,15 +213,14 @@ async def test_inject_targets_endpoint_reports_cached():
     tp53.uniprot_accession = "P04637"
     tp53.protein_name = "Cellular tumor antigen p53"
 
-    with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53)), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=1)) as mock_cache:
 
         mock_session = AsyncMock()
         request = InjectTargetsRequest(targets=["TP53"])
-        result = await inject_targets(ANALYSIS_UUID, request, mock_session)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
 
     assert result.injected == 1
     assert result.cached == 1
@@ -249,7 +248,7 @@ def test_inject_targets_response_has_normalized_and_unrecognized_fields():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_normalizes_symbols():
     """Lenient mode resolves an alias to canonical HGNC and reports the change."""
-    from app.routers.analyses import inject_targets
+    from app.services.manual_inputs import inject_targets_service
     from app.schemas.analysis import InjectTargetsRequest
     import app.services.gene_symbols as gs
 
@@ -257,8 +256,8 @@ async def test_inject_targets_lenient_normalizes_symbols():
         "TNFA": {"symbol": "TNF", "kind": "alias"},
         "TP53": {"symbol": "TP53", "kind": "approved"},
     }
-    ANALYSIS_UUID = UUID("00000000-0000-0000-0000-000000000055")
     run = MagicMock()
+    run.analysis_id = UUID("00000000-0000-0000-0000-000000000055")
     run.status = "pending"
     run.parameters = {}
     run.stage_results = {}
@@ -269,12 +268,11 @@ async def test_inject_targets_lenient_normalizes_symbols():
         captured["stage3"] = stage_results["stage_3"]
         return run
 
-    with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=_capture_status)), \
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=_capture_status)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["TNFA", "TP53"], skip_validation=True)
-        result = await inject_targets(ANALYSIS_UUID, request, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
 
     assert result.injected == 2
     assert {"from": "TNFA", "to": "TNF"} in result.normalized
@@ -287,22 +285,22 @@ async def test_inject_targets_lenient_normalizes_symbols():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_dedups_alias_and_canonical():
     """Submitting an alias and its canonical collapses to one target after normalization."""
-    from app.routers.analyses import inject_targets
+    from app.services.manual_inputs import inject_targets_service
     from app.schemas.analysis import InjectTargetsRequest
     import app.services.gene_symbols as gs
 
     gs._MAP = {"TNFA": {"symbol": "TNF", "kind": "alias"}, "TNF": {"symbol": "TNF", "kind": "approved"}}
     run = MagicMock()
+    run.analysis_id = UUID("00000000-0000-0000-0000-000000000056")
     run.status = "pending"
     run.parameters = {}
     run.stage_results = {}
 
-    with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["TNF", "TNFA"], skip_validation=True)
-        result = await inject_targets(UUID("00000000-0000-0000-0000-000000000056"), request, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
 
     assert result.injected == 1
     assert result.duplicates_removed == 1
@@ -312,22 +310,22 @@ async def test_inject_targets_lenient_dedups_alias_and_canonical():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_unknown_kept_and_flagged():
     """An unknown symbol is kept (injected) but reported in unrecognized[]."""
-    from app.routers.analyses import inject_targets
+    from app.services.manual_inputs import inject_targets_service
     from app.schemas.analysis import InjectTargetsRequest
     import app.services.gene_symbols as gs
 
     gs._MAP = {"TP53": {"symbol": "TP53", "kind": "approved"}}
     run = MagicMock()
+    run.analysis_id = UUID("00000000-0000-0000-0000-000000000057")
     run.status = "pending"
     run.parameters = {}
     run.stage_results = {}
 
-    with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["ZZZ9"], skip_validation=True)
-        result = await inject_targets(UUID("00000000-0000-0000-0000-000000000057"), request, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
 
     assert result.injected == 1
     assert result.unrecognized == ["ZZZ9"]
@@ -337,7 +335,7 @@ async def test_inject_targets_lenient_unknown_kept_and_flagged():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_accession_routes_to_uniprot():
     """A UniProt accession in lenient mode is resolved via UniProt, not the offline map."""
-    from app.routers.analyses import inject_targets
+    from app.services.manual_inputs import inject_targets_service
     from app.schemas.analysis import InjectTargetsRequest
     import app.services.gene_symbols as gs
 
@@ -348,17 +346,17 @@ async def test_inject_targets_lenient_accession_routes_to_uniprot():
     info.protein_name = "Cellular tumor antigen p53"
 
     run = MagicMock()
+    run.analysis_id = UUID("00000000-0000-0000-0000-000000000058")
     run.status = "pending"
     run.parameters = {}
     run.stage_results = {}
 
-    with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=info)) as mock_val, \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=1)):
         request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
-        result = await inject_targets(UUID("00000000-0000-0000-0000-000000000058"), request, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
 
     mock_val.assert_awaited_once()
     assert result.injected == 1
@@ -368,24 +366,24 @@ async def test_inject_targets_lenient_accession_routes_to_uniprot():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_accession_uniprot_down_kept_no_503():
     """If UniProt is unavailable for an accession in lenient mode, keep+flag (no 503)."""
-    from app.routers.analyses import inject_targets
+    from app.services.manual_inputs import inject_targets_service
     from app.schemas.analysis import InjectTargetsRequest
     from integrations._retry import ServiceUnavailableError
     import app.services.gene_symbols as gs
 
     gs._MAP = {}
     run = MagicMock()
+    run.analysis_id = UUID("00000000-0000-0000-0000-000000000059")
     run.status = "pending"
     run.parameters = {}
     run.stage_results = {}
 
-    with patch("app.routers.analyses.analysis_repo.get_run", new=AsyncMock(return_value=run)), \
-         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
          patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(side_effect=ServiceUnavailableError("down"))), \
          patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
-        result = await inject_targets(UUID("00000000-0000-0000-0000-000000000059"), request, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
 
     assert result.injected == 1
     assert "P04637" in result.unrecognized

@@ -1,11 +1,11 @@
-"""Unit tests for inject-compounds validation and user-compound add/remove endpoints.
+"""Unit tests for inject-compounds request validation, user-compound add/remove
+endpoints, and the compound deduplication service.
 
 Tests:
 1. Empty compounds list → Pydantic ValidationError (min_length=1)
 2. Compounds list exceeding HARD_CAP_MANUAL_COMPOUNDS items → Pydantic ValidationError
-3. HTTP boundary: POST /analyses/{id}/inject-compounds with [] → HTTP 422
-4. POST /analyses/{id}/user-compounds adds a compound to stage_1 results
-5. DELETE /analyses/{id}/user-compounds/{compound_id} removes a compound from stage_1
+3. POST /analyses/{id}/user-compounds adds a compound to stage_1 results
+4. DELETE /analyses/{id}/user-compounds/{compound_id} removes a compound from stage_1
 """
 import httpx
 import pytest
@@ -52,44 +52,7 @@ def test_inject_compounds_over_limit_raises_validation_error():
 
 
 # ---------------------------------------------------------------------------
-# Test 3: HTTP boundary — over HARD_CAP items → HTTP 422
-# ---------------------------------------------------------------------------
-
-
-def test_inject_compounds_over_hard_cap_returns_422():
-    """POST /analyses/{id}/inject-compounds with > HARD_CAP_MANUAL_COMPOUNDS items returns 422."""
-    too_many = ["CC"] * (HARD_CAP_MANUAL_COMPOUNDS + 1)
-    client = TestClient(app, raise_server_exceptions=False)
-    response = client.post(
-        f"/analyses/{ANALYSIS_ID}/inject-compounds",
-        json={"compounds": too_many},
-    )
-    assert response.status_code == 422
-
-
-# ---------------------------------------------------------------------------
-# Test 4: HTTP boundary — empty list → HTTP 422
-# ---------------------------------------------------------------------------
-
-
-def test_inject_compounds_http_empty_list_returns_422():
-    """Sending compounds=[] over HTTP must produce a 422 response.
-
-    This confirms FastAPI's request/response boundary: the Pydantic
-    ValidationError from InjectCompoundsRequest (min_length=1) is
-    automatically converted to HTTP 422 before the route handler runs.
-    No mocking required — validation fires before the handler is called.
-    """
-    client = TestClient(app, raise_server_exceptions=False)
-    response = client.post(
-        f"/analyses/{ANALYSIS_ID}/inject-compounds",
-        json={"compounds": []},
-    )
-    assert response.status_code == 422
-
-
-# ---------------------------------------------------------------------------
-# Test 4: POST /analyses/{id}/user-compounds adds a compound to stage_1
+# Test 3: POST /analyses/{id}/user-compounds adds a compound to stage_1
 # ---------------------------------------------------------------------------
 
 _ASPIRIN_SMILES = "CC(=O)Oc1ccccc1C(=O)O"

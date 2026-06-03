@@ -123,9 +123,9 @@ async def test_dedup_against_existing_ids():
 
 @pytest.mark.asyncio
 async def test_dedup_response_summary_fields():
-    """inject_targets endpoint must return duplicates_removed and duplicate_names."""
-    from uuid import UUID
-    from app.schemas.analysis import InjectTargetsRequest, InjectTargetsResponse
+    """inject_targets_service must return duplicates_removed and duplicate_names."""
+    from app.schemas.analysis import InjectTargetsRequest
+    from app.services.manual_inputs import inject_targets_service
 
     run = _make_run(status="pending")
     captured_stage_results: dict = {}
@@ -144,22 +144,20 @@ async def test_dedup_response_summary_fields():
         return egfr_target
 
     # Submit TP53 and its accession P04637 — should deduplicate to 1
-    with patch("app.routers.analyses.analysis_repo.get_run",
-               new=AsyncMock(return_value=run)), \
-         patch("app.routers.analyses.analysis_repo.update_run_status",
+    with patch("app.services.manual_inputs.analysis_repo.update_run_status",
                new=AsyncMock(side_effect=fake_update)), \
-         patch("app.routers.analyses.analysis_repo.merge_run_parameters",
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters",
                new=AsyncMock()), \
          patch("app.services.target_dedup.validate_human_target",
                new=AsyncMock(side_effect=fake_validate)), \
-         patch("app.routers.analyses.validate_human_target",
-               new=AsyncMock(side_effect=fake_validate)):
-
-        from app.routers.analyses import inject_targets
+         patch("app.services.manual_inputs.validate_human_target",
+               new=AsyncMock(side_effect=fake_validate)), \
+         patch("app.services.target_persist.persist_validated_targets",
+               new=AsyncMock(return_value=0)):
 
         mock_session = AsyncMock()
         request = InjectTargetsRequest(targets=["TP53", "P04637"])
-        result = await inject_targets(UUID(ANALYSIS_ID), request, mock_session)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
 
     # Response must have dedup summary fields
     assert hasattr(result, "duplicates_removed"), "Response missing duplicates_removed"
