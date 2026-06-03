@@ -333,6 +333,12 @@ async def export_stage_results(
     if stage_data is None:
         raise HTTPException(status_code=404, detail=f"Stage {stage} results not found")
 
+    if isinstance(stage_data, dict) and stage_data.get("state") == "not_applicable":
+        raise HTTPException(
+            status_code=422,
+            detail=f"Stage {stage} not applicable for this analysis mode",
+        )
+
     if format == "json":
         content = json.dumps(stage_data, indent=2)
         return StreamingResponse(
