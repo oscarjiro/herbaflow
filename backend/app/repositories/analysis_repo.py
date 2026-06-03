@@ -35,6 +35,18 @@ async def get_run(session: AsyncSession, analysis_id: UUID) -> AnalysisRun | Non
     return result.first()
 
 
+async def get_run_locked(session: AsyncSession, analysis_id: UUID) -> AnalysisRun | None:
+    """Fetch the run with a row-level write lock (SELECT ... FOR UPDATE).
+
+    The caller must perform its check-and-write inside the same session/transaction
+    so concurrent mutators serialize instead of clobbering each other's JSONB merges.
+    """
+    result = await session.exec(
+        select(AnalysisRun).where(AnalysisRun.analysis_id == analysis_id).with_for_update()
+    )
+    return result.first()
+
+
 async def delete_run(session: AsyncSession, analysis_id: UUID) -> None:
     """Delete an analysis run row (used to roll back a create whose manual-input
     injection failed, so no orphan 'pending' run is left behind)."""
@@ -62,7 +74,7 @@ async def reset_run_from_stage(
     If param_overrides provided, merge into run.parameters before clearing results.
     Dict values are deep-merged; non-dict values are replaced.
     """
-    run = await get_run(session, analysis_id)
+    run = await get_run_locked(session, analysis_id)
 
     # Apply param overrides BEFORE clearing stage results
     if param_overrides:
@@ -104,7 +116,7 @@ async def merge_run_parameters(
     Used by approve_stage to pre-configure the next stage before it runs.
     Dict values are deep-merged; non-dict values are replaced.
     """
-    run = await get_run(session, analysis_id)
+    run = await get_run_locked(session, analysis_id)
     merged = dict(run.parameters or {})
     for key, val in param_overrides.items():
         if isinstance(val, dict) and isinstance(merged.get(key), dict):
@@ -126,7 +138,7 @@ async def update_run_status(
     error_message: str | None = None,
     completed: bool = False,
 ) -> AnalysisRun:
-    run = await get_run(session, analysis_id)
+    run = await get_run_locked(session, analysis_id)
     run.status = status
     run.updated_at = datetime.utcnow()
     if current_stage is not None:

@@ -114,7 +114,7 @@ async def test_reset_run_from_stage_no_overrides_preserves_params():
     session.commit = AsyncMock()
     session.refresh = AsyncMock()
 
-    with patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=run)):
+    with patch("app.repositories.analysis_repo.get_run_locked", new=AsyncMock(return_value=run)):
         result = await reset_run_from_stage(session, run.analysis_id, from_stage=2)
 
     # Parameters unchanged
@@ -139,7 +139,7 @@ async def test_reset_run_from_stage_with_overrides_merges_params():
 
     overrides = {"adme": {"max_mw": 600.0}}
 
-    with patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=run)):
+    with patch("app.repositories.analysis_repo.get_run_locked", new=AsyncMock(return_value=run)):
         result = await reset_run_from_stage(
             session, run.analysis_id, from_stage=2, param_overrides=overrides
         )
@@ -162,7 +162,7 @@ async def test_reset_run_from_stage_status_set_correctly_for_stage_gt_1():
     session.commit = AsyncMock()
     session.refresh = AsyncMock()
 
-    with patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=run)):
+    with patch("app.repositories.analysis_repo.get_run_locked", new=AsyncMock(return_value=run)):
         result = await reset_run_from_stage(session, run.analysis_id, from_stage=3)
 
     assert result.status == "stage_2_awaiting_approval"
@@ -185,7 +185,7 @@ async def test_reset_run_from_stage_stage_1_sets_pending():
     session.commit = AsyncMock()
     session.refresh = AsyncMock()
 
-    with patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=run)):
+    with patch("app.repositories.analysis_repo.get_run_locked", new=AsyncMock(return_value=run)):
         result = await reset_run_from_stage(session, run.analysis_id, from_stage=1)
 
     assert result.status == "pending"
