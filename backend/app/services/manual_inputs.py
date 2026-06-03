@@ -114,45 +114,15 @@ async def inject_compounds_service(
         "compounds": stage1_compounds,
         # Store full property data for downstream use (inchikey, mw, etc.)
         "_manual_compounds": validated,
-    }
-
-    # Build stage_2 synthetic result — mimics stage2_adme.run() output.
-    pass_count = sum(1 for c in validated if c.get("adme_pass"))
-    stage2_compounds = [
-        {
-            "compound_id": c["compound_id"],
-            "canonical_name": c["canonical_name"],
-            "plant_ids": [],
-            "adme_pass": c["adme_pass"],
-            "is_np_exception": c["is_np_exception"],
-            "is_pains_positive": c["is_pains_positive"],
-            "molecular_weight": c["molecular_weight"],
-            "logp": c["logp"],
-            "tpsa": c["tpsa"],
-            "hbond_donors": c["hbond_donors"],
-            "hbond_acceptors": c["hbond_acceptors"],
-            "np_likeness_score": c["np_likeness_score"],
-            "rotatable_bonds": c["rotatable_bonds"],
-        }
-        for c in validated
-    ]
-    # Stage 3 reads all_active_compound_ids from stage_2 to get its work list.
-    # For manual input all validated compounds are "active" (ADME filter already applied).
-    stage2_result = {
-        "passed": pass_count,
-        "failed": len(validated) - pass_count,
-        "np_exceptions": 0,
-        "passed_compound_ids": [c["compound_id"] for c in validated if c.get("adme_pass")],
-        "np_exception_compound_ids": [],
-        "all_active_compound_ids": compound_ids,  # stage 3 reads this
-        "compounds": stage2_compounds,
+        "state": "user_provided",
+        "inputs": {"rejected": failed, "normalized": [], "unrecognized": []},
     }
 
     await analysis_repo.update_run_status(
         session,
         analysis_id,
         status=run.status,  # leave status unchanged — pipeline not started yet
-        stage_results={"stage_1": stage1_result, "stage_2": stage2_result},
+        stage_results={"stage_1": stage1_result},
     )
     # Persist manual_compound_ids so stage2_adme.run() can identify them and
     # apply the ADME bypass when apply_adme_to_manual=False.  Merge with any

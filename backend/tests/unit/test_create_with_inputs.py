@@ -114,3 +114,71 @@ async def test_all_invalid_compounds_deletes_run_and_422_no_schedule():
     assert ei.value.status_code == 422
     assert deleted == [run.analysis_id]
     assert scheduled == []
+
+
+# ---------------------------------------------------------------------------
+# Test: inject_compounds_service stamps stage_1 as user_provided + inputs;
+#       the synthetic stage_2 must NOT be written.
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_inject_compounds_stamps_user_provided_and_drops_stage2():
+    """stage_1 gains state='user_provided' + inputs.rejected; stage_2 is never written."""
+    from unittest.mock import MagicMock, patch
+    from app.services.manual_inputs import inject_compounds_service
+
+    run = MagicMock()
+    run.analysis_id = uuid.uuid4()
+    run.status = "pending"
+    run.stage_results = {}
+    run.parameters = {}
+
+    # One validated compound, one failed raw string
+    validated_compound = {
+        "compound_id": str(uuid.uuid4()),
+        "canonical_name": "Ethanol",
+        "canonical_key": "pubchem:702",
+        "pubchem_cid": 702,
+        "adme_pass": True,
+        "is_np_exception": False,
+        "is_pains_positive": False,
+        "molecular_weight": 46.07,
+        "logp": -0.14,
+        "tpsa": 20.23,
+        "hbond_donors": 1,
+        "hbond_acceptors": 1,
+        "np_likeness_score": -1.0,
+        "rotatable_bonds": 0,
+    }
+    failed_input = "BADINPUT"
+
+    written_stage_results: dict = {}
+
+    async def fake_update(session, analysis_id, status, **kwargs):
+        if "stage_results" in kwargs:
+            written_stage_results.update(kwargs["stage_results"])
+
+    mock_session = MagicMock()
+
+    with patch("app.services.manual_inputs.validate_compounds_batch",
+               new=AsyncMock(return_value=([validated_compound], [failed_input]))), \
+         patch("app.services.manual_inputs.deduplicate_compounds",
+               new=AsyncMock(return_value=(["ETHANOL", failed_input], []))), \
+         patch("app.services.manual_inputs.analysis_repo.update_run_status",
+               new=AsyncMock(side_effect=fake_update)), \
+         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters",
+               new=AsyncMock()), \
+         patch("app.services.compound_persist.persist_validated_compounds",
+               new=AsyncMock(return_value=0)):
+
+        await inject_compounds_service(
+            compounds=["ETHANOL", failed_input],
+            run=run,
+            session=mock_session,
+        )
+
+    stage1 = written_stage_results.get("stage_1", {})
+
+    assert stage1["state"] == "user_provided"
+    assert stage1["inputs"]["rejected"] == ["BADINPUT"]
+    assert "stage_2" not in written_stage_results  # synthetic stage_2 dropped
