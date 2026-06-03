@@ -18,6 +18,9 @@ import { Stage5Panel } from '@/components/stages/Stage5Panel'
 import { Stage6Panel } from '@/components/stages/Stage6Panel'
 import { Stage7Panel } from '@/components/stages/Stage7Panel'
 import { Stage8Panel } from '@/components/stages/Stage8Panel'
+import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
+import { UserProvidedNotice } from '@/components/shared/UserProvidedNotice'
+import { getStageState, getStageInputs } from '@/types/api'
 import type { AnalysisStatusResponse, AnalysisRunResponse } from '@/types/api'
 
 // ============================================================================
@@ -66,6 +69,13 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
     return <EmptyState message={`Stage ${stage} is not available`} />
   }
 
+  const stageResult = analysis?.stage_results[`stage_${stage}`]
+  const stageState = getStageState(stageResult)
+
+  if (stageState === 'not_applicable') {
+    return <SkippedStageNotice />
+  }
+
   const isStageFailed =
     status?.current_stage === stage &&
     status?.status === `stage_${stage}_failed`
@@ -96,6 +106,9 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
 
   return (
     <div>
+      {stageState === 'user_provided' && (
+        <UserProvidedNotice inputs={getStageInputs(stageResult)} />
+      )}
       <StageComponent
         stage={stage}
         analysis={analysis}
