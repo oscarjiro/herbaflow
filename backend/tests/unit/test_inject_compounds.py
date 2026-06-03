@@ -116,13 +116,22 @@ def test_add_user_compound_to_stage1():
     """POST /analyses/{id}/user-compounds adds a compound to stage_1 results.
 
     The endpoint requires stage_1 results to exist before compounds can be added,
-    so we supply a minimal (empty) stage_1 in the mock run.
+    so we supply a minimal (empty) stage_1 in the mock run. The endpoint validates
+    via PubChem first (no lock held), guards existence via the unlocked ``get_run``,
+    then commits the stage_1 merge through ``merge_stage_results_locked`` in one
+    locked transaction — so we patch those two repo calls.
     """
     mock_run = _make_mock_run(stage1=_STAGE1_EMPTY)
 
+    async def _fake_merge(session, analysis_id, mutate, status=None):
+        # Mirror the real primitive: apply the mutate closure to the CURRENT
+        # stage_results under the lock, then return the run.
+        mock_run.stage_results = mutate(dict(mock_run.stage_results or {}))
+        return mock_run
+
     with (
-        patch("app.repositories.analysis_repo.get_run_locked", new=AsyncMock(return_value=mock_run)),
-        patch("app.repositories.analysis_repo.update_run_status", new=AsyncMock()),
+        patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=mock_run)),
+        patch("app.repositories.analysis_repo.merge_stage_results_locked", new=AsyncMock(side_effect=_fake_merge)),
         patch(
             "integrations.pubchem_compound.validate_compound",
             new=AsyncMock(return_value=_MOCK_COMPOUND),

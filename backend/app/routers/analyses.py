@@ -732,14 +732,7 @@ async def add_user_compound(
     import httpx
     from integrations.pubchem_compound import validate_compound
 
-    run = await analysis_repo.get_run_locked(session, analysis_id)
-    if not run:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-
-    stage1 = (run.stage_results or {}).get("stage_1")
-    if not stage1:
-        raise HTTPException(status_code=400, detail="Stage 1 results not available")
-
+    # Validate via PubChem FIRST — before taking any row lock (no lock held across the network call)
     structure = body.smiles or body.inchi
     async with httpx.AsyncClient(timeout=20.0) as client:
         try:
@@ -754,30 +747,35 @@ async def add_user_compound(
     if not validated:
         raise HTTPException(status_code=400, detail="Invalid compound structure: not found in PubChem")
 
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    if not (run.stage_results or {}).get("stage_1"):
+        raise HTTPException(status_code=400, detail="Stage 1 results not available")
+
     # Populate smiles from request body (PubChem does not return canonical SMILES
     # via the property endpoint we use, so fall back to what the user provided).
     if body.smiles:
         validated["smiles"] = body.smiles
 
-    # Merge into stage_1 compounds (stage1 guard already confirmed it exists above)
-    stage1 = dict(stage1)
-    existing_ids = {c["compound_id"] for c in stage1.get("compounds", [])}
-    if validated["compound_id"] not in existing_ids:
-        stage1.setdefault("compounds", []).append({
-            "compound_id": validated["compound_id"],
-            "canonical_name": validated["canonical_name"],
-            "plant_ids": [],
-        })
-    stage1["compound_ids"] = [c["compound_id"] for c in stage1["compounds"]]
-    stage1["total_compounds"] = len(stage1["compounds"])
-    stage1["compound_count"] = len(stage1["compounds"])
-    stage1["user_modified"] = True
+    def _merge(current: dict) -> dict:
+        stage1 = dict(current.get("stage_1") or {})
+        existing_ids = {c["compound_id"] for c in stage1.get("compounds", [])}
+        if validated["compound_id"] not in existing_ids:
+            stage1.setdefault("compounds", []).append({
+                "compound_id": validated["compound_id"],
+                "canonical_name": validated["canonical_name"],
+                "plant_ids": [],
+            })
+        stage1["compound_ids"] = [c["compound_id"] for c in stage1["compounds"]]
+        stage1["total_compounds"] = len(stage1["compounds"])
+        stage1["compound_count"] = len(stage1["compounds"])
+        stage1["user_modified"] = True
+        return {**current, "stage_1": stage1}
 
-    await analysis_repo.update_run_status(
-        session, analysis_id,
-        status=run.status,
-        stage_results={"stage_1": stage1},
-    )
+    updated = await analysis_repo.merge_stage_results_locked(session, analysis_id, _merge)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Analysis not found")
     return AddUserCompoundResponse(
         compound_id=validated["compound_id"],
         canonical_name=validated["canonical_name"],
@@ -826,13 +824,7 @@ async def add_user_target(
     session: AsyncSession = Depends(get_session),
 ):
     """Add a user-provided target to Stage 3 results. Validates via UniProt."""
-    run = await analysis_repo.get_run_locked(session, analysis_id)
-    if not run:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-    stage3 = (run.stage_results or {}).get("stage_3")
-    if not stage3:
-        raise HTTPException(status_code=400, detail="Stage 3 results not available")
-
+    # Validate via UniProt FIRST — before taking any row lock (no lock held across the network call)
     try:
         info = await validate_human_target(body.gene_symbol, body.uniprot_id)
     except ServiceUnavailableError as exc:
@@ -847,7 +839,13 @@ async def add_user_target(
             raise HTTPException(status_code=422, detail=UNIPROT_TARGET_NOT_FOUND)
         raise HTTPException(status_code=422, detail=UNIPROT_VALIDATION_FAILED)
 
-    # Upsert Target row (canonical cache — permanent)
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    if not (run.stage_results or {}).get("stage_3"):
+        raise HTTPException(status_code=400, detail="Stage 3 results not available")
+
+    # Upsert Target row (canonical cache — permanent; no commit, merged below)
     target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
     await persist_canonical_target([Target(
         target_id=target_id,
@@ -858,18 +856,26 @@ async def add_user_target(
         retrieved_at=datetime.utcnow(),
     )], session)
 
+    def _merge(current: dict) -> dict:
+        stage3 = current.get("stage_3")
+        if not stage3:
+            raise HTTPException(status_code=400, detail="Stage 3 results not available")
+        return {
+            **current,
+            "stage_3": _add_target_to_stage3(
+                stage3, info.gene_symbol, info.uniprot_accession, info.protein_name
+            ),
+        }
+
     try:
-        updated = _add_target_to_stage3(stage3, info.gene_symbol, info.uniprot_accession, info.protein_name)
+        updated = await analysis_repo.merge_stage_results_locked(session, analysis_id, _merge)
+        if updated is None:
+            raise HTTPException(status_code=404, detail="Analysis not found")
     except ValueError as exc:
+        await session.rollback()
         logger.warning("Duplicate target rejected for stage 3: %s", exc)
         raise HTTPException(status_code=409, detail=TARGET_ALREADY_EXISTS)
 
-    await session.commit()
-    await analysis_repo.update_run_status(
-        session, analysis_id,
-        status=run.status,
-        stage_results={"stage_3": updated},
-    )
     return AddUserTargetResponse(
         target_id=target_id,
         gene_symbol=info.gene_symbol,
@@ -913,13 +919,7 @@ async def add_user_disease_target(
     session: AsyncSession = Depends(get_session),
 ):
     """Add a user-provided target to Stage 4 (disease targets) results. Validates via UniProt."""
-    run = await analysis_repo.get_run_locked(session, analysis_id)
-    if not run:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-    stage4 = (run.stage_results or {}).get("stage_4")
-    if not stage4:
-        raise HTTPException(status_code=400, detail="Stage 4 results not available")
-
+    # Validate via UniProt FIRST — before taking any row lock (no lock held across the network call)
     try:
         info = await validate_human_target(body.gene_symbol, body.uniprot_id)
     except ServiceUnavailableError as exc:
@@ -934,7 +934,13 @@ async def add_user_disease_target(
             raise HTTPException(status_code=422, detail=UNIPROT_TARGET_NOT_FOUND)
         raise HTTPException(status_code=422, detail=UNIPROT_VALIDATION_FAILED)
 
-    # Upsert Target row (canonical cache — permanent)
+    run = await analysis_repo.get_run(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    if not (run.stage_results or {}).get("stage_4"):
+        raise HTTPException(status_code=400, detail="Stage 4 results not available")
+
+    # Upsert Target row (canonical cache — permanent; no commit, merged below)
     target_id = _make_target_id(info.uniprot_accession, info.gene_symbol)
     await persist_canonical_target([Target(
         target_id=target_id,
@@ -945,20 +951,26 @@ async def add_user_disease_target(
         retrieved_at=datetime.utcnow(),
     )], session)
 
+    def _merge(current: dict) -> dict:
+        stage4 = current.get("stage_4")
+        if not stage4:
+            raise HTTPException(status_code=400, detail="Stage 4 results not available")
+        return {
+            **current,
+            "stage_4": _add_target_to_stage4(
+                stage4, info.gene_symbol, info.uniprot_accession, info.protein_name
+            ),
+        }
+
     try:
-        updated = _add_target_to_stage4(
-            stage4, info.gene_symbol, info.uniprot_accession, info.protein_name
-        )
+        updated = await analysis_repo.merge_stage_results_locked(session, analysis_id, _merge)
+        if updated is None:
+            raise HTTPException(status_code=404, detail="Analysis not found")
     except ValueError as exc:
+        await session.rollback()
         logger.warning("Duplicate target rejected for stage 4: %s", exc)
         raise HTTPException(status_code=409, detail=TARGET_ALREADY_EXISTS)
 
-    await session.commit()
-    await analysis_repo.update_run_status(
-        session, analysis_id,
-        status=run.status,
-        stage_results={"stage_4": updated},
-    )
     return AddUserTargetResponse(
         target_id=target_id,
         gene_symbol=info.gene_symbol,
