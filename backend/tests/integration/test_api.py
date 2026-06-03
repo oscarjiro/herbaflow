@@ -28,7 +28,7 @@ async def test_list_plants_has_compounds(client):
     assert any(p["compound_count"] > 0 for p in plants)
 
 
-async def test_create_analysis_returns_pending(client):
+async def test_create_analysis_returns_pending(client, created_runs):
     # Get a real plant_id to use
     plants_resp = await client.get("/plants?limit=1")
     plant_id = plants_resp.json()[0]["plant_id"]
@@ -47,6 +47,7 @@ async def test_create_analysis_returns_pending(client):
     data = resp.json()
     assert data["status"] == "pending"
     assert "analysis_id" in data
+    created_runs.append(UUID(data["analysis_id"]))
 
 
 # ── Plant detail ───────────────────────────────────────────────────────────────
@@ -142,7 +143,7 @@ async def test_list_analyses(client):
     assert isinstance(resp.json(), list)
 
 
-async def test_get_analysis_detail(client):
+async def test_get_analysis_detail(client, created_runs):
     plants_resp = await client.get("/plants?limit=1")
     plant_id = plants_resp.json()[0]["plant_id"]
     disease_id = (await client.get("/diseases")).json()[0]["disease_id"]
@@ -156,6 +157,7 @@ async def test_get_analysis_detail(client):
     })
     assert create_resp.status_code == 201
     analysis_id = create_resp.json()["analysis_id"]
+    created_runs.append(UUID(analysis_id))
 
     resp = await client.get(f"/analyses/{analysis_id}")
     assert resp.status_code == 200
@@ -165,7 +167,7 @@ async def test_get_analysis_detail(client):
     assert "mode" in data
 
 
-async def test_get_analysis_status(client):
+async def test_get_analysis_status(client, created_runs):
     plants_resp = await client.get("/plants?limit=1")
     plant_id = plants_resp.json()[0]["plant_id"]
     disease_id = (await client.get("/diseases")).json()[0]["disease_id"]
@@ -178,6 +180,7 @@ async def test_get_analysis_status(client):
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]
+    created_runs.append(UUID(analysis_id))
 
     resp = await client.get(f"/analyses/{analysis_id}/status")
     assert resp.status_code == 200
@@ -194,7 +197,7 @@ async def test_get_analysis_404(client):
 
 # ── Analyses: approve returns 400 when not awaiting ───────────────────────────
 
-async def test_approve_when_not_awaiting_returns_400(client):
+async def test_approve_when_not_awaiting_returns_400(client, created_runs):
     plants_resp = await client.get("/plants?limit=1")
     plant_id = plants_resp.json()[0]["plant_id"]
     disease_id = (await client.get("/diseases")).json()[0]["disease_id"]
@@ -207,6 +210,7 @@ async def test_approve_when_not_awaiting_returns_400(client):
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]
+    created_runs.append(UUID(analysis_id))
     # Reject stage 1 (status → stage_1_rejected, not awaiting)
     reject_resp = await client.post(f"/analyses/{analysis_id}/reject")
     assert reject_resp.status_code == 200
@@ -242,7 +246,7 @@ async def test_delete_analysis(client):
 
 # ── Analyses: reject returns 400 when not awaiting ────────────────────────────
 
-async def test_reject_when_not_awaiting_returns_400(client):
+async def test_reject_when_not_awaiting_returns_400(client, created_runs):
     plants_resp = await client.get("/plants?limit=1")
     plant_id = plants_resp.json()[0]["plant_id"]
     disease_id = (await client.get("/diseases")).json()[0]["disease_id"]
@@ -255,6 +259,7 @@ async def test_reject_when_not_awaiting_returns_400(client):
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]
+    created_runs.append(UUID(analysis_id))
     # First reject succeeds (stage_1_awaiting_approval → stage_1_rejected)
     first_reject = await client.post(f"/analyses/{analysis_id}/reject")
     assert first_reject.status_code == 200
@@ -265,7 +270,7 @@ async def test_reject_when_not_awaiting_returns_400(client):
 
 # ── Analyses: export stage not yet run returns 404 ────────────────────────────
 
-async def test_export_stage_not_run_returns_404(client):
+async def test_export_stage_not_run_returns_404(client, created_runs):
     plants_resp = await client.get("/plants?limit=1")
     plant_id = plants_resp.json()[0]["plant_id"]
     disease_id = (await client.get("/diseases")).json()[0]["disease_id"]
@@ -278,6 +283,7 @@ async def test_export_stage_not_run_returns_404(client):
         "parameters": {},
     })
     analysis_id = create_resp.json()["analysis_id"]
+    created_runs.append(UUID(analysis_id))
 
     # No stages have run, so stage_8 results don't exist
     resp = await client.get(f"/analyses/{analysis_id}/export/8")
