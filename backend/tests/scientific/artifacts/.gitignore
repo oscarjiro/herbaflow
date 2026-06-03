@@ -1,0 +1,3 @@
+# Per-run golden-dataset artifacts are reproducible; do not commit them.
+*
+!.gitignore
