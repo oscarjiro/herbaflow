@@ -5,6 +5,7 @@ import React from 'react'
 import { server } from '@/mocks/node'
 import { http, HttpResponse } from 'msw'
 import { useStartAnalysis } from '@/hooks/useStartAnalysis'
+import { api } from '@/lib/api'
 
 // Mock react-router-dom navigate
 const mockNavigate = vi.fn()
@@ -92,4 +93,22 @@ describe('useStartAnalysis', () => {
   // now fail the create call at the backend boundary (surfaced via isError),
   // so the former create->inject two-call hook tests are removed here rather
   // than rewritten against the old endpoints.
+})
+
+describe('single create call', () => {
+  it('api exposes no inject wrappers', () => {
+    expect((api as Record<string, unknown>).injectCompounds).toBeUndefined()
+    expect((api as Record<string, unknown>).injectTargets).toBeUndefined()
+  })
+
+  it('createAnalysis is called exactly once carrying inline inputs', async () => {
+    const createSpy = vi.spyOn(api, 'createAnalysis')
+      .mockResolvedValue({ analysis_id: 'a1' } as never)
+    await api.createAnalysis({
+      name: 'n', mode: 'guided', plant_ids: [], disease_id: 'd1',
+      parameters: {} as never, compounds: ['CCO'],
+    })
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    createSpy.mockRestore()
+  })
 })

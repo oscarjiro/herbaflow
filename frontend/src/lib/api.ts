@@ -12,10 +12,6 @@ import type {
   AddUserTargetResponse,
   AddUserCompoundRequest,
   AddUserCompoundResponse,
-  InjectCompoundsRequest,
-  InjectCompoundsResponse,
-  InjectTargetsRequest,
-  InjectTargetsResponse,
 } from '@/types/api'
 
 export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -168,21 +164,4 @@ export const api = {
     return res.json()
   },
 
-  // Inject manually-provided SMILES/InChI strings as stage 1+2 results
-  injectCompounds(analysisId: string, compounds: string[]): Promise<InjectCompoundsResponse> {
-    const body: InjectCompoundsRequest = { compounds }
-    return request(`/analyses/${analysisId}/inject-compounds`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-    })
-  },
-
-  // Inject manually-provided gene symbols or UniProt accessions as stage 3 results
-  injectTargets(analysisId: string, targets: string[]): Promise<InjectTargetsResponse> {
-    const body: InjectTargetsRequest = { targets }
-    return request(`/analyses/${analysisId}/inject-targets`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-    })
-  },
 }
