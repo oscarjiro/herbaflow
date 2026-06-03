@@ -19,26 +19,49 @@ from urllib3.util.retry import Retry
 # =========================================================
 # CONFIG
 # =========================================================
+# Cheap, side-effect-free constants stay at module level.
 URL = "https://www.knapsackfamily.com/KNApSAcK_World/search.php?cn=IDN&wd=&flg="
 BASE_URL = "https://www.knapsackfamily.com/KNApSAcK_World/"
 
-_cfg = load_settings("knapsack")
-OUTPUT_DIR = ETL_ROOT / _cfg["paths"]["output_dir"]
-PLANTS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_file"]
-COMPOUNDS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_compounds_file"]
-FAILED_PAGES_LOG = OUTPUT_DIR / _cfg["paths"]["failed_pages_log"]
+# Runtime state (config, derived paths, logger, scraper settings) is populated
+# lazily by init_runtime() — called from main(), never at import — so that
+# importing this module has ZERO filesystem side effects.
+_cfg = None
+OUTPUT_DIR = None
+PLANTS_CSV = None
+COMPOUNDS_CSV = None
+FAILED_PAGES_LOG = None
+log = None
+REQUEST_DELAY = None
+TIMEOUT = None
+MAX_RETRIES = None
+HEADERS = None
 
-ensure_dir(OUTPUT_DIR)
 
-log = setup_logging("knapsack", _cfg)
+def init_runtime():
+    """Build paths, logger, and scraper settings, populating the module-level
+    runtime globals. Called from main() — NOT at import — so importing this
+    module performs no config read, directory creation, or logging setup."""
+    global _cfg, OUTPUT_DIR, PLANTS_CSV, COMPOUNDS_CSV, FAILED_PAGES_LOG
+    global log, REQUEST_DELAY, TIMEOUT, MAX_RETRIES, HEADERS
 
-REQUEST_DELAY = _cfg["scraper"]["request_delay_seconds"]
-TIMEOUT = _cfg["scraper"]["timeout_seconds"]
-MAX_RETRIES = _cfg["scraper"]["max_retries"]
+    _cfg = load_settings("knapsack")
+    OUTPUT_DIR = ETL_ROOT / _cfg["paths"]["output_dir"]
+    PLANTS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_file"]
+    COMPOUNDS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_compounds_file"]
+    FAILED_PAGES_LOG = OUTPUT_DIR / _cfg["paths"]["failed_pages_log"]
 
-HEADERS = {
-    "User-Agent": _cfg["scraper"]["user_agent"]
-}
+    ensure_dir(OUTPUT_DIR)
+
+    log = setup_logging("knapsack", _cfg)
+
+    REQUEST_DELAY = _cfg["scraper"]["request_delay_seconds"]
+    TIMEOUT = _cfg["scraper"]["timeout_seconds"]
+    MAX_RETRIES = _cfg["scraper"]["max_retries"]
+
+    HEADERS = {
+        "User-Agent": _cfg["scraper"]["user_agent"]
+    }
 
 
 # ========================================================
@@ -389,6 +412,7 @@ def scrape_detail_page(session: requests.Session, detail_url: str, plant_id: int
 # MAIN
 # =========================================================
 def main():
+    init_runtime()
     args = parse_args()
     session = make_session()
 
