@@ -291,7 +291,7 @@ export default function SetupPage() {
               }}
               rows={6}
               data-testid="compounds-textarea"
-              className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y border-0"
+              className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none resize-y border-0"
               placeholder={"CC(=O)Oc1ccccc1C(=O)O\nInChI=1S/C9H8O4/..."}
             />
           </div>
@@ -332,7 +332,7 @@ export default function SetupPage() {
               }}
               rows={6}
               data-testid="targets-textarea"
-              className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y border-0"
+              className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none resize-y border-0"
               placeholder={"TP53\nBRCA1\nP04637"}
             />
           </div>
@@ -379,7 +379,7 @@ export default function SetupPage() {
               placeholder={"TP53\nBRCA1\nP04637"}
               rows={6}
               data-testid="disease-targets-textarea"
-              className="w-full rounded-md border bg-hf-bg text-hf-fg1 text-sm p-3 font-mono placeholder:text-hf-fg3 focus:outline-none focus:ring-1 focus:ring-hf-accent resize-y border-hf-border"
+              className="w-full rounded-md border bg-hf-bg text-hf-fg1 text-sm p-3 font-mono placeholder:text-hf-fg3 focus:outline-none resize-y border-hf-border"
             />
             {formErrors.disease_targets ? (
               <p className="text-xs text-hf-danger mt-1">{formErrors.disease_targets}</p>
