@@ -252,6 +252,40 @@ async def approve_stage(
     return {"status": f"stage_{next_stage}_starting", "next_stage": next_stage}
 
 
+@router.post("/{analysis_id}/retry-enrichment")
+async def retry_enrichment(
+    analysis_id: UUID,
+    background_tasks: BackgroundTasks,
+    session: AsyncSession = Depends(get_session),
+):
+    """Re-run ONLY Stage 8 (enrichment) for a complete-but-degraded run.
+
+    Stage 8 (g:Profiler enrichment) is supplementary: when the provider is down
+    the run still completes with ``stage_8.degraded=True``. This lets the user
+    retry just enrichment without re-running the whole pipeline. Because Stage 8
+    is the last stage, the background task overwrites ``stage_8`` with a fresh
+    (non-degraded) result and sets the run back to ``complete`` on success.
+
+    The row lock from ``get_run_locked`` is released when this request's session
+    closes — BEFORE the background task runs — mirroring the approve endpoint to
+    avoid a FOR UPDATE deadlock against the background task's own session.
+    """
+    run = await analysis_repo.get_run_locked(session, analysis_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    if run.status != "complete":
+        raise HTTPException(status_code=400, detail="Analysis is not complete")
+    stage8 = (run.stage_results or {}).get("stage_8", {})
+    if not stage8.get("degraded"):
+        raise HTTPException(status_code=400, detail="Stage 8 enrichment is not degraded")
+
+    await analysis_repo.update_run_status(
+        session, analysis_id, status="stage_8_running", current_stage=8,
+    )
+    background_tasks.add_task(run_stage, analysis_id, 8, async_session_factory)
+    return {"status": "stage_8_running"}
+
+
 @router.post("/{analysis_id}/reject")
 async def reject_stage(
     analysis_id: UUID,
