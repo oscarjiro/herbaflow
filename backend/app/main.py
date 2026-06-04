@@ -2,6 +2,8 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -75,4 +77,13 @@ app.include_router(analyses.router)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "version": "0.1.0"}
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+    except Exception:
+        logger.warning("Health check: database unreachable")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "degraded", "database": "unavailable", "version": "0.1.0"},
+        )
+    return {"status": "ok", "database": "ok", "version": "0.1.0"}
