@@ -159,6 +159,14 @@ class CreateAnalysisRequest(BaseModel):
     manual_disease_targets: list[str] | None = Field(
         default=None, max_length=HARD_CAP_DISEASE_TARGETS,
         description="Manual disease-side gene symbols / UniProt accessions (bypasses Open Targets).")
+    skip_validation: bool = Field(
+        default=False,
+        description=(
+            "Lenient injection for manual `targets`: skip the per-symbol UniProt round-trip and "
+            "normalize gene symbols offline to canonical HGNC symbols (unknowns kept and flagged). "
+            "UniProt accessions are still resolved via UniProt. Default False keeps strict validation."
+        ),
+    )
 
     @field_validator("mode")
     @classmethod

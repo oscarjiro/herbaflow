@@ -1,4 +1,5 @@
 # backend/tests/unit/test_create_with_inputs.py
+import types
 import uuid
 from unittest.mock import AsyncMock, patch
 import pytest
@@ -58,6 +59,31 @@ async def test_standard_mode_schedules_without_inject():
         await analyses.create_analysis(None, body, FakeBG(), session=AsyncMock())
 
     assert len(scheduled) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("skip", [True, False])
+async def test_create_forwards_skip_validation_to_inject_targets(skip):
+    """The request's skip_validation flag reaches inject_targets_service so a caller can
+    opt into lenient offline-HGNC injection instead of the strict UniProt round-trip."""
+    captured = {}
+
+    async def fake_inject(targets, skip_validation, run, session):
+        captured["skip_validation"] = skip_validation
+        return types.SimpleNamespace(injected=len(targets))
+
+    class FakeBG:
+        def add_task(self, *a, **k): pass
+
+    from app.routers import analyses
+    with patch.object(analyses.analysis_repo, "create_run", new=AsyncMock(return_value=_fake_run())), \
+         patch("app.services.manual_inputs.inject_targets_service", new=AsyncMock(side_effect=fake_inject)):
+        body = CreateAnalysisRequest.model_validate(
+            {"name": "n", "mode": "guided", "plant_ids": [], "disease_id": "d1",
+             "targets": ["AKT1"], "skip_validation": skip, "parameters": {}})
+        await analyses.create_analysis(None, body, FakeBG(), session=AsyncMock())
+
+    assert captured["skip_validation"] is skip
 
 
 @pytest.mark.asyncio

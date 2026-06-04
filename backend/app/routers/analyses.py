@@ -145,7 +145,7 @@ async def create_analysis(
             if result.injected == 0:
                 raise HTTPException(status_code=422, detail="No valid compounds could be injected")
         if body.targets:
-            result = await inject_targets_service(body.targets, False, run, session)
+            result = await inject_targets_service(body.targets, body.skip_validation, run, session)
             if result.injected == 0:
                 raise HTTPException(status_code=422, detail="No valid targets could be injected")
     except HTTPException:
