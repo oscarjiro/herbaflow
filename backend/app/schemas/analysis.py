@@ -203,6 +203,10 @@ class AnalysisStatusResponse(BaseModel):
     updated_at: datetime | None
     error_message: str | None = None
     expires_at: datetime | None = None
+    degraded: bool = False
+    has_results: bool = True
+    retriable: bool = False
+    warnings: list[dict] = Field(default_factory=list)
 
 
 class AnalysisRunResponse(BaseModel):
@@ -218,6 +222,10 @@ class AnalysisRunResponse(BaseModel):
     completed_at: datetime | None
     expires_at: datetime | None = None
     error_message: str | None
+    degraded: bool = False
+    has_results: bool = True
+    retriable: bool = False
+    warnings: list[dict] = Field(default_factory=list)
 
 
 class AddUserTargetRequest(BaseModel):

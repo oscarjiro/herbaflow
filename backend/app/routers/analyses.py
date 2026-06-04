@@ -28,6 +28,7 @@ from app.schemas.analysis import (
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.models.target import Target, CompoundTarget
 from app.config import get_settings
+from analysis.run_health import derive_run_health
 from app.repositories import analysis_repo
 from app.security import limiter, sanitize_filename
 from analysis.pipeline import run_stage
@@ -169,7 +170,10 @@ async def create_analysis(
 @router.get("", response_model=list[AnalysisRunResponse])
 async def list_analyses(session: AsyncSession = Depends(get_session)):
     runs = await analysis_repo.list_runs(session)
-    return [AnalysisRunResponse(**r.model_dump()) for r in runs]
+    return [
+        AnalysisRunResponse(**r.model_dump(), **derive_run_health(r.stage_results, r.status))
+        for r in runs
+    ]
 
 
 @router.get("/{analysis_id}/status", response_model=AnalysisStatusResponse)
@@ -187,6 +191,7 @@ async def get_status(analysis_id: UUID, session: AsyncSession = Depends(get_sess
         updated_at=run.updated_at,
         error_message=run.error_message,
         expires_at=run.expires_at,
+        **derive_run_health(run.stage_results, run.status),
     )
 
 
@@ -201,7 +206,8 @@ async def get_analysis(analysis_id: UUID, session: AsyncSession = Depends(get_se
         expires_naive = run.expires_at.replace(tzinfo=None)
         if expires_naive < datetime.utcnow():
             raise HTTPException(status_code=410, detail="Analysis has expired")
-    return AnalysisRunResponse(**run.model_dump())
+    health = derive_run_health(run.stage_results, run.status)
+    return AnalysisRunResponse(**run.model_dump(), **health)
 
 
 @router.post("/{analysis_id}/approve")
