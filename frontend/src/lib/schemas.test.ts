@@ -12,6 +12,7 @@ import {
   nestedParamsSchema,
   nestAdvancedParams,
   capState,
+  manualFieldState,
 } from './schemas'
 import { DEFAULT_PARAMS } from '@/components/setup/AdvancedParameters'
 
@@ -187,6 +188,33 @@ describe('capState', () => {
   })
   it('labels n / hard', () => {
     expect(capState(3, 10, 20).label).toBe('3 / 20')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// manualFieldState — maps a list length to textarea messaging
+// ---------------------------------------------------------------------------
+
+describe('manualFieldState', () => {
+  it('returns only an error when over the hard cap', () => {
+    const s = manualFieldState(21, 10, 20, 'item')
+    expect(s.error).toBeTruthy()
+    expect(s.count).toBeUndefined()
+    expect(s.warning).toBeUndefined()
+  })
+  it('returns a warning (with n / hard) between soft and hard', () => {
+    const s = manualFieldState(12, 10, 20, 'item')
+    expect(s.warning).toMatch(/12 \/ 20/)
+    expect(s.error).toBeUndefined()
+  })
+  it('returns a singular count for n = 1', () => {
+    expect(manualFieldState(1, 10, 20, 'structure')).toEqual({ count: '1 structure entered' })
+  })
+  it('pluralises the noun for n > 1 below soft', () => {
+    expect(manualFieldState(3, 10, 20, 'structure')).toEqual({ count: '3 structures entered' })
+  })
+  it('returns an empty object for n = 0', () => {
+    expect(manualFieldState(0, 10, 20, 'structure')).toEqual({})
   })
 })
 

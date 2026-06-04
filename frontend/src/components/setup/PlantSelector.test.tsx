@@ -56,4 +56,25 @@ describe('PlantSelector', () => {
       screen.getByRole('button', { name: 'Remove Curcuma longa' }),
     ).toBeInTheDocument()
   })
+
+  it('shows an amber soft-cap counter and notice at the soft cap', () => {
+    const value = Array.from({ length: 10 }, (_, i) => `p${i}`)
+    render(<PlantSelector value={value} onChange={vi.fn()} />)
+    const counter = screen.getByText(/10 \/ 20/)
+    expect(counter).toHaveClass('text-hf-warning')
+    expect(counter).toHaveTextContent(/approaching/i)
+  })
+
+  it('disables unselected rows and shows the max notice at the hard cap', async () => {
+    const value = Array.from({ length: 20 }, (_, i) => `p${i}`)
+    render(<PlantSelector value={value} onChange={vi.fn()} />)
+
+    const notice = screen.getByText(/Maximum 20 plants reached/i)
+    expect(notice).toHaveClass('text-hf-warning')
+
+    await userEvent.click(screen.getByRole('combobox'))
+    // The 2 mocked fixtures are not among the 20 ids → unselected → disabled.
+    const row = screen.getByText('Curcuma longa').closest('[role="option"]')
+    expect(row).toHaveAttribute('aria-disabled', 'true')
+  })
 })

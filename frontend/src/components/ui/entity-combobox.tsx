@@ -29,6 +29,7 @@ interface EntityComboboxProps<T> {
   triggerLabel: (selectedCount: number) => string
   multi?: boolean
   isLoading?: boolean
+  disabledKey?: (item: T) => boolean
 }
 
 export function EntityCombobox<T>(p: EntityComboboxProps<T>) {
@@ -83,8 +84,15 @@ export function EntityCombobox<T>(p: EntityComboboxProps<T>) {
                 {ordered.map((item) => {
                   const key = p.getKey(item)
                   const selected = p.value.includes(key)
+                  const disabled = p.disabledKey?.(item) ?? false
                   return (
-                    <CommandItem key={key} value={key} role="option" onSelect={() => toggle(key)}>
+                    <CommandItem
+                      key={key}
+                      value={key}
+                      role="option"
+                      disabled={disabled}
+                      onSelect={() => { if (!disabled) toggle(key) }}
+                    >
                       <Check className={cn('mr-2 h-4 w-4 shrink-0', selected ? 'opacity-100' : 'opacity-0')} />
                       {p.renderRow(item)}
                     </CommandItem>

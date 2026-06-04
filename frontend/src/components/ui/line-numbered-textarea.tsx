@@ -7,6 +7,7 @@ interface LineNumberedTextareaProps {
   placeholder?: string
   rows?: number
   error?: string                       // whole-field error (border + message)
+  warning?: string                     // amber soft-cap message (no border change)
   lineErrors?: Record<number, string>  // 1-based line -> message
   count?: string                       // e.g. "12 targets entered"
   'aria-label': string
@@ -47,6 +48,8 @@ export function LineNumberedTextarea(p: LineNumberedTextareaProps) {
       </div>
       {p.error ? (
         <p className="mt-1 text-xs text-hf-danger">{p.error}</p>
+      ) : p.warning ? (
+        <p className="mt-1 text-xs text-hf-warning">{p.warning}</p>
       ) : p.count ? (
         <p className="mt-1 text-xs text-hf-fg3">{p.count}</p>
       ) : null}

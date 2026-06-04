@@ -12,7 +12,18 @@ import { useStartAnalysis } from '@/hooks/useStartAnalysis'
 import { api } from '@/lib/api'
 import { isTerminalStatus } from '@/types/api'
 import type { CreateAnalysisRequest } from '@/types/api'
-import { validateSetupForm, nestAdvancedParams, type SetupFormErrors } from '@/lib/schemas'
+import {
+  validateSetupForm,
+  nestAdvancedParams,
+  manualFieldState,
+  SOFT_CAP_MANUAL_COMPOUNDS,
+  HARD_CAP_MANUAL_COMPOUNDS,
+  SOFT_CAP_MANUAL_TARGETS,
+  HARD_CAP_MANUAL_TARGETS,
+  SOFT_CAP_DISEASE_TARGETS,
+  HARD_CAP_DISEASE_TARGETS,
+  type SetupFormErrors,
+} from '@/lib/schemas'
 
 // ============================================================================
 // Helpers
@@ -155,6 +166,11 @@ export default function SetupPage() {
   const parsedCompounds = isManualCompounds ? parseCompoundLines(compoundsRaw) : []
   const parsedTargets = isManualTargets ? parseTargetLines(targetsRaw) : []
 
+  // Live cap state per manual field (count / soft warning / hard error).
+  const compoundsCap = manualFieldState(parsedCompounds.length, SOFT_CAP_MANUAL_COMPOUNDS, HARD_CAP_MANUAL_COMPOUNDS, 'structure')
+  const targetsCap = manualFieldState(parsedTargets.length, SOFT_CAP_MANUAL_TARGETS, HARD_CAP_MANUAL_TARGETS, 'target')
+  const diseaseTargetsCap = manualFieldState(parsedDiseaseTargets.length, SOFT_CAP_DISEASE_TARGETS, HARD_CAP_DISEASE_TARGETS, 'target')
+
   // Cache restore: if there's an in-progress analysis, redirect to it
   useEffect(() => {
     const lastId = localStorage.getItem('hf_last_analysis_id')
@@ -264,8 +280,9 @@ export default function SetupPage() {
             value={compoundsRaw}
             onChange={(v) => { setCompoundsRaw(v); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
             placeholder={"CC(=O)Oc1ccccc1C(=O)O\nInChI=1S/C9H8O4/..."}
-            error={formErrors.compounds}
-            count={parsedCompounds.length > 0 ? `${parsedCompounds.length} structure${parsedCompounds.length !== 1 ? 's' : ''} entered` : undefined}
+            error={formErrors.compounds ?? compoundsCap.error}
+            warning={compoundsCap.warning}
+            count={compoundsCap.count}
           />
         ) : (
           <LineNumberedTextarea
@@ -273,8 +290,9 @@ export default function SetupPage() {
             value={targetsRaw}
             onChange={(v) => { setTargetsRaw(v); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
             placeholder={"TP53\nBRCA1\nP04637"}
-            error={formErrors.targets}
-            count={parsedTargets.length > 0 ? `${parsedTargets.length} target${parsedTargets.length !== 1 ? 's' : ''} entered` : undefined}
+            error={formErrors.targets ?? targetsCap.error}
+            warning={targetsCap.warning}
+            count={targetsCap.count}
           />
         )}
       </div>
@@ -316,8 +334,9 @@ export default function SetupPage() {
             value={diseaseTargetsRaw}
             onChange={(v) => { setDiseaseTargetsRaw(v); setFormErrors((prev) => ({ ...prev, disease_targets: undefined })) }}
             placeholder={"TP53\nBRCA1\nP04637"}
-            error={formErrors.disease_targets}
-            count={parsedDiseaseTargets.length > 0 ? `${parsedDiseaseTargets.length} target${parsedDiseaseTargets.length !== 1 ? 's' : ''} entered` : undefined}
+            error={formErrors.disease_targets ?? diseaseTargetsCap.error}
+            warning={diseaseTargetsCap.warning}
+            count={diseaseTargetsCap.count}
           />
         )}
       </div>

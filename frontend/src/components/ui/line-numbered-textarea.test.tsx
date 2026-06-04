@@ -27,4 +27,18 @@ describe('LineNumberedTextarea', () => {
     expect(screen.getByText('2 targets')).toBeInTheDocument()
     expect(screen.getByTestId('line-error-2')).toHaveTextContent('not a valid gene symbol')
   })
+  it('renders an amber warning message with the warning token', () => {
+    render(<LineNumberedTextarea value={'a'} onChange={() => {}} aria-label="x" warning="x / y soft" />)
+    const msg = screen.getByText('x / y soft')
+    expect(msg).toBeInTheDocument()
+    expect(msg).toHaveClass('text-hf-warning')
+  })
+  it('prefers the error over the warning when both are passed', () => {
+    render(
+      <LineNumberedTextarea value={'a'} onChange={() => {}} aria-label="x"
+        error="boom" warning="x / y soft" />,
+    )
+    expect(screen.getByText('boom')).toBeInTheDocument()
+    expect(screen.queryByText('x / y soft')).not.toBeInTheDocument()
+  })
 })

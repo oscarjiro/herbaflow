@@ -293,3 +293,14 @@ export function validateSetupForm(
 export function capState(count: number, soft: number, hard: number) {
   return { over: count > hard, warn: count >= soft, label: `${count} / ${hard}` }
 }
+
+/** Map a manual-list length to LineNumberedTextarea messaging given soft/hard caps. */
+export function manualFieldState(
+  n: number, soft: number, hard: number, noun: string,
+): { count?: string; warning?: string; error?: string } {
+  const s = capState(n, soft, hard)
+  if (s.over) return { error: `Over the ${hard.toLocaleString()}-${noun} limit — remove ${(n - hard).toLocaleString()}.` }
+  if (s.warn) return { warning: `${s.label} — large list; the analysis may be slow.` }
+  if (n > 0) return { count: `${n} ${noun}${n !== 1 ? 's' : ''} entered` }
+  return {}
+}

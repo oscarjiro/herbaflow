@@ -3,6 +3,8 @@ import { FlaskConical, X } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { EntityCombobox } from '@/components/ui/entity-combobox'
 import { usePlants } from '@/hooks/usePlants'
+import { capState, SOFT_CAP_PLANTS, HARD_CAP_PLANTS } from '@/lib/schemas'
+import { cn } from '@/lib/utils'
 import type { PlantResponse } from '@/types/api'
 
 interface PlantSelectorProps {
@@ -40,6 +42,14 @@ export function PlantSelector({ value, onChange }: PlantSelectorProps) {
 
   const selectedPlants = plants.filter((p) => value.includes(p.plant_id))
 
+  const cap = capState(value.length, SOFT_CAP_PLANTS, HARD_CAP_PLANTS)
+  const atHardCap = value.length >= HARD_CAP_PLANTS
+  const counterNotice = atHardCap
+    ? ` — Maximum ${HARD_CAP_PLANTS} plants reached.`
+    : cap.warn
+      ? ` — Approaching the ${HARD_CAP_PLANTS}-plant limit.`
+      : ''
+
   return (
     <div className="flex flex-col gap-2">
       <EntityCombobox<PlantResponse>
@@ -58,7 +68,12 @@ export function PlantSelector({ value, onChange }: PlantSelectorProps) {
         placeholder="Select plants..."
         triggerLabel={(n) => `${n} plant${n === 1 ? '' : 's'} selected`}
         renderRow={renderPlantRow}
+        disabledKey={(p) => value.length >= HARD_CAP_PLANTS && !value.includes(p.plant_id)}
       />
+
+      <p className={cn('text-xs', cap.warn ? 'text-hf-warning' : 'text-hf-fg3')}>
+        {cap.label} plants selected{counterNotice}
+      </p>
 
       {selectedPlants.length > 0 && (
         <div className="flex flex-wrap gap-1.5">

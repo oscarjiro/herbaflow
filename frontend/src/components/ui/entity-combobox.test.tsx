@@ -52,4 +52,28 @@ describe('EntityCombobox', () => {
     const options = screen.getAllByRole('option')
     expect(options[0]).toHaveTextContent('Zingiber officinale')
   })
+
+  it('disables rows matched by disabledKey and ignores clicks on them', async () => {
+    const onChange = vi.fn()
+    render(
+      <EntityCombobox<Row>
+        multi
+        items={items}
+        value={[]}
+        onChange={onChange}
+        getKey={(r) => r.id}
+        getLabel={(r) => r.name}
+        searchKeys={[{ name: 'name', weight: 1 }]}
+        placeholder="Select plants..."
+        triggerLabel={(n) => (n === 0 ? 'Select plants...' : `${n} selected`)}
+        renderRow={(r) => <span>{r.name}</span>}
+        disabledKey={(r) => r.id === '1'}
+      />,
+    )
+    await userEvent.click(screen.getByRole('combobox'))
+    const disabledRow = screen.getByText('Curcuma longa').closest('[role="option"]')
+    expect(disabledRow).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.click(screen.getByText('Curcuma longa'))
+    expect(onChange).not.toHaveBeenCalled()
+  })
 })
