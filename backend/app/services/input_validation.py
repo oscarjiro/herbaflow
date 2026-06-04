@@ -17,20 +17,29 @@ byte-compatible at the stage_3 contract level.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass, field
 
+import httpx
 from analysis.stages.stage3_targets import _make_target_id
 from integrations._retry import ServiceUnavailableError
+from integrations.pubchem_compound import validate_compound
 from integrations.uniprot import validate_human_target
 from sqlalchemy import func
 from sqlmodel import select
 
+from app.models.compound import Compound
 from app.models.target import Target
 from app.schemas.analysis import UNIPROT_ACCESSION_RE
 from app.services import gene_symbols
+from app.services.canonicalize import make_compound_id
+from app.services.compound_persist import persist_validated_compounds
 from app.services.target_persist import persist_validated_targets
 
 logger = logging.getLogger(__name__)
+
+# A standard InChIKey: 14 block / 10 block / 1 char (e.g. BSYNRYMUTXBXSQ-UHFFFAOYSA-N).
+_INCHIKEY_RE = re.compile(r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$")
 
 
 @dataclass
@@ -229,6 +238,207 @@ async def resolve_targets(
     # Persist only newly enriched targets that carry a UniProt accession.
     await persist_validated_targets(
         [t for t in to_persist if t.get("uniprot_id")], session
+    )
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Compound resolution
+# ---------------------------------------------------------------------------
+def _classify_compound(stripped: str) -> str:
+    """Classify an already-stripped compound input.
+
+    Returns one of ``"inchikey"`` (DB-only), ``"cid"`` (all-digits PubChem CID,
+    DB-only), or ``"structure"`` (SMILES / InChI / name → PubChem round-trip).
+    """
+    if _INCHIKEY_RE.match(stripped.upper()):
+        return "inchikey"
+    if stripped.isdigit():
+        return "cid"
+    return "structure"
+
+
+def _compound_cache_dict(row: Compound) -> dict:
+    """Build a stage_1-compatible compound dict from a cached ``Compound`` row.
+
+    Mirrors the key shape ``validate_compound`` returns so downstream stages stay
+    happy, tagged ``sources=["cache"]`` (mirrors how ``_target_dict`` marks a hit).
+    """
+    return {
+        "compound_id": row.compound_id,
+        "canonical_key": row.canonical_key,
+        "pubchem_cid": row.pubchem_cid,
+        "inchikey": row.inchi_key,
+        "iupac_name": row.canonical_name,
+        "molecular_formula": row.molecular_formula,
+        "molecular_weight": row.molecular_weight,
+        "canonical_name": row.canonical_name,
+        "plant_ids": [],
+        "adme_pass": None,
+        "is_np_exception": False,
+        "is_pains_positive": bool(row.is_pains_positive),
+        "logp": row.logp,
+        "tpsa": row.tpsa,
+        "hbond_donors": row.hbond_donors,
+        "hbond_acceptors": row.hbond_acceptors,
+        "np_likeness_score": row.np_likeness_score,
+        "rotatable_bonds": row.rotatable_bonds,
+        "mw": row.molecular_weight,
+        "xlogp": row.logp,
+        "hbd": row.hbond_donors,
+        "hba": row.hbond_acceptors,
+        "sources": ["cache"],
+    }
+
+
+async def _lookup_cached_compound(*, kind: str, key: str, session) -> Compound | None:
+    """DB-first lookup against the canonical ``compounds`` table.
+
+    ``inchikey`` matches on ``upper(inchi_key)``; ``cid`` matches on
+    ``pubchem_cid`` (exact, stored as a string).
+    """
+    if kind == "inchikey":
+        stmt = select(Compound).where(func.upper(Compound.inchi_key) == key)
+    else:
+        stmt = select(Compound).where(Compound.pubchem_cid == key)
+    result = await session.exec(stmt)
+    return result.first()
+
+
+async def _lookup_compound_by_id(*, compound_id: str, session) -> Compound | None:
+    """Look up an already-resolved compound by its canonical id (DB-first persist check)."""
+    stmt = select(Compound).where(Compound.compound_id == compound_id)
+    result = await session.exec(stmt)
+    return result.first()
+
+
+async def resolve_compounds(
+    raw_inputs: list[str],
+    *,
+    existing_keys: set[str],
+    session,
+    client: httpx.AsyncClient,
+) -> ResolveResult:
+    """Resolve a batch of raw compound inputs DB-first, then via PubChem.
+
+    Per input (1-based index):
+
+    - **InChIKey** (``^[A-Z]{14}-[A-Z]{10}-[A-Z]$``, case-insensitive) → DB-only:
+      look up by ``upper(inchi_key)``. Hit → reuse (no PubChem); miss → failed.
+    - **all-digits CID** → DB-only: look up by ``pubchem_cid``. Hit → reuse; miss
+      → failed.
+    - **else (SMILES / InChI / name)** → ``validate_compound`` EXACTLY ONCE. A dict
+      is BOTH the ``valid`` entry and the persist payload; ``None`` → failed.
+
+    Dedup is on the canonical ``compound_id`` (a UUID string, compared exactly)
+    against ``existing_keys`` and within the batch. A structure also dedups on its
+    raw text so a byte-identical repeat never triggers a second PubChem call.
+    ``reused`` counts DB cache hits (InChIKey/CID hit, or a structure whose
+    resolved compound is already cached); ``enriched`` counts structures whose
+    PubChem round-trip resolved a NEW, not-yet-cached compound.
+
+    Args:
+        raw_inputs: Raw compound strings (InChIKey, CID, SMILES, InChI, or name).
+        existing_keys: ``compound_id`` strings already present — seeds the seen set.
+        session: Async SQLModel/SQLAlchemy session.
+        client: Shared ``httpx.AsyncClient`` for PubChem lookups.
+
+    Returns:
+        A ``ResolveResult`` with the canonical dicts, per-line failures, dropped
+        duplicates, and reuse/enrichment counters. ``normalized`` is unused here.
+    """
+    result = ResolveResult()
+    # compound_id dedup keys are UUID strings — compared exactly (no upper()).
+    seen: set[str] = set(existing_keys or set())
+    # Tracks raw structure text already PubChem-resolved this batch, so a
+    # byte-identical repeat dedups without a second validate_compound call.
+    seen_structures: set[str] = set()
+    to_persist: list[dict] = []
+
+    for idx, raw in enumerate(raw_inputs, start=1):
+        stripped = (raw or "").strip()
+        if not stripped:
+            result.failed.append(LineFailure(line=idx, input=raw, reason="empty line"))
+            continue
+
+        kind = _classify_compound(stripped)
+
+        # --- InChIKey: DB-only, compute id up front to dedup before the DB call.
+        if kind == "inchikey":
+            key = stripped.upper()
+            compound_id = make_compound_id(key)
+            if compound_id in seen:
+                result.duplicates.append(raw)
+                continue
+            cached = await _lookup_cached_compound(kind="inchikey", key=key, session=session)
+            if cached is not None:
+                result.valid.append(_compound_cache_dict(cached))
+                result.reused += 1
+                seen.add(cached.compound_id)
+                continue
+            result.failed.append(
+                LineFailure(
+                    line=idx,
+                    input=raw,
+                    reason="not in cache — paste the structure to resolve via PubChem",
+                )
+            )
+            continue
+
+        # --- CID: DB-only; the canonical id is unknown until the row is found.
+        if kind == "cid":
+            cached = await _lookup_cached_compound(kind="cid", key=stripped, session=session)
+            if cached is not None:
+                if cached.compound_id in seen:
+                    result.duplicates.append(raw)
+                    continue
+                result.valid.append(_compound_cache_dict(cached))
+                result.reused += 1
+                seen.add(cached.compound_id)
+                continue
+            result.failed.append(
+                LineFailure(
+                    line=idx,
+                    input=raw,
+                    reason="not in cache — paste the structure to resolve via PubChem",
+                )
+            )
+            continue
+
+        # --- Structure (SMILES / InChI / name): one PubChem round-trip, max.
+        if stripped in seen_structures:
+            result.duplicates.append(raw)
+            continue
+
+        info = await validate_compound(stripped, client)
+        if info is None:
+            result.failed.append(
+                LineFailure(line=idx, input=raw, reason="not found in PubChem")
+            )
+            continue
+
+        seen_structures.add(stripped)
+        compound_id = info["compound_id"]
+        if compound_id in seen:
+            # Resolves to a compound already selected this batch / in existing_keys.
+            result.duplicates.append(raw)
+            continue
+        seen.add(compound_id)
+
+        # DB-first persist check: if already cached, this is reuse, not enrichment.
+        existing_row = await _lookup_compound_by_id(compound_id=compound_id, session=session)
+        if existing_row is not None:
+            result.reused += 1
+        else:
+            result.enriched += 1
+        # The single resolved dict is BOTH the valid entry and the persist payload.
+        result.valid.append(info)
+        to_persist.append(info)
+
+    # Persist only structure-resolved compounds that carry a PubChem CID.
+    await persist_validated_compounds(
+        [c for c in to_persist if c.get("pubchem_cid")], session
     )
 
     return result
