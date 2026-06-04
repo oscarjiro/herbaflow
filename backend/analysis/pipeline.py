@@ -3,6 +3,7 @@ import logging
 from uuid import UUID
 from sqlalchemy.orm import sessionmaker
 
+from app.config import get_settings
 from app.repositories import analysis_repo
 from app.security import client_error_message
 from integrations._retry import ServiceUnavailableError
@@ -20,6 +21,25 @@ from analysis.stages import (
 )
 
 logger = logging.getLogger(__name__)
+
+HEARTBEAT_INTERVAL_SECONDS = get_settings().heartbeat_interval_seconds
+
+
+async def _heartbeat_loop(
+    analysis_id: UUID,
+    session_factory: sessionmaker,
+) -> None:
+    """Periodically bump the run's updated_at while a stage executes so a reaper can
+    distinguish a live-but-slow run from a dead one. Reads the module-global interval
+    each iteration so tests can monkeypatch it. Best-effort: a failed write is logged,
+    never raised, so the ticker keeps running."""
+    while True:
+        await asyncio.sleep(HEARTBEAT_INTERVAL_SECONDS)
+        try:
+            async with session_factory() as session:
+                await analysis_repo.touch_heartbeat(session, analysis_id)
+        except Exception:
+            logger.warning("Heartbeat write failed for analysis %s", analysis_id)
 
 STAGE_RUNNERS = {
     1: stage1_selection.run,
@@ -73,10 +93,14 @@ async def run_stage(
         )
 
     try:
-        async with session_factory() as session:
-            run = await analysis_repo.get_run(session, analysis_id)
-            stage_result = await stage_fn(run, config, session)
-            stage_result.setdefault("state", stage_state.COMPUTED)
+        hb = asyncio.create_task(_heartbeat_loop(analysis_id, session_factory))
+        try:
+            async with session_factory() as session:
+                run = await analysis_repo.get_run(session, analysis_id)
+                stage_result = await stage_fn(run, config, session)
+                stage_result.setdefault("state", stage_state.COMPUTED)
+        finally:
+            hb.cancel()
 
         async with session_factory() as session:
             run = await analysis_repo.get_run(session, analysis_id)
