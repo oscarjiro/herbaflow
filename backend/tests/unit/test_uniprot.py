@@ -69,6 +69,25 @@ async def test_search_by_gene_resolves_human_symbol(httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_search_by_gene_restricts_to_reviewed_swissprot(httpx_mock):
+    """Gene search restricts to reviewed (Swiss-Prot) entries for the canonical accession.
+
+    Without ``reviewed:true``, UniProt's relevance sort with size=1 can return an
+    unreviewed TrEMBL fragment first (live: EGFR -> C9JYS6, TP53 -> S4R334 instead
+    of canonical P00533 / P04637). The reviewed filter pins the canonical entry.
+    """
+    httpx_mock.add_response(json=_AKT1_SEARCH_RESPONSE)
+
+    await validate_human_target("EGFR", None)
+
+    req = httpx_mock.get_requests()[0]
+    query = req.url.params.get("query")
+    assert query is not None and "reviewed:true" in query, (
+        f"search query must restrict to reviewed entries, got: {query!r}"
+    )
+
+
+@pytest.mark.asyncio
 async def test_lookup_by_accession_malformed_gives_clear_message(httpx_mock):
     """A malformed accession (UniProt 400) surfaces a clear 'invalid format' message.
 

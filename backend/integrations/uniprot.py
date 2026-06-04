@@ -95,7 +95,13 @@ async def _search_by_gene(client: httpx.AsyncClient, gene_symbol: str) -> UniPro
             r = await client.get(
                 f"{UNIPROT_BASE}/search",
                 params={
-                    "query": f"gene_exact:{gene_symbol} AND organism_id:{HUMAN_TAXON_ID}",
+                    # reviewed:true restricts to Swiss-Prot. Without it, UniProt's
+                    # relevance sort with size=1 can return an unreviewed TrEMBL
+                    # fragment first (e.g. EGFR -> C9JYS6 not canonical P00533).
+                    "query": (
+                        f"gene_exact:{gene_symbol} "
+                        f"AND organism_id:{HUMAN_TAXON_ID} AND reviewed:true"
+                    ),
                     # NB: 'organism' is NOT a valid UniProt return field (valid:
                     # organism_name/organism_id) and triggers HTTP 400. Human-ness
                     # is already guaranteed by the organism_id:9606 query filter,

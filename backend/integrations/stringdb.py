@@ -75,7 +75,9 @@ async def get_ppi_network(
             combined_score=combined,
             experimental_score=float(row.get("escore", 0)),
             textmining_score=float(row.get("tscore", 0)),
-            coexpression_score=float(row.get("coexpression_score", 0)),
+            # STRING's JSON network API names coexpression "ascore"
+            # (escore=experimental, tscore=textmining, ascore=coexpression).
+            coexpression_score=float(row.get("ascore", 0)),
         ))
 
     return edges

@@ -42,7 +42,9 @@ def _make_edge_row(
         "score": score,
         "escore": escore,
         "tscore": tscore,
-        "coexpression_score": coexpression_score,
+        # STRING's JSON network API names coexpression "ascore" (not
+        # "coexpression_score") — mirror the real response key.
+        "ascore": coexpression_score,
     }
 
 
