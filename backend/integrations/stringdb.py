@@ -53,9 +53,9 @@ async def get_ppi_network(
                 return r
 
             resp = await with_retry(_fetch_string, service_name="STRING-DB")
-        except ServiceUnavailableError as exc:
-            logger.error("STRING-DB unavailable after retries: %s", exc)
-            return []
+        except ServiceUnavailableError:
+            logger.error("STRING-DB unavailable after retries for %d genes", len(gene_symbols))
+            raise
         except httpx.HTTPError as exc:
             logger.error("STRING-DB HTTP error for %d genes: %s", len(gene_symbols), exc)
             return []

@@ -215,18 +215,15 @@ async def test_get_ppi_network_excludes_self_loops():
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-async def test_get_ppi_network_returns_empty_on_service_unavailable():
-    """ServiceUnavailableError after retries returns empty list, no exception."""
+async def test_get_ppi_network_raises_when_provider_unavailable(httpx_mock):
+    """ServiceUnavailableError propagates to caller after retries exhaust."""
     from integrations._retry import ServiceUnavailableError
 
-    with patch("httpx.AsyncClient"):
-        with patch(
-            "integrations.stringdb.with_retry",
-            side_effect=ServiceUnavailableError("STRING-DB", last_status=503),
-        ):
-            result = await get_ppi_network(["AKT1", "TP53"])
-
-    assert result == []
+    # with_retry default: max_retries=3 → 4 total attempts.
+    for _ in range(4):
+        httpx_mock.add_response(status_code=503)
+    with pytest.raises(ServiceUnavailableError):
+        await get_ppi_network(["TP53", "EGFR"], min_confidence=0.4)
 
 
 @pytest.mark.asyncio
