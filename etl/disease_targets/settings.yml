@@ -26,15 +26,12 @@ api:
 filtering:
     min_association_score: 0.10
     organism_tax_id: 9606
-    require_uniprot: false
     uniprot_coverage_warn_threshold: 0.60
 
 validation:
     fail_on: []
     warn_on:
         - low_uniprot_coverage
-    strict_mode: true
 
 export:
     format: csv
-    sql_schema: public

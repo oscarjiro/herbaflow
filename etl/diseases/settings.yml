@@ -17,8 +17,6 @@ paths:
 validation:
   fail_on: []
   warn_on: []
-  strict_mode: true
-  allow_missing_ontology_id: true
   near_duplicate_threshold: 0.92
 
 export:

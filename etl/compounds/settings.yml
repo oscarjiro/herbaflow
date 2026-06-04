@@ -28,21 +28,6 @@ validation:
     enabled: true
     thresholds:
         min_compound_confidence_to_auto_accept: 0.70
-        min_join_confidence_to_keep: 0.50
-        min_alias_confidence_to_keep: 0.30
-        max_orphan_plant_join_ratio: 0.00
-        max_missing_identifier_ratio: 0.20
-        max_duplicate_canonical_key_ratio: 0.00
-    checks:
-        require_compound_id: true
-        require_canonical_key: true
-        require_canonical_name: true
-        require_at_least_one_identifier: true
-        require_no_duplicate_compound_ids: true
-        require_no_duplicate_join_rows: true
-        require_join_plant_id_exists: true
-        require_join_compound_id_exists: true
-        allow_review_queue: true
 
 export:
     format: csv
@@ -53,270 +38,28 @@ enrichment:
     pubchem:
         enabled: true
         base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
-        compound_lookup_endpoint: /compound/name
-        cid_lookup_endpoint: /compound/cid
-        synonym_lookup_endpoint: /compound/synonyms
-        property_endpoint: /compound/cid/property
         source_name: PubChem
         timeout_seconds: 30
         max_retries: 4
-        retry_backoff_seconds: 2
         request_delay_seconds: 0.3
         cache_responses: true
 
     chembl:
         enabled: true
         base_url: https://www.ebi.ac.uk/chembl/api/data
-        molecule_lookup_endpoint: /molecule
         source_name: ChEMBL
         timeout_seconds: 30
         max_retries: 4
-        retry_backoff_seconds: 2
         request_delay_seconds: 0.3
         cache_responses: true
 
-    # Optional identity sources may be added later, but seed-layer enrichment should stay stable.
-    allow_optional_sources: false
-
 matching:
-    # Normalization and matching settings.
-    normalize_whitespace: true
-    normalize_unicode: true
-    lowercase_lookup_keys: true
-    strip_punctuation_for_keys: true
-    collapse_separators: true
-
-    # Chemical identifier handling.
-    cas:
-        preserve_original_format: true
-        normalize_hyphenation: true
-        validate_checksum: true
-
     # Matching thresholds.
-    exact_name_match_required_for_auto_accept: false
     high_confidence_threshold: 0.90
     medium_confidence_threshold: 0.70
-    review_confidence_threshold: 0.50
-
-    # Identifier-based confidence logic.
-    pubchem_cid_exact_match_weight: 1.0
-    inchikey_exact_match_weight: 1.0
-    chembl_id_exact_match_weight: 0.95
-    cas_exact_match_weight: 0.85
-    name_only_match_weight: 0.60
-
-    # Deduplication rules.
-    deduplicate_by:
-        - inchikey
-        - pubchem_cid
-        - chembl_id
-        - canonical_name
-    prefer:
-        canonical_name_source_priority:
-            - PubChem
-            - ChEMBL
-            - KNApSAcK
-        canonical_identifier_priority:
-            - inchikey
-            - pubchem_cid
-            - chembl_id
-            - cas_id
 
 sql_export:
     enabled: false
-    dialect: postgresql
     schema: public
     quote_identifiers: false
-    include_drop_statements: false
-    include_create_table_statements: true
-    include_copy_statements: false
-    include_upsert_statements: true
-    conflict_target:
-        compounds: compound_id
-        compound_aliases: compound_alias_id
-        plant_compounds: plant_compound_id
-    foreign_keys:
-        enabled: true
-        defer_constraints: true
-    statement_order:
-        - compounds
-        - compound_aliases
-        - plant_compounds
-        - compound_review
 
-tables:
-    # Canonical table names used by the compound ETL outputs.
-    compounds:
-        table_name: compounds
-        output_file: compounds.csv
-        key_column: compound_id
-        preferred_column_order:
-            - compound_id
-            - canonical_key
-            - canonical_name
-            - inchi_key
-            - smiles
-            - cas_id
-            - pubchem_cid
-            - chembl_id
-            - molecular_formula
-            - molecular_weight
-            - source_name
-            - source_url
-            - source_batch_id
-            - retrieved_at
-            - confidence
-            - match_status
-            - notes
-
-    compound_aliases:
-        table_name: compound_aliases
-        output_file: compound_aliases.csv
-        key_column: compound_alias_id
-        preferred_column_order:
-            - compound_alias_id
-            - compound_id
-            - alias_name
-            - alias_key
-            - alias_type
-            - source_name
-            - source_url
-            - source_batch_id
-            - retrieved_at
-            - confidence
-            - notes
-
-    plant_compounds:
-        table_name: plant_compounds
-        output_file: plant_compounds.csv
-        key_column: plant_compound_id
-        preferred_column_order:
-            - plant_compound_id
-            - plant_id
-            - compound_id
-            - source_plant_raw_id
-            - source_compound_raw_id
-            - source_name
-            - evidence_type
-            - confidence
-            - source_batch_id
-            - retrieved_at
-            - notes
-
-    compound_matches:
-        table_name: compound_matches
-        output_file: compound_matches.csv
-        key_column: compound_match_id
-        preferred_column_order:
-            - compound_match_id
-            - source_compound_raw_id
-            - raw_metabolite_name
-            - normalized_name
-            - match_status
-            - matched_name
-            - matched_identifier
-            - matched_identifier_type
-            - confidence
-            - source_name
-            - source_url
-            - source_batch_id
-            - retrieved_at
-            - notes
-
-    compound_review:
-        table_name: compound_review
-        output_file: compound_review.csv
-        key_column: compound_review_id
-        preferred_column_order:
-            - compound_review_id
-            - source_compound_raw_id
-            - raw_metabolite_name
-            - normalized_name
-            - reason
-            - suggested_action
-            - confidence
-            - source_name
-            - source_batch_id
-            - retrieved_at
-            - notes
-
-columns:
-    raw_source:
-        plant_id: plant_id
-        compound_id: c_id
-        cas_id: cas_id
-        metabolite_name: metabolite
-        molecular_formula: molecular_formula
-        molecular_weight: mw
-        organism: organism
-
-    normalized:
-        raw_plant_id: source_plant_raw_id
-        raw_compound_id: source_compound_raw_id
-        raw_metabolite_name: raw_metabolite_name
-        normalized_metabolite_name: normalized_metabolite_name
-        metabolite_key: metabolite_key
-        cas_normalized: cas_normalized
-        compound_key: compound_key
-        plant_key: plant_key
-
-    canonical:
-        compound_id: compound_id
-        canonical_key: canonical_key
-        canonical_name: canonical_name
-        inchi_key: inchi_key
-        smiles: smiles
-        cas_id: cas_id
-        pubchem_cid: pubchem_cid
-        chembl_id: chembl_id
-        molecular_formula: molecular_formula
-        molecular_weight: molecular_weight
-        source_name: source_name
-        source_url: source_url
-        source_batch_id: source_batch_id
-        retrieved_at: retrieved_at
-        confidence: confidence
-
-    aliases:
-        compound_alias_id: compound_alias_id
-        compound_id: compound_id
-        alias_name: alias_name
-        alias_key: alias_key
-        alias_type: alias_type
-        source_name: source_name
-        source_url: source_url
-        source_batch_id: source_batch_id
-        retrieved_at: retrieved_at
-
-    joins:
-        plant_compound_id: plant_compound_id
-        plant_id: plant_id
-        compound_id: compound_id
-        source_plant_raw_id: source_plant_raw_id
-        source_compound_raw_id: source_compound_raw_id
-        source_name: source_name
-        evidence_type: evidence_type
-        confidence: confidence
-        source_batch_id: source_batch_id
-        retrieved_at: retrieved_at
-
-cli:
-    default_from_step: 01_extract
-    default_to_step: 06_export
-    stop_on_failure: true
-    verbose: true
-    dry_run: false
-    files:
-        preserve_raw_input: true
-        write_step_manifests: true
-        write_run_manifest: true
-        write_hash_manifest: true
-
-extensibility:
-    # Keep this module easy to extend later for disease ETL.
-    shared_conventions:
-        use_canonical_keys: true
-        use_source_provenance: true
-        use_stepwise_out_dirs: true
-        use_cache_dirs_for_api_calls: true
-        use_review_tables_for_uncertain_matches: true
