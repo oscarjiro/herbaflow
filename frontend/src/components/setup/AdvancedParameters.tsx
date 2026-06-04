@@ -128,7 +128,7 @@ interface CheckboxFieldProps {
   onChange: (v: boolean) => void
 }
 
-function CheckboxField({ label, value, onChange }: CheckboxFieldProps) {
+export function CheckboxField({ label, value, onChange }: CheckboxFieldProps) {
   return (
     <div className="flex items-center gap-2">
       <input

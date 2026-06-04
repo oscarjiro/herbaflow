@@ -122,6 +122,28 @@ describe('SetupPage — manual compound input mode', () => {
     expect(screen.getByText(/Stages 1–2 skipped/i)).toBeInTheDocument()
     expect(screen.getByLabelText('Compounds')).toBeInTheDocument()
   })
+
+  // ---------------------------------------------------------------------------
+  // Test: contextual ADME checkbox next to manual compounds textarea
+  // ---------------------------------------------------------------------------
+
+  it('renders a checked ADME checkbox next to the compounds textarea and toggles it', async () => {
+    await renderSetupPage()
+
+    fireEvent.click(screen.getByTestId('input-mode-manual'))
+
+    // Checkbox should be present with the contextual label
+    const checkbox = screen.getByRole('checkbox', {
+      name: /apply adme screening to these compounds/i,
+    })
+    expect(checkbox).toBeInTheDocument()
+    // DEFAULT_PARAMS.apply_adme_to_manual is true
+    expect(checkbox).toBeChecked()
+
+    // Clicking unchecks it
+    fireEvent.click(checkbox)
+    expect(checkbox).not.toBeChecked()
+  })
 })
 
 // ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@ import { LineNumberedTextarea } from '@/components/ui/line-numbered-textarea'
 import { PlantSelector } from '@/components/setup/PlantSelector'
 import { DiseaseSelector } from '@/components/setup/DiseaseSelector'
 import { ModeToggle } from '@/components/setup/ModeToggle'
-import { AdvancedParameters, DEFAULT_PARAMS } from '@/components/setup/AdvancedParameters'
+import { AdvancedParameters, CheckboxField, DEFAULT_PARAMS } from '@/components/setup/AdvancedParameters'
 import type { AdvancedParams } from '@/components/setup/AdvancedParameters'
 import { useStartAnalysis } from '@/hooks/useStartAnalysis'
 import { api } from '@/lib/api'
@@ -281,16 +281,25 @@ export default function SetupPage() {
             )}
           </div>
         ) : isManualCompounds ? (
-          <LineNumberedTextarea
-            aria-label="Compounds"
-            value={compoundsRaw}
-            onChange={(v) => { setCompoundsRaw(v); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
-            placeholder={"CC(=O)Oc1ccccc1C(=O)O\nInChI=1S/C9H8O4/..."}
-            error={formErrors.compounds ?? compoundsCap.error}
-            warning={compoundsCap.warning}
-            count={compoundsCap.count}
-            lineErrors={compoundsLineErrors}
-          />
+          <>
+            <LineNumberedTextarea
+              aria-label="Compounds"
+              value={compoundsRaw}
+              onChange={(v) => { setCompoundsRaw(v); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
+              placeholder={"CC(=O)Oc1ccccc1C(=O)O\nInChI=1S/C9H8O4/..."}
+              error={formErrors.compounds ?? compoundsCap.error}
+              warning={compoundsCap.warning}
+              count={compoundsCap.count}
+              lineErrors={compoundsLineErrors}
+            />
+            <div className="mt-2">
+              <CheckboxField
+                label="Apply ADME screening to these compounds"
+                value={params.apply_adme_to_manual}
+                onChange={(v) => setParams((p) => ({ ...p, apply_adme_to_manual: v }))}
+              />
+            </div>
+          </>
         ) : (
           <LineNumberedTextarea
             aria-label="Targets"
