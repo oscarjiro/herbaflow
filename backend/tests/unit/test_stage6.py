@@ -196,3 +196,20 @@ async def test_stage6_isolated_genes_get_singleton_community_not_counted():
         return sorted(tuple(sorted(s)) for s in groups.values())
 
     assert grouping(iso) == grouping(base)
+
+
+async def test_stage6_propagates_string_outage():
+    """STRING-DB ServiceUnavailableError must bubble out of stage 6 run()."""
+    from integrations._retry import ServiceUnavailableError
+
+    run = make_run(overlap=["TP53", "EGFR"])
+    config = PipelineConfig()
+    session = AsyncMock()
+
+    with patch(
+        "analysis.stages.stage6_ppi.get_ppi_network",
+        side_effect=ServiceUnavailableError("STRING-DB", 503),
+    ):
+        import pytest
+        with pytest.raises(ServiceUnavailableError):
+            await stage6_ppi.run(run, config, session)
