@@ -168,3 +168,25 @@ async def test_stage8_global_enrichment_deduplicated_genes():
 
     ge = result["global_enrichment"]
     assert len(ge["hub_genes_queried"]) == len(set(ge["hub_genes_queried"]))
+
+
+import pytest
+from integrations._retry import ServiceUnavailableError
+
+
+@pytest.mark.asyncio
+async def test_stage8_degrades_when_gprofiler_unavailable():
+    run = type("R", (), {"stage_results": {
+        "stage_7": {"ranked": [{"gene_symbol": "TP53", "community_id": 0}]},
+        "stage_3": {"target_gene_symbols": ["TP53", "EGFR"]},
+    }})()
+    config = PipelineConfig.from_dict({})
+    with patch.object(
+        stage8_enrichment, "run_enrichment",
+        side_effect=ServiceUnavailableError("g:Profiler", 503),
+    ):
+        result = await stage8_enrichment.run(run, config, session=None)
+    assert result["degraded"] is True
+    assert result["warning"]["provider"] == "g:Profiler"
+    assert result["total_significant"] == 0
+    assert result["go_bp"] == []
