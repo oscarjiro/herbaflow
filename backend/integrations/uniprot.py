@@ -48,8 +48,11 @@ async def _lookup_by_accession(client: httpx.AsyncClient, accession: str) -> Uni
     try:
         async def _fetch() -> httpx.Response:
             r = await client.get(f"{UNIPROT_BASE}/{accession}.json")
-            if r.status_code == 404:
-                return r  # caller checks 404 — not a retriable error
+            # 404 = well-formed but unknown accession; 400 = malformed accession.
+            # Both are non-retriable client errors the caller maps to a clear
+            # message, so return them instead of raising for_status.
+            if r.status_code in (400, 404):
+                return r
             r.raise_for_status()
             return r
 
@@ -60,6 +63,8 @@ async def _lookup_by_accession(client: httpx.AsyncClient, accession: str) -> Uni
         raise ValueError(f"UniProt request failed: {exc}") from exc
     if resp.status_code == 404:
         raise ValueError(f"UniProt accession '{accession}' not found")
+    if resp.status_code == 400:
+        raise ValueError(f"UniProt accession '{accession}' has an invalid format")
     try:
         resp.raise_for_status()
     except httpx.HTTPStatusError as exc:
@@ -91,7 +96,11 @@ async def _search_by_gene(client: httpx.AsyncClient, gene_symbol: str) -> UniPro
                 f"{UNIPROT_BASE}/search",
                 params={
                     "query": f"gene_exact:{gene_symbol} AND organism_id:{HUMAN_TAXON_ID}",
-                    "fields": "accession,gene_names,protein_name,organism",
+                    # NB: 'organism' is NOT a valid UniProt return field (valid:
+                    # organism_name/organism_id) and triggers HTTP 400. Human-ness
+                    # is already guaranteed by the organism_id:9606 query filter,
+                    # so no organism field is needed in the response.
+                    "fields": "accession,gene_names,protein_name",
                     "size": 1,
                     "format": "json",
                 },
