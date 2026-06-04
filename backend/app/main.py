@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,17 +8,38 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.config import get_settings
-from app.database import engine
+from app.database import engine, async_session_factory
+from app.repositories import analysis_repo
 from app.security import limiter, MaxRequestSizeMiddleware
 from app.routers import plants, compounds, diseases, analyses
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
+
+REAPER_INTERVAL_SECONDS: float = settings.reaper_interval_seconds
+STALE_THRESHOLD_SECONDS: int = settings.stale_run_threshold_seconds
+
+
+async def _reaper_loop() -> None:
+    while True:
+        await asyncio.sleep(REAPER_INTERVAL_SECONDS)
+        try:
+            async with async_session_factory() as session:
+                reaped = await analysis_repo.reap_stale_runs(session, STALE_THRESHOLD_SECONDS)
+            if reaped:
+                logger.info("Reaper marked %d stale run(s) failed", reaped)
+        except Exception:
+            logger.exception("Reaper sweep failed")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    yield
-    await engine.dispose()
+    reaper = asyncio.create_task(_reaper_loop())
+    try:
+        yield
+    finally:
+        reaper.cancel()
+        await engine.dispose()
 
 
 app = FastAPI(
