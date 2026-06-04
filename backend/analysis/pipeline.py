@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.repositories import analysis_repo
 from app.security import client_error_message
+from integrations._retry import ServiceUnavailableError
 from analysis.models import PipelineConfig
 from analysis import stage_state
 from analysis.stages import (
@@ -30,6 +31,24 @@ STAGE_RUNNERS = {
     7: stage7_hub_genes.run,
     8: stage8_enrichment.run,
 }
+
+
+async def _record_failure(session_factory, analysis_id, kind: str, message: str) -> None:
+    """Record a run as failed with a failure-kind marker. Best-effort: if the DB
+    write itself fails (e.g. DB outage), log and return — never let the exception
+    escape the background task (the reaper cleans the frozen run)."""
+    try:
+        async with session_factory() as session:
+            await analysis_repo.update_run_status(
+                session, analysis_id,
+                status="failed",
+                error_message=message,
+                stage_results={"_run_health": {"failure_kind": kind}},
+            )
+    except Exception:
+        logger.exception(
+            "Could not record failure for analysis %s (DB unavailable?)", analysis_id
+        )
 
 
 async def run_stage(
@@ -85,16 +104,23 @@ async def run_stage(
                     run_stage(analysis_id, stage_num + 1, session_factory)
                 )
 
+    except ServiceUnavailableError as exc:
+        logger.warning(
+            "Stage %s provider unavailable for analysis %s: %s",
+            stage_num, analysis_id, exc,
+        )
+        await _record_failure(
+            session_factory, analysis_id,
+            kind="provider_unavailable", message=str(exc),
+        )
     except Exception:
         logger.exception(
             "Stage %s failed for analysis %s", stage_num, analysis_id
         )
-        async with session_factory() as session:
-            await analysis_repo.update_run_status(
-                session, analysis_id,
-                status="failed",
-                error_message=client_error_message(stage_num),
-            )
+        await _record_failure(
+            session_factory, analysis_id,
+            kind="internal_error", message=client_error_message(stage_num),
+        )
 
 
 async def advance_pipeline(
