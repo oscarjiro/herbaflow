@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -36,6 +37,18 @@ async def get_disease_by_ontology_id(session: AsyncSession, ontology_id: str) ->
         select(Disease).where(Disease.ontology_id == ontology_id)
     )
     return result.first()
+
+
+async def count_targets_per_disease_bulk(session: AsyncSession, disease_ids: list[str]) -> dict[str, int]:
+    if not disease_ids:
+        return {}
+    stmt = (
+        select(DiseaseTarget.disease_id, func.count().label("cnt"))
+        .where(DiseaseTarget.disease_id.in_(disease_ids))
+        .group_by(DiseaseTarget.disease_id)
+    )
+    result = await session.execute(stmt)
+    return {row.disease_id: row.cnt for row in result.all()}
 
 
 async def get_targets_for_disease(

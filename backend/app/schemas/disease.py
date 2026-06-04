@@ -7,3 +7,4 @@ class DiseaseResponse(BaseModel):
     ontology_id: str | None
     ontology_source: str | None
     disease_aliases: list[str] = []
+    target_count: int = 0
