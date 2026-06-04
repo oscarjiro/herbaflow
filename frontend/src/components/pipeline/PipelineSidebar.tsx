@@ -128,7 +128,7 @@ export function PipelineSidebar({
       {/* Confirmation dialog — portal renders above everything */}
       <DialogPrimitive.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-hf-fg1/40 backdrop-blur-sm" />
           <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-hf-border bg-hf-surface p-6 shadow-lg focus:outline-none">
             <DialogPrimitive.Title className="text-base font-semibold text-hf-fg1">
               Start a new analysis?
@@ -176,7 +176,7 @@ export function PipelineSidebar({
         <>
           {/* Backdrop */}
           <div
-            className="md:hidden fixed inset-0 z-40 bg-black/40"
+            className="md:hidden fixed inset-0 z-40 bg-hf-fg1/40"
             onClick={() => setIsMobileOpen(false)}
           />
           {/* Drawer */}

@@ -178,7 +178,7 @@ export function ApprovalBar({
           type="button"
           onClick={handleApprove}
           disabled={isLoading}
-          className="rounded-sm bg-hf-fg1 px-5 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-45"
+          className="rounded-sm bg-hf-fg1 px-5 py-2 text-sm font-medium text-hf-bg hover:opacity-90 disabled:opacity-45"
         >
           Approve & Continue
         </button>

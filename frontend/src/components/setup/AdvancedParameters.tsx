@@ -166,7 +166,7 @@ function StringConfidenceSelector({ value, onChange }: StringConfidenceSelectorP
               aria-pressed={isActive}
               className={`px-2 py-1 rounded-sm text-xs border transition-colors ${
                 isActive
-                  ? 'bg-hf-fg1 text-white border-hf-fg1'
+                  ? 'bg-hf-fg1 text-hf-bg border-hf-fg1'
                   : 'bg-hf-surface text-hf-fg2 border-hf-border hover:border-hf-border-strong'
               }`}
             >

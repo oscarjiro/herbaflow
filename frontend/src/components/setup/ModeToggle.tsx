@@ -38,7 +38,7 @@ export function ModeToggle({ value, onChange }: ModeToggleProps) {
             className={cn(
               'flex flex-1 flex-col items-start rounded-sm px-4 py-3 text-left transition-colors',
               isActive
-                ? 'bg-hf-fg1 text-white'
+                ? 'bg-hf-fg1 text-hf-bg'
                 : 'bg-hf-surface border border-hf-border text-hf-fg2 hover:border-hf-border-strong'
             )}
           >
@@ -46,7 +46,7 @@ export function ModeToggle({ value, onChange }: ModeToggleProps) {
             <span
               className={cn(
                 'mt-0.5 text-xs',
-                isActive ? 'text-white/70' : 'text-hf-fg3'
+                isActive ? 'text-hf-bg/70' : 'text-hf-fg3'
               )}
             >
               {option.description}

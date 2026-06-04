@@ -52,7 +52,7 @@ interface InputModeToggleProps {
 function InputModeToggle({ value, onChange }: InputModeToggleProps) {
   const base =
     'flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none'
-  const active = 'bg-hf-fg1 text-white'
+  const active = 'bg-hf-fg1 text-hf-bg'
   const inactive = 'text-hf-fg2 hover:text-hf-fg1'
 
   return (
