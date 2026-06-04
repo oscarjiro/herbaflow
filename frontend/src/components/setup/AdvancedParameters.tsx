@@ -86,7 +86,7 @@ const STRING_CONFIDENCE_PRESETS = [
   { label: 'Low', value: 0.15 },
   { label: 'Medium', value: 0.4 },
   { label: 'High', value: 0.7 },
-  { label: 'Highest', value: 0.9 },
+  { label: 'Very High', value: 0.9 },
 ] as const
 
 // ============================================================================
@@ -170,7 +170,7 @@ function StringConfidenceSelector({ value, onChange }: StringConfidenceSelectorP
                   : 'bg-hf-surface text-hf-fg2 border-hf-border hover:border-hf-border-strong'
               }`}
             >
-              {preset.label}
+              {`${preset.label} (${preset.value.toFixed(2)})`}
             </button>
           )
         })}
@@ -320,7 +320,7 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
         {/* Network */}
         <AccordionItem value="network">
           <AccordionTrigger className="text-sm text-hf-fg1">
-            Network
+            PPI Network
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex flex-col gap-3 pt-1">

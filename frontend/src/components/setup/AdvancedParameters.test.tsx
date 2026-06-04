@@ -8,7 +8,7 @@ import { AdvancedParameters, DEFAULT_PARAMS } from './AdvancedParameters'
 // The Accordion is real but needs no special setup in jsdom.
 
 describe('AdvancedParameters — STRING confidence preset selector', () => {
-  it('STRING confidence selector offers Low/Medium/High/Highest presets', () => {
+  it('STRING confidence selector offers Low/Medium/High/Very High presets', () => {
     render(
       <AdvancedParameters
         value={DEFAULT_PARAMS}
@@ -16,15 +16,15 @@ describe('AdvancedParameters — STRING confidence preset selector', () => {
       />
     )
 
-    // Open the Network accordion section
-    const networkTrigger = screen.getByText('Network')
+    // Open the PPI Network accordion section
+    const networkTrigger = screen.getByText('PPI Network')
     fireEvent.click(networkTrigger)
 
-    // All four preset labels must be present
-    expect(screen.getByText('Low')).toBeInTheDocument()
-    expect(screen.getByText('Medium')).toBeInTheDocument()
-    expect(screen.getByText('High')).toBeInTheDocument()
-    expect(screen.getByText('Highest')).toBeInTheDocument()
+    // All four preset labels must be present (with numeric values)
+    expect(screen.getByRole('button', { name: 'Low (0.15)' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Medium (0.40)' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'High (0.70)' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Very High (0.90)' })).toBeInTheDocument()
   })
 
   it('STRING confidence selector default value is Medium (0.400)', () => {
@@ -35,11 +35,11 @@ describe('AdvancedParameters — STRING confidence preset selector', () => {
       />
     )
 
-    const networkTrigger = screen.getByText('Network')
+    const networkTrigger = screen.getByText('PPI Network')
     fireEvent.click(networkTrigger)
 
     // Button preset group: Medium button should have aria-pressed="true"
-    const mediumBtn = screen.getByRole('button', { name: 'Medium' })
+    const mediumBtn = screen.getByRole('button', { name: 'Medium (0.40)' })
     expect(mediumBtn).toHaveAttribute('aria-pressed', 'true')
   })
 
@@ -52,16 +52,47 @@ describe('AdvancedParameters — STRING confidence preset selector', () => {
       />
     )
 
-    const networkTrigger = screen.getByText('Network')
+    const networkTrigger = screen.getByText('PPI Network')
     fireEvent.click(networkTrigger)
 
     // Click "High" preset
-    const highBtn = screen.getByRole('button', { name: 'High' })
+    const highBtn = screen.getByRole('button', { name: 'High (0.70)' })
     fireEvent.click(highBtn)
 
     // onChange must have been called with min_confidence = 0.7
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({ min_confidence: 0.7 })
     )
+  })
+})
+
+describe('AdvancedParameters — PPI Network rename + numeric preset labels', () => {
+  it('network accordion trigger reads "PPI Network"', () => {
+    render(
+      <AdvancedParameters
+        value={DEFAULT_PARAMS}
+        onChange={() => {}}
+      />
+    )
+
+    expect(screen.getByText('PPI Network')).toBeInTheDocument()
+  })
+
+  it('confidence preset buttons read Low (0.15), Medium (0.40), High (0.70), Very High (0.90)', () => {
+    render(
+      <AdvancedParameters
+        value={DEFAULT_PARAMS}
+        onChange={() => {}}
+      />
+    )
+
+    // Open the PPI Network accordion section
+    const ppiTrigger = screen.getByText('PPI Network')
+    fireEvent.click(ppiTrigger)
+
+    expect(screen.getByRole('button', { name: 'Low (0.15)' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Medium (0.40)' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'High (0.70)' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Very High (0.90)' })).toBeInTheDocument()
   })
 })
