@@ -20,10 +20,12 @@ from analysis.models import PipelineConfig
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:
     params = run.parameters or {}
 
-    # Manual disease targets mode: bypass Open Targets, use injected gene list.
+    # Manual disease targets mode: bypass Open Targets, use injected target list.
+    # _injected_disease_targets is resolved at create time (app.routers.analyses →
+    # resolve_targets) and stored as a list of resolved DICTS, each carrying
+    # gene_symbol / uniprot_id / sources. Normalization already happened upstream,
+    # so this branch just reads the dicts (no offline normalize here).
     if params.get("_disease_input_mode") == "manual_targets":
-        from app.services import gene_symbols
-
         injected = params.get("_injected_disease_targets", [])
         if not injected:
             return {
@@ -36,25 +38,37 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
                 "inputs": {"rejected": [], "normalized": [], "unrecognized": []},
             }
 
-        results = gene_symbols.normalize_many(
-            g for g in injected if isinstance(g, str) and g.strip()
-        )
-        changed = [
-            {"from": r.input, "to": r.canonical}
-            for r in results
-            if r.status != "unrecognized" and r.canonical != r.input.upper()
-        ]
-        unrecognized = [r.input for r in results if r.status == "unrecognized"]
+        # Coerce each element to the resolved-dict shape. The create path always
+        # stores dicts now; a plain string is a legacy/unexpected shape — treat it
+        # as a symbol-only target (uppercased) so we never crash on bad input.
+        def _as_dict(el) -> dict | None:
+            if isinstance(el, dict):
+                return el
+            if isinstance(el, str) and el.strip():
+                return {"gene_symbol": el.strip().upper(), "sources": []}
+            return None
 
-        unique_genes = list(dict.fromkeys(r.canonical for r in results if r.canonical))
-        targets = [
-            {
+        coerced = [d for d in (_as_dict(e) for e in injected) if d]
+
+        targets: list[dict] = []
+        seen: set[str] = set()
+        for d in coerced:
+            gene = d.get("gene_symbol")
+            if not gene or gene in seen:
+                continue
+            seen.add(gene)
+            targets.append({
                 "gene_symbol": gene,
-                "uniprot_accession": None,
+                "uniprot_accession": d.get("uniprot_id"),
                 "score": None,
                 "source": "user_provided",
-            }
-            for gene in unique_genes
+            })
+
+        unique_genes = [t["gene_symbol"] for t in targets]
+        unrecognized = [
+            d["gene_symbol"]
+            for d in coerced
+            if "manual_unrecognized" in d.get("sources", []) and d.get("gene_symbol")
         ]
         return {
             "disease_id": None,
@@ -64,8 +78,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "targets": targets,
             "state": "user_provided",
             "inputs": {
+                # Normalization happened at create time; nothing rejected here.
                 "rejected": [],
-                "normalized": changed,
+                "normalized": [],
                 "unrecognized": unrecognized,
             },
         }

@@ -38,6 +38,29 @@ def _make_run(status: str = "pending") -> MagicMock:
     return run
 
 
+class _ExecResult:
+    """Mimics ``await session.exec(stmt)`` — exposes ``.first()``."""
+
+    def __init__(self, row):
+        self._row = row
+
+    def first(self):
+        return self._row
+
+
+class _FakeSession:
+    """Async session stub for resolve_targets: every DB-first lookup is a miss."""
+
+    async def exec(self, _stmt):
+        return _ExecResult(None)
+
+    def add(self, _obj):
+        pass
+
+    async def commit(self):
+        pass
+
+
 # ---------------------------------------------------------------------------
 # Service-layer unit tests (no HTTP / no DB)
 # ---------------------------------------------------------------------------
@@ -143,21 +166,28 @@ async def test_dedup_response_summary_fields():
             return tp53_target
         return egfr_target
 
-    # Submit TP53 and its accession P04637 — should deduplicate to 1
-    with patch("app.services.manual_inputs.analysis_repo.update_run_status",
-               new=AsyncMock(side_effect=fake_update)), \
-         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters",
-               new=AsyncMock()), \
-         patch("app.services.target_dedup.validate_human_target",
-               new=AsyncMock(side_effect=fake_validate)), \
-         patch("app.services.manual_inputs.validate_human_target",
-               new=AsyncMock(side_effect=fake_validate)), \
-         patch("app.services.target_persist.persist_validated_targets",
-               new=AsyncMock(return_value=0)):
+    # inject_targets_service routes through the unified resolve_targets, which does
+    # the UniProt call and DB-first lookup. TP53 (symbol) resolves to accession
+    # P04637; resolve_targets then sees the accession P04637 again in the batch and
+    # dedups it. So we mock UniProt in input_validation and feed a DB-miss session.
+    from app.services import gene_symbols
+    gene_symbols._MAP = {"TP53": {"symbol": "TP53", "kind": "approved"}}
+    try:
+        with patch("app.services.manual_inputs.analysis_repo.update_run_status",
+                   new=AsyncMock(side_effect=fake_update)), \
+             patch("app.services.manual_inputs.analysis_repo.merge_run_parameters",
+                   new=AsyncMock()), \
+             patch("app.services.input_validation.validate_human_target",
+                   new=AsyncMock(side_effect=fake_validate)), \
+             patch("app.services.input_validation.persist_validated_targets",
+                   new=AsyncMock(return_value=0)):
 
-        mock_session = AsyncMock()
-        request = InjectTargetsRequest(targets=["TP53", "P04637"])
-        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+            request = InjectTargetsRequest(targets=["TP53", "P04637"])
+            result = await inject_targets_service(
+                request.targets, request.skip_validation, run, _FakeSession()
+            )
+    finally:
+        gene_symbols._MAP = None
 
     # Response must have dedup summary fields
     assert hasattr(result, "duplicates_removed"), "Response missing duplicates_removed"

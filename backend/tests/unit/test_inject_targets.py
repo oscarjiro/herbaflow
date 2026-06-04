@@ -1,5 +1,12 @@
 """Unit tests for manual-target injection logic (inject_targets_service).
 
+inject_targets_service now routes through the unified ``resolve_targets`` service
+(``app.services.input_validation``). The unified service does the DB-first lookup
+(``session.exec``) and the UniProt enrichment call; this module is a thin adapter.
+So these tests mock ``input_validation.validate_human_target`` (not the old
+``manual_inputs.validate_human_target``) and feed a tiny ``_FakeSession`` whose
+``exec`` returns DB misses, forcing the UniProt enrichment path.
+
 Tests:
 1. Valid gene symbol → injected with gene_symbol, uniprot_id, protein_name
 2. Valid UniProt accession → injected directly
@@ -12,6 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
 import pytest
+from app.services import gene_symbols
 from app.services.manual_inputs import inject_targets_service
 
 ANALYSIS_ID = "00000000-0000-0000-0000-000000000044"
@@ -40,6 +48,43 @@ def _make_uniprot_target(gene: str, accession: str, protein_name: str | None = N
     return t
 
 
+class _ExecResult:
+    """Mimics ``await session.exec(stmt)`` — exposes ``.first()``."""
+
+    def __init__(self, row):
+        self._row = row
+
+    def first(self):
+        return self._row
+
+
+class _FakeSession:
+    """Async session stub: every DB-first lookup is a miss (returns None)."""
+
+    async def exec(self, _stmt):
+        return _ExecResult(None)
+
+    def add(self, _obj):
+        pass
+
+    async def commit(self):
+        pass
+
+
+@pytest.fixture(autouse=True)
+def _hgnc_identity_map():
+    """Deterministic offline HGNC map so resolve_targets' symbol classification is
+    stable without a live map file. Symbols pass through as approved (identity);
+    unknowns stay unrecognized via gene_symbols.normalize."""
+    gene_symbols._MAP = {
+        "TP53": {"symbol": "TP53", "kind": "approved"},
+        "EGFR": {"symbol": "EGFR", "kind": "approved"},
+        "BRCA1": {"symbol": "BRCA1", "kind": "approved"},
+    }
+    yield
+    gene_symbols._MAP = None
+
+
 # ---------------------------------------------------------------------------
 # Test 1: Valid gene symbol → injected
 # ---------------------------------------------------------------------------
@@ -62,13 +107,13 @@ async def test_inject_valid_gene_symbol():
 
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock(side_effect=fake_merge)), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53_target)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(return_value=tp53_target)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=1)):
 
         from app.schemas.analysis import InjectTargetsRequest
 
-        mock_session = AsyncMock()
         request = InjectTargetsRequest(targets=["TP53"])
-        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert result.injected == 1
     assert result.failed == []
@@ -102,13 +147,13 @@ async def test_inject_valid_uniprot_accession():
 
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=egfr_target)) as mock_validate:
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(return_value=egfr_target)) as mock_validate, \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=1)):
 
         from app.schemas.analysis import InjectTargetsRequest
 
-        mock_session = AsyncMock()
         request = InjectTargetsRequest(targets=["P00533"])
-        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert result.injected == 1
     assert result.failed == []
@@ -135,13 +180,13 @@ async def test_inject_unknown_gene_symbol_in_failed():
 
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(side_effect=fake_validate)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(side_effect=fake_validate)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=1)):
 
         from app.schemas.analysis import InjectTargetsRequest
 
-        mock_session = AsyncMock()
         request = InjectTargetsRequest(targets=["TP53", "FAKEGENE"])
-        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert result.injected == 1
     assert "FAKEGENE" in result.failed
@@ -163,13 +208,13 @@ async def test_inject_targets_sets_input_mode():
 
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock(side_effect=fake_merge)), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53_target)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(return_value=tp53_target)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=1)):
 
         from app.schemas.analysis import InjectTargetsRequest
 
-        mock_session = AsyncMock()
         request = InjectTargetsRequest(targets=["TP53"])
-        await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+        await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert captured_params.get("_input_mode") == "manual_targets"
 
@@ -214,14 +259,14 @@ async def test_inject_targets_deduplicates_gene_symbols():
 
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53_target)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(return_value=tp53_target)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=1)):
 
         from app.schemas.analysis import InjectTargetsRequest
 
-        mock_session = AsyncMock()
         # TP53 submitted twice
         request = InjectTargetsRequest(targets=["TP53", "TP53"])
-        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert result.injected == 1
     stage3 = captured_stage_results["stage_3"]
@@ -276,15 +321,14 @@ async def test_inject_targets_strict_user_provided_state():
 
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(side_effect=fake_validate)), \
-         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(side_effect=fake_validate)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=0)):
 
         from app.schemas.analysis import InjectTargetsRequest
 
-        mock_session = AsyncMock()
         # P04637 is a real accession pattern; BADINPUT is not a valid accession → fails
         request = InjectTargetsRequest(targets=["P04637", "BADINPUT"])
-        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert "stage_3" in captured_stage_results
     stage3 = captured_stage_results["stage_3"]
@@ -300,7 +344,14 @@ async def test_inject_targets_strict_user_provided_state():
 
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_user_provided_state():
-    """LENIENT path (skip_validation=True): rename + unknown → stage_3 carries inputs."""
+    """LENIENT path (skip_validation=True): rename + unknown → stage_3 carries inputs.
+
+    Under the unified resolve_targets, a lenient *symbol* is still offline-normalized
+    (BRCA → BRCA1, recorded in inputs.normalized) and then enriched via UniProt on a
+    DB miss. A symbol UniProt can't resolve (UNKNOWN_XYZ) is kept + flagged
+    manual_unrecognized (never failed). So we mock the offline HGNC map (BRCA→BRCA1)
+    and make UniProt resolve BRCA1 but reject UNKNOWN_XYZ.
+    """
     run = _make_run(status="pending")
     captured_stage_results = {}
 
@@ -309,27 +360,21 @@ async def test_inject_targets_lenient_user_provided_state():
             captured_stage_results.update(kwargs["stage_results"])
         return run
 
-    # gene_symbols.normalize: BRCA → canonical "BRCA1", UNKNOWN → unrecognized
-    def fake_normalize(symbol):
-        result = MagicMock()
-        if symbol.upper() == "BRCA":
-            result.status = "normalized"
-            result.canonical = "BRCA1"
-        else:
-            result.status = "unrecognized"
-            result.canonical = symbol.upper()
-        return result
+    async def fake_validate(gene_symbol=None, uniprot_id=None):
+        if gene_symbol == "BRCA1":
+            return _make_uniprot_target("BRCA1", "P38398", "Breast cancer type 1")
+        raise ValueError(f"Gene symbol {gene_symbol!r} not found as human protein in UniProt")
 
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=fake_update)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.gene_symbols.normalize", side_effect=fake_normalize), \
-         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
+         patch.dict(gene_symbols._MAP, {"BRCA": {"symbol": "BRCA1", "kind": "alias"}}), \
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(side_effect=fake_validate)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=0)):
 
         from app.schemas.analysis import InjectTargetsRequest
 
-        mock_session = AsyncMock()
         request = InjectTargetsRequest(targets=["BRCA", "UNKNOWN_XYZ"], skip_validation=True)
-        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert "stage_3" in captured_stage_results
     stage3 = captured_stage_results["stage_3"]
@@ -337,3 +382,5 @@ async def test_inject_targets_lenient_user_provided_state():
     assert stage3["inputs"]["normalized"] == [{"from": "BRCA", "to": "BRCA1"}]
     assert stage3["inputs"]["unrecognized"] == ["UNKNOWN_XYZ"]
     assert stage3["inputs"]["rejected"] == []
+    # BRCA1 enriched, UNKNOWN_XYZ kept+flagged → 2 valid targets injected
+    assert result.injected == 2

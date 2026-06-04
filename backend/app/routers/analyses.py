@@ -138,8 +138,23 @@ async def create_analysis(
     if input_mode != "standard":
         parameters["_input_mode"] = input_mode
     if body.manual_disease_targets:
+        # Resolve disease-side manual targets at create time via the unified service
+        # (STRICT — accessions/symbols resolved to canonical gene symbols + UniProt
+        # accessions; bogus inputs are dropped to failed rather than kept verbatim).
+        # A provider outage surfaces as HTTP 503, mirroring the inject-targets path.
+        from app.services.input_validation import resolve_targets
+        try:
+            disease_result = await resolve_targets(
+                body.manual_disease_targets,
+                lenient=False,
+                existing_keys=set(),
+                session=session,
+            )
+        except ServiceUnavailableError as exc:
+            logger.error("UniProt unavailable resolving manual disease targets: %s", exc)
+            raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
         parameters["_disease_input_mode"] = "manual_targets"
-        parameters["_injected_disease_targets"] = body.manual_disease_targets
+        parameters["_injected_disease_targets"] = disease_result.valid
 
     run = await analysis_repo.create_run(
         session, body.name, body.mode, parameters,

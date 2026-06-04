@@ -149,19 +149,23 @@ async def test_stage4_manual_targets_mode_empty_list():
     assert result["targets"] == []
 
 
-async def test_stage4_manual_targets_normalized():
-    """Manual disease targets are canonicalized to HGNC and changes reported."""
-    import app.services.gene_symbols as gs
-    gs._MAP = {
-        "TNFA": {"symbol": "TNF", "kind": "alias"},
-        "TP53": {"symbol": "TP53", "kind": "approved"},
-    }
+async def test_stage4_manual_targets_reads_resolved_dicts():
+    """Manual disease targets are resolved to dicts AT CREATE TIME; stage 4 just reads them.
 
+    _injected_disease_targets is now a list of resolved dicts (gene_symbol /
+    uniprot_id / sources). Stage 4 surfaces the canonical gene symbols, marks
+    manual_unrecognized inputs in inputs.unrecognized, and reports an empty
+    inputs.normalized (normalization already happened upstream)."""
     mock_run = MagicMock()
     mock_run.stage_results = {}
     mock_run.parameters = {
         "_disease_input_mode": "manual_targets",
-        "_injected_disease_targets": ["TNFA", "TP53", "ZZZ9"],
+        # TNFA already normalized to TNF + enriched upstream; ZZZ9 kept + flagged.
+        "_injected_disease_targets": [
+            {"gene_symbol": "TNF", "uniprot_id": "P01375", "sources": ["manual"]},
+            {"gene_symbol": "TP53", "uniprot_id": "P04637", "sources": ["manual"]},
+            {"gene_symbol": "ZZZ9", "uniprot_id": None, "sources": ["manual_unrecognized"]},
+        ],
     }
     config = PipelineConfig()
     session = AsyncMock()
@@ -172,10 +176,13 @@ async def test_stage4_manual_targets_normalized():
     assert "TNF" in symbols
     assert "TP53" in symbols
     assert "TNFA" not in symbols
-    assert {"from": "TNFA", "to": "TNF"} in result["inputs"]["normalized"]
+    # Normalization happened at create time — stage 4 no longer reports it.
+    assert result["inputs"]["normalized"] == []
     assert "ZZZ9" in result["inputs"]["unrecognized"]
     assert "ZZZ9" in symbols
-    gs._MAP = None
+    # Resolved accession carried through onto the target row.
+    tnf_row = next(t for t in result["targets"] if t["gene_symbol"] == "TNF")
+    assert tnf_row["uniprot_accession"] == "P01375"
 
 
 def test_open_targets_module_removed():
@@ -221,26 +228,27 @@ class _Run:
 
 
 @pytest.mark.asyncio
-async def test_stage4_manual_branch_is_user_provided_with_inputs(monkeypatch):
-    # Force HGNC normalize_many to a deterministic result.
-    class _R:
-        def __init__(self, inp, canonical, status):
-            self.input, self.canonical, self.status = inp, canonical, status
+async def test_stage4_manual_branch_is_user_provided_with_inputs():
+    """Manual branch stamps state=user_provided + the standardized inputs structure.
 
-    def fake_normalize_many(genes):
-        return [_R("AKT", "AKT1", "ok"), _R("EGFR", "EGFR", "ok"), _R("QWZ", "QWZ", "unrecognized")]
-
-    from app.services import gene_symbols
-    monkeypatch.setattr(gene_symbols, "normalize_many", fake_normalize_many)
-
+    _injected_disease_targets is now resolved dicts (resolution happens at create
+    time), so stage 4 no longer calls gene_symbols.normalize_many. Normalization is
+    reported empty here; unrecognized inputs come from the dicts' sources marker."""
+    injected = [
+        {"gene_symbol": "AKT1", "uniprot_id": "P31749", "sources": ["manual"]},
+        {"gene_symbol": "EGFR", "uniprot_id": "P00533", "sources": ["manual"]},
+        {"gene_symbol": "QWZ", "uniprot_id": None, "sources": ["manual_unrecognized"]},
+    ]
     run = _Run({"_disease_input_mode": "manual_targets",
-                "_injected_disease_targets": ["AKT", "EGFR", "QWZ"]})
+                "_injected_disease_targets": injected})
     result = await s4.run(run, config=None, session=None)
 
     assert result["state"] == "user_provided"
-    assert result["inputs"]["normalized"] == [{"from": "AKT", "to": "AKT1"}]
+    # Normalization moved to create time → empty at stage 4.
+    assert result["inputs"]["normalized"] == []
     assert result["inputs"]["unrecognized"] == ["QWZ"]
     assert result["inputs"]["rejected"] == []
+    assert result["disease_gene_symbols"] == ["AKT1", "EGFR", "QWZ"]
     assert "normalization" not in result  # old key removed
 
 

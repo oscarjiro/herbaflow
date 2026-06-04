@@ -266,20 +266,19 @@ async def test_inject_compounds_service_reports_cached():
         }
     ]
 
+    # inject_compounds_service now routes through the unified resolve_compounds, which
+    # owns DB-first reuse, validation, and persistence. Its ResolveResult counters
+    # (reused + enriched) drive the response's `cached` count. One newly-resolved
+    # compound that gets persisted → enriched=1 → cached=1.
+    from app.services.input_validation import ResolveResult
+    canned = ResolveResult(valid=mock_validated, enriched=1)
+
     with (
         patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock()),
         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()),
         patch(
-            "app.services.manual_inputs.validate_compounds_batch",
-            new=AsyncMock(return_value=(mock_validated, [])),
-        ),
-        patch(
-            "app.services.manual_inputs.deduplicate_compounds",
-            new=AsyncMock(return_value=(["CC(=O)Oc1ccccc1C(=O)O"], [])),
-        ),
-        patch(
-            "app.services.compound_persist.persist_validated_compounds",
-            new=AsyncMock(return_value=1),
+            "app.services.manual_inputs.resolve_compounds",
+            new=AsyncMock(return_value=canned),
         ),
     ):
         mock_session = AsyncMock()

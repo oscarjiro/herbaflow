@@ -48,6 +48,33 @@ UNVALIDATED_TARGETS = [
 ]
 
 
+class _ExecResult:
+    """Mimics ``await session.exec(stmt)`` — exposes ``.first()``."""
+
+    def __init__(self, row):
+        self._row = row
+
+    def first(self):
+        return self._row
+
+
+class _FakeSession:
+    """Async session stub for resolve_targets: every DB-first lookup is a miss.
+
+    inject_targets_service now delegates to the unified resolve_targets, which issues
+    one ``session.exec`` per novel input. Returning None makes every lookup a DB miss,
+    forcing the UniProt-enrichment path (the behavior these inject tests exercise)."""
+
+    async def exec(self, _stmt):
+        return _ExecResult(None)
+
+    def add(self, _obj):
+        pass
+
+    async def commit(self):
+        pass
+
+
 @pytest.mark.asyncio
 async def test_persist_validated_targets_persists_validated():
     """Targets with a UniProt accession are inserted into the targets table."""
@@ -213,14 +240,22 @@ async def test_inject_targets_validated_path_reports_cached():
     tp53.uniprot_accession = "P04637"
     tp53.protein_name = "Cellular tumor antigen p53"
 
-    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=tp53)), \
-         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=1)) as mock_cache:
+    # inject_targets_service now routes through resolve_targets, which owns the UniProt
+    # call, the DB-first lookup, and persistence. The response `cached` count is
+    # reused+enriched; a single novel enriched target → cached=1. We mock UniProt and
+    # persistence inside input_validation and feed a DB-miss session.
+    import app.services.gene_symbols as gs
+    gs._MAP = {"TP53": {"symbol": "TP53", "kind": "approved"}}
+    try:
+        with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+             patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+             patch("app.services.input_validation.validate_human_target", new=AsyncMock(return_value=tp53)), \
+             patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=1)) as mock_cache:
 
-        mock_session = AsyncMock()
-        request = InjectTargetsRequest(targets=["TP53"])
-        result = await inject_targets_service(request.targets, request.skip_validation, run, mock_session)
+            request = InjectTargetsRequest(targets=["TP53"])
+            result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
+    finally:
+        gs._MAP = None
 
     assert result.injected == 1
     assert result.cached == 1
@@ -268,11 +303,21 @@ async def test_inject_targets_lenient_normalizes_symbols():
         captured["stage3"] = stage_results["stage_3"]
         return run
 
+    # Lenient symbols are offline-normalized (TNFA→TNF, recorded in normalized) then
+    # enriched via UniProt on a DB miss. Mock UniProt to resolve both canonical symbols.
+    async def fake_validate(gene_symbol=None, uniprot_id=None):
+        info = MagicMock()
+        info.gene_symbol = gene_symbol
+        info.uniprot_accession = "P01375" if gene_symbol == "TNF" else "P04637"
+        info.protein_name = None
+        return info
+
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(side_effect=_capture_status)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(side_effect=fake_validate)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["TNFA", "TP53"], skip_validation=True)
-        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert result.injected == 2
     assert {"from": "TNFA", "to": "TNF"} in result.normalized
@@ -296,11 +341,21 @@ async def test_inject_targets_lenient_dedups_alias_and_canonical():
     run.parameters = {}
     run.stage_results = {}
 
+    # Both inputs normalize to canonical TNF → same dedup key → second collapses.
+    # The first (TNF) enriches via UniProt on a DB miss.
+    async def fake_validate(gene_symbol=None, uniprot_id=None):
+        info = MagicMock()
+        info.gene_symbol = "TNF"
+        info.uniprot_accession = "P01375"
+        info.protein_name = None
+        return info
+
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(side_effect=fake_validate)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["TNF", "TNFA"], skip_validation=True)
-        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert result.injected == 1
     assert result.duplicates_removed == 1
@@ -321,11 +376,18 @@ async def test_inject_targets_lenient_unknown_kept_and_flagged():
     run.parameters = {}
     run.stage_results = {}
 
+    # ZZZ9 is an unknown symbol: offline-normalize leaves it as-is, the DB lookup
+    # misses, and UniProt can't resolve it (ValueError). Lenient mode keeps it and
+    # flags it manual_unrecognized rather than failing it.
+    async def fake_validate(gene_symbol=None, uniprot_id=None):
+        raise ValueError(f"Gene symbol {gene_symbol!r} not found as human protein")
+
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(side_effect=fake_validate)), \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=0)):
         request = InjectTargetsRequest(targets=["ZZZ9"], skip_validation=True)
-        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     assert result.injected == 1
     assert result.unrecognized == ["ZZZ9"]
@@ -353,10 +415,10 @@ async def test_inject_targets_lenient_accession_routes_to_uniprot():
 
     with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
          patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(return_value=info)) as mock_val, \
-         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=1)):
+         patch("app.services.input_validation.validate_human_target", new=AsyncMock(return_value=info)) as mock_val, \
+         patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=1)):
         request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
-        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
+        result = await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
 
     mock_val.assert_awaited_once()
     assert result.injected == 1
@@ -364,11 +426,19 @@ async def test_inject_targets_lenient_accession_routes_to_uniprot():
 
 
 @pytest.mark.asyncio
-async def test_inject_targets_lenient_accession_uniprot_down_kept_no_503():
-    """If UniProt is unavailable for an accession in lenient mode, keep+flag (no 503)."""
+async def test_inject_targets_lenient_accession_uniprot_down_maps_503():
+    """A UniProt outage while resolving an accession (even in lenient mode) maps to 503.
+
+    BEHAVIOR CHANGE: the old hand-rolled lenient path silently kept+flagged an
+    accession when UniProt was down (no 503). The unified resolve_targets instead
+    treats a provider outage as a transient, retriable condition — it re-raises
+    ServiceUnavailableError, which inject_targets_service maps to HTTP 503. An outage
+    must not masquerade as a permanently-unrecognized target. (Offline symbol
+    normalization is unaffected; only accession/symbol *enrichment* needs UniProt.)"""
     import app.services.gene_symbols as gs
     from app.schemas.analysis import InjectTargetsRequest
     from app.services.manual_inputs import inject_targets_service
+    from fastapi import HTTPException
     from integrations._retry import ServiceUnavailableError
 
     gs._MAP = {}
@@ -378,13 +448,14 @@ async def test_inject_targets_lenient_accession_uniprot_down_kept_no_503():
     run.parameters = {}
     run.stage_results = {}
 
-    with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
-         patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
-         patch("app.services.manual_inputs.validate_human_target", new=AsyncMock(side_effect=ServiceUnavailableError("down"))), \
-         patch("app.services.target_persist.persist_validated_targets", new=AsyncMock(return_value=0)):
-        request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
-        result = await inject_targets_service(request.targets, request.skip_validation, run, AsyncMock())
-
-    assert result.injected == 1
-    assert "P04637" in result.unrecognized
-    gs._MAP = None
+    try:
+        with patch("app.services.manual_inputs.analysis_repo.update_run_status", new=AsyncMock(return_value=run)), \
+             patch("app.services.manual_inputs.analysis_repo.merge_run_parameters", new=AsyncMock()), \
+             patch("app.services.input_validation.validate_human_target", new=AsyncMock(side_effect=ServiceUnavailableError("down"))), \
+             patch("app.services.input_validation.persist_validated_targets", new=AsyncMock(return_value=0)):
+            request = InjectTargetsRequest(targets=["P04637"], skip_validation=True)
+            with pytest.raises(HTTPException) as ei:
+                await inject_targets_service(request.targets, request.skip_validation, run, _FakeSession())
+        assert ei.value.status_code == 503
+    finally:
+        gs._MAP = None
