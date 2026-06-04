@@ -7,9 +7,11 @@
  *
  * Also covers: raw string id path-args are wrapped in encodeURIComponent so a
  * hostile id can't break out of the URL path.
+ *
+ * Also covers: humanized error messages from request().
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { api } from './api'
+import { api, ApiError } from './api'
 
 function mockFetchOnce(response: Response) {
   vi.stubGlobal('fetch', vi.fn(async () => response))
@@ -59,9 +61,53 @@ describe('api void endpoints with empty/204 bodies', () => {
     ).resolves.toEqual({ analysis_id: 'a1' })
   })
 
-  it('throws a descriptive error on a non-2xx response', async () => {
+  it('throws a descriptive error on a non-2xx response with plain text body', async () => {
+    // Plain-text body (not JSON) — falls through to generic fallback
     mockFetchOnce(new Response('boom', { status: 500 }))
-    await expect(api.rejectStage('a1')).rejects.toThrow('API 500: boom')
+    await expect(api.rejectStage('a1')).rejects.toThrow(/500/)
+  })
+})
+
+describe('api humanized error messages', () => {
+  it('422 with Pydantic detail array joins .msg fields', async () => {
+    const body = JSON.stringify({
+      detail: [
+        { msg: 'field required', loc: ['body', 'x'], type: 'missing' },
+        { msg: 'too short' },
+      ],
+    })
+    mockFetchOnce(new Response(body, { status: 422, headers: { 'Content-Type': 'application/json' } }))
+    const err = await api.rejectStage('a1').catch((e) => e)
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(422)
+    expect(err.message).toContain('field required')
+    expect(err.message).toContain('too short')
+  })
+
+  it('503 response produces a friendly retry message and preserves status', async () => {
+    mockFetchOnce(new Response('Service Unavailable', { status: 503 }))
+    const err = await api.rejectStage('a1').catch((e) => e)
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(503)
+    expect(err.message).toMatch(/temporarily unavailable|try again/i)
+  })
+
+  it('network failure (fetch rejects) gives a friendly message with status 0', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')))
+    const err = await api.rejectStage('a1').catch((e) => e)
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(0)
+    expect(err.message).toMatch(/couldn'?t reach the server|network/i)
+    expect(err.message).not.toContain('Failed to fetch')
+  })
+
+  it('500 with { detail: "boom" } uses the detail string directly', async () => {
+    const body = JSON.stringify({ detail: 'boom' })
+    mockFetchOnce(new Response(body, { status: 500, headers: { 'Content-Type': 'application/json' } }))
+    const err = await api.rejectStage('a1').catch((e) => e)
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(500)
+    expect(err.message).toBe('boom')
   })
 })
 
