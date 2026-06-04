@@ -54,3 +54,14 @@ export function formatDiseaseName(name: string): string {
     })
     .join(' ')
 }
+
+/**
+ * Format an ontology id for display as a standard CURIE.
+ * The DB stores the cleaned form (DOID_2843); the colon form (DOID:2843) is the
+ * display/standard form. Converts the FIRST `<ALPHA>_<rest>` separator to a colon.
+ */
+export function formatCurie(id: string): string {
+  if (!id) return id
+  if (id.includes(':')) return id
+  return id.replace(/^([A-Za-z]+)_/, '$1:')
+}

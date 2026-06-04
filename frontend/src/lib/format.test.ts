@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { formatDiseaseName } from './format'
+import { formatCurie } from './format'
 
 describe('formatDiseaseName', () => {
   it('title-cases normal disease names', () => {
@@ -16,5 +17,21 @@ describe('formatDiseaseName', () => {
   })
   it('handles mixed case in disease names', () => {
     expect(formatDiseaseName('type 2 diabetes mellitus')).toBe('Type 2 Diabetes Mellitus')
+  })
+})
+
+describe('formatCurie', () => {
+  it('converts the cleaned underscore form to a display colon', () => {
+    expect(formatCurie('DOID_2843')).toBe('DOID:2843')
+  })
+  it('is idempotent on already-colon CURIEs', () => {
+    expect(formatCurie('DOID:2843')).toBe('DOID:2843')
+  })
+  it('handles other prefixes and leaves bare ids unchanged', () => {
+    expect(formatCurie('MONDO_0005148')).toBe('MONDO:0005148')
+    expect(formatCurie('12345')).toBe('12345')
+  })
+  it('passes through empty/nullish safely', () => {
+    expect(formatCurie('')).toBe('')
   })
 })
