@@ -9,6 +9,8 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
+from sqlalchemy.exc import OperationalError, InterfaceError
+
 from app.config import get_settings
 from app.database import engine, async_session_factory
 from app.repositories import analysis_repo
@@ -73,6 +75,16 @@ app.include_router(plants.router)
 app.include_router(compounds.router)
 app.include_router(diseases.router)
 app.include_router(analyses.router)
+
+
+@app.exception_handler(OperationalError)
+@app.exception_handler(InterfaceError)
+async def _db_unavailable_handler(request, exc):
+    logger.warning("Database connection error on %s: %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "The database is temporarily unavailable. Please try again later."},
+    )
 
 
 @app.get("/health")
