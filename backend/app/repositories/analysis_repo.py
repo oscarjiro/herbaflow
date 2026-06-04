@@ -1,6 +1,7 @@
 from typing import Callable
 from uuid import UUID
 from datetime import datetime, timedelta
+from sqlalchemy import or_
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.models.analysis import AnalysisRun
@@ -197,3 +198,39 @@ async def touch_heartbeat(session: AsyncSession, analysis_id: UUID) -> None:
     run.updated_at = datetime.utcnow()
     session.add(run)
     await session.commit()
+
+
+TIMEOUT_MESSAGE = "Run timed out or was interrupted; please retry."
+
+
+def _is_in_progress_status(status: str) -> bool:
+    return status == "pending" or status.endswith("_running")
+
+
+async def reap_stale_runs(session: AsyncSession, threshold_seconds: int) -> int:
+    """Mark in-progress runs whose updated_at is older than threshold as failed
+    (failure_kind=timeout). Idempotent; safe to run from multiple workers."""
+    cutoff = datetime.utcnow() - timedelta(seconds=threshold_seconds)
+    result = await session.exec(
+        select(AnalysisRun).where(
+            or_(
+                AnalysisRun.status == "pending",
+                AnalysisRun.status.like("stage_%_running"),
+            )
+        )
+    )
+    reaped = 0
+    for run in result.all():
+        # updated_at is timestamptz (tz-aware on read) but written naive UTC.
+        updated_naive = run.updated_at.replace(tzinfo=None) if run.updated_at else datetime.min
+        if updated_naive >= cutoff:
+            continue
+        run.status = "failed"
+        run.error_message = TIMEOUT_MESSAGE
+        run.stage_results = {**(run.stage_results or {}), "_run_health": {"failure_kind": "timeout"}}
+        run.updated_at = datetime.utcnow()
+        session.add(run)
+        reaped += 1
+    if reaped:
+        await session.commit()
+    return reaped
