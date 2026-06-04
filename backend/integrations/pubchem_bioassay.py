@@ -69,9 +69,9 @@ async def _get_cid(client: httpx.AsyncClient, inchikey: str) -> int | None:
             resp = await with_retry(_fetch_cid, service_name="PubChem BioAssay")
             if resp.status_code == 404:
                 return None
-        except ServiceUnavailableError as exc:
-            logger.error("PubChem BioAssay unavailable after retries (CID lookup for %s): %s", inchikey, exc)
-            return None
+        except ServiceUnavailableError:
+            logger.error("PubChem BioAssay unavailable after retries (CID lookup for %s)", inchikey)
+            raise
         except httpx.HTTPError as exc:
             logger.error("PubChem BioAssay HTTP error (CID lookup for %s): %s", inchikey, exc)
             return None
@@ -100,9 +100,9 @@ async def _get_assay_rows(client: httpx.AsyncClient, cid: int) -> list[dict]:
             resp = await with_retry(_fetch_assay, service_name="PubChem BioAssay")
             if resp.status_code == 404:
                 return []
-        except ServiceUnavailableError as exc:
-            logger.error("PubChem BioAssay unavailable after retries (assay rows for CID %s): %s", cid, exc)
-            return []
+        except ServiceUnavailableError:
+            logger.error("PubChem BioAssay unavailable after retries (assay rows for CID %s)", cid)
+            raise
         except httpx.HTTPError as exc:
             logger.error("PubChem BioAssay HTTP error (assay rows for CID %s): %s", cid, exc)
             return []
@@ -137,9 +137,9 @@ async def _resolve_uniprot(
             resp = await with_retry(_fetch_uniprot, service_name="UniProt")
             if resp.status_code == 404:
                 return None, None
-        except ServiceUnavailableError as exc:
-            logger.error("UniProt unavailable after retries (resolving accession %s): %s", accession, exc)
-            return None, None
+        except ServiceUnavailableError:
+            logger.error("UniProt unavailable after retries (resolving accession %s)", accession)
+            raise
         except httpx.HTTPError as exc:
             logger.error("UniProt HTTP error (resolving accession %s): %s", accession, exc)
             return None, None
