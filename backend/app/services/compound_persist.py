@@ -15,7 +15,6 @@ Design decisions:
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 from typing import TYPE_CHECKING, Iterable
 
 from sqlmodel import select
@@ -24,6 +23,7 @@ if TYPE_CHECKING:
     from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.compound import Compound
+from app.repositories.analysis_repo import now_utc
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ async def _do_persist(
     session: AsyncSession,
 ) -> int:
     """Inner implementation — raises on DB error (caller handles)."""
-    now = datetime.utcnow()
+    now = now_utc()
 
     compounds: list[Compound] = []
     for c in validated_compounds:

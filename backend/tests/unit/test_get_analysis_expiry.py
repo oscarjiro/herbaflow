@@ -12,8 +12,8 @@ def _run(expires_at):
     return AnalysisRun(
         analysis_name="t", status="complete", mode="auto",
         current_stage=8, stage_results={}, parameters={},
-        created_at=datetime.utcnow(), completed_at=datetime.utcnow(),
-        expires_at=expires_at, updated_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc), completed_at=datetime.now(timezone.utc),
+        expires_at=expires_at, updated_at=datetime.now(timezone.utc),
     )
 
 

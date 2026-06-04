@@ -3,7 +3,6 @@ import csv
 import io
 import json
 import logging
-from datetime import datetime
 from uuid import UUID
 
 from analysis.pipeline import run_stage
@@ -29,6 +28,7 @@ from app.errors import (
 )
 from app.models.target import CompoundTarget, Target
 from app.repositories import analysis_repo
+from app.repositories.analysis_repo import now_utc
 from app.schemas.analysis import (
     AddUserCompoundRequest,
     AddUserCompoundResponse,
@@ -217,10 +217,7 @@ async def get_analysis(analysis_id: UUID, session: AsyncSession = Depends(get_se
     threshold = get_settings().stale_run_threshold_seconds
     run = await analysis_repo.mark_failed_if_stale(session, analysis_id, threshold)
     if run.expires_at:
-        # expires_at comes back from the timestamptz column as timezone-aware, but it is
-        # written with naive UTC (datetime.utcnow). Normalize to naive UTC before comparing.
-        expires_naive = run.expires_at.replace(tzinfo=None)
-        if expires_naive < datetime.utcnow():
+        if run.expires_at < now_utc():
             raise HTTPException(status_code=410, detail="Analysis has expired")
     health = derive_run_health(run.stage_results, run.status)
     return AnalysisRunResponse(**run.model_dump(), **health)
@@ -725,7 +722,7 @@ async def import_targets(
             status_code=422, detail=f"compound_id {body.compound_id!r} not found in this analysis"
         )
 
-    now = datetime.utcnow()
+    now = now_utc()
     imported = 0
     skipped = 0
 
@@ -912,7 +909,7 @@ async def add_user_target(
         gene_symbol=info.gene_symbol,
         uniprot_accession=info.uniprot_accession,
         protein_name=info.protein_name,
-        retrieved_at=datetime.utcnow(),
+        retrieved_at=now_utc(),
     )], session)
 
     def _merge(current: dict) -> dict:
@@ -1007,7 +1004,7 @@ async def add_user_disease_target(
         gene_symbol=info.gene_symbol,
         uniprot_accession=info.uniprot_accession,
         protein_name=info.protein_name,
-        retrieved_at=datetime.utcnow(),
+        retrieved_at=now_utc(),
     )], session)
 
     def _merge(current: dict) -> dict:

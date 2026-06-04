@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Callable
 from uuid import UUID
 
@@ -7,6 +7,11 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.models.analysis import AnalysisRun
+
+
+def now_utc() -> datetime:
+    """Timezone-aware UTC 'now'. Use instead of datetime.utcnow()."""
+    return datetime.now(timezone.utc)
 
 
 async def create_run(
@@ -23,8 +28,8 @@ async def create_run(
         disease_id=disease_id,
         status="pending",
         stage_results={},
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
+        created_at=now_utc(),
+        updated_at=now_utc(),
     )
     session.add(run)
     await session.commit()
@@ -100,7 +105,7 @@ async def reset_run_from_stage(
     else:
         run.status = f"stage_{from_stage - 1}_awaiting_approval"
         run.current_stage = from_stage - 1
-    run.updated_at = datetime.utcnow()
+    run.updated_at = now_utc()
     run.completed_at = None
     run.expires_at = None
     run.error_message = None
@@ -128,7 +133,7 @@ async def merge_run_parameters(
         else:
             merged[key] = val
     run.parameters = merged
-    run.updated_at = datetime.utcnow()
+    run.updated_at = now_utc()
     session.add(run)
     await session.commit()
 
@@ -144,7 +149,7 @@ async def update_run_status(
 ) -> AnalysisRun:
     run = await get_run_locked(session, analysis_id)
     run.status = status
-    run.updated_at = datetime.utcnow()
+    run.updated_at = now_utc()
     if current_stage is not None:
         run.current_stage = current_stage
     if stage_results is not None:
@@ -152,8 +157,8 @@ async def update_run_status(
     if error_message is not None:
         run.error_message = error_message
     if completed:
-        run.completed_at = datetime.utcnow()
-        run.expires_at = datetime.utcnow() + timedelta(hours=24)
+        run.completed_at = now_utc()
+        run.expires_at = now_utc() + timedelta(hours=24)
     session.add(run)
     await session.commit()
     await session.refresh(run)
@@ -184,7 +189,7 @@ async def merge_stage_results_locked(
     run.stage_results = mutate(current)
     if status is not None:
         run.status = status
-    run.updated_at = datetime.utcnow()
+    run.updated_at = now_utc()
     session.add(run)
     await session.commit()
     await session.refresh(run)
@@ -197,7 +202,7 @@ async def touch_heartbeat(session: AsyncSession, analysis_id: UUID) -> None:
     run = await get_run(session, analysis_id)
     if run is None:
         return
-    run.updated_at = datetime.utcnow()
+    run.updated_at = now_utc()
     session.add(run)
     await session.commit()
 
@@ -212,7 +217,7 @@ def _is_in_progress_status(status: str) -> bool:
 async def reap_stale_runs(session: AsyncSession, threshold_seconds: int) -> int:
     """Mark in-progress runs whose updated_at is older than threshold as failed
     (failure_kind=timeout). Idempotent; safe to run from multiple workers."""
-    cutoff = datetime.utcnow() - timedelta(seconds=threshold_seconds)
+    cutoff = now_utc() - timedelta(seconds=threshold_seconds)
     result = await session.exec(
         select(AnalysisRun).where(
             or_(
@@ -223,14 +228,14 @@ async def reap_stale_runs(session: AsyncSession, threshold_seconds: int) -> int:
     )
     reaped = 0
     for run in result.all():
-        # updated_at is timestamptz (tz-aware on read) but written naive UTC.
-        updated_naive = run.updated_at.replace(tzinfo=None) if run.updated_at else datetime.min
-        if updated_naive >= cutoff:
+        # updated_at is timestamptz (tz-aware on read); compare aware to aware.
+        updated_at = run.updated_at if run.updated_at else datetime.min.replace(tzinfo=timezone.utc)
+        if updated_at >= cutoff:
             continue
         run.status = "failed"
         run.error_message = TIMEOUT_MESSAGE
         run.stage_results = {**(run.stage_results or {}), "_run_health": {"failure_kind": "timeout"}}
-        run.updated_at = datetime.utcnow()
+        run.updated_at = now_utc()
         session.add(run)
         reaped += 1
     if reaped:
@@ -249,14 +254,14 @@ async def mark_failed_if_stale(
         return None
     if not _is_in_progress_status(run.status):
         return run
-    cutoff = datetime.utcnow() - timedelta(seconds=threshold_seconds)
-    updated_naive = run.updated_at.replace(tzinfo=None) if run.updated_at else datetime.min
-    if updated_naive >= cutoff:
+    cutoff = now_utc() - timedelta(seconds=threshold_seconds)
+    updated_at = run.updated_at if run.updated_at else datetime.min.replace(tzinfo=timezone.utc)
+    if updated_at >= cutoff:
         return run
     run.status = "failed"
     run.error_message = TIMEOUT_MESSAGE
     run.stage_results = {**(run.stage_results or {}), "_run_health": {"failure_kind": "timeout"}}
-    run.updated_at = datetime.utcnow()
+    run.updated_at = now_utc()
     session.add(run)
     await session.commit()
     await session.refresh(run)

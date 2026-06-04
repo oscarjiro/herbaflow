@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from analysis import pipeline
@@ -18,7 +18,7 @@ async def test_heartbeat_advances_updated_at_during_slow_stage(created_runs, mon
                         "_injected_disease_targets": ["TP53"]},
         )
         # Force updated_at into the past so any heartbeat advance is detectable.
-        run.updated_at = datetime.utcnow() - timedelta(seconds=300)
+        run.updated_at = datetime.now(timezone.utc) - timedelta(seconds=300)
         s.add(run)
         await s.commit()
     created_runs.append(run.analysis_id)
@@ -28,10 +28,10 @@ async def test_heartbeat_advances_updated_at_during_slow_stage(created_runs, mon
         return {"disease_target_count": 1, "targets": []}
 
     monkeypatch.setitem(pipeline.STAGE_RUNNERS, 4, slow_stage)
-    start = datetime.utcnow() - timedelta(seconds=1)
+    start = datetime.now(timezone.utc) - timedelta(seconds=1)
     await pipeline.run_stage(run.analysis_id, 4, async_session_factory)
 
     async with async_session_factory() as s:
         got = await analysis_repo.get_run(s, run.analysis_id)
     # updated_at was refreshed by a heartbeat partway through the slow stage.
-    assert got.updated_at.replace(tzinfo=None) > start
+    assert got.updated_at > start

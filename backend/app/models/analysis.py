@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Any, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import JSON, Column, ForeignKey
+from sqlalchemy import JSON, Column, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
 
@@ -25,8 +25,18 @@ class AnalysisRun(SQLModel, table=True):
     status: str = "pending"
     mode: str = "auto"
     current_stage: Optional[int] = None
-    created_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
+    # These columns are timestamptz in Postgres. Declare them WITH TIME ZONE so the
+    # ORM binds/returns timezone-aware UTC datetimes (matches now_utc()); no schema change.
+    created_at: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    completed_at: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    expires_at: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
     error_message: Optional[str] = None
-    updated_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )

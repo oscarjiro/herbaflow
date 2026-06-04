@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from datetime import datetime
 
 import httpx
 
@@ -8,6 +7,7 @@ logger = logging.getLogger(__name__)
 from app.models.analysis import AnalysisRun
 from app.models.target import CompoundTarget, Target
 from app.repositories import compound_repo
+from app.repositories.analysis_repo import now_utc
 from app.services.canonicalize import (
     TARGET_NS,  # noqa: F401 — re-exported; tests import this from here
     make_compound_target_id,
@@ -173,7 +173,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             pubchem_warning = {"provider": "pubchem_bioassay", "reason": str(exc)}
 
     # ── Upsert Target rows (ChEMBL + PubChem) ─────────────────────────────────
-    now = datetime.utcnow()
+    now = now_utc()
 
     for gene, t in target_info.items():  # ChEMBL targets
         target_id = _make_target_id(t.uniprot_accession, gene)

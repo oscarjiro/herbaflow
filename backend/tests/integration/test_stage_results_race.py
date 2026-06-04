@@ -17,9 +17,9 @@ pytestmark = pytest.mark.asyncio(loop_scope="session")
 
 
 async def _seed_run() -> UUID:
-    from datetime import datetime
+    from datetime import datetime, timezone
     async with async_session_factory() as session:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         run = AnalysisRun(
             analysis_name="RACE_TEST merge primitive",
             mode="guided",

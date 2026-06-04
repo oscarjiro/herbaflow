@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from app import main
@@ -25,7 +25,7 @@ async def test_reaper_loop_sweeps_once(created_runs, monkeypatch):
     # Back-date updated_at so the reaper sees it as stale (600s >> 1s threshold)
     async with async_session_factory() as s:
         frozen = await analysis_repo.get_run(s, run.analysis_id)
-        frozen.updated_at = datetime.utcnow() - timedelta(seconds=600)
+        frozen.updated_at = datetime.now(timezone.utc) - timedelta(seconds=600)
         s.add(frozen)
         await s.commit()
 
