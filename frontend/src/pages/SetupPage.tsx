@@ -211,8 +211,19 @@ export default function SetupPage() {
   // field-level errors are surfaced by Zod on submit.
   const isDisabled = mutation.isPending
 
-  /** Fire the create-analysis mutation from the current form state. */
-  function startCreate() {
+  /**
+   * Fire the create-analysis mutation from the current form state.
+   *
+   * `overrides` lets the review flow substitute the dry-run's resolved CANONICAL
+   * KEYS (InChIKeys / UniProt accessions) for the raw typed inputs. Those keys are
+   * DB cache hits at create time, so no PubChem/UniProt re-enrichment runs. The
+   * standard (no-override) call path is unchanged.
+   */
+  function startCreate(overrides?: {
+    compounds?: string[]
+    targets?: string[]
+    diseaseTargets?: string[]
+  }) {
     mutation.mutate({
       request: buildCreateRequest({
         name,
@@ -222,9 +233,9 @@ export default function SetupPage() {
         params,
         inputMode,
         diseaseInputMode,
-        parsedCompounds,
-        parsedTargets,
-        parsedDiseaseTargets,
+        parsedCompounds: overrides?.compounds ?? parsedCompounds,
+        parsedTargets: overrides?.targets ?? parsedTargets,
+        parsedDiseaseTargets: overrides?.diseaseTargets ?? parsedDiseaseTargets,
         lenient: lenientTargets,
       }),
     })
@@ -299,10 +310,42 @@ export default function SetupPage() {
       })
   }
 
+  /**
+   * Extract the canonical keys the dry-run resolved+persisted, so create can reuse
+   * them as DB cache hits (no re-enrichment):
+   * - compound → InChIKey
+   * - target / disease_target → UniProt accession, falling back to the gene symbol
+   *   for unrecognized lenient inputs (`uniprot_id: null`).
+   */
+  function canonicalKeysFor(
+    kind: 'compound' | 'target' | 'disease_target',
+    valid: Record<string, unknown>[],
+  ): string[] {
+    if (kind === 'compound') {
+      return valid.map((v) => v.inchikey as string).filter(Boolean)
+    }
+    return valid
+      .map((v) => (v.uniprot_id as string) ?? (v.gene_symbol as string))
+      .filter(Boolean)
+  }
+
   function handleContinue() {
+    // Reuse the dry-run's resolved canonical keys for the primary manual kind, so
+    // create resolves them as DB cache hits instead of re-calling providers.
+    const manual = primaryManualInput()
+    const keys = manual && validation ? canonicalKeysFor(manual.kind, validation.valid) : []
+    const override =
+      manual?.kind === 'compound'
+        ? { compounds: keys }
+        : manual?.kind === 'target'
+          ? { targets: keys }
+          : manual?.kind === 'disease_target'
+            ? { diseaseTargets: keys }
+            : undefined
+
     setReviewState('idle')
     setValidation(null)
-    startCreate()
+    startCreate(override)
   }
 
   function handleBack() {

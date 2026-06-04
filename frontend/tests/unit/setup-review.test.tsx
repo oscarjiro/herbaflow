@@ -50,10 +50,20 @@ afterEach(() => {
 })
 
 describe('SetupPage — validate-before-commit review (manual mode)', () => {
-  it('shows the review after Start, then Continue triggers the create mutation', async () => {
+  it('shows the review after Start, then Continue sends the dry-run resolved accessions (not raw symbols)', async () => {
+    // The dry-run resolved+persisted these targets; its valid dicts carry the
+    // canonical UniProt accessions. Continue must reuse those (DB cache hits) —
+    // NOT the raw typed gene symbols.
+    const resolvedPayload = {
+      ...cannedPayload,
+      valid: [
+        { gene_symbol: 'TP53', uniprot_id: 'P04637' },
+        { gene_symbol: 'EGFR', uniprot_id: 'P00533' },
+      ],
+    }
     const validateSpy = vi
       .spyOn(api, 'validateInChunks')
-      .mockResolvedValue(cannedPayload as never)
+      .mockResolvedValue(resolvedPayload as never)
     const createSpy = vi
       .spyOn(api, 'createAnalysis')
       .mockResolvedValue({ analysis_id: 'a1' })
@@ -72,7 +82,7 @@ describe('SetupPage — validate-before-commit review (manual mode)', () => {
       target: { value: 'TP53' },
     })
 
-    // Start → validation runs, review appears.
+    // Start → validation runs against the RAW typed symbols, review appears.
     fireEvent.click(screen.getByRole('button', { name: /start analysis/i }))
 
     await screen.findByTestId('validation-review')
@@ -86,11 +96,11 @@ describe('SetupPage — validate-before-commit review (manual mode)', () => {
     // The create mutation has NOT fired yet — review gates it.
     expect(createSpy).not.toHaveBeenCalled()
 
-    // Continue → create mutation fires.
+    // Continue → create mutation fires with the resolved canonical accessions.
     await userEvent.click(screen.getByRole('button', { name: /continue \(2\)/i }))
     await waitFor(() => expect(createSpy).toHaveBeenCalledTimes(1))
     const req = createSpy.mock.calls[0][0]
-    expect(req.targets).toEqual(['TP53', 'EGFR'])
+    expect(req.targets).toEqual(['P04637', 'P00533'])
   })
 
   it('Go back returns to editing without creating a run', async () => {
