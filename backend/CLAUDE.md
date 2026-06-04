@@ -22,8 +22,8 @@ app/
   repositories/    # DB queries (data access layer)
 
 analysis/stages/   # 8-stage pipeline (independent of HTTP layer)
-  stage1_selection.py   # Compound filtering (Lipinski)
-  stage2_adme.py        # ADME prediction
+  stage1_selection.py   # Compound gathering (from selected plants)
+  stage2_adme.py        # ADME / Lipinski drug-likeness screening
   stage3_targets.py     # Target identification (ChEMBL)
   stage4_disease_targets.py  # Disease-specific targets (Open Targets)
   stage5_overlap.py     # Compound-disease target overlap
