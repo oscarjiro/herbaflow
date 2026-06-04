@@ -132,6 +132,46 @@ export function buildCreateRequest(a: BuildCreateArgs): CreateAnalysisRequest {
   }
 }
 
+export interface BuildSetupFormDataArgs {
+  name: string
+  mode: 'guided' | 'auto'
+  inputMode: 'standard' | 'manual_compounds' | 'manual_targets'
+  diseaseInputMode: 'disease' | 'manual_targets'
+  plantIds: string[]
+  diseaseId: string | null
+  params: AdvancedParams
+  parsedCompounds: string[]
+  parsedTargets: string[]
+  parsedDiseaseTargets: string[]
+}
+
+/**
+ * Build the object handed to validateSetupForm.
+ *
+ * Parameters MUST be nested into the PipelineConfig shape the Zod schema (and the
+ * server) expect — validating the flat accordion state directly fails every submit
+ * with "Invalid input: expected object, received undefined" (the flat object has no
+ * `adme`/`target`/… groups). This mirrors buildCreateRequest, which already nests.
+ */
+export function buildSetupFormData(a: BuildSetupFormDataArgs): Record<string, unknown> {
+  const isManualCompounds = a.inputMode === 'manual_compounds'
+  const isManualTargets = a.inputMode === 'manual_targets'
+  return {
+    name: a.name,
+    mode: a.mode,
+    disease_id: a.diseaseInputMode === 'manual_targets' ? null : a.diseaseId,
+    parameters: nestAdvancedParams(a.params),
+    ...(isManualCompounds
+      ? { compounds: a.parsedCompounds }
+      : isManualTargets
+        ? { targets: a.parsedTargets }
+        : { plant_ids: a.plantIds }),
+    ...(a.diseaseInputMode === 'manual_targets'
+      ? { disease_targets: a.parsedDiseaseTargets }
+      : {}),
+  }
+}
+
 // ============================================================================
 // SetupPage
 // ============================================================================
@@ -192,21 +232,19 @@ export default function SetupPage() {
   function handleSubmit() {
     if (mutation.isPending) return
 
-    // Run Zod validation
-    const formData: Record<string, unknown> = {
+    // Run Zod validation against the same nested shape buildCreateRequest sends.
+    const formData = buildSetupFormData({
       name,
       mode,
-      disease_id: diseaseInputMode === 'manual_targets' ? null : diseaseId,
-      parameters: params,
-      ...(isManualCompounds
-        ? { compounds: parsedCompounds }
-        : isManualTargets
-          ? { targets: parsedTargets }
-          : { plant_ids: plantIds }),
-      ...(diseaseInputMode === 'manual_targets'
-        ? { disease_targets: parsedDiseaseTargets }
-        : {}),
-    }
+      inputMode,
+      diseaseInputMode,
+      plantIds,
+      diseaseId,
+      params,
+      parsedCompounds,
+      parsedTargets,
+      parsedDiseaseTargets,
+    })
     const { success, errors } = validateSetupForm(inputMode, diseaseInputMode, formData)
     if (!success) {
       setFormErrors(errors)
