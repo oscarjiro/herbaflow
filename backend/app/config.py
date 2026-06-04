@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     rate_limit_export: str = "30/minute"
     max_request_bytes: int = 2_097_152  # 2 MB
 
+    # --- Pipeline liveness / reaper ---
+    heartbeat_interval_seconds: int = 30
+    stale_run_threshold_seconds: int = 120
+    reaper_interval_seconds: int = 60
+
     model_config = {
         "env_file": str(Path(__file__).parent.parent.parent / ".env"),
         "env_file_encoding": "utf-8",

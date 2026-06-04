@@ -186,3 +186,14 @@ async def merge_stage_results_locked(
     await session.commit()
     await session.refresh(run)
     return run
+
+
+async def touch_heartbeat(session: AsyncSession, analysis_id: UUID) -> None:
+    """Bump updated_at to now — the liveness heartbeat written periodically while a
+    stage is executing. Lightweight: no status/stage_results change."""
+    run = await get_run(session, analysis_id)
+    if run is None:
+        return
+    run.updated_at = datetime.utcnow()
+    session.add(run)
+    await session.commit()
