@@ -39,6 +39,7 @@ from app.schemas.analysis import (
     ApproveRequest,
     CreateAnalysisRequest,
     ResetFromRequest,
+    ValidateInputsRequest,
 )
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.security import limiter, sanitize_filename
@@ -191,6 +192,45 @@ async def create_analysis(
         created_at=run.created_at,
         updated_at=run.updated_at,
     )
+
+
+@router.post("/validate-inputs")
+@limiter.limit(get_settings().rate_limit_create)
+async def validate_inputs(
+    request: Request,
+    body: ValidateInputsRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Dry-run resolve inputs WITHOUT creating a run.
+
+    Returns the unified ``ResolveResult`` payload (valid / failed / normalized /
+    duplicates / reused / enriched) so the UI can review inputs before committing
+    to an analysis. A literal ``/validate-inputs`` path — declared before the
+    parametrized ``/{analysis_id}`` GET routes — so FastAPI never matches it as an
+    analysis id. A provider outage maps to HTTP 503 (mirrors the create path).
+    """
+    import httpx
+
+    from app.services.input_validation import resolve_compounds, resolve_targets
+
+    try:
+        if body.kind == "compound":
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                res = await resolve_compounds(
+                    body.inputs, existing_keys=set(), session=session, client=client
+                )
+        elif body.kind in ("target", "disease_target"):
+            res = await resolve_targets(
+                body.inputs, lenient=body.lenient, existing_keys=set(), session=session
+            )
+        else:
+            raise HTTPException(
+                status_code=422, detail="kind must be compound | target | disease_target"
+            )
+    except ServiceUnavailableError as exc:
+        logger.error("Provider unavailable during validate-inputs: %s", exc)
+        raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
+    return res.to_payload()
 
 
 @router.get("", response_model=list[AnalysisRunResponse])

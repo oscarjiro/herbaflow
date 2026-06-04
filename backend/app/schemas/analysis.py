@@ -267,6 +267,20 @@ class AddUserTargetResponse(BaseModel):
     protein_name: str | None
 
 
+class ValidateInputsRequest(BaseModel):
+    """Dry-run validation request — resolves inputs without creating a run.
+
+    ``kind`` selects the resolver: ``compound`` routes through ``resolve_compounds``
+    (PubChem), ``target`` / ``disease_target`` route through ``resolve_targets``
+    (UniProt). ``lenient`` only affects target resolution (keeps unrecognized
+    symbols flagged instead of dropping them).
+    """
+
+    kind: str  # 'compound' | 'target' | 'disease_target'
+    inputs: list[str] = Field(min_length=1, max_length=HARD_CAP_MANUAL_COMPOUNDS)
+    lenient: bool = False
+
+
 class InjectCompoundsRequest(BaseModel):
     compounds: list[str] = Field(
         min_length=1,
