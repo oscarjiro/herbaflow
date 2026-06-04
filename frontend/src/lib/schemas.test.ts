@@ -11,6 +11,7 @@ import {
   smilesSchema,
   nestedParamsSchema,
   nestAdvancedParams,
+  capState,
 } from './schemas'
 import { DEFAULT_PARAMS } from '@/components/setup/AdvancedParameters'
 
@@ -167,6 +168,25 @@ describe('nestedParamsSchema — min_confidence STRING presets', () => {
     const bad = nestAdvancedParams({ ...DEFAULT_PARAMS, min_confidence: 0.5 as never })
     const r = nestedParamsSchema.safeParse(bad)
     expect(r.success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// capState — UI cap/warn helper
+// ---------------------------------------------------------------------------
+
+describe('capState', () => {
+  it('flags over the hard cap', () => {
+    expect(capState(21, 10, 20)).toMatchObject({ over: true, warn: true })
+  })
+  it('warns between soft and hard', () => {
+    expect(capState(12, 10, 20)).toMatchObject({ over: false, warn: true })
+  })
+  it('is clear below soft', () => {
+    expect(capState(3, 10, 20)).toMatchObject({ over: false, warn: false })
+  })
+  it('labels n / hard', () => {
+    expect(capState(3, 10, 20).label).toBe('3 / 20')
   })
 })
 

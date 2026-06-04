@@ -285,3 +285,11 @@ export function validateSetupForm(
   }
   return { success: false, errors }
 }
+
+// ---------------------------------------------------------------------------
+// Cap state helper — returns over/warn flags and a display label
+// ---------------------------------------------------------------------------
+
+export function capState(count: number, soft: number, hard: number) {
+  return { over: count > hard, warn: count >= soft, label: `${count} / ${hard}` }
+}
