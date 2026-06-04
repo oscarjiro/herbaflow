@@ -5,8 +5,9 @@ from app.database import async_session_factory
 from app.repositories import analysis_repo
 from analysis import pipeline
 
+pytestmark = pytest.mark.asyncio(loop_scope="session")
 
-@pytest.mark.asyncio
+
 async def test_provider_outage_records_provider_unavailable_kind(created_runs):
     async with async_session_factory() as s:
         run = await analysis_repo.create_run(
@@ -29,7 +30,6 @@ async def test_provider_outage_records_provider_unavailable_kind(created_runs):
     assert "try again" in (got.error_message or "").lower()
 
 
-@pytest.mark.asyncio
 async def test_internal_error_records_internal_kind(created_runs):
     async with async_session_factory() as s:
         run = await analysis_repo.create_run(

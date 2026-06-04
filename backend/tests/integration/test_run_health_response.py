@@ -2,8 +2,9 @@ import pytest
 from app.database import async_session_factory
 from app.repositories import analysis_repo
 
+pytestmark = pytest.mark.asyncio(loop_scope="session")
 
-@pytest.mark.asyncio
+
 async def test_get_analysis_includes_derived_health_fields(client, created_runs):
     async with async_session_factory() as s:
         run = await analysis_repo.create_run(
