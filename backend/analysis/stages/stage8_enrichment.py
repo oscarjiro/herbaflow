@@ -47,6 +47,20 @@ def _empty_enrichment(hub_genes: list[str], degraded: bool = False, reason: str 
     return result
 
 
+def group_hub_genes_by_community(ranked: list[dict]) -> dict[int, list[str]]:
+    """Group ranked hub-gene dicts by community_id.
+
+    Genes missing a community_id are placed in sentinel bucket -1.
+    Bucket -1 is NOT a real Leiden community; callers should skip it when
+    iterating over actual communities.
+    """
+    groups: dict[int, list[str]] = defaultdict(list)
+    for r in ranked:
+        comm_id = r.get("community_id", -1)  # -1 = un-clustered sentinel
+        groups[comm_id].append(r["gene_symbol"])
+    return groups
+
+
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:
     stage7 = (run.stage_results or {}).get("stage_7", {})
     ranked = stage7.get("ranked", [])
@@ -76,14 +90,13 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         grouped = _group_by_source(results)
 
         # Per-community enrichment
-        # Group hub genes by community_id (default 0 if missing)
-        community_genes: dict[int, list[str]] = defaultdict(list)
-        for r in ranked:
-            comm_id = r.get("community_id", 0)
-            community_genes[comm_id].append(r["gene_symbol"])
+        # Group hub genes by community_id; -1 is the sentinel for un-clustered genes
+        community_genes = group_hub_genes_by_community(ranked)
 
         community_results = []
         for comm_id in sorted(community_genes.keys()):
+            if comm_id == -1:
+                continue  # un-clustered genes — not a real community, skip ORA
             genes = community_genes[comm_id]
             if len(genes) < 3:
                 # Skip tiny communities — insufficient gene count for meaningful ORA

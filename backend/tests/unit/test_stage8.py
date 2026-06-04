@@ -192,6 +192,19 @@ async def test_stage8_degrades_when_gprofiler_unavailable():
     assert result["go_bp"] == []
 
 
+def test_missing_community_id_uses_negative_sentinel():
+    from analysis.stages.stage8_enrichment import group_hub_genes_by_community
+
+    ranked = [
+        {"gene_symbol": "AKT1", "community_id": 0},
+        {"gene_symbol": "TP53"},  # no community_id — must NOT land in community 0
+    ]
+    groups = group_hub_genes_by_community(ranked)
+    assert "TP53" in groups[-1], "un-clustered gene must land in sentinel bucket -1"
+    assert "TP53" not in groups.get(0, []), "un-clustered gene must NOT be merged into community 0"
+    assert groups[0] == ["AKT1"]
+
+
 def test_group_by_source_omits_p_value():
     from analysis.stages.stage8_enrichment import _group_by_source
     from integrations.gprofiler import EnrichmentResult
