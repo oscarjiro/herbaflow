@@ -195,8 +195,12 @@ async def get_analysis(analysis_id: UUID, session: AsyncSession = Depends(get_se
     run = await analysis_repo.get_run(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
-    if run.expires_at and run.expires_at < datetime.utcnow():
-        raise HTTPException(status_code=410, detail="Analysis has expired")
+    if run.expires_at:
+        # expires_at comes back from the timestamptz column as timezone-aware, but it is
+        # written with naive UTC (datetime.utcnow). Normalize to naive UTC before comparing.
+        expires_naive = run.expires_at.replace(tzinfo=None)
+        if expires_naive < datetime.utcnow():
+            raise HTTPException(status_code=410, detail="Analysis has expired")
     return AnalysisRunResponse(**run.model_dump())
 
 
