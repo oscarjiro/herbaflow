@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { SegmentedToggle } from '@/components/ui/segmented-toggle'
 import { PlantSelector } from '@/components/setup/PlantSelector'
 import { DiseaseSelector } from '@/components/setup/DiseaseSelector'
 import { ModeToggle } from '@/components/setup/ModeToggle'
@@ -38,58 +39,11 @@ function parseTargetLines(raw: string): string[] {
 }
 
 // ============================================================================
-// InputModeToggle — standard vs manual_compounds vs manual_targets
+// Types — standard vs manual_compounds vs manual_targets
 // ============================================================================
 
 type InputMode = 'standard' | 'manual_compounds' | 'manual_targets'
 type DiseaseInputMode = 'disease' | 'manual_targets'
-
-interface InputModeToggleProps {
-  value: InputMode
-  onChange: (v: InputMode) => void
-}
-
-function InputModeToggle({ value, onChange }: InputModeToggleProps) {
-  const base =
-    'flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none'
-  const active = 'bg-hf-fg1 text-hf-bg'
-  const inactive = 'text-hf-fg2 hover:text-hf-fg1'
-
-  return (
-    <div
-      className="flex gap-1 bg-hf-bg border border-hf-border rounded-lg p-1"
-      role="group"
-      aria-label="Input mode"
-    >
-      <button
-        type="button"
-        className={`${base} ${value === 'standard' ? active : inactive}`}
-        onClick={() => onChange('standard')}
-        aria-pressed={value === 'standard'}
-      >
-        Standard (plant-based)
-      </button>
-      <button
-        type="button"
-        className={`${base} ${value === 'manual_compounds' ? active : inactive}`}
-        onClick={() => onChange('manual_compounds')}
-        aria-pressed={value === 'manual_compounds'}
-        data-testid="input-mode-manual"
-      >
-        Manual compounds
-      </button>
-      <button
-        type="button"
-        className={`${base} ${value === 'manual_targets' ? active : inactive}`}
-        onClick={() => onChange('manual_targets')}
-        aria-pressed={value === 'manual_targets'}
-        data-testid="input-mode-manual-targets"
-      >
-        Manual targets
-      </button>
-    </div>
-  )
-}
 
 // ============================================================================
 // Request builder
@@ -275,7 +229,16 @@ export default function SetupPage() {
       {/* Input Mode */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
         <p className="text-sm font-medium text-hf-fg2 mb-2">Input Mode</p>
-        <InputModeToggle value={inputMode} onChange={(v) => { setInputMode(v); setDiseaseInputMode('disease'); setFormErrors({}) }} />
+        <SegmentedToggle<InputMode>
+          ariaLabel="Input mode"
+          value={inputMode}
+          onChange={(v) => { setInputMode(v); setDiseaseInputMode('disease'); setFormErrors({}) }}
+          options={[
+            { value: 'standard', label: 'Standard (plant-based)' },
+            { value: 'manual_compounds', label: 'Manual compounds', testId: 'input-mode-manual' },
+            { value: 'manual_targets', label: 'Manual targets', testId: 'input-mode-manual-targets' },
+          ]}
+        />
         {isManualCompounds && (
           <p className="text-xs text-hf-fg3 mt-2">
             Stages 1–2 (compound selection and ADME screening) will be skipped.
@@ -387,29 +350,16 @@ export default function SetupPage() {
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
         <p className="text-sm font-medium text-hf-fg2 mb-2">Disease Targets</p>
         {/* Disease input mode toggle */}
-        <div className="flex gap-1 bg-hf-bg border border-hf-border rounded-lg p-1 mb-3" role="group" aria-label="Disease input mode">
-          <button
-            type="button"
-            className={`flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none ${
-              diseaseInputMode === 'disease' ? 'bg-hf-accent text-white' : 'text-hf-fg2 hover:text-hf-fg1'
-            }`}
-            onClick={() => { setDiseaseInputMode('disease'); setFormErrors((prev) => ({ ...prev, disease_id: undefined, disease_targets: undefined })) }}
-            aria-pressed={diseaseInputMode === 'disease'}
-          >
-            Select Disease
-          </button>
-          <button
-            type="button"
-            className={`flex-1 py-1.5 px-3 rounded text-sm font-medium transition-colors focus:outline-none ${
-              diseaseInputMode === 'manual_targets' ? 'bg-hf-accent text-white' : 'text-hf-fg2 hover:text-hf-fg1'
-            }`}
-            onClick={() => { setDiseaseInputMode('manual_targets'); setFormErrors((prev) => ({ ...prev, disease_id: undefined, disease_targets: undefined })) }}
-            aria-pressed={diseaseInputMode === 'manual_targets'}
-            data-testid="disease-input-mode-manual"
-          >
-            Manual Targets
-          </button>
-        </div>
+        <SegmentedToggle<DiseaseInputMode>
+          ariaLabel="Disease input mode"
+          value={diseaseInputMode}
+          onChange={(v) => { setDiseaseInputMode(v); setFormErrors((prev) => ({ ...prev, disease_id: undefined, disease_targets: undefined })) }}
+          options={[
+            { value: 'disease', label: 'Select Disease' },
+            { value: 'manual_targets', label: 'Manual Targets', testId: 'disease-input-mode-manual' },
+          ]}
+          className="mb-3"
+        />
 
         {diseaseInputMode === 'disease' ? (
           <>
