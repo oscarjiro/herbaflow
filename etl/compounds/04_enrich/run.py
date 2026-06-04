@@ -889,7 +889,10 @@ def pubchem_search_url(base_url: str, term: str, kind: str) -> str:
 
 
 def pubchem_properties_url(base_url: str, cid: str) -> str:
-    props = "IUPACName,CanonicalSMILES,IsomericSMILES,InChIKey,MolecularFormula,MolecularWeight,Title"
+    # PubChem PUG-REST renamed its SMILES properties in 2025:
+    # CanonicalSMILES -> ConnectivitySMILES, IsomericSMILES -> SMILES. Request the
+    # current names; the parser still accepts the legacy keys for cached responses.
+    props = "IUPACName,ConnectivitySMILES,SMILES,InChIKey,MolecularFormula,MolecularWeight,Title"
     return f"{base_url}/compound/cid/{quote(str(cid), safe='')}/property/{props}/JSON"
 
 
@@ -1159,8 +1162,15 @@ def pubchem_hit_from_properties(
         pubchem_cid=str(cid),
         chembl_id="",
         inchi_key=normalize_whitespace(prop.get("InChIKey") or ""),
+        # PubChem renamed CanonicalSMILES -> ConnectivitySMILES and
+        # IsomericSMILES -> SMILES (2025). Read the current keys first, falling
+        # back to the legacy names so pre-rename cached responses still resolve.
         smiles=normalize_whitespace(
-            prop.get("CanonicalSMILES") or prop.get("IsomericSMILES") or ""
+            prop.get("ConnectivitySMILES")
+            or prop.get("SMILES")
+            or prop.get("CanonicalSMILES")
+            or prop.get("IsomericSMILES")
+            or ""
         ),
         molecular_formula=normalize_whitespace(prop.get("MolecularFormula") or ""),
         molecular_weight=normalize_whitespace(prop.get("MolecularWeight") or ""),
@@ -1168,6 +1178,7 @@ def pubchem_hit_from_properties(
         preferred_name=normalize_whitespace(
             prop.get("Title")
             or prop.get("IUPACName")
+            or prop.get("ConnectivitySMILES")
             or prop.get("CanonicalSMILES")
             or ""
         ),

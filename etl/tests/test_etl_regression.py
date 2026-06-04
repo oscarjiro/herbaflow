@@ -292,3 +292,56 @@ class TestCompoundsOrchestratorBuildCmd:
                 sys.executable,
                 str(ETL_ROOT / compounds_main.STAGE_SCRIPTS[step]),
             ], f"stage {step} produced unexpected args: {cmd}"
+
+
+compounds_enrich = _load("compounds_04_enrich", "compounds/04_enrich/run.py")
+
+
+class TestPubChemSmilesKeyDrift:
+    """PubChem PUG-REST renamed its SMILES properties in 2025:
+    CanonicalSMILES -> ConnectivitySMILES and IsomericSMILES -> SMILES. The
+    server accepts the legacy names in the request (HTTP 200) but returns the
+    payload under the NEW keys, so a parser that only reads the legacy keys gets
+    an empty SMILES for every fresh fetch. The properties parser must read the
+    current keys, and the request URL must ask for them; legacy keys stay as a
+    fallback so pre-rename cached responses still parse.
+    """
+
+    def test_new_keys_extracted(self):
+        prop = {
+            "CID": 2244,
+            "SMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+            "ConnectivitySMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+            "InChIKey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+            "MolecularFormula": "C9H8O4",
+            "MolecularWeight": "180.16",
+            "IUPACName": "2-acetyloxybenzoic acid",
+            "Title": "Aspirin",
+        }
+        hit = compounds_enrich.pubchem_hit_from_properties(
+            "2244", prop, [], 1, "http://example/2244"
+        )
+        assert hit.smiles == "CC(=O)OC1=CC=CC=C1C(=O)O"
+        assert hit.inchi_key == "BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+
+    def test_legacy_keys_still_extracted(self):
+        # Pre-rename cached responses carry the old key names — must still parse.
+        prop = {
+            "CID": 2244,
+            "CanonicalSMILES": "OLD_CANONICAL",
+            "IsomericSMILES": "OLD_ISOMERIC",
+            "InChIKey": "K",
+        }
+        hit = compounds_enrich.pubchem_hit_from_properties(
+            "2244", prop, [], 1, "http://example/2244"
+        )
+        assert hit.smiles == "OLD_CANONICAL"
+
+    def test_properties_url_requests_current_smiles_names(self):
+        url = compounds_enrich.pubchem_properties_url(
+            "https://pubchem.ncbi.nlm.nih.gov/rest/pug", "2244"
+        )
+        assert "ConnectivitySMILES" in url
+        assert "/property/" in url and "SMILES" in url
+        assert "CanonicalSMILES" not in url
+        assert "IsomericSMILES" not in url
