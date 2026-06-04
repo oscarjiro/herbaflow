@@ -15,9 +15,7 @@ const groups = {
 // Contract fields the setup form intentionally does NOT surface. Every backend
 // field is optional, so an un-exposed field is not a contract gap — it just
 // isn't overridden at create time. Update this when the UI exposes a control.
-const UI_OMITTED: Record<string, string[]> = {
-  ppi: ['community_resolution'],
-}
+const UI_OMITTED: Record<string, string[]> = {}
 
 const contractParams = contract.pipeline_parameters as Record<string, Record<string, unknown>>
 

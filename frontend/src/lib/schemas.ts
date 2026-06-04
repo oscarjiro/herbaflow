@@ -118,6 +118,7 @@ export const targetGroupSchema = z.object({
 export const diseaseTargetsGroupSchema = z.object({ min_score: z.number().min(0).max(1) })
 export const ppiGroupSchema = z.object({
   min_confidence: z.union([z.literal(0.15), z.literal(0.4), z.literal(0.7), z.literal(0.9)]),
+  community_resolution: z.number().min(0.1).max(3.0),
 })
 export const hubGenesGroupSchema = z.object({
   top_n: z.number().int().min(1).max(200),

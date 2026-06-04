@@ -33,6 +33,7 @@ export interface AdvancedParams {
 
   // Network (Stage 6)
   min_confidence: number
+  community_resolution: number
 
   // Hub Genes (Stage 7)
   top_n: number
@@ -69,6 +70,7 @@ export const DEFAULT_PARAMS: AdvancedParams = {
 
   // Network (Stage 6)
   min_confidence: PARAM_DEFAULTS.ppi.min_confidence as number,
+  community_resolution: PARAM_DEFAULTS.ppi.community_resolution as number,
 
   // Hub Genes (Stage 7)
   top_n: PARAM_DEFAULTS.hub_genes.top_n as number,
@@ -327,6 +329,13 @@ export function AdvancedParameters({ value, onChange }: AdvancedParametersProps)
               <StringConfidenceSelector
                 value={value.min_confidence}
                 onChange={(v) => set('min_confidence', v)}
+              />
+              <NumberField
+                label="Community resolution (γ)"
+                value={value.community_resolution}
+                onChange={(v) => set('community_resolution', v)}
+                step={0.1}
+                min={0.1}
               />
             </div>
           </AccordionContent>

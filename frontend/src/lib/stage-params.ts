@@ -126,7 +126,7 @@ export const FLAT_FIELD_GROUP: Record<string, string> = {
   np_exception_threshold: 'adme', apply_adme_to_manual: 'adme',
   min_pchembl: 'target', human_only: 'target', min_assay_confidence: 'target',
   min_score: 'disease_targets',
-  min_confidence: 'ppi',
+  min_confidence: 'ppi', community_resolution: 'ppi',
   top_n: 'hub_genes', use_hub_bottleneck: 'hub_genes',
   fdr_threshold: 'enrichment', sources: 'enrichment',
 }

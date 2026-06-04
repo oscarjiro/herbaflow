@@ -11,6 +11,7 @@ import {
   smilesSchema,
   nestedParamsSchema,
   nestAdvancedParams,
+  ppiGroupSchema,
   capState,
   manualFieldState,
   lineErrorsFor,
@@ -216,6 +217,19 @@ describe('manualFieldState', () => {
   })
   it('returns an empty object for n = 0', () => {
     expect(manualFieldState(0, 10, 20, 'structure')).toEqual({})
+  })
+})
+
+// ---------------------------------------------------------------------------
+// ppiGroupSchema — community_resolution bounds
+// ---------------------------------------------------------------------------
+
+describe('ppiGroupSchema — community_resolution', () => {
+  it('nests community_resolution under ppi and range-checks it', () => {
+    const flat = { ...DEFAULT_PARAMS, community_resolution: 1.0 }
+    const nested = nestAdvancedParams(flat)
+    expect((nested.ppi as any).community_resolution).toBe(1.0)
+    expect(ppiGroupSchema.safeParse({ min_confidence: 0.4, community_resolution: 4.0 }).success).toBe(false)
   })
 })
 
