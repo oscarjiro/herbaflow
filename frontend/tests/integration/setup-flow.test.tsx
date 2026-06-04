@@ -53,4 +53,15 @@ describe('SetupPage', () => {
     expect(screen.queryByPlaceholderText('Enter analysis name')).not.toBeInTheDocument()
     expect(screen.queryByText('Analysis Name')).not.toBeInTheDocument()
   })
+
+  it('mode toggle defaults to guided (not auto)', () => {
+    render(<SetupPage />, { wrapper })
+    // ModeToggle renders two buttons: "Guided" and "Auto".
+    // The active button receives the bg-hf-fg1 class; the inactive one does not.
+    // This pins the initial mode state to 'guided' so any accidental change to 'auto' is caught.
+    const guidedBtn = screen.getByRole('button', { name: /guided/i })
+    const autoBtn = screen.getByRole('button', { name: /auto/i })
+    expect(guidedBtn.className).toContain('bg-hf-fg1')
+    expect(autoBtn.className).not.toContain('bg-hf-fg1')
+  })
 })
