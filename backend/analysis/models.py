@@ -50,6 +50,11 @@ class TargetParams:
 @dataclass
 class DiseaseTargetParams:
     min_score: float = 0.3
+    # Open Targets overall association score cutoff. 0.3 retains moderate-to-strong
+    # disease–target associations while filtering weak/noisy evidence; consistent with
+    # network-pharmacology practice of using a moderate association threshold rather than
+    # the platform's stricter 0.5+ "high-confidence" tier (Ochoa et al. 2021, Nucleic
+    # Acids Res 49:D1302, Open Targets Platform scoring).
 
 
 @dataclass
