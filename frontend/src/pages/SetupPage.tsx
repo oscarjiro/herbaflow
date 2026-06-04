@@ -73,6 +73,8 @@ export interface BuildCreateArgs {
   parsedCompounds: string[]
   parsedTargets: string[]
   parsedDiseaseTargets: string[]
+  /** Lenient target injection: keep unrecognized symbols flagged instead of dropped. Only applied for manual_targets mode. */
+  lenient?: boolean
 }
 
 /**
@@ -93,6 +95,7 @@ export function buildCreateRequest(a: BuildCreateArgs): CreateAnalysisRequest {
     parameters: nestAdvancedParams(a.params),
     ...(a.inputMode === 'manual_compounds' ? { compounds: a.parsedCompounds } : {}),
     ...(a.inputMode === 'manual_targets' ? { targets: a.parsedTargets } : {}),
+    ...(a.inputMode === 'manual_targets' && a.lenient ? { skip_validation: true } : {}),
     ...(a.diseaseInputMode === 'manual_targets'
       ? { manual_disease_targets: a.parsedDiseaseTargets }
       : {}),
@@ -158,6 +161,7 @@ export default function SetupPage() {
   const [targetsRaw, setTargetsRaw] = useState('')
   const [formErrors, setFormErrors] = useState<SetupFormErrors>({})
   // Disease input mode: select from DB or paste manual gene/accession list
+  const [lenientTargets, setLenientTargets] = useState(false)
   const [diseaseInputMode, setDiseaseInputMode] = useState<DiseaseInputMode>('disease')
   const [diseaseTargetsRaw, setDiseaseTargetsRaw] = useState('')
   const parsedDiseaseTargets = diseaseInputMode === 'manual_targets' ? parseTargetLines(diseaseTargetsRaw) : []
@@ -234,6 +238,7 @@ export default function SetupPage() {
         parsedCompounds,
         parsedTargets,
         parsedDiseaseTargets,
+        lenient: lenientTargets,
       }),
     })
   }
@@ -301,16 +306,28 @@ export default function SetupPage() {
             </div>
           </>
         ) : (
-          <LineNumberedTextarea
-            aria-label="Targets"
-            value={targetsRaw}
-            onChange={(v) => { setTargetsRaw(v); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
-            placeholder={"TP53\nBRCA1\nP04637"}
-            error={formErrors.targets ?? targetsCap.error}
-            warning={targetsCap.warning}
-            count={targetsCap.count}
-            lineErrors={targetsLineErrors}
-          />
+          <>
+            <LineNumberedTextarea
+              aria-label="Targets"
+              value={targetsRaw}
+              onChange={(v) => { setTargetsRaw(v); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
+              placeholder={"TP53\nBRCA1\nP04637"}
+              error={formErrors.targets ?? targetsCap.error}
+              warning={targetsCap.warning}
+              count={targetsCap.count}
+              lineErrors={targetsLineErrors}
+            />
+            <div className="mt-2">
+              <CheckboxField
+                label="Keep unrecognized symbols (lenient)"
+                value={lenientTargets}
+                onChange={setLenientTargets}
+              />
+              <p className="text-xs text-hf-fg3 mt-1">
+                Unrecognized gene symbols are kept and flagged instead of dropped; UniProt accessions are still resolved.
+              </p>
+            </div>
+          </>
         )}
       </div>
 

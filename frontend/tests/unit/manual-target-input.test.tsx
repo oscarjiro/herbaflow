@@ -111,4 +111,28 @@ describe('SetupPage — manual target input mode', () => {
     expect(manualTargetsBtn).toBeInTheDocument()
     expect(manualTargetsBtn).toHaveTextContent(/manual targets/i)
   })
+
+  // ---------------------------------------------------------------------------
+  // Test 5: Lenient checkbox present and unchecked in manual_targets mode
+  // ---------------------------------------------------------------------------
+
+  it('shows an unchecked lenient checkbox in manual_targets mode', async () => {
+    await renderSetupPage()
+
+    fireEvent.click(screen.getByTestId('input-mode-manual-targets'))
+
+    const checkbox = screen.getByRole('checkbox', { name: /keep unrecognized symbols/i })
+    expect(checkbox).toBeInTheDocument()
+    expect(checkbox).not.toBeChecked()
+  })
+
+  it('lenient checkbox is absent in manual_compounds mode', async () => {
+    await renderSetupPage()
+
+    fireEvent.click(screen.getByTestId('input-mode-manual'))
+
+    expect(
+      screen.queryByRole('checkbox', { name: /keep unrecognized symbols/i })
+    ).not.toBeInTheDocument()
+  })
 })

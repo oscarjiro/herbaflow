@@ -126,6 +126,8 @@ export interface CreateAnalysisRequest {
   compounds?: string[]
   targets?: string[]
   manual_disease_targets?: string[]
+  /** Lenient target injection: keep unrecognized symbols flagged instead of dropped. Only sent for manual_targets mode. */
+  skip_validation?: boolean
 }
 
 export interface AnalysisStatusResponse {

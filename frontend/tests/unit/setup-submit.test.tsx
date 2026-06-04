@@ -37,4 +37,58 @@ describe('buildCreateRequest', () => {
     expect(req.manual_disease_targets).toEqual(['TP53'])
     expect(req.disease_id).toBeNull()
   })
+
+  it('manual_targets + lenient: skip_validation is true', () => {
+    const req = buildCreateRequest({
+      name: 'n', mode: 'guided', plantIds: [], diseaseId: 'd1',
+      params: DEFAULT_PARAMS, inputMode: 'manual_targets',
+      diseaseInputMode: 'disease',
+      parsedCompounds: [], parsedTargets: ['TP53'], parsedDiseaseTargets: [],
+      lenient: true,
+    })
+    expect(req.skip_validation).toBe(true)
+  })
+
+  it('manual_targets + lenient false: skip_validation is undefined', () => {
+    const req = buildCreateRequest({
+      name: 'n', mode: 'guided', plantIds: [], diseaseId: 'd1',
+      params: DEFAULT_PARAMS, inputMode: 'manual_targets',
+      diseaseInputMode: 'disease',
+      parsedCompounds: [], parsedTargets: ['TP53'], parsedDiseaseTargets: [],
+      lenient: false,
+    })
+    expect(req.skip_validation).toBeUndefined()
+  })
+
+  it('manual_targets + lenient omitted: skip_validation is undefined', () => {
+    const req = buildCreateRequest({
+      name: 'n', mode: 'guided', plantIds: [], diseaseId: 'd1',
+      params: DEFAULT_PARAMS, inputMode: 'manual_targets',
+      diseaseInputMode: 'disease',
+      parsedCompounds: [], parsedTargets: ['TP53'], parsedDiseaseTargets: [],
+    })
+    expect(req.skip_validation).toBeUndefined()
+  })
+
+  it('standard mode + lenient true: skip_validation is undefined', () => {
+    const req = buildCreateRequest({
+      name: 'n', mode: 'guided', plantIds: ['p1'], diseaseId: 'd1',
+      params: DEFAULT_PARAMS, inputMode: 'standard',
+      diseaseInputMode: 'disease',
+      parsedCompounds: [], parsedTargets: [], parsedDiseaseTargets: [],
+      lenient: true,
+    })
+    expect(req.skip_validation).toBeUndefined()
+  })
+
+  it('manual_compounds + lenient true: skip_validation is undefined', () => {
+    const req = buildCreateRequest({
+      name: 'n', mode: 'guided', plantIds: [], diseaseId: 'd1',
+      params: DEFAULT_PARAMS, inputMode: 'manual_compounds',
+      diseaseInputMode: 'disease',
+      parsedCompounds: ['CCO'], parsedTargets: [], parsedDiseaseTargets: [],
+      lenient: true,
+    })
+    expect(req.skip_validation).toBeUndefined()
+  })
 })
