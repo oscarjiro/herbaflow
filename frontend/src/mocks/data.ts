@@ -25,6 +25,7 @@ export const diseasesFixture: DiseaseResponse[] = [
     ontology_id: 'MONDO:0005148',
     ontology_source: 'mondo',
     disease_aliases: [],
+    target_count: 128,
   },
   {
     disease_id: 'dtg_mondo_0004981',
@@ -32,6 +33,7 @@ export const diseasesFixture: DiseaseResponse[] = [
     ontology_id: 'MONDO:0004981',
     ontology_source: 'mondo',
     disease_aliases: [],
+    target_count: 96,
   },
 ]
 

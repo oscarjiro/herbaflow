@@ -23,6 +23,7 @@ export interface DiseaseResponse {
   ontology_id: string | null
   ontology_source: string | null
   disease_aliases: string[]
+  target_count: number
 }
 
 export interface CompoundResponse {
