@@ -43,6 +43,7 @@ from app.schemas.analysis import (
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.security import limiter, sanitize_filename
 from app.services.canonicalize import make_compound_target_id, make_target_id, target_canonical_key
+from app.services.compound_persist import persist_validated_compounds
 from app.services.target_persist import persist_canonical_target
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
@@ -828,6 +829,9 @@ async def add_user_compound(
     # via the property endpoint we use, so fall back to what the user provided).
     if body.smiles:
         validated["smiles"] = body.smiles
+
+    # Persist to the canonical compounds cache (non-fatal — service handles errors).
+    await persist_validated_compounds([validated], session)
 
     def _merge(current: dict) -> dict:
         stage1 = dict(current.get("stage_1") or {})

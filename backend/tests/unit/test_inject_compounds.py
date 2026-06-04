@@ -151,6 +151,54 @@ def test_add_user_compound_to_stage1():
 
 
 # ---------------------------------------------------------------------------
+# Test 4: POST /analyses/{id}/user-compounds persists the compound to the cache
+# ---------------------------------------------------------------------------
+
+
+def test_add_user_compound_persists_to_cache():
+    """POST /analyses/{id}/user-compounds must call persist_validated_compounds
+    with a one-element list containing the validated compound dict.
+
+    This guards the bug where the single-add path skipped the canonical compounds
+    table (unlike bulk inject which always persists via persist_validated_compounds).
+    """
+    mock_run = _make_mock_run(stage1=_STAGE1_EMPTY)
+
+    async def _fake_merge(session, analysis_id, mutate, status=None):
+        mock_run.stage_results = mutate(dict(mock_run.stage_results or {}))
+        return mock_run
+
+    mock_persist = AsyncMock(return_value=1)
+
+    with (
+        patch("app.repositories.analysis_repo.get_run", new=AsyncMock(return_value=mock_run)),
+        patch("app.repositories.analysis_repo.merge_stage_results_locked", new=AsyncMock(side_effect=_fake_merge)),
+        patch(
+            "integrations.pubchem_compound.validate_compound",
+            new=AsyncMock(return_value=_MOCK_COMPOUND),
+        ),
+        patch(
+            "app.routers.analyses.persist_validated_compounds",
+            new=mock_persist,
+        ),
+        patch("app.database.get_session"),
+    ):
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.post(
+            f"/analyses/{ANALYSIS_ID}/user-compounds",
+            json={"smiles": _ASPIRIN_SMILES},
+        )
+
+    assert response.status_code == 200, response.text
+    # persist_validated_compounds must have been called exactly once
+    assert mock_persist.await_count == 1
+    call_args = mock_persist.await_args
+    persisted_list = call_args[0][0]  # first positional arg
+    assert len(persisted_list) == 1
+    assert persisted_list[0]["compound_id"] == _MOCK_COMPOUND["compound_id"]
+
+
+# ---------------------------------------------------------------------------
 # Test 5: DELETE /analyses/{id}/user-compounds/{compound_id} removes it
 # ---------------------------------------------------------------------------
 
