@@ -16,6 +16,7 @@ import {
   validateSetupForm,
   nestAdvancedParams,
   manualFieldState,
+  lineErrorsFor,
   SOFT_CAP_MANUAL_COMPOUNDS,
   HARD_CAP_MANUAL_COMPOUNDS,
   SOFT_CAP_MANUAL_TARGETS,
@@ -171,6 +172,11 @@ export default function SetupPage() {
   const targetsCap = manualFieldState(parsedTargets.length, SOFT_CAP_MANUAL_TARGETS, HARD_CAP_MANUAL_TARGETS, 'target')
   const diseaseTargetsCap = manualFieldState(parsedDiseaseTargets.length, SOFT_CAP_DISEASE_TARGETS, HARD_CAP_DISEASE_TARGETS, 'target')
 
+  // Live per-line format hints (client-side only; server dry-run is authoritative).
+  const compoundsLineErrors = lineErrorsFor('compound', compoundsRaw.split('\n'))
+  const targetsLineErrors = lineErrorsFor('target', targetsRaw.split('\n'))
+  const diseaseTargetsLineErrors = lineErrorsFor('target', diseaseTargetsRaw.split('\n'))
+
   // Cache restore: if there's an in-progress analysis, redirect to it
   useEffect(() => {
     const lastId = localStorage.getItem('hf_last_analysis_id')
@@ -283,6 +289,7 @@ export default function SetupPage() {
             error={formErrors.compounds ?? compoundsCap.error}
             warning={compoundsCap.warning}
             count={compoundsCap.count}
+            lineErrors={compoundsLineErrors}
           />
         ) : (
           <LineNumberedTextarea
@@ -293,6 +300,7 @@ export default function SetupPage() {
             error={formErrors.targets ?? targetsCap.error}
             warning={targetsCap.warning}
             count={targetsCap.count}
+            lineErrors={targetsLineErrors}
           />
         )}
       </div>
@@ -337,6 +345,7 @@ export default function SetupPage() {
             error={formErrors.disease_targets ?? diseaseTargetsCap.error}
             warning={diseaseTargetsCap.warning}
             count={diseaseTargetsCap.count}
+            lineErrors={diseaseTargetsLineErrors}
           />
         )}
       </div>

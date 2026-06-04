@@ -13,6 +13,7 @@ import {
   nestAdvancedParams,
   capState,
   manualFieldState,
+  lineErrorsFor,
 } from './schemas'
 import { DEFAULT_PARAMS } from '@/components/setup/AdvancedParameters'
 
@@ -215,6 +216,29 @@ describe('manualFieldState', () => {
   })
   it('returns an empty object for n = 0', () => {
     expect(manualFieldState(0, 10, 20, 'structure')).toEqual({})
+  })
+})
+
+// ---------------------------------------------------------------------------
+// lineErrorsFor — per-line format hints for manual textarea inputs
+// ---------------------------------------------------------------------------
+
+describe('lineErrorsFor', () => {
+  it('flags an invalid target line with a 1-based index', () => {
+    const e = lineErrorsFor('target', ['TP53', 'bad!'])
+    expect(e[2]).toMatch(/gene symbol or UniProt accession/i)
+    expect(e[1]).toBeUndefined()
+  })
+  it('accepts a UniProt accession as a target', () => {
+    expect(lineErrorsFor('target', ['P04637'])[1]).toBeUndefined()
+  })
+  it('flags too-short SMILES', () => {
+    expect(lineErrorsFor('compound', ['CC', 'x'])[2]).toBeTruthy()
+  })
+  it('ignores blank lines (no error key, keeps 1-based alignment)', () => {
+    const e = lineErrorsFor('target', ['TP53', '', 'bad!'])
+    expect(e[2]).toBeUndefined()   // blank line is not flagged
+    expect(e[3]).toMatch(/gene symbol or UniProt accession/i)
   })
 })
 

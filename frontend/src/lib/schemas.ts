@@ -287,6 +287,36 @@ export function validateSetupForm(
 }
 
 // ---------------------------------------------------------------------------
+// Per-line format hints for manual textarea inputs
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-line format hints for manual inputs. Keys are 1-based line indices that
+ * align with the displayed line numbers (caller passes value.split('\n')).
+ * Blank/whitespace-only lines are skipped (no key). These are CLIENT-SIDE HINTS;
+ * authoritative resolution happens server-side (dry-run).
+ */
+export function lineErrorsFor(
+  kind: 'compound' | 'target',
+  lines: string[],
+): Record<number, string> {
+  const errors: Record<number, string> = {}
+  lines.forEach((line, i) => {
+    const s = line.trim()
+    if (!s) return // skip blanks; keep 1-based alignment
+    if (kind === 'target') {
+      const ok = geneSymbolSchema.safeParse(s).success || uniprotAccessionSchema.safeParse(s).success
+      if (!ok) errors[i + 1] = 'not a valid gene symbol or UniProt accession'
+    } else {
+      if (!smilesSchema.safeParse(s).success) {
+        errors[i + 1] = 'not a valid structure (min 3 chars, printable ASCII)'
+      }
+    }
+  })
+  return errors
+}
+
+// ---------------------------------------------------------------------------
 // Cap state helper — returns over/warn flags and a display label
 // ---------------------------------------------------------------------------
 
