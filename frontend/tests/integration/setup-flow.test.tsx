@@ -31,7 +31,7 @@ describe('SetupPage', () => {
 
     // Section labels (Analysis Name input was removed — name is auto-generated)
     expect(screen.getByText('Plants')).toBeInTheDocument()
-    expect(screen.getAllByText('Disease Targets').length).toBeGreaterThan(0)
+    expect(screen.getByText('Disease')).toBeInTheDocument()
     expect(screen.getByText('Mode')).toBeInTheDocument()
     expect(screen.getByText('Advanced Parameters')).toBeInTheDocument()
 

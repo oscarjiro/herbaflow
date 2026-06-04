@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { SegmentedToggle } from '@/components/ui/segmented-toggle'
+import { LineNumberedTextarea } from '@/components/ui/line-numbered-textarea'
 import { PlantSelector } from '@/components/setup/PlantSelector'
 import { DiseaseSelector } from '@/components/setup/DiseaseSelector'
 import { ModeToggle } from '@/components/setup/ModeToggle'
@@ -149,15 +150,8 @@ export default function SetupPage() {
   const [diseaseTargetsRaw, setDiseaseTargetsRaw] = useState('')
   const parsedDiseaseTargets = diseaseInputMode === 'manual_targets' ? parseTargetLines(diseaseTargetsRaw) : []
 
-  // Refs for line-number scroll sync
-  const compoundsTextareaRef = useRef<HTMLTextAreaElement>(null)
-  const compoundsLineNumsRef = useRef<HTMLDivElement>(null)
-  const targetsTextareaRef = useRef<HTMLTextAreaElement>(null)
-  const targetsLineNumsRef = useRef<HTMLDivElement>(null)
-
   const isManualCompounds = inputMode === 'manual_compounds'
   const isManualTargets = inputMode === 'manual_targets'
-  const isManual = isManualCompounds || isManualTargets
   const parsedCompounds = isManualCompounds ? parseCompoundLines(compoundsRaw) : []
   const parsedTargets = isManualTargets ? parseTargetLines(targetsRaw) : []
 
@@ -226,9 +220,9 @@ export default function SetupPage() {
     <div className="max-w-2xl mx-auto py-12 px-6">
       <h1 className="font-display text-3xl text-hf-fg1 mb-8">New Analysis</h1>
 
-      {/* Input Mode */}
+      {/* Plants */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
-        <p className="text-sm font-medium text-hf-fg2 mb-2">Input Mode</p>
+        <p className="text-sm font-medium text-hf-fg2 mb-2">Plants</p>
         <SegmentedToggle<InputMode>
           ariaLabel="Input mode"
           value={inputMode}
@@ -238,118 +232,56 @@ export default function SetupPage() {
             { value: 'manual_compounds', label: 'Manual compounds', testId: 'input-mode-manual' },
             { value: 'manual_targets', label: 'Manual targets', testId: 'input-mode-manual-targets' },
           ]}
+          className="mb-3"
         />
+
+        {inputMode === 'standard' && (
+          <p className="text-xs text-hf-fg3 mb-2">
+            Select one or more plants from the KNApSAcK catalogue.
+          </p>
+        )}
         {isManualCompounds && (
-          <p className="text-xs text-hf-fg3 mt-2">
-            Stages 1–2 (compound selection and ADME screening) will be skipped.
-            Compounds are validated via PubChem; invalid structures are discarded.
+          <p className="text-xs text-hf-fg3 mb-2">
+            Paste compounds (Stages 1–2 skipped). One SMILES or InChI per line; mixed formats accepted.
           </p>
         )}
         {isManualTargets && (
-          <p className="text-xs text-hf-fg3 mt-2">
-            Stages 1–3 (compound selection, ADME screening, and target identification) will be skipped.
-            Targets are validated via UniProt (human proteome); unrecognised entries are discarded.
+          <p className="text-xs text-hf-fg3 mb-2">
+            Paste compound targets (Stages 1–3 skipped). One HGNC gene symbol or UniProt accession per line.
           </p>
+        )}
+
+        {inputMode === 'standard' ? (
+          <div data-testid="plants-section">
+            <PlantSelector value={plantIds} onChange={(v) => { setPlantIds(v); setFormErrors((prev) => ({ ...prev, plant_ids: undefined })) }} />
+            {formErrors.plant_ids && (
+              <p className="text-xs text-hf-danger mt-1">{formErrors.plant_ids}</p>
+            )}
+          </div>
+        ) : isManualCompounds ? (
+          <LineNumberedTextarea
+            aria-label="Compounds"
+            value={compoundsRaw}
+            onChange={(v) => { setCompoundsRaw(v); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
+            placeholder={"CC(=O)Oc1ccccc1C(=O)O\nInChI=1S/C9H8O4/..."}
+            error={formErrors.compounds}
+            count={parsedCompounds.length > 0 ? `${parsedCompounds.length} structure${parsedCompounds.length !== 1 ? 's' : ''} entered` : undefined}
+          />
+        ) : (
+          <LineNumberedTextarea
+            aria-label="Targets"
+            value={targetsRaw}
+            onChange={(v) => { setTargetsRaw(v); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
+            placeholder={"TP53\nBRCA1\nP04637"}
+            error={formErrors.targets}
+            count={parsedTargets.length > 0 ? `${parsedTargets.length} target${parsedTargets.length !== 1 ? 's' : ''} entered` : undefined}
+          />
         )}
       </div>
 
-      {/* Plants — hidden in manual mode */}
-      {!isManual && (
-        <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" data-testid="plants-section">
-          <p className="text-sm font-medium text-hf-fg2 mb-2">Plants</p>
-          <PlantSelector value={plantIds} onChange={(v) => { setPlantIds(v); setFormErrors((prev) => ({ ...prev, plant_ids: undefined })) }} />
-          {formErrors.plant_ids && (
-            <p className="text-xs text-hf-danger mt-1">{formErrors.plant_ids}</p>
-          )}
-        </div>
-      )}
-
-      {/* Manual compound input */}
-      {isManualCompounds && (
-        <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" data-testid="compounds-section">
-          <p className="text-sm font-medium text-hf-fg2 mb-2">Compounds</p>
-          <p className="text-xs text-hf-fg3 mb-2">One SMILES or InChI string per line. Mixed formats accepted.</p>
-          <div className={`relative flex font-mono text-sm rounded-md border bg-hf-bg${formErrors.compounds ? ' border-hf-danger' : ' border-hf-border'}`}>
-            {/* Line numbers */}
-            <div
-              ref={compoundsLineNumsRef}
-              data-testid="compounds-line-nums"
-              className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none overflow-hidden"
-            >
-              {(compoundsRaw === '' ? [] : compoundsRaw.split('\n')).map((_, i) => (
-                <div key={`line-${i}`} className="leading-6">{i + 1}</div>
-              ))}
-            </div>
-            <textarea
-              ref={compoundsTextareaRef}
-              value={compoundsRaw}
-              onChange={(e) => { setCompoundsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, compounds: undefined })) }}
-              onScroll={() => {
-                if (compoundsTextareaRef.current && compoundsLineNumsRef.current) {
-                  compoundsLineNumsRef.current.scrollTop = compoundsTextareaRef.current.scrollTop
-                }
-              }}
-              rows={6}
-              data-testid="compounds-textarea"
-              className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none resize-y border-0"
-              placeholder={"CC(=O)Oc1ccccc1C(=O)O\nInChI=1S/C9H8O4/..."}
-            />
-          </div>
-          {formErrors.compounds ? (
-            <p className="text-xs text-hf-danger mt-1">{formErrors.compounds}</p>
-          ) : parsedCompounds.length > 0 ? (
-            <p className="text-xs text-hf-fg3 mt-1">
-              {parsedCompounds.length} structure{parsedCompounds.length !== 1 ? 's' : ''} entered
-            </p>
-          ) : null}
-        </div>
-      )}
-
-      {/* Manual target input */}
-      {isManualTargets && (
-        <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" data-testid="targets-section">
-          <p className="text-sm font-medium text-hf-fg2 mb-2">Targets</p>
-          <p className="text-xs text-hf-fg3 mb-2">One gene symbol or UniProt accession per line.</p>
-          <div className={`relative flex font-mono text-sm rounded-md border bg-hf-bg${formErrors.targets ? ' border-hf-danger' : ' border-hf-border'}`}>
-            {/* Line numbers */}
-            <div
-              ref={targetsLineNumsRef}
-              data-testid="targets-line-nums"
-              className="select-none pr-3 pl-3 text-hf-fg3 text-right min-w-[2.5rem] pt-3 leading-none overflow-hidden"
-            >
-              {(targetsRaw === '' ? [] : targetsRaw.split('\n')).map((_, i) => (
-                <div key={`line-${i}`} className="leading-6">{i + 1}</div>
-              ))}
-            </div>
-            <textarea
-              ref={targetsTextareaRef}
-              value={targetsRaw}
-              onChange={(e) => { setTargetsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, targets: undefined })) }}
-              onScroll={() => {
-                if (targetsTextareaRef.current && targetsLineNumsRef.current) {
-                  targetsLineNumsRef.current.scrollTop = targetsTextareaRef.current.scrollTop
-                }
-              }}
-              rows={6}
-              data-testid="targets-textarea"
-              className="flex-1 rounded-r-md bg-hf-bg text-hf-fg1 text-sm p-3 pt-3 leading-6 placeholder:text-hf-fg3 focus:outline-none resize-y border-0"
-              placeholder={"TP53\nBRCA1\nP04637"}
-            />
-          </div>
-          {formErrors.targets ? (
-            <p className="text-xs text-hf-danger mt-1">{formErrors.targets}</p>
-          ) : parsedTargets.length > 0 ? (
-            <p className="text-xs text-hf-fg3 mt-1">
-              {parsedTargets.length} target{parsedTargets.length !== 1 ? 's' : ''} entered
-            </p>
-          ) : null}
-        </div>
-      )}
-
       {/* Disease */}
       <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4">
-        <p className="text-sm font-medium text-hf-fg2 mb-2">Disease Targets</p>
-        {/* Disease input mode toggle */}
+        <p className="text-sm font-medium text-hf-fg2 mb-2">Disease</p>
         <SegmentedToggle<DiseaseInputMode>
           ariaLabel="Disease input mode"
           value={diseaseInputMode}
@@ -362,6 +294,16 @@ export default function SetupPage() {
         />
 
         {diseaseInputMode === 'disease' ? (
+          <p className="text-xs text-hf-fg3 mb-2">
+            Targets are sourced from Open Targets for the selected disease.
+          </p>
+        ) : (
+          <p className="text-xs text-hf-fg3 mb-2">
+            Paste disease targets (bypasses Open Targets). One HGNC gene symbol or UniProt accession per line.
+          </p>
+        )}
+
+        {diseaseInputMode === 'disease' ? (
           <>
             <DiseaseSelector value={diseaseId} onChange={(v) => { setDiseaseId(v); setFormErrors((prev) => ({ ...prev, disease_id: undefined })) }} />
             {formErrors.disease_id && (
@@ -369,26 +311,14 @@ export default function SetupPage() {
             )}
           </>
         ) : (
-          <>
-            <p className="text-xs text-hf-fg3 mb-2">
-              One gene symbol or UniProt accession per line. Bypasses Open Targets.
-            </p>
-            <textarea
-              value={diseaseTargetsRaw}
-              onChange={(e) => { setDiseaseTargetsRaw(e.target.value); setFormErrors((prev) => ({ ...prev, disease_targets: undefined })) }}
-              placeholder={"TP53\nBRCA1\nP04637"}
-              rows={6}
-              data-testid="disease-targets-textarea"
-              className="w-full rounded-md border bg-hf-bg text-hf-fg1 text-sm p-3 font-mono placeholder:text-hf-fg3 focus:outline-none resize-y border-hf-border"
-            />
-            {formErrors.disease_targets ? (
-              <p className="text-xs text-hf-danger mt-1">{formErrors.disease_targets}</p>
-            ) : parsedDiseaseTargets.length > 0 ? (
-              <p className="text-xs text-hf-fg3 mt-1">
-                {parsedDiseaseTargets.length} target{parsedDiseaseTargets.length !== 1 ? 's' : ''} entered
-              </p>
-            ) : null}
-          </>
+          <LineNumberedTextarea
+            aria-label="Disease targets"
+            value={diseaseTargetsRaw}
+            onChange={(v) => { setDiseaseTargetsRaw(v); setFormErrors((prev) => ({ ...prev, disease_targets: undefined })) }}
+            placeholder={"TP53\nBRCA1\nP04637"}
+            error={formErrors.disease_targets}
+            count={parsedDiseaseTargets.length > 0 ? `${parsedDiseaseTargets.length} target${parsedDiseaseTargets.length !== 1 ? 's' : ''} entered` : undefined}
+          />
         )}
       </div>
 

@@ -32,8 +32,8 @@ describe('SetupPage — line numbers scroll in sync with textarea', () => {
     const manualBtn = screen.getByTestId('input-mode-manual')
     fireEvent.click(manualBtn)
 
-    const textarea = screen.getByTestId('compounds-textarea')
-    const lineNums = screen.getByTestId('compounds-line-nums')
+    const textarea = screen.getByLabelText('Compounds')
+    const lineNums = screen.getByTestId('line-nums')
 
     // Simulate the user scrolling the textarea
     // Use configurable: true to allow jsdom to read the scrollTop value
@@ -54,8 +54,8 @@ describe('SetupPage — line numbers scroll in sync with textarea', () => {
     const manualTargetsBtn = screen.getByTestId('input-mode-manual-targets')
     fireEvent.click(manualTargetsBtn)
 
-    const textarea = screen.getByTestId('targets-textarea')
-    const lineNums = screen.getByTestId('targets-line-nums')
+    const textarea = screen.getByLabelText('Targets')
+    const lineNums = screen.getByTestId('line-nums')
 
     // Use configurable: true to allow jsdom to read the scrollTop value
     Object.defineProperty(textarea, 'scrollTop', {

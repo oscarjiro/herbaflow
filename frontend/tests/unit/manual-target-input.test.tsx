@@ -47,14 +47,14 @@ describe('SetupPage — manual target input mode', () => {
     await renderSetupPage()
 
     // Initially no targets textarea
-    expect(screen.queryByTestId('targets-textarea')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Targets')).not.toBeInTheDocument()
 
     // Click "Manual targets" toggle button
     const manualTargetsBtn = screen.getByTestId('input-mode-manual-targets')
     fireEvent.click(manualTargetsBtn)
 
-    // Targets textarea should now be visible
-    const textarea = screen.getByTestId('targets-textarea')
+    // Targets textarea should now be visible (queried by its aria-label)
+    const textarea = screen.getByLabelText('Targets')
     expect(textarea).toBeInTheDocument()
     // Placeholder contains example gene symbols (literal newline in the attribute)
     expect(textarea.getAttribute('placeholder')).toMatch(/TP53/)
@@ -92,7 +92,7 @@ describe('SetupPage — manual target input mode', () => {
     expect(submitBtn).toBeEnabled()
 
     // Type a gene symbol → target count hint should appear
-    fireEvent.change(screen.getByTestId('targets-textarea'), {
+    fireEvent.change(screen.getByLabelText('Targets'), {
       target: { value: 'TP53' },
     })
 

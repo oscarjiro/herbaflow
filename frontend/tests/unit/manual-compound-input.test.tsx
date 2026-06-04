@@ -48,15 +48,15 @@ describe('SetupPage — manual compound input mode', () => {
   it('shows compound textarea after switching to manual_compounds mode', async () => {
     await renderSetupPage()
 
-    // Initially no textarea
-    expect(screen.queryByTestId('compounds-textarea')).not.toBeInTheDocument()
+    // Initially no Compounds textarea
+    expect(screen.queryByLabelText('Compounds')).not.toBeInTheDocument()
 
     // Click "Manual compounds" toggle button
     const manualBtn = screen.getByTestId('input-mode-manual')
     fireEvent.click(manualBtn)
 
-    // Textarea should now be visible
-    const textarea = screen.getByTestId('compounds-textarea')
+    // Textarea should now be visible (queried by its aria-label)
+    const textarea = screen.getByLabelText('Compounds')
     expect(textarea).toBeInTheDocument()
     // Placeholder contains example SMILES string (literal newline in the attribute)
     expect(textarea.getAttribute('placeholder')).toMatch(/CC\(=O\)Oc1ccccc1/)
@@ -94,12 +94,33 @@ describe('SetupPage — manual compound input mode', () => {
     expect(submitBtn).toBeEnabled()
 
     // Type a SMILES string → structure count hint should appear
-    fireEvent.change(screen.getByTestId('compounds-textarea'), {
+    fireEvent.change(screen.getByLabelText('Compounds'), {
       target: { value: 'CC(=O)Oc1ccccc1C(=O)O' },
     })
 
     // Structure count hint confirms textarea value is tracked
     expect(screen.getByText(/1 structure entered/i)).toBeInTheDocument()
+  })
+
+  // ---------------------------------------------------------------------------
+  // Test: coupled-card layout — Plants + Disease cards and helper text
+  // ---------------------------------------------------------------------------
+
+  it('renders the Plants and Disease card titles', async () => {
+    await renderSetupPage()
+
+    expect(screen.getByText('Plants')).toBeInTheDocument()
+    expect(screen.getByText('Disease')).toBeInTheDocument()
+  })
+
+  it('shows the skipped-stages helper text alongside the Compounds textarea in manual_compounds mode', async () => {
+    await renderSetupPage()
+
+    fireEvent.click(screen.getByTestId('input-mode-manual'))
+
+    // Helper text and the Compounds textarea live in the same (Plants) card
+    expect(screen.getByText(/Stages 1–2 skipped/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Compounds')).toBeInTheDocument()
   })
 })
 
