@@ -106,7 +106,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             seen.add(gene)
             targets.append({
                 "gene_symbol": gene,
-                "uniprot_accession": target.uniprot_accession or "",
+                "uniprot_accession": target.uniprot_accession or None,
                 "score": score,
                 "source": "db_cache",
             })

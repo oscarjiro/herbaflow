@@ -285,12 +285,12 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
             "smiles": detail[1],
         })
 
-    def _get_uniprot(gene: str) -> str:
+    def _get_uniprot(gene: str) -> str | None:
         if gene in target_info:
-            return target_info[gene].uniprot_accession or ""
+            return target_info[gene].uniprot_accession or None
         if gene in pubchem_target_info:
-            return pubchem_target_info[gene].uniprot_accession or ""
-        return ""
+            return pubchem_target_info[gene].uniprot_accession or None
+        return None
 
     # Build compound → sources mapping.
     # Each compound is tagged with the source(s) that yielded targets for it.

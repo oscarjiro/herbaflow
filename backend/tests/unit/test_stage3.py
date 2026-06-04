@@ -469,3 +469,58 @@ async def test_stage3_degrades_when_pubchem_fallback_unavailable(
     assert result["target_count"] >= 1
     assert result["degraded"] is True
     assert result["warning"]["provider"] == "pubchem_bioassay"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Null-sentinel consistency: absent uniprot accession is None, never ""
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+async def test_stage3_emits_none_uniprot_when_accession_absent(
+    stage3_run_with_one_chembl_compound, pipeline_config
+):
+    # A ChEMBL target with no uniprot accession must surface as None (not "")
+    # in the emitted target dict's uniprot_id field.
+    fixture = stage3_run_with_one_chembl_compound
+    run = fixture["run"]
+    session = make_session()
+    fake_compound = make_fake_compound(
+        fixture["compound_id"],
+        chembl_id=fixture["chembl_id"],
+        inchi_key=fixture["inchi_key"],
+        canonical_name=fixture["canonical_name"],
+        smiles=fixture["smiles"],
+    )
+
+    target_no_acc = ChemblTarget(
+        chembl_id="CHEMBL_TGT_NOACC",
+        gene_symbol="PTGS2",
+        uniprot_accession=None,
+        organism="Homo sapiens",
+        pchembl_value=7.0,
+    )
+
+    with patch(
+        "analysis.stages.stage3_targets.compound_repo.get_compounds_by_ids",
+        return_value=[fake_compound],
+    ):
+        with patch.object(
+            stage3_targets,
+            "get_targets_for_compounds",
+            new=AsyncMock(return_value={fixture["chembl_id"]: [target_no_acc]}),
+        ):
+            with patch.object(
+                stage3_targets,
+                "get_targets_by_inchikey",
+                new=AsyncMock(return_value=[]),
+            ):
+                with patch(
+                    "analysis.stages.stage3_targets.httpx.AsyncClient",
+                    return_value=_mock_httpx_client(),
+                ):
+                    result = await stage3_targets.run(
+                        run, pipeline_config, session
+                    )
+
+    ptgs2 = next(t for t in result["targets"] if t["gene_symbol"] == "PTGS2")
+    assert ptgs2["uniprot_id"] is None

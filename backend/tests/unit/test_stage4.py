@@ -240,3 +240,46 @@ async def test_stage4_manual_branch_is_user_provided_with_inputs(monkeypatch):
     assert result["inputs"]["unrecognized"] == ["QWZ"]
     assert result["inputs"]["rejected"] == []
     assert "normalization" not in result  # old key removed
+
+
+# ---------------------------------------------------------------------------
+# Null-sentinel consistency: absent uniprot accession is None, never ""
+# ---------------------------------------------------------------------------
+
+
+async def test_stage4_db_path_uses_none_accession():
+    """DB-cache path must emit None (not '') for an absent uniprot accession."""
+    run = make_run(disease_id="dis_1")
+    config = PipelineConfig()
+    session = AsyncMock()
+
+    fake_disease = make_fake_disease("dis_1", "Diabetes")
+    # DB row with an empty-string accession (the drift we are correcting)
+    fake_target = make_fake_target("TP53", uniprot="")
+
+    with patch(
+        "analysis.stages.stage4_disease_targets.disease_repo.get_disease_by_id",
+        return_value=fake_disease,
+    ), patch(
+        "analysis.stages.stage4_disease_targets.disease_repo.get_targets_for_disease",
+        return_value=[(fake_target, 0.9)],
+    ):
+        result = await stage4_disease_targets.run(run, config, session)
+
+    assert result["targets"][0]["uniprot_accession"] is None
+
+
+async def test_stage4_manual_targets_use_none_accession():
+    """Manual-targets path already emits None for the absent accession."""
+    mock_run = MagicMock()
+    mock_run.stage_results = {}
+    mock_run.parameters = {
+        "_disease_input_mode": "manual_targets",
+        "_injected_disease_targets": ["TP53"],
+    }
+    config = PipelineConfig()
+    session = AsyncMock()
+
+    result = await stage4_disease_targets.run(mock_run, config, session)
+
+    assert result["targets"][0]["uniprot_accession"] is None
