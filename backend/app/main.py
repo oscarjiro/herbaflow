@@ -1,21 +1,21 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-
-from sqlalchemy.exc import OperationalError, InterfaceError
+from sqlalchemy import text
+from sqlalchemy.exc import InterfaceError, OperationalError
 
 from app.config import get_settings
-from app.database import engine, async_session_factory
+from app.database import async_session_factory, engine
 from app.repositories import analysis_repo
-from app.security import limiter, MaxRequestSizeMiddleware
-from app.routers import plants, compounds, diseases, analyses
+from app.routers import analyses, compounds, diseases, plants
+from app.security import MaxRequestSizeMiddleware, limiter
 
 settings = get_settings()
 logger = logging.getLogger(__name__)

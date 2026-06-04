@@ -1,8 +1,9 @@
 # backend/tests/unit/test_contract_param_agreement.py
 import dataclasses
+
+from analysis.models import PipelineConfig
 from app.contracts import PIPELINE_PARAM_FIELDS
 from app.schemas.analysis import AnalysisParameters
-from analysis.models import PipelineConfig
 
 _SUBMODELS = {
     name: field.annotation

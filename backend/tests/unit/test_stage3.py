@@ -1,8 +1,9 @@
 import uuid
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from analysis.stages import stage3_targets
+
+import pytest
 from analysis.models import PipelineConfig
+from analysis.stages import stage3_targets
 from app.models.analysis import AnalysisRun
 from integrations.chembl import ChemblTarget
 from integrations.pubchem_bioassay import PubChemTarget

@@ -4,9 +4,10 @@ Tests that start_pipeline() reads _input_mode from run.parameters and:
 - skips the appropriate stages (writing sentinel dicts to stage_results)
 - calls run_stage() at the correct first real stage number
 """
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
+
+import pytest
 
 ANALYSIS_ID = UUID("00000000-0000-0000-0000-000000000099")
 

@@ -1,9 +1,8 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from fastapi.testclient import TestClient
-
-from app.main import app
 import app.routers.analyses as analyses
+from app.main import app
+from fastapi.testclient import TestClient
 
 ANALYSIS_ID = "00000000-0000-0000-0000-000000000051"
 NASTY = 'evil\r\nSet-Cookie: x"; name=/etc/passwd'

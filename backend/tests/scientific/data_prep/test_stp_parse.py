@@ -1,6 +1,9 @@
 import pytest
+
 from tests.scientific.data_prep.stp_parse import (
-    parse_stp_csv_text, filter_and_normalize, aggregate_targets,
+    aggregate_targets,
+    filter_and_normalize,
+    parse_stp_csv_text,
 )
 
 pytestmark = pytest.mark.scientific

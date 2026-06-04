@@ -2,10 +2,10 @@ from uuid import UUID
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from app.main import app
 from app.database import async_session_factory
+from app.main import app
 from app.repositories import analysis_repo
+from httpx import ASGITransport, AsyncClient
 
 
 @pytest_asyncio.fixture(loop_scope="session")

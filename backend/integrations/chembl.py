@@ -1,9 +1,10 @@
 import asyncio
 import logging
-import httpx
 from dataclasses import dataclass
 
-from integrations._retry import with_retry, ServiceUnavailableError
+import httpx
+
+from integrations._retry import ServiceUnavailableError, with_retry
 
 logger = logging.getLogger(__name__)
 

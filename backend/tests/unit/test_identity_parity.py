@@ -7,7 +7,6 @@ asserts (etl/tests/test_identity.py). If either side drifts, one of these fails.
 import uuid
 
 import pytest
-
 from app.services import canonicalize as cz
 
 COMPOUND_NS = uuid.UUID("ea972261-ef25-5420-b17c-317f73ec590e")

@@ -7,14 +7,14 @@ Tests:
 3. POST /analyses/{id}/user-compounds adds a compound to stage_1 results
 4. DELETE /analyses/{id}/user-compounds/{compound_id} removes a compound from stage_1
 """
-import httpx
-import pytest
-from pydantic import ValidationError
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from fastapi.testclient import TestClient
+import httpx
+import pytest
 from app.main import app
-from app.schemas.analysis import InjectCompoundsRequest, HARD_CAP_MANUAL_COMPOUNDS
+from app.schemas.analysis import HARD_CAP_MANUAL_COMPOUNDS, InjectCompoundsRequest
+from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 ANALYSIS_ID = "00000000-0000-0000-0000-000000000043"
 

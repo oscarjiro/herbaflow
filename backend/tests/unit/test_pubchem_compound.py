@@ -9,15 +9,14 @@ API flow (two-step):
   2. GET /compound/cid/{cid}/property/{props}/JSON
      → {"PropertyTable": {"Properties": [...]}}
 """
-import json
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, call
-import httpx
+from unittest.mock import AsyncMock, MagicMock
 
+import httpx
+import pytest
 from integrations.pubchem_compound import (
-    validate_compound,
     compute_adme,
     make_compound_id,
+    validate_compound,
 )
 
 # ---------------------------------------------------------------------------

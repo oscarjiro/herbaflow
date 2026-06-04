@@ -11,11 +11,11 @@ An imported accession that is lowercase and/or carries an isoform suffix
 Pre-fix, the handler set canonical_key from the raw field (f"uniprot:{uniprot_id}"),
 so the id (folded by the core) and key (raw) drifted apart.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
-from app.schemas.import_targets import STPTarget, ImportTargetsRequest
+import pytest
+from app.schemas.import_targets import ImportTargetsRequest, STPTarget
 from app.services.canonicalize import make_target_id, target_canonical_key
 
 

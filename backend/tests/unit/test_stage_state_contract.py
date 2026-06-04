@@ -1,5 +1,5 @@
-from app.contracts import STAGE_STATES
 from analysis import stage_state
+from app.contracts import STAGE_STATES
 
 
 def test_contract_exposes_three_states():

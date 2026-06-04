@@ -11,18 +11,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
 
-from shared.utils import safe_str, clean_str, normalize_text  # noqa: F401
-from shared.frames import read_frame, write_frame, validate_required_columns  # noqa: F401
+from shared.frames import read_frame, validate_required_columns, write_frame  # noqa: F401
 from shared.identity import (  # noqa: F401
-    DISEASE_NS,
+    ALIAS_PRIORITY,
     DISEASE_ALIAS_NS,
+    DISEASE_NS,
+    disease_alias_id,
     disease_canonical_key,
     disease_id,
-    disease_alias_id,
-    slugify,
-    ALIAS_PRIORITY,
     pick_alias,
+    slugify,
 )
+from shared.utils import clean_str, normalize_text, safe_str  # noqa: F401
 
 # Disease canonical key == the shared slug (single source of truth).
 canonical_key = slugify

@@ -1,5 +1,6 @@
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
 from app.database import async_session_factory
 from app.repositories import analysis_repo
 

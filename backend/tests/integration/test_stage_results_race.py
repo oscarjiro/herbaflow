@@ -9,7 +9,6 @@ import asyncio
 from uuid import UUID
 
 import pytest
-
 from app.database import async_session_factory
 from app.models.analysis import AnalysisRun
 from app.repositories import analysis_repo

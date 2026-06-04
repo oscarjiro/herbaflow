@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
-from analysis.stages import stage8_enrichment
+
 from analysis.models import PipelineConfig
+from analysis.stages import stage8_enrichment
 from app.models.analysis import AnalysisRun
 from integrations.gprofiler import EnrichmentResult
 

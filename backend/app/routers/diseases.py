@@ -1,10 +1,12 @@
 import logging
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.database import get_session
-from app.schemas.disease import DiseaseResponse
 from app.repositories import disease_repo
+from app.schemas.disease import DiseaseResponse
 
 logger = logging.getLogger(__name__)
 

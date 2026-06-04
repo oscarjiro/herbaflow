@@ -1,6 +1,7 @@
-import pytest
-from uuid import uuid4
 from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
+
+import pytest
 from analysis.models import AdmeParams, CompoundRecord, PipelineConfig
 from analysis.stages.stage2_adme import filter_compounds
 

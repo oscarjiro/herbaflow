@@ -7,21 +7,19 @@ rejected at the backend schema layer when they would cause runtime errors
 All tests are synchronous — pure Pydantic model instantiation, no DB or mocks.
 """
 import pytest
-from pydantic import ValidationError
-
 from app.schemas.analysis import (
+    HARD_CAP_DISEASE_TARGETS,
+    HARD_CAP_MANUAL_COMPOUNDS,
+    HARD_CAP_MANUAL_TARGETS,
+    HARD_CAP_PLANTS,
     AnalysisParameters,
     ApproveRequest,
     CreateAnalysisRequest,
     InjectCompoundsRequest,
     InjectTargetsRequest,
     ResetFromRequest,
-    HARD_CAP_PLANTS,
-    HARD_CAP_MANUAL_COMPOUNDS,
-    HARD_CAP_MANUAL_TARGETS,
-    HARD_CAP_DISEASE_TARGETS,
 )
-
+from pydantic import ValidationError
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -279,19 +277,19 @@ class TestErrorConstants:
 
     def _load_constants(self) -> dict:
         from app.errors import (
+            ANALYSIS_NOT_FOUND,
+            CHEMBL_UNAVAILABLE,
+            COMPOUND_NOT_FOUND,
+            INVALID_STAGE,
             PUBCHEM_UNAVAILABLE,
             PUBCHEM_VALIDATION_FAILED,
-            UNIPROT_UNAVAILABLE,
-            UNIPROT_TARGET_NOT_FOUND,
-            UNIPROT_VALIDATION_FAILED,
-            CHEMBL_UNAVAILABLE,
-            STRING_UNAVAILABLE,
-            ANALYSIS_NOT_FOUND,
-            COMPOUND_NOT_FOUND,
-            TARGET_NOT_FOUND,
             STAGE_NOT_READY,
-            INVALID_STAGE,
+            STRING_UNAVAILABLE,
             TARGET_ALREADY_EXISTS,
+            TARGET_NOT_FOUND,
+            UNIPROT_TARGET_NOT_FOUND,
+            UNIPROT_UNAVAILABLE,
+            UNIPROT_VALIDATION_FAILED,
         )
         return {
             "PUBCHEM_UNAVAILABLE": PUBCHEM_UNAVAILABLE,
@@ -328,10 +326,10 @@ class TestErrorConstants:
     def test_service_unavailable_messages_are_actionable(self):
         """Service-unavailable messages must tell the user to retry."""
         from app.errors import (
-            PUBCHEM_UNAVAILABLE,
-            UNIPROT_UNAVAILABLE,
             CHEMBL_UNAVAILABLE,
+            PUBCHEM_UNAVAILABLE,
             STRING_UNAVAILABLE,
+            UNIPROT_UNAVAILABLE,
         )
         for msg in [PUBCHEM_UNAVAILABLE, UNIPROT_UNAVAILABLE, CHEMBL_UNAVAILABLE, STRING_UNAVAILABLE]:
             assert any(
@@ -362,6 +360,7 @@ class TestRouterErrorsNoRawExceptionStrings:
         'detail=str(e' or 'detail=str(exc' must not appear.
         """
         import inspect
+
         import app.routers.analyses as analyses_module
 
         source = inspect.getsource(analyses_module)
@@ -511,8 +510,8 @@ class TestInjectedDiseaseTargetsCap:
 
 
 def test_create_analysis_requires_disease_id_unless_manual():
-    from app.schemas.analysis import CreateAnalysisRequest
     import pytest
+    from app.schemas.analysis import CreateAnalysisRequest
     from pydantic import ValidationError
 
     # Missing disease_id in standard mode → error
@@ -537,10 +536,10 @@ def test_create_analysis_requires_disease_id_unless_manual():
 # ---------------------------------------------------------------------------
 
 from app.schemas.analysis import (
-    AddUserTargetRequest,
-    AddUserCompoundRequest,
-    UNIPROT_ACCESSION_RE,
     GENE_SYMBOL_RE,
+    UNIPROT_ACCESSION_RE,
+    AddUserCompoundRequest,
+    AddUserTargetRequest,
 )
 
 

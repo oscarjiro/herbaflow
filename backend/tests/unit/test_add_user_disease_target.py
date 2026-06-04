@@ -1,6 +1,6 @@
-import pytest
 import copy
 
+import pytest
 from app.routers.analyses import _add_target_to_stage4, _remove_target_from_stage4
 
 

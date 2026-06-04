@@ -1,8 +1,9 @@
 # backend/app/models/analysis.py
-from typing import Optional, Any
-from uuid import UUID, uuid4
 from datetime import datetime
-from sqlalchemy import Column, ForeignKey, JSON
+from typing import Any, Optional
+from uuid import UUID, uuid4
+
+from sqlalchemy import JSON, Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
 

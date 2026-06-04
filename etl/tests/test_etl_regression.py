@@ -11,13 +11,10 @@ Covers:
 """
 
 import importlib.util
+import logging
 import sys
 from pathlib import Path
 from types import SimpleNamespace
-
-import logging
-
-import pytest
 
 ETL_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ETL_ROOT))  # etl/

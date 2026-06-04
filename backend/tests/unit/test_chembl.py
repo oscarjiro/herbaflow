@@ -3,19 +3,18 @@
 Tests get_bioactivities, resolve_target, and get_targets_for_compounds
 using mock httpx clients — no real HTTP calls.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-import httpx
 
+import httpx
+import pytest
 from integrations._retry import ServiceUnavailableError
 from integrations.chembl import (
-    get_bioactivities,
-    resolve_target,
-    get_targets_for_compounds,
-    ChemblTarget,
     ChemblBioactivity,
+    ChemblTarget,
+    get_bioactivities,
+    get_targets_for_compounds,
+    resolve_target,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

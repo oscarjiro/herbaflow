@@ -1,6 +1,6 @@
 import pytest
-from sqlalchemy.exc import OperationalError
 from app.routers import analyses
+from sqlalchemy.exc import OperationalError
 
 pytestmark = pytest.mark.asyncio(loop_scope="session")
 

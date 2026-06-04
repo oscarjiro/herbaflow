@@ -1,0 +1,24 @@
+# Ruff configuration — Herbaflow.
+# Narrow, high-signal starting ruleset: pyflakes (F) for the real bug class
+# (unused imports, redefinitions, undefined names) + import sorting (I).
+# Style (E), bugbear (B), and pyupgrade (UP) are deferred to a later widening
+# pass once the tree is clean; see project follow-ups.
+target-version = "py311"
+line-length = 100
+
+[lint]
+select = ["F", "I"]
+ignore = [
+  "E501",   # line length — soft; many long scientific-citation comments
+  "F841",   # unused local var — deferred (not autofixable; needs per-site judgment)
+]
+
+[lint.per-file-ignores]
+"**/tests/**" = ["F841"]
+# These files are re-export facades — their imports are consumed by downstream
+# scripts that import from the module utils, not directly from shared.identity.
+"etl/plants/utils.py" = ["F401"]
+"etl/compounds/utils.py" = ["F401"]
+
+[format]
+quote-style = "double"

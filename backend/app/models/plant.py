@@ -1,7 +1,8 @@
 # backend/app/models/plant.py
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from datetime import datetime
+
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel

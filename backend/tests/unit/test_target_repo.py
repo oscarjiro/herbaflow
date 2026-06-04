@@ -3,12 +3,11 @@
 Tests ORM query structure and upsert deduplication logic using mock sessions.
 No real database connections are used.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from app.models import Target, CompoundTarget, DiseaseTarget
+import pytest
+from app.models import Target
 from app.repositories import target_repo
-
 
 # ---------------------------------------------------------------------------
 # Helpers

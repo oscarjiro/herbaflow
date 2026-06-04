@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
-from analysis.stages import stage6_ppi
+
 from analysis.models import PipelineConfig
+from analysis.stages import stage6_ppi
 from app.models.analysis import AnalysisRun
 from integrations.stringdb import PpiEdgeData
 
@@ -110,8 +111,9 @@ def test_leiden_deterministic_with_seed():
 async def test_stage6_nodes_have_community_id():
     """Each node in the stage 6 result must have community_id in its data."""
     from unittest.mock import AsyncMock, MagicMock, patch
-    from analysis.stages import stage6_ppi
+
     from analysis.models import PipelineConfig
+    from analysis.stages import stage6_ppi
     from app.models.analysis import AnalysisRun
     from integrations.stringdb import PpiEdgeData
 

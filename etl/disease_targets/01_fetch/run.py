@@ -19,8 +19,16 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
-from disease_targets.utils import read_frame, write_frame, make_slug_key, clean_str
+from disease_targets.utils import clean_str, make_slug_key, read_frame, write_frame
+from shared.utils import (
+    ETL_ROOT,
+    ensure_dir,
+    load_settings,
+    make_run_id,
+    now_iso,
+    setup_logging,
+    write_json,
+)
 
 # ---------------------------------------------------------------------------
 # GraphQL queries

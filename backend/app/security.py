@@ -48,11 +48,11 @@ def client_error_message(stage_num: int) -> str:
     )
 
 
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 from app.config import get_settings
 

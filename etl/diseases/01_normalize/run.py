@@ -37,16 +37,16 @@ from pathlib import Path
 from typing import Any, Iterable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, now_iso
-
 from diseases.utils import (
+    SETTINGS_PATH,
     canonical_key,
+    clean_str,
     normalize_text,
     read_frame,
-    clean_str,
     write_frame,
-    SETTINGS_PATH,
 )
+from shared.utils import ETL_ROOT, ensure_dir, load_settings, now_iso
+from shared.utils import setup_logging as shared_setup_logging
 
 NAME_COLUMNS = ("disease_name", "disease", "name", "condition", "disease_label")
 SYNONYM_COLUMNS = ("synonym", "synonyms", "alias", "aliases", "other_names")

@@ -42,15 +42,25 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, ensure_dir, normalize_whitespace, make_run_id, write_csv, write_json, now_iso
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 import argparse
 import csv
 import hashlib
 import json
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+from shared.utils import (
+    ETL_ROOT,
+    ensure_dir,
+    load_settings,
+    make_run_id,
+    normalize_whitespace,
+    now_iso,
+    write_csv,
+    write_json,
+)
 
 EXPECTED_RAW_COLUMNS = [
     "plant_id",

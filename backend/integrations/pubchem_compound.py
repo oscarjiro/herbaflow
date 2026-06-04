@@ -7,12 +7,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from urllib.parse import quote
 
 import httpx
+from app.services.canonicalize import compound_canonical_key, make_compound_id
 
-from app.services.canonicalize import make_compound_id, compound_canonical_key
-from integrations._retry import with_retry, ServiceUnavailableError
+from integrations._retry import ServiceUnavailableError, with_retry
 
 logger = logging.getLogger(__name__)
 

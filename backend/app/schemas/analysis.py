@@ -1,9 +1,9 @@
 import re
-
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-from uuid import UUID
 from datetime import datetime
 from typing import Any
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.contracts import ANALYSIS_MODES
 

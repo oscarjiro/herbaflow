@@ -6,14 +6,14 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
-from shared.utils import normalize_whitespace, normalize_unicode
-from shared.identity import (
-    PLANT_NS,
+from shared.identity import (  # noqa: F401 — re-exported for downstream scripts
     PLANT_ALIAS_NS,
+    PLANT_NS,
+    plant_alias_id,
     plant_canonical_key,
     plant_id,
-    plant_alias_id,
 )
+from shared.utils import normalize_unicode, normalize_whitespace
 
 
 def split_scientific_name(name: str) -> tuple[str, str]:

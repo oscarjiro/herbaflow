@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.models import Disease, DiseaseAlias, DiseaseTarget, Target
 
 

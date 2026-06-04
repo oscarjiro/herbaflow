@@ -1,8 +1,9 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
+from analysis import pipeline
 from app.database import async_session_factory
 from app.repositories import analysis_repo
-from analysis import pipeline
 
 pytestmark = pytest.mark.asyncio(loop_scope="session")
 

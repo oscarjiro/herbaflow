@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
-from analysis.stages import stage1_selection
+
 from analysis.models import PipelineConfig
+from analysis.stages import stage1_selection
 from app.models.analysis import AnalysisRun
 
 

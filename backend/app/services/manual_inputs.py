@@ -1,19 +1,20 @@
 """Service layer for manual compound/target injection endpoints."""
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
-import asyncio
 
 import httpx
+from analysis.stages.stage3_targets import _make_target_id
 from integrations._retry import ServiceUnavailableError
 from integrations.pubchem_compound import validate_compounds_batch
 from integrations.uniprot import validate_human_target
+
 from app.errors import PUBCHEM_UNAVAILABLE, UNIPROT_UNAVAILABLE
 from app.repositories import analysis_repo
 from app.schemas.analysis import InjectCompoundsResponse, InjectTargetsResponse
 from app.services.compound_dedup import deduplicate_compounds
-from analysis.stages.stage3_targets import _make_target_id
 
 logger = logging.getLogger(__name__)
 

@@ -49,16 +49,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings as shared_load_settings, ensure_dir, normalize_whitespace, make_run_id, now_iso
-from compounds.utils import (
-    compound_id_from_key as make_compound_id,
-    compound_alias_id,
-    compound_canonical_key,
-)
-from shared.identity import plant_compound_id
-from shared.provenance import pubchem_compound_url, chembl_compound_url, knapsack_metabolite_url
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 import argparse
 import csv
 import hashlib
@@ -71,6 +63,17 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
+from compounds.utils import (
+    compound_alias_id,
+    compound_canonical_key,
+)
+from compounds.utils import (
+    compound_id_from_key as make_compound_id,
+)
+from shared.identity import plant_compound_id
+from shared.provenance import chembl_compound_url, knapsack_metabolite_url, pubchem_compound_url
+from shared.utils import ETL_ROOT, ensure_dir, make_run_id, normalize_whitespace
+from shared.utils import load_settings as shared_load_settings
 
 CANDIDATE_COLUMNS = [
     "compound_candidate_id",

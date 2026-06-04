@@ -3,13 +3,15 @@ Fetches full GBIF metadata for manually verified UsageKeys.
 """
 
 from __future__ import annotations
+
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 import pandas as pd
 import requests
+from shared.utils import ETL_ROOT, load_settings
+from shared.utils import setup_logging as shared_setup_logging
 
 GBIF_API = "https://api.gbif.org/v1/species/"
 

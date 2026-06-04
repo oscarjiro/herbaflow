@@ -1,7 +1,8 @@
-from scipy.stats import hypergeom
-from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
+from scipy.stats import hypergeom
 from sqlmodel.ext.asyncio.session import AsyncSession
+
+from analysis.models import PipelineConfig
 
 # Universe for the Stage 5 overlap hypergeometric test: ~20,000 human protein-coding
 # genes. This is the proteome population for the overlap test ONLY — it is distinct from

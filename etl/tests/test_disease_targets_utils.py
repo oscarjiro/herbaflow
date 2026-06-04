@@ -7,15 +7,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
 
 from disease_targets.utils import (
     TARGET_NS,
-    TARGET_ALIAS_NS,
-    DISEASE_TARGET_NS,
-    target_id_from_key,
-    target_alias_id,
-    disease_target_id,
     canonical_key_for_target,
-    normalize_text,
+    disease_target_id,
     make_slug_key,
-    safe_str,
+    normalize_text,
+    target_alias_id,
+    target_id_from_key,
 )
 
 

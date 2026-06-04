@@ -1,8 +1,6 @@
-import asyncio
-import pytest
 import httpx
-from unittest.mock import AsyncMock, patch
-from integrations._retry import with_retry, ServiceUnavailableError
+import pytest
+from integrations._retry import ServiceUnavailableError, with_retry
 
 
 @pytest.mark.asyncio

@@ -7,20 +7,20 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
 
-from shared.utils import safe_str, clean_str, normalize_text  # noqa: F401
-from shared.frames import read_frame, write_frame, validate_required_columns  # noqa: F401
+from shared.frames import read_frame, validate_required_columns, write_frame  # noqa: F401
 from shared.identity import (  # noqa: F401
-    TARGET_NS,
-    TARGET_ALIAS_NS,
     DISEASE_TARGET_NS,
-    target_canonical_key,
-    target_id,
-    target_id_from_key,
-    target_alias_id,
+    TARGET_ALIAS_NS,
+    TARGET_NS,
     disease_target_id,
     fold_isoform,
     slugify,
+    target_alias_id,
+    target_canonical_key,
+    target_id,
+    target_id_from_key,
 )
+from shared.utils import clean_str, normalize_text, safe_str  # noqa: F401
 
 make_slug_key = slugify  # backward-compatible alias
 

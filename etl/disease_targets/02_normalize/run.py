@@ -14,10 +14,21 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
 from disease_targets.utils import (
-    read_frame, write_frame, normalize_text, clean_str, validate_required_columns,
     canonical_key_for_target,
+    normalize_text,
+    read_frame,
+    validate_required_columns,
+    write_frame,
+)
+from shared.utils import (
+    ETL_ROOT,
+    ensure_dir,
+    load_settings,
+    make_run_id,
+    now_iso,
+    setup_logging,
+    write_json,
 )
 
 REQUIRED_INPUT_COLS = [

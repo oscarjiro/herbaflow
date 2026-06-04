@@ -3,10 +3,11 @@ from collections import Counter
 import igraph as ig
 import leidenalg
 import networkx as nx
-from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
-from sqlmodel.ext.asyncio.session import AsyncSession
 from integrations.stringdb import get_ppi_network
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from analysis.models import PipelineConfig
 
 
 def detect_communities(

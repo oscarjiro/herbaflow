@@ -1,7 +1,6 @@
+from app.security import MaxRequestSizeMiddleware, limiter
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
-from app.security import MaxRequestSizeMiddleware, limiter
 
 
 def _app(max_bytes: int) -> FastAPI:

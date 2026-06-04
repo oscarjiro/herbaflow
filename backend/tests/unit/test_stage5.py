@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock
-from analysis.stages import stage5_overlap
+
 from analysis.models import PipelineConfig
+from analysis.stages import stage5_overlap
 from app.models.analysis import AnalysisRun
 
 

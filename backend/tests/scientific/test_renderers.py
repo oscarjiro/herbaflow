@@ -1,6 +1,8 @@
 import os
+
 import pytest
-from tests.scientific.renderers import render_ppi, render_centrality, render_enrichment
+
+from tests.scientific.renderers import render_centrality, render_enrichment, render_ppi
 
 pytestmark = pytest.mark.scientific
 

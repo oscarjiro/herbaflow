@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
-from shared.frames import read_frame, write_frame, validate_required_columns
+from shared.frames import read_frame, validate_required_columns, write_frame
 
 
 def test_write_then_read_frame_roundtrips_as_strings(tmp_path):

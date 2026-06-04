@@ -1,30 +1,29 @@
 import asyncio
 import logging
-import uuid
 from datetime import datetime
 
 import httpx
 
 logger = logging.getLogger(__name__)
-from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
-from app.models.target import Target, CompoundTarget
-from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.models.target import CompoundTarget, Target
 from app.repositories import compound_repo
-from integrations._retry import ServiceUnavailableError
-from integrations.chembl import get_targets_for_compounds, ChemblTarget
-from integrations.pubchem_bioassay import get_targets_by_inchikey, PubChemTarget
 from app.services.canonicalize import (
-    TARGET_NS,
-    make_target_id as _core_make_target_id,
+    TARGET_NS,  # noqa: F401 — re-exported; tests import this from here
     make_compound_target_id,
     target_canonical_key,
 )
+from app.services.canonicalize import (
+    make_target_id as _core_make_target_id,
+)
 from app.services.target_persist import persist_canonical_target
+from integrations._retry import ServiceUnavailableError
+from integrations.chembl import ChemblTarget, get_targets_for_compounds
+from integrations.pubchem_bioassay import PubChemTarget, get_targets_by_inchikey
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-# TARGET_NS is imported from the canonicalization core above (re-exported for
-# existing importers: `from analysis.stages.stage3_targets import TARGET_NS`).
+from analysis.models import PipelineConfig
 
 
 def _make_target_id(uniprot_accession: str | None, gene_symbol: str) -> str:

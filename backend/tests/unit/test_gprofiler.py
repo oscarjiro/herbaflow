@@ -4,10 +4,10 @@ The g:Profiler client builds its own httpx.AsyncClient and POSTs a single
 payload to /gost/profile/. These tests patch httpx.AsyncClient and bypass the
 retry layer (with_retry) to assert payload construction and result parsing.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-import httpx
 
+import httpx
+import pytest
 from integrations.gprofiler import run_enrichment
 
 

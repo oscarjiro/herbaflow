@@ -21,13 +21,26 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir, now_iso, make_run_id, write_json
 from disease_targets.utils import (
-    read_frame, write_frame, clean_str, validate_required_columns, make_slug_key,
-    target_id_from_key, target_alias_id, disease_target_id,
+    clean_str,
+    disease_target_id,
+    make_slug_key,
+    read_frame,
+    target_alias_id,
+    target_id_from_key,
+    write_frame,
 )
 from shared.identity import pick_alias
-from shared.provenance import opentargets_target_url, opentargets_evidence_url, uniprot_url
+from shared.provenance import opentargets_evidence_url, opentargets_target_url, uniprot_url
+from shared.utils import (
+    ETL_ROOT,
+    ensure_dir,
+    load_settings,
+    make_run_id,
+    now_iso,
+    setup_logging,
+    write_json,
+)
 
 
 def build_targets(targets_raw: pd.DataFrame, cfg: dict, retrieved_at: str) -> pd.DataFrame:

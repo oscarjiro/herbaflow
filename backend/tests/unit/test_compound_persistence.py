@@ -8,9 +8,9 @@ Covers:
 5. inject_compounds response includes 'cached' count
 6. DB error during caching → logs warning and proceeds (does not fail endpoint)
 """
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, call
-from datetime import datetime
 
 # ---------------------------------------------------------------------------
 # Fixtures: shared test data
@@ -86,8 +86,8 @@ VALIDATED_NO_CID = [
 @pytest.mark.asyncio
 async def test_persist_validated_compounds_persists_cid_compounds():
     """Compounds with a pubchem_cid are inserted into the compounds table."""
-    from app.services.compound_persist import persist_validated_compounds
     from app.models.compound import Compound
+    from app.services.compound_persist import persist_validated_compounds
 
     mock_session = AsyncMock()
     # exec returns empty result → compound not yet in DB → we insert
@@ -139,8 +139,8 @@ async def test_persist_validated_compounds_skips_no_cid():
 @pytest.mark.asyncio
 async def test_persist_validated_compounds_skips_existing():
     """If a compound_id already exists in DB, it is not inserted again."""
-    from app.services.compound_persist import persist_validated_compounds
     from app.models.compound import Compound
+    from app.services.compound_persist import persist_validated_compounds
 
     mock_session = AsyncMock()
     # exec returns an existing Compound → do not insert
@@ -163,8 +163,8 @@ async def test_persist_validated_compounds_skips_existing():
 @pytest.mark.asyncio
 async def test_persist_validated_compounds_no_plant_links():
     """Caching must never create PlantCompound associations."""
-    from app.services.compound_persist import persist_validated_compounds
     from app.models.compound import PlantCompound
+    from app.services.compound_persist import persist_validated_compounds
 
     mock_session = AsyncMock()
     mock_result = MagicMock()
@@ -235,8 +235,9 @@ async def test_persist_validated_compounds_db_error_returns_zero():
 async def test_inject_compounds_service_reports_cached():
     """inject_compounds_service surfaces the persistence cache count in its response."""
     from uuid import UUID
-    from app.services.manual_inputs import inject_compounds_service
+
     from app.schemas.analysis import InjectCompoundsRequest
+    from app.services.manual_inputs import inject_compounds_service
 
     mock_run = MagicMock()
     mock_run.analysis_id = UUID("00000000-0000-0000-0000-000000000099")

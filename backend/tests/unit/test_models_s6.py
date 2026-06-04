@@ -7,11 +7,20 @@ def test_import_batch_model_removed():
     assert "ImportBatch" not in models.__all__
 
 
-from app.models import Plant, PlantAlias, Compound, CompoundAlias, Disease, Target
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from app.models import (
-    PlantCompound, DiseaseAlias, CompoundTarget, DiseaseTarget, AnalysisRun,
+    AnalysisRun,
+    Compound,
+    CompoundAlias,
+    CompoundTarget,
+    Disease,
+    DiseaseAlias,
+    DiseaseTarget,
+    Plant,
+    PlantAlias,
+    PlantCompound,
+    Target,
 )
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 
 
 def test_no_source_batch_id_on_models():

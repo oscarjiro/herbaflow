@@ -1,16 +1,18 @@
 """Tests for isoform-folding target id parity between stage3 and the canonicalization core."""
 from __future__ import annotations
 
-import pytest
 from types import SimpleNamespace
 
-from analysis.stages.stage3_targets import _make_target_id, TARGET_NS
+import app.services.target_dedup as target_dedup
+import pytest
+from analysis.stages.stage3_targets import TARGET_NS, _make_target_id
+from app.services.canonicalize import (
+    TARGET_NS as CORE_TARGET_NS,
+)
 from app.services.canonicalize import (
     make_target_id,
     target_canonical_key,
-    TARGET_NS as CORE_TARGET_NS,
 )
-import app.services.target_dedup as target_dedup
 
 
 def test_stage3_target_ns_is_the_core_ns():

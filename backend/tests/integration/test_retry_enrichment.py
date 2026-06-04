@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
 from app.database import async_session_factory
 from app.repositories import analysis_repo
 from app.routers import analyses

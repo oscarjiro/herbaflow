@@ -1,8 +1,6 @@
 """Unit tests for offline HGNC gene-symbol normalization."""
-import pytest
-
 import app.services.gene_symbols as gs
-
+import pytest
 
 # Small fixture map mirroring the build script's nested structure:
 # UPPER(key) -> {"symbol": approved, "kind": "approved"|"prev"|"alias"}

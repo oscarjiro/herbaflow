@@ -1,6 +1,6 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from app.services.compound_persist import _do_persist
 
 

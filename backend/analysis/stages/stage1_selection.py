@@ -1,9 +1,10 @@
-from sqlalchemy import select
-from analysis.models import PipelineConfig
-from app.models.analysis import AnalysisRun
 from app.models import PlantCompound
-from sqlmodel.ext.asyncio.session import AsyncSession
+from app.models.analysis import AnalysisRun
 from app.repositories.compound_repo import get_compounds_for_plants
+from sqlalchemy import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from analysis.models import PipelineConfig
 
 
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:

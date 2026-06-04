@@ -1,19 +1,20 @@
 """Unit tests for plants/utils.py, compounds/utils.py, diseases/utils.py."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import importlib.util
 import uuid
-import pytest
+
 from plants.utils import (
-    split_scientific_name,
+    PLANT_ALIAS_NS,
+    PLANT_NS,
     build_canonical_lookup_key,
+    plant_alias_id,
     plant_canonical_key,
     plant_id,
-    plant_alias_id,
-    PLANT_NS,
-    PLANT_ALIAS_NS,
+    split_scientific_name,
 )
 
 
@@ -88,11 +89,11 @@ def test_plant_alias_ns_differs_from_plant_ns():
 
 
 from compounds.utils import (
-    normalize_cas,
+    COMPOUND_NS,
+    compound_alias_id,
     compound_canonical_key,
     compound_id_from_key,
-    compound_alias_id,
-    COMPOUND_NS,
+    normalize_cas,
 )
 
 # Load the real build module to test canonical_identity_for_candidate against the
@@ -159,10 +160,12 @@ def test_canonical_identity_for_candidate_cas():
 
 
 from diseases.utils import (
-    disease_id,
-    canonical_key as disease_slug_key,
     DISEASE_NS,
     disease_canonical_key,
+    disease_id,
+)
+from diseases.utils import (
+    canonical_key as disease_slug_key,
 )
 
 

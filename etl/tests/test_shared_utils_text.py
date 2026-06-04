@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
-from shared.utils import safe_str, clean_str, normalize_text
+from shared.utils import clean_str, normalize_text, safe_str
 
 
 def test_safe_str_does_not_fold_missing_markers():

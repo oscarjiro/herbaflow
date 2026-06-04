@@ -1,8 +1,10 @@
 import statistics
+
 import networkx as nx
-from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
 from sqlmodel.ext.asyncio.session import AsyncSession
+
+from analysis.models import PipelineConfig
 
 
 def compute_hub_genes(G: nx.Graph, top_n: int = 20, use_hub_bottleneck: bool = True) -> dict:

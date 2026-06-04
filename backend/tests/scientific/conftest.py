@@ -29,9 +29,8 @@ import time
 import pytest
 import pytest_asyncio
 import uvicorn
-from httpx import AsyncClient, Limits
-
 from app.main import app
+from httpx import AsyncClient, Limits
 
 FIXTURES = os.path.join(os.path.dirname(__file__), "fixtures")
 T2DM_DISEASE_ID = "079e61f1-4104-59c4-9c16-c77fe87dfeae"

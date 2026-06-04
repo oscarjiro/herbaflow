@@ -49,20 +49,22 @@ from typing import Any, Iterable
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, now_iso
-from shared.provenance import disease_ontology_url
-
 from diseases.utils import (
+    ALIAS_PRIORITY,
     canonical_key,
+    clean_str,
+    disease_alias_id,
+    disease_canonical_key,
     normalize_text,
     read_frame,
-    clean_str,
     write_frame,
-    disease_canonical_key,
-    disease_id as make_disease_id,
-    disease_alias_id,
-    ALIAS_PRIORITY,
 )
+from diseases.utils import (
+    disease_id as make_disease_id,
+)
+from shared.provenance import disease_ontology_url
+from shared.utils import ETL_ROOT, ensure_dir, load_settings, now_iso
+from shared.utils import setup_logging as shared_setup_logging
 
 DEFAULT_SETTINGS_PATH = ETL_ROOT / "diseases" / "settings.yml"
 

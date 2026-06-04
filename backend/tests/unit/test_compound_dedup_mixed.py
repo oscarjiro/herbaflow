@@ -20,9 +20,8 @@ is consumed and no unmatched request goes undetected.
 """
 from __future__ import annotations
 
-import pytest
 import httpx
-
+import pytest
 from app.services.compound_dedup import deduplicate_compounds
 
 QUERCETIN_IK = "REFJWTPEDVJJIY-UHFFFAOYSA-N"

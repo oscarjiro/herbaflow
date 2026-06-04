@@ -10,7 +10,6 @@ validation was 100% broken.
 from __future__ import annotations
 
 import pytest
-
 from integrations.uniprot import validate_human_target
 
 # Realistic shape of a UniProt /uniprotkb/search result for a human gene.

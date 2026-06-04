@@ -8,10 +8,10 @@ Tests:
 5. Empty targets list → 422 (Pydantic ValidationError)
 6. Deduplication: same gene symbol appears twice → only one entry injected
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
+import pytest
 from app.services.manual_inputs import inject_targets_service
 
 ANALYSIS_ID = "00000000-0000-0000-0000-000000000044"
@@ -186,8 +186,8 @@ def test_inject_targets_empty_list_422():
     so Pydantic raises ValidationError *before* the route handler runs.
     FastAPI converts this to a 422 Unprocessable Entity automatically.
     """
-    from pydantic import ValidationError
     from app.schemas.analysis import InjectTargetsRequest
+    from pydantic import ValidationError
 
     with pytest.raises(ValidationError) as exc_info:
         InjectTargetsRequest(targets=[])

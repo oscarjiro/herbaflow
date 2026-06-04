@@ -2,6 +2,7 @@
 import types
 import uuid
 from unittest.mock import AsyncMock, patch
+
 import pytest
 from app.schemas.analysis import CreateAnalysisRequest, InjectCompoundsResponse
 
@@ -151,6 +152,7 @@ async def test_all_invalid_compounds_deletes_run_and_422_no_schedule():
 async def test_inject_compounds_stamps_user_provided_and_drops_stage2():
     """stage_1 gains state='user_provided' + inputs.rejected; stage_2 is never written."""
     from unittest.mock import MagicMock, patch
+
     from app.services.manual_inputs import inject_compounds_service
 
     run = MagicMock()

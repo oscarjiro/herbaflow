@@ -157,9 +157,10 @@ def fetch_chembl_molecule(
 def _load_np_scorer():
     """Load the RDKit NP scorer model. Returns the fscore object or None if unavailable."""
     try:
-        from rdkit.Chem import RDConfig
         import os
         import sys
+
+        from rdkit.Chem import RDConfig
         sys.path.append(os.path.join(RDConfig.RDContribDir, "NP_Score"))
         import npscorer  # type: ignore[import]
         fscore = npscorer.readNPModel()

@@ -13,7 +13,7 @@ mod = importlib.util.module_from_spec(spec)
 sys.modules["plants_build_part2"] = mod
 spec.loader.exec_module(mod)
 
-from shared.identity import slugify, plant_alias_id
+from shared.identity import plant_alias_id, slugify
 
 
 def test_alias_key_is_underscore_slug():

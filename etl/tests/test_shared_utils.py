@@ -5,21 +5,21 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import uuid
+
 from shared.utils import (
-    normalize_whitespace,
-    normalize_unicode,
-    to_key,
-    safe_str,
-    stable_id,
-    now_iso,
-    make_run_id,
+    ETL_ROOT,
     ensure_dir,
+    make_run_id,
+    normalize_unicode,
+    normalize_whitespace,
+    now_iso,
     read_csv,
+    safe_str,
+    setup_logging,
+    stable_id,
+    to_key,
     write_csv,
     write_json,
-    load_settings,
-    setup_logging,
-    ETL_ROOT,
 )
 
 
@@ -136,7 +136,6 @@ def test_load_settings_returns_merged_dict(tmp_path, monkeypatch):
 
 
 def test_setup_logging_returns_logger():
-    from shared.utils import setup_logging
     import logging
     cfg = {"logging": {"level": "WARNING", "format": "%(message)s"}}
     logger = setup_logging("test.logger", cfg)

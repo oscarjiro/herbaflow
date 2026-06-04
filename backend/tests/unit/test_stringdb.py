@@ -2,12 +2,11 @@
 
 Tests get_ppi_network using mock httpx clients — no real HTTP calls.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
-
-from integrations.stringdb import get_ppi_network, PpiEdgeData
-
+import pytest
+from integrations.stringdb import PpiEdgeData, get_ppi_network
 
 # ---------------------------------------------------------------------------
 # Helpers

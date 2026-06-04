@@ -2,10 +2,10 @@
 
 Tests param_overrides merging behaviour without hitting the DB.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
+import pytest
 
 # ---------------------------------------------------------------------------
 # Helper: build a mock AnalysisRun

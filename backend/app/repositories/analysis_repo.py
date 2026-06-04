@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta
 from typing import Callable
 from uuid import UUID
-from datetime import datetime, timedelta
+
 from sqlalchemy import or_
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.models.analysis import AnalysisRun
 
 

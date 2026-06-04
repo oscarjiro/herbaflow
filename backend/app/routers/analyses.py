@@ -5,38 +5,45 @@ import json
 import logging
 from datetime import datetime
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
+
+from analysis.pipeline import run_stage
+from analysis.run_health import derive_run_health
+from analysis.stages.stage3_targets import _make_target_id
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
+from integrations._retry import ServiceUnavailableError
+from integrations.uniprot import validate_human_target
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.database import get_session, async_session_factory
+
+from app.config import get_settings
+from app.database import async_session_factory, get_session
 from app.errors import (
     PUBCHEM_UNAVAILABLE,
-    UNIPROT_UNAVAILABLE,
-    UNIPROT_TARGET_NOT_FOUND,
-    UNIPROT_VALIDATION_FAILED,
-    TARGET_NOT_FOUND,
     TARGET_ALREADY_EXISTS,
+    TARGET_NOT_FOUND,
+    UNIPROT_TARGET_NOT_FOUND,
+    UNIPROT_UNAVAILABLE,
+    UNIPROT_VALIDATION_FAILED,
 )
+from app.models.target import CompoundTarget, Target
+from app.repositories import analysis_repo
 from app.schemas.analysis import (
-    CreateAnalysisRequest, AnalysisStatusResponse, AnalysisRunResponse,
-    ResetFromRequest, ApproveRequest,
-    AddUserTargetRequest, AddUserTargetResponse,
-    AddUserCompoundRequest, AddUserCompoundResponse,
+    AddUserCompoundRequest,
+    AddUserCompoundResponse,
+    AddUserTargetRequest,
+    AddUserTargetResponse,
+    AnalysisRunResponse,
+    AnalysisStatusResponse,
+    ApproveRequest,
+    CreateAnalysisRequest,
+    ResetFromRequest,
 )
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
-from app.models.target import Target, CompoundTarget
-from app.config import get_settings
-from analysis.run_health import derive_run_health
-from app.repositories import analysis_repo
 from app.security import limiter, sanitize_filename
-from analysis.pipeline import run_stage
-from analysis.stages.stage3_targets import _make_target_id
-from app.services.canonicalize import make_target_id, make_compound_target_id, target_canonical_key
+from app.services.canonicalize import make_compound_target_id, make_target_id, target_canonical_key
 from app.services.target_persist import persist_canonical_target
-from integrations.uniprot import validate_human_target
-from integrations._retry import ServiceUnavailableError
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
 logger = logging.getLogger(__name__)
@@ -104,7 +111,10 @@ async def create_analysis(
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
 ):
-    from analysis.pipeline import start_pipeline  # imported here to avoid a circular import at module load
+    from analysis.pipeline import (
+        start_pipeline,  # imported here to avoid a circular import at module load
+    )
+
     from app.services.manual_inputs import inject_compounds_service, inject_targets_service
 
     # plant_ids is intentionally allowed to be empty here: manual_compounds and

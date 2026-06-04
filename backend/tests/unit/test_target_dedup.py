@@ -9,9 +9,9 @@ Covers:
 """
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 
 # ---------------------------------------------------------------------------
 # Helpers shared across tests
@@ -169,8 +169,8 @@ async def test_dedup_response_summary_fields():
 @pytest.mark.asyncio
 async def test_dedup_uniprot_unavailable_fallback():
     """When UniProt is unavailable during dedup, fall back to lowercased string comparison."""
-    from integrations._retry import ServiceUnavailableError
     from app.services.target_dedup import deduplicate_targets
+    from integrations._retry import ServiceUnavailableError
 
     async def raise_unavailable(gene_symbol=None, uniprot_id=None):
         raise ServiceUnavailableError("UniProt is down")

@@ -10,10 +10,10 @@ Symmetric to test_compound_persistence.py. Covers:
 7. inject-targets endpoint (validated path) wires persistence and reports 'cached'
 8. persist_canonical_target primitive: insert-if-absent, no links, no commit
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
+import pytest
 
 # Validated targets as produced by inject_targets after UniProt validation.
 VALIDATED_TARGETS = [
@@ -51,8 +51,8 @@ UNVALIDATED_TARGETS = [
 @pytest.mark.asyncio
 async def test_persist_validated_targets_persists_validated():
     """Targets with a UniProt accession are inserted into the targets table."""
-    from app.services.target_persist import persist_validated_targets
     from app.models.target import Target
+    from app.services.target_persist import persist_validated_targets
 
     mock_session = AsyncMock()
     mock_result = MagicMock()
@@ -88,8 +88,8 @@ async def test_persist_validated_targets_skips_unvalidated():
 @pytest.mark.asyncio
 async def test_persist_validated_targets_skips_existing():
     """If a target_id already exists in DB, it is not inserted again."""
-    from app.services.target_persist import persist_validated_targets
     from app.models.target import Target
+    from app.services.target_persist import persist_validated_targets
 
     mock_session = AsyncMock()
     existing = MagicMock(spec=Target)
@@ -106,8 +106,8 @@ async def test_persist_validated_targets_skips_existing():
 @pytest.mark.asyncio
 async def test_persist_validated_targets_no_link_rows():
     """Caching must never create CompoundTarget or DiseaseTarget association rows."""
-    from app.services.target_persist import persist_validated_targets
     from app.models.target import CompoundTarget, DiseaseTarget
+    from app.services.target_persist import persist_validated_targets
 
     mock_session = AsyncMock()
     mock_result = MagicMock()
@@ -126,8 +126,8 @@ async def test_persist_validated_targets_no_link_rows():
 async def test_persist_canonical_target_inserts_absent_skips_present_no_commit():
     """Primitive inserts an absent target, skips a present one, creates no link
     rows, and never commits (the caller owns commit granularity)."""
+    from app.models.target import CompoundTarget, DiseaseTarget, Target
     from app.services.target_persist import persist_canonical_target
-    from app.models.target import Target, CompoundTarget, DiseaseTarget
 
     absent = Target(
         target_id="uniprot:P04637",
@@ -199,8 +199,8 @@ async def test_persist_validated_targets_db_error_returns_zero():
 @pytest.mark.asyncio
 async def test_inject_targets_validated_path_reports_cached():
     """inject_targets_service validated path calls the cache and surfaces its count."""
-    from app.services.manual_inputs import inject_targets_service
     from app.schemas.analysis import InjectTargetsRequest
+    from app.services.manual_inputs import inject_targets_service
 
     run = MagicMock()
     run.analysis_id = UUID("00000000-0000-0000-0000-000000000044")
@@ -248,9 +248,9 @@ def test_inject_targets_response_has_normalized_and_unrecognized_fields():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_normalizes_symbols():
     """Lenient mode resolves an alias to canonical HGNC and reports the change."""
-    from app.services.manual_inputs import inject_targets_service
-    from app.schemas.analysis import InjectTargetsRequest
     import app.services.gene_symbols as gs
+    from app.schemas.analysis import InjectTargetsRequest
+    from app.services.manual_inputs import inject_targets_service
 
     gs._MAP = {
         "TNFA": {"symbol": "TNF", "kind": "alias"},
@@ -285,9 +285,9 @@ async def test_inject_targets_lenient_normalizes_symbols():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_dedups_alias_and_canonical():
     """Submitting an alias and its canonical collapses to one target after normalization."""
-    from app.services.manual_inputs import inject_targets_service
-    from app.schemas.analysis import InjectTargetsRequest
     import app.services.gene_symbols as gs
+    from app.schemas.analysis import InjectTargetsRequest
+    from app.services.manual_inputs import inject_targets_service
 
     gs._MAP = {"TNFA": {"symbol": "TNF", "kind": "alias"}, "TNF": {"symbol": "TNF", "kind": "approved"}}
     run = MagicMock()
@@ -310,9 +310,9 @@ async def test_inject_targets_lenient_dedups_alias_and_canonical():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_unknown_kept_and_flagged():
     """An unknown symbol is kept (injected) but reported in unrecognized[]."""
-    from app.services.manual_inputs import inject_targets_service
-    from app.schemas.analysis import InjectTargetsRequest
     import app.services.gene_symbols as gs
+    from app.schemas.analysis import InjectTargetsRequest
+    from app.services.manual_inputs import inject_targets_service
 
     gs._MAP = {"TP53": {"symbol": "TP53", "kind": "approved"}}
     run = MagicMock()
@@ -335,9 +335,9 @@ async def test_inject_targets_lenient_unknown_kept_and_flagged():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_accession_routes_to_uniprot():
     """A UniProt accession in lenient mode is resolved via UniProt, not the offline map."""
-    from app.services.manual_inputs import inject_targets_service
-    from app.schemas.analysis import InjectTargetsRequest
     import app.services.gene_symbols as gs
+    from app.schemas.analysis import InjectTargetsRequest
+    from app.services.manual_inputs import inject_targets_service
 
     gs._MAP = {}
     info = MagicMock()
@@ -366,10 +366,10 @@ async def test_inject_targets_lenient_accession_routes_to_uniprot():
 @pytest.mark.asyncio
 async def test_inject_targets_lenient_accession_uniprot_down_kept_no_503():
     """If UniProt is unavailable for an accession in lenient mode, keep+flag (no 503)."""
-    from app.services.manual_inputs import inject_targets_service
-    from app.schemas.analysis import InjectTargetsRequest
-    from integrations._retry import ServiceUnavailableError
     import app.services.gene_symbols as gs
+    from app.schemas.analysis import InjectTargetsRequest
+    from app.services.manual_inputs import inject_targets_service
+    from integrations._retry import ServiceUnavailableError
 
     gs._MAP = {}
     run = MagicMock()

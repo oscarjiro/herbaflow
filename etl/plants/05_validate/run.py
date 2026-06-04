@@ -36,9 +36,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 import argparse
 import json
 import logging
@@ -48,6 +47,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import pandas as pd
+from shared.utils import ETL_ROOT, ensure_dir, load_settings
+from shared.utils import setup_logging as shared_setup_logging
 
 
 def _defaults() -> dict:

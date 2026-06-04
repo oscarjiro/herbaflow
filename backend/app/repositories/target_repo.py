@@ -1,6 +1,7 @@
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.models import Target, CompoundTarget, DiseaseTarget
+
+from app.models import CompoundTarget, DiseaseTarget, Target
 
 
 async def get_target_by_id(session: AsyncSession, target_id: str) -> Target | None:

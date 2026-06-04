@@ -27,9 +27,12 @@ lives in P3 (thesis manual disease targets; user-gated).
 import pytest
 
 from tests.scientific.conftest import (
-    create_and_run, export_all_stages, load_gene_fixture, T2DM_DISEASE_ID,
+    T2DM_DISEASE_ID,
+    create_and_run,
+    export_all_stages,
+    load_gene_fixture,
 )
-from tests.scientific.renderers import render_ppi, render_centrality, render_enrichment
+from tests.scientific.renderers import render_centrality, render_enrichment, render_ppi
 
 # Li-2025 anchors — REPORTED for human review, NOT asserted on the Open-Targets path.
 CUR_HUBS = {"AKT1", "TNF", "TP53", "IL6", "EGFR"}

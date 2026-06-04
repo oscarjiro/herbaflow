@@ -2,9 +2,8 @@ import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
-import pytest
-
 import analysis.pipeline as pipeline
+import pytest
 
 ANALYSIS_ID = UUID("00000000-0000-0000-0000-000000000099")
 

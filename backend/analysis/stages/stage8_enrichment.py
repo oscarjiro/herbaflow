@@ -1,10 +1,12 @@
 import logging
 from collections import defaultdict
-from analysis.models import PipelineConfig
+
 from app.models.analysis import AnalysisRun
-from sqlmodel.ext.asyncio.session import AsyncSession
-from integrations.gprofiler import run_enrichment
 from integrations._retry import ServiceUnavailableError
+from integrations.gprofiler import run_enrichment
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from analysis.models import PipelineConfig
 
 logger = logging.getLogger(__name__)
 

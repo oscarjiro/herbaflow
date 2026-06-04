@@ -1,11 +1,10 @@
 import inspect
 
 import app.models as models
-from sqlmodel import SQLModel
-
 from analysis.stages import stage7_hub_genes
 from app.models.compound import PlantCompound
 from app.models.target import CompoundTarget
+from sqlmodel import SQLModel
 
 
 def test_stage7_run_has_no_target_rankings_write():
@@ -34,10 +33,10 @@ def test_evidence_type_removed():
     assert "prediction_method" in CompoundTarget.model_fields  # kept
 
 
-from app.models.plant import Plant
-from app.models.disease import Disease
 from app.models.compound import Compound
-from app.models.target import Target, DiseaseTarget
+from app.models.disease import Disease
+from app.models.plant import Plant
+from app.models.target import DiseaseTarget, Target
 
 
 def test_confidence_removed_everywhere():

@@ -1,6 +1,6 @@
 import pytest
+from analysis.models import AdmeParams, CompoundRecord
 
-from analysis.models import CompoundRecord, AdmeParams
 from tests.scientific.data_prep.select_curcuma_compounds import screen_compounds
 
 pytestmark = pytest.mark.scientific

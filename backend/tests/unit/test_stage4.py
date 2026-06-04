@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
-from analysis.stages import stage4_disease_targets
+
 from analysis.models import PipelineConfig
+from analysis.stages import stage4_disease_targets
 from app.models.analysis import AnalysisRun
 
 
@@ -180,6 +181,7 @@ async def test_stage4_manual_targets_normalized():
 def test_open_targets_module_removed():
     """The dead live Open Targets fallback must be deleted entirely."""
     import importlib
+
     import pytest
     with pytest.raises(ModuleNotFoundError):
         importlib.import_module("integrations.open_targets")

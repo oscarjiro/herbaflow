@@ -1,7 +1,8 @@
-import pytest
 from uuid import UUID
-from fastapi import HTTPException
+
+import pytest
 from app.routers.analyses import export_stage_results
+from fastapi import HTTPException
 
 
 class _Run:

@@ -7,15 +7,15 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
-from shared.utils import safe_str
-from shared.identity import (
-    COMPOUND_NS,
+from shared.identity import (  # noqa: F401 — re-exported for downstream scripts
     COMPOUND_ALIAS_NS,
+    COMPOUND_NS,
+    compound_alias_id,
     compound_canonical_key,
     compound_id,
     compound_id_from_key,
-    compound_alias_id,
 )
+from shared.utils import safe_str
 
 
 def normalize_cas(cas: str) -> tuple[str, bool, str]:

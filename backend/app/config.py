@@ -1,7 +1,8 @@
 # backend/app/config.py
-from pydantic_settings import BaseSettings
 from functools import lru_cache
 from pathlib import Path
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):

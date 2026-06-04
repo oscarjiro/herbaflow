@@ -5,7 +5,6 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
 from app.models.analysis import AnalysisRun
 
 
@@ -32,8 +31,8 @@ async def test_get_analysis_handles_timezone_aware_expires_at():
 @pytest.mark.asyncio
 async def test_get_analysis_410_when_expired_with_aware_timestamp():
     """A tz-aware past expires_at is correctly detected as expired (410), not a 500."""
-    from fastapi import HTTPException
     from app.routers import analyses
+    from fastapi import HTTPException
     run = _run(datetime.now(timezone.utc) - timedelta(hours=1))
     with patch.object(analyses.analysis_repo, "get_run", new=AsyncMock(return_value=run)), \
             patch.object(analyses.analysis_repo, "mark_failed_if_stale", new=AsyncMock(return_value=run)):

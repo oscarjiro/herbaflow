@@ -1,7 +1,7 @@
 # backend/tests/unit/test_create_request.py
 import pytest
-from pydantic import ValidationError
 from app.schemas.analysis import CreateAnalysisRequest
+from pydantic import ValidationError
 
 
 def _base(**kw):

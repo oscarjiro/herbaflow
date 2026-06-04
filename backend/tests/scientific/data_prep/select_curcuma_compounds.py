@@ -11,10 +11,9 @@ import os
 import sys
 
 import pytest
-from sqlalchemy import text
-
 from analysis.models import AdmeParams, CompoundRecord
 from analysis.stages.stage2_adme import filter_compounds
+from sqlalchemy import text
 
 CURCUMA_SQL = """
 select c.compound_id, c.canonical_name, c.inchi_key, c.smiles,

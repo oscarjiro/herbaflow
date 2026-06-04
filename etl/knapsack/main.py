@@ -8,12 +8,11 @@ from pathlib import Path
 from urllib.parse import urljoin
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging, ensure_dir
-
-import requests
 import pandas as pd
+import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
 from requests.adapters import HTTPAdapter
+from shared.utils import ETL_ROOT, ensure_dir, load_settings, setup_logging
 from urllib3.util.retry import Retry
 
 # =========================================================

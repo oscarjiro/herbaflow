@@ -1,4 +1,4 @@
-from app.security import client_error_message, STAGE_LABELS
+from app.security import STAGE_LABELS, client_error_message
 
 
 def test_message_is_human_readable_and_leak_free():

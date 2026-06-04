@@ -17,8 +17,8 @@ from pathlib import Path
 
 import psycopg2
 import psycopg2.extras
-from psycopg2 import sql
 from dotenv import load_dotenv
+from psycopg2 import sql
 
 load_dotenv()
 

@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock, MagicMock
-from analysis.stages import stage7_hub_genes
+
 from analysis.models import PipelineConfig
+from analysis.stages import stage7_hub_genes
 from app.models.analysis import AnalysisRun
 
 

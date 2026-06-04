@@ -49,9 +49,8 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings as shared_load_settings, ensure_dir, normalize_whitespace, make_run_id, now_iso
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 import argparse
 import csv
 import hashlib
@@ -59,21 +58,23 @@ import json
 import logging
 import math
 import os
+import random
 import re
 import socket
 import threading
 import time
-import random
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from http.client import RemoteDisconnected
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
-from http.client import RemoteDisconnected
-from collections import defaultdict
 
+from shared.utils import ETL_ROOT, ensure_dir, make_run_id, normalize_whitespace
+from shared.utils import load_settings as shared_load_settings
 
 CANDIDATE_COLUMNS = [
     "compound_candidate_id",

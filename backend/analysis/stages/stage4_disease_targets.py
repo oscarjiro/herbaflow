@@ -10,10 +10,11 @@ stage level; each target row carries only ``gene_symbol``, ``uniprot_accession``
 ``score`` and ``source``.
 """
 
-from analysis.models import PipelineConfig
 from app.models.analysis import AnalysisRun
-from sqlmodel.ext.asyncio.session import AsyncSession
 from app.repositories import disease_repo
+from sqlmodel.ext.asyncio.session import AsyncSession
+
+from analysis.models import PipelineConfig
 
 
 async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -> dict:

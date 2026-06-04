@@ -45,15 +45,15 @@ from typing import Any
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, now_iso
-
 from diseases.utils import (
+    clean_str,
     normalize_text,
     read_frame,
-    clean_str,
     validate_required_columns,
     write_frame,
 )
+from shared.utils import ETL_ROOT, ensure_dir, load_settings, now_iso
+from shared.utils import setup_logging as shared_setup_logging
 
 DEFAULT_SETTINGS_PATH = ETL_ROOT / "diseases" / "settings.yml"
 

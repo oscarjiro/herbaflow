@@ -1,5 +1,5 @@
 import networkx as nx
-from analysis.stages.stage7_hub_genes import compute_hub_genes, compute_community_centrality
+from analysis.stages.stage7_hub_genes import compute_community_centrality, compute_hub_genes
 
 
 def make_star_graph() -> nx.Graph:
@@ -77,8 +77,9 @@ def test_no_null_score_fields_in_ranked():
 # ── Stage 7 run() wrapper ──────────────────────────────────────────────────────
 
 from unittest.mock import AsyncMock, MagicMock
-from analysis.stages import stage7_hub_genes
+
 from analysis.models import PipelineConfig
+from analysis.stages import stage7_hub_genes
 from app.models.analysis import AnalysisRun
 
 

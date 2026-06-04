@@ -1,8 +1,8 @@
-from analysis.models import AdmeParams, CompoundRecord, PipelineConfig
 from app.models.analysis import AnalysisRun
-from sqlmodel.ext.asyncio.session import AsyncSession
 from app.repositories import compound_repo
+from sqlmodel.ext.asyncio.session import AsyncSession
 
+from analysis.models import AdmeParams, CompoundRecord, PipelineConfig
 
 # Core Lipinski properties that must exist for a compound to be evaluable.
 # If every one of these is None the compound was never enriched from PubChem

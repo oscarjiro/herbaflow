@@ -1,7 +1,7 @@
 # backend/tests/unit/test_analysis_parameters.py
 import pytest
-from pydantic import ValidationError
 from app.schemas.analysis import AnalysisParameters
+from pydantic import ValidationError
 
 
 def test_valid_nested_accepted():

@@ -11,12 +11,12 @@ HTTP call sequence for validate_compound("O=c1c(O)c(...)oc2cc(O)cc(O)c12", clien
 Both calls are mocked below — if either is missing, validate_compound returns None
 and the result-is-not-None guard catches it immediately.
 """
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-import httpx
 
+import httpx
+import pytest
+from app.services.canonicalize import compound_canonical_key, make_compound_id
 from integrations.pubchem_compound import validate_compound
-from app.services.canonicalize import make_compound_id, compound_canonical_key
 
 QUERCETIN_IK = "REFJWTPEDVJJIY-UHFFFAOYSA-N"
 QUERCETIN_CID = 5280343

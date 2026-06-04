@@ -6,10 +6,10 @@ Tests the state machine behavior of run_stage:
 - Updates status to stage_N_complete after stage succeeds
 - Updates status to "failed" when stage function raises
 """
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
+import pytest
 from analysis.pipeline import run_stage
 
 ANALYSIS_ID = UUID("11111111-1111-1111-1111-111111111111")

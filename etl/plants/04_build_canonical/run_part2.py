@@ -30,22 +30,24 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
-from shared.utils import ETL_ROOT, load_settings, setup_logging as shared_setup_logging, ensure_dir, now_iso
-from plants.utils import plant_canonical_key, plant_id as make_plant_id, plant_alias_id as make_alias_id
-from shared.identity import pick_alias, slugify
-from shared.provenance import gbif_species_url
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
 import argparse
 import logging
 import math
 import re
 import unicodedata
 from dataclasses import dataclass
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pandas as pd
-
+from plants.utils import plant_alias_id as make_alias_id
+from plants.utils import plant_canonical_key
+from plants.utils import plant_id as make_plant_id
+from shared.identity import pick_alias, slugify
+from shared.provenance import gbif_species_url
+from shared.utils import ETL_ROOT, ensure_dir, load_settings, now_iso
+from shared.utils import setup_logging as shared_setup_logging
 
 DEFAULT_SOURCE_NAME = "KNApSAcK World"
 

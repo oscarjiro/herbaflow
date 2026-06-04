@@ -2,14 +2,14 @@ import uuid
 
 from app.services.canonicalize import (
     COMPOUND_NS,
-    TARGET_NS,
     COMPOUND_TARGET_NS,
+    TARGET_NS,
     compound_canonical_key,
+    fold_isoform,
     make_compound_id,
     make_compound_target_id,
-    fold_isoform,
-    target_canonical_key,
     make_target_id,
+    target_canonical_key,
 )
 
 
@@ -58,5 +58,4 @@ def test_target_canonical_key_cascade():
 
 
 def test_make_compound_target_id():
-    from app.services.canonicalize import COMPOUND_TARGET_NS, make_compound_target_id
     assert make_compound_target_id("c1", "t1") == str(uuid.uuid5(COMPOUND_TARGET_NS, "c1:t1"))

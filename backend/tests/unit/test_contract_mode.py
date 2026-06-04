@@ -3,10 +3,9 @@ import re
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
-
 from app.contracts import ANALYSIS_MODES
 from app.schemas.analysis import CreateAnalysisRequest
+from pydantic import ValidationError
 
 MIGRATION = (
     Path(__file__).resolve().parents[3]

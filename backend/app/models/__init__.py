@@ -1,9 +1,9 @@
 # backend/app/models/__init__.py
-from .plant import Plant, PlantAlias
+from .analysis import AnalysisRun
 from .compound import Compound, CompoundAlias, PlantCompound
 from .disease import Disease, DiseaseAlias
-from .target import Target, CompoundTarget, DiseaseTarget
-from .analysis import AnalysisRun
+from .plant import Plant, PlantAlias
+from .target import CompoundTarget, DiseaseTarget, Target
 
 __all__ = [
     "Plant", "PlantAlias",
