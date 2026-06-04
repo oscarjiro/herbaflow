@@ -16,6 +16,15 @@ import type {
 
 export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
+export class ApiError extends Error {
+  status: number
+  constructor(status: number, body: string) {
+    super(`API ${status}: ${body}`)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { 'Content-Type': 'application/json', ...init?.headers },
@@ -23,7 +32,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   })
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText)
-    throw new Error(`API ${res.status}: ${text}`)
+    throw new ApiError(res.status, text)
   }
   // Tolerate empty bodies (e.g. 204 No Content): calling res.json() on an
   // empty body throws a SyntaxError, so return undefined for void responses.

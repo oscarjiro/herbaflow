@@ -22,6 +22,7 @@ import { SkippedStageNotice } from '@/components/shared/SkippedStageNotice'
 import { UserProvidedNotice } from '@/components/shared/UserProvidedNotice'
 import { getStageState, getStageInputs } from '@/types/api'
 import type { AnalysisStatusResponse, AnalysisRunResponse } from '@/types/api'
+import { ApiError } from '@/lib/api'
 
 // ============================================================================
 // Stage panel registry
@@ -135,12 +136,9 @@ function StagePanelRouter({ stage, analysis, status, analysisId }: StagePanelRou
 // Error helpers
 // ============================================================================
 
-// api.ts throws expired-analysis (HTTP 410 Gone) as a plain Error whose message
-// is formatted `API 410: <body>` (see lib/api.ts). Until that error shape carries
-// a status code, the message prefix is the only reliable signal — this helper
-// keeps the brittle string check in one place.
+// api.ts throws expired-analysis (HTTP 410 Gone) as ApiError with status 410.
 function isGoneError(err: unknown): boolean {
-  return err instanceof Error && err.message.startsWith('API 410:')
+  return err instanceof ApiError && err.status === 410
 }
 
 // ============================================================================
