@@ -82,6 +82,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
       key: 'gene_symbol',
       header: 'Gene Symbol',
       sortable: true,
+      enableColumnFilter: true,
       className: 'font-mono',
     },
     {
@@ -589,8 +590,7 @@ export function Stage3Panel({ stage, analysis, status, analysisId: _analysisId }
           <DataTable
             data={result.targets as TargetRow[]}
             columns={columns}
-            filterPlaceholder="Filter targets..."
-            filterKeys={['gene_symbol']}
+            filterable
           />
 
           <DataSources sources={SOURCES} />

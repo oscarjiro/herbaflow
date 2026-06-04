@@ -51,6 +51,7 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
       key: 'gene_symbol',
       header: 'Gene Symbol',
       sortable: true,
+      enableColumnFilter: true,
       className: 'font-mono',
     },
     {
@@ -185,8 +186,7 @@ export function Stage4Panel({ stage, analysis, status, analysisId }: Stage4Panel
           <DataTable
             data={result.targets as DiseaseRow[]}
             columns={columns}
-            filterPlaceholder="Filter targets..."
-            filterKeys={['gene_symbol']}
+            filterable
           />
 
           <div className="space-y-1 text-xs text-hf-fg3 font-sans">

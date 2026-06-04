@@ -37,6 +37,7 @@ export function Stage1Panel({ stage, analysis, status, analysisId }: Stage1Panel
       key: 'canonical_name',
       header: 'Compound Name',
       sortable: true,
+      enableColumnFilter: true,
     },
     {
       key: 'plant_ids',
@@ -97,8 +98,7 @@ export function Stage1Panel({ stage, analysis, status, analysisId }: Stage1Panel
           <DataTable
             data={result.compounds as CompoundRow[]}
             columns={columns}
-            filterPlaceholder="Filter compounds..."
-            filterKeys={['canonical_name']}
+            filterable
           />
 
           <div className="border-t border-hf-border pt-4">

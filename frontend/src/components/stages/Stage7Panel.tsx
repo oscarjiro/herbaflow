@@ -30,7 +30,7 @@ type HubGeneRow = HubGeneResult & Record<string, unknown>
 type CommunityHubRow = CommunityHubGene & Record<string, unknown>
 
 const communityColumns: ColumnDef<CommunityHubRow>[] = [
-  { key: 'gene_symbol', header: 'Gene', sortable: true },
+  { key: 'gene_symbol', header: 'Gene', sortable: true, enableColumnFilter: true },
   {
     key: 'community_degree',
     header: 'Degree',
@@ -59,7 +59,7 @@ const communityColumns: ColumnDef<CommunityHubRow>[] = [
 
 const columns: ColumnDef<HubGeneRow>[] = [
   { key: 'rank', header: 'Rank', sortable: true },
-  { key: 'gene_symbol', header: 'Gene', sortable: true },
+  { key: 'gene_symbol', header: 'Gene', sortable: true, enableColumnFilter: true },
   {
     key: 'degree',
     header: 'Degree Centrality',
@@ -158,8 +158,7 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
       <DataTable
         data={result.ranked as HubGeneRow[]}
         columns={columns}
-        filterPlaceholder="Filter genes..."
-        filterKeys={['gene_symbol']}
+        filterable
         rowClassName={(row) =>
           (row as HubGeneResult).is_hub ? 'bg-hf-sage-faint' : ''
         }
@@ -205,8 +204,7 @@ export function Stage7Panel({ stage, analysis, status, analysisId }: Stage7Panel
                 <DataTable
                   data={top5}
                   columns={communityColumns}
-                  filterPlaceholder={`Filter community ${cidStr} genes...`}
-                  filterKeys={['gene_symbol']}
+                  filterable
                 />
               </div>
             )

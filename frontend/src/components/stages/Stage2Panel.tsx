@@ -41,6 +41,7 @@ const columns: ColumnDef<AdmeRow>[] = [
     key: 'canonical_name',
     header: 'Compound Name',
     sortable: true,
+    enableColumnFilter: true,
   },
   {
     key: 'molecular_weight',
@@ -203,8 +204,7 @@ export function Stage2Panel({ stage, analysis, status, analysisId }: Stage2Panel
           <DataTable
             data={filteredCompounds}
             columns={columns}
-            filterPlaceholder="Filter compounds..."
-            filterKeys={['canonical_name']}
+            filterable
           />
 
           <div className="space-y-1 text-xs text-hf-fg3 font-sans">
