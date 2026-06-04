@@ -200,6 +200,12 @@ async def get_analysis(analysis_id: UUID, session: AsyncSession = Depends(get_se
     run = await analysis_repo.get_run(session, analysis_id)
     if not run:
         raise HTTPException(status_code=404, detail="Analysis not found")
+    # Lazy-on-read cleanup: if this run is an in-progress zombie whose heartbeat is
+    # stale past the threshold, mark it failed (timeout) inline so the caller sees the
+    # truth now instead of an eternal "running". The row lock is acquired, mutated, and
+    # committed/released inside mark_failed_if_stale — never held across the response.
+    threshold = get_settings().stale_run_threshold_seconds
+    run = await analysis_repo.mark_failed_if_stale(session, analysis_id, threshold)
     if run.expires_at:
         # expires_at comes back from the timestamptz column as timezone-aware, but it is
         # written with naive UTC (datetime.utcnow). Normalize to naive UTC before comparing.

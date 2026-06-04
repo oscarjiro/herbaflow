@@ -234,3 +234,28 @@ async def reap_stale_runs(session: AsyncSession, threshold_seconds: int) -> int:
     if reaped:
         await session.commit()
     return reaped
+
+
+async def mark_failed_if_stale(
+    session: AsyncSession, analysis_id: UUID, threshold_seconds: int
+) -> AnalysisRun | None:
+    """If the run is in-progress and its updated_at is past threshold, mark it
+    failed (timeout) under a row lock and return it; otherwise return the run as-is.
+    Used by get_analysis for instant cleanup of a watched zombie."""
+    run = await get_run_locked(session, analysis_id)
+    if run is None:
+        return None
+    if not _is_in_progress_status(run.status):
+        return run
+    cutoff = datetime.utcnow() - timedelta(seconds=threshold_seconds)
+    updated_naive = run.updated_at.replace(tzinfo=None) if run.updated_at else datetime.min
+    if updated_naive >= cutoff:
+        return run
+    run.status = "failed"
+    run.error_message = TIMEOUT_MESSAGE
+    run.stage_results = {**(run.stage_results or {}), "_run_health": {"failure_kind": "timeout"}}
+    run.updated_at = datetime.utcnow()
+    session.add(run)
+    await session.commit()
+    await session.refresh(run)
+    return run
