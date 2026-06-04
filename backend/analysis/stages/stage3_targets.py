@@ -12,6 +12,7 @@ from app.models.target import Target, CompoundTarget
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.repositories import compound_repo
+from integrations._retry import ServiceUnavailableError
 from integrations.chembl import get_targets_for_compounds, ChemblTarget
 from integrations.pubchem_bioassay import get_targets_by_inchikey, PubChemTarget
 from app.services.canonicalize import (
@@ -135,26 +136,42 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
     pubchem_target_info: dict[str, PubChemTarget] = {}
     pubchem_ct: dict[str, set[str]] = {}  # gene -> {compound_ids from PubChem}
 
+    # PubChem BioAssay is a non-critical FALLBACK. If it is unavailable, we keep
+    # the ChEMBL data already gathered and mark the stage result as degraded —
+    # we must NOT fail the run (ChEMBL outage is handled differently: unwrapped).
+    pubchem_degraded = False
+    pubchem_warning: dict[str, str] | None = None
+
     if uncovered_compounds:
-        async with httpx.AsyncClient() as client:
-            results = await asyncio.gather(*[
-                get_targets_by_inchikey(client, ik, human_only=config.target.human_only)
-                for ik, _ in uncovered_compounds
-            ])
-        for (ik, compound_id), targets in zip(uncovered_compounds, results):
-            for t in targets:
-                if not t.gene_symbol:
-                    continue
-                gene = t.gene_symbol.upper()
-                # Register in PubChem-specific maps (for source-tagged CT upsert)
-                if gene not in pubchem_target_info:
-                    pubchem_target_info[gene] = t
-                    pubchem_ct[gene] = set()
-                pubchem_ct[gene].add(compound_id)
-                # Merge into unified target_compound_map for output
-                if gene not in target_compound_map:
-                    target_compound_map[gene] = []
-                target_compound_map[gene].append(compound_id)
+        try:
+            async with httpx.AsyncClient() as client:
+                results = await asyncio.gather(*[
+                    get_targets_by_inchikey(client, ik, human_only=config.target.human_only)
+                    for ik, _ in uncovered_compounds
+                ])
+            # Merge inside the try so a mid-gather failure never half-merges.
+            for (ik, compound_id), targets in zip(uncovered_compounds, results):
+                for t in targets:
+                    if not t.gene_symbol:
+                        continue
+                    gene = t.gene_symbol.upper()
+                    # Register in PubChem-specific maps (for source-tagged CT upsert)
+                    if gene not in pubchem_target_info:
+                        pubchem_target_info[gene] = t
+                        pubchem_ct[gene] = set()
+                    pubchem_ct[gene].add(compound_id)
+                    # Merge into unified target_compound_map for output
+                    if gene not in target_compound_map:
+                        target_compound_map[gene] = []
+                    target_compound_map[gene].append(compound_id)
+        except ServiceUnavailableError as exc:
+            logger.warning(
+                "stage3: PubChem BioAssay fallback unavailable; "
+                "continuing with ChEMBL data only (degraded): %s",
+                exc,
+            )
+            pubchem_degraded = True
+            pubchem_warning = {"provider": "pubchem_bioassay", "reason": str(exc)}
 
     # ── Upsert Target rows (ChEMBL + PubChem) ─────────────────────────────────
     now = datetime.utcnow()
@@ -301,7 +318,7 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         for gene, cids in target_compound_map.items()
     ]
 
-    return {
+    result = {
         # Pipeline chain keys (Stage 4 reads these)
         "covered": covered,
         "no_data": no_data,
@@ -319,3 +336,9 @@ async def run(run: AnalysisRun, config: PipelineConfig, session: AsyncSession) -
         # Coverage section: compounds with zero targets after ChEMBL + PubChem
         "uncovered_compounds": uncovered_compound_list,
     }
+
+    if pubchem_degraded:
+        result["degraded"] = True
+        result["warning"] = pubchem_warning
+
+    return result

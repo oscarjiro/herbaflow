@@ -357,3 +357,115 @@ async def test_stage3_output_uses_coverage_pct_field():
         "Stage 3 output must use 'coverage_pct', not the old 'coverage_percent' key"
     )
     assert isinstance(result["coverage_pct"], float)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Provider-outage failure routing: ChEMBL (critical) propagates, PubChem degrades
+# ─────────────────────────────────────────────────────────────────────────────
+from integrations._retry import ServiceUnavailableError
+
+
+@pytest.fixture
+def pipeline_config():
+    return PipelineConfig.from_dict({})
+
+
+@pytest.fixture
+def stage3_run_with_one_chembl_compound():
+    # One active compound that ChEMBL can cover (has chembl_id) but that also
+    # carries an inchi_key, so it can fall into the PubChem fallback when ChEMBL
+    # does not cover it. Stage 3 reads stage_2.all_active_compound_ids then loads
+    # compounds via compound_repo.get_compounds_by_ids — tests patch that loader.
+    compound_id = "11111111-1111-5111-8111-111111111111"
+    return {
+        "compound_id": compound_id,
+        "canonical_name": "celecoxib",
+        "chembl_id": "CHEMBL118",
+        "inchi_key": "RZEKVGVHFLEQIL-UHFFFAOYSA-N",
+        "smiles": "O=S(=O)(N)c1ccc(cc1)-c1cc(C(F)(F)F)nn1-c1ccc(C)cc1",
+        "run": make_run(all_active_compound_ids=[compound_id]),
+    }
+
+
+async def test_stage3_propagates_chembl_outage(
+    stage3_run_with_one_chembl_compound, pipeline_config
+):
+    # ChEMBL down → stage must raise (critical), not swallow.
+    fixture = stage3_run_with_one_chembl_compound
+    run = fixture["run"]
+    session = make_session()
+    fake_compound = make_fake_compound(
+        fixture["compound_id"],
+        chembl_id=fixture["chembl_id"],
+        inchi_key=fixture["inchi_key"],
+        canonical_name=fixture["canonical_name"],
+        smiles=fixture["smiles"],
+    )
+
+    with patch(
+        "analysis.stages.stage3_targets.compound_repo.get_compounds_by_ids",
+        return_value=[fake_compound],
+    ):
+        with patch.object(
+            stage3_targets,
+            "get_targets_for_compounds",
+            side_effect=ServiceUnavailableError("ChEMBL", 503),
+        ):
+            with pytest.raises(ServiceUnavailableError):
+                await stage3_targets.run(run, pipeline_config, session)
+
+
+async def test_stage3_degrades_when_pubchem_fallback_unavailable(
+    stage3_run_with_one_chembl_compound, pipeline_config
+):
+    # ChEMBL ok (returns a target for the covered compound), PubChem fallback down
+    # for a SEPARATE uncovered compound → keep ChEMBL data + degraded marker.
+    fixture = stage3_run_with_one_chembl_compound
+    covered_cid = fixture["compound_id"]
+    uncovered_cid = "22222222-2222-5222-8222-222222222222"
+    run = make_run(all_active_compound_ids=[covered_cid, uncovered_cid])
+    session = make_session()
+
+    covered_compound = make_fake_compound(
+        covered_cid,
+        chembl_id=fixture["chembl_id"],
+        inchi_key=fixture["inchi_key"],
+        canonical_name=fixture["canonical_name"],
+        smiles=fixture["smiles"],
+    )
+    # No chembl_id but has an inchi_key → routed into the PubChem fallback.
+    uncovered_compound = make_fake_compound(
+        uncovered_cid, chembl_id=None, inchi_key="BSYNRYMUTXBXSQ-UHFFFAOYSA-N"
+    )
+
+    chembl_target = ChemblTarget(
+        chembl_id="CHEMBL25",
+        gene_symbol="PTGS2",
+        uniprot_accession="P35354",
+        organism="Homo sapiens",
+        pchembl_value=7.0,
+    )
+
+    with patch(
+        "analysis.stages.stage3_targets.compound_repo.get_compounds_by_ids",
+        return_value=[covered_compound, uncovered_compound],
+    ):
+        with patch.object(
+            stage3_targets,
+            "get_targets_for_compounds",
+            new=AsyncMock(return_value={fixture["chembl_id"]: [chembl_target]}),
+        ):
+            with patch.object(
+                stage3_targets,
+                "get_targets_by_inchikey",
+                side_effect=ServiceUnavailableError("PubChem BioAssay", 503),
+            ):
+                with patch(
+                    "analysis.stages.stage3_targets.httpx.AsyncClient",
+                    return_value=_mock_httpx_client(),
+                ):
+                    result = await stage3_targets.run(run, pipeline_config, session)
+
+    assert result["target_count"] >= 1
+    assert result["degraded"] is True
+    assert result["warning"]["provider"] == "pubchem_bioassay"
