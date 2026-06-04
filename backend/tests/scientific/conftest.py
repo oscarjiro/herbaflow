@@ -19,13 +19,17 @@ stage is approved explicitly. Verified pipeline facts this helper relies on
     brief window before the background task flips it to "_running", each awaiting stage
     is approved at most once.
 """
+import asyncio
 import csv
 import os
+import socket
+import threading
 import time
 
 import pytest
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
+import uvicorn
+from httpx import AsyncClient, Limits
 
 from app.main import app
 
@@ -51,10 +55,52 @@ def artifacts_dir(request) -> str:
     return d
 
 
+def _free_port() -> int:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]
+    s.close()
+    return port
+
+
+@pytest.fixture(scope="session")
+def live_server_url():
+    """Run the real app under uvicorn in a background thread, driven over TCP.
+
+    Why a real server (not httpx ASGITransport): the golden pipeline advances via
+    POST /approve, which holds a FOR UPDATE on the run row in its request session and
+    schedules run_stage as a background task that UPDATEs the same row. Under ASGITransport
+    the request and its background task share the test's event loop, so the background UPDATE
+    deadlocks against the request's still-held FOR UPDATE (statement timeout). A real server
+    runs requests and background tasks with production lifecycle semantics — the request
+    (and its lock) is released before the background task runs — so the approve loop works.
+    """
+    port = _free_port()
+    config = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="warning")
+    server = uvicorn.Server(config)
+    thread = threading.Thread(target=server.run, daemon=True)
+    thread.start()
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        if getattr(server, "started", False):
+            break
+        time.sleep(0.1)
+    else:
+        raise RuntimeError("uvicorn test server did not start within 30s")
+    yield f"http://127.0.0.1:{port}"
+    server.should_exit = True
+    thread.join(timeout=10)
+
+
 @pytest_asyncio.fixture
-async def api_client():
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
+async def api_client(live_server_url):
+    # max_keepalive_connections=0: close each connection after its response so nothing
+    # lingers to be torn down after the event loop closes (avoids a Windows-proactor
+    # "Event loop is closed" RuntimeError during fixture teardown).
+    async with AsyncClient(
+        base_url=live_server_url, timeout=120.0,
+        limits=Limits(max_keepalive_connections=0),
+    ) as client:
         yield client
 
 
@@ -70,7 +116,7 @@ def _awaiting_stage(status: str) -> int | None:
 
 async def create_and_run(
     client, *, name, targets, disease_id=None, manual_disease_targets=None,
-    mode="guided", poll_timeout_s=600,
+    mode="auto", poll_timeout_s=600,
 ) -> dict:
     """Create a manual-targets analysis, drive it to completion, return full stage_results.
 
@@ -83,6 +129,9 @@ async def create_and_run(
         "plant_ids": [],
         "disease_id": disease_id,
         "targets": targets,
+        # Lenient injection: STP gene symbols are normalized offline (HGNC), no per-symbol
+        # UniProt round-trip. Keeps the golden run deterministic and UniProt-independent.
+        "skip_validation": True,
         "parameters": {},
     }
     if manual_disease_targets is not None:
@@ -91,8 +140,15 @@ async def create_and_run(
     assert resp.status_code == 201, resp.text
     analysis_id = resp.json()["analysis_id"]
 
+    # NOTE: this runs on the same event loop as the ASGI app under httpx ASGITransport.
+    # Never block the loop (no time.sleep) — the approve handler holds a FOR UPDATE on the
+    # run row via its request session, and the scheduled run_stage background task + session
+    # teardown only progress when the loop is free. Blocking would stall lock release and
+    # deadlock the next approve's FOR UPDATE. Use await asyncio.sleep, and settle briefly
+    # after each approve so the prior request's transaction releases before the next poll.
     approved: set[int] = set()
     deadline = time.time() + poll_timeout_s
+    status = ""
     while time.time() < deadline:
         s = (await client.get(f"/analyses/{analysis_id}/status")).json()
         status = s.get("status", "")
@@ -105,8 +161,9 @@ async def create_and_run(
             approved.add(stage)
             r = await client.post(f"/analyses/{analysis_id}/approve")
             assert r.status_code in (200, 400), r.text  # 400 = already advanced; benign
+            await asyncio.sleep(1.0)
         else:
-            time.sleep(2)
+            await asyncio.sleep(2)
     else:
         raise AssertionError(f"pipeline did not finish within {poll_timeout_s}s: last status={status!r}")
 
