@@ -49,3 +49,15 @@ async def test_run_enrichment_uses_benjamini_hochberg_correction():
 
     payload = mock_client.post.call_args.kwargs["json"]
     assert payload.get("significance_threshold_method") == "fdr"
+
+
+from integrations._retry import ServiceUnavailableError
+
+
+@pytest.mark.asyncio
+async def test_run_enrichment_raises_when_provider_unavailable(httpx_mock):
+    # with_retry default: max_retries=3 → 4 total attempts (range(max_retries+1)).
+    for _ in range(4):
+        httpx_mock.add_response(status_code=503)
+    with pytest.raises(ServiceUnavailableError):
+        await run_enrichment(gene_symbols=["TP53", "EGFR", "AKT1"])

@@ -76,9 +76,9 @@ async def run_enrichment(
                 return r
 
             resp = await with_retry(_fetch_gprofiler, service_name="g:Profiler")
-        except ServiceUnavailableError as exc:
-            logger.error("g:Profiler unavailable after retries: %s", exc)
-            return []
+        except ServiceUnavailableError:
+            logger.error("g:Profiler unavailable after retries for %d genes", len(gene_symbols))
+            raise
         except httpx.HTTPError as exc:
             logger.error("g:Profiler HTTP error for %d genes: %s", len(gene_symbols), exc)
             return []
