@@ -8,8 +8,10 @@ import { DiseaseSelector } from '@/components/setup/DiseaseSelector'
 import { ModeToggle } from '@/components/setup/ModeToggle'
 import { AdvancedParameters, CheckboxField, DEFAULT_PARAMS } from '@/components/setup/AdvancedParameters'
 import type { AdvancedParams } from '@/components/setup/AdvancedParameters'
+import { ValidationReview } from '@/components/setup/ValidationReview'
 import { useStartAnalysis } from '@/hooks/useStartAnalysis'
 import { api } from '@/lib/api'
+import type { ValidationPayload } from '@/lib/api'
 import { isTerminalStatus } from '@/types/api'
 import type { CreateAnalysisRequest } from '@/types/api'
 import {
@@ -164,6 +166,12 @@ export default function SetupPage() {
   const [lenientTargets, setLenientTargets] = useState(false)
   const [diseaseInputMode, setDiseaseInputMode] = useState<DiseaseInputMode>('disease')
   const [diseaseTargetsRaw, setDiseaseTargetsRaw] = useState('')
+  // Validate-before-commit review state machine (manual modes only).
+  const [reviewState, setReviewState] = useState<'idle' | 'validating' | 'reviewing'>('idle')
+  const [validation, setValidation] = useState<ValidationPayload | null>(null)
+  const [reviewTotal, setReviewTotal] = useState(0)
+  const [progress, setProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 })
+  const [reviewError, setReviewError] = useState<string | null>(null)
   const parsedDiseaseTargets = diseaseInputMode === 'manual_targets' ? parseTargetLines(diseaseTargetsRaw) : []
 
   const isManualCompounds = inputMode === 'manual_compounds'
@@ -203,8 +211,47 @@ export default function SetupPage() {
   // field-level errors are surfaced by Zod on submit.
   const isDisabled = mutation.isPending
 
+  /** Fire the create-analysis mutation from the current form state. */
+  function startCreate() {
+    mutation.mutate({
+      request: buildCreateRequest({
+        name,
+        mode,
+        plantIds,
+        diseaseId,
+        params,
+        inputMode,
+        diseaseInputMode,
+        parsedCompounds,
+        parsedTargets,
+        parsedDiseaseTargets,
+        lenient: lenientTargets,
+      }),
+    })
+  }
+
+  /**
+   * Pick the primary manual input to review, by precedence:
+   * manual compounds → manual targets → manual disease targets. Returns null for
+   * a fully standard submit (no manual input to validate first).
+   */
+  function primaryManualInput():
+    | { kind: 'compound' | 'target' | 'disease_target'; inputs: string[]; lenient: boolean }
+    | null {
+    if (inputMode === 'manual_compounds') {
+      return { kind: 'compound', inputs: parsedCompounds, lenient: false }
+    }
+    if (inputMode === 'manual_targets') {
+      return { kind: 'target', inputs: parsedTargets, lenient: lenientTargets }
+    }
+    if (diseaseInputMode === 'manual_targets') {
+      return { kind: 'disease_target', inputs: parsedDiseaseTargets, lenient: false }
+    }
+    return null
+  }
+
   function handleSubmit() {
-    if (mutation.isPending) return
+    if (mutation.isPending || reviewState === 'validating') return
 
     // Run Zod validation against the same nested shape buildCreateRequest sends.
     const formData = buildSetupFormData({
@@ -225,22 +272,42 @@ export default function SetupPage() {
       return
     }
     setFormErrors({})
+    setReviewError(null)
 
-    mutation.mutate({
-      request: buildCreateRequest({
-        name,
-        mode,
-        plantIds,
-        diseaseId,
-        params,
-        inputMode,
-        diseaseInputMode,
-        parsedCompounds,
-        parsedTargets,
-        parsedDiseaseTargets,
-        lenient: lenientTargets,
-      }),
-    })
+    // Standard mode submits directly — no dry-run. Manual modes get a review pass.
+    const manual = primaryManualInput()
+    if (!manual) {
+      startCreate()
+      return
+    }
+
+    setReviewState('validating')
+    setProgress({ done: 0, total: manual.inputs.length })
+    setReviewTotal(manual.inputs.length)
+    api
+      .validateInChunks(manual.kind, manual.inputs, manual.lenient, (done, total) =>
+        setProgress({ done, total }),
+      )
+      .then((result) => {
+        setValidation(result)
+        setReviewState('reviewing')
+      })
+      .catch((err: unknown) => {
+        setReviewState('idle')
+        setValidation(null)
+        setReviewError(err instanceof Error ? err.message : 'Validation failed — please try again.')
+      })
+  }
+
+  function handleContinue() {
+    setReviewState('idle')
+    setValidation(null)
+    startCreate()
+  }
+
+  function handleBack() {
+    setReviewState('idle')
+    setValidation(null)
   }
 
   return (
@@ -391,21 +458,46 @@ export default function SetupPage() {
         )}
       </div>
 
+      {/* Validation progress */}
+      {reviewState === 'validating' && (
+        <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" role="status">
+          <p className="text-sm text-hf-fg2" aria-live="polite">
+            {progress.done} / {progress.total} validated
+          </p>
+        </div>
+      )}
+
+      {/* Review */}
+      {reviewState === 'reviewing' && validation && (
+        <ValidationReview
+          result={validation}
+          total={reviewTotal}
+          onContinue={handleContinue}
+          onBack={handleBack}
+        />
+      )}
+
       {/* Error message */}
-      {mutation.isError && (
+      {(mutation.isError || reviewError) && (
         <div className="text-hf-danger text-sm mt-2">
-          {mutation.error?.message}
+          {reviewError ?? mutation.error?.message}
         </div>
       )}
 
       {/* Submit */}
-      <Button
-        className="w-full mt-2"
-        disabled={isDisabled}
-        onClick={handleSubmit}
-      >
-        {mutation.isPending ? 'Starting...' : 'Start Analysis'}
-      </Button>
+      {reviewState !== 'reviewing' && (
+        <Button
+          className="w-full mt-2"
+          disabled={isDisabled || reviewState === 'validating'}
+          onClick={handleSubmit}
+        >
+          {reviewState === 'validating'
+            ? 'Validating...'
+            : mutation.isPending
+              ? 'Starting...'
+              : 'Start Analysis'}
+        </Button>
+      )}
     </div>
   )
 }

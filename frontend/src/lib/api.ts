@@ -16,6 +16,19 @@ import type {
 
 export const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
+/** Result of a (non-mutating) input validation pass from POST /analyses/validate-inputs. */
+export interface ValidationPayload {
+  valid: Record<string, unknown>[]
+  failed: { line: number; input: string; reason: string }[]
+  normalized: { from: string; to: string }[]
+  duplicates: string[]
+  reused: number
+  enriched: number
+}
+
+/** Inputs are validated in batches of this size to keep each request small and surface live progress. */
+const VALIDATE_CHUNK_SIZE = 25
+
 export class ApiError extends Error {
   status: number
   constructor(status: number, message: string) {
@@ -125,6 +138,59 @@ export const api = {
       method: 'POST',
       ...(body ? { body: JSON.stringify(body) } : {}),
     }),
+
+  /** Validate a list of inputs without creating a run. 503 on provider outage. */
+  validateInputs: (
+    kind: 'compound' | 'target' | 'disease_target',
+    inputs: string[],
+    lenient: boolean,
+  ): Promise<ValidationPayload> =>
+    request('/analyses/validate-inputs', {
+      method: 'POST',
+      body: JSON.stringify({ kind, inputs, lenient }),
+    }),
+
+  /**
+   * Validate inputs in sequential chunks, merging the per-chunk payloads.
+   *
+   * `failed[].line` from each chunk is local (1-based within that chunk), so it is
+   * re-indexed by the running offset to produce a global 1-based line number across
+   * the whole input list. `valid`/`normalized`/`duplicates` are concatenated;
+   * `reused`/`enriched` are summed. `onProgress` fires after each chunk with the
+   * cumulative processed count and the total.
+   */
+  async validateInChunks(
+    kind: 'compound' | 'target' | 'disease_target',
+    inputs: string[],
+    lenient: boolean,
+    onProgress?: (done: number, total: number) => void,
+  ): Promise<ValidationPayload> {
+    const merged: ValidationPayload = {
+      valid: [],
+      failed: [],
+      normalized: [],
+      duplicates: [],
+      reused: 0,
+      enriched: 0,
+    }
+    const total = inputs.length
+    let offset = 0
+    for (let i = 0; i < inputs.length; i += VALIDATE_CHUNK_SIZE) {
+      const chunk = inputs.slice(i, i + VALIDATE_CHUNK_SIZE)
+      const part = await this.validateInputs(kind, chunk, lenient)
+      merged.valid.push(...part.valid)
+      merged.normalized.push(...part.normalized)
+      merged.duplicates.push(...part.duplicates)
+      merged.failed.push(
+        ...part.failed.map((f) => ({ ...f, line: f.line + offset })),
+      )
+      merged.reused += part.reused
+      merged.enriched += part.enriched
+      offset += chunk.length
+      onProgress?.(offset, total)
+    }
+    return merged
+  },
 
   async addUserTarget(analysisId: string, body: AddUserTargetRequest): Promise<AddUserTargetResponse> {
     const res = await fetch(`${BASE_URL}/analyses/${encodeURIComponent(analysisId)}/targets/user`, {

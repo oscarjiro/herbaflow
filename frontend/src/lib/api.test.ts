@@ -111,6 +111,86 @@ describe('api humanized error messages', () => {
   })
 })
 
+describe('api.validateInChunks', () => {
+  function emptyPayload() {
+    return { valid: [], failed: [], normalized: [], duplicates: [], reused: 0, enriched: 0 }
+  }
+
+  function jsonResponse(body: unknown): Response {
+    return new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  function lastFetchBody(callIndex: number): Record<string, unknown> {
+    const calls = (globalThis.fetch as any).mock.calls
+    return JSON.parse(calls[callIndex][1].body as string)
+  }
+
+  it('chunks 60 inputs into 3 sequential POSTs and merges the payloads', async () => {
+    const inputs = Array.from({ length: 60 }, (_, i) => `g${i + 1}`)
+    const responses = [
+      jsonResponse({ ...emptyPayload(), valid: [{ id: 1 }], reused: 1, enriched: 2 }),
+      jsonResponse({ ...emptyPayload(), valid: [{ id: 2 }], reused: 3, enriched: 4 }),
+      jsonResponse({ ...emptyPayload(), valid: [{ id: 3 }], reused: 5, enriched: 6 }),
+    ]
+    let n = 0
+    vi.stubGlobal('fetch', vi.fn(async () => responses[n++]))
+
+    const result = await api.validateInChunks('target', inputs, false)
+
+    expect((globalThis.fetch as any).mock.calls).toHaveLength(3)
+    // Chunk sizes 25 / 25 / 10
+    expect((lastFetchBody(0).inputs as string[]).length).toBe(25)
+    expect((lastFetchBody(1).inputs as string[]).length).toBe(25)
+    expect((lastFetchBody(2).inputs as string[]).length).toBe(10)
+    // POSTs to the validate-inputs endpoint with the right kind
+    expect(lastFetchUrl()).toContain('/analyses/validate-inputs')
+    expect(lastFetchBody(0).kind).toBe('target')
+    // Merged: concat valid, summed counters
+    expect(result.valid).toEqual([{ id: 1 }, { id: 2 }, { id: 3 }])
+    expect(result.reused).toBe(9)
+    expect(result.enriched).toBe(12)
+  })
+
+  it('re-indexes a 2nd-chunk failed line (local 2) to a global line (27)', async () => {
+    const inputs = Array.from({ length: 30 }, (_, i) => `g${i + 1}`)
+    const responses = [
+      jsonResponse(emptyPayload()),
+      jsonResponse({
+        ...emptyPayload(),
+        failed: [{ line: 2, input: 'bad', reason: 'invalid' }],
+      }),
+    ]
+    let n = 0
+    vi.stubGlobal('fetch', vi.fn(async () => responses[n++]))
+
+    const result = await api.validateInChunks('target', inputs, false)
+
+    expect(result.failed).toHaveLength(1)
+    // First chunk had 25 inputs → offset 25; local line 2 → global 27
+    expect(result.failed[0].line).toBe(27)
+    expect(result.failed[0].input).toBe('bad')
+  })
+
+  it('calls onProgress with cumulative counts ending at the total', async () => {
+    const inputs = Array.from({ length: 60 }, (_, i) => `g${i + 1}`)
+    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(emptyPayload())))
+
+    const progress: [number, number][] = []
+    await api.validateInChunks('compound', inputs, false, (done, total) => {
+      progress.push([done, total])
+    })
+
+    expect(progress).toEqual([
+      [25, 60],
+      [50, 60],
+      [60, 60],
+    ])
+  })
+})
+
 describe('api path encoding', () => {
   it('encodes the analysis id in getAnalysis', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(
