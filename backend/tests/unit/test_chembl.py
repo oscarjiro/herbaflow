@@ -7,6 +7,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 
+from integrations._retry import ServiceUnavailableError
 from integrations.chembl import (
     get_bioactivities,
     resolve_target,
@@ -161,16 +162,14 @@ async def test_get_bioactivities_human_only_filter_via_params():
 
 
 @pytest.mark.asyncio
-async def test_get_bioactivities_returns_empty_on_http_error():
-    """HTTP errors are caught and return an empty list."""
-    from integrations._retry import ServiceUnavailableError
+async def test_get_bioactivities_raises_on_service_unavailable():
+    """ServiceUnavailableError propagates out instead of collapsing to empty list."""
     mock_client = AsyncMock(spec=httpx.AsyncClient)
 
     with patch("integrations.chembl.with_retry",
                side_effect=ServiceUnavailableError("ChEMBL", last_status=503)):
-        result = await get_bioactivities(mock_client, "CHEMBL_MOL_Z")
-
-    assert result == []
+        with pytest.raises(ServiceUnavailableError):
+            await get_bioactivities(mock_client, "CHEMBL_MOL_Z")
 
 
 # ---------------------------------------------------------------------------
@@ -305,6 +304,18 @@ async def test_get_targets_for_compounds_deduplicates_same_gene():
     targets = result["CHEMBL_MOL_1"]
     gene_symbols = [t.gene_symbol for t in targets]
     assert gene_symbols.count("AKT1") == 1
+
+
+@pytest.mark.asyncio
+async def test_get_targets_for_compounds_raises_when_chembl_unavailable(httpx_mock):
+    # Bioactivity fetch returns 503 on every attempt → ServiceUnavailableError
+    # must propagate out of the gather instead of collapsing to empty targets.
+    # with_retry default: max_retries=3 → 4 attempts per retried call.
+    # 1 compound × 4 attempts = 4 total 503 responses consumed.
+    for _ in range(4):
+        httpx_mock.add_response(status_code=503)
+    with pytest.raises(ServiceUnavailableError):
+        await get_targets_for_compounds(["CHEMBL25"], min_pchembl=5.0)
 
 
 @pytest.mark.asyncio

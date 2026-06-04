@@ -55,9 +55,9 @@ async def get_bioactivities(
                 return r
 
             resp = await with_retry(_fetch_bioactivities, service_name="ChEMBL")
-        except ServiceUnavailableError as exc:
-            logger.error("ChEMBL unavailable after retries: %s", exc)
-            return []
+        except ServiceUnavailableError:
+            logger.error("ChEMBL unavailable after retries (bioactivities for %s)", molecule_chembl_id)
+            raise
         except httpx.HTTPError as exc:
             logger.error("ChEMBL HTTP error fetching bioactivities for %s: %s", molecule_chembl_id, exc)
             return []
@@ -108,9 +108,9 @@ async def resolve_target(
             resp = await with_retry(_fetch_target, service_name="ChEMBL")
             if resp.status_code == 404:
                 return None
-        except ServiceUnavailableError as exc:
-            logger.error("ChEMBL unavailable after retries: %s", exc)
-            return None
+        except ServiceUnavailableError:
+            logger.error("ChEMBL unavailable after retries (target %s)", target_chembl_id)
+            raise
         except httpx.HTTPError as exc:
             logger.error("ChEMBL HTTP error resolving target %s: %s", target_chembl_id, exc)
             return None
