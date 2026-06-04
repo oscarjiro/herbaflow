@@ -87,6 +87,32 @@ CSV export works for **all stages 1–8**. Each stage produces a sensible flat C
 | 7     | `*_stage7_hub_genes.csv`      | One row per ranked hub gene (centrality scores)|
 | 8     | `*_stage8_enrichment.csv`     | One row per pathway term across GO/KEGG       |
 
+Stage-8 enrichment rows expose `fdr` only (the Benjamini-Hochberg-corrected value
+g:Profiler returns); there is no separate `p_value` column.
+
+## Run Health & Failure Semantics
+
+Analysis responses (`GET /analyses`, `GET /analyses/{id}`, `GET /analyses/{id}/status`)
+carry derived run-health fields computed from `stage_results` at response time (no DB columns):
+
+| Field         | Meaning                                                                 |
+| ------------- | ---------------------------------------------------------------------- |
+| `degraded`    | A supplementary stage ran without a provider (e.g. enrichment skipped) |
+| `warnings`    | `[{stage, provider, reason}]` for each degraded stage                  |
+| `has_results` | Whether the run produced compound/disease targets                      |
+| `retriable`   | `failed` run whose cause was a provider outage or timeout              |
+
+How outages route: critical providers (ChEMBL in stage 3, STRING in stage 6) fail the
+run; supplementary providers (PubChem fallback in stage 3, g:Profiler in stage 8) degrade
+it but let it complete. A failed run records its cause in `stage_results._run_health.failure_kind`
+(`provider_unavailable` / `internal_error` / `timeout`).
+
+A heartbeat bumps `updated_at` while a stage runs; a reaper (periodic sweep + lazy-on-read in
+`get_analysis`) marks in-progress runs stale past `stale_run_threshold_seconds` as
+`failed` (`timeout`). `/health` probes the DB and returns 503 when it is unreachable.
+
+`POST /analyses/{id}/retry-enrichment` re-runs only stage 8 for a complete-but-degraded run.
+
 ## Tests
 
 180 tests: all must pass before commit.
