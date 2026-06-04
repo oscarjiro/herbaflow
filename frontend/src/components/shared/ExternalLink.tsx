@@ -8,7 +8,7 @@ interface ExternalLinkProps {
 
 export function ExternalLink({ href, children, className }: ExternalLinkProps) {
   if (!href.startsWith('https://') && !href.startsWith('http://')) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (import.meta.env.DEV) {
       console.warn(`ExternalLink: unsafe href blocked: ${href}`)
     }
     return <span className={className}>{children}</span>
