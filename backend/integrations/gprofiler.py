@@ -14,7 +14,6 @@ class EnrichmentResult:
     source: str          # 'GO:BP', 'GO:MF', 'GO:CC', 'KEGG'
     term_id: str
     term_name: str
-    p_value: float
     fdr: float
     intersection_size: int
     term_size: int
@@ -99,6 +98,8 @@ async def run_enrichment(
     for row in results_raw:
         if row.get("significant") is False:
             continue
+        # g:Profiler returns the BH-corrected significance in its "p_value" field
+        # and does not return a separate raw p-value; we store it as fdr.
         fdr = row.get("p_value", 1.0)
         if fdr > fdr_threshold:
             continue
@@ -106,7 +107,6 @@ async def run_enrichment(
             source=row.get("source", ""),
             term_id=row.get("native", ""),
             term_name=row.get("name", ""),
-            p_value=row.get("p_value", 1.0),
             fdr=fdr,
             intersection_size=row.get("intersection_size", 0),
             term_size=row.get("term_size", 0),

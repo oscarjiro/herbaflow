@@ -494,7 +494,7 @@ async def export_stage_results(
 
         elif stage_key == "stage_8":
             # One row per pathway term across all sources
-            fieldnames = ["source", "term_id", "term_name", "p_value", "fdr", "intersection_size", "term_size", "genes"]
+            fieldnames = ["source", "term_id", "term_name", "fdr", "intersection_size", "term_size", "genes"]
             writer = csv.DictWriter(output, fieldnames=fieldnames)
             writer.writeheader()
             for source_key, source_label in [("go_bp", "GO:BP"), ("go_mf", "GO:MF"), ("go_cc", "GO:CC"), ("kegg", "KEGG")]:
@@ -503,7 +503,6 @@ async def export_stage_results(
                         "source": source_label,
                         "term_id": term.get("term_id", ""),
                         "term_name": term.get("term_name", ""),
-                        "p_value": term.get("p_value", ""),
                         "fdr": term.get("fdr", ""),
                         "intersection_size": term.get("intersection_size", ""),
                         "term_size": term.get("term_size", ""),

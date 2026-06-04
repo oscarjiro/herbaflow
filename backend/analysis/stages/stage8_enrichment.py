@@ -18,7 +18,6 @@ def _group_by_source(results) -> dict:
         grouped[source].append({
             "term_id": r.term_id,
             "term_name": r.term_name,
-            "p_value": round(r.p_value, 8),
             "fdr": round(r.fdr, 8),
             "intersection_size": r.intersection_size,
             "term_size": r.term_size,

@@ -17,7 +17,6 @@ def make_result(source: str, term_id: str, term_name: str, fdr: float = 0.01) ->
         source=source,
         term_id=term_id,
         term_name=term_name,
-        p_value=fdr,
         fdr=fdr,
         intersection_size=2,
         term_size=100,
@@ -190,3 +189,16 @@ async def test_stage8_degrades_when_gprofiler_unavailable():
     assert result["warning"]["provider"] == "g:Profiler"
     assert result["total_significant"] == 0
     assert result["go_bp"] == []
+
+
+def test_group_by_source_omits_p_value():
+    from analysis.stages.stage8_enrichment import _group_by_source
+    from integrations.gprofiler import EnrichmentResult
+    r = EnrichmentResult(
+        source="GO:BP", term_id="GO:1", term_name="x",
+        fdr=0.01, intersection_size=2, term_size=10, query_size=5, genes=["TP53"],
+    )
+    grouped = _group_by_source([r])
+    row = grouped["GO:BP"][0]
+    assert "p_value" not in row
+    assert row["fdr"] == 0.01
