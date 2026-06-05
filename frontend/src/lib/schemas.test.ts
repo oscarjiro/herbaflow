@@ -240,7 +240,7 @@ describe('ppiGroupSchema — community_resolution', () => {
 describe('lineErrorsFor', () => {
   it('flags an invalid target line with a 1-based index', () => {
     const e = lineErrorsFor('target', ['TP53', 'bad!'])
-    expect(e[2]).toMatch(/gene symbol or UniProt accession/i)
+    expect(e[2]).toMatch(/gene symbol.*UniProt accession/i)
     expect(e[1]).toBeUndefined()
   })
   it('accepts a UniProt accession as a target', () => {
@@ -252,7 +252,15 @@ describe('lineErrorsFor', () => {
   it('ignores blank lines (no error key, keeps 1-based alignment)', () => {
     const e = lineErrorsFor('target', ['TP53', '', 'bad!'])
     expect(e[2]).toBeUndefined()   // blank line is not flagged
-    expect(e[3]).toMatch(/gene symbol or UniProt accession/i)
+    expect(e[3]).toMatch(/gene symbol.*UniProt accession/i)
+  })
+  it('uses plain-language messages — no developer jargon', () => {
+    // Regression: messages used to leak "printable ASCII" / "min 3 chars".
+    const compound = lineErrorsFor('compound', ['x'])[1]
+    expect(compound).toMatch(/structure/i)
+    expect(compound).toMatch(/characters/i)
+    expect(compound).not.toMatch(/ASCII/i)
+    expect(compound).not.toMatch(/chars\b/i)
   })
 })
 

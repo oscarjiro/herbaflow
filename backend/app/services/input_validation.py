@@ -243,6 +243,129 @@ async def resolve_targets(
     return result
 
 
+@dataclass
+class ScopeRequest:
+    """One named target scope to resolve as part of a shared union."""
+
+    name: str
+    inputs: list[str]
+    lenient: bool = False
+
+
+async def resolve_target_scopes(
+    scopes: list[ScopeRequest],
+    *,
+    session,
+) -> dict[str, ResolveResult]:
+    """Resolve several named target scopes against a SHARED union.
+
+    Each unique target (by canonical key) is looked up DB-first and, on a miss,
+    enriched via UniProt EXACTLY ONCE across all scopes — the resolved (or failed)
+    outcome is then fanned back out to every scope that asked for it. A symbol that
+    UniProt rejects is kept-and-flagged in a lenient scope and dropped to ``failed``
+    in a strict one: the keep/drop decision is per-scope, but the resolution work
+    (DB lookup + UniProt round-trip) is shared, so a target appearing in both the
+    compound-side and disease-side lists costs a single provider call.
+
+    Args:
+        scopes: Named scopes, each with its raw inputs and lenient flag.
+        session: Async SQLModel/SQLAlchemy session.
+
+    Returns:
+        ``{scope_name: ResolveResult}`` — one result per scope, in the same dict
+        shape as ``resolve_targets``. Newly enriched targets carrying a UniProt
+        accession are persisted once.
+    """
+    results: dict[str, ResolveResult] = {s.name: ResolveResult() for s in scopes}
+
+    # 1. Per-scope preprocess: classify, offline-normalize, in-scope dedup.
+    #    asks[name] = list of (line, raw, key, is_acc) in input order.
+    asks: dict[str, list[tuple[int, str, str, bool]]] = {}
+    for s in scopes:
+        scope_asks: list[tuple[int, str, str, bool]] = []
+        seen: set[str] = set()
+        for idx, raw in enumerate(s.inputs, start=1):
+            stripped = (raw or "").strip()
+            if not stripped:
+                results[s.name].failed.append(
+                    LineFailure(line=idx, input=raw, reason="empty line")
+                )
+                continue
+            is_acc = _is_accession(stripped)
+            if is_acc:
+                key = stripped.upper()
+            else:
+                norm = gene_symbols.normalize(stripped)
+                canonical = norm.canonical or stripped.upper()
+                if canonical != stripped.upper():
+                    results[s.name].normalized.append({"from": stripped, "to": canonical})
+                key = canonical.upper()
+            if key in seen:
+                results[s.name].duplicates.append(raw)
+                continue
+            seen.add(key)
+            scope_asks.append((idx, raw, key, is_acc))
+        asks[s.name] = scope_asks
+
+    # 2. Union of unique keys across all scopes (first-seen order).
+    union: dict[str, bool] = {}
+    for s in scopes:
+        for _idx, _raw, key, is_acc in asks[s.name]:
+            union.setdefault(key, is_acc)
+
+    # 3. Resolve each unique key ONCE: DB-first, then UniProt on a miss.
+    resolved: dict[str, dict] = {}
+    origin: dict[str, str] = {}          # key -> "reused" | "enriched"
+    failed_reason: dict[str, str] = {}
+    to_persist: list[dict] = []
+    for key, is_acc in union.items():
+        cached = await _lookup_cached_target(is_acc=is_acc, key=key, session=session)
+        if cached is not None:
+            resolved[key] = _target_dict(
+                cached.gene_symbol, cached.uniprot_accession, cached.protein_name, ["cache"]
+            )
+            origin[key] = "reused"
+            continue
+        try:
+            info = await validate_human_target(
+                gene_symbol=None if is_acc else key,
+                uniprot_id=key if is_acc else None,
+            )
+        except ServiceUnavailableError:
+            raise  # caller maps to HTTP 503
+        except ValueError as exc:
+            failed_reason[key] = _uniprot_reason(str(exc), is_acc)
+            continue
+        td = _target_dict(info.gene_symbol, info.uniprot_accession, info.protein_name, ["manual"])
+        resolved[key] = td
+        origin[key] = "enriched"
+        to_persist.append(td)
+
+    await persist_validated_targets([t for t in to_persist if t.get("uniprot_id")], session)
+
+    # 4. Fan out per scope (per-scope lenient keep/drop on a shared failure).
+    for s in scopes:
+        res = results[s.name]
+        for idx, raw, key, is_acc in asks[s.name]:
+            if key in resolved:
+                res.valid.append(dict(resolved[key]))
+                if origin[key] == "reused":
+                    res.reused += 1
+                else:
+                    res.enriched += 1
+            elif s.lenient and not is_acc:
+                res.valid.append(_target_dict(key, None, None, ["manual_unrecognized"]))
+            else:
+                res.failed.append(
+                    LineFailure(
+                        line=idx, input=raw,
+                        reason=failed_reason.get(key, "could not be resolved"),
+                    )
+                )
+
+    return results
+
+
 # ---------------------------------------------------------------------------
 # Compound resolution
 # ---------------------------------------------------------------------------

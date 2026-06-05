@@ -192,6 +192,22 @@ export const api = {
     return merged
   },
 
+  /**
+   * Validate several manual scopes in one pass. The two target scopes
+   * (`targets` / `disease_targets`) share a resolution union server-side, so a
+   * target in both costs a single UniProt call. Returns a per-scope result map
+   * keyed by scope name. 503 on provider outage.
+   */
+  async validateScopes(
+    scopes: { scope: 'compounds' | 'targets' | 'disease_targets'; inputs: string[]; lenient: boolean }[],
+  ): Promise<Record<string, ValidationPayload>> {
+    const res = await request<{ results: Record<string, ValidationPayload> }>(
+      '/analyses/validate-input-scopes',
+      { method: 'POST', body: JSON.stringify({ scopes }) },
+    )
+    return res.results
+  },
+
   async addUserTarget(analysisId: string, body: AddUserTargetRequest): Promise<AddUserTargetResponse> {
     const res = await fetch(`${BASE_URL}/analyses/${encodeURIComponent(analysisId)}/targets/user`, {
       method: 'POST',

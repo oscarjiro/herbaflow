@@ -71,10 +71,10 @@ export const geneSymbolSchema = z
  */
 export const smilesSchema = z
   .string()
-  .min(3, 'SMILES string is too short; minimum length is 3')
+  .min(3, 'Structure is too short — enter at least 3 characters')
   .refine(
     (v) => /^[\x20-\x7E]+$/.test(v),
-    'SMILES must contain only printable ASCII characters',
+    'Structure contains unsupported characters',
   )
 
 // ---------------------------------------------------------------------------
@@ -307,10 +307,10 @@ export function lineErrorsFor(
     if (!s) return // skip blanks; keep 1-based alignment
     if (kind === 'target') {
       const ok = geneSymbolSchema.safeParse(s).success || uniprotAccessionSchema.safeParse(s).success
-      if (!ok) errors[i + 1] = 'not a valid gene symbol or UniProt accession'
+      if (!ok) errors[i + 1] = 'expected a gene symbol (e.g. TP53) or UniProt accession (e.g. P04637)'
     } else {
       if (!smilesSchema.safeParse(s).success) {
-        errors[i + 1] = 'not a valid structure (min 3 chars, printable ASCII)'
+        errors[i + 1] = 'expected a SMILES or InChI structure (at least 3 characters)'
       }
     }
   })

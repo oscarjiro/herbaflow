@@ -40,6 +40,7 @@ from app.schemas.analysis import (
     CreateAnalysisRequest,
     ResetFromRequest,
     ValidateInputsRequest,
+    ValidateScopesRequest,
 )
 from app.schemas.import_targets import ImportTargetsRequest, ImportTargetsResponse, STPTarget
 from app.security import limiter, sanitize_filename
@@ -148,7 +149,7 @@ async def create_analysis(
         try:
             disease_result = await resolve_targets(
                 body.manual_disease_targets,
-                lenient=False,
+                lenient=body.skip_disease_validation,
                 existing_keys=set(),
                 session=session,
             )
@@ -231,6 +232,60 @@ async def validate_inputs(
         logger.error("Provider unavailable during validate-inputs: %s", exc)
         raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
     return res.to_payload()
+
+
+@router.post("/validate-input-scopes")
+@limiter.limit(get_settings().rate_limit_create)
+async def validate_input_scopes(
+    request: Request,
+    body: ValidateScopesRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Dry-run validation across several manual scopes in one pass (no run created).
+
+    The two target scopes (``targets`` / ``disease_targets``) are resolved against a
+    SHARED union — a target in both costs a single UniProt round-trip — while
+    ``compounds`` is resolved independently via PubChem. Returns
+    ``{"results": {scope: ResolveResult payload}}`` so the UI can review every
+    section together. A provider outage maps to HTTP 503.
+    """
+    import httpx
+
+    from app.services.input_validation import (
+        ScopeRequest,
+        resolve_compounds,
+        resolve_target_scopes,
+    )
+
+    valid_scopes = {"compounds", "targets", "disease_targets"}
+    unknown = [s.scope for s in body.scopes if s.scope not in valid_scopes]
+    if unknown:
+        raise HTTPException(
+            status_code=422, detail=f"unknown scope(s): {', '.join(unknown)}"
+        )
+
+    target_specs = [s for s in body.scopes if s.scope in ("targets", "disease_targets")]
+    compound_specs = [s for s in body.scopes if s.scope == "compounds"]
+
+    out: dict[str, dict] = {}
+    try:
+        if target_specs:
+            scope_results = await resolve_target_scopes(
+                [ScopeRequest(s.scope, s.inputs, s.lenient) for s in target_specs],
+                session=session,
+            )
+            for name, res in scope_results.items():
+                out[name] = res.to_payload()
+        for spec in compound_specs:
+            async with httpx.AsyncClient(timeout=20.0) as client:
+                res = await resolve_compounds(
+                    spec.inputs, existing_keys=set(), session=session, client=client
+                )
+            out[spec.scope] = res.to_payload()
+    except ServiceUnavailableError as exc:
+        logger.error("Provider unavailable during validate-input-scopes: %s", exc)
+        raise HTTPException(status_code=503, detail=UNIPROT_UNAVAILABLE)
+    return {"results": out}
 
 
 @router.get("", response_model=list[AnalysisRunResponse])

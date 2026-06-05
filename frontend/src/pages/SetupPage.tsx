@@ -59,6 +59,25 @@ function parseTargetLines(raw: string): string[] {
 
 type InputMode = 'standard' | 'manual_compounds' | 'manual_targets'
 type DiseaseInputMode = 'disease' | 'manual_targets'
+type ManualKind = 'compound' | 'target' | 'disease_target'
+type ScopeName = 'compounds' | 'targets' | 'disease_targets'
+
+/** A manual input scope to validate (and, after validation, review). */
+interface ManualScope {
+  kind: ManualKind
+  scope: ScopeName
+  label: string
+  inputs: string[]
+  lenient: boolean
+}
+
+/** A validated scope carried into the review step. */
+interface ReviewScope {
+  kind: ManualKind
+  label: string
+  total: number
+  result: ValidationPayload
+}
 
 // ============================================================================
 // Request builder
@@ -77,6 +96,8 @@ export interface BuildCreateArgs {
   parsedDiseaseTargets: string[]
   /** Lenient target injection: keep unrecognized symbols flagged instead of dropped. Only applied for manual_targets mode. */
   lenient?: boolean
+  /** Lenient disease-target resolution: keep unrecognized symbols flagged instead of dropped. Only applied for manual disease targets. */
+  lenientDiseaseTargets?: boolean
 }
 
 /**
@@ -100,6 +121,9 @@ export function buildCreateRequest(a: BuildCreateArgs): CreateAnalysisRequest {
     ...(a.inputMode === 'manual_targets' && a.lenient ? { skip_validation: true } : {}),
     ...(a.diseaseInputMode === 'manual_targets'
       ? { manual_disease_targets: a.parsedDiseaseTargets }
+      : {}),
+    ...(a.diseaseInputMode === 'manual_targets' && a.lenientDiseaseTargets
+      ? { skip_disease_validation: true }
       : {}),
   }
 }
@@ -131,7 +155,10 @@ export function buildSetupFormData(a: BuildSetupFormDataArgs): Record<string, un
   return {
     name: a.name,
     mode: a.mode,
-    disease_id: a.diseaseInputMode === 'manual_targets' ? null : a.diseaseId,
+    // Coerce a null disease_id to '' in disease mode so the friendly
+    // "Select a disease" min-length message fires instead of Zod's raw
+    // "expected string, received null" type error.
+    disease_id: a.diseaseInputMode === 'manual_targets' ? null : (a.diseaseId ?? ''),
     parameters: nestAdvancedParams(a.params),
     ...(isManualCompounds
       ? { compounds: a.parsedCompounds }
@@ -166,10 +193,11 @@ export default function SetupPage() {
   const [lenientTargets, setLenientTargets] = useState(false)
   const [diseaseInputMode, setDiseaseInputMode] = useState<DiseaseInputMode>('disease')
   const [diseaseTargetsRaw, setDiseaseTargetsRaw] = useState('')
+  const [lenientDiseaseTargets, setLenientDiseaseTargets] = useState(false)
   // Validate-before-commit review state machine (manual modes only).
   const [reviewState, setReviewState] = useState<'idle' | 'validating' | 'reviewing'>('idle')
-  const [validation, setValidation] = useState<ValidationPayload | null>(null)
-  const [reviewTotal, setReviewTotal] = useState(0)
+  const [reviewScopes, setReviewScopes] = useState<ReviewScope[] | null>(null)
+  const [validatingKinds, setValidatingKinds] = useState<ManualKind[]>([])
   const [progress, setProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 })
   const [reviewError, setReviewError] = useState<string | null>(null)
   const parsedDiseaseTargets = diseaseInputMode === 'manual_targets' ? parseTargetLines(diseaseTargetsRaw) : []
@@ -237,28 +265,27 @@ export default function SetupPage() {
         parsedTargets: overrides?.targets ?? parsedTargets,
         parsedDiseaseTargets: overrides?.diseaseTargets ?? parsedDiseaseTargets,
         lenient: lenientTargets,
+        lenientDiseaseTargets,
       }),
     })
   }
 
   /**
-   * Pick the primary manual input to review, by precedence:
-   * manual compounds → manual targets → manual disease targets. Returns null for
-   * a fully standard submit (no manual input to validate first).
+   * Every active manual input scope, in display order: the plant-side scope
+   * (compounds XOR compound-targets) then the disease-side scope (disease targets).
+   * Empty for a fully standard submit.
    */
-  function primaryManualInput():
-    | { kind: 'compound' | 'target' | 'disease_target'; inputs: string[]; lenient: boolean }
-    | null {
+  function activeManualInputs(): ManualScope[] {
+    const out: ManualScope[] = []
     if (inputMode === 'manual_compounds') {
-      return { kind: 'compound', inputs: parsedCompounds, lenient: false }
-    }
-    if (inputMode === 'manual_targets') {
-      return { kind: 'target', inputs: parsedTargets, lenient: lenientTargets }
+      out.push({ kind: 'compound', scope: 'compounds', label: 'Compounds', inputs: parsedCompounds, lenient: false })
+    } else if (inputMode === 'manual_targets') {
+      out.push({ kind: 'target', scope: 'targets', label: 'Compound targets', inputs: parsedTargets, lenient: lenientTargets })
     }
     if (diseaseInputMode === 'manual_targets') {
-      return { kind: 'disease_target', inputs: parsedDiseaseTargets, lenient: false }
+      out.push({ kind: 'disease_target', scope: 'disease_targets', label: 'Disease targets', inputs: parsedDiseaseTargets, lenient: lenientDiseaseTargets })
     }
-    return null
+    return out
   }
 
   function handleSubmit() {
@@ -286,28 +313,53 @@ export default function SetupPage() {
     setReviewError(null)
 
     // Standard mode submits directly — no dry-run. Manual modes get a review pass.
-    const manual = primaryManualInput()
-    if (!manual) {
+    const manuals = activeManualInputs()
+    if (manuals.length === 0) {
       startCreate()
       return
     }
 
+    const fail = (err: unknown) => {
+      setReviewState('idle')
+      setReviewScopes(null)
+      setValidatingKinds([])
+      setReviewError(err instanceof Error ? err.message : 'Validation failed — please try again.')
+    }
+
     setReviewState('validating')
-    setProgress({ done: 0, total: manual.inputs.length })
-    setReviewTotal(manual.inputs.length)
+    setValidatingKinds(manuals.map((m) => m.kind))
+
+    if (manuals.length === 1) {
+      // Single scope keeps the chunked live-progress path.
+      const m = manuals[0]
+      setProgress({ done: 0, total: m.inputs.length })
+      api
+        .validateInChunks(m.kind, m.inputs, m.lenient, (done, total) => setProgress({ done, total }))
+        .then((result) => {
+          setReviewScopes([{ kind: m.kind, label: m.label, total: m.inputs.length, result }])
+          setValidatingKinds([])
+          setReviewState('reviewing')
+        })
+        .catch(fail)
+      return
+    }
+
+    // Multiple scopes → one combined pass (shared target union, server-side).
     api
-      .validateInChunks(manual.kind, manual.inputs, manual.lenient, (done, total) =>
-        setProgress({ done, total }),
-      )
-      .then((result) => {
-        setValidation(result)
+      .validateScopes(manuals.map((m) => ({ scope: m.scope, inputs: m.inputs, lenient: m.lenient })))
+      .then((byScope) => {
+        setReviewScopes(
+          manuals.map((m) => ({
+            kind: m.kind,
+            label: m.label,
+            total: m.inputs.length,
+            result: byScope[m.scope],
+          })),
+        )
+        setValidatingKinds([])
         setReviewState('reviewing')
       })
-      .catch((err: unknown) => {
-        setReviewState('idle')
-        setValidation(null)
-        setReviewError(err instanceof Error ? err.message : 'Validation failed — please try again.')
-      })
+      .catch(fail)
   }
 
   /**
@@ -330,27 +382,29 @@ export default function SetupPage() {
   }
 
   function handleContinue() {
-    // Reuse the dry-run's resolved canonical keys for the primary manual kind, so
-    // create resolves them as DB cache hits instead of re-calling providers.
-    const manual = primaryManualInput()
-    const keys = manual && validation ? canonicalKeysFor(manual.kind, validation.valid) : []
-    const override =
-      manual?.kind === 'compound'
-        ? { compounds: keys }
-        : manual?.kind === 'target'
-          ? { targets: keys }
-          : manual?.kind === 'disease_target'
-            ? { diseaseTargets: keys }
-            : undefined
-
+    // Reuse every reviewed scope's resolved canonical keys so create resolves them
+    // as known-in-DB hits instead of re-calling providers.
+    const override: { compounds?: string[]; targets?: string[]; diseaseTargets?: string[] } = {}
+    for (const s of reviewScopes ?? []) {
+      const keys = canonicalKeysFor(s.kind, s.result.valid)
+      if (s.kind === 'compound') override.compounds = keys
+      else if (s.kind === 'target') override.targets = keys
+      else override.diseaseTargets = keys
+    }
     setReviewState('idle')
-    setValidation(null)
+    setReviewScopes(null)
     startCreate(override)
   }
 
   function handleBack() {
     setReviewState('idle')
-    setValidation(null)
+    setReviewScopes(null)
+  }
+
+  /** Per-section progress note: a chunk count for a single scope, else a spinner label. */
+  function validatingNote(kind: ManualKind): string | null {
+    if (reviewState !== 'validating' || !validatingKinds.includes(kind)) return null
+    return validatingKinds.length === 1 ? `${progress.done} / ${progress.total} validated…` : 'Validating…'
   }
 
   return (
@@ -363,7 +417,7 @@ export default function SetupPage() {
         <SegmentedToggle<InputMode>
           ariaLabel="Input mode"
           value={inputMode}
-          onChange={(v) => { setInputMode(v); setDiseaseInputMode('disease'); setFormErrors({}) }}
+          onChange={(v) => { setInputMode(v); setFormErrors({}) }}
           options={[
             { value: 'standard', label: 'Standard (plant-based)' },
             { value: 'manual_compounds', label: 'Manual compounds', testId: 'input-mode-manual' },
@@ -384,7 +438,7 @@ export default function SetupPage() {
         )}
         {isManualTargets && (
           <p className="text-xs text-hf-fg3 mb-2">
-            Paste compound targets (Stages 1–3 skipped). One HGNC gene symbol or UniProt accession per line.
+            Paste compound targets (Stages 1–3 skipped). One gene symbol or UniProt accession per line; mixed formats accepted.
           </p>
         )}
 
@@ -407,6 +461,11 @@ export default function SetupPage() {
               count={compoundsCap.count}
               lineErrors={compoundsLineErrors}
             />
+            {validatingNote('compound') && (
+              <p className="mt-2 text-xs text-hf-fg3" role="status" aria-live="polite">
+                {validatingNote('compound')}
+              </p>
+            )}
             <div className="mt-2">
               <CheckboxField
                 label="Apply ADME screening to these compounds"
@@ -427,6 +486,11 @@ export default function SetupPage() {
               count={targetsCap.count}
               lineErrors={targetsLineErrors}
             />
+            {validatingNote('target') && (
+              <p className="mt-2 text-xs text-hf-fg3" role="status" aria-live="polite">
+                {validatingNote('target')}
+              </p>
+            )}
             <div className="mt-2">
               <CheckboxField
                 label="Keep unrecognized symbols (lenient)"
@@ -461,7 +525,7 @@ export default function SetupPage() {
           </p>
         ) : (
           <p className="text-xs text-hf-fg3 mb-2">
-            Paste disease targets (bypasses Open Targets). One HGNC gene symbol or UniProt accession per line.
+            Paste disease targets (bypasses Open Targets). One gene symbol or UniProt accession per line; mixed formats accepted.
           </p>
         )}
 
@@ -473,16 +537,33 @@ export default function SetupPage() {
             )}
           </>
         ) : (
-          <LineNumberedTextarea
-            aria-label="Disease targets"
-            value={diseaseTargetsRaw}
-            onChange={(v) => { setDiseaseTargetsRaw(v); setFormErrors((prev) => ({ ...prev, disease_targets: undefined })) }}
-            placeholder={"TP53\nBRCA1\nP04637"}
-            error={formErrors.disease_targets ?? diseaseTargetsCap.error}
-            warning={diseaseTargetsCap.warning}
-            count={diseaseTargetsCap.count}
-            lineErrors={diseaseTargetsLineErrors}
-          />
+          <>
+            <LineNumberedTextarea
+              aria-label="Disease targets"
+              value={diseaseTargetsRaw}
+              onChange={(v) => { setDiseaseTargetsRaw(v); setFormErrors((prev) => ({ ...prev, disease_targets: undefined })) }}
+              placeholder={"TP53\nBRCA1\nP04637"}
+              error={formErrors.disease_targets ?? diseaseTargetsCap.error}
+              warning={diseaseTargetsCap.warning}
+              count={diseaseTargetsCap.count}
+              lineErrors={diseaseTargetsLineErrors}
+            />
+            {validatingNote('disease_target') && (
+              <p className="mt-2 text-xs text-hf-fg3" role="status" aria-live="polite">
+                {validatingNote('disease_target')}
+              </p>
+            )}
+            <div className="mt-2">
+              <CheckboxField
+                label="Keep unrecognized symbols (lenient)"
+                value={lenientDiseaseTargets}
+                onChange={setLenientDiseaseTargets}
+              />
+              <p className="text-xs text-hf-fg3 mt-1">
+                Unrecognized gene symbols are kept and flagged instead of dropped; UniProt accessions are still resolved.
+              </p>
+            </div>
+          </>
         )}
       </div>
 
@@ -501,20 +582,10 @@ export default function SetupPage() {
         )}
       </div>
 
-      {/* Validation progress */}
-      {reviewState === 'validating' && (
-        <div className="bg-hf-surface rounded-lg border border-hf-border p-6 mb-4" role="status">
-          <p className="text-sm text-hf-fg2" aria-live="polite">
-            {progress.done} / {progress.total} validated
-          </p>
-        </div>
-      )}
-
       {/* Review */}
-      {reviewState === 'reviewing' && validation && (
+      {reviewState === 'reviewing' && reviewScopes && (
         <ValidationReview
-          result={validation}
-          total={reviewTotal}
+          scopes={reviewScopes.map((s) => ({ label: s.label, total: s.total, result: s.result }))}
           onContinue={handleContinue}
           onBack={handleBack}
         />

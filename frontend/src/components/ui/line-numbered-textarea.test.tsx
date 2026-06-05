@@ -27,6 +27,18 @@ describe('LineNumberedTextarea', () => {
     expect(screen.getByText('2 targets')).toBeInTheDocument()
     expect(screen.getByTestId('line-error-2')).toHaveTextContent('not a valid gene symbol')
   })
+  it('collapses many line errors into a single expandable "N issues" summary', () => {
+    render(
+      <LineNumberedTextarea value={'a\nb\nc'} onChange={() => {}} aria-label="x"
+        lineErrors={{ 1: 'bad', 2: 'bad', 3: 'bad' }} />,
+    )
+    // One summary line stands in for all the individual errors.
+    expect(screen.getByText(/3 issues found/i)).toBeInTheDocument()
+    // The details element groups every per-line message under that summary.
+    const details = screen.getByTestId('line-errors')
+    expect(details.tagName.toLowerCase()).toBe('details')
+    expect(details).toContainElement(screen.getByTestId('line-error-3'))
+  })
   it('renders an amber warning message with the warning token', () => {
     render(<LineNumberedTextarea value={'a'} onChange={() => {}} aria-label="x" warning="x / y soft" />)
     const msg = screen.getByText('x / y soft')

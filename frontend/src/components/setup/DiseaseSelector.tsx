@@ -1,3 +1,5 @@
+import { Target } from 'lucide-react'
+
 import { Badge } from '@/components/ui/badge'
 import { EntityCombobox } from '@/components/ui/entity-combobox'
 import { useDiseases } from '@/hooks/useDiseases'
@@ -24,9 +26,10 @@ function renderDiseaseRow(disease: DiseaseResponse) {
       </div>
       <Badge
         variant="secondary"
-        className="ml-2 shrink-0 text-xs"
-        title={`${disease.target_count} disease targets (cached, pre-filter)`}
+        className="ml-2 shrink-0 inline-flex items-center gap-1 text-xs"
+        title={`${disease.target_count} disease targets (in database, pre-filter)`}
       >
+        <Target className="h-3 w-3" />
         {disease.target_count}
       </Badge>
     </div>

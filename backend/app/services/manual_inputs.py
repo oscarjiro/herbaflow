@@ -131,9 +131,10 @@ async def inject_targets_service(
     ``body.targets`` as ``targets`` and ``body.skip_validation`` as
     ``skip_validation``.
 
-    Routes through the unified ``resolve_targets`` service: a single call handles
-    both the strict (UniProt round-trip per novel input) and lenient
-    (``skip_validation`` — offline HGNC normalize, keep+flag unknowns) paths.
+    Routes through the unified ``resolve_targets`` service. Both modes run the same
+    DB-first + UniProt resolution per novel input; ``skip_validation`` (lenient) only
+    changes the failure branch — a UniProt-unrecognized symbol is kept and flagged
+    instead of dropped. It does NOT skip the UniProt round-trip.
     """
     analysis_id = run.analysis_id
 

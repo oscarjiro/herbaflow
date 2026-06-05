@@ -162,9 +162,18 @@ class CreateAnalysisRequest(BaseModel):
     skip_validation: bool = Field(
         default=False,
         description=(
-            "Lenient injection for manual `targets`: skip the per-symbol UniProt round-trip and "
-            "normalize gene symbols offline to canonical HGNC symbols (unknowns kept and flagged). "
-            "UniProt accessions are still resolved via UniProt. Default False keeps strict validation."
+            "Lenient resolution for manual `targets`: a gene symbol that UniProt does NOT "
+            "recognize is kept and flagged (in its offline-HGNC-normalized form) instead of "
+            "dropped. Recognized symbols are still UniProt-enriched and accessions still resolved "
+            "— the UniProt round-trip is NOT skipped. Default False drops unrecognized symbols."
+        ),
+    )
+    skip_disease_validation: bool = Field(
+        default=False,
+        description=(
+            "Lenient resolution for `manual_disease_targets`: unrecognized gene symbols are kept "
+            "and flagged instead of dropped. UniProt accessions are still resolved. Mirrors "
+            "`skip_validation` for the disease side. Default False keeps strict resolution."
         ),
     )
 
@@ -279,6 +288,26 @@ class ValidateInputsRequest(BaseModel):
     kind: str  # 'compound' | 'target' | 'disease_target'
     inputs: list[str] = Field(min_length=1, max_length=HARD_CAP_MANUAL_COMPOUNDS)
     lenient: bool = False
+
+
+class ScopeSpec(BaseModel):
+    """One named scope in a multi-scope dry-run validation request."""
+
+    scope: str  # 'compounds' | 'targets' | 'disease_targets'
+    inputs: list[str] = Field(min_length=1, max_length=HARD_CAP_MANUAL_COMPOUNDS)
+    lenient: bool = False
+
+
+class ValidateScopesRequest(BaseModel):
+    """Dry-run validation across several manual scopes at once.
+
+    The two target scopes (``targets`` / ``disease_targets``) are resolved against a
+    SHARED union so a target appearing in both costs a single UniProt round-trip;
+    ``compounds`` is resolved independently via PubChem. Returns one result per
+    scope so the UI can review every section together.
+    """
+
+    scopes: list[ScopeSpec] = Field(min_length=1, max_length=3)
 
 
 class InjectCompoundsRequest(BaseModel):

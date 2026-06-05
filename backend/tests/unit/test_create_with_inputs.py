@@ -129,6 +129,30 @@ async def test_manual_disease_targets_persisted_into_stored_parameters():
     assert p["_injected_disease_targets"] == resolved
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("skip", [True, False])
+async def test_create_forwards_skip_disease_validation_to_resolve_targets(skip):
+    """The request's skip_disease_validation flag reaches resolve_targets(lenient=...),
+    giving manual disease targets the same lenient/strict choice as compound targets."""
+    from app.services.input_validation import ResolveResult
+
+    mock_resolve = AsyncMock(return_value=ResolveResult(valid=[], enriched=0))
+
+    class FakeBG:
+        def add_task(self, *a, **k): pass
+
+    from app.routers import analyses
+    with patch.object(analyses.analysis_repo, "create_run", new=AsyncMock(return_value=_fake_run())), \
+         patch("app.services.input_validation.resolve_targets", new=mock_resolve):
+        body = CreateAnalysisRequest.model_validate(
+            {"name": "n", "mode": "guided", "plant_ids": ["p1"], "disease_id": None,
+             "manual_disease_targets": ["TP53"], "skip_disease_validation": skip,
+             "parameters": {}})
+        await analyses.create_analysis(None, body, FakeBG(), session=AsyncMock())
+
+    assert mock_resolve.await_args.kwargs["lenient"] is skip
+
+
 class _ExecResult:
     """Mimics ``await session.exec(stmt)`` — exposes ``.first()``."""
 

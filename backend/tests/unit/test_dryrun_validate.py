@@ -17,7 +17,7 @@ import app.routers.analyses as analyses
 import pytest
 from app.database import get_session
 from app.main import app
-from app.schemas.analysis import ValidateInputsRequest
+from app.schemas.analysis import ValidateInputsRequest, ValidateScopesRequest
 from app.services.input_validation import LineFailure, ResolveResult
 from fastapi.testclient import TestClient
 
@@ -175,5 +175,48 @@ async def test_validate_unknown_kind_returns_422():
         body = ValidateInputsRequest(kind="bogus", inputs=["X"])
         with pytest.raises(HTTPException) as ei:
             await analyses.validate_inputs(None, body, session=_MissSession())
+
+    assert ei.value.status_code == 422
+
+
+# ===========================================================================
+# POST /analyses/validate-input-scopes — multi-scope dry-run (shared union)
+# ===========================================================================
+@pytest.mark.asyncio
+async def test_validate_scopes_returns_per_scope_payloads_no_run():
+    """Both target scopes come back keyed by scope name, in payload shape, no run."""
+    canned = {
+        "targets": ResolveResult(valid=[{"gene_symbol": "AKT1"}], enriched=1),
+        "disease_targets": ResolveResult(valid=[{"gene_symbol": "TP53"}], reused=1),
+    }
+    with patch.object(analyses.analysis_repo, "create_run",
+                      new=AsyncMock(side_effect=AssertionError("must not create a run"))) as create_run_mock, \
+         patch("app.services.input_validation.resolve_target_scopes",
+               new=AsyncMock(return_value=canned)):
+        body = ValidateScopesRequest.model_validate({"scopes": [
+            {"scope": "targets", "inputs": ["AKT1"]},
+            {"scope": "disease_targets", "inputs": ["TP53"], "lenient": True},
+        ]})
+        out = await analyses.validate_input_scopes(None, body, session=_MissSession())
+
+    assert set(out["results"]) == {"targets", "disease_targets"}
+    assert set(out["results"]["targets"]) == PAYLOAD_KEYS
+    assert out["results"]["targets"]["valid"][0]["gene_symbol"] == "AKT1"
+    assert out["results"]["disease_targets"]["reused"] == 1
+    create_run_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_validate_scopes_unknown_scope_returns_422():
+    """An unrecognized scope name raises HTTPException(422) before any resolution."""
+    from fastapi import HTTPException
+
+    with patch("app.services.input_validation.resolve_target_scopes",
+               new=AsyncMock(side_effect=AssertionError("must not resolve"))):
+        body = ValidateScopesRequest.model_validate(
+            {"scopes": [{"scope": "bogus", "inputs": ["X"]}]}
+        )
+        with pytest.raises(HTTPException) as ei:
+            await analyses.validate_input_scopes(None, body, session=_MissSession())
 
     assert ei.value.status_code == 422
