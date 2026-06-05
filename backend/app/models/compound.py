@@ -3,9 +3,14 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
+
+# DB columns are `timestamp with time zone`; bind them as tz-aware so the
+# tz-aware `now_utc()` value matches the column type (a naive bind makes asyncpg
+# raise DataError: "can't subtract offset-naive and offset-aware datetimes").
+_TZ = DateTime(timezone=True)
 
 
 class Compound(SQLModel, table=True):
@@ -32,7 +37,7 @@ class Compound(SQLModel, table=True):
     is_pains_positive: bool = False
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
-    retrieved_at: Optional[datetime] = None
+    retrieved_at: Optional[datetime] = Field(default=None, sa_type=_TZ)
 
 
 class CompoundAlias(SQLModel, table=True):
@@ -43,7 +48,7 @@ class CompoundAlias(SQLModel, table=True):
     alias_name: str
     alias_key: Optional[str] = None
     alias_type: Optional[str] = None
-    retrieved_at: Optional[datetime] = None
+    retrieved_at: Optional[datetime] = Field(default=None, sa_type=_TZ)
 
 
 class PlantCompound(SQLModel, table=True):
@@ -54,4 +59,4 @@ class PlantCompound(SQLModel, table=True):
     compound_id: str = Field(sa_column=Column(PGUUID(as_uuid=False), ForeignKey("compounds.compound_id")))
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
-    retrieved_at: Optional[datetime] = None
+    retrieved_at: Optional[datetime] = Field(default=None, sa_type=_TZ)

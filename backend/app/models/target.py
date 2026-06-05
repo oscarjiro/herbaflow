@@ -3,9 +3,14 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlmodel import Field, SQLModel
+
+# DB columns are `timestamp with time zone`; bind them as tz-aware so the
+# tz-aware `now_utc()` value asyncpg receives matches the column type. A naive
+# bind raises asyncpg DataError ("can't subtract offset-naive and offset-aware").
+_TZ = DateTime(timezone=True)
 
 
 class Target(SQLModel, table=True):
@@ -18,7 +23,7 @@ class Target(SQLModel, table=True):
     uniprot_accession: Optional[str] = None
     source_id: Optional[UUID] = Field(default=None, sa_type=PGUUID(as_uuid=True))
     source_url: Optional[str] = None
-    retrieved_at: Optional[datetime] = None
+    retrieved_at: Optional[datetime] = Field(default=None, sa_type=_TZ)
 
 
 class CompoundTarget(SQLModel, table=True):
@@ -31,7 +36,7 @@ class CompoundTarget(SQLModel, table=True):
     prediction_method: Optional[str] = None
     score: Optional[float] = None
     pchembl_value: Optional[float] = None
-    retrieved_at: Optional[datetime] = None
+    retrieved_at: Optional[datetime] = Field(default=None, sa_type=_TZ)
 
 
 class DiseaseTarget(SQLModel, table=True):
@@ -44,4 +49,4 @@ class DiseaseTarget(SQLModel, table=True):
     association_type: Optional[str] = None
     score: Optional[float] = None
     source_url: Optional[str] = None
-    retrieved_at: Optional[datetime] = None
+    retrieved_at: Optional[datetime] = Field(default=None, sa_type=_TZ)
