@@ -126,3 +126,7 @@ _*/
 CLAUDE.md
 AGENTS.md
 *.local.md
+
+# scratch schema-equivalence work (not part of the baseline)
+supabase/_baseline_work/
+
