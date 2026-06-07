@@ -370,6 +370,45 @@ def _detect_seed_name_clean(row: pd.Series) -> str:
     return _clean_name_text(_detect_seed_name(row))
 
 
+def _detect_seed_name_raw(row: pd.Series) -> str:
+    """Case-preserved seed/original disease name (strip + fold only, no lowercasing).
+
+    disease_name is the display field — keep the curated seed casing
+    ('Type 2 Diabetes Mellitus'), never the lowercased ontology/normalized form.
+    """
+    for col in (
+        "seed_disease_name",
+        "disease_name",
+        "disease",
+        "name",
+        "condition",
+        "raw_disease_name",
+        "source_name_raw",
+    ):
+        if col in row.index:
+            value = clean_str(row.get(col, ""))
+            if value:
+                return re.sub(r"\s+", " ", value).strip()
+    return ""
+
+
+def _choose_display_name(row: pd.Series, confident: bool) -> tuple[str, str]:
+    """Choose the case-preserved display disease_name and its source.
+
+    Prefer the curated seed name (case intact). Only when no seed name exists,
+    fall back to the case-preserved ontology label. The ``confident`` flag is
+    retained for signature stability and provenance reporting.
+    """
+    seed_raw = _detect_seed_name_raw(row)
+    if seed_raw:
+        return seed_raw, "seed_disease_name"
+    label_raw = (
+        re.sub(r"\s+", " ", clean_str(row.get("ontology_label", ""))).strip()
+        or re.sub(r"\s+", " ", clean_str(row.get("standardized_name", ""))).strip()
+    )
+    return label_raw, "ontology_label"
+
+
 def _detect_ontology_synonyms(row: pd.Series) -> list[str]:
     """Collect ontology-provided synonyms from likely columns."""
     candidates: list[str] = []
@@ -611,7 +650,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
             in {"matched", "seed_provided", "cache", "ambiguous"}
         )
 
-        disease_name, canonical_name_source = _choose_canonical_name(rep, is_confident)
+        disease_name, canonical_name_source = _choose_display_name(rep, is_confident)
 
         seed_name = _detect_seed_name(rep)
         seed_name_clean = _detect_seed_name_clean(rep)
@@ -655,7 +694,7 @@ def run(settings_path: str | Path = DEFAULT_SETTINGS_PATH) -> dict[str, Any]:
             "disease_id": disease_id,
             "disease_key": disease_key,
             "canonical_key": canonical_key_value,
-            "disease_name": _clean_name_text(disease_name),
+            "disease_name": disease_name,
             "disease_name_clean": _clean_name_text(disease_name),
             "canonical_name_source": canonical_name_source,
             "seed_disease_name": seed_name,
