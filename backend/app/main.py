@@ -1,4 +1,4 @@
-"""FastAPI application entry point. Phase 0: liveness probe only."""
+"""FastAPI application entry point."""
 
 from fastapi import FastAPI
 
@@ -7,5 +7,5 @@ app = FastAPI(title="Herbaflow API")
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    """Liveness probe. DB-awareness is added in a later phase."""
+    """Liveness probe reporting service status."""
     return {"status": "ok"}

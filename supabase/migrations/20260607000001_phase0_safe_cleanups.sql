@@ -1,4 +1,4 @@
--- Phase 0 safe, standalone cleanups. Idempotent where possible.
+-- Safe, standalone cleanups. Idempotent where possible.
 
 -- 1. Fast-purge index for the hourly pg_cron sweep + lazy-reaper on expires_at.
 create index if not exists idx_analysis_runs_expires_at on public.analysis_runs (expires_at);

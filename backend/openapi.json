@@ -8,7 +8,7 @@
     "/health": {
       "get": {
         "summary": "Health",
-        "description": "Liveness probe. DB-awareness is added in a later phase.",
+        "description": "Liveness probe reporting service status.",
         "operationId": "health_health_get",
         "responses": {
           "200": {

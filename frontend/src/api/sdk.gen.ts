@@ -20,7 +20,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 
 /**
  * Health
- * Liveness probe. DB-awareness is added in a later phase.
+ * Liveness probe reporting service status.
  */
 export const healthHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthHealthGetData, ThrowOnError>) => {
     return (options?.client ?? _heyApiClient).get<HealthHealthGetResponse, unknown, ThrowOnError>({
