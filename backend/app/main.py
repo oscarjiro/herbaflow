@@ -1,4 +1,5 @@
 """FastAPI application entry point. Phase 0: liveness probe only."""
+
 from fastapi import FastAPI
 
 app = FastAPI(title="Herbaflow API")
