@@ -113,10 +113,16 @@ frontend/test-results/
 frontend/playwright-report/
 
 # =========================
-# AI TOOLING
+# TOOLING
 # =========================
 .superpowers/
-.claude/settings.local.json
-*.local.md
+.claude/
 .serena/
 .playwright-mcp/
+.rebuild/
+.codex/
+.agents/
+_*/
+CLAUDE.md
+AGENTS.md
+*.local.md
