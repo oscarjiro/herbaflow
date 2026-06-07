@@ -1,0 +1,4 @@
+# pnpm settings home (pnpm 11 moved these out of package.json's "pnpm" field).
+# Allow esbuild to run its postinstall so vite/vitest get their platform binary.
+allowBuilds:
+  esbuild: true
