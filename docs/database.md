@@ -1,323 +1,551 @@
 # Database Schema
 
-PostgreSQL. All tables use snake_case. All timestamps are `timestamptz`.
+PostgreSQL via Supabase. All tables use snake_case. All timestamps are `timestamptz`.
+13 tables total.
 
 ---
 
-## Primary key format
+## Overview
 
-All primary keys are native **`uuid`** columns. Values are still derived deterministically as `uuid5(NAMESPACE, canonical_key)` — no entity type prefixes (`pl_`, `tgt_`, etc.) are used; the column name (`plant_id`, `target_id`) provides type context. All FK columns that reference an entity PK are also `uuid`. The `text → uuid` column conversion is applied by migration `20260602000003_type_validation.sql` at the bundled reload (against empty tables).
+| Group | Tables |
+|---|---|
+| Content-addressable entities | `plants`, `compounds`, `targets`, `diseases` |
+| Alias children (1:m) | `plant_aliases`, `compound_aliases`, `target_aliases`, `disease_aliases` |
+| Pair-grain junctions (m:m) | `plant_compounds`, `compound_targets`, `disease_targets` |
+| Operational | `source_systems`, `analysis_runs` |
 
-Every namespace, canonical-key cascade, and id/alias/bridge builder lives in one place — `etl/shared/identity.py` — which each module's `utils.py` re-exports. The backend mirrors the three ids it mints (`compound_id`, `target_id`, `compound_target_id`) in `backend/app/services/canonicalize.py`, kept byte-identical by parity tests. `canonical_key` is single-colon `{source}:{id}` (CURIE-style).
+---
 
-| Entity | Namespace `uuid5(NAMESPACE_DNS, …)` | canonical_key (the uuid5 input) |
+## Identity conventions
+
+### UUID strategy
+
+Entity PKs (`plant_id`, `compound_id`, `target_id`, `disease_id`) are UUID v5 derived
+deterministically from `canonical_key` — there is no `DEFAULT gen_random_uuid()` on these
+columns. The same input always produces the same UUID. Operational table PKs
+(`source_systems.source_id`, `analysis_runs.analysis_id`) use UUID v4 via
+`DEFAULT gen_random_uuid()`.
+
+### Canonical keys
+
+All canonical keys use `{source}:{id}` CURIE form. Examples:
+
+| Entity | Canonical key form | Example |
 |---|---|---|
-| `plant_id` | `"herbaflow.plants"` | `gbif:{usageKey}` → `plant:{slug}` fallback |
-| `compound_id` | `"herbaflow.compounds"` | cascade: `inchikey:` > `pubchem:` > `chembl:` > `cas:` > `name_formula:` > `name:` > `formula:` |
-| `target_id` | `"herbaflow.targets"` | `uniprot:{acc}` (isoform-folded) → `ensembl:{id}` → `gene:{SYMBOL}` |
-| `disease_id` | `"herbaflow.diseases"` | `doid:{id}` / `mesh:{id}` → `disease:{slug}` fallback |
-| `plant_compound_id` | `"herbaflow.plant_compounds"` | `{plant_id}:{compound_id}` (pair grain) |
-| `compound_target_id` | `"herbaflow.compound_targets"` | `{compound_id}:{target_id}` (pair grain) |
-| `disease_target_id` | `"herbaflow.disease_targets"` | `{disease_id}:{target_id}` (pair grain) |
+| Plant | `gbif:{usageKey}` → `plant:{slug}` fallback | `gbif:2927065` |
+| Compound | cascade: `inchikey:` > `pubchem:` > `chembl:` > `cas:` > `name_formula:` > `name:` > `formula:` | `inchikey:RYYVLZVUVIJVGH-UHFFFAOYSA-N` |
+| Target | `uniprot:{acc}` (isoform-folded) → `ensembl:{id}` → `gene:{SYMBOL}` | `uniprot:P00533` |
+| Disease | `doid:{id}` / `mesh:{id}` → `disease:{slug}` fallback | `doid:9352` |
 
-Bridge ids key on `{left_id}:{right_id}` — `source_id` is **not** part of identity (bridges are one row per entity pair). Alias ids key on `{parent_id}:{alias_key}` — `alias_type` is **not** part of identity (one row per parent+slug). `canonical_key` is also stored as a `UNIQUE` alternate key on each entity table: a deliberate derived-key denormalization for fast lookup.
+Junction PKs key on `{left_id}:{right_id}` (pair grain). Alias PKs key on
+`{parent_id}:{alias_key}`. `canonical_key` is also stored as a `UNIQUE` text column on each
+entity table as a fast-lookup alternate key.
 
-IDs are deterministic: same input always produces the same UUID. At the bundled reload every entity, alias, and bridge id is re-derived from these keys — all change except where the key is unchanged (most `target_id`s stay; isoform-bearing accessions fold and change).
+Every namespace, canonical-key cascade, and id builder lives in `etl/shared/identity.py`.
+The backend mirrors the three IDs it mints (`compound_id`, `target_id`, `compound_target_id`)
+in `backend/app/services/canonicalize.py`, kept byte-identical by parity tests.
+
+### Per-row provenance
+
+Each entity and junction row carries three provenance columns:
+
+| Column | Purpose |
+|---|---|
+| `source_id` | FK → `source_systems`; identifies the source system |
+| `source_url` | Per-row deep link to the exact source record (authoritative) |
+| `retrieved_at` | Timestamp when the row was fetched |
+
+An unknown `source_name` fails the ETL load — there is no silent NULL fallback.
 
 ---
 
 ## Naming conventions
 
-| Pattern           | Meaning                                                            |
-| ----------------- | ------------------------------------------------------------------ |
-| `*_id`            | Stable primary key                                                 |
-| `*_key`           | Deduplication / lookup key (usually slugified)                     |
-| `canonical_*`     | Final accepted entity name                                         |
-| `*_aliases`       | All non-canonical names for an entity                              |
-| `source_name`     | External system name (e.g. `KNApSAcK World`), never an entity name |
-| `retrieved_at`    | When the record was fetched from the source                        |
-| `source_url`      | Per-row deep link to the exact source record; authoritative provenance |
+| Pattern | Meaning |
+|---|---|
+| `*_id` | Stable primary key |
+| `*_key` | Deduplication / lookup key (usually slugified) |
+| `canonical_*` | Final accepted entity name or key |
+| `*_aliases` | All non-canonical names for an entity |
+| `source_name` | External system name (e.g. `KNApSAcK World`), never an entity name |
+| `retrieved_at` | When the record was fetched from the source |
+| `source_url` | Per-row deep link to the exact source record; authoritative provenance |
+
 ---
 
-## 1. Provenance
+## Tables
 
 ### `source_systems`
 
-One row per external data source.
+One row per external data source. PKs are UUID v4.
 
-| Column        | Type | Notes                                                                     |
-| ------------- | ---- | ------------------------------------------------------------------------- |
-| `source_id`   | PK   |                                                                           |
-| `source_name` | text | e.g. `KNApSAcK World`, `GBIF`, `PubChem`, `UniProt`, `STRING` |
-| `source_type` | enum | `scrape` / `api` / `download` / `manual`                                  |
-| `base_url`    | text |                                                                           |
-| `notes`       | text |                                                                           |
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `source_id` | uuid PK | NO | `DEFAULT gen_random_uuid()` |
+| `source_name` | text | NO | e.g. `KNApSAcK World`, `GBIF`, `PubChem`, `UniProt`, `STRING` |
+| `source_type` | text | NO | CHECK: `scrape` / `api` / `download` / `manual` |
+| `base_url` | text | YES | Reference/fallback field; per-row `source_url` is authoritative |
+| `notes` | text | YES | |
 
-**Provenance policy:** Every entity and link row carries `source_id` (FK → `source_systems`) and `source_url` (exact record deep link). These two columns are the authoritative provenance for each row. `source_systems.base_url` is a reference/fallback field only. An unknown `source_name` fails the load — there is no silent NULL fallback.
+**Constraints:**
+- PK: `source_systems_pkey` on `source_id`
+- UNIQUE: `source_systems_source_name_key` on `source_name`
+- CHECK `source_systems_source_type_check`: `source_type IN ('scrape', 'api', 'download', 'manual')`
+
+**Indexes:**
+- `source_systems_pkey` (unique, btree, `source_id`)
+- `source_systems_source_name_key` (unique, btree, `source_name`)
 
 ---
-
-## 2. Plants
 
 ### `plants`
 
 One canonical row per accepted plant taxon.
 
-| Column                      | Type                  | Notes                                     |
-| --------------------------- | --------------------- | ----------------------------------------- |
-| `plant_id`                  | uuid PK               |                                           |
-| `canonical_key`             | text                  | unique                                    |
-| `canonical_scientific_name` | text                  | cleaned accepted name only, no authorship |
-| `family_name`               | text                  |                                           |
-| `source_id`                 | FK → `source_systems` | the system, not a plant name              |
-| `source_url`                | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
-| `retrieved_at`              | timestamptz           |                                           |
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `plant_id` | uuid PK | NO | UUID v5 from `canonical_key` |
+| `canonical_key` | text | NO | UNIQUE; `gbif:{usageKey}` or `plant:{slug}` |
+| `canonical_scientific_name` | text | YES | Cleaned accepted name only, no authorship |
+| `family_name` | text | YES | |
+| `source_id` | uuid FK → `source_systems` | YES | |
+| `source_url` | text | YES | Per-row deep link; authoritative |
+| `retrieved_at` | timestamptz | YES | |
 
-### `plant_aliases`
+**Constraints:**
+- PK: `plants_pkey` on `plant_id`
+- UNIQUE: `plants_canonical_key_key` on `canonical_key`
+- FK: `plants_source_id_fkey` → `source_systems(source_id)`
 
-All alternate names for a canonical plant. Each alias belongs to exactly one plant (no m:m needed here).
-
-| Column            | Type                  | Notes                                                                                             |
-| ----------------- | --------------------- | ------------------------------------------------------------------------------------------------- |
-| `alias_id`        | uuid PK               |                                                                                                   |
-| `plant_id`        | uuid FK → `plants`    |                                                                                                   |
-| `alias_name`      | text                  |                                                                                                   |
-| `alias_key`       | text                  |                                                                                                   |
-| `alias_type`      | text                  | free text; per-table vocab: `normalized_variant`, `synonym_variant` (no CHECK — disjoint per-table, ETL-internal) |
-| `retrieved_at`    | timestamptz           |                                                                                                   |
-
-Unique constraint: `(plant_id, alias_key)` — one row per plant + slug; `alias_type` is an attribute. Index: `plant_aliases(alias_key)`.
+**Indexes:**
+- `plants_pkey` (unique, btree, `plant_id`)
+- `plants_canonical_key_key` (unique, btree, `canonical_key`)
+- `plants_source_id_idx` (btree, `source_id`)
 
 ---
 
-## 3. Compounds
+### `plant_aliases`
+
+All alternate names for a canonical plant.
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `alias_id` | uuid PK | NO | UUID v5 from `{plant_id}:{alias_key}` |
+| `plant_id` | uuid FK → `plants` | NO | |
+| `alias_name` | text | YES | Display form of the alias |
+| `alias_key` | text | YES | Slugified; used as the UNIQUE grain |
+| `alias_type` | text | YES | ETL-internal vocab: `normalized_variant`, `synonym_variant` (no DB CHECK) |
+| `retrieved_at` | timestamptz | YES | |
+
+**Constraints:**
+- PK: `plant_aliases_pkey` on `alias_id`
+- UNIQUE: `plant_aliases_parent_key` on `(plant_id, alias_key)` — one row per plant + slug; `alias_type` is an attribute
+- FK: `plant_aliases_plant_id_fkey` → `plants(plant_id)`
+
+**Indexes:**
+- `plant_aliases_pkey` (unique, btree, `alias_id`)
+- `plant_aliases_parent_key` (unique, btree, `(plant_id, alias_key)`)
+- `plant_aliases_plant_id_idx` (btree, `plant_id`)
+- `plant_aliases_alias_key_idx` (btree, `alias_key`)
+
+---
 
 ### `compounds`
 
 One canonical row per chemical entity.
 
-| Column              | Type                  | Notes  |
-| ------------------- | --------------------- | ------ |
-| `compound_id`       | uuid PK               |        |
-| `canonical_key`     | text                  | unique |
-| `canonical_name`    | text                  |        |
-| `inchi_key`         | text                  |        |
-| `smiles`            | text                  |        |
-| `cas_id`            | text                  |        |
-| `pubchem_cid`       | text                  |        |
-| `chembl_id`         | text                  |        |
-| `molecular_formula` | text                  |        |
-| `molecular_weight`  | float                 |        |
-| `tpsa`              | float                 |        |
-| `logp`              | float                 |        |
-| `hbond_donors`      | int                   |        |
-| `hbond_acceptors`   | int                   |        |
-| `rotatable_bonds`   | int                   |        |
-| `num_ro5_violations` | int                  | count of Lipinski Rule of Five violations (0–4); 0 = fully drug-like; CHECK 0–4 |
-| `qed_score`         | float                 | Quantitative Estimate of Drug-likeness (0–1, higher = more drug-like); computed by RDKit |
-| `np_likeness_score` | float                 | Natural product-likeness score (RDKit); ≥ 0.5 triggers NP exception in ADME filtering |
-| `is_pains_positive` | boolean NOT NULL DEFAULT false | PAINS flag (Baell & Holloway 2010); true = matches pan-assay interference pattern. Reporting only — not a filter. Populated by ETL `patch_missing_lipinski.py` Pass 3. |
-| `source_id`         | FK → `source_systems` |        |
-| `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
-| `retrieved_at`      | timestamptz           |        |
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `compound_id` | uuid PK | NO | UUID v5 from `canonical_key` |
+| `canonical_key` | text | NO | UNIQUE; cascade from `inchikey:` → … → `formula:` |
+| `canonical_name` | text | YES | |
+| `inchi_key` | text | YES | |
+| `smiles` | text | YES | Canonical or isomeric SMILES |
+| `cas_id` | text | YES | |
+| `pubchem_cid` | text | YES | |
+| `chembl_id` | text | YES | |
+| `molecular_formula` | text | YES | |
+| `molecular_weight` | double precision | YES | |
+| `tpsa` | double precision | YES | Topological polar surface area |
+| `logp` | double precision | YES | Calculated lipophilicity |
+| `hbond_donors` | integer | YES | |
+| `hbond_acceptors` | integer | YES | |
+| `rotatable_bonds` | integer | YES | |
+| `qed_score` | double precision | YES | Quantitative Estimate of Drug-likeness (0–1, higher = more drug-like); computed by RDKit |
+| `np_likeness_score` | double precision | YES | Natural product-likeness score (RDKit); ≥ 0.5 triggers NP exception in ADME filtering |
+| `num_ro5_violations` | integer | YES | Count of Lipinski Rule of Five violations; CHECK 0–4 |
+| `is_pains_positive` | boolean | NO | DEFAULT `false`; PAINS flag (Baell & Holloway 2010); reporting only, not a filter |
+| `source_id` | uuid FK → `source_systems` | YES | |
+| `source_url` | text | YES | Per-row deep link; authoritative |
+| `retrieved_at` | timestamptz | YES | |
 
-### `compound_aliases`
+**Constraints:**
+- PK: `compounds_pkey` on `compound_id`
+- UNIQUE: `compounds_canonical_key_key` on `canonical_key`
+- FK: `compounds_source_id_fkey` → `source_systems(source_id)`
+- CHECK `compounds_num_ro5_violations_check`: `num_ro5_violations IS NULL OR (num_ro5_violations >= 0 AND num_ro5_violations <= 4)`
 
-| Column              | Type                  | Notes |
-| ------------------- | --------------------- | ----- |
-| `compound_alias_id` | uuid PK                   |       |
-| `compound_id`       | uuid FK → `compounds`     |       |
-| `alias_name`        | text                      |       |
-| `alias_key`         | text                      |       |
-| `alias_type`        | text                      | free text; per-table vocab: `enrichment_synonym`, `source_compound_id`, `cas_id`, `canonical_name`, `raw_metabolite_name`, `iupac_name` (no CHECK — disjoint per-table, ETL-internal) |
-| `retrieved_at`      | timestamptz           |       |
-
-Unique constraint: `(compound_id, alias_key)` — one row per compound + slug; `alias_type` is an attribute. Index: `compound_aliases(alias_key)`.
-
-### `plant_compounds`
-
-m:m join. Answers: which compounds were found in which plants?
-
-| Column                   | Type                               | Notes                 |
-| ------------------------ | ---------------------------------- | --------------------- |
-| `plant_compound_id`      | uuid PK                            |                       |
-| `plant_id`               | uuid FK → `plants`                 |                       |
-| `compound_id`            | uuid FK → `compounds`              |                       |
-| `source_id`              | FK → `source_systems`              |                       |
-| `source_url`             | text                               | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
-| `retrieved_at`           | timestamptz                        |                       |
-
-Unique constraint: `(plant_id, compound_id)` — pair grain; `source_id` is an attribute, not part of the key.
+**Indexes:**
+- `compounds_pkey` (unique, btree, `compound_id`)
+- `compounds_canonical_key_key` (unique, btree, `canonical_key`)
+- `compounds_inchi_key_idx` (btree, `inchi_key`)
+- `compounds_pubchem_cid_idx` (btree, `pubchem_cid`)
+- `compounds_chembl_id_idx` (btree, `chembl_id`)
+- `compounds_source_id_idx` (btree, `source_id`)
 
 ---
 
-## 4. Targets
+### `compound_aliases`
+
+All alternate names for a canonical compound.
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `compound_alias_id` | uuid PK | NO | UUID v5 from `{compound_id}:{alias_key}` |
+| `compound_id` | uuid FK → `compounds` | NO | |
+| `alias_name` | text | YES | Display form |
+| `alias_key` | text | YES | Slugified; used as the UNIQUE grain |
+| `alias_type` | text | YES | ETL-internal vocab: `enrichment_synonym`, `source_compound_id`, `cas_id`, `canonical_name`, `raw_metabolite_name`, `iupac_name` (no DB CHECK) |
+| `retrieved_at` | timestamptz | YES | |
+
+**Constraints:**
+- PK: `compound_aliases_pkey` on `compound_alias_id`
+- UNIQUE: `compound_aliases_parent_key` on `(compound_id, alias_key)`
+- FK: `compound_aliases_compound_id_fkey` → `compounds(compound_id)`
+
+**Indexes:**
+- `compound_aliases_pkey` (unique, btree, `compound_alias_id`)
+- `compound_aliases_parent_key` (unique, btree, `(compound_id, alias_key)`)
+- `compound_aliases_compound_id_idx` (btree, `compound_id`)
+- `compound_aliases_alias_key_idx` (btree, `alias_key`)
+
+---
+
+### `plant_compounds`
+
+Pair-grain junction. Answers: which compounds were found in which plants?
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `plant_compound_id` | uuid PK | NO | UUID v5 from `{plant_id}:{compound_id}` |
+| `plant_id` | uuid FK → `plants` | NO | |
+| `compound_id` | uuid FK → `compounds` | NO | |
+| `source_id` | uuid FK → `source_systems` | YES | Attribute; not part of pair grain |
+| `source_url` | text | YES | Per-row deep link; authoritative |
+| `retrieved_at` | timestamptz | YES | |
+
+**Constraints:**
+- PK: `plant_compounds_pkey` on `plant_compound_id`
+- UNIQUE: `plant_compounds_pair_key` on `(plant_id, compound_id)`
+- FK: `plant_compounds_plant_id_fkey` → `plants(plant_id)`
+- FK: `plant_compounds_compound_id_fkey` → `compounds(compound_id)`
+- FK: `plant_compounds_source_id_fkey` → `source_systems(source_id)`
+
+**Indexes:**
+- `plant_compounds_pkey` (unique, btree, `plant_compound_id`)
+- `plant_compounds_pair_key` (unique, btree, `(plant_id, compound_id)`)
+- `plant_compounds_plant_id_idx` (btree, `plant_id`)
+- `plant_compounds_compound_id_idx` (btree, `compound_id`)
+
+---
 
 ### `targets`
 
 Canonical protein/gene entities. All targets are human (NCBI taxonomy 9606) — organism taxon is a pipeline invariant and is not stored as a column.
 
-| Column              | Type                  | Notes  |
-| ------------------- | --------------------- | ------ |
-| `target_id`         | uuid PK               |        |
-| `canonical_key`     | text                  | unique |
-| `gene_symbol`       | text                  |        |
-| `protein_name`      | text                  |        |
-| `uniprot_accession` | text                  |        |
-| `source_id`         | FK → `source_systems` |        |
-| `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
-| `retrieved_at`      | timestamptz           |        |
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `target_id` | uuid PK | NO | UUID v5 from `canonical_key` |
+| `canonical_key` | text | NO | UNIQUE; `uniprot:{acc}` → `ensembl:{id}` → `gene:{SYMBOL}` |
+| `gene_symbol` | text | YES | HGNC-approved symbol |
+| `protein_name` | text | YES | |
+| `uniprot_accession` | text | YES | Isoform-folded canonical accession |
+| `source_id` | uuid FK → `source_systems` | YES | |
+| `source_url` | text | YES | Per-row deep link; authoritative |
+| `retrieved_at` | timestamptz | YES | |
 
-Indexes: `idx_targets_uniprot_accession` on `uniprot_accession`; `idx_targets_gene_symbol` on `gene_symbol`.
+**Constraints:**
+- PK: `targets_pkey` on `target_id`
+- UNIQUE: `targets_canonical_key_key` on `canonical_key`
+- FK: `targets_source_id_fkey` → `source_systems(source_id)`
+
+**Indexes:**
+- `targets_pkey` (unique, btree, `target_id`)
+- `targets_canonical_key_key` (unique, btree, `canonical_key`)
+- `idx_targets_gene_symbol` (btree, `gene_symbol`)
+- `idx_targets_uniprot_accession` (btree, `uniprot_accession`)
+
+Note: the legacy duplicate indexes `targets_gene_symbol_idx` and
+`targets_uniprot_accession_idx` were dropped; only `idx_targets_gene_symbol` and
+`idx_targets_uniprot_accession` remain.
+
+---
 
 ### `target_aliases`
 
-| Column            | Type                  | Notes |
-| ----------------- | --------------------- | ----- |
-| `target_alias_id` | uuid PK               |       |
-| `target_id`       | uuid FK → `targets`   |       |
-| `alias_name`      | text                  |       |
-| `alias_key`       | text                  |       |
-| `alias_type`      | text                  | free text; per-table vocab: `ensembl_id`, `approved_symbol`, `approved_name` (no CHECK — disjoint per-table, ETL-internal) |
-| `retrieved_at`    | timestamptz           |       |
+All alternate names for a canonical target.
 
-Unique constraint: `(target_id, alias_key)` — one row per target + slug; `alias_type` is an attribute. Index: `target_aliases(alias_key)`.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `target_alias_id` | uuid PK | NO | UUID v5 from `{target_id}:{alias_key}` |
+| `target_id` | uuid FK → `targets` | NO | |
+| `alias_name` | text | YES | Display form |
+| `alias_key` | text | YES | Slugified; used as the UNIQUE grain |
+| `alias_type` | text | YES | ETL-internal vocab: `ensembl_id`, `approved_symbol`, `approved_name` (no DB CHECK) |
+| `retrieved_at` | timestamptz | YES | |
+
+**Constraints:**
+- PK: `target_aliases_pkey` on `target_alias_id`
+- UNIQUE: `target_aliases_parent_key` on `(target_id, alias_key)`
+- FK: `target_aliases_target_id_fkey` → `targets(target_id)`
+
+**Indexes:**
+- `target_aliases_pkey` (unique, btree, `target_alias_id`)
+- `target_aliases_parent_key` (unique, btree, `(target_id, alias_key)`)
+- `target_aliases_target_id_idx` (btree, `target_id`)
+- `target_aliases_alias_key_idx` (btree, `alias_key`)
+
+---
 
 ### `compound_targets`
 
-m:m join. Answers: which targets are linked to which compounds?
+Pair-grain junction. Answers: which targets are linked to which compounds?
 
-| Column               | Type                  | Notes |
-| -------------------- | --------------------- | ----- |
-| `compound_target_id` | uuid PK               |       |
-| `compound_id`        | uuid FK → `compounds` |       |
-| `target_id`          | uuid FK → `targets`   |       |
-| `source_id`          | FK → `source_systems` |       |
-| `source_url`         | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
-| `prediction_method`  | text                  | sole compound-target link provenance; CHECK `chembl_bioactivity` / `pubchem_bioassay` / `stp_import` (nullable) |
-| `score`              | float                 |       |
-| `pchembl_value`      | float                 | −log₁₀(IC50 in molar) from ChEMBL; ≥ 5.0 means IC50 ≤ 10µM (active binder); null for STITCH-sourced or unassayed interactions |
-| `retrieved_at`       | timestamptz           |       |
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `compound_target_id` | uuid PK | NO | UUID v5 from `{compound_id}:{target_id}` |
+| `compound_id` | uuid FK → `compounds` | NO | |
+| `target_id` | uuid FK → `targets` | NO | |
+| `source_id` | uuid FK → `source_systems` | YES | Attribute; not part of pair grain |
+| `prediction_method` | text | YES | CHECK: `NULL` or `chembl_bioactivity` / `pubchem_bioassay` / `stp_import` |
+| `score` | double precision | YES | Source-specific activity score |
+| `pchembl_value` | double precision | YES | −log₁₀(IC50 in molar) from ChEMBL; ≥ 5.0 means IC50 ≤ 10µM; null for non-ChEMBL sources |
+| `source_url` | text | YES | Per-row deep link; authoritative |
+| `retrieved_at` | timestamptz | YES | |
 
-Unique constraint: `(compound_id, target_id)` — pair grain; `source_id` is an attribute, not part of the key.
+**Constraints:**
+- PK: `compound_targets_pkey` on `compound_target_id`
+- UNIQUE: `compound_targets_pair_key` on `(compound_id, target_id)`
+- FK: `compound_targets_compound_id_fkey` → `compounds(compound_id)`
+- FK: `compound_targets_target_id_fkey` → `targets(target_id)`
+- FK: `compound_targets_source_id_fkey` → `source_systems(source_id)`
+- CHECK `compound_targets_prediction_method_check`: `prediction_method IS NULL OR prediction_method IN ('chembl_bioactivity', 'pubchem_bioassay', 'stp_import')`
+
+**Indexes:**
+- `compound_targets_pkey` (unique, btree, `compound_target_id`)
+- `compound_targets_pair_key` (unique, btree, `(compound_id, target_id)`)
+- `compound_targets_compound_id_idx` (btree, `compound_id`)
+- `compound_targets_target_id_idx` (btree, `target_id`)
 
 ---
-
-## 5. Diseases
 
 ### `diseases`
 
-| Column            | Type                  | Notes                                   |
-| ----------------- | --------------------- | --------------------------------------- |
-| `disease_id`      | uuid PK               |                                         |
-| `canonical_key`   | text                  | unique                                  |
-| `disease_name`    | text                  |                                         |
-| `ontology_id`     | text                  | MeSH / DOID / UMLS / OMIM ID |
-| `ontology_source` | text                  |                                         |
-| `source_id`       | FK → `source_systems` |                                         |
-| `source_url`      | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
-| `retrieved_at`    | timestamptz           |                                         |
+One canonical row per disease entity.
+
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `disease_id` | uuid PK | NO | UUID v5 from `canonical_key` |
+| `canonical_key` | text | NO | UNIQUE; `doid:{id}` / `mesh:{id}` → `disease:{slug}` fallback |
+| `disease_name` | text | YES | |
+| `ontology_id` | text | YES | MeSH / DOID / UMLS / OMIM identifier |
+| `ontology_source` | text | YES | e.g. `Disease Ontology`, `MeSH`; free text, no CHECK |
+| `source_id` | uuid FK → `source_systems` | YES | |
+| `source_url` | text | YES | Per-row deep link; authoritative |
+| `retrieved_at` | timestamptz | YES | |
+
+**Constraints:**
+- PK: `diseases_pkey` on `disease_id`
+- UNIQUE: `diseases_canonical_key_key` on `canonical_key`
+- FK: `diseases_source_id_fkey` → `source_systems(source_id)`
+
+**Indexes:**
+- `diseases_pkey` (unique, btree, `disease_id`)
+- `diseases_canonical_key_key` (unique, btree, `canonical_key`)
+- `diseases_ontology_id_idx` (btree, `ontology_id`)
+
+---
 
 ### `disease_aliases`
 
-| Column             | Type                  | Notes |
-| ------------------ | --------------------- | ----- |
-| `disease_alias_id` | uuid PK               |       |
-| `disease_id`       | uuid FK → `diseases`  |       |
-| `alias_name`       | text                  |       |
-| `alias_key`        | text                  |       |
-| `alias_type`       | text                  | free text; per-table vocab: `user_alias` (no CHECK — disjoint per-table, ETL-internal) |
-| `retrieved_at`     | timestamptz           |       |
+All alternate names for a canonical disease.
 
-Unique constraint: `(disease_id, alias_key)` — one row per disease + slug; `alias_type` is an attribute. Index: `idx_disease_aliases_alias_key` on `alias_key`.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `disease_alias_id` | uuid PK | NO | UUID v5 from `{disease_id}:{alias_key}` |
+| `disease_id` | uuid FK → `diseases` | NO | |
+| `alias_name` | text | YES | Display form |
+| `alias_key` | text | YES | Slugified; used as the UNIQUE grain |
+| `alias_type` | text | YES | ETL-internal vocab: `user_alias` (no DB CHECK) |
+| `retrieved_at` | timestamptz | YES | |
+
+**Constraints:**
+- PK: `disease_aliases_pkey` on `disease_alias_id`
+- UNIQUE: `disease_aliases_parent_key` on `(disease_id, alias_key)`
+- FK: `disease_aliases_disease_id_fkey` → `diseases(disease_id)`
+
+**Indexes:**
+- `disease_aliases_pkey` (unique, btree, `disease_alias_id`)
+- `disease_aliases_parent_key` (unique, btree, `(disease_id, alias_key)`)
+- `disease_aliases_disease_id_idx` (btree, `disease_id`)
+- `idx_disease_aliases_alias_key` (btree, `alias_key`)
+
+---
 
 ### `disease_targets`
 
-m:m join. Answers: which targets are implicated in which diseases?
+Pair-grain junction. Answers: which targets are implicated in which diseases?
 
-| Column              | Type                  | Notes |
-| ------------------- | --------------------- | ----- |
-| `disease_target_id` | uuid PK               |       |
-| `disease_id`        | uuid FK → `diseases`  |       |
-| `target_id`         | uuid FK → `targets`   |       |
-| `source_id`         | FK → `source_systems` |       |
-| `source_url`        | text                  | per-row source deep link; authoritative. `source_systems.base_url` is fallback |
-| `association_type`  | text                  |       |
-| `score`             | float                 |       |
-| `retrieved_at`      | timestamptz           |       |
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `disease_target_id` | uuid PK | NO | UUID v5 from `{disease_id}:{target_id}` |
+| `disease_id` | uuid FK → `diseases` | NO | |
+| `target_id` | uuid FK → `targets` | NO | |
+| `source_id` | uuid FK → `source_systems` | YES | Attribute; not part of pair grain |
+| `association_type` | text | YES | Source-owned vocab; e.g. `open_targets_overall`; no DB CHECK |
+| `score` | double precision | YES | Open Targets overall association score |
+| `source_url` | text | YES | Per-row deep link; authoritative |
+| `retrieved_at` | timestamptz | YES | |
 
-Unique constraint: `(disease_id, target_id)` — pair grain; `source_id` is an attribute, not part of the key.
+**Constraints:**
+- PK: `disease_targets_pkey` on `disease_target_id`
+- UNIQUE: `disease_targets_pair_key` on `(disease_id, target_id)`
+- FK: `disease_targets_disease_id_fkey` → `diseases(disease_id)`
+- FK: `disease_targets_target_id_fkey` → `targets(target_id)`
+- FK: `disease_targets_source_id_fkey` → `source_systems(source_id)`
 
-Index: `idx_disease_targets_score` on `score`.
-
-### Free-text vocabs (no CHECK constraint)
-
-The following columns hold controlled values that are **not** enforced by a DB CHECK because they are externally-owned, subject to upstream churn, or kept intentionally fuzzy:
-
-| Column | Table | Known values | Reason for no CHECK |
-| ------ | ----- | ------------ | ------------------- |
-| `association_type` | `disease_targets` | `open_targets_overall` | Open Targets-owned vocab |
-| `ontology_source` | `diseases` | `Disease Ontology`, `MeSH` | inferred/fuzzy; multi-source |
-
-`alias_type` columns across all alias tables are also free `text` — each table has a disjoint per-table vocab (see per-table Notes above) and no CHECK, because these sets are ETL-internal and subject to churn.
+**Indexes:**
+- `disease_targets_pkey` (unique, btree, `disease_target_id`)
+- `disease_targets_pair_key` (unique, btree, `(disease_id, target_id)`)
+- `disease_targets_disease_id_idx` (btree, `disease_id`)
+- `disease_targets_target_id_idx` (btree, `target_id`)
+- `idx_disease_targets_score` (btree, `score`)
 
 ---
-
-## 6. Analysis runs
 
 ### `analysis_runs`
 
-| Column          | Type            | Notes    |
-| --------------- | --------------- | -------- |
-| `analysis_id`   | PK              |          |
-| `analysis_name` | text            |          |
-| `disease_id`    | uuid FK → `diseases` | optional |
-| `parameters`    | jsonb NOT NULL  | CHECK `jsonb_typeof = 'object'` |
-| `status`          | text            | dynamic stage-derived string set by the backend (`pending`, `failed`, `complete`, `stage_{N}_running`, `stage_{N}_awaiting_approval`, `stage_{N}_starting`, `stage_{N}_rejected`) — no fixed-vocab CHECK |
-| `current_stage`   | int             | null = not started, 1–8 during pipeline; CHECK 1–8 |
-| `stage_results`   | jsonb NOT NULL  | per-stage intermediate results `{stage_1: {...}}`; default `{}`; CHECK `jsonb_typeof = 'object'` |
-| `mode`            | text NOT NULL   | `auto` (end-to-end) or `guided` (pauses for approval per stage); default `auto`; CHECK `auto` / `guided` — single source: `shared/contracts/analysis.json` |
-| `completed_at`    | timestamptz     |          |
-| `expires_at`      | timestamptz     | null until complete; set to `completed_at + 24h`; GET returns 410 Gone after expiry; an hourly `pg_cron` job `purge-expired-analysis-runs` hard-deletes rows where `expires_at < now()` |
-| `error_message`   | text            |          |
-| `updated_at`      | timestamptz NOT NULL | last write timestamp; default `now()` |
-| `created_at`      | timestamptz     |          |
+One row per pipeline execution. PKs are UUID v4.
 
-Index: `idx_analysis_runs_status` on `status`.
+| Column | Type | Nullable | Notes |
+|---|---|---|---|
+| `analysis_id` | uuid PK | NO | `DEFAULT gen_random_uuid()` |
+| `analysis_name` | text | YES | User-supplied label |
+| `disease_id` | uuid FK → `diseases` | YES | The target disease for this run |
+| `parameters` | jsonb | NO | Run-input snapshot (plants, compounds, targets, options); CHECK `jsonb_typeof = 'object'` |
+| `status` | text | YES | Dynamic backend-set string: `pending`, `failed`, `complete`, `stage_{N}_running`, `stage_{N}_awaiting_approval`, `stage_{N}_starting`, `stage_{N}_rejected`; no fixed-vocab CHECK |
+| `current_stage` | integer | YES | null = not started; 1–8 during pipeline; CHECK `NULL OR (1 <= current_stage <= 8)` |
+| `stage_results` | jsonb | NO | Per-stage intermediate results keyed by stage number; default `{}`; CHECK `jsonb_typeof = 'object'` |
+| `mode` | text | NO | CHECK: `auto` (end-to-end) or `guided` (pauses for approval per stage); contract source: `shared/contracts/analysis.json` |
+| `created_at` | timestamptz | YES | |
+| `completed_at` | timestamptz | YES | Set when pipeline finishes |
+| `expires_at` | timestamptz | YES | Set to `completed_at + 24h`; GET returns 410 Gone after expiry |
+| `error_message` | text | YES | |
+| `updated_at` | timestamptz | NO | Last write timestamp |
+
+**Run-input storage:** All run inputs (plant list, manual compounds, manual targets, disease
+scope, validation options) are stored in `parameters` jsonb. The only relational link to an
+entity table is `disease_id` FK. There are no separate run-input junction tables — they were
+dropped and stay dropped. This means cascading deletes of the disease row would orphan runs;
+guard accordingly.
+
+**Constraints:**
+- PK: `analysis_runs_pkey` on `analysis_id`
+- FK: `analysis_runs_disease_id_fkey` → `diseases(disease_id)`
+- CHECK `analysis_runs_mode_check`: `mode IN ('auto', 'guided')`
+- CHECK `analysis_runs_current_stage_check`: `current_stage IS NULL OR (current_stage >= 1 AND current_stage <= 8)`
+- CHECK `analysis_runs_parameters_object_check`: `jsonb_typeof(parameters) = 'object'`
+- CHECK `analysis_runs_stage_results_object_check`: `jsonb_typeof(stage_results) = 'object'`
+
+**Indexes:**
+- `analysis_runs_pkey` (unique, btree, `analysis_id`)
+- `idx_analysis_runs_status` (btree, `status`)
+- `idx_analysis_runs_expires_at` (btree, `expires_at`)
 
 ---
 
-## What is not a table
+## Security
 
-These relations are query-derived, not stored:
+### Row-Level Security
 
-- plant → disease (go through compounds → targets → diseases)
-- compound → disease (go through targets → diseases)
-- plant → target (go through compounds → targets)
+RLS is **enabled on all 13 tables** (`pg_class.relrowsecurity = true`). There are **no
+permissive policies defined** in the `public` schema. This means all 13 tables are
+deny-by-default: every row operation from the Supabase Data API (PostgREST / anon/authenticated
+roles) is blocked unless a policy explicitly permits it.
 
-The pipeline is: `plants → compounds → targets → diseases → PPI`
+The application accesses the database exclusively via the FastAPI backend using the
+service-role key or a direct connection string — never through the Data API with the anon key.
+
+### Data API
+
+The Supabase Data API (PostgREST auto-generated REST endpoints) is **being disabled** as a
+defense-in-depth measure on top of RLS. This is a Supabase dashboard setting. Intended state:
+Data API disabled; all database access goes through the FastAPI backend only.
 
 ---
 
-## Build order
+## Operational
+
+### pg_cron: expired run purge
+
+A pg_cron job runs hourly to hard-delete expired analysis runs:
+
+| Property | Value |
+|---|---|
+| Job name | `purge-expired-analysis-runs` |
+| Schedule | `0 * * * *` (top of every hour) |
+| Command | `DELETE FROM analysis_runs WHERE expires_at IS NOT NULL AND expires_at < now()` |
+| Active | yes |
+
+Rows are eligible for deletion once `expires_at` is set (after completion) and the 24-hour
+TTL has elapsed. The API returns 410 Gone for expired runs before the cron job removes them.
+
+---
+
+## Tables that do not exist
+
+The following tables appear in some older documentation or planning notes but **do not exist
+in the schema and are not part of the model:**
+
+| Table | Status |
+|---|---|
+| `ppi_edges` | Never created; PPI data is computed at pipeline runtime, not persisted |
+| `analysis_run_inputs` | Dropped; superseded by `analysis_runs.parameters` jsonb |
+| `analysis_run_compounds` | Dropped; superseded by `analysis_runs.parameters` jsonb |
+| `analysis_run_targets` | Dropped; superseded by `analysis_runs.parameters` jsonb |
+| `source_snapshots` | Never created |
+| `import_batches` | Never created |
+| `api_cache` | Never created |
+
+Run-input provenance (plant list, manual compounds, manual targets, disease scope, options)
+lives entirely in `analysis_runs.parameters` jsonb plus the `disease_id` FK. The relational
+run-input junction tables were dropped and stay dropped. Known limitation: querying "which
+plants were used in which runs" requires parsing the jsonb rather than a join.
+
+---
+
+## Derived relationships (not stored)
+
+These associations are query-derived through the graph, not stored as tables:
+
+- Plant → Disease (via `plant_compounds` → `compound_targets` → `disease_targets`)
+- Compound → Disease (via `compound_targets` → `disease_targets`)
+- Plant → Target (via `plant_compounds` → `compound_targets`)
+
+The pipeline traversal order is: `plants → compounds → targets → diseases → PPI network`.
+
+---
+
+## ETL build order
 
 ```
-Phase 1 (plants)
-  source_systems
-  plants, plant_aliases
-
-Phase 2 (compounds)
-  compounds, compound_aliases
-  plant_compounds
-
-Phase 3 (targets)
-  targets, target_aliases
-  compound_targets
-
-Phase 4 (diseases)
-  diseases, disease_aliases
-  disease_targets
-
-Phase 5 (network + analysis)
-  analysis_runs
+1. source_systems
+2. plants, plant_aliases
+3. compounds, compound_aliases
+4. plant_compounds
+5. targets, target_aliases
+6. compound_targets
+7. diseases, disease_aliases
+8. disease_targets
+9. analysis_runs  (created at runtime by the backend)
 ```
