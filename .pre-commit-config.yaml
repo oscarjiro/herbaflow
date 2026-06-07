@@ -1,8 +1,41 @@
-# Local pre-commit gate. Install once: `pip install pre-commit && pre-commit install`.
-# Lint-only for now; ruff-format adoption is a separate pass (tree not yet formatted).
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.0
+  - repo: local
     hooks:
+      # Backend gates run inside backend/ via uv's --directory (no shell needed).
       - id: ruff
-        args: [--fix]
+        name: ruff
+        entry: uv run --directory backend ruff check .
+        language: system
+        pass_filenames: false
+      - id: black
+        name: black
+        entry: uv run --directory backend black --check .
+        language: system
+        pass_filenames: false
+      - id: mypy
+        name: mypy
+        entry: uv run --directory backend mypy app
+        language: system
+        pass_filenames: false
+      # Frontend gates run inside frontend/ via pnpm -C (no shell needed).
+      - id: eslint
+        name: eslint
+        entry: pnpm -C frontend lint
+        language: system
+        pass_filenames: false
+      - id: prettier
+        name: prettier
+        entry: pnpm -C frontend format:check
+        language: system
+        pass_filenames: false
+      - id: tsc
+        name: tsc
+        entry: pnpm -C frontend typecheck
+        language: system
+        pass_filenames: false
+      # Cross-platform drift gate (Python, no shell).
+      - id: codegen-drift
+        name: codegen-drift
+        entry: python scripts/check_codegen_drift.py
+        language: system
+        pass_filenames: false
