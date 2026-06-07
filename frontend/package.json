@@ -12,6 +12,7 @@
     "gen:api": "openapi-ts"
   },
   "dependencies": {
+    "@hey-api/client-fetch": "^0.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
