@@ -347,7 +347,7 @@ One canonical row per disease entity.
 |---|---|---|---|
 | `disease_id` | uuid PK | NO | UUID v5 from `canonical_key` |
 | `canonical_key` | text | NO | UNIQUE; `doid:{id}` / `mesh:{id}` → `disease:{slug}` fallback |
-| `disease_name` | text | YES | |
+| `disease_name` | text | YES | Display field — case-preserved from the curated seed (e.g. `Type 2 Diabetes Mellitus`), single column. The lowercase ontology label lives in `disease_aliases`, not here. |
 | `ontology_id` | text | YES | MeSH / DOID / UMLS / OMIM identifier |
 | `ontology_source` | text | YES | e.g. `Disease Ontology`, `MeSH`; free text, no CHECK |
 | `source_id` | uuid FK → `source_systems` | YES | |
@@ -549,3 +549,26 @@ The pipeline traversal order is: `plants → compounds → targets → diseases 
 8. disease_targets
 9. analysis_runs  (created at runtime by the backend)
 ```
+
+---
+
+## Migrations
+
+The schema is represented by a single clean ordered baseline in `supabase/migrations/`,
+diff-verified schema-equivalent to the live database. It supersedes the earlier
+incremental ledger.
+
+```
+20260608000001_baseline_extensions_functions.sql   rls_auto_enable() event-trigger function
+20260608000002_baseline_entities.sql               plants, compounds, targets, diseases
+20260608000003_baseline_aliases.sql                the four *_aliases tables
+20260608000004_baseline_junctions.sql              plant_compounds, compound_targets, disease_targets
+20260608000005_baseline_operational.sql            source_systems, analysis_runs
+20260608000006_baseline_constraints_indexes_rls.sql  all foreign keys, indexes, ENABLE ROW LEVEL SECURITY
+20260608000007_baseline_cron.sql                   pg_cron hourly purge of expired analysis_runs (platform-only)
+```
+
+Tables are created first and all foreign keys added last, so the set replays in order on a
+fresh database. File `0007` requires the managed platform's `pg_cron`; the other six replay
+on any stock PostgreSQL (used for the equivalence check).
+
