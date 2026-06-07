@@ -1,37 +1,84 @@
 {
-  "analysis_mode": ["auto", "guided"],
-  "stage_state": ["computed", "user_provided", "not_applicable"],
-  "pipeline_parameters": {
-    "adme": {
-      "max_mw":               { "type": "number",  "exclusiveMin": 0 },
-      "max_logp":             { "type": "number" },
-      "max_hbd":              { "type": "integer", "min": 0 },
-      "max_hba":              { "type": "integer", "min": 0 },
-      "max_tpsa":             { "type": "number",  "min": 0 },
-      "max_rotatable_bonds":  { "type": "integer", "min": 0 },
-      "apply_veber":          { "type": "boolean" },
-      "np_exception_threshold": { "type": "number", "min": 0, "max": 1 },
-      "apply_adme_to_manual": { "type": "boolean" }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://herbaflow.local/contracts/analysis.json",
+  "title": "Herbaflow analysis contract",
+  "description": "Single upstream source for analysis-domain vocabularies and pipeline-parameter bounds. Read by both stacks. The DB run-status column stays free text (composite 'stage_{N}_{phase}'); only the vocabulary is codified here.",
+  "type": "object",
+  "$defs": {
+    "mode": {
+      "description": "Allowed values for analysis_runs.mode.",
+      "type": "string",
+      "enum": ["auto", "guided"]
     },
-    "target": {
-      "min_pchembl":          { "type": "number",  "min": 0, "max": 14 },
-      "human_only":           { "type": "boolean" },
-      "min_assay_confidence": { "type": "integer", "min": 0, "max": 9 }
+    "stage_state": {
+      "description": "Per-stage entry-point state.",
+      "type": "string",
+      "enum": ["computed", "user_provided", "not_applicable"]
     },
-    "disease_targets": {
-      "min_score":            { "type": "number",  "min": 0, "max": 1 }
+    "run_status_flat": {
+      "description": "Non-composite analysis_runs.status values.",
+      "type": "string",
+      "enum": ["pending", "complete", "failed"]
     },
-    "ppi": {
-      "min_confidence":       { "type": "number",  "enum": [0.15, 0.4, 0.7, 0.9] },
-      "community_resolution": { "type": "number",  "min": 0.1, "max": 3.0 }
+    "stage_phase": {
+      "description": "Phase suffix in the composite status 'stage_{N}_{phase}'.",
+      "type": "string",
+      "enum": ["starting", "running", "awaiting_approval", "complete"]
     },
-    "hub_genes": {
-      "top_n":                { "type": "integer", "min": 1 },
-      "use_hub_bottleneck":   { "type": "boolean" }
-    },
-    "enrichment": {
-      "fdr_threshold":        { "type": "number",  "exclusiveMin": 0, "max": 1 },
-      "sources":              { "type": "array", "items": "string", "minItems": 1 }
+    "pipeline_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adme": {
+          "type": "object",
+          "properties": {
+            "max_mw": { "type": "number", "exclusiveMinimum": 0 },
+            "max_logp": { "type": "number" },
+            "max_hbd": { "type": "integer", "minimum": 0 },
+            "max_hba": { "type": "integer", "minimum": 0 },
+            "max_tpsa": { "type": "number", "minimum": 0 },
+            "max_rotatable_bonds": { "type": "integer", "minimum": 0 },
+            "apply_veber": { "type": "boolean" },
+            "np_exception_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+            "apply_adme_to_manual": { "type": "boolean" }
+          }
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "min_pchembl": { "type": "number", "minimum": 0, "maximum": 14 },
+            "human_only": { "type": "boolean" },
+            "min_assay_confidence": { "type": "integer", "minimum": 0, "maximum": 9 }
+          }
+        },
+        "disease_targets": {
+          "type": "object",
+          "properties": {
+            "min_score": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "ppi": {
+          "type": "object",
+          "properties": {
+            "min_confidence": { "type": "number", "enum": [0.15, 0.4, 0.7, 0.9] },
+            "community_resolution": { "type": "number", "minimum": 0.1, "maximum": 3.0 }
+          }
+        },
+        "hub_genes": {
+          "type": "object",
+          "properties": {
+            "top_n": { "type": "integer", "minimum": 1 },
+            "use_hub_bottleneck": { "type": "boolean" }
+          }
+        },
+        "enrichment": {
+          "type": "object",
+          "properties": {
+            "fdr_threshold": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+            "sources": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+          }
+        }
+      }
     }
   }
 }
