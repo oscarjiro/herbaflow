@@ -11,7 +11,7 @@
           "diseases"
         ],
         "summary": "List Diseases",
-        "operationId": "list_diseases_diseases_get",
+        "operationId": "list_diseases",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -22,7 +22,7 @@
                     "$ref": "#/components/schemas/DiseaseRead"
                   },
                   "type": "array",
-                  "title": "Response List Diseases Diseases Get"
+                  "title": "Response List Diseases"
                 }
               }
             }
@@ -36,7 +36,7 @@
           "plants"
         ],
         "summary": "List Plants",
-        "operationId": "list_plants_plants_get",
+        "operationId": "list_plants",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -47,7 +47,7 @@
                     "$ref": "#/components/schemas/PlantRead"
                   },
                   "type": "array",
-                  "title": "Response List Plants Plants Get"
+                  "title": "Response List Plants"
                 }
               }
             }
@@ -61,7 +61,7 @@
           "analyses"
         ],
         "summary": "Create Analysis",
-        "operationId": "create_analysis_analyses_post",
+        "operationId": "create_analysis",
         "requestBody": {
           "content": {
             "application/json": {
@@ -102,7 +102,7 @@
           "analyses"
         ],
         "summary": "Get Analysis",
-        "operationId": "get_analysis_analyses__analysis_id__get",
+        "operationId": "get_analysis",
         "parameters": [
           {
             "name": "analysis_id",
@@ -145,7 +145,7 @@
           "analyses"
         ],
         "summary": "Advance Analysis",
-        "operationId": "advance_analysis_analyses__analysis_id__advance_post",
+        "operationId": "advance_analysis",
         "parameters": [
           {
             "name": "analysis_id",
@@ -186,7 +186,7 @@
       "get": {
         "summary": "Health",
         "description": "Liveness probe reporting service status.",
-        "operationId": "health_health_get",
+        "operationId": "health",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -197,7 +197,7 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Health Health Get"
+                  "title": "Response Health"
                 }
               }
             }
