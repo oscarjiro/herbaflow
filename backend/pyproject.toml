@@ -21,6 +21,8 @@ dev = [
     "pytest-httpx>=0.35",
     "httpx>=0.28",
     "jsonschema>=4.26.0",
+    "testcontainers[postgresql]>=4.8",
+    "psycopg2-binary>=2.9",
 ]
 
 [tool.ruff]
