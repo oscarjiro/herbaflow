@@ -43,3 +43,8 @@ def stage_phases() -> tuple[str, ...]:
 def pipeline_parameters() -> dict[str, Any]:
     """The pipeline_parameters property map (group -> JSON-Schema object)."""
     return cast(dict[str, Any], _defs()["pipeline_parameters"]["properties"])
+
+
+def max_plants() -> int:
+    """Maximum plants selectable for one run (shared input bound)."""
+    return int(_defs()["limits"]["properties"]["max_plants"]["const"])

@@ -79,6 +79,18 @@
           }
         }
       }
+    },
+    "limits": {
+      "description": "App-level input bounds shared by both stacks.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_plants": {
+          "description": "Maximum plants selectable for one analysis run.",
+          "type": "integer",
+          "const": 20
+        }
+      }
     }
   }
 }

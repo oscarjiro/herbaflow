@@ -43,3 +43,9 @@ def test_pipeline_parameters_groups():
     }
     assert params["disease_targets"]["properties"]["min_score"]["minimum"] == 0
     assert params["disease_targets"]["properties"]["min_score"]["maximum"] == 1
+
+
+def test_max_plants_is_twenty() -> None:
+    from app import contracts
+
+    assert contracts.max_plants() == 20
