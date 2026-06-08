@@ -2,3 +2,4 @@
 # Allow esbuild to run its postinstall so vite/vitest get their platform binary.
 allowBuilds:
   esbuild: true
+  msw: true
