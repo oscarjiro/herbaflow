@@ -23,3 +23,11 @@ def _mode_check_values() -> set[str]:
 
 def test_mode_check_matches_contract():
     assert _mode_check_values() == set(contracts.modes())
+
+
+def test_create_schema_cap_matches_contract() -> None:
+    from app.schemas.analysis import AnalysisCreate
+
+    field = AnalysisCreate.model_fields["plant_ids"]
+    maxes = [m for m in field.metadata if getattr(m, "max_length", None) is not None]
+    assert maxes and maxes[0].max_length == contracts.max_plants()
