@@ -1,0 +1,66 @@
+"""Analysis run service: validate, create, fetch, advance."""
+
+from __future__ import annotations
+
+import uuid
+from typing import Any
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.clock import now_utc
+from app.errors import GoneProblem, NotFoundProblem, ValidationProblem
+from app.pipeline import engine
+from app.repositories.analysis import AnalysisRepository
+from app.repositories.disease import DiseaseRepository
+from app.repositories.plant import PlantRepository
+from app.schemas.analysis import AnalysisCreate, AnalysisRead
+
+
+class AnalysisService:
+    def __init__(
+        self,
+        *,
+        plant_repo: Any,
+        disease_repo: Any,
+        analysis_repo: Any,
+    ) -> None:
+        self.plant_repo = plant_repo
+        self.disease_repo = disease_repo
+        self.analysis_repo = analysis_repo
+
+    @classmethod
+    def from_session(cls, session: AsyncSession) -> AnalysisService:
+        return cls(
+            plant_repo=PlantRepository(session),
+            disease_repo=DiseaseRepository(session),
+            analysis_repo=AnalysisRepository(session),
+        )
+
+    async def create(self, payload: AnalysisCreate) -> AnalysisRead:
+        missing = await self.plant_repo.missing_ids(payload.plant_ids)
+        if missing:
+            raise ValidationProblem(
+                detail="Unknown plant ids.", invalid_plant_ids=[str(p) for p in missing]
+            )
+        if not await self.disease_repo.exists(payload.disease_id):
+            raise ValidationProblem(
+                detail="Unknown disease id.", invalid_disease_id=str(payload.disease_id)
+            )
+        run = await self.analysis_repo.create(
+            analysis_name=payload.analysis_name,
+            disease_id=payload.disease_id,
+            plant_ids=payload.plant_ids,
+            mode=payload.mode.value,
+        )
+        return AnalysisRead.model_validate(run)
+
+    async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
+        run = await self.analysis_repo.get(analysis_id)
+        if run is None:
+            raise NotFoundProblem(detail="Analysis run not found.")
+        if run.expires_at is not None and run.expires_at < now_utc():
+            raise GoneProblem(detail="Analysis run has expired.")
+        return AnalysisRead.model_validate(run)
+
+    async def advance(self, analysis_id: uuid.UUID) -> None:
+        await engine.advance_run(self.analysis_repo, analysis_id)
