@@ -1,0 +1,26 @@
+"""Compound ORM model (read; subset used by Stage 1)."""
+
+from __future__ import annotations
+
+import uuid
+from datetime import datetime
+
+from sqlalchemy import DateTime, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.models.base import Base
+
+
+class Compound(Base):
+    __tablename__ = "compounds"
+
+    compound_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    canonical_key: Mapped[str] = mapped_column(String, nullable=False)
+    canonical_name: Mapped[str | None] = mapped_column(String)
+    inchi_key: Mapped[str | None] = mapped_column(String)
+    pubchem_cid: Mapped[str | None] = mapped_column(String)
+    chembl_id: Mapped[str | None] = mapped_column(String)
+    molecular_formula: Mapped[str | None] = mapped_column(String)
+    source_url: Mapped[str | None] = mapped_column(String)
+    retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
