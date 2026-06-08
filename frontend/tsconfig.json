@@ -11,6 +11,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
   "include": ["src", "tests"]
