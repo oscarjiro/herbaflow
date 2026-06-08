@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from app import db
 from app.config import settings
 from app.errors import register_error_handlers
+from app.routers import analyses, diseases, plants
 
 
 @asynccontextmanager
@@ -24,6 +25,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="Herbaflow API", lifespan=lifespan)
 register_error_handlers(app)
+app.include_router(diseases.router)
+app.include_router(plants.router)
+app.include_router(analyses.router)
 
 
 @app.get("/health")
