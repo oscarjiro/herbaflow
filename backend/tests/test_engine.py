@@ -1,0 +1,93 @@
+import uuid
+from types import SimpleNamespace
+
+import pytest
+
+from app.errors import ConflictProblem
+from app.pipeline import engine
+
+
+class FakeRepo:
+    def __init__(self, run):
+        self.run = run
+
+    async def get(self, analysis_id):
+        return self.run
+
+    async def set_status(self, run, status, *, current_stage=None):
+        run.status = status
+        if current_stage is not None:
+            run.current_stage = current_stage
+
+    async def set_stage_result(self, run, stage, result):
+        run.stage_results[str(stage)] = result
+
+    async def complete(self, run):
+        run.status = "complete"
+
+    async def fail(self, run, message):
+        run.status = "failed"
+        run.error_message = message
+
+
+def _run(mode):
+    return SimpleNamespace(
+        analysis_id=uuid.uuid4(),
+        mode=mode,
+        status="pending",
+        current_stage=None,
+        stage_results={},
+        error_message=None,
+        parameters={"plant_ids": [str(uuid.uuid4())]},
+    )
+
+
+@pytest.mark.asyncio
+async def test_auto_runs_to_complete() -> None:
+    run = _run("auto")
+    repo = FakeRepo(run)
+
+    async def stage_runner(r):
+        return {"count": 2, "compounds": [], "per_plant": {}, "state": "computed"}
+
+    await engine.execute_run(repo, run.analysis_id, stage_runner)
+
+    assert run.status == "complete"
+    assert run.stage_results["1"]["count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_guided_pauses_for_approval() -> None:
+    run = _run("guided")
+    repo = FakeRepo(run)
+
+    async def stage_runner(r):
+        return {"count": 1, "compounds": [], "per_plant": {}, "state": "computed"}
+
+    await engine.execute_run(repo, run.analysis_id, stage_runner)
+    assert run.status == "stage_1_awaiting_approval"
+
+    await engine.advance_run(repo, run.analysis_id)
+    assert run.status == "complete"
+
+
+@pytest.mark.asyncio
+async def test_zero_compounds_fails() -> None:
+    run = _run("auto")
+    repo = FakeRepo(run)
+
+    async def stage_runner(r):
+        return {"count": 0, "compounds": [], "per_plant": {}, "state": "computed"}
+
+    await engine.execute_run(repo, run.analysis_id, stage_runner)
+    assert run.status == "failed"
+    assert "compound" in run.error_message.lower()
+
+
+@pytest.mark.asyncio
+async def test_advance_rejects_wrong_state() -> None:
+    run = _run("guided")
+    run.status = "stage_1_running"
+    repo = FakeRepo(run)
+    with pytest.raises(ConflictProblem):
+        await engine.advance_run(repo, run.analysis_id)
