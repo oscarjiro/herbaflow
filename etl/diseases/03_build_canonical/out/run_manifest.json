@@ -9,8 +9,8 @@
   "alias_map_output": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_alias_map.csv",
   "targets_template_output": "C:\\code\\web\\herbaflow\\etl\\diseases\\03_build_canonical\\out\\disease_targets_template.csv",
   "disease_count": 10,
-  "alias_count": 48,
-  "alias_map_count": 56,
+  "alias_count": 50,
+  "alias_map_count": 60,
   "confidence_threshold": 0.8,
-  "timestamp": "2026-06-02T16:39:43+00:00"
+  "timestamp": "2026-06-08T06:39:03+00:00"
 }

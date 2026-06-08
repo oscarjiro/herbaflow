@@ -1,9 +1,9 @@
 {
-  "run_id": "build_canonical_20260602_164214",
-  "targets": 7589,
-  "target_aliases": 22739,
-  "disease_targets": 14736,
+  "run_id": "build_canonical_20260608_064146",
+  "targets": 8033,
+  "target_aliases": 24068,
+  "disease_targets": 15504,
   "diseases_covered": 10,
   "skipped_pairs": 0,
-  "retrieved_at": "2026-06-02T16:42:12+00:00"
+  "retrieved_at": "2026-06-08T06:41:37+00:00"
 }

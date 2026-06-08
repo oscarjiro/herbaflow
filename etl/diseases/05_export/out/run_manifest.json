@@ -15,10 +15,10 @@
   },
   "row_counts": {
     "diseases": 10,
-    "disease_aliases": 48,
-    "disease_alias_map": 56,
+    "disease_aliases": 50,
+    "disease_alias_map": 60,
     "disease_targets_template": 0
   },
   "missing_sources": [],
-  "timestamp": "2026-06-02T16:39:45+00:00"
+  "timestamp": "2026-06-08T06:39:06+00:00"
 }

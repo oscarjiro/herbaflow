@@ -11,15 +11,6 @@ high blood pressure,hypertension,user_alias
 hyperpiesia,hypertension,ontology_synonym
 vascular hypertensive disorder,hypertension,ontology_synonym
 htn,hypertension,ontology_synonym
-obesity,obesity,primary
-overweight and obesity,obesity,user_alias
-osteoarthritis,osteoarthritis,primary
-oa,osteoarthritis,user_alias
-osteoarthrosis and allied disorder,osteoarthritis,ontology_synonym
-degenerative arthritis,osteoarthritis,ontology_synonym
-degenerative joint disease,osteoarthritis,ontology_synonym
-hypertrophic arthritis,osteoarthritis,ontology_synonym
-osteoarthrosis,osteoarthritis,ontology_synonym
 rheumatoid arthritis,rheumatoid_arthritis,primary
 ra,rheumatoid_arthritis,user_alias
 "arthritis or polyarthritis, rheumatic",rheumatoid_arthritis,ontology_synonym
@@ -60,3 +51,17 @@ primary breast cancer,breast_cancer,ontology_synonym
 colorectal cancer,colorectal_cancer,primary
 colon cancer,colorectal_cancer,user_alias
 rectal cancer,colorectal_cancer,user_alias
+ischemic heart disease,ischemic_heart_disease,primary
+coronary heart disease,ischemic_heart_disease,user_alias
+coronary artery disease,ischemic_heart_disease,user_alias
+myocardial ischemia,ischemic_heart_disease,user_alias
+coronary disease,ischemic_heart_disease,ontology_synonym
+ischemic heart disease,ischemic_heart_disease,ontology_synonym
+coronary arteriosclerosis,ischemic_heart_disease,ontology_synonym
+coronary heart disease,ischemic_heart_disease,ontology_synonym
+myocardial ischemia,ischemic_heart_disease,ontology_synonym
+chd,ischemic_heart_disease,ontology_synonym
+alzheimer's disease,alzheimer_s_disease,primary
+alzheimer disease,alzheimer_s_disease,user_alias
+ad,alzheimer_s_disease,user_alias
+late-onset alzheimer's,alzheimer_s_disease,user_alias

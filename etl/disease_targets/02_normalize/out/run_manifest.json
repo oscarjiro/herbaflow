@@ -1,8 +1,8 @@
 {
-  "run_id": "normalize_20260602_112028",
-  "input_rows": 14778,
-  "filtered_rows": 14778,
-  "unique_targets": 7589,
-  "disease_target_pairs": 14736,
+  "run_id": "normalize_20260608_064136",
+  "input_rows": 15547,
+  "filtered_rows": 15547,
+  "unique_targets": 8033,
+  "disease_target_pairs": 15504,
   "uniprot_coverage": 0.9912
 }
