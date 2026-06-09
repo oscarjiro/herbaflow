@@ -5,12 +5,13 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.compound import Compound
 from app.models.source_system import SourceSystem
+from app.services.descriptors import MolDescriptors
 
 
 class CompoundRepository:
@@ -42,6 +43,30 @@ class CompoundRepository:
     async def manual_source_id(self) -> uuid.UUID | None:
         stmt = select(SourceSystem.source_id).where(SourceSystem.source_name == "Manual Entry")
         return (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def update_descriptors(self, compound_id: uuid.UUID, d: MolDescriptors) -> None:
+        """Persist RDKit-computed descriptors back to the compound row.
+
+        Idempotent: calling again with updated values overwrites the previous ones.
+        No commit here — the caller's session_scope commits.
+        """
+        stmt = (
+            update(Compound)
+            .where(Compound.compound_id == compound_id)
+            .values(
+                molecular_weight=d.molecular_weight,
+                logp=d.logp,
+                hbond_donors=d.hbond_donors,
+                hbond_acceptors=d.hbond_acceptors,
+                tpsa=d.tpsa,
+                rotatable_bonds=d.rotatable_bonds,
+                qed_score=d.qed_score,
+                np_likeness_score=d.np_likeness_score,
+                num_ro5_violations=d.num_ro5_violations,
+                is_pains_positive=d.is_pains_positive,
+            )
+        )
+        await self.session.execute(stmt)
 
     async def count(self) -> int:
         result = await self.session.execute(select(func.count(Compound.compound_id)))

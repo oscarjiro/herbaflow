@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, Integer, String
+from sqlalchemy import Boolean, DateTime, Float, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -32,6 +32,7 @@ class Compound(Base):
     qed_score: Mapped[float | None] = mapped_column(Float)
     np_likeness_score: Mapped[float | None] = mapped_column(Float)
     num_ro5_violations: Mapped[int | None] = mapped_column(Integer)
+    is_pains_positive: Mapped[bool] = mapped_column(Boolean, nullable=False)
     validation_status: Mapped[str] = mapped_column(String, nullable=False)
     source_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     source_url: Mapped[str | None] = mapped_column(String)
