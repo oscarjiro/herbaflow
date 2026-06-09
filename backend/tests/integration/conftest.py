@@ -132,6 +132,39 @@ async def seeded(engine):
 
 
 @pytest_asyncio.fixture()
+async def seed_compound(engine):
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    cid = uuid.uuid4()
+    async with maker() as s:
+        await s.execute(
+            text(
+                "insert into compounds"
+                "(compound_id, canonical_key, canonical_name, validation_status) "
+                "values (:c, 'inchikey:CT0', 'CTComp', 'externally_validated')"
+            ),
+            {"c": cid},
+        )
+        await s.commit()
+    return cid
+
+
+@pytest_asyncio.fixture()
+async def seed_target(engine):
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    tid = uuid.uuid4()
+    async with maker() as s:
+        await s.execute(
+            text(
+                "insert into targets(target_id, canonical_key, gene_symbol) "
+                "values (:t, 'uniprot:PCT0', 'CTGENE')"
+            ),
+            {"t": tid},
+        )
+        await s.commit()
+    return tid
+
+
+@pytest_asyncio.fixture()
 async def client(engine, seeded):
     """httpx AsyncClient against the app, with get_session bound to the test engine."""
     maker = async_sessionmaker(engine, expire_on_commit=False)
