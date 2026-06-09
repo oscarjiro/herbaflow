@@ -47,9 +47,13 @@ def _run(mode: str) -> SimpleNamespace:
     )
 
 
+def _compounds(n: int) -> list[dict]:
+    return [{"compound_id": f"c{i}", "canonical_name": f"C{i}"} for i in range(n)]
+
+
 def _runners(stage1_count: int, stage2_count: int) -> dict[int, object]:
     async def stage1_runner(run: SimpleNamespace) -> dict:
-        return {"count": stage1_count, "compounds": [], "state": "computed"}
+        return {"count": stage1_count, "compounds": _compounds(stage1_count), "state": "computed"}
 
     async def stage2_runner(run: SimpleNamespace) -> dict:
         return {

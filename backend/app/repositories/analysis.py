@@ -74,6 +74,18 @@ class AnalysisRepository:
         run.updated_at = now_utc()
         await self.session.flush()
 
+    async def clear_stage_results(self, run: AnalysisRun, stages: set[int]) -> None:
+        """Drop the stored results for ``stages`` (jsonb dirty via dict reassign)."""
+        merged = {k: v for k, v in run.stage_results.items() if int(k) not in stages}
+        run.stage_results = merged
+        run.updated_at = now_utc()
+        await self.session.flush()
+
+    async def set_parameters(self, run: AnalysisRun) -> None:
+        """Flush a re-assigned ``run.parameters`` dict (jsonb dirty)."""
+        run.updated_at = now_utc()
+        await self.session.flush()
+
     async def complete(self, run: AnalysisRun) -> None:
         done = now_utc()
         run.status = "complete"

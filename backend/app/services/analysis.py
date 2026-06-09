@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import contracts
 from app.clock import now_utc
-from app.errors import GoneProblem, NotFoundProblem, ValidationProblem
-from app.pipeline import engine
+from app.errors import ConflictProblem, GoneProblem, NotFoundProblem, ValidationProblem
+from app.pipeline import edits, engine, state
 from app.pipeline.limits import EntityCapExceeded, check_entity_cap
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
@@ -98,3 +98,110 @@ class AnalysisService:
     async def advance(self, analysis_id: uuid.UUID) -> None:
         runners = engine.build_runners(self.analysis_repo.session)
         await engine.advance_run(self.analysis_repo, analysis_id, runners)
+
+    async def reset_from(
+        self,
+        analysis_id: uuid.UUID,
+        stage: int,
+        param_overrides: dict[str, Any] | None,
+    ) -> None:
+        """Re-run a settled run from ``stage`` (param Redo or set edit) via the engine."""
+        runners = engine.build_runners(self.analysis_repo.session)
+        await engine.reset_from(
+            self.analysis_repo, analysis_id, stage, runners, param_overrides=param_overrides
+        )
+
+    async def edit_stage(
+        self,
+        analysis_id: uuid.UUID,
+        stage: int,
+        *,
+        add: list[uuid.UUID],
+        remove: list[uuid.UUID],
+    ) -> None:
+        """Apply a durable in-stage entity edit (add/remove) and re-run downstream.
+
+        Validates added ids exist, enforces the entity cap on net additions, folds the edit into
+        the durable edit layer, re-derives the edited stage's stored result, and either fails the
+        run (empty effective set, E3) or triggers a dependency-aware set-edit re-run.
+        """
+        run = await self.analysis_repo.get(analysis_id)
+        if run is None:
+            raise NotFoundProblem(detail="Analysis run not found.")
+
+        # Settled guard (engine.reset_from re-checks; guard here so the edit never half-applies).
+        if not state.is_settled(run.status):
+            raise ConflictProblem(
+                detail="Run is still running; wait for it to settle before editing."
+            )
+
+        skey = str(stage)
+        existing_result = run.stage_results.get(skey)
+        if existing_result is None:
+            raise ValidationProblem(detail=f"Stage {stage} has not been computed yet.")
+
+        # Verify added ids exist.
+        if add:
+            existing_ids = await self.compound_repo.existing_ids(add)
+            missing = [c for c in add if c not in existing_ids]
+            if missing:
+                raise ValidationProblem(
+                    detail="Unknown compound ids.",
+                    invalid_compound_ids=[str(c) for c in missing],
+                )
+
+        # Cap on net additions: current effective size + |add| <= cap.
+        current_effective = sum(
+            1 for c in existing_result["compounds"] if c.get("tag") != "user-removed"
+        )
+        if add:
+            try:
+                check_entity_cap("compound", current=current_effective, adding=len(add))
+            except EntityCapExceeded as e:
+                raise ValidationProblem(
+                    detail=(
+                        f"Too many compounds for this stage (max {e.cap}, "
+                        f"have {e.current}, adding {e.adding})."
+                    )
+                ) from e
+
+        # Resolve added compounds' names (self-contained edit layer).
+        add_entries: list[dict[str, Any]] = []
+        if add:
+            for comp in await self.compound_repo.get_many(add):
+                add_entries.append(
+                    {"compound_id": str(comp.compound_id), "canonical_name": comp.canonical_name}
+                )
+
+        # Fold into the durable edit layer.
+        prior_edit = run.parameters.get("stage_edits", {}).get(skey, edits.empty_edit())
+        new_edit = edits.normalize_edit(prior_edit, add_entries, [str(r) for r in remove])
+        new_params = dict(run.parameters)
+        stage_edits = dict(new_params.get("stage_edits", {}))
+        stage_edits[skey] = new_edit
+        new_params["stage_edits"] = stage_edits
+        run.parameters = new_params
+        await self.analysis_repo.set_parameters(run)
+
+        # Re-derive the edited stage's stored result from its RAW computed entities + the new edit.
+        computed_ids = existing_result["computed_ids"]
+        names = {c["compound_id"]: c.get("canonical_name") for c in existing_result["compounds"]}
+        for entry in new_edit["added"]:
+            names.setdefault(entry["compound_id"], entry.get("canonical_name"))
+        computed_entities = [
+            {"compound_id": cid, "canonical_name": names.get(cid)} for cid in computed_ids
+        ]
+        frag = edits.build_stage_entities(computed_entities, new_edit)
+        preserved = {k: v for k, v in existing_result.items() if k not in frag and k != "compounds"}
+        await self.analysis_repo.set_stage_result(run, stage, {**preserved, **frag})
+
+        # E3: empty effective set -> fail, no re-run.
+        if frag["count"] == 0:
+            await self.analysis_repo.fail(
+                run, "No compounds remain after editing; add at least one compound."
+            )
+            return
+
+        # Set-edit re-run: clears downstream, re-runs from the nearest runnable dependent.
+        runners = engine.build_runners(self.analysis_repo.session)
+        await engine.reset_from(self.analysis_repo, analysis_id, stage, runners)

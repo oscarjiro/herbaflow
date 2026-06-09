@@ -13,9 +13,9 @@ import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any, Protocol
 
-from app import db
-from app.errors import ConflictProblem
-from app.pipeline import state
+from app import contracts, db
+from app.errors import ConflictProblem, ValidationProblem
+from app.pipeline import edits, state
 from app.pipeline.stages import stage1, stage2
 from app.repositories.analysis import AnalysisRepository
 
@@ -60,6 +60,11 @@ STAGE_PARAM_GROUP: dict[int, str] = {2: "adme"}  # extended per chunk (3 -> targ
 RUNNABLE_STAGES: tuple[int, ...] = (1, 2)  # extended as stages land
 NEEDS_APPROVAL: frozenset[int] = frozenset({1, 2})  # guided checkpoints
 
+# Entity stages carry a user-editable entity set (compounds/targets). Their stored result is
+# always run through the durable edit layer so the in-stage add/remove decisions reapply on
+# every recompute (E6). Only stage 1 is runnable this chunk; 3 and 4 land in later chunks.
+ENTITY_STAGES: frozenset[int] = frozenset({1, 3, 4})
+
 
 class _Repo(Protocol):  # structural type for testability
     async def get(self, analysis_id: uuid.UUID) -> Any: ...
@@ -67,6 +72,8 @@ class _Repo(Protocol):  # structural type for testability
         self, run: Any, status: str, *, current_stage: int | None = None
     ) -> None: ...
     async def set_stage_result(self, run: Any, stage: int, result: dict[str, Any]) -> None: ...
+    async def clear_stage_results(self, run: Any, stages: set[int]) -> None: ...
+    async def set_parameters(self, run: Any) -> None: ...
     async def complete(self, run: Any) -> None: ...
     async def fail(self, run: Any, message: str) -> None: ...
 
@@ -87,7 +94,14 @@ async def execute_run(
         await repo.set_status(run, state.stage_status(stage, "running"), current_stage=stage)
         result = await runners[stage](run)
 
-        # Stage 1 truly-empty: unconditional hard-stop.
+        # Entity stages: fold the durable edit layer over the freshly-computed entities so
+        # in-stage add/remove decisions reapply on every recompute (E6). The stored result
+        # becomes the uniform {compounds: tagged, computed_ids, count, state} shape.
+        if stage in ENTITY_STAGES:
+            edit = run.parameters.get("stage_edits", {}).get(str(stage))
+            result = {**result, **edits.build_stage_entities(result["compounds"], edit)}
+
+        # Stage 1 truly-empty: unconditional hard-stop (effective forward set is empty).
         if stage == 1 and result["count"] == 0:
             logger.warning("run %s: stage 1 found 0 compounds — failing", rid)
             await repo.fail(run, "No compounds found for the selected plants.")
@@ -137,6 +151,114 @@ async def advance_run(repo: _Repo, analysis_id: uuid.UUID, runners: dict[int, St
     await execute_run(repo, analysis_id, runners, start_stage=nxt)
 
 
+def _validate_overrides(group: str, overrides: dict[str, Any]) -> None:
+    """Validate param overrides against the group's HARD bounds only.
+
+    Enforces ``minimum``/``maximum``/``exclusiveMinimum`` and the JSON-Schema ``type``.
+    The advisory ``recommended_min``/``recommended_max`` are NEVER enforced. An unknown key
+    or an out-of-range value raises :class:`ValidationProblem` (422).
+    """
+    bounds = contracts.pipeline_param_bounds(group)
+    for name, value in overrides.items():
+        spec = bounds.get(name)
+        if spec is None:
+            raise ValidationProblem(detail=f"Unknown {group} parameter: {name}.")
+        kind = spec.get("type")
+        if kind == "boolean":
+            if not isinstance(value, bool):
+                raise ValidationProblem(detail=f"{name} must be a boolean.")
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValidationProblem(detail=f"{name} must be a number.")
+        if kind == "integer" and isinstance(value, float) and not value.is_integer():
+            raise ValidationProblem(detail=f"{name} must be an integer.")
+        minimum = spec.get("minimum")
+        if minimum is not None and value < minimum:
+            raise ValidationProblem(detail=f"{name} must be >= {minimum}.")
+        excl_min = spec.get("exclusiveMinimum")
+        if excl_min is not None and value <= excl_min:
+            raise ValidationProblem(detail=f"{name} must be > {excl_min}.")
+        maximum = spec.get("maximum")
+        if maximum is not None and value > maximum:
+            raise ValidationProblem(detail=f"{name} must be <= {maximum}.")
+
+
+async def reset_from(
+    repo: _Repo,
+    analysis_id: uuid.UUID,
+    stage: int,
+    runners: dict[int, StageRunner],
+    *,
+    param_overrides: dict[str, Any] | None = None,
+) -> None:
+    """Dependency-aware destructive re-run from ``stage``.
+
+    Two modes:
+
+    - **param Redo** (``param_overrides is not None``): inclusive — the edited stage itself is
+      recomputed. Overrides are validated against the group's HARD bounds, merged into the frozen
+      param group, and the stage + its downstream closure are invalidated. A no-op (overrides equal
+      the current group) returns early without clearing or re-running (E7).
+    - **set edit** (``param_overrides is None``): exclusive — the edited stage's stored result was
+      already updated by the caller; only its downstream closure is invalidated and the re-run
+      starts at the nearest runnable dependent (for stage 1 -> stage 2).
+
+    The invalidated stages are cleared BEFORE the re-run (E2), and any re-run failure marks the run
+    failed while leaving the cleared downstream cleared (idempotent on outage).
+    """
+    run = await repo.get(analysis_id)
+    if run is None:
+        raise ConflictProblem(detail="Run not found.")
+
+    # E1: only a settled run may be reset.
+    if not state.is_settled(run.status):
+        raise ConflictProblem(
+            detail="Run is still running; wait for it to settle before re-running."
+        )
+
+    # Validate the target stage.
+    if stage not in RUNNABLE_STAGES:
+        raise ValidationProblem(detail=f"Stage {stage} is not runnable.")
+    if str(stage) not in run.stage_results:
+        raise ValidationProblem(detail=f"Stage {stage} has not been computed yet.")
+    if stage > (run.current_stage or 0):
+        raise ValidationProblem(detail=f"Stage {stage} is beyond the run's progress.")
+
+    if param_overrides is not None:
+        group = STAGE_PARAM_GROUP.get(stage)
+        if group is None:
+            raise ValidationProblem(detail=f"Stage {stage} takes no parameters.")
+        _validate_overrides(group, param_overrides)
+        current = dict(run.parameters.get(group, {}))
+        merged = {**current, **param_overrides}
+        if merged == current:  # E7: nothing changed -> no clear, no re-run.
+            return
+        new_params = dict(run.parameters)
+        new_params[group] = merged
+        run.parameters = new_params
+        await repo.set_parameters(run)
+        invalidate = {stage} | downstream_closure(stage)
+        start = stage
+    else:
+        invalidate = downstream_closure(stage)
+        runnable_dependents = [s for s in DEPENDENTS[stage] if s in RUNNABLE_STAGES]
+        if not runnable_dependents:
+            # Nothing runnable depends on this stage; clear downstream and settle.
+            produced = {int(k) for k in run.stage_results}
+            await repo.clear_stage_results(run, invalidate & produced)
+            return
+        start = min(runnable_dependents)
+
+    # E2: destructive clear of (invalidate ∩ produced) BEFORE re-running.
+    produced = {int(k) for k in run.stage_results}
+    await repo.clear_stage_results(run, invalidate & produced)
+
+    try:
+        await execute_run(repo, analysis_id, runners, start_stage=start)
+    except Exception as exc:  # noqa: BLE001 — re-run failure must be idempotent
+        await repo.fail(run, f"Re-run from stage {start} failed: {exc}")
+
+
 def build_runners(session: Any) -> dict[int, StageRunner]:
     """The single canonical runners map, shared by every engine entry point."""
 
@@ -146,8 +268,13 @@ def build_runners(session: Any) -> dict[int, StageRunner]:
         return await stage1.run(session, plant_ids, manual_ids)
 
     async def stage2_runner(run: Any) -> dict[str, Any]:
-        step1 = run.stage_results["1"]["compounds"]
-        return await stage2.run(session, step1, run.parameters["adme"])
+        # Screen only the EFFECTIVE S1 set: drop user-removed entries, pass id+name to stage 2.
+        effective = [
+            {"compound_id": c["compound_id"], "canonical_name": c.get("canonical_name")}
+            for c in run.stage_results["1"]["compounds"]
+            if c.get("tag") != "user-removed"
+        ]
+        return await stage2.run(session, effective, run.parameters["adme"])
 
     return {1: stage1_runner, 2: stage2_runner}
 

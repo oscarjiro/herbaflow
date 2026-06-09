@@ -42,9 +42,18 @@ def _run(mode):
     )
 
 
+def _compounds(n):
+    return [{"compound_id": f"c{i}", "canonical_name": f"C{i}"} for i in range(n)]
+
+
 def _runners(stage1_count, stage2_count):
     async def stage1_runner(r):
-        return {"count": stage1_count, "compounds": [], "per_plant": {}, "state": "computed"}
+        return {
+            "count": stage1_count,
+            "compounds": _compounds(stage1_count),
+            "per_plant": {},
+            "state": "computed",
+        }
 
     async def stage2_runner(r):
         return {
