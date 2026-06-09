@@ -53,6 +53,11 @@ class ValidationProblem(ProblemException):
         super().__init__(422, "Unprocessable Entity", detail, **extra)
 
 
+class ServiceUnavailableError(ProblemException):
+    def __init__(self, detail: str | None = None, **extra: Any) -> None:
+        super().__init__(503, "Service Unavailable", detail, **extra)
+
+
 def _problem(status: int, title: str, detail: str | None, type_: str, **extra: Any) -> JSONResponse:
     body: dict[str, Any] = {"type": type_, "title": title, "status": status}
     if detail is not None:
