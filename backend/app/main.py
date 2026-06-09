@@ -14,7 +14,7 @@ from app import db
 from app.config import settings
 from app.errors import register_error_handlers
 from app.logging_config import configure_logging
-from app.routers import analyses, compounds, diseases, plants
+from app.routers import analyses, compounds, diseases, plants, targets
 
 logger = logging.getLogger("herbaflow.app")
 
@@ -58,6 +58,7 @@ app.include_router(diseases.router)
 app.include_router(plants.router)
 app.include_router(analyses.router)
 app.include_router(compounds.router)
+app.include_router(targets.router)
 
 
 @app.get("/health")

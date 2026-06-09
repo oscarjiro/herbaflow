@@ -45,6 +45,7 @@ export type DiseaseRead = {
 export type FailedInput = {
     value: string;
     reason: string;
+    line?: number | null;
 };
 
 export type HttpValidationError = {
@@ -82,6 +83,14 @@ export type ResolvedCompound = {
     validation_status: string;
 };
 
+export type ResolvedTarget = {
+    target_id: string;
+    canonical_key: string;
+    gene_symbol: string | null;
+    uniprot_accession: string | null;
+    validation_status: string;
+};
+
 /**
  * Body for POST /analyses/{id}/stages/{stage}/edit.
  */
@@ -90,12 +99,26 @@ export type StageEditRequest = {
     remove?: Array<string>;
 };
 
+export type TargetInput = {
+    type?: ('symbol' | 'uniprot') | null;
+    value: string;
+};
+
 export type ValidateRequest = {
     inputs: Array<CompoundInput>;
 };
 
 export type ValidateResponse = {
     resolved: Array<ResolvedCompound>;
+    failed: Array<FailedInput>;
+};
+
+export type ValidateTargetsRequest = {
+    inputs: Array<TargetInput>;
+};
+
+export type ValidateTargetsResponse = {
+    resolved: Array<ResolvedTarget>;
     failed: Array<FailedInput>;
 };
 
@@ -300,6 +323,31 @@ export type ValidateCompoundsResponses = {
 };
 
 export type ValidateCompoundsResponse = ValidateCompoundsResponses[keyof ValidateCompoundsResponses];
+
+export type ValidateTargetsData = {
+    body: ValidateTargetsRequest;
+    path?: never;
+    query?: never;
+    url: '/targets/validate';
+};
+
+export type ValidateTargetsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ValidateTargetsError = ValidateTargetsErrors[keyof ValidateTargetsErrors];
+
+export type ValidateTargetsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ValidateTargetsResponse;
+};
+
+export type ValidateTargetsResponse2 = ValidateTargetsResponses[keyof ValidateTargetsResponses];
 
 export type HealthData = {
     body?: never;

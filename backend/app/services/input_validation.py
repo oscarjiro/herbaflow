@@ -4,14 +4,19 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import uuid
+from collections.abc import Sequence
 from typing import Any
 
 from app.clock import now_utc
 from app.schemas.compound import CompoundInput, FailedInput, ResolvedCompound
-from app.services import canonical, structure
+from app.schemas.target import ResolvedTarget, TargetInput
+from app.services import canonical, gene_symbols, structure
 
 logger = logging.getLogger("herbaflow.resolution")
+
+_ACCESSION_RE = re.compile(r"^[A-Z0-9]{6,10}$")
 
 
 async def resolve_compounds(
@@ -114,4 +119,110 @@ async def resolve_compounds(
         )
 
     logger.info("resolution complete: %d resolved, %d failed", len(resolved), len(failed))
+    return list(resolved.values()), failed
+
+
+async def resolve_targets(
+    inputs: Sequence[TargetInput | dict[str, Any]],
+    repo: Any,
+    uniprot: Any,
+    *,
+    gene_to_acc: dict[str, str] | None = None,
+) -> tuple[list[ResolvedTarget], list[FailedInput]]:
+    """Resolve manual targets: classify -> HGNC -> dedupe -> DB-first -> UniProt 9606 -> persist.
+
+    ``gene_to_acc`` is an optional symbol->accession map (test seam / cache); when a symbol
+    is not present, the UniProt client resolves it via resolve_symbol. ``line`` (1-based)
+    is recorded on failures.
+    """
+    logger.info("validating %d target input(s)", len(inputs))
+    resolved: dict[str, ResolvedTarget] = {}
+    failed: list[FailedInput] = []
+    gene_to_acc = gene_to_acc or {}
+
+    for idx, raw in enumerate(inputs, start=1):
+        item = raw if isinstance(raw, TargetInput) else TargetInput(**raw)
+        token = item.value.strip()
+        if not token:
+            continue
+
+        is_accession = item.type == "uniprot" or (
+            item.type is None and _ACCESSION_RE.match(token.upper()) is not None
+        )
+
+        if is_accession:
+            acc = token.upper()
+            if not _ACCESSION_RE.match(acc):
+                failed.append(
+                    FailedInput(
+                        value=item.value, reason="invalid UniProt accession format", line=idx
+                    )
+                )
+                continue
+        else:
+            sym = gene_symbols.normalize(token).canonical
+            acc = gene_to_acc.get(sym, "")
+            if not acc:
+                rec0 = (
+                    await uniprot.resolve_symbol(sym)
+                    if hasattr(uniprot, "resolve_symbol")
+                    else None
+                )
+                acc = rec0.uniprot_accession if rec0 else ""
+            if not acc:
+                failed.append(
+                    FailedInput(
+                        value=item.value,
+                        reason="gene symbol not resolved to a human UniProt accession",
+                        line=idx,
+                    )
+                )
+                continue
+
+        canonical_key = canonical.target_canonical_key(uniprot=acc)
+        if canonical_key in resolved:
+            continue
+        tid = uuid.UUID(canonical.target_id_from_key(canonical_key))
+
+        existing = await repo.get_by_key(canonical_key)
+        if existing is not None:
+            resolved[canonical_key] = ResolvedTarget(
+                target_id=existing.target_id,
+                canonical_key=existing.canonical_key,
+                gene_symbol=existing.gene_symbol,
+                uniprot_accession=existing.uniprot_accession,
+                validation_status="db_hit",
+            )
+            continue
+
+        rec = await uniprot.resolve(acc)
+        if rec is None:
+            failed.append(
+                FailedInput(
+                    value=item.value, reason="not a human (9606) UniProt accession", line=idx
+                )
+            )
+            continue
+
+        await repo.upsert(
+            {
+                "target_id": tid,
+                "canonical_key": canonical_key,
+                "gene_symbol": rec.gene_symbol,
+                "protein_name": rec.protein_name,
+                "uniprot_accession": rec.uniprot_accession,
+                "source_id": await repo.source_id_by_name("UniProt"),
+                "source_url": f"https://www.uniprot.org/uniprotkb/{rec.uniprot_accession}/entry",
+                "retrieved_at": now_utc(),
+            }
+        )
+        resolved[canonical_key] = ResolvedTarget(
+            target_id=tid,
+            canonical_key=canonical_key,
+            gene_symbol=rec.gene_symbol,
+            uniprot_accession=rec.uniprot_accession,
+            validation_status="externally_validated",
+        )
+
+    logger.info("target resolution complete: %d resolved, %d failed", len(resolved), len(failed))
     return list(resolved.values()), failed

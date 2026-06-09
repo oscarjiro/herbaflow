@@ -96,7 +96,11 @@ export const zDiseaseRead = z.object({
 
 export const zFailedInput = z.object({
     value: z.string(),
-    reason: z.string()
+    reason: z.string(),
+    line: z.union([
+        z.number().int(),
+        z.null()
+    ]).optional()
 });
 
 export const zHttpValidationError = z.object({
@@ -144,9 +148,34 @@ export const zResolvedCompound = z.object({
     validation_status: z.string()
 });
 
+export const zResolvedTarget = z.object({
+    target_id: z.string().uuid(),
+    canonical_key: z.string(),
+    gene_symbol: z.union([
+        z.string(),
+        z.null()
+    ]),
+    uniprot_accession: z.union([
+        z.string(),
+        z.null()
+    ]),
+    validation_status: z.string()
+});
+
 export const zStageEditRequest = z.object({
     add: z.array(z.string().uuid()).optional(),
     remove: z.array(z.string().uuid()).optional()
+});
+
+export const zTargetInput = z.object({
+    type: z.union([
+        z.enum([
+            'symbol',
+            'uniprot'
+        ]),
+        z.null()
+    ]).optional(),
+    value: z.string()
 });
 
 export const zValidateRequest = z.object({
@@ -155,6 +184,15 @@ export const zValidateRequest = z.object({
 
 export const zValidateResponse = z.object({
     resolved: z.array(zResolvedCompound),
+    failed: z.array(zFailedInput)
+});
+
+export const zValidateTargetsRequest = z.object({
+    inputs: z.array(zTargetInput)
+});
+
+export const zValidateTargetsResponse = z.object({
+    resolved: z.array(zResolvedTarget),
     failed: z.array(zFailedInput)
 });
 
@@ -181,5 +219,7 @@ export const zResetFromResponse = zAnalysisRead;
 export const zEditStageResponse = zAnalysisRead;
 
 export const zValidateCompoundsResponse = zValidateResponse;
+
+export const zValidateTargetsResponse2 = zValidateTargetsResponse;
 
 export const zHealthResponse = z.object({});

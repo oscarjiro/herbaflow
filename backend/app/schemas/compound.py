@@ -23,6 +23,7 @@ class ResolvedCompound(BaseModel):
 class FailedInput(BaseModel):
     value: str
     reason: str
+    line: int | None = None
 
 
 class ValidateRequest(BaseModel):

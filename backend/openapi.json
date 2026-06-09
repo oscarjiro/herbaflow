@@ -347,6 +347,47 @@
         }
       }
     },
+    "/targets/validate": {
+      "post": {
+        "tags": [
+          "targets"
+        ],
+        "summary": "Validate Targets",
+        "operationId": "validate_targets",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateTargetsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateTargetsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health",
@@ -667,6 +708,17 @@
           "reason": {
             "type": "string",
             "title": "Reason"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
           }
         },
         "type": "object",
@@ -798,6 +850,54 @@
         ],
         "title": "ResolvedCompound"
       },
+      "ResolvedTarget": {
+        "properties": {
+          "target_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Id"
+          },
+          "canonical_key": {
+            "type": "string",
+            "title": "Canonical Key"
+          },
+          "gene_symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gene Symbol"
+          },
+          "uniprot_accession": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uniprot Accession"
+          },
+          "validation_status": {
+            "type": "string",
+            "title": "Validation Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target_id",
+          "canonical_key",
+          "gene_symbol",
+          "uniprot_accession",
+          "validation_status"
+        ],
+        "title": "ResolvedTarget"
+      },
       "StageEditRequest": {
         "properties": {
           "add": {
@@ -820,6 +920,34 @@
         "type": "object",
         "title": "StageEditRequest",
         "description": "Body for POST /analyses/{id}/stages/{stage}/edit."
+      },
+      "TargetInput": {
+        "properties": {
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "symbol",
+                  "uniprot"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "TargetInput"
       },
       "ValidateRequest": {
         "properties": {
@@ -860,6 +988,46 @@
           "failed"
         ],
         "title": "ValidateResponse"
+      },
+      "ValidateTargetsRequest": {
+        "properties": {
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/TargetInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "inputs"
+        ],
+        "title": "ValidateTargetsRequest"
+      },
+      "ValidateTargetsResponse": {
+        "properties": {
+          "resolved": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedTarget"
+            },
+            "type": "array",
+            "title": "Resolved"
+          },
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/FailedInput"
+            },
+            "type": "array",
+            "title": "Failed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resolved",
+          "failed"
+        ],
+        "title": "ValidateTargetsResponse"
       },
       "ValidationError": {
         "properties": {
