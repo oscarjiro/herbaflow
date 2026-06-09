@@ -45,6 +45,25 @@ export const server = setupServer(
       { status: 202 },
     ),
   ),
+  http.post(`${BASE}/compounds/validate`, () =>
+    HttpResponse.json({
+      resolved: [
+        {
+          compound_id: "c1",
+          canonical_key: "inchikey:LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+          canonical_name: "ethanol",
+          validation_status: "externally_validated",
+        },
+      ],
+      failed: [
+        {
+          value: "NOTAKEY",
+          reason:
+            "not found in the database or PubChem. If it is a real compound, paste its SMILES (structure) instead.",
+        },
+      ],
+    }),
+  ),
   http.get(`${BASE}/analyses/r1`, () =>
     HttpResponse.json({
       analysis_id: "r1",
