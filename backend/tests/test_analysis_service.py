@@ -117,6 +117,40 @@ async def test_create_rejects_unknown_manual_compounds() -> None:
 
 
 @pytest.mark.asyncio
+async def test_create_rejects_too_many_manual_compounds() -> None:
+    # The manual-compound cap (RS.2: max 2000) is enforced before the existence check,
+    # so an overflow is rejected without touching the compound repo.
+    over = contracts.max_compounds() + 1
+    ids = [uuid.uuid4() for _ in range(over)]
+    svc = _service(compound_existing=ids)  # all "exist" — only the cap should reject
+    payload = AnalysisCreate(
+        plant_ids=[uuid.uuid4()],
+        disease_id=uuid.uuid4(),
+        mode=Mode.auto,
+        manual_compound_ids=ids,
+    )
+    with pytest.raises(ValidationProblem) as e:
+        await svc.create(payload)
+    assert str(contracts.max_compounds()) in (e.value.detail or "")
+
+
+@pytest.mark.asyncio
+async def test_create_allows_manual_compounds_at_cap() -> None:
+    # Exactly the cap is allowed (no off-by-one); existence still validated.
+    at_cap = contracts.max_compounds()
+    ids = [uuid.uuid4() for _ in range(at_cap)]
+    svc = _service(compound_existing=ids)
+    payload = AnalysisCreate(
+        plant_ids=[uuid.uuid4()],
+        disease_id=uuid.uuid4(),
+        mode=Mode.auto,
+        manual_compound_ids=ids,
+    )
+    result = await svc.create(payload)
+    assert result is not None
+
+
+@pytest.mark.asyncio
 async def test_get_unknown_is_404() -> None:
     svc = _service(run=None)
     with pytest.raises(NotFoundProblem):

@@ -12,6 +12,7 @@ from app import contracts
 from app.clock import now_utc
 from app.errors import GoneProblem, NotFoundProblem, ValidationProblem
 from app.pipeline import engine
+from app.pipeline.limits import EntityCapExceeded, check_entity_cap
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
@@ -62,6 +63,12 @@ class AnalysisService:
                 detail="Unknown disease id.", invalid_disease_id=str(payload.disease_id)
             )
         if payload.manual_compound_ids:
+            try:
+                check_entity_cap("compound", current=0, adding=len(payload.manual_compound_ids))
+            except EntityCapExceeded as e:
+                raise ValidationProblem(
+                    detail=f"Too many manual compounds (max {e.cap}, got {e.adding})."
+                ) from e
             existing = await self.compound_repo.existing_ids(payload.manual_compound_ids)
             missing = [c for c in payload.manual_compound_ids if c not in existing]
             if missing:

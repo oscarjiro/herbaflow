@@ -50,6 +50,16 @@ def max_plants() -> int:
     return int(_defs()["limits"]["properties"]["max_plants"]["const"])
 
 
+def max_compounds() -> int:
+    """Maximum compounds in one run (shared input bound, RS.2)."""
+    return int(_defs()["limits"]["properties"]["max_compounds"]["const"])
+
+
+def max_targets() -> int:
+    """Maximum targets in one run (shared input bound, RS.2)."""
+    return int(_defs()["limits"]["properties"]["max_targets"]["const"])
+
+
 @lru_cache(maxsize=1)
 def default_mode() -> str:
     return cast(str, _defs()["mode"]["default"])
