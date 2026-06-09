@@ -65,6 +65,13 @@ NEEDS_APPROVAL: frozenset[int] = frozenset({1, 2})  # guided checkpoints
 # every recompute (E6). Only stage 1 is runnable this chunk; 3 and 4 land in later chunks.
 ENTITY_STAGES: frozenset[int] = frozenset({1, 3, 4})
 
+# Per entity stage: (stored list key, id key). The edit layer reapplies on every recompute.
+ENTITY_KEYS: dict[int, tuple[str, str]] = {
+    1: ("compounds", "compound_id"),
+    3: ("targets", "target_id"),
+    4: ("targets", "target_id"),
+}
+
 
 class _Repo(Protocol):  # structural type for testability
     async def get(self, analysis_id: uuid.UUID) -> Any: ...
@@ -96,10 +103,16 @@ async def execute_run(
 
         # Entity stages: fold the durable edit layer over the freshly-computed entities so
         # in-stage add/remove decisions reapply on every recompute (E6). The stored result
-        # becomes the uniform {compounds: tagged, computed_ids, count, state} shape.
+        # becomes the uniform {<list_key>: tagged, computed_ids, count, state} shape.
         if stage in ENTITY_STAGES:
+            list_key, id_key = ENTITY_KEYS[stage]
             edit = run.parameters.get("stage_edits", {}).get(str(stage))
-            result = {**result, **edits.build_stage_entities(result["compounds"], edit)}
+            result = {
+                **result,
+                **edits.build_stage_entities(
+                    result[list_key], edit, id_key=id_key, list_key=list_key
+                ),
+            }
 
         # Stage 1 truly-empty: unconditional hard-stop (effective forward set is empty).
         if stage == 1 and result["count"] == 0:

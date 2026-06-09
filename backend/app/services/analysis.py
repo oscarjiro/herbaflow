@@ -17,9 +17,18 @@ from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
+from app.repositories.target import TargetRepository
 from app.schemas.analysis import AnalysisCreate, AnalysisRead
 
 logger = logging.getLogger("herbaflow.analysis")
+
+# Per editable entity stage: (cap entity, id_key, stored list key). Stage 1 edits compounds;
+# Stage 3/4 edit targets. The durable edit layer is threaded with these keys.
+_STAGE_ENTITY: dict[int, tuple[str, str, str]] = {
+    1: ("compound", "compound_id", "compounds"),
+    3: ("target", "target_id", "targets"),
+    4: ("target", "target_id", "targets"),
+}
 
 
 class AnalysisService:
@@ -30,11 +39,13 @@ class AnalysisService:
         disease_repo: Any,
         analysis_repo: Any,
         compound_repo: Any,
+        target_repo: Any = None,
     ) -> None:
         self.plant_repo = plant_repo
         self.disease_repo = disease_repo
         self.analysis_repo = analysis_repo
         self.compound_repo = compound_repo
+        self.target_repo = target_repo
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> AnalysisService:
@@ -43,6 +54,7 @@ class AnalysisService:
             disease_repo=DiseaseRepository(session),
             analysis_repo=AnalysisRepository(session),
             compound_repo=CompoundRepository(session),
+            target_repo=TargetRepository(session),
         )
 
     async def create(self, payload: AnalysisCreate) -> AnalysisRead:
@@ -125,6 +137,12 @@ class AnalysisService:
         the durable edit layer, re-derives the edited stage's stored result, and either fails the
         run (empty effective set, E3) or triggers a dependency-aware set-edit re-run.
         """
+        entity_keys = _STAGE_ENTITY.get(stage)
+        if entity_keys is None:
+            raise ValidationProblem(detail=f"Stage {stage} is not an editable entity stage.")
+        entity, id_key, list_key = entity_keys
+        repo = self.target_repo if entity == "target" else self.compound_repo
+
         run = await self.analysis_repo.get(analysis_id)
         if run is None:
             raise NotFoundProblem(detail="Analysis run not found.")
@@ -142,40 +160,47 @@ class AnalysisService:
 
         # Verify added ids exist.
         if add:
-            existing_ids = await self.compound_repo.existing_ids(add)
+            existing_ids = await repo.existing_ids(add)
             missing = [c for c in add if c not in existing_ids]
             if missing:
                 raise ValidationProblem(
-                    detail="Unknown compound ids.",
-                    invalid_compound_ids=[str(c) for c in missing],
+                    detail=f"Unknown {entity} ids.",
+                    **{f"invalid_{entity}_ids": [str(x) for x in missing]},
                 )
 
         # Cap on net additions: current effective size + |add| <= cap.
         current_effective = sum(
-            1 for c in existing_result["compounds"] if c.get("tag") != "user-removed"
+            1 for c in existing_result[list_key] if c.get("tag") != "user-removed"
         )
         if add:
             try:
-                check_entity_cap("compound", current=current_effective, adding=len(add))
+                check_entity_cap(entity, current=current_effective, adding=len(add))
             except EntityCapExceeded as e:
                 raise ValidationProblem(
                     detail=(
-                        f"Too many compounds for this stage (max {e.cap}, "
+                        f"Too many {entity}s for this stage (max {e.cap}, "
                         f"have {e.current}, adding {e.adding})."
                     )
                 ) from e
 
-        # Resolve added compounds' names (self-contained edit layer).
+        # Resolve added entities' names (self-contained edit layer); targets fall back to
+        # gene_symbol when no canonical_name attribute is present.
         add_entries: list[dict[str, Any]] = []
         if add:
-            for comp in await self.compound_repo.get_many(add):
+            for obj in await repo.get_many(add):
                 add_entries.append(
-                    {"compound_id": str(comp.compound_id), "canonical_name": comp.canonical_name}
+                    {
+                        id_key: str(getattr(obj, id_key)),
+                        "canonical_name": getattr(obj, "canonical_name", None)
+                        or getattr(obj, "gene_symbol", None),
+                    }
                 )
 
         # Fold into the durable edit layer.
         prior_edit = run.parameters.get("stage_edits", {}).get(skey, edits.empty_edit())
-        new_edit = edits.normalize_edit(prior_edit, add_entries, [str(r) for r in remove])
+        new_edit = edits.normalize_edit(
+            prior_edit, add_entries, [str(r) for r in remove], id_key=id_key
+        )
         new_params = dict(run.parameters)
         stage_edits = dict(new_params.get("stage_edits", {}))
         stage_edits[skey] = new_edit
@@ -185,20 +210,22 @@ class AnalysisService:
 
         # Re-derive the edited stage's stored result from its RAW computed entities + the new edit.
         computed_ids = existing_result["computed_ids"]
-        names = {c["compound_id"]: c.get("canonical_name") for c in existing_result["compounds"]}
+        names = {c[id_key]: c.get("canonical_name") for c in existing_result[list_key]}
         for entry in new_edit["added"]:
-            names.setdefault(entry["compound_id"], entry.get("canonical_name"))
+            names.setdefault(entry[id_key], entry.get("canonical_name"))
         computed_entities = [
-            {"compound_id": cid, "canonical_name": names.get(cid)} for cid in computed_ids
+            {id_key: cid, "canonical_name": names.get(cid)} for cid in computed_ids
         ]
-        frag = edits.build_stage_entities(computed_entities, new_edit)
-        preserved = {k: v for k, v in existing_result.items() if k not in frag and k != "compounds"}
+        frag = edits.build_stage_entities(
+            computed_entities, new_edit, id_key=id_key, list_key=list_key
+        )
+        preserved = {k: v for k, v in existing_result.items() if k not in frag and k != list_key}
         await self.analysis_repo.set_stage_result(run, stage, {**preserved, **frag})
 
         # E3: empty effective set -> fail, no re-run.
         if frag["count"] == 0:
             await self.analysis_repo.fail(
-                run, "No compounds remain after editing; add at least one compound."
+                run, f"No {entity}s remain after editing; add at least one {entity}."
             )
             return
 

@@ -159,3 +159,94 @@ def test_build_stage_entities_count_is_effective_forward_set() -> None:
     }
     frag = edits.build_stage_entities(fresh, edit)
     assert frag["count"] == 2
+
+
+# ---------------------------------------------------------------------------
+# Entity-keyed variant (id_key="target_id", list_key="targets") — Stage 3/4.
+# The same algebra must hold with the target id key and the result fragment must
+# expose the tagged list under "targets", never "compounds".
+# ---------------------------------------------------------------------------
+def test_normalize_edit_target_id_key() -> None:
+    a, b = _eid(1), _eid(2)
+    existing = {"added": [{"target_id": a, "canonical_name": "EGFR"}], "removed": [b]}
+    # Add b (currently removed) and remove a (currently added): both cross out (E5 disjoint).
+    out = edits.normalize_edit(
+        existing, [{"target_id": b, "canonical_name": "TP53"}], [a], id_key="target_id"
+    )
+    added_ids = {e["target_id"] for e in out["added"]}
+    removed_ids = set(out["removed"])
+    assert added_ids & removed_ids == set()
+    assert added_ids == {b}
+    assert removed_ids == set()
+    assert out["added"] == [{"target_id": b, "canonical_name": "TP53"}]
+
+
+def test_apply_edits_target_id_key() -> None:
+    computed = [_eid(1), _eid(2)]
+    edit = {
+        "added": [{"target_id": _eid(9), "canonical_name": "New"}],
+        "removed": [_eid(2)],
+    }
+    out = edits.apply_edits(computed, edit, id_key="target_id")
+    assert _eid(9) in out["effective"]
+    assert out["tags"][_eid(9)] == "user-added"
+    assert out["tags"][_eid(2)] == "user-removed"
+    assert out["tags"][_eid(1)] == "computed"
+    assert _eid(2) not in out["effective"]
+
+
+def test_build_stage_entities_targets_list_key_and_tags() -> None:
+    # 2 computed targets, remove 1, add 1 -> tagged list lives under "targets", count = 2.
+    fresh = [
+        {"target_id": _eid(1), "canonical_name": "EGFR"},
+        {"target_id": _eid(2), "canonical_name": "TP53"},
+    ]
+    edit = {
+        "added": [{"target_id": _eid(9), "canonical_name": "AKT1"}],
+        "removed": [_eid(2)],
+    }
+    frag = edits.build_stage_entities(fresh, edit, id_key="target_id", list_key="targets")
+    assert "targets" in frag
+    assert "compounds" not in frag
+    rows = {t["target_id"]: t for t in frag["targets"]}
+    assert rows[_eid(1)]["tag"] == "computed"
+    assert rows[_eid(2)]["tag"] == "user-removed"
+    assert rows[_eid(9)]["tag"] == "user-added"
+    assert rows[_eid(9)]["canonical_name"] == "AKT1"
+    assert frag["computed_ids"] == [_eid(1), _eid(2)]
+    assert frag["count"] == 2
+    assert frag["state"] == "user_provided"
+
+
+def test_build_stage_entities_targets_no_edit_is_all_computed() -> None:
+    fresh = [
+        {"target_id": _eid(1), "canonical_name": "EGFR"},
+        {"target_id": _eid(2), "canonical_name": "TP53"},
+    ]
+    frag = edits.build_stage_entities(fresh, None, id_key="target_id", list_key="targets")
+    assert frag["count"] == 2
+    assert frag["state"] == "computed"
+    assert frag["computed_ids"] == [_eid(1), _eid(2)]
+    assert all(t["tag"] == "computed" for t in frag["targets"])
+
+
+def test_e6_target_add_reapplied_and_remove_resuppressed() -> None:
+    # Fresh set drops the added id (re-applied) and re-introduces the removed id (re-suppressed).
+    added = _eid(9)
+    removed = _eid(2)
+    fresh = [
+        {"target_id": _eid(1), "canonical_name": "EGFR"},
+        {"target_id": removed, "canonical_name": "TP53"},
+    ]
+    edit = {
+        "added": [{"target_id": added, "canonical_name": "AKT1"}],
+        "removed": [removed],
+    }
+    frag = edits.build_stage_entities(fresh, edit, id_key="target_id", list_key="targets")
+    rows = {t["target_id"]: t for t in frag["targets"]}
+    assert rows[added]["tag"] == "user-added"
+    assert rows[removed]["tag"] == "user-removed"
+    effective = [t["target_id"] for t in frag["targets"] if t["tag"] != "user-removed"]
+    assert added in effective
+    assert removed not in effective
+    assert frag["count"] == 2

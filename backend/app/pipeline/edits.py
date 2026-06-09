@@ -1,9 +1,10 @@
 """The durable in-stage edit layer (pure functions).
 
 A *stage edit* records user add/remove decisions for an entity stage as a pair of
-disjoint lists::
+disjoint lists. The entity id key is parameterized (``id_key``); it defaults to
+``"compound_id"`` (Stage 1), and Stage 3/4 pass ``"target_id"``::
 
-    {"added": [{"compound_id": str, "canonical_name": str | None}], "removed": [str, ...]}
+    {"added": [{<id_key>: str, "canonical_name": str | None}], "removed": [str, ...]}
 
 Added entries carry their resolved name so the layer is self-contained — rendering or
 reapplying an edit never needs an external lookup. The edit is *durable*: it is applied
@@ -29,19 +30,23 @@ def _is_empty(edit: dict[str, Any] | None) -> bool:
 
 
 def normalize_edit(
-    existing: dict[str, Any], add: list[dict[str, Any]], remove: list[str]
+    existing: dict[str, Any],
+    add: list[dict[str, Any]],
+    remove: list[str],
+    *,
+    id_key: str = "compound_id",
 ) -> dict[str, Any]:
     """Fold ``add``/``remove`` into ``existing``, returning a new disjoint, de-duped edit.
 
     - Adding an id currently in ``removed`` clears it from ``removed`` (re-adding undoes a removal).
     - Removing an id currently in ``added`` clears it from ``added`` (re-removing undoes an add).
-    - Otherwise the id unions into the respective list. ``added`` is de-duped by ``compound_id``;
+    - Otherwise the id unions into the respective list. ``added`` is de-duped by ``id_key``;
       the last name wins. ``added`` and ``removed`` end disjoint.
     """
     # Start from copies of the existing state, keyed by id for O(1) updates.
     added: dict[str, dict[str, Any]] = {
-        str(e["compound_id"]): {
-            "compound_id": str(e["compound_id"]),
+        str(e[id_key]): {
+            id_key: str(e[id_key]),
             "canonical_name": e.get("canonical_name"),
         }
         for e in existing.get("added", [])
@@ -49,9 +54,9 @@ def normalize_edit(
     removed: set[str] = {str(r) for r in existing.get("removed", [])}
 
     for entry in add:
-        cid = str(entry["compound_id"])
+        cid = str(entry[id_key])
         removed.discard(cid)  # re-adding clears a pending removal
-        added[cid] = {"compound_id": cid, "canonical_name": entry.get("canonical_name")}
+        added[cid] = {id_key: cid, "canonical_name": entry.get("canonical_name")}
 
     for rid in remove:
         rid_s = str(rid)
@@ -63,7 +68,9 @@ def normalize_edit(
     return {"added": list(added.values()), "removed": sorted(removed)}
 
 
-def apply_edits(computed_ids: list[str], edit: dict[str, Any] | None) -> dict[str, Any]:
+def apply_edits(
+    computed_ids: list[str], edit: dict[str, Any] | None, *, id_key: str = "compound_id"
+) -> dict[str, Any]:
     """Apply ``edit`` to the computed id list, returning ``{effective, tags}``.
 
     ``effective = (computed ∪ added) − removed`` (order: computed first, then added).
@@ -76,7 +83,7 @@ def apply_edits(computed_ids: list[str], edit: dict[str, Any] | None) -> dict[st
     computed = [str(c) for c in computed_ids]
     computed_set = set(computed)
     removed = {str(r) for r in edit.get("removed", [])}
-    added_ids = [str(e["compound_id"]) for e in edit.get("added", [])]
+    added_ids = [str(e[id_key]) for e in edit.get("added", [])]
 
     tags: dict[str, str] = {}
     effective: list[str] = []
@@ -97,45 +104,49 @@ def apply_edits(computed_ids: list[str], edit: dict[str, Any] | None) -> dict[st
 
 
 def build_stage_entities(
-    computed_entities: list[dict[str, Any]], edit: dict[str, Any] | None
+    computed_entities: list[dict[str, Any]],
+    edit: dict[str, Any] | None,
+    *,
+    id_key: str = "compound_id",
+    list_key: str = "compounds",
 ) -> dict[str, Any]:
     """Build the stored entity-stage fragment from raw computed entities + an edit.
 
     ``computed_entities`` is the raw runner output: a list of
-    ``{compound_id, canonical_name, ...}``.
-    Returns ``{compounds, computed_ids, count, state}`` where ``compounds`` is the tagged list
+    ``{<id_key>, canonical_name, ...}``.
+    Returns ``{<list_key>, computed_ids, count, state}`` where ``<list_key>`` is the tagged list
     (computed entries first — each tagged ``"computed"`` or ``"user-removed"`` — followed by
     added entries tagged ``"user-added"``, names from the edit). The effective forward set is the
     entries with ``tag != "user-removed"``; ``count`` is its size. ``state`` is ``"user_provided"``
     iff the edit is non-empty, else ``"computed"``.
     """
-    computed_ids = [str(e["compound_id"]) for e in computed_entities]
+    computed_ids = [str(e[id_key]) for e in computed_entities]
     names: dict[str, str | None] = {
-        str(e["compound_id"]): e.get("canonical_name") for e in computed_entities
+        str(e[id_key]): e.get("canonical_name") for e in computed_entities
     }
-    applied = apply_edits(computed_ids, edit)
+    applied = apply_edits(computed_ids, edit, id_key=id_key)
     tags = applied["tags"]
 
-    compounds: list[dict[str, Any]] = []
+    entities: list[dict[str, Any]] = []
     for cid in computed_ids:
-        compounds.append({"compound_id": cid, "canonical_name": names.get(cid), "tag": tags[cid]})
+        entities.append({id_key: cid, "canonical_name": names.get(cid), "tag": tags[cid]})
     for entry in (edit or _EMPTY_EDIT).get("added", []):
-        aid = str(entry["compound_id"])
+        aid = str(entry[id_key])
         if aid in names:
             # Already represented as a computed entry above.
             continue
-        compounds.append(
+        entities.append(
             {
-                "compound_id": aid,
+                id_key: aid,
                 "canonical_name": entry.get("canonical_name"),
                 "tag": "user-added",
             }
         )
 
-    count = sum(1 for c in compounds if c["tag"] != "user-removed")
+    count = sum(1 for c in entities if c["tag"] != "user-removed")
     state = "computed" if _is_empty(edit) else "user_provided"
     return {
-        "compounds": compounds,
+        list_key: entities,
         "computed_ids": computed_ids,
         "count": count,
         "state": state,
