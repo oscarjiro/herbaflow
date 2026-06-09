@@ -25,6 +25,24 @@ class AnalysisCreate(BaseModel):
     manual_compound_ids: list[uuid.UUID] = Field(default_factory=list)
 
 
+class ResetFromRequest(BaseModel):
+    """Body for POST /analyses/{id}/reset-from/{stage}.
+
+    ``parameters`` is a stage-keyed map of ADME param overrides, e.g.
+    ``{"2": {"max_violations": 0}}``.  Only the entry matching the target
+    stage is extracted and forwarded to the service.
+    """
+
+    parameters: dict[str, dict[str, Any]] | None = None
+
+
+class StageEditRequest(BaseModel):
+    """Body for POST /analyses/{id}/stages/{stage}/edit."""
+
+    add: list[uuid.UUID] = Field(default_factory=list)
+    remove: list[uuid.UUID] = Field(default_factory=list)
+
+
 class AnalysisRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -34,6 +52,7 @@ class AnalysisRead(BaseModel):
     mode: Mode
     status: str | None
     current_stage: int | None
+    parameters: dict[str, Any] = Field(default_factory=dict)
     stage_results: dict[str, Any]
     created_at: datetime | None
     completed_at: datetime | None

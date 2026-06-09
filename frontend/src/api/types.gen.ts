@@ -15,6 +15,9 @@ export type AnalysisRead = {
     mode: Mode;
     status: string | null;
     current_stage: number | null;
+    parameters?: {
+        [key: string]: unknown;
+    };
     stage_results: {
         [key: string]: unknown;
     };
@@ -57,11 +60,34 @@ export type PlantRead = {
     family_name: string | null;
 };
 
+/**
+ * Body for POST /analyses/{id}/reset-from/{stage}.
+ *
+ * ``parameters`` is a stage-keyed map of ADME param overrides, e.g.
+ * ``{"2": {"max_violations": 0}}``.  Only the entry matching the target
+ * stage is extracted and forwarded to the service.
+ */
+export type ResetFromRequest = {
+    parameters?: {
+        [key: string]: {
+            [key: string]: unknown;
+        };
+    } | null;
+};
+
 export type ResolvedCompound = {
     compound_id: string;
     canonical_key: string;
     canonical_name: string | null;
     validation_status: string;
+};
+
+/**
+ * Body for POST /analyses/{id}/stages/{stage}/edit.
+ */
+export type StageEditRequest = {
+    add?: Array<string>;
+    remove?: Array<string>;
 };
 
 export type ValidateRequest = {
@@ -193,6 +219,62 @@ export type AdvanceAnalysisResponses = {
 };
 
 export type AdvanceAnalysisResponse = AdvanceAnalysisResponses[keyof AdvanceAnalysisResponses];
+
+export type ResetFromData = {
+    body: ResetFromRequest;
+    path: {
+        analysis_id: string;
+        stage: number;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/reset-from/{stage}';
+};
+
+export type ResetFromErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResetFromError = ResetFromErrors[keyof ResetFromErrors];
+
+export type ResetFromResponses = {
+    /**
+     * Successful Response
+     */
+    200: AnalysisRead;
+};
+
+export type ResetFromResponse = ResetFromResponses[keyof ResetFromResponses];
+
+export type EditStageData = {
+    body: StageEditRequest;
+    path: {
+        analysis_id: string;
+        stage: number;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/stages/{stage}/edit';
+};
+
+export type EditStageErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type EditStageError = EditStageErrors[keyof EditStageErrors];
+
+export type EditStageResponses = {
+    /**
+     * Successful Response
+     */
+    200: AnalysisRead;
+};
+
+export type EditStageResponse = EditStageResponses[keyof EditStageResponses];
 
 export type ValidateCompoundsData = {
     body: ValidateRequest;

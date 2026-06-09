@@ -1,0 +1,220 @@
+"""Integration tests for the guided machinery: reset-from and stage-edit endpoints.
+
+All scenarios use the seeded compounds (c1/c2) — no 2,000-compound seeding.
+"""
+
+from __future__ import annotations
+
+import uuid
+
+import pytest
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+SETTLED = frozenset(
+    {"complete", "failed", "stage_1_awaiting_approval", "stage_2_awaiting_approval"}
+)
+
+
+async def _poll(c, run_id: str, *, until=None, max_iters: int = 80) -> dict:
+    """Poll GET /analyses/{id} until settled (or a specific status is reached)."""
+    final = {}
+    for _ in range(max_iters):
+        r = await c.get(f"/analyses/{run_id}")
+        final = r.json()
+        st = final.get("status")
+        if until is not None and st == until:
+            break
+        if until is None and st in SETTLED:
+            break
+    return final
+
+
+async def _create(c, ids, *, mode: str = "guided", plant: str = "plant_full", manual=None):
+    body = {
+        "plant_ids": [str(ids[plant])],
+        "disease_id": str(ids["disease"]),
+        "mode": mode,
+    }
+    if manual:
+        body["manual_compound_ids"] = [str(m) for m in manual]
+    resp = await c.post("/analyses", json=body)
+    assert resp.status_code == 202
+    return resp.json()["analysis_id"]
+
+
+# ---------------------------------------------------------------------------
+# E6 — Edit S1 + reset-from S2 (edit layer survives param Redo)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) -> None:
+    """
+    Scenario E6:
+    1. Create guided run on plant_empty with c1 as manual compound -> S1 awaiting (c1 effective).
+    2. Stage-edit S1: add c2, remove c1 -> re-run from S2; reach stage_2_awaiting_approval; c2
+       effective, c1 tagged user-removed.
+    3. reset-from/2 with skip_adme=true -> re-run from S2 again; S1 edit layer survives (c2
+       effective, c1 user-removed) and parameters["stage_edits"]["1"] is preserved.
+    """
+    c, ids = client
+
+    # Step 1: guided, plant_empty + manual c1
+    run_id = await _create(c, ids, mode="guided", plant="plant_empty", manual=[ids["c1"]])
+    state = await _poll(c, run_id, until="stage_1_awaiting_approval")
+    assert state["status"] == "stage_1_awaiting_approval"
+    assert any(
+        comp["compound_id"] == str(ids["c1"])
+        for comp in state["stage_results"]["1"]["compounds"]
+        if comp.get("tag") != "user-removed"
+    ), "c1 should be effective in S1 before edit"
+
+    # Step 2: edit S1 — add c2, remove c1
+    edit_resp = await c.post(
+        f"/analyses/{run_id}/stages/1/edit",
+        json={"add": [str(ids["c2"])], "remove": [str(ids["c1"])]},
+    )
+    assert edit_resp.status_code == 200
+    # The edit triggers a re-run from S2; wait for it to settle.
+    state = await _poll(c, run_id, until="stage_2_awaiting_approval")
+    assert state["status"] == "stage_2_awaiting_approval"
+
+    s1_compounds = state["stage_results"]["1"]["compounds"]
+    c2_entries = [x for x in s1_compounds if x["compound_id"] == str(ids["c2"])]
+    c1_entries = [x for x in s1_compounds if x["compound_id"] == str(ids["c1"])]
+    assert c2_entries, "c2 should be in S1 after edit"
+    assert c2_entries[0].get("tag") != "user-removed", "c2 should be effective"
+    assert c1_entries, "c1 should remain in S1 compounds list (tagged user-removed)"
+    assert c1_entries[0].get("tag") == "user-removed", "c1 should be tagged user-removed"
+
+    # Step 3: reset-from/2 with skip_adme=true — edit layer must survive
+    reset_resp = await c.post(
+        f"/analyses/{run_id}/reset-from/2",
+        json={"parameters": {"2": {"skip_adme": True}}},
+    )
+    assert reset_resp.status_code == 200
+    state = await _poll(c, run_id, until="stage_2_awaiting_approval")
+    assert state["status"] == "stage_2_awaiting_approval"
+
+    # S1 edit layer must be preserved after the S2 re-run.
+    s1_after = state["stage_results"]["1"]["compounds"]
+    c2_after = [x for x in s1_after if x["compound_id"] == str(ids["c2"])]
+    c1_after = [x for x in s1_after if x["compound_id"] == str(ids["c1"])]
+    assert c2_after and c2_after[0].get("tag") != "user-removed", "c2 still effective after S2 redo"
+    assert (
+        c1_after and c1_after[0].get("tag") == "user-removed"
+    ), "c1 still user-removed after S2 redo"
+
+    # parameters["stage_edits"]["1"] must be persisted.
+    assert "stage_edits" in state["parameters"], "stage_edits key must exist in parameters"
+    assert "1" in state["parameters"]["stage_edits"], "stage_edits['1'] must survive S2 param Redo"
+
+
+# ---------------------------------------------------------------------------
+# Zero-pass S2 guided — checkpoint, not failure
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_zero_pass_s2_guided_is_checkpoint_not_failure(client) -> None:
+    """
+    For a guided run, a zero-pass S2 (all compounds fail ADME) must land at
+    stage_2_awaiting_approval — NOT failed.  A subsequent reset-from with
+    skip_adme=true must recover (compounds pass again).
+    """
+    c, ids = client
+
+    run_id = await _create(c, ids, mode="guided", plant="plant_full")
+    # Poll to S1 checkpoint then advance.
+    state = await _poll(c, run_id, until="stage_1_awaiting_approval")
+    assert state["status"] == "stage_1_awaiting_approval"
+    adv = await c.post(f"/analyses/{run_id}/advance")
+    assert adv.status_code == 200
+    state = await _poll(c, run_id, until="stage_2_awaiting_approval")
+    assert state["status"] == "stage_2_awaiting_approval"
+
+    # Reset with max_mw=1 AND max_violations=0 -> every compound fails ADME -> zero-pass.
+    # (max_violations default is 1, so max_mw=1 alone still allows 1 violation — we need 0.)
+    reset_resp = await c.post(
+        f"/analyses/{run_id}/reset-from/2",
+        json={"parameters": {"2": {"max_mw": 1, "max_violations": 0}}},
+    )
+    assert reset_resp.status_code == 200
+    state = await _poll(c, run_id, until="stage_2_awaiting_approval")
+    assert (
+        state["status"] == "stage_2_awaiting_approval"
+    ), "Guided zero-pass S2 must be a checkpoint, not a hard failure"
+    assert (
+        state["stage_results"]["2"]["count"] == 0
+    ), "No compounds should pass with max_mw=1 and max_violations=0"
+
+    # Recovery: reset with skip_adme=true -> both compounds pass.
+    recover_resp = await c.post(
+        f"/analyses/{run_id}/reset-from/2",
+        json={"parameters": {"2": {"skip_adme": True}}},
+    )
+    assert recover_resp.status_code == 200
+    state = await _poll(c, run_id, until="stage_2_awaiting_approval")
+    assert state["status"] == "stage_2_awaiting_approval"
+    assert state["stage_results"]["2"]["count"] == 2, "Both compounds pass with skip_adme=true"
+
+
+# ---------------------------------------------------------------------------
+# Zero-pass S2 auto — hard failure with skip_adme hint
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_zero_pass_s2_auto_is_hard_failure(client) -> None:
+    """
+    For an auto run, a zero-pass S2 (all compounds fail ADME) must hard-fail
+    and the error message must mention skip_adme.
+    """
+    c, ids = client
+
+    run_id = await _create(c, ids, mode="auto", plant="plant_full")
+    state = await _poll(c, run_id, until="complete")
+    assert state["status"] == "complete"
+
+    # Trigger a zero-pass S2 via reset-from.
+    # Use max_mw=1 + max_violations=0 so all compounds fail (default max_violations=1 would
+    # allow one violation, meaning a compound with MW=46.07 still passes with max_mw=1 alone).
+    reset_resp = await c.post(
+        f"/analyses/{run_id}/reset-from/2",
+        json={"parameters": {"2": {"max_mw": 1, "max_violations": 0}}},
+    )
+    assert reset_resp.status_code == 200
+    state = await _poll(c, run_id)
+    assert state["status"] == "failed", "Auto zero-pass S2 must hard-fail (no guided checkpoint)"
+    assert (
+        "skip_adme" in state["error_message"].lower()
+    ), "Error message must mention skip_adme as a recovery hint"
+
+
+# ---------------------------------------------------------------------------
+# 422 — unknown compound id in stage-edit add
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_edit_stage_422_on_unknown_add_id(client) -> None:
+    """POST /stages/1/edit with an unknown compound UUID returns 422 problem+json."""
+    c, ids = client
+
+    run_id = await _create(c, ids, mode="guided", plant="plant_full")
+    state = await _poll(c, run_id, until="stage_1_awaiting_approval")
+    assert state["status"] == "stage_1_awaiting_approval"
+
+    unknown = uuid.uuid4()
+    resp = await c.post(
+        f"/analyses/{run_id}/stages/1/edit",
+        json={"add": [str(unknown)], "remove": []},
+    )
+    assert resp.status_code == 422
+    assert resp.headers["content-type"].startswith("application/problem+json")
+    body = resp.json()
+    assert body["status"] == 422
+    assert str(unknown) in body.get("invalid_compound_ids", [])

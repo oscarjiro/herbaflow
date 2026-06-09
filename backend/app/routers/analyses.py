@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
 from app.pipeline.engine import run_analysis_task
-from app.schemas.analysis import AnalysisCreate, AnalysisRead
+from app.schemas.analysis import AnalysisCreate, AnalysisRead, ResetFromRequest, StageEditRequest
 from app.services.analysis import AnalysisService
 
 router = APIRouter(tags=["analyses"])
@@ -44,5 +44,32 @@ async def advance_analysis(
 ) -> AnalysisRead:
     service = AnalysisService.from_session(session)
     await service.advance(analysis_id)
+    await _commit(session)
+    return await service.get(analysis_id)
+
+
+@router.post("/analyses/{analysis_id}/reset-from/{stage}", response_model=AnalysisRead)
+async def reset_from(
+    analysis_id: uuid.UUID,
+    stage: int,
+    payload: ResetFromRequest,
+    session: AsyncSession = Depends(get_session),
+) -> AnalysisRead:
+    service = AnalysisService.from_session(session)
+    overrides = payload.parameters.get(str(stage)) if payload.parameters else None
+    await service.reset_from(analysis_id, stage, overrides)
+    await _commit(session)
+    return await service.get(analysis_id)
+
+
+@router.post("/analyses/{analysis_id}/stages/{stage}/edit", response_model=AnalysisRead)
+async def edit_stage(
+    analysis_id: uuid.UUID,
+    stage: int,
+    payload: StageEditRequest,
+    session: AsyncSession = Depends(get_session),
+) -> AnalysisRead:
+    service = AnalysisService.from_session(session)
+    await service.edit_stage(analysis_id, stage, add=payload.add, remove=payload.remove)
     await _commit(session)
     return await service.get(analysis_id)

@@ -182,6 +182,130 @@
         }
       }
     },
+    "/analyses/{analysis_id}/reset-from/{stage}": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Reset From",
+        "operationId": "reset_from",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          },
+          {
+            "name": "stage",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Stage"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetFromRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyses/{analysis_id}/stages/{stage}/edit": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Edit Stage",
+        "operationId": "edit_stage",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          },
+          {
+            "name": "stage",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Stage"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StageEditRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/compounds/validate": {
       "post": {
         "tags": [
@@ -351,6 +475,11 @@
               }
             ],
             "title": "Current Stage"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Parameters"
           },
           "stage_results": {
             "additionalProperties": true,
@@ -611,6 +740,28 @@
         ],
         "title": "PlantRead"
       },
+      "ResetFromRequest": {
+        "properties": {
+          "parameters": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parameters"
+          }
+        },
+        "type": "object",
+        "title": "ResetFromRequest",
+        "description": "Body for POST /analyses/{id}/reset-from/{stage}.\n\n``parameters`` is a stage-keyed map of ADME param overrides, e.g.\n``{\"2\": {\"max_violations\": 0}}``.  Only the entry matching the target\nstage is extracted and forwarded to the service."
+      },
       "ResolvedCompound": {
         "properties": {
           "compound_id": {
@@ -646,6 +797,29 @@
           "validation_status"
         ],
         "title": "ResolvedCompound"
+      },
+      "StageEditRequest": {
+        "properties": {
+          "add": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Add"
+          },
+          "remove": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Remove"
+          }
+        },
+        "type": "object",
+        "title": "StageEditRequest",
+        "description": "Body for POST /analyses/{id}/stages/{stage}/edit."
       },
       "ValidateRequest": {
         "properties": {

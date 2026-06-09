@@ -38,6 +38,7 @@ export const zAnalysisRead = z.object({
         z.number().int(),
         z.null()
     ]),
+    parameters: z.object({}).optional(),
     stage_results: z.object({}),
     created_at: z.union([
         z.string().datetime(),
@@ -126,6 +127,13 @@ export const zPlantRead = z.object({
     ])
 });
 
+export const zResetFromRequest = z.object({
+    parameters: z.union([
+        z.object({}),
+        z.null()
+    ]).optional()
+});
+
 export const zResolvedCompound = z.object({
     compound_id: z.string().uuid(),
     canonical_key: z.string(),
@@ -134,6 +142,11 @@ export const zResolvedCompound = z.object({
         z.null()
     ]),
     validation_status: z.string()
+});
+
+export const zStageEditRequest = z.object({
+    add: z.array(z.string().uuid()).optional(),
+    remove: z.array(z.string().uuid()).optional()
 });
 
 export const zValidateRequest = z.object({
@@ -162,6 +175,10 @@ export const zCreateAnalysisResponse = zAnalysisRead;
 export const zGetAnalysisResponse = zAnalysisRead;
 
 export const zAdvanceAnalysisResponse = zAnalysisRead;
+
+export const zResetFromResponse = zAnalysisRead;
+
+export const zEditStageResponse = zAnalysisRead;
 
 export const zValidateCompoundsResponse = zValidateResponse;
 
