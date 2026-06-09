@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -12,7 +13,10 @@ from fastapi.routing import APIRoute
 from app import db
 from app.config import settings
 from app.errors import register_error_handlers
+from app.logging_config import configure_logging
 from app.routers import analyses, compounds, diseases, plants
+
+logger = logging.getLogger("herbaflow.app")
 
 
 def _operation_id(route: APIRoute) -> str:
@@ -26,8 +30,12 @@ def _operation_id(route: APIRoute) -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    configure_logging()
     if settings.async_database_url:
         db.init_engine()
+        logger.info("database engine initialized")
+    else:
+        logger.warning("DATABASE_URL not set — database routes will fail until it is configured")
     try:
         yield
     finally:

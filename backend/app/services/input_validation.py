@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import uuid
 from typing import Any
 
@@ -10,10 +11,13 @@ from app.clock import now_utc
 from app.schemas.compound import CompoundInput, FailedInput, ResolvedCompound
 from app.services import canonical, structure
 
+logger = logging.getLogger("herbaflow.resolution")
+
 
 async def resolve_compounds(
     inputs: list[CompoundInput], repo: Any, pubchem: Any
 ) -> tuple[list[ResolvedCompound], list[FailedInput]]:
+    logger.info("validating %d compound input(s)", len(inputs))
     resolved: dict[str, ResolvedCompound] = {}
     failed: list[FailedInput] = []
 
@@ -26,12 +30,14 @@ async def resolve_compounds(
         # 1. Identity
         if is_key:
             if not structure.is_inchikey(token):
+                logger.info("  rejected %r: invalid InChIKey format", item.value)
                 failed.append(FailedInput(value=item.value, reason="invalid InChIKey format"))
                 continue
             inchikey, smiles = token.upper(), None
         else:
             ident = await asyncio.to_thread(structure.identity_from_smiles, token)
             if ident is None:
+                logger.info("  rejected %r: invalid structure", item.value)
                 failed.append(FailedInput(value=item.value, reason="invalid structure"))
                 continue
             inchikey, smiles = ident.inchikey, ident.canonical_smiles
@@ -44,6 +50,7 @@ async def resolve_compounds(
         # 2. DB-first
         existing = await repo.get_by_key(canonical_key)
         if existing is not None:
+            logger.info("  reuse (db hit): %s", existing.canonical_name or existing.canonical_key)
             resolved[canonical_key] = ResolvedCompound(
                 compound_id=existing.compound_id,
                 canonical_key=existing.canonical_key,
@@ -55,6 +62,7 @@ async def resolve_compounds(
         # 3. Enrich from PubChem
         rec = await pubchem.fetch_by_inchikey(inchikey)
         if rec is not None:
+            logger.info("  enriched via PubChem: %s (CID %s)", rec.name, rec.pubchem_cid)
             row: dict[str, Any] = {
                 "compound_id": cid,
                 "canonical_key": canonical_key,
@@ -74,6 +82,7 @@ async def resolve_compounds(
             }
             status = "externally_validated"
         elif smiles is not None:  # structure-only (SMILES with no PubChem row)
+            logger.info("  persisted structure-only: %s", inchikey)
             row = {
                 "compound_id": cid,
                 "canonical_key": canonical_key,
@@ -86,6 +95,7 @@ async def resolve_compounds(
             }
             status = "structure_only"
         else:  # bare InChIKey, nowhere found -> dead end
+            logger.info("  rejected %s: not found in the database or PubChem", inchikey)
             failed.append(
                 FailedInput(
                     value=item.value,
@@ -103,4 +113,5 @@ async def resolve_compounds(
             validation_status=status,
         )
 
+    logger.info("resolution complete: %d resolved, %d failed", len(resolved), len(failed))
     return list(resolved.values()), failed

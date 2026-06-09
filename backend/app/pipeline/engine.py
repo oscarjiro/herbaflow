@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any, Protocol
@@ -11,6 +12,8 @@ from app.errors import ConflictProblem
 from app.pipeline import state
 from app.pipeline.stages import stage1
 from app.repositories.analysis import AnalysisRepository
+
+logger = logging.getLogger("herbaflow.pipeline")
 
 StageRunner = Callable[[Any], Awaitable[dict[str, Any]]]
 
@@ -33,16 +36,21 @@ async def execute_run(repo: _Repo, analysis_id: uuid.UUID, stage_runner: StageRu
     run = await repo.get(analysis_id)
     if run is None:
         return
+    rid = str(analysis_id)[:8]
+    logger.info("run %s: stage 1 running", rid)
     await repo.set_status(run, state.stage_status(1, "starting"), current_stage=1)
     await repo.set_status(run, state.stage_status(1, "running"))
     result = await stage_runner(run)
     if result["count"] == 0:
+        logger.warning("run %s: stage 1 found 0 compounds — failing", rid)
         await repo.fail(run, "No compounds found for the selected plants.")
         return
     await repo.set_stage_result(run, 1, result)
     if run.mode == "guided":
+        logger.info("run %s: stage 1 done (%d compounds) — awaiting approval", rid, result["count"])
         await repo.set_status(run, state.stage_status(1, "awaiting_approval"))
         return
+    logger.info("run %s: stage 1 done (%d compounds) — complete (auto)", rid, result["count"])
     await repo.set_status(run, state.stage_status(1, "complete"))
     await repo.complete(run)
 
@@ -54,6 +62,7 @@ async def advance_run(repo: _Repo, analysis_id: uuid.UUID) -> None:
         raise ConflictProblem(detail="Run not found.")
     if run.status != state.stage_status(1, "awaiting_approval"):
         raise ConflictProblem(detail="Run is not awaiting approval.")
+    logger.info("run %s: approved stage 1 — complete", str(analysis_id)[:8])
     await repo.set_status(run, state.stage_status(_LAST_STAGE, "complete"))
     await repo.complete(run)
 

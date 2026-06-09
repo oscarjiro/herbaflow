@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 import httpx
 
 from app.integrations.base import with_retry
+
+logger = logging.getLogger("herbaflow.integrations.pubchem")
 
 _BASE = "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
 # 2025 rename: CanonicalSMILES->ConnectivitySMILES (no stereo), IsomericSMILES->SMILES (stereo).
@@ -28,6 +31,7 @@ class PubChemClient:
         self._client = client
 
     async def fetch_by_inchikey(self, inchikey: str) -> PubChemRecord | None:
+        logger.info("PubChem lookup: %s", inchikey)
         url = f"{_BASE}/compound/inchikey/{inchikey}/property/{_PROPS}/JSON"
 
         async def _call() -> httpx.Response:
@@ -35,6 +39,7 @@ class PubChemClient:
 
         resp = await with_retry(_call)
         if resp.status_code == 404:
+            logger.info("PubChem: no record for %s", inchikey)
             return None
         resp.raise_for_status()
         props = resp.json().get("PropertyTable", {}).get("Properties", [])

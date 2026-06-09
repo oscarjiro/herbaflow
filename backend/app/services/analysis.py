@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import uuid
 from typing import Any
 
@@ -15,6 +16,8 @@ from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
 from app.schemas.analysis import AnalysisCreate, AnalysisRead
+
+logger = logging.getLogger("herbaflow.analysis")
 
 
 class AnalysisService:
@@ -41,6 +44,13 @@ class AnalysisService:
         )
 
     async def create(self, payload: AnalysisCreate) -> AnalysisRead:
+        logger.info(
+            "creating analysis: %d plant(s), disease %s, %d manual compound(s), mode=%s",
+            len(payload.plant_ids),
+            str(payload.disease_id)[:8],
+            len(payload.manual_compound_ids),
+            payload.mode.value,
+        )
         missing = await self.plant_repo.missing_ids(payload.plant_ids)
         if missing:
             raise ValidationProblem(

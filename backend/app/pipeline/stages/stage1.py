@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import uuid
 from dataclasses import dataclass
 from typing import Any
@@ -12,6 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.compound import Compound
 from app.models.plant_compound import PlantCompound
 from app.repositories.compound import CompoundRepository
+
+logger = logging.getLogger("herbaflow.pipeline")
 
 
 @dataclass(frozen=True)
@@ -73,4 +76,11 @@ async def run(
             manual.append(
                 {"compound_id": str(comp.compound_id), "canonical_name": comp.canonical_name}
             )
-    return select_compounds(rows, manual=manual)
+    out = select_compounds(rows, manual=manual)
+    logger.info(
+        "stage 1: %d plant-link row(s) + %d manual -> %d distinct compound(s)",
+        len(rows),
+        len(manual),
+        out["count"],
+    )
+    return out
