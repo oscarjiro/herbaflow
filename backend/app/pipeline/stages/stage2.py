@@ -158,13 +158,36 @@ async def screen(
             descriptor_source = "etl"
             computed_here = False
             computed_d = None
-            # Descriptor source object is the compound itself
+
+            # Read raw (no or-0 coercion) so missing descriptors surface correctly.
+            raw_logp = _read(compound, "logp")
+            raw_hbd = _read(compound, "hbond_donors")
+            raw_hba = _read(compound, "hbond_acceptors")
+            raw_tpsa = _read(compound, "tpsa")
+            raw_rb = _read(compound, "rotatable_bonds")
+
+            # Determine which descriptors are required for this screening run.
+            # Lipinski descriptors are always required; Veber descriptors only when
+            # apply_veber=True.
+            lipinski_missing = raw_logp is None or raw_hbd is None or raw_hba is None
+            veber_missing = apply_veber and (raw_tpsa is None or raw_rb is None)
+
+            if lipinski_missing or veber_missing:
+                # Cannot screen: exclude with reason rather than coercing to 0
+                annotations["could_not_screen"].append(cid)
+                filtered.append(
+                    _filtered_dict(compound, descriptor_source="etl", reason="could not screen")
+                )
+                continue
+
             d_mw = float(mw)
-            d_logp = float(_read(compound, "logp") or 0)
-            d_hbd = int(_read(compound, "hbond_donors") or 0)
-            d_hba = int(_read(compound, "hbond_acceptors") or 0)
-            d_tpsa = float(_read(compound, "tpsa") or 0)
-            d_rb = int(_read(compound, "rotatable_bonds") or 0)
+            d_logp = float(raw_logp)
+            d_hbd = int(raw_hbd)
+            d_hba = int(raw_hba)
+            # Veber descriptors: use real values when present; 0-fallback is safe when
+            # apply_veber=False because d_tpsa/d_rb are only read inside the Veber gate.
+            d_tpsa = float(raw_tpsa) if raw_tpsa is not None else 0.0
+            d_rb = int(raw_rb) if raw_rb is not None else 0
             d_np: float | None = _read(compound, "np_likeness_score")
             d_pains: bool = bool(_read(compound, "is_pains_positive") or False)
         else:

@@ -44,11 +44,11 @@ def _seeded(
     canonical_name: str = "Test Compound",
     smiles: str = "CCO",
     molecular_weight: float = 46.07,
-    logp: float = -0.14,
-    hbond_donors: int = 1,
-    hbond_acceptors: int = 1,
-    tpsa: float = 20.23,
-    rotatable_bonds: int = 0,
+    logp: float | None = -0.14,
+    hbond_donors: int | None = 1,
+    hbond_acceptors: int | None = 1,
+    tpsa: float | None = 20.23,
+    rotatable_bonds: int | None = 0,
     qed_score: float = 0.4,
     np_likeness_score: float | None = None,
     num_ro5_violations: int = 0,
@@ -459,3 +459,48 @@ async def test_zero_pass_returns_empty_passed() -> None:
     assert result["count"] == 0
     assert result["passed"] == []
     assert len(result["filtered"]) == 1
+
+
+# ---------------------------------------------------------------------------
+# NEW: seeded compound with incomplete descriptors → "could not screen"
+# (mw present but a Lipinski descriptor is None — live DB has 8 such rows)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_seeded_incomplete_descriptors_could_not_screen() -> None:
+    """Seeded compound: mw present, logp NULL → must be EXCLUDED, not silently passed."""
+    c = _seeded(logp=None)
+    result = await stage2.screen([c], _params(apply_veber=True), compute=_fake_compute_none)
+
+    assert result["count"] == 0, "should NOT silently pass with logp=None"
+    assert result["passed"] == []
+    assert len(result["filtered"]) == 1
+    assert result["filtered"][0]["reason"] == "could not screen"
+    assert str(c.compound_id) in result["annotations"]["could_not_screen"]
+    assert result["filtered"][0]["descriptor_source"] == "etl"
+
+
+@pytest.mark.asyncio
+async def test_seeded_missing_veber_descriptor_only_required_when_veber_on() -> None:
+    """tpsa=None, rotatable_bonds=None with valid Lipinski descriptors:
+    - apply_veber=False  → screened normally, count == 1 (Veber unused)
+    - apply_veber=True   → cannot screen, count == 0
+    """
+    # apply_veber=False: Veber descriptors not required → should pass Lipinski
+    c_off = _seeded(tpsa=None, rotatable_bonds=None)
+    result_off = await stage2.screen(
+        [c_off], _params(apply_veber=False), compute=_fake_compute_none
+    )
+    assert (
+        result_off["count"] == 1
+    ), "Veber descriptors should not be required when apply_veber=False"
+
+    # apply_veber=True: Veber descriptors required → cannot screen
+    c_on = _seeded(tpsa=None, rotatable_bonds=None)
+    result_on = await stage2.screen([c_on], _params(apply_veber=True), compute=_fake_compute_none)
+    assert (
+        result_on["count"] == 0
+    ), "should not screen when tpsa/rotatable_bonds are None with apply_veber=True"
+    assert result_on["filtered"][0]["reason"] == "could not screen"
+    assert str(c_on.compound_id) in result_on["annotations"]["could_not_screen"]
