@@ -30,6 +30,7 @@ class AnalysisRepository:
         plant_ids: list[uuid.UUID],
         mode: str,
         manual_compound_ids: list[uuid.UUID],
+        pipeline_parameters: dict[str, Any] | None = None,
     ) -> AnalysisRun:
         run = AnalysisRun(
             analysis_name=analysis_name,
@@ -37,6 +38,8 @@ class AnalysisRepository:
             parameters={
                 "plant_ids": [str(p) for p in plant_ids],
                 "manual_compounds": [str(c) for c in manual_compound_ids],
+                "stage_edits": {},
+                **(pipeline_parameters or {}),
             },
             status="pending",
             stage_results={},

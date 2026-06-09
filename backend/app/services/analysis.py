@@ -8,6 +8,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import contracts
 from app.clock import now_utc
 from app.errors import GoneProblem, NotFoundProblem, ValidationProblem
 from app.pipeline import engine
@@ -68,12 +69,14 @@ class AnalysisService:
                     detail="Unknown compound ids.",
                     invalid_compound_ids=[str(c) for c in missing],
                 )
+        pipeline_parameters = {"adme": contracts.adme_defaults()}
         run = await self.analysis_repo.create(
             analysis_name=payload.analysis_name,
             disease_id=payload.disease_id,
             plant_ids=payload.plant_ids,
             mode=payload.mode.value,
             manual_compound_ids=payload.manual_compound_ids,
+            pipeline_parameters=pipeline_parameters,
         )
         return AnalysisRead.model_validate(run)
 

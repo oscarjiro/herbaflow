@@ -27,11 +27,22 @@ class FakeDiseaseRepo:
 class FakeAnalysisRepo:
     def __init__(self, run=None):
         self.created = None
+        self.created_parameters: dict = {}
         self._run = run
 
     async def create(self, **kwargs):
         from types import SimpleNamespace
 
+        pipeline_parameters = kwargs.get("pipeline_parameters") or {}
+        plant_ids = kwargs.get("plant_ids") or []
+        manual_compound_ids = kwargs.get("manual_compound_ids") or []
+        # Mirror real repo parameter-building so tests assert the stored shape
+        self.created_parameters = {
+            "plant_ids": [str(p) for p in plant_ids],
+            "manual_compounds": [str(c) for c in manual_compound_ids],
+            "stage_edits": {},
+            **pipeline_parameters,
+        }
         self.created = SimpleNamespace(
             analysis_id=uuid.uuid4(),
             analysis_name=kwargs["analysis_name"],
@@ -123,3 +134,15 @@ async def test_get_expired_is_410() -> None:
     svc = _service(run=expired)
     with pytest.raises(GoneProblem):
         await svc.get(uuid.uuid4())
+
+
+@pytest.mark.asyncio
+async def test_create_freezes_adme_defaults() -> None:
+    P = uuid.uuid4()
+    D = uuid.uuid4()
+    svc = _service()
+    # Access the underlying fake repo so we can inspect what was passed
+    fake_analysis_repo = svc.analysis_repo
+    await svc.create(AnalysisCreate(plant_ids=[P], disease_id=D))
+    assert fake_analysis_repo.created_parameters.get("adme") == contracts.adme_defaults()
+    assert fake_analysis_repo.created_parameters.get("stage_edits") == {}
