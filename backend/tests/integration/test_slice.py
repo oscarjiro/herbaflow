@@ -84,3 +84,76 @@ async def test_diseases_and_plants_list(client) -> None:
     plants = await c.get("/plants")
     assert plants.status_code == 200
     assert len(plants.json()) == 2
+
+
+@pytest.fixture
+def non_mocked_hosts() -> list[str]:
+    # Let the test's own ASGITransport calls (host "test") through; only PubChem is mocked.
+    return ["test"]
+
+
+@pytest.mark.asyncio
+async def test_validate_enriches_persists_and_is_idempotent(client, httpx_mock) -> None:
+    c, _ = client
+    httpx_mock.add_response(
+        url="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/inchikey/"
+        "LFQSCWFLJHTTHZ-UHFFFAOYSA-N/property/"
+        "MolecularFormula,MolecularWeight,SMILES,ConnectivitySMILES,IUPACName,CanonicalSMILES/JSON",
+        json={
+            "PropertyTable": {
+                "Properties": [
+                    {
+                        "CID": 702,
+                        "MolecularFormula": "C2H6O",
+                        "MolecularWeight": "46.07",
+                        "SMILES": "CCO",
+                        "IUPACName": "ethanol",
+                    }
+                ]
+            }
+        },
+    )
+
+    first = await c.post("/compounds/validate", json={"inputs": [{"value": "CCO"}]})
+    assert first.status_code == 200
+    body = first.json()
+    assert body["failed"] == []
+    assert len(body["resolved"]) == 1
+    assert body["resolved"][0]["validation_status"] == "externally_validated"
+    compound_id = body["resolved"][0]["compound_id"]
+
+    # Second call hits the DB first -> no PubChem request (no extra mock added).
+    second = await c.post("/compounds/validate", json={"inputs": [{"value": "CCO"}]})
+    assert second.status_code == 200
+    repeat = second.json()
+    assert len(repeat["resolved"]) == 1
+    assert repeat["resolved"][0]["compound_id"] == compound_id
+
+
+@pytest.mark.asyncio
+async def test_validate_structure_only_on_pubchem_miss(client, httpx_mock) -> None:
+    c, _ = client
+    httpx_mock.add_response(status_code=404)
+
+    resp = await c.post("/compounds/validate", json={"inputs": [{"value": "c1ccc(cc1)CCN"}]})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["failed"] == []
+    assert len(body["resolved"]) == 1
+    assert body["resolved"][0]["validation_status"] == "structure_only"
+
+
+@pytest.mark.asyncio
+async def test_validate_nowhere_inchikey_fails(client, httpx_mock) -> None:
+    c, _ = client
+    httpx_mock.add_response(status_code=404)
+
+    resp = await c.post(
+        "/compounds/validate",
+        json={"inputs": [{"type": "inchikey", "value": "ZZZZZZZZZZZZZZ-UHFFFAOYSA-N"}]},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["resolved"] == []
+    assert len(body["failed"]) == 1
+    assert "SMILES" in body["failed"][0]["reason"]

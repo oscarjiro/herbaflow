@@ -56,6 +56,17 @@ export const zAnalysisRead = z.object({
     ])
 });
 
+export const zCompoundInput = z.object({
+    type: z.union([
+        z.enum([
+            'smiles',
+            'inchikey'
+        ]),
+        z.null()
+    ]).optional(),
+    value: z.string()
+});
+
 export const zDiseaseRead = z.object({
     disease_id: z.string().uuid(),
     canonical_key: z.string(),
@@ -79,6 +90,11 @@ export const zDiseaseRead = z.object({
         z.string().datetime(),
         z.null()
     ])
+});
+
+export const zFailedInput = z.object({
+    value: z.string(),
+    reason: z.string()
 });
 
 export const zHttpValidationError = z.object({
@@ -109,6 +125,25 @@ export const zPlantRead = z.object({
     ])
 });
 
+export const zResolvedCompound = z.object({
+    compound_id: z.string().uuid(),
+    canonical_key: z.string(),
+    canonical_name: z.union([
+        z.string(),
+        z.null()
+    ]),
+    validation_status: z.string()
+});
+
+export const zValidateRequest = z.object({
+    inputs: z.array(zCompoundInput)
+});
+
+export const zValidateResponse = z.object({
+    resolved: z.array(zResolvedCompound),
+    failed: z.array(zFailedInput)
+});
+
 export const zValidationError = z.object({
     loc: z.array(z.unknown()),
     msg: z.string(),
@@ -126,5 +161,7 @@ export const zCreateAnalysisResponse = zAnalysisRead;
 export const zGetAnalysisResponse = zAnalysisRead;
 
 export const zAdvanceAnalysisResponse = zAnalysisRead;
+
+export const zValidateCompoundsResponse = zValidateResponse;
 
 export const zHealthResponse = z.object({});

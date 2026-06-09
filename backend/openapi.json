@@ -182,6 +182,47 @@
         }
       }
     },
+    "/compounds/validate": {
+      "post": {
+        "tags": [
+          "compounds"
+        ],
+        "summary": "Validate Compounds",
+        "operationId": "validate_compounds",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health",
@@ -372,6 +413,34 @@
         ],
         "title": "AnalysisRead"
       },
+      "CompoundInput": {
+        "properties": {
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "smiles",
+                  "inchikey"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "CompoundInput"
+      },
       "DiseaseRead": {
         "properties": {
           "disease_id": {
@@ -452,6 +521,24 @@
         ],
         "title": "DiseaseRead"
       },
+      "FailedInput": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "reason"
+        ],
+        "title": "FailedInput"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -515,6 +602,82 @@
           "family_name"
         ],
         "title": "PlantRead"
+      },
+      "ResolvedCompound": {
+        "properties": {
+          "compound_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Compound Id"
+          },
+          "canonical_key": {
+            "type": "string",
+            "title": "Canonical Key"
+          },
+          "canonical_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canonical Name"
+          },
+          "validation_status": {
+            "type": "string",
+            "title": "Validation Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "compound_id",
+          "canonical_key",
+          "canonical_name",
+          "validation_status"
+        ],
+        "title": "ResolvedCompound"
+      },
+      "ValidateRequest": {
+        "properties": {
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/CompoundInput"
+            },
+            "type": "array",
+            "title": "Inputs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "inputs"
+        ],
+        "title": "ValidateRequest"
+      },
+      "ValidateResponse": {
+        "properties": {
+          "resolved": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedCompound"
+            },
+            "type": "array",
+            "title": "Resolved"
+          },
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/FailedInput"
+            },
+            "type": "array",
+            "title": "Failed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resolved",
+          "failed"
+        ],
+        "title": "ValidateResponse"
       },
       "ValidationError": {
         "properties": {

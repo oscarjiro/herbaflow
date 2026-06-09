@@ -11,7 +11,7 @@ from fastapi.routing import APIRoute
 from app import db
 from app.config import settings
 from app.errors import register_error_handlers
-from app.routers import analyses, diseases, plants
+from app.routers import analyses, compounds, diseases, plants
 
 
 def _operation_id(route: APIRoute) -> str:
@@ -42,6 +42,7 @@ register_error_handlers(app)
 app.include_router(diseases.router)
 app.include_router(plants.router)
 app.include_router(analyses.router)
+app.include_router(compounds.router)
 
 
 @app.get("/health")

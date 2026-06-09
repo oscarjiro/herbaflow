@@ -23,6 +23,11 @@ export type AnalysisRead = {
     error_message: string | null;
 };
 
+export type CompoundInput = {
+    type?: ('smiles' | 'inchikey') | null;
+    value: string;
+};
+
 export type DiseaseRead = {
     disease_id: string;
     canonical_key: string;
@@ -31,6 +36,11 @@ export type DiseaseRead = {
     ontology_source: string | null;
     source_url: string | null;
     retrieved_at: string | null;
+};
+
+export type FailedInput = {
+    value: string;
+    reason: string;
 };
 
 export type HttpValidationError = {
@@ -44,6 +54,22 @@ export type PlantRead = {
     canonical_key: string;
     canonical_scientific_name: string | null;
     family_name: string | null;
+};
+
+export type ResolvedCompound = {
+    compound_id: string;
+    canonical_key: string;
+    canonical_name: string | null;
+    validation_status: string;
+};
+
+export type ValidateRequest = {
+    inputs: Array<CompoundInput>;
+};
+
+export type ValidateResponse = {
+    resolved: Array<ResolvedCompound>;
+    failed: Array<FailedInput>;
 };
 
 export type ValidationError = {
@@ -166,6 +192,31 @@ export type AdvanceAnalysisResponses = {
 };
 
 export type AdvanceAnalysisResponse = AdvanceAnalysisResponses[keyof AdvanceAnalysisResponses];
+
+export type ValidateCompoundsData = {
+    body: ValidateRequest;
+    path?: never;
+    query?: never;
+    url: '/compounds/validate';
+};
+
+export type ValidateCompoundsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ValidateCompoundsError = ValidateCompoundsErrors[keyof ValidateCompoundsErrors];
+
+export type ValidateCompoundsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ValidateResponse;
+};
+
+export type ValidateCompoundsResponse = ValidateCompoundsResponses[keyof ValidateCompoundsResponses];
 
 export type HealthData = {
     body?: never;
