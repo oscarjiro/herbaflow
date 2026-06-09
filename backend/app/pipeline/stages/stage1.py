@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.compound import Compound
 from app.models.plant_compound import PlantCompound
+from app.repositories.compound import CompoundRepository
 
 
 @dataclass(frozen=True)
@@ -20,7 +21,9 @@ class CompoundRow:
     canonical_name: str | None
 
 
-def select_compounds(rows: list[CompoundRow]) -> dict[str, Any]:
+def select_compounds(
+    rows: list[CompoundRow], manual: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
     """Dedupe compounds across plants, keep per-plant attribution."""
     compounds: dict[str, dict[str, Any]] = {}
     per_plant: dict[str, list[str]] = {}
@@ -30,6 +33,12 @@ def select_compounds(rows: list[CompoundRow]) -> dict[str, Any]:
         per_plant.setdefault(str(row.plant_id), [])
         if cid not in per_plant[str(row.plant_id)]:
             per_plant[str(row.plant_id)].append(cid)
+    for m in manual or []:
+        cid = str(m["compound_id"])
+        compounds.setdefault(cid, {"compound_id": cid, "canonical_name": m.get("canonical_name")})
+        per_plant.setdefault("manual", [])
+        if cid not in per_plant["manual"]:
+            per_plant["manual"].append(cid)
     return {
         "compounds": list(compounds.values()),
         "per_plant": per_plant,
@@ -38,7 +47,11 @@ def select_compounds(rows: list[CompoundRow]) -> dict[str, Any]:
     }
 
 
-async def run(session: AsyncSession, plant_ids: list[uuid.UUID]) -> dict[str, Any]:
+async def run(
+    session: AsyncSession,
+    plant_ids: list[uuid.UUID],
+    manual_compound_ids: list[uuid.UUID] | None = None,
+) -> dict[str, Any]:
     """Fetch plant-compound links for the selected plants and select compounds."""
     stmt = (
         select(
@@ -54,4 +67,10 @@ async def run(session: AsyncSession, plant_ids: list[uuid.UUID]) -> dict[str, An
         CompoundRow(plant_id=r.plant_id, compound_id=r.compound_id, canonical_name=r.canonical_name)
         for r in result.all()
     ]
-    return select_compounds(rows)
+    manual: list[dict[str, Any]] = []
+    if manual_compound_ids:
+        for comp in await CompoundRepository(session).get_many(manual_compound_ids):
+            manual.append(
+                {"compound_id": str(comp.compound_id), "canonical_name": comp.canonical_name}
+            )
+    return select_compounds(rows, manual=manual)

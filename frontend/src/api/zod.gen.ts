@@ -12,7 +12,8 @@ export const zAnalysisCreate = z.object({
     mode: z.enum([
         'auto',
         'guided'
-    ]).optional()
+    ]).optional(),
+    manual_compound_ids: z.array(z.string().uuid()).optional()
 });
 
 export const zAnalysisRead = z.object({

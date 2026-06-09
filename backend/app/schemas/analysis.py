@@ -21,7 +21,8 @@ class AnalysisCreate(BaseModel):
     analysis_name: str | None = None
     plant_ids: list[uuid.UUID] = Field(min_length=1, max_length=contracts.max_plants())
     disease_id: uuid.UUID
-    mode: Mode = Mode.auto
+    mode: Mode = Mode(contracts.default_mode())
+    manual_compound_ids: list[uuid.UUID] = Field(default_factory=list)
 
 
 class AnalysisRead(BaseModel):

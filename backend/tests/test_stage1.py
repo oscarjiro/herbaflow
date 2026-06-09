@@ -25,3 +25,14 @@ def test_select_empty_is_zero() -> None:
     result = stage1.select_compounds([])
     assert result["count"] == 0
     assert result["compounds"] == []
+
+
+def test_select_compounds_unions_manual_attribution() -> None:
+    p, c1, cm = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
+    out = stage1.select_compounds(
+        rows=[stage1.CompoundRow(plant_id=p, compound_id=c1, canonical_name="a")],
+        manual=[{"compound_id": str(cm), "canonical_name": "ethanol"}],
+    )
+    assert out["count"] == 2
+    assert any(c["compound_id"] == str(cm) for c in out["compounds"])
+    assert str(cm) in out["per_plant"].get("manual", [])

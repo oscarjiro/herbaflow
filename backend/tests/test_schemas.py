@@ -22,6 +22,7 @@ def test_requires_at_least_one_plant() -> None:
         AnalysisCreate(plant_ids=[], disease_id=uuid.uuid4())
 
 
-def test_defaults_to_auto() -> None:
+def test_defaults_to_contract_mode() -> None:
     payload = AnalysisCreate(plant_ids=[uuid.uuid4()], disease_id=uuid.uuid4())
-    assert payload.mode == Mode.auto
+    assert payload.mode == Mode.guided
+    assert payload.mode.value == contracts.default_mode()

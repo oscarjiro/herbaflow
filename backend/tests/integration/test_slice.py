@@ -6,7 +6,11 @@ async def test_auto_run_completes(client) -> None:
     c, ids = client
     resp = await c.post(
         "/analyses",
-        json={"plant_ids": [str(ids["plant_full"])], "disease_id": str(ids["disease"])},
+        json={
+            "plant_ids": [str(ids["plant_full"])],
+            "disease_id": str(ids["disease"]),
+            "mode": "auto",
+        },
     )
     assert resp.status_code == 202
     run_id = resp.json()["analysis_id"]
@@ -62,6 +66,48 @@ async def test_zero_compounds_fails(client) -> None:
             break
     assert final["status"] == "failed"
     assert "compound" in final["error_message"].lower()
+
+
+@pytest.mark.asyncio
+async def test_manual_compound_unions_into_stage1(client) -> None:
+    c, ids = client
+    resp = await c.post(
+        "/analyses",
+        json={
+            "plant_ids": [str(ids["plant_empty"])],
+            "disease_id": str(ids["disease"]),
+            "mode": "auto",
+            "manual_compound_ids": [str(ids["c1"])],
+        },
+    )
+    assert resp.status_code == 202
+    run_id = resp.json()["analysis_id"]
+
+    final = None
+    for _ in range(50):
+        final = (await c.get(f"/analyses/{run_id}")).json()
+        if final["status"] in ("complete", "failed"):
+            break
+    assert final["status"] == "complete"
+    assert final["stage_results"]["1"]["count"] == 1
+    assert str(ids["c1"]) in final["stage_results"]["1"]["per_plant"]["manual"]
+
+
+@pytest.mark.asyncio
+async def test_unknown_manual_compound_is_422(client) -> None:
+    import uuid
+
+    c, ids = client
+    resp = await c.post(
+        "/analyses",
+        json={
+            "plant_ids": [str(ids["plant_full"])],
+            "disease_id": str(ids["disease"]),
+            "manual_compound_ids": [str(uuid.uuid4())],
+        },
+    )
+    assert resp.status_code == 422
+    assert resp.headers["content-type"].startswith("application/problem+json")
 
 
 @pytest.mark.asyncio

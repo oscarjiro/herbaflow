@@ -5,6 +5,7 @@ export type AnalysisCreate = {
     plant_ids: Array<string>;
     disease_id: string;
     mode?: Mode;
+    manual_compound_ids?: Array<string>;
 };
 
 export type AnalysisRead = {

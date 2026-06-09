@@ -11,6 +11,7 @@ from app.clock import now_utc
 from app.errors import GoneProblem, NotFoundProblem, ValidationProblem
 from app.pipeline import engine
 from app.repositories.analysis import AnalysisRepository
+from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
 from app.schemas.analysis import AnalysisCreate, AnalysisRead
@@ -23,10 +24,12 @@ class AnalysisService:
         plant_repo: Any,
         disease_repo: Any,
         analysis_repo: Any,
+        compound_repo: Any,
     ) -> None:
         self.plant_repo = plant_repo
         self.disease_repo = disease_repo
         self.analysis_repo = analysis_repo
+        self.compound_repo = compound_repo
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> AnalysisService:
@@ -34,6 +37,7 @@ class AnalysisService:
             plant_repo=PlantRepository(session),
             disease_repo=DiseaseRepository(session),
             analysis_repo=AnalysisRepository(session),
+            compound_repo=CompoundRepository(session),
         )
 
     async def create(self, payload: AnalysisCreate) -> AnalysisRead:
@@ -46,11 +50,20 @@ class AnalysisService:
             raise ValidationProblem(
                 detail="Unknown disease id.", invalid_disease_id=str(payload.disease_id)
             )
+        if payload.manual_compound_ids:
+            existing = await self.compound_repo.existing_ids(payload.manual_compound_ids)
+            missing = [c for c in payload.manual_compound_ids if c not in existing]
+            if missing:
+                raise ValidationProblem(
+                    detail="Unknown compound ids.",
+                    invalid_compound_ids=[str(c) for c in missing],
+                )
         run = await self.analysis_repo.create(
             analysis_name=payload.analysis_name,
             disease_id=payload.disease_id,
             plant_ids=payload.plant_ids,
             mode=payload.mode.value,
+            manual_compound_ids=payload.manual_compound_ids,
         )
         return AnalysisRead.model_validate(run)
 

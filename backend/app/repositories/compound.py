@@ -33,6 +33,12 @@ class CompoundRepository:
         stmt = select(Compound.compound_id).where(Compound.compound_id.in_(ids))
         return {r[0] for r in (await self.session.execute(stmt)).all()}
 
+    async def get_many(self, ids: list[uuid.UUID]) -> list[Compound]:
+        if not ids:
+            return []
+        stmt = select(Compound).where(Compound.compound_id.in_(ids))
+        return list((await self.session.execute(stmt)).scalars().all())
+
     async def manual_source_id(self) -> uuid.UUID | None:
         stmt = select(SourceSystem.source_id).where(SourceSystem.source_name == "Manual Entry")
         return (await self.session.execute(stmt)).scalar_one_or_none()

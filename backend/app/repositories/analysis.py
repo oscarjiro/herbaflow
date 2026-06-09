@@ -29,11 +29,15 @@ class AnalysisRepository:
         disease_id: uuid.UUID,
         plant_ids: list[uuid.UUID],
         mode: str,
+        manual_compound_ids: list[uuid.UUID],
     ) -> AnalysisRun:
         run = AnalysisRun(
             analysis_name=analysis_name,
             disease_id=disease_id,
-            parameters={"plant_ids": [str(p) for p in plant_ids]},
+            parameters={
+                "plant_ids": [str(p) for p in plant_ids],
+                "manual_compounds": [str(c) for c in manual_compound_ids],
+            },
             status="pending",
             stage_results={},
             mode=mode,

@@ -2,6 +2,7 @@ import uuid
 
 import pytest
 
+from app import contracts
 from app.errors import GoneProblem, NotFoundProblem, ValidationProblem
 from app.schemas.analysis import AnalysisCreate, Mode
 from app.services.analysis import AnalysisService
@@ -50,11 +51,20 @@ class FakeAnalysisRepo:
         return self._run
 
 
-def _service(plant_missing=None, disease_exists=True, run=None):
+class FakeCompoundRepo:
+    def __init__(self, existing=None):
+        self._existing = set(existing or [])
+
+    async def existing_ids(self, ids):
+        return {i for i in ids if i in self._existing}
+
+
+def _service(plant_missing=None, disease_exists=True, run=None, compound_existing=None):
     return AnalysisService(
         plant_repo=FakePlantRepo(plant_missing or []),
         disease_repo=FakeDiseaseRepo(disease_exists),
         analysis_repo=FakeAnalysisRepo(run),
+        compound_repo=FakeCompoundRepo(compound_existing or []),
     )
 
 
@@ -71,6 +81,26 @@ async def test_create_rejects_unknown_plants() -> None:
 async def test_create_rejects_unknown_disease() -> None:
     svc = _service(disease_exists=False)
     payload = AnalysisCreate(plant_ids=[uuid.uuid4()], disease_id=uuid.uuid4())
+    with pytest.raises(ValidationProblem):
+        await svc.create(payload)
+
+
+def test_create_default_mode_matches_contract() -> None:
+    payload = AnalysisCreate(plant_ids=[uuid.uuid4()], disease_id=uuid.uuid4())
+    assert payload.mode.value == contracts.default_mode()
+    assert payload.mode.value == "guided"
+
+
+@pytest.mark.asyncio
+async def test_create_rejects_unknown_manual_compounds() -> None:
+    svc = _service(compound_existing=[])
+    bad = uuid.uuid4()
+    payload = AnalysisCreate(
+        plant_ids=[uuid.uuid4()],
+        disease_id=uuid.uuid4(),
+        mode=Mode.auto,
+        manual_compound_ids=[bad],
+    )
     with pytest.raises(ValidationProblem):
         await svc.create(payload)
 

@@ -65,7 +65,8 @@ async def run_analysis_task(analysis_id: uuid.UUID) -> None:
 
         async def stage_runner(run: Any) -> dict[str, Any]:
             plant_ids = [uuid.UUID(p) for p in run.parameters["plant_ids"]]
-            return await stage1.run(session, plant_ids)
+            manual_ids = [uuid.UUID(c) for c in run.parameters.get("manual_compounds", [])]
+            return await stage1.run(session, plant_ids, manual_ids)
 
         await execute_run(repo, analysis_id, stage_runner)
         await session.commit()

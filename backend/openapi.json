@@ -279,7 +279,15 @@
           },
           "mode": {
             "$ref": "#/components/schemas/Mode",
-            "default": "auto"
+            "default": "guided"
+          },
+          "manual_compound_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Manual Compound Ids"
           }
         },
         "type": "object",
