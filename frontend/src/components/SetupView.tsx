@@ -1,14 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { listDiseasesOptions, listPlantsOptions } from "../api/@tanstack/react-query.gen";
-import { createAnalysis, validateCompounds } from "../api/sdk.gen";
-import type {
-  AnalysisRead,
-  ResolvedCompound,
-  FailedInput,
-  ValidateResponse,
-} from "../api/types.gen";
+import { createAnalysis } from "../api/sdk.gen";
+import type { AnalysisRead, ResolvedCompound } from "../api/types.gen";
 import { DEFAULT_MODE, MAX_PLANTS, MODES } from "../contract";
+import { CompoundValidateBox } from "./CompoundValidateBox";
 
 export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   const diseases = useQuery(listDiseasesOptions());
@@ -18,25 +14,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   const [mode, setMode] = useState<string>(DEFAULT_MODE);
   const [filter, setFilter] = useState("");
 
-  const [manualText, setManualText] = useState("");
   const [resolved, setResolved] = useState<ResolvedCompound[]>([]);
-  const [failed, setFailed] = useState<FailedInput[]>([]);
-
-  const validate = useMutation({
-    mutationFn: async () => {
-      const lines = manualText
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean);
-      const inputs = lines.map((value) => ({ value }));
-      const res = await validateCompounds({ body: { inputs } });
-      return res.data as unknown as ValidateResponse;
-    },
-    onSuccess: (data) => {
-      setResolved(data?.resolved ?? []);
-      setFailed(data?.failed ?? []);
-    },
-  });
 
   const create = useMutation({
     mutationFn: async () => {
@@ -114,38 +92,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
           ))}
       </ul>
 
-      <label htmlFor="manual-compounds">Manual compounds</label>
-      <textarea
-        id="manual-compounds"
-        aria-label="Manual compounds"
-        value={manualText}
-        onChange={(e) => setManualText(e.target.value)}
-        placeholder="One SMILES or InChIKey per line"
-      />
-      <button disabled={validate.isPending} onClick={() => validate.mutate()}>
-        Validate
-      </button>
-
-      {resolved.length > 0 && (
-        <ul aria-label="Resolved compounds">
-          {resolved.map((r) => (
-            <li key={r.compound_id}>
-              {r.canonical_name ?? r.canonical_key}
-              {r.validation_status === "structure_only" && " (structure only)"}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {failed.length > 0 && (
-        <ul aria-label="Failed inputs">
-          {failed.map((f) => (
-            <li key={f.value}>
-              {f.value}: {f.reason}
-            </li>
-          ))}
-        </ul>
-      )}
+      <CompoundValidateBox onResolved={setResolved} />
 
       <button disabled={!canSubmit || create.isPending} onClick={() => create.mutate()}>
         Create analysis

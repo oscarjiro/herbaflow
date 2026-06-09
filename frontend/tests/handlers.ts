@@ -88,6 +88,56 @@ export const SAMPLE_STAGE2_RESULTS = {
   },
 };
 
+// r3: stage_1_awaiting_approval — tagged compounds for Step-1 editor tests
+export const ANALYSIS_STAGE1_AWAITING = {
+  analysis_id: "r3",
+  analysis_name: null,
+  disease_id: "d1",
+  mode: "guided",
+  status: "stage_1_awaiting_approval",
+  current_stage: 1,
+  parameters: { adme: ADME_FROZEN_DEFAULTS },
+  stage_results: {
+    "1": {
+      count: 2,
+      compounds: [
+        { compound_id: "c1", canonical_name: "Curcumin", tag: "computed" },
+        { compound_id: "c2", canonical_name: "Berberine", tag: "user-added" },
+        { compound_id: "c3", canonical_name: "RemovedOne", tag: "user-removed" },
+      ],
+      per_plant: {},
+      state: "user_provided",
+    },
+  },
+  created_at: null,
+  completed_at: null,
+  expires_at: null,
+  error_message: null,
+};
+
+// r4: stage_1_awaiting_approval — count at cap (2000) to test disabled add
+export const ANALYSIS_STAGE1_AT_CAP = {
+  analysis_id: "r4",
+  analysis_name: null,
+  disease_id: "d1",
+  mode: "guided",
+  status: "stage_1_awaiting_approval",
+  current_stage: 1,
+  parameters: { adme: ADME_FROZEN_DEFAULTS },
+  stage_results: {
+    "1": {
+      count: 2000,
+      compounds: [{ compound_id: "c1", canonical_name: "Curcumin", tag: "computed" }],
+      per_plant: {},
+      state: "computed",
+    },
+  },
+  created_at: null,
+  completed_at: null,
+  expires_at: null,
+  error_message: null,
+};
+
 const ANALYSIS_WITH_STAGE2 = {
   analysis_id: "r2",
   analysis_name: null,
@@ -201,6 +251,8 @@ export const server = setupServer(
     }),
   ),
   http.get(`${BASE}/analyses/r2`, () => HttpResponse.json(ANALYSIS_WITH_STAGE2)),
+  http.get(`${BASE}/analyses/r3`, () => HttpResponse.json(ANALYSIS_STAGE1_AWAITING)),
+  http.get(`${BASE}/analyses/r4`, () => HttpResponse.json(ANALYSIS_STAGE1_AT_CAP)),
   // reset-from: echo back the same run with updated adme params
   http.post(`${BASE}/analyses/:id/reset-from/:stage`, () =>
     HttpResponse.json({ ...ANALYSIS_WITH_STAGE2, status: "stage_2_awaiting_approval" }),
