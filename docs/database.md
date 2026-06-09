@@ -438,7 +438,7 @@ One row per pipeline execution. PKs are UUID v4.
 | `analysis_name` | text | YES | User-supplied label |
 | `disease_id` | uuid FK → `diseases` | YES | The target disease for this run |
 | `parameters` | jsonb | NO | Run-input snapshot (plants, compounds, targets, options); CHECK `jsonb_typeof = 'object'` |
-| `status` | text | YES | Dynamic backend-set string: `pending`, `failed`, `complete`, `stage_{N}_running`, `stage_{N}_awaiting_approval`, `stage_{N}_starting`, `stage_{N}_rejected`; no fixed-vocab CHECK |
+| `status` | text | YES | Dynamic backend-set string: `pending`, `failed`, `complete`, `stage_{N}_running`, `stage_{N}_awaiting_approval`, `stage_{N}_starting`; no fixed-vocab CHECK |
 | `current_stage` | integer | YES | null = not started; 1–8 during pipeline; CHECK `NULL OR (1 <= current_stage <= 8)` |
 | `stage_results` | jsonb | NO | Per-stage intermediate results keyed by stage number; default `{}`; CHECK `jsonb_typeof = 'object'` |
 | `mode` | text | NO | DEFAULT `guided`; CHECK: `auto` (end-to-end) or `guided` (pauses for approval per stage); contract source: `shared/contracts/analysis.json` |

@@ -60,7 +60,7 @@ The UI implements two execution modes:
 - **Guided Mode**: Pauses after each stage, displaying results and awaiting researcher approval (`POST /analyses/{id}/approve`) before proceeding
 - **Auto Mode**: Executes all 8 stages unattended; useful for batch processing or hypothesis validation
 
-Status polling (2-second intervals via TanStack Query) drives stage panel visibility and sidebar state. When status transitions to a terminal state (complete, failed, rejected), polling ceases automatically.
+Status polling (2-second intervals via TanStack Query) drives stage panel visibility and sidebar state. When status transitions to a terminal state (complete, failed), polling ceases automatically.
 
 ## Key Design Decisions
 
@@ -98,7 +98,7 @@ const { data: status } = useAnalysisStatus(analysisId, {
 })
 ```
 
-Once `isTerminalStatus()` returns true (status is 'complete', 'failed', or 'rejected'), the query stops refetching. This prevents background network churn and allows the UI to remain on the final stage panel indefinitely.
+Once `isTerminalStatus()` returns true (status is 'complete' or 'failed'), the query stops refetching. This prevents background network churn and allows the UI to remain on the final stage panel indefinitely.
 
 ## Testing Approach
 
