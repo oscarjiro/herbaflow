@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 
 from app import db
@@ -37,6 +38,12 @@ app = FastAPI(
     title="Herbaflow API",
     lifespan=lifespan,
     generate_unique_id_function=_operation_id,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins_list,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 register_error_handlers(app)
 app.include_router(diseases.router)
