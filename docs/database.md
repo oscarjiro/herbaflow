@@ -82,7 +82,7 @@ One row per external data source. PKs are UUID v4.
 | Column | Type | Nullable | Notes |
 |---|---|---|---|
 | `source_id` | uuid PK | NO | `DEFAULT gen_random_uuid()` |
-| `source_name` | text | NO | e.g. `KNApSAcK World`, `GBIF`, `PubChem`, `UniProt`, `STRING` |
+| `source_name` | text | NO | e.g. `KNApSAcK World`, `GBIF`, `PubChem`, `UniProt`, `STRING`, `Manual Entry` |
 | `source_type` | text | NO | CHECK: `scrape` / `api` / `download` / `manual` |
 | `base_url` | text | YES | Reference/fallback field; per-row `source_url` is authoritative |
 | `notes` | text | YES | |
@@ -95,6 +95,9 @@ One row per external data source. PKs are UUID v4.
 **Indexes:**
 - `source_systems_pkey` (unique, btree, `source_id`)
 - `source_systems_source_name_key` (unique, btree, `source_name`)
+
+The `Manual Entry` row (`source_type = 'manual'`, `base_url` null) is seeded so user-entered
+compounds satisfy the `source_id` FK; their per-row `source_url` is null (no external deep link).
 
 ---
 
@@ -178,12 +181,14 @@ One canonical row per chemical entity.
 | `source_id` | uuid FK → `source_systems` | YES | |
 | `source_url` | text | YES | Per-row deep link; authoritative |
 | `retrieved_at` | timestamptz | YES | |
+| `validation_status` | text | NO | DEFAULT `externally_validated`; `externally_validated` = backed by DB/PubChem (and all ETL rows); `structure_only` = RDKit-derived identity from a manually entered SMILES with no external match (descriptors null until ADME runs) |
 
 **Constraints:**
 - PK: `compounds_pkey` on `compound_id`
 - UNIQUE: `compounds_canonical_key_key` on `canonical_key`
 - FK: `compounds_source_id_fkey` → `source_systems(source_id)`
 - CHECK `compounds_num_ro5_violations_check`: `num_ro5_violations IS NULL OR (num_ro5_violations >= 0 AND num_ro5_violations <= 4)`
+- CHECK `compounds_validation_status_check`: `validation_status IN ('externally_validated', 'structure_only')`
 
 **Indexes:**
 - `compounds_pkey` (unique, btree, `compound_id`)
@@ -436,7 +441,7 @@ One row per pipeline execution. PKs are UUID v4.
 | `status` | text | YES | Dynamic backend-set string: `pending`, `failed`, `complete`, `stage_{N}_running`, `stage_{N}_awaiting_approval`, `stage_{N}_starting`, `stage_{N}_rejected`; no fixed-vocab CHECK |
 | `current_stage` | integer | YES | null = not started; 1–8 during pipeline; CHECK `NULL OR (1 <= current_stage <= 8)` |
 | `stage_results` | jsonb | NO | Per-stage intermediate results keyed by stage number; default `{}`; CHECK `jsonb_typeof = 'object'` |
-| `mode` | text | NO | CHECK: `auto` (end-to-end) or `guided` (pauses for approval per stage); contract source: `shared/contracts/analysis.json` |
+| `mode` | text | NO | DEFAULT `guided`; CHECK: `auto` (end-to-end) or `guided` (pauses for approval per stage); contract source: `shared/contracts/analysis.json` |
 | `created_at` | timestamptz | YES | |
 | `completed_at` | timestamptz | YES | Set when pipeline finishes |
 | `expires_at` | timestamptz | YES | Set to `completed_at + 24h`; GET returns 410 Gone after expiry |
