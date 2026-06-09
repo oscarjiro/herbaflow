@@ -16,7 +16,7 @@ from typing import Any, Protocol
 from app import contracts, db
 from app.errors import ConflictProblem, ValidationProblem
 from app.pipeline import edits, state
-from app.pipeline.stages import stage1, stage2
+from app.pipeline.stages import stage1, stage2, stage3
 from app.repositories.analysis import AnalysisRepository
 
 logger = logging.getLogger("herbaflow.pipeline")
@@ -56,9 +56,9 @@ def downstream_closure(stage: int) -> set[int]:
 # ---------------------------------------------------------------------------
 # Stage registry. Extended as stages land in later chunks.
 # ---------------------------------------------------------------------------
-STAGE_PARAM_GROUP: dict[int, str] = {2: "adme"}  # extended per chunk (3 -> target, ...)
-RUNNABLE_STAGES: tuple[int, ...] = (1, 2)  # extended as stages land
-NEEDS_APPROVAL: frozenset[int] = frozenset({1, 2})  # guided checkpoints
+STAGE_PARAM_GROUP: dict[int, str] = {2: "adme", 3: "target"}  # extended per chunk
+RUNNABLE_STAGES: tuple[int, ...] = (1, 2, 3)  # extended as stages land
+NEEDS_APPROVAL: frozenset[int] = frozenset({1, 2, 3})  # guided checkpoints
 
 # Entity stages carry a user-editable entity set (compounds/targets). Their stored result is
 # always run through the durable edit layer so the in-stage add/remove decisions reapply on
@@ -289,7 +289,11 @@ def build_runners(session: Any) -> dict[int, StageRunner]:
         ]
         return await stage2.run(session, effective, run.parameters["adme"])
 
-    return {1: stage1_runner, 2: stage2_runner}
+    async def stage3_runner(run: Any) -> dict[str, Any]:
+        passed = run.stage_results["2"]["passed"]
+        return await stage3.run(session, passed, run.parameters["target"])
+
+    return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner}
 
 
 async def run_analysis_task(analysis_id: uuid.UUID) -> None:

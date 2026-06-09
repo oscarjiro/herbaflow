@@ -88,7 +88,10 @@ class AnalysisService:
                     detail="Unknown compound ids.",
                     invalid_compound_ids=[str(c) for c in missing],
                 )
-        pipeline_parameters = {"adme": contracts.adme_defaults()}
+        pipeline_parameters = {
+            "adme": contracts.adme_defaults(),
+            "target": contracts.target_defaults(),
+        }
         run = await self.analysis_repo.create(
             analysis_name=payload.analysis_name,
             disease_id=payload.disease_id,

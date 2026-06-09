@@ -64,11 +64,21 @@ def _runners(stage1_count: int, stage2_count: int) -> dict[int, object]:
             "state": "computed",
         }
 
-    return {1: stage1_runner, 2: stage2_runner}
+    async def stage3_runner(run: SimpleNamespace) -> dict:
+        return {
+            "targets": [],
+            "compound_targets": [],
+            "per_compound": {},
+            "coverage_pct": 0.0,
+            "count": 0,
+            "state": "computed",
+        }
+
+    return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner}
 
 
 @pytest.mark.asyncio
-async def test_guided_pauses_then_advances_through_both_stages() -> None:
+async def test_guided_pauses_then_advances_through_all_stages() -> None:
     run = _run("guided")
     repo = FakeRepo(run)
     runners = _runners(3, 2)
@@ -80,6 +90,10 @@ async def test_guided_pauses_then_advances_through_both_stages() -> None:
     await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "stage_2_awaiting_approval"
     assert run.current_stage == 2
+
+    await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_3_awaiting_approval"
+    assert run.current_stage == 3
 
     await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "complete"
@@ -95,7 +109,8 @@ async def test_auto_chains_to_complete() -> None:
     assert run.status == "complete"
     assert run.stage_results["1"]["count"] == 3
     assert run.stage_results["2"]["count"] == 2
-    assert run.current_stage == 2
+    assert run.stage_results["3"]["state"] == "computed"
+    assert run.current_stage == 3
 
 
 @pytest.mark.asyncio

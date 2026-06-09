@@ -51,9 +51,15 @@ async def test_guided_pauses_then_advances(client) -> None:
     assert adv1.status_code == 200
     assert adv1.json()["status"] == "stage_2_awaiting_approval"
 
+    # Stage 3 runs with the seeded compounds (no InChIKey -> coverage 0) and pauses
+    # at the guided S3 checkpoint.
     adv2 = await c.post(f"/analyses/{run_id}/advance")
     assert adv2.status_code == 200
-    assert adv2.json()["status"] == "complete"
+    assert adv2.json()["status"] == "stage_3_awaiting_approval"
+
+    adv3 = await c.post(f"/analyses/{run_id}/advance")
+    assert adv3.status_code == 200
+    assert adv3.json()["status"] == "complete"
 
 
 @pytest.mark.asyncio

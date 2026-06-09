@@ -64,7 +64,17 @@ def _runners(stage1_count, stage2_count):
             "state": "computed",
         }
 
-    return {1: stage1_runner, 2: stage2_runner}
+    async def stage3_runner(r):
+        return {
+            "targets": [],
+            "compound_targets": [],
+            "per_compound": {},
+            "coverage_pct": 0.0,
+            "count": 0,
+            "state": "computed",
+        }
+
+    return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner}
 
 
 @pytest.mark.asyncio
@@ -90,6 +100,10 @@ async def test_guided_pauses_for_approval() -> None:
     # Approving stage 1 runs stage 2, which (guided) pauses again.
     await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "stage_2_awaiting_approval"
+
+    # Approving stage 2 runs stage 3, which (guided) pauses at the S3 checkpoint.
+    await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_3_awaiting_approval"
 
     # Approving the last runnable stage completes the run.
     await engine.advance_run(repo, run.analysis_id, runners)
