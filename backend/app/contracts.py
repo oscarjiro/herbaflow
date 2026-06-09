@@ -52,6 +52,4 @@ def max_plants() -> int:
 
 @lru_cache(maxsize=1)
 def default_mode() -> str:
-    value = _defs()["mode"]["default"]
-    assert isinstance(value, str)
-    return value
+    return cast(str, _defs()["mode"]["default"])
