@@ -75,3 +75,39 @@ export const ADME_NUMERIC_PARAMS = [
 ] as const;
 
 export const ADME_BOOLEAN_PARAMS = ["apply_veber", "apply_np_exception", "skip_adme"] as const;
+
+// ---------------------------------------------------------------------------
+// Target parameter metadata — derived from the shared contract.
+// ---------------------------------------------------------------------------
+
+const targetProps = contract.$defs.pipeline_parameters.properties.target.properties;
+
+function targetEntry(key: keyof typeof targetProps): AdmeParamMeta {
+  const p = targetProps[key] as Record<string, unknown>;
+  const minExclusive = "exclusiveMinimum" in p && !("minimum" in p);
+  const min =
+    "minimum" in p
+      ? (p.minimum as number)
+      : "exclusiveMinimum" in p
+        ? (p.exclusiveMinimum as number)
+        : undefined;
+  const max = "maximum" in p ? (p.maximum as number) : undefined;
+  const recommended_min = "recommended_min" in p ? (p.recommended_min as number) : undefined;
+  const recommended_max = "recommended_max" in p ? (p.recommended_max as number) : undefined;
+  return {
+    default: p.default as number | boolean,
+    min,
+    minExclusive,
+    max,
+    recommended_min,
+    recommended_max,
+    description: p.description as string,
+  };
+}
+
+export const TARGET_PARAMS: Record<string, AdmeParamMeta> = {
+  min_pchembl: targetEntry("min_pchembl"),
+  min_assay_confidence: targetEntry("min_assay_confidence"),
+};
+
+export const TARGET_NUMERIC_PARAMS = ["min_pchembl", "min_assay_confidence"] as const;
