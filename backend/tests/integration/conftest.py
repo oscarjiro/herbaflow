@@ -24,6 +24,7 @@ _APPLY = [
     "20260608000002_baseline_entities.sql",
     "20260608000004_baseline_junctions.sql",
     "20260608000005_baseline_operational.sql",
+    "20260609000001_compound_validation_status.sql",
 ]
 
 
@@ -61,6 +62,13 @@ async def engine(pg_container):
             "disease_targets, plants, compounds, targets, diseases, source_systems cascade;",
         )
     await eng.dispose()
+
+
+@pytest_asyncio.fixture()
+async def session(engine):
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    async with maker() as s:
+        yield s
 
 
 @pytest_asyncio.fixture()
