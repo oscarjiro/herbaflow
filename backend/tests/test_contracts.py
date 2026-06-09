@@ -56,3 +56,40 @@ def test_default_mode_is_guided() -> None:
 
     assert contracts.default_mode() == "guided"
     assert contracts.default_mode() in contracts.modes()
+
+
+def test_adme_defaults_match_methodology_lock() -> None:
+    from app import contracts
+
+    d = contracts.adme_defaults()
+    assert d == {
+        "max_mw": 500,
+        "max_logp": 5,
+        "max_hbd": 5,
+        "max_hba": 10,
+        "max_tpsa": 140,
+        "max_rotatable_bonds": 10,
+        "apply_veber": True,
+        "np_exception_threshold": 0.5,
+        "apply_np_exception": True,
+        "max_violations": 1,
+        "skip_adme": False,
+    }
+
+
+def test_apply_adme_to_manual_is_removed() -> None:
+    from app import contracts
+
+    assert "apply_adme_to_manual" not in contracts.pipeline_parameters()["adme"]["properties"]
+
+
+def test_adme_params_carry_description_bounds_and_recommendation() -> None:
+    from app import contracts
+
+    meta = contracts.adme_param_meta()
+    assert all(m["description"] for m in meta.values())
+    assert (meta["max_mw"]["min"], meta["max_mw"]["max"]) == (0, 2000)
+    assert (meta["max_mw"]["recommended_min"], meta["max_mw"]["recommended_max"]) == (350, 600)
+    assert (meta["max_violations"]["min"], meta["max_violations"]["max"]) == (0, 4)
+    assert (meta["np_exception_threshold"]["min"], meta["np_exception_threshold"]["max"]) == (-5, 5)
+    assert meta["skip_adme"]["min"] is None and meta["skip_adme"]["max"] is None

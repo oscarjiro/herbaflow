@@ -53,3 +53,34 @@ def max_plants() -> int:
 @lru_cache(maxsize=1)
 def default_mode() -> str:
     return cast(str, _defs()["mode"]["default"])
+
+
+def adme_defaults() -> dict[str, Any]:
+    """The frozen-at-create defaults for the adme param group (from the contract)."""
+    props = pipeline_parameters()["adme"]["properties"]
+    return {name: spec["default"] for name, spec in props.items()}
+
+
+def pipeline_param_bounds(group: str) -> dict[str, Any]:
+    """The JSON-Schema property map for a param group (used for override-bounds validation)."""
+    return cast(dict[str, Any], pipeline_parameters()[group]["properties"])
+
+
+def adme_param_meta() -> dict[str, Any]:
+    """Per-param UI metadata: default + hard bounds + advisory recommended range + description.
+
+    The contract is the single lock-cited source. ``min``/``max`` are the HARD validation bounds
+    (``exclusiveMinimum`` is surfaced as ``min`` too); ``recommended_*`` are the advisory lock
+    range.
+    """
+    out: dict[str, Any] = {}
+    for name, spec in pipeline_parameters()["adme"]["properties"].items():
+        out[name] = {
+            "default": spec.get("default"),
+            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
+            "max": spec.get("maximum"),
+            "recommended_min": spec.get("recommended_min"),
+            "recommended_max": spec.get("recommended_max"),
+            "description": spec.get("description"),
+        }
+    return out

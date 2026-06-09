@@ -25,6 +25,13 @@ def test_mode_check_matches_contract():
     assert _mode_check_values() == set(contracts.modes())
 
 
+def test_adme_defaults_agree_with_contract_properties() -> None:
+    """adme_defaults() must equal the ``default`` field of every adme property in the contract."""
+    props = contracts.pipeline_parameters()["adme"]["properties"]
+    expected = {name: spec["default"] for name, spec in props.items()}
+    assert contracts.adme_defaults() == expected
+
+
 def test_create_schema_cap_matches_contract() -> None:
     from app.schemas.analysis import AnalysisCreate
 
