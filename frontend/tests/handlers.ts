@@ -3,6 +3,120 @@ import { setupServer } from "msw/node";
 
 const BASE = "http://localhost:8000";
 
+// ---------------------------------------------------------------------------
+// Shared fixture data
+// ---------------------------------------------------------------------------
+
+const ADME_FROZEN_DEFAULTS = {
+  max_mw: 500,
+  max_logp: 5,
+  max_hbd: 5,
+  max_hba: 10,
+  max_tpsa: 140,
+  max_rotatable_bonds: 10,
+  apply_veber: true,
+  np_exception_threshold: 0.5,
+  apply_np_exception: true,
+  max_violations: 1,
+  skip_adme: false,
+};
+
+export const SAMPLE_STAGE2_RESULTS = {
+  count: 3,
+  state: "computed",
+  passed: [
+    {
+      compound_id: "c1",
+      canonical_name: "Curcumin",
+      descriptor_source: "rdkit",
+      molecular_weight: 368.4,
+      logp: 3.2,
+      hbond_donors: 2,
+      hbond_acceptors: 6,
+      tpsa: 93.1,
+      rotatable_bonds: 8,
+      qed_score: 0.55,
+      np_likeness_score: 1.8,
+      num_ro5_violations: 0,
+      is_pains_positive: true,
+      source_url: "https://pubchem.ncbi.nlm.nih.gov/compound/969516",
+      badges: ["pains"],
+    },
+    {
+      compound_id: "c2",
+      canonical_name: "Berberine",
+      descriptor_source: "etl",
+      molecular_weight: 336.4,
+      logp: 1.3,
+      hbond_donors: 0,
+      hbond_acceptors: 4,
+      tpsa: 40.8,
+      rotatable_bonds: 1,
+      qed_score: 0.49,
+      np_likeness_score: 2.1,
+      num_ro5_violations: 0,
+      is_pains_positive: false,
+      source_url: null,
+      badges: ["np_bypass"],
+    },
+  ],
+  filtered: [
+    {
+      compound_id: "c3",
+      canonical_name: "HeavyMolecule",
+      descriptor_source: "rdkit",
+      molecular_weight: 850.2,
+      logp: 8.5,
+      hbond_donors: 3,
+      hbond_acceptors: 8,
+      tpsa: 120.0,
+      rotatable_bonds: 12,
+      qed_score: 0.12,
+      np_likeness_score: -1.0,
+      num_ro5_violations: 3,
+      is_pains_positive: false,
+      source_url: null,
+      badges: [],
+      reason: "Exceeds max_mw (850.2 > 500)",
+    },
+  ],
+  annotations: {
+    pains: ["c1"],
+    np_bypass: ["c2"],
+    unscreened: [],
+    could_not_screen: [],
+  },
+};
+
+const ANALYSIS_WITH_STAGE2 = {
+  analysis_id: "r2",
+  analysis_name: null,
+  disease_id: "d1",
+  mode: "guided",
+  status: "stage_2_awaiting_approval",
+  current_stage: 2,
+  parameters: {
+    adme: ADME_FROZEN_DEFAULTS,
+  },
+  stage_results: {
+    "1": {
+      count: 3,
+      compounds: [
+        { compound_id: "c1", canonical_name: "Curcumin" },
+        { compound_id: "c2", canonical_name: "Berberine" },
+        { compound_id: "c3", canonical_name: "HeavyMolecule" },
+      ],
+      per_plant: {},
+      state: "computed",
+    },
+    "2": SAMPLE_STAGE2_RESULTS,
+  },
+  created_at: null,
+  completed_at: null,
+  expires_at: null,
+  error_message: null,
+};
+
 export const server = setupServer(
   http.get(`${BASE}/diseases`, () =>
     HttpResponse.json([
@@ -85,5 +199,14 @@ export const server = setupServer(
       expires_at: null,
       error_message: null,
     }),
+  ),
+  http.get(`${BASE}/analyses/r2`, () => HttpResponse.json(ANALYSIS_WITH_STAGE2)),
+  // reset-from: echo back the same run with updated adme params
+  http.post(`${BASE}/analyses/:id/reset-from/:stage`, () =>
+    HttpResponse.json({ ...ANALYSIS_WITH_STAGE2, status: "stage_2_awaiting_approval" }),
+  ),
+  // stages edit: echo back the same run
+  http.post(`${BASE}/analyses/:id/stages/:stage/edit`, () =>
+    HttpResponse.json({ ...ANALYSIS_WITH_STAGE2 }),
   ),
 );

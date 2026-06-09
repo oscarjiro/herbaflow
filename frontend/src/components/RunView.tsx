@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { advanceAnalysis } from "../api/sdk.gen";
 import { useAnalysisStatus } from "../hooks/useAnalysisStatus";
+import { ApprovalBar } from "./stages/ApprovalBar";
+import { Stage2View } from "./stages/Stage2View";
 
 export function RunView({ analysisId }: { analysisId: string }) {
   const { data } = useAnalysisStatus(analysisId);
@@ -21,9 +23,7 @@ export function RunView({ analysisId }: { analysisId: string }) {
       <h1>Run {analysisId}</h1>
       <p>Status: {data.status}</p>
       {data.status === "failed" && <p role="alert">{data.error_message}</p>}
-      {data.status === "stage_1_awaiting_approval" && (
-        <button onClick={() => advance.mutate()}>Approve and continue</button>
-      )}
+
       {stage1 && (
         <>
           <h2>Compounds ({stage1.compounds?.length ?? 0})</h2>
@@ -32,8 +32,15 @@ export function RunView({ analysisId }: { analysisId: string }) {
               <li key={i}>{c.canonical_name}</li>
             ))}
           </ul>
+          <ApprovalBar
+            status={data.status}
+            currentStage={data.current_stage}
+            onApprove={() => advance.mutate()}
+          />
         </>
       )}
+
+      {Boolean(data.stage_results?.["2"]) && <Stage2View data={data} />}
     </section>
   );
 }

@@ -34,6 +34,15 @@ const OriginalRequest = globalThis.Request;
   }
 };
 
+// jsdom does not implement URL.createObjectURL — provide a no-op stub so that
+// components that build CSV blob download links don't crash in tests.
+if (typeof URL.createObjectURL === "undefined") {
+  URL.createObjectURL = () => "blob:mock";
+}
+if (typeof URL.revokeObjectURL === "undefined") {
+  URL.revokeObjectURL = () => {};
+}
+
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
