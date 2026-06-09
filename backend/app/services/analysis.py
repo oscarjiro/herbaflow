@@ -15,10 +15,12 @@ from app.pipeline import edits, engine, state
 from app.pipeline.limits import EntityCapExceeded, check_entity_cap
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
+from app.repositories.compound_target import CompoundTargetRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
 from app.repositories.target import TargetRepository
 from app.schemas.analysis import AnalysisCreate, AnalysisRead
+from app.services import canonical
 
 logger = logging.getLogger("herbaflow.analysis")
 
@@ -40,12 +42,14 @@ class AnalysisService:
         analysis_repo: Any,
         compound_repo: Any,
         target_repo: Any = None,
+        compound_target_repo: Any = None,
     ) -> None:
         self.plant_repo = plant_repo
         self.disease_repo = disease_repo
         self.analysis_repo = analysis_repo
         self.compound_repo = compound_repo
         self.target_repo = target_repo
+        self.compound_target_repo = compound_target_repo
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> AnalysisService:
@@ -55,6 +59,7 @@ class AnalysisService:
             analysis_repo=AnalysisRepository(session),
             compound_repo=CompoundRepository(session),
             target_repo=TargetRepository(session),
+            compound_target_repo=CompoundTargetRepository(session),
         )
 
     async def create(self, payload: AnalysisCreate) -> AnalysisRead:
@@ -235,3 +240,71 @@ class AnalysisService:
         # Set-edit re-run: clears downstream, re-runs from the nearest runnable dependent.
         runners = engine.build_runners(self.analysis_repo.session)
         await engine.reset_from(self.analysis_repo, analysis_id, stage, runners)
+
+    async def import_stp(
+        self, analysis_id: uuid.UUID, compound_ids: list[uuid.UUID], rows: list[Any]
+    ) -> dict[str, Any]:
+        """Import SwissTargetPrediction paste-back rows as ``stp_import`` edges.
+
+        Resolves+9606-validates the pasted UniProt accessions, replaces any prior STP edges for
+        the given compounds (whole-compound replace), writes a predicted edge per (compound,
+        target) pair UNLESS a measured edge already covers it (those count as ``skipped_measured``,
+        never overwritten), and adds the resolved targets to the run's Stage-3 set (an entity edit
+        that re-runs from the nearest runnable dependent — S5).
+        """
+        run = await self.analysis_repo.get(analysis_id)
+        if run is None:
+            raise NotFoundProblem(detail="Analysis run not found.")
+        if not state.is_settled(run.status):
+            raise ConflictProblem(detail="Run is still running; wait before importing.")
+
+        import httpx
+
+        from app.integrations.uniprot import UniProtClient
+        from app.services.input_validation import resolve_targets
+
+        # Resolve + 9606-validate the pasted rows -> canonical targets.
+        async with httpx.AsyncClient() as client:
+            resolved, failed = await resolve_targets(
+                [{"type": "uniprot", "value": r.uniprot} for r in rows],
+                self.target_repo,
+                UniProtClient(client),
+            )
+        prob_by_acc = {r.uniprot.upper(): r.probability for r in rows}
+
+        stp_src = await self.target_repo.source_id_by_name("SwissTargetPrediction")
+        existing_methods = await self.compound_target_repo.methods_for_pairs(compound_ids)
+
+        # Whole-compound replace of prior stp edges for these compounds.
+        await self.compound_target_repo.delete_stp_for_compounds(compound_ids)
+
+        imported = 0
+        skipped = 0
+        for cid in compound_ids:
+            for t in resolved:
+                prior = existing_methods.get((cid, t.target_id))
+                if prior in ("chembl_bioactivity", "pubchem_bioassay"):
+                    skipped += 1  # never overwrite a measured edge
+                    continue
+                await self.compound_target_repo.insert_stp(
+                    {
+                        "compound_target_id": uuid.UUID(
+                            canonical.compound_target_id(str(cid), str(t.target_id))
+                        ),
+                        "compound_id": cid,
+                        "target_id": t.target_id,
+                        "prediction_method": "stp_import",
+                        "score": prob_by_acc.get((t.uniprot_accession or "").upper()),
+                        "pchembl_value": None,
+                        "source_id": stp_src,
+                        "source_url": "http://www.swisstargetprediction.ch/",
+                        "retrieved_at": now_utc(),
+                    }
+                )
+                imported += 1
+
+        # Add the resolved targets to the run's stage-3 set (entity edit -> re-run from S5).
+        if resolved:
+            await self.edit_stage(analysis_id, 3, add=[t.target_id for t in resolved], remove=[])
+
+        return {"imported": imported, "failed": failed, "skipped_measured": skipped}

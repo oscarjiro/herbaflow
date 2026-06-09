@@ -306,6 +306,59 @@
         }
       }
     },
+    "/analyses/{analysis_id}/import-stp-targets": {
+      "post": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Import Stp Targets",
+        "operationId": "import_stp_targets",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StpImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StpImportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/compounds/validate": {
       "post": {
         "tags": [
@@ -920,6 +973,86 @@
         "type": "object",
         "title": "StageEditRequest",
         "description": "Body for POST /analyses/{id}/stages/{stage}/edit."
+      },
+      "StpImportRequest": {
+        "properties": {
+          "compound_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Compound Ids"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/StpRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "compound_ids",
+          "rows"
+        ],
+        "title": "StpImportRequest"
+      },
+      "StpImportResponse": {
+        "properties": {
+          "imported": {
+            "type": "integer",
+            "title": "Imported"
+          },
+          "failed": {
+            "items": {
+              "$ref": "#/components/schemas/FailedInput"
+            },
+            "type": "array",
+            "title": "Failed"
+          },
+          "skipped_measured": {
+            "type": "integer",
+            "title": "Skipped Measured"
+          }
+        },
+        "type": "object",
+        "required": [
+          "imported",
+          "failed",
+          "skipped_measured"
+        ],
+        "title": "StpImportResponse"
+      },
+      "StpRow": {
+        "properties": {
+          "uniprot": {
+            "type": "string",
+            "title": "Uniprot"
+          },
+          "common_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Common Name"
+          },
+          "probability": {
+            "type": "number",
+            "title": "Probability"
+          }
+        },
+        "type": "object",
+        "required": [
+          "uniprot",
+          "probability"
+        ],
+        "title": "StpRow"
       },
       "TargetInput": {
         "properties": {

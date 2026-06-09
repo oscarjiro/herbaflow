@@ -167,6 +167,33 @@ export const zStageEditRequest = z.object({
     remove: z.array(z.string().uuid()).optional()
 });
 
+export const zStpImportRequest = z.object({
+    compound_ids: z.array(z.string().uuid()),
+    rows: z.array(z.object({
+        uniprot: z.string(),
+        common_name: z.union([
+            z.string(),
+            z.null()
+        ]).optional(),
+        probability: z.number()
+    }))
+});
+
+export const zStpImportResponse = z.object({
+    imported: z.number().int(),
+    failed: z.array(zFailedInput),
+    skipped_measured: z.number().int()
+});
+
+export const zStpRow = z.object({
+    uniprot: z.string(),
+    common_name: z.union([
+        z.string(),
+        z.null()
+    ]).optional(),
+    probability: z.number()
+});
+
 export const zTargetInput = z.object({
     type: z.union([
         z.enum([
@@ -217,6 +244,8 @@ export const zAdvanceAnalysisResponse = zAnalysisRead;
 export const zResetFromResponse = zAnalysisRead;
 
 export const zEditStageResponse = zAnalysisRead;
+
+export const zImportStpTargetsResponse = zStpImportResponse;
 
 export const zValidateCompoundsResponse = zValidateResponse;
 

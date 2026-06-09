@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import get_session
 from app.pipeline.engine import run_analysis_task
 from app.schemas.analysis import AnalysisCreate, AnalysisRead, ResetFromRequest, StageEditRequest
+from app.schemas.target import StpImportRequest, StpImportResponse
 from app.services.analysis import AnalysisService
 
 router = APIRouter(tags=["analyses"])
@@ -73,3 +74,15 @@ async def edit_stage(
     await service.edit_stage(analysis_id, stage, add=payload.add, remove=payload.remove)
     await _commit(session)
     return await service.get(analysis_id)
+
+
+@router.post("/analyses/{analysis_id}/import-stp-targets", response_model=StpImportResponse)
+async def import_stp_targets(
+    analysis_id: uuid.UUID,
+    payload: StpImportRequest,
+    session: AsyncSession = Depends(get_session),
+) -> StpImportResponse:
+    service = AnalysisService.from_session(session)
+    out = await service.import_stp(analysis_id, payload.compound_ids, payload.rows)
+    await _commit(session)
+    return StpImportResponse(**out)

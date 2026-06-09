@@ -99,6 +99,23 @@ export type StageEditRequest = {
     remove?: Array<string>;
 };
 
+export type StpImportRequest = {
+    compound_ids: Array<string>;
+    rows: Array<StpRow>;
+};
+
+export type StpImportResponse = {
+    imported: number;
+    failed: Array<FailedInput>;
+    skipped_measured: number;
+};
+
+export type StpRow = {
+    uniprot: string;
+    common_name?: string | null;
+    probability: number;
+};
+
 export type TargetInput = {
     type?: ('symbol' | 'uniprot') | null;
     value: string;
@@ -298,6 +315,33 @@ export type EditStageResponses = {
 };
 
 export type EditStageResponse = EditStageResponses[keyof EditStageResponses];
+
+export type ImportStpTargetsData = {
+    body: StpImportRequest;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/import-stp-targets';
+};
+
+export type ImportStpTargetsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ImportStpTargetsError = ImportStpTargetsErrors[keyof ImportStpTargetsErrors];
+
+export type ImportStpTargetsResponses = {
+    /**
+     * Successful Response
+     */
+    200: StpImportResponse;
+};
+
+export type ImportStpTargetsResponse = ImportStpTargetsResponses[keyof ImportStpTargetsResponses];
 
 export type ValidateCompoundsData = {
     body: ValidateRequest;
