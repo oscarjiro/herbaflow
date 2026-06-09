@@ -92,8 +92,18 @@ async def seeded(engine):
         )
         await session.execute(
             text(
-                "insert into compounds(compound_id, canonical_key, canonical_name) "
-                "values (:c1,'inchikey:A','Alpha'),(:c2,'inchikey:B','Beta')"
+                "insert into compounds("
+                "  compound_id, canonical_key, canonical_name,"
+                "  molecular_weight, logp, hbond_donors, hbond_acceptors,"
+                "  tpsa, rotatable_bonds, num_ro5_violations,"
+                "  validation_status"
+                ") values ("
+                "  :c1,'inchikey:A','Alpha',"
+                "  46.07,-0.14,1,1,20.23,0,0,'externally_validated'"
+                "),("
+                "  :c2,'inchikey:B','Beta',"
+                "  46.07,-0.14,1,1,20.23,0,0,'externally_validated'"
+                ")"
             ),
             {"c1": ids["c1"], "c2": ids["c2"]},
         )

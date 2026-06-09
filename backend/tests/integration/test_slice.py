@@ -23,6 +23,7 @@ async def test_auto_run_completes(client) -> None:
             break
     assert final["status"] == "complete"
     assert final["stage_results"]["1"]["count"] == 2
+    assert final["stage_results"]["2"]["count"] == 2
     assert final["expires_at"] is not None
 
 
@@ -46,9 +47,13 @@ async def test_guided_pauses_then_advances(client) -> None:
             break
     assert status == "stage_1_awaiting_approval"
 
-    adv = await c.post(f"/analyses/{run_id}/advance")
-    assert adv.status_code == 200
-    assert adv.json()["status"] == "complete"
+    adv1 = await c.post(f"/analyses/{run_id}/advance")
+    assert adv1.status_code == 200
+    assert adv1.json()["status"] == "stage_2_awaiting_approval"
+
+    adv2 = await c.post(f"/analyses/{run_id}/advance")
+    assert adv2.status_code == 200
+    assert adv2.json()["status"] == "complete"
 
 
 @pytest.mark.asyncio
@@ -91,6 +96,7 @@ async def test_manual_compound_unions_into_stage1(client) -> None:
     assert final["status"] == "complete"
     assert final["stage_results"]["1"]["count"] == 1
     assert str(ids["c1"]) in final["stage_results"]["1"]["per_plant"]["manual"]
+    assert final["stage_results"]["2"]["count"] == 1
 
 
 @pytest.mark.asyncio
