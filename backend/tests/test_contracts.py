@@ -49,3 +49,10 @@ def test_max_plants_is_twenty() -> None:
     from app import contracts
 
     assert contracts.max_plants() == 20
+
+
+def test_default_mode_is_guided() -> None:
+    from app import contracts
+
+    assert contracts.default_mode() == "guided"
+    assert contracts.default_mode() in contracts.modes()

@@ -8,7 +8,8 @@
     "mode": {
       "description": "Allowed values for analysis_runs.mode.",
       "type": "string",
-      "enum": ["auto", "guided"]
+      "enum": ["auto", "guided"],
+      "default": "guided"
     },
     "stage_state": {
       "description": "Per-stage entry-point state.",

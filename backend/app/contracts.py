@@ -48,3 +48,10 @@ def pipeline_parameters() -> dict[str, Any]:
 def max_plants() -> int:
     """Maximum plants selectable for one run (shared input bound)."""
     return int(_defs()["limits"]["properties"]["max_plants"]["const"])
+
+
+@lru_cache(maxsize=1)
+def default_mode() -> str:
+    value = _defs()["mode"]["default"]
+    assert isinstance(value, str)
+    return value
