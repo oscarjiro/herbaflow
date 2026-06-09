@@ -187,6 +187,67 @@ frontend/
 └── package.json
 ```
 
+## Guided Machinery UX
+
+### Param panel (param-bearing stages)
+
+Each stage that carries tunable parameters (currently Step 2 — ADME) renders a collapsible
+**param panel** above its results. The panel lists every parameter with its description, its
+default, and (where applicable) the recommended range in the format `(default X, recommended
+lo–hi)`. Input fields validate against the contract's **hard bounds** only — the backend's
+enforcement threshold — not the advisory recommended range.
+
+The **Redo** button at the bottom of the panel is armed only when at least one value differs from
+the **frozen** value stored in `parameters.adme` (i.e., the value the run was actually computed
+with, not the contract default). Submitting Redo calls `POST /analyses/{id}/reset-from/{stage}`
+with the changed values; the backend validates, merges, clears downstream stages, and re-runs.
+
+### In-stage add/remove (Step 1 — compound selection)
+
+Step 1 renders an `EditableEntityList` over its compound result. Each computed row has a remove
+control; a separate add box (reusing the `CompoundValidateBox` from setup) resolves a SMILES or
+name through `POST /compounds/validate` before adding. Rows are tagged visually:
+
+| Tag | Meaning |
+|---|---|
+| `computed` | Came from the plant-compound lookup |
+| `user-added` | Added by the researcher after the stage ran |
+| `user-removed` | Removed by the researcher; still shown (greyed) but excluded from the forward set |
+
+The add box is disabled once the compound cap (2,000) is reached; the disabled state shows
+`"cap / current"` so the researcher knows how many slots remain. Submitting calls
+`POST /analyses/{id}/stages/{stage}/edit`; the backend reapplies the durable edit layer and
+re-runs from Step 2.
+
+### Approval bar
+
+An **ApprovalBar** (`"Approve & Continue"` button) is visible **only on the current awaiting
+stage** — i.e., when the run status is `stage_{N}_awaiting_approval` and `N` matches the
+displayed stage. Approving calls `POST /analyses/{id}/advance`. The bar is hidden once the stage
+is past or the run is in auto mode.
+
+### Step 2 results view
+
+The ADME results panel renders two tables — **Passed** and **Filtered** — switchable by tab.
+Each row carries:
+
+- The descriptor values (MW, logP, HBD, HBA, TPSA, rotatable bonds).
+- `qed_score` (QED — Quantitative Estimate of Drug-likeness, 0–1).
+- `descriptor_source` badge: `etl` (DB columns), `rdkit` (computed at screen time), or
+  `unscreened`.
+- Status badges: `PAINS`, `NP-bypass`, `unscreened`, `could-not-screen` where applicable.
+- A `reason` column on filtered rows (e.g. `"2 Lipinski violation(s)"`, `"fails Veber: TPSA"`).
+
+A **CSV download** button exports the full passed + filtered compound list with all descriptor
+columns. A tools-and-data-sources footer lists the screening rules applied (Lipinski / Veber /
+NP-bypass / PAINS) and the parameter values used for the run.
+
+---
+
 ## Summary
 
-Herbaflow's frontend is architected around the 8-stage pipeline abstraction. TypeScript ensures correctness of complex result structures; TanStack Query eliminates manual polling logic; Tailwind's design system tokens enable rapid, consistent styling; and Cytoscape provides domain-familiar network visualization. The combination of these technologies allows researchers to intuitively explore drug discovery hypotheses while maintaining code quality and test coverage.
+Herbaflow's frontend is architected around the 8-stage pipeline abstraction. TypeScript ensures
+correctness of complex result structures; TanStack Query eliminates manual polling logic; Tailwind's
+design system tokens enable rapid, consistent styling; and Cytoscape provides domain-familiar
+network visualization. The combination of these technologies allows researchers to intuitively
+explore drug discovery hypotheses while maintaining code quality and test coverage.

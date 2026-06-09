@@ -454,6 +454,203 @@ entity table is `disease_id` FK. There are no separate run-input junction tables
 dropped and stay dropped. This means cascading deletes of the disease row would orphan runs;
 guard accordingly.
 
+#### `parameters` jsonb shape
+
+```jsonc
+{
+  "plant_ids":        ["<uuid>", ...],          // selected plant UUIDs
+  "manual_compounds": ["<uuid>", ...],          // pre-resolved compound UUIDs injected into Stage 1
+  "stage_edits": {                              // durable in-stage add/remove decisions; keyed by stage number string
+    "<stage>": {
+      "added":   [{"compound_id": "<uuid>", "canonical_name": "<str|null>"}, ...],
+      "removed": ["<uuid>", ...]
+    }
+    // ...
+  },
+  "adme": { /* frozen ADME parameters; see below */ }
+  // further param groups added per chunk (e.g. "target", "disease_targets", "ppi", …)
+}
+```
+
+`stage_edits` is normalized: an id is never in both `added` and `removed` simultaneously (re-adding
+clears a pending removal; re-removing clears a pending add). The edit layer is **durable** — it
+survives a re-run's clear of `stage_results` and is reapplied every time the stage recomputes.
+Defaults for each param-bearing stage are frozen into `parameters` at run-creation time; a Redo
+overrides them within the contract's hard bounds.
+
+#### `stage_results` jsonb shape
+
+Keyed by stage number string (e.g. `"1"`, `"2"`).
+
+**Entity stages** (e.g. Stage 1 — compound selection):
+
+```jsonc
+{
+  "compounds": [
+    {"compound_id": "<uuid>", "canonical_name": "<str|null>", "tag": "<tag>"},
+    // tag ∈ {"computed", "user-added", "user-removed"}
+    // "user-removed" entries are PRESENT in this list but excluded from the effective forward set
+    ...
+  ],
+  "computed_ids": ["<uuid>", ...],   // the raw runner output before edit-layer application
+  "count": <int>,                    // effective count (excludes "user-removed"); 0 hard-stops the run
+  "state": "<stage_state>",          // "computed" (no edit) | "user_provided" (non-empty edit layer)
+  "per_plant": { "<plant_id>": ["<compound_id>", ...], ... }  // Stage 1 only
+}
+```
+
+**ADME stage** (Stage 2):
+
+```jsonc
+{
+  "passed": [
+    {
+      "compound_id": "<uuid>", "canonical_name": "<str|null>",
+      "descriptor_source": "etl|rdkit|unscreened",
+      "molecular_weight": <float|null>, "logp": <float|null>,
+      "hbond_donors": <int|null>, "hbond_acceptors": <int|null>,
+      "tpsa": <float|null>, "rotatable_bonds": <int|null>,
+      "qed_score": <float|null>, "np_likeness_score": <float|null>,
+      "num_ro5_violations": <int|null>, "is_pains_positive": <bool>,
+      "source_url": "<str|null>",
+      "badges": ["pains", "np_bypass", "unscreened"]   // only relevant badges present
+    },
+    ...
+  ],
+  "filtered": [
+    { /* same descriptor fields */ , "reason": "<str>" },
+    // reason examples: "2 Lipinski violation(s)", "fails Veber: TPSA", "could not screen"
+    ...
+  ],
+  "annotations": {
+    "pains":           ["<compound_id>", ...],   // annotated on screened compounds; NEVER a filter
+    "np_bypass":       ["<compound_id>", ...],
+    "unscreened":      ["<compound_id>", ...],
+    "could_not_screen":["<compound_id>", ...]
+  },
+  "count": <int>,       // len(passed); 0 triggers zero-pass handling (see gate semantics below)
+  "state": "computed"   // ADME stage has no edit layer
+}
+```
+
+`descriptor_source` values:
+- `"etl"` — descriptors read from the database columns (seeded by ETL/PubChem).
+- `"rdkit"` — descriptors computed on-the-fly via RDKit from the compound's SMILES (manual/null path);
+  persisted back to the `compounds` table after computation.
+- `"unscreened"` — `skip_adme` was on; no descriptor access took place.
+
+---
+
+#### ADME parameters and gate semantics
+
+##### `parameters.adme` block
+
+The `adme` object is frozen from the contract defaults at run-creation. Fields in the contract carry:
+
+- A `default` value (frozen at create time).
+- A human-readable `description` (shown in the UI param panel).
+- **Two-tier bounds:** hard `minimum`/`maximum` (or `exclusiveMinimum`) enforce only
+  physically-impossible values and are validated by the backend on every Redo. Advisory
+  `recommended_min`/`recommended_max` define the literature-tunable range shown in the UI
+  but are **never enforced** by the backend.
+- Booleans carry only `default` + `description` (no range bounds).
+
+Current `adme` parameters (all sourced from `shared/contracts/analysis.json`):
+
+| Parameter | Type | Default | Hard bounds | Recommended range | Notes |
+|---|---|---|---|---|---|
+| `max_mw` | number | 500 | >0, ≤2000 | 350–600 | Molecular weight ceiling (Da) |
+| `max_logp` | number | 5 | ≥−10, ≤20 | 3–5.6 | Lipophilicity ceiling |
+| `max_hbd` | integer | 5 | ≥0, ≤50 | 3–5 | H-bond donor ceiling |
+| `max_hba` | integer | 10 | ≥0, ≤50 | 8–10 | H-bond acceptor ceiling |
+| `max_tpsa` | number | 140 | ≥0, ≤500 | 90–140 | TPSA ceiling (Å²); Veber criterion |
+| `max_rotatable_bonds` | integer | 10 | ≥0, ≤50 | 7–10 | Rotatable-bond ceiling; Veber criterion |
+| `apply_veber` | boolean | true | — | — | Enable Veber (TPSA + rotatable bonds) gate |
+| `np_exception_threshold` | number | 0.5 | ≥−5, ≤5 | −1–2 | Ertl NP-likeness score at/above which NP bypass fires |
+| `apply_np_exception` | boolean | true | — | — | Enable NP-likeness exception; off = strict (no NP rescue) |
+| `max_violations` | integer | 1 | ≥0, ≤4 | 0–2 | Max Lipinski criteria a compound may break and still pass |
+| `skip_adme` | boolean | false | — | — | Bypass ADME entirely; all compounds pass as "unscreened" |
+
+##### Per-compound ADME gate (strict precedence — do not reorder)
+
+1. **`skip_adme` on** → compound passes, badged `"unscreened"`. Operational opt-out; overrides
+   everything.
+2. **Descriptors unavailable** (manual compound whose SMILES will not compute, or a seeded row
+   missing a required descriptor) → compound excluded, reason `"could not screen"`. This is a data
+   gap, not a verdict.
+3. **`apply_np_exception` AND `np_likeness_score >= np_exception_threshold`** → compound passes,
+   badged `"np_bypass"`. Overrides **both** Lipinski and Veber.
+4. **Rule gate:** count the four Lipinski criteria violated (MW / logP / HBD / HBA). Must be
+   `<= max_violations`. If `apply_veber`, **both** Veber criteria (rotatable bonds AND TPSA) must
+   pass — Veber is a hard conjunctive gate; one Veber violation filters. Failure reason distinguishes
+   Lipinski vs Veber.
+5. **PAINS** — annotated on every screened compound (badge `"pains"` on passed rows) but **never
+   affects pass/fail**.
+
+##### Deviations from the original parameter spec (record for collaborators)
+
+- **`skip_adme` replaces `apply_adme_to_manual`** — one unified, all-or-nothing opt-out. The
+  per-source granularity (ADME on manual vs seeded) was dropped by choice; there is a single bypass
+  switch that applies to the whole screening run.
+- **`max_violations` was added** (absent from the original contract). It is scoped to the **four
+  Lipinski criteria only** — Veber's two criteria are not summed into this budget.
+- **Lipinski is always on** — there is no Lipinski toggle. `apply_veber` extends the gate; it does
+  not replace Lipinski.
+- **Veber is a hard conjunctive gate** when enabled — both rotatable-bonds and TPSA must pass; there
+  is no Veber violation budget.
+- **`apply_np_exception`** is a new boolean (default on); setting it off means strict mode — no NP
+  rescue regardless of score.
+- **`np_exception_threshold` bounds corrected** from the original `0..1` to hard `−5..5` (the Ertl
+  score's actual scale) with recommended `−1..2`.
+
+---
+
+#### Dependency DAG and re-run rules
+
+Re-runs follow a **dependency DAG**, not raw stage numbering:
+
+```
+S1 → S2 → S3 ─┐
+               ├─→ S5 → S6 → S7
+S4 ────────────┘    └──────→ S8
+```
+
+`S1→S2→S3` and `S4` both feed `S5`; `S5` feeds `S6` and `S8`; `S6` feeds `S7`; `S7` and `S8` are
+parallel leaves.
+
+**Param Redo** (changing a param-bearing stage's parameters via `POST /analyses/{id}/reset-from/{stage}`
+with a `param_overrides` body): re-runs from **that stage, inclusive**, plus its downstream closure.
+A no-op Redo (overrides equal the current frozen values) returns immediately without clearing or
+re-running.
+
+**Set edit** (adding/removing entities on an entity stage via `POST /analyses/{id}/stages/{stage}/edit`):
+re-runs from the **next dependent stage(s), exclusive** — the edit is itself the new output. For
+example, editing Step-1 compounds re-runs from Step 2.
+
+Both `reset-from` and stage-edit are rejected with **409 Conflict** unless the run is settled
+(`*_awaiting_approval` / `complete` / `failed`). `reset-from` is destructive: the downstream
+`stage_results` are cleared **before** re-running (idempotent on outage).
+
+**Edit layer durability:** `parameters.stage_edits` persists across re-runs. When a stage
+recomputes, the edit layer is reapplied over the fresh result — manual curation is never silently
+lost.
+
+**Entity caps** — the following hard limits are sourced from the contract; overflow raises **422**
+with the cap and the current count (no silent truncation):
+
+| Entity | Cap |
+|---|---|
+| Compounds | 2,000 |
+| Targets | 5,000 |
+| Plants | 20 |
+
+An edit that empties an entity stage triggers the same hard-stop as a computed-empty stage.
+
+**Zero-pass at Step 2:**
+- In **guided** mode — surfaces as the normal Step-2 approval checkpoint; a looser Redo or
+  enabling `skip_adme` recovers the run.
+- In **auto** mode — hard-stops the run with a recoverable empty-state error message.
+
 **Constraints:**
 - PK: `analysis_runs_pkey` on `analysis_id`
 - FK: `analysis_runs_disease_id_fkey` → `diseases(disease_id)`
