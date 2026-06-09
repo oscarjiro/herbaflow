@@ -38,3 +38,12 @@ def test_create_schema_cap_matches_contract() -> None:
     field = AnalysisCreate.model_fields["plant_ids"]
     maxes = [m for m in field.metadata if getattr(m, "max_length", None) is not None]
     assert maxes and maxes[0].max_length == contracts.max_plants()
+
+
+def test_target_defaults_match_contract():
+    d = contracts.target_defaults()
+    assert d == {"min_pchembl": 5.0, "min_assay_confidence": 7}
+    assert "human_only" not in d
+    meta = contracts.target_param_meta()
+    assert meta["min_pchembl"]["recommended_max"] == 7.0
+    assert meta["min_assay_confidence"]["max"] == 9

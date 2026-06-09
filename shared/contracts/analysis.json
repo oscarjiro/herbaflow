@@ -68,9 +68,12 @@
         "target": {
           "type": "object",
           "properties": {
-            "min_pchembl": { "type": "number", "minimum": 0, "maximum": 14 },
-            "human_only": { "type": "boolean" },
-            "min_assay_confidence": { "type": "integer", "minimum": 0, "maximum": 9 }
+            "min_pchembl": { "type": "number", "minimum": 0, "maximum": 14, "default": 5.0,
+              "recommended_min": 5.0, "recommended_max": 7.0,
+              "description": "Minimum pChEMBL (−log10 molar potency) for a measured compound–target edge. 5 ≈ active at ≤10 µM (standard cutoff); 6 = 1 µM; 7 = 100 nM (stricter)." },
+            "min_assay_confidence": { "type": "integer", "minimum": 0, "maximum": 9, "default": 7,
+              "recommended_min": 5, "recommended_max": 9,
+              "description": "Minimum ChEMBL target-confidence score (0–9). 9 = direct single protein; ≥7 high-confidence molecular target; <4 cellular." }
           }
         },
         "disease_targets": {

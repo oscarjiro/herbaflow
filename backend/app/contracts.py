@@ -94,3 +94,24 @@ def adme_param_meta() -> dict[str, Any]:
             "description": spec.get("description"),
         }
     return out
+
+
+def target_defaults() -> dict[str, Any]:
+    """The frozen-at-create defaults for the target param group (from the contract)."""
+    props = pipeline_parameters()["target"]["properties"]
+    return {name: spec["default"] for name, spec in props.items()}
+
+
+def target_param_meta() -> dict[str, Any]:
+    """Per-param UI metadata for the target group (bounds, advisory range, description)."""
+    out: dict[str, Any] = {}
+    for name, spec in pipeline_parameters()["target"]["properties"].items():
+        out[name] = {
+            "default": spec.get("default"),
+            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
+            "max": spec.get("maximum"),
+            "recommended_min": spec.get("recommended_min"),
+            "recommended_max": spec.get("recommended_max"),
+            "description": spec.get("description"),
+        }
+    return out
