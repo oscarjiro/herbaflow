@@ -19,3 +19,8 @@ def stage_status(stage: int, phase: str) -> str:
 def is_terminal(status: str | None) -> bool:
     """True when the run has reached a terminal flat status."""
     return status in {COMPLETE, FAILED}
+
+
+def is_settled(status: str | None) -> bool:
+    """True when the run is not actively running: terminal or paused for approval."""
+    return status in {COMPLETE, FAILED} or bool(status and status.endswith("_awaiting_approval"))

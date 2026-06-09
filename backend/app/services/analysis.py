@@ -96,4 +96,5 @@ class AnalysisService:
         return AnalysisRead.model_validate(run)
 
     async def advance(self, analysis_id: uuid.UUID) -> None:
-        await engine.advance_run(self.analysis_repo, analysis_id)
+        runners = engine.build_runners(self.analysis_repo.session)
+        await engine.advance_run(self.analysis_repo, analysis_id, runners)

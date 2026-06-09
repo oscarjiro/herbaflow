@@ -42,15 +42,28 @@ def _run(mode):
     )
 
 
+def _runners(stage1_count, stage2_count):
+    async def stage1_runner(r):
+        return {"count": stage1_count, "compounds": [], "per_plant": {}, "state": "computed"}
+
+    async def stage2_runner(r):
+        return {
+            "count": stage2_count,
+            "passed": [],
+            "filtered": [],
+            "annotations": {},
+            "state": "computed",
+        }
+
+    return {1: stage1_runner, 2: stage2_runner}
+
+
 @pytest.mark.asyncio
 async def test_auto_runs_to_complete() -> None:
     run = _run("auto")
     repo = FakeRepo(run)
 
-    async def stage_runner(r):
-        return {"count": 2, "compounds": [], "per_plant": {}, "state": "computed"}
-
-    await engine.execute_run(repo, run.analysis_id, stage_runner)
+    await engine.execute_run(repo, run.analysis_id, _runners(2, 1))
 
     assert run.status == "complete"
     assert run.stage_results["1"]["count"] == 2
@@ -60,14 +73,17 @@ async def test_auto_runs_to_complete() -> None:
 async def test_guided_pauses_for_approval() -> None:
     run = _run("guided")
     repo = FakeRepo(run)
+    runners = _runners(1, 1)
 
-    async def stage_runner(r):
-        return {"count": 1, "compounds": [], "per_plant": {}, "state": "computed"}
-
-    await engine.execute_run(repo, run.analysis_id, stage_runner)
+    await engine.execute_run(repo, run.analysis_id, runners)
     assert run.status == "stage_1_awaiting_approval"
 
-    await engine.advance_run(repo, run.analysis_id)
+    # Approving stage 1 runs stage 2, which (guided) pauses again.
+    await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_2_awaiting_approval"
+
+    # Approving the last runnable stage completes the run.
+    await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "complete"
 
 
@@ -76,10 +92,7 @@ async def test_zero_compounds_fails() -> None:
     run = _run("auto")
     repo = FakeRepo(run)
 
-    async def stage_runner(r):
-        return {"count": 0, "compounds": [], "per_plant": {}, "state": "computed"}
-
-    await engine.execute_run(repo, run.analysis_id, stage_runner)
+    await engine.execute_run(repo, run.analysis_id, _runners(0, 0))
     assert run.status == "failed"
     assert "compound" in run.error_message.lower()
 
@@ -90,4 +103,4 @@ async def test_advance_rejects_wrong_state() -> None:
     run.status = "stage_1_running"
     repo = FakeRepo(run)
     with pytest.raises(ConflictProblem):
-        await engine.advance_run(repo, run.analysis_id)
+        await engine.advance_run(repo, run.analysis_id, _runners(1, 1))
