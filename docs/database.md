@@ -99,6 +99,11 @@ One row per external data source. PKs are UUID v4.
 The `Manual Entry` row (`source_type = 'manual'`, `base_url` null) is seeded so user-entered
 compounds satisfy the `source_id` FK; their per-row `source_url` is null (no external deep link).
 
+Stage 3 (compound→target) attributes edges and target rows to four sources. `ChEMBL`,
+`UniProt`, and `PubChem` already exist; `PubChem BioAssay` (`api`; distinct from `PubChem`,
+which serves compound structures) and `SwissTargetPrediction` (`manual`; user-pasted
+`stp_import` edges) are seeded by `20260610000001_seed_target_sources.sql`.
+
 ---
 
 ### `plants`
@@ -768,6 +773,13 @@ incremental ledger.
 20260608000005_baseline_operational.sql            source_systems, analysis_runs
 20260608000006_baseline_constraints_indexes_rls.sql  all foreign keys, indexes, ENABLE ROW LEVEL SECURITY
 20260608000007_baseline_cron.sql                   pg_cron hourly purge of expired analysis_runs (platform-only)
+```
+
+Later migrations (applied on top of the baseline):
+
+```
+20260609000001_compound_validation_status.sql      compounds.validation_status + Manual Entry source + guided default
+20260610000001_seed_target_sources.sql             PubChem BioAssay + SwissTargetPrediction source rows
 ```
 
 Tables are created first and all foreign keys added last, so the set replays in order on a
