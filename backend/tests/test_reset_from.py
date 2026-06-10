@@ -424,6 +424,27 @@ async def test_edit_removing_all_compounds_is_rejected_and_persists_nothing(
 
 
 # ---------------------------------------------------------------------------
+# reset-from is the explicit confirm: it RUNS even when parked at the edited stage,
+# and clears the rerun_from marker.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_reset_from_runs_and_clears_rerun_from(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = _patch_runners(monkeypatch)
+    run = _run(computed=["a", "b"], mode="guided")
+    run.status = "stage_1_awaiting_approval"
+    run.current_stage = 1
+    run.parameters["rerun_from"] = 1
+    run.stage_results["2"]["stale"] = True
+    svc = _service(run, {})
+
+    # Explicit reset-from/1 (no overrides) is the confirm — it must RUN, not re-park.
+    await svc.reset_from(run.analysis_id, 1, None)
+
+    assert len(calls["2"]) == 1  # S2 actually re-ran
+    assert "rerun_from" not in run.parameters  # confirm marker cleared
+
+
+# ---------------------------------------------------------------------------
 # cap — add beyond the compound cap -> 422 with the cap
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
