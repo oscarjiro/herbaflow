@@ -78,9 +78,16 @@ async def test_guided_pauses_then_advances(client) -> None:
     assert adv2.json()["status"] == "stage_3_running"
     assert await _poll(c, run_id, until="stage_3_awaiting_approval") == "stage_3_awaiting_approval"
 
+    # Approving stage 3 now schedules stage 4 (disease-target read), which pauses at the
+    # guided S4 checkpoint.
     adv3 = await c.post(f"/analyses/{run_id}/advance")
     assert adv3.status_code == 202
-    # Last runnable stage: advance completes synchronously in prepare (nothing to schedule).
+    assert adv3.json()["status"] == "stage_4_running"
+    assert await _poll(c, run_id, until="stage_4_awaiting_approval") == "stage_4_awaiting_approval"
+
+    # Last runnable stage: approving stage 4 completes in prepare (nothing left to schedule).
+    adv4 = await c.post(f"/analyses/{run_id}/advance")
+    assert adv4.status_code == 202
     assert await _poll(c, run_id, until="complete") == "complete"
 
 
