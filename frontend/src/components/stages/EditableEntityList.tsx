@@ -37,6 +37,7 @@ export function EditableEntityList({
   addControl?: React.ReactNode;
 }) {
   const atCap = current >= cap;
+  const atMin = current <= 1;
 
   return (
     <div className="editable-entity-list">
@@ -54,6 +55,12 @@ export function EditableEntityList({
               className="hf-btn hf-btn-icon"
               aria-label={`Remove ${e.label}`}
               onClick={() => onRemove(e.id)}
+              disabled={atMin && e.tag !== "user-removed"}
+              title={
+                atMin && e.tag !== "user-removed"
+                  ? "A stage must keep at least one entry."
+                  : undefined
+              }
             >
               ✕
             </button>
