@@ -74,6 +74,19 @@ def downstream_closure(stage: int) -> set[int]:
     return seen
 
 
+async def mark_downstream_stale(repo: _Repo, run: Any, stage: int) -> None:
+    """Flag every already-produced stage downstream of ``stage`` as out-of-date.
+
+    A set edit re-derives only the edited stage in place; its heavier downstream stages are
+    NOT re-run (D3: recompute only on an explicit reset-from). They keep their stored results,
+    flagged stale, until the user confirms with a reset-from. Mode-agnostic.
+    """
+    produced = {int(k) for k in run.stage_results}
+    stale = downstream_closure(stage) & produced
+    if stale:
+        await repo.mark_stages_stale(run, stale)
+
+
 # ---------------------------------------------------------------------------
 # Stage registry. Extended as stages land in later chunks.
 # ---------------------------------------------------------------------------
@@ -101,6 +114,7 @@ class _Repo(Protocol):  # structural type for testability
     ) -> None: ...
     async def set_stage_result(self, run: Any, stage: int, result: dict[str, Any]) -> None: ...
     async def clear_stage_results(self, run: Any, stages: set[int]) -> None: ...
+    async def mark_stages_stale(self, run: Any, stages: set[int]) -> None: ...
     async def set_parameters(self, run: Any) -> None: ...
     async def complete(self, run: Any) -> None: ...
     async def fail(self, run: Any, message: str) -> None: ...
