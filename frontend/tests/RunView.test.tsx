@@ -32,13 +32,14 @@ describe("RunView with Stage 2 data", () => {
     expect(curcuminEls.length).toBeGreaterThan(0);
   });
 
-  it("shows ApprovalBar at stage_2_awaiting_approval", async () => {
+  it("shows exactly one ApprovalBar at stage_2_awaiting_approval", async () => {
     wrap("r2");
     // Wait for data to load — heading is a reliable marker
     await screen.findByRole("heading", { name: /step 2/i });
-    // Approve button should already be in DOM once heading is present
+    // Only the per-stage (Stage 2) bar may show; RunView's own bar is gated to
+    // Stage 1, so an awaiting Stage 2 must render a single Approve button.
     const approveBtns = screen.getAllByRole("button", { name: /approve/i });
-    expect(approveBtns.length).toBeGreaterThan(0);
+    expect(approveBtns).toHaveLength(1);
   });
 
   it("does NOT show approve button for r1 which is complete", async () => {

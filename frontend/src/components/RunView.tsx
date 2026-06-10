@@ -50,11 +50,16 @@ export function RunView({ analysisId }: { analysisId: string }) {
               </ul>
             </>
           )}
-          <ApprovalBar
-            status={data.status}
-            currentStage={data.current_stage}
-            onApprove={() => advance.mutate()}
-          />
+          {/* RunView owns the approval bar for Stage 1 only; Stages 2+ render
+              their own bar inside the per-stage view, so gating here avoids two
+              identical "Approve & Continue" buttons at an awaiting checkpoint. */}
+          {data.current_stage === 1 && (
+            <ApprovalBar
+              status={data.status}
+              currentStage={data.current_stage}
+              onApprove={() => advance.mutate()}
+            />
+          )}
         </>
       )}
 
