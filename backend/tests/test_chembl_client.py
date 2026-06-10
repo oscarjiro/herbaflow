@@ -6,15 +6,22 @@ import pytest
 from app.errors import ServiceUnavailableError
 from app.integrations.chembl import ChemblClient
 
+_MOLECULE_RE = re.compile(r".*/data/molecule.*")
 _ACTIVITY_RE = re.compile(r".*/data/activity.*")
 _ASSAY_RE = re.compile(r".*/data/assay.*")
 _TARGET_RE = re.compile(r".*/data/target.*")
 
+# The InChIKey is resolved to a molecule id first (the /activity InChIKey filter is a no-op
+# on the real API), so every join test seeds a /molecule response.
+_MOLECULE_HIT = {"molecules": [{"molecule_chembl_id": "CHEMBL_M1"}], "page_meta": {"next": None}}
+
 
 @pytest.mark.asyncio
 async def test_join_filters_by_pchembl_confidence_human_and_type(httpx_mock):
-    # /activity: one fully-qualifying, one below pchembl, one non-human, one whose
-    # assay confidence is too low. accession/confidence are NOT on these rows.
+    # /molecule: resolve the InChIKey to a molecule id (the load-bearing first step).
+    httpx_mock.add_response(url=_MOLECULE_RE, json=_MOLECULE_HIT)
+    # /activity (by molecule id): one fully-qualifying, one below pchembl, one non-human, one
+    # whose assay confidence is too low. accession/confidence are NOT on these rows.
     httpx_mock.add_response(
         url=_ACTIVITY_RE,
         json={
@@ -102,7 +109,35 @@ async def test_join_filters_by_pchembl_confidence_human_and_type(httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_resolves_inchikey_via_molecule_endpoint(httpx_mock):
+    # The /activity request must be keyed on the resolved molecule id, NOT the InChIKey
+    # (the InChIKey filter is silently ignored on /activity by the real API).
+    httpx_mock.add_response(url=_MOLECULE_RE, json=_MOLECULE_HIT)
+    httpx_mock.add_response(url=_ACTIVITY_RE, json={"activities": [], "page_meta": {"next": None}})
+    async with httpx.AsyncClient() as c:
+        await ChemblClient(c).targets_for_inchikey("AAA", min_pchembl=5.0, min_confidence=7)
+
+    reqs = httpx_mock.get_requests()
+    mol_req = next(r for r in reqs if "/data/molecule" in str(r.url))
+    act_req = next(r for r in reqs if "/data/activity" in str(r.url))
+    assert "standard_inchi_key=AAA" in str(mol_req.url)
+    assert "molecule_chembl_id__in=CHEMBL_M1" in str(act_req.url)
+    assert "AAA" not in str(act_req.url)  # the InChIKey never reaches /activity
+
+
+@pytest.mark.asyncio
+async def test_not_in_chembl_returns_empty(httpx_mock):
+    # No molecule for the InChIKey -> the compound is absent from ChEMBL -> [] (no /activity).
+    httpx_mock.add_response(url=_MOLECULE_RE, json={"molecules": [], "page_meta": {"next": None}})
+    async with httpx.AsyncClient() as c:
+        hits = await ChemblClient(c).targets_for_inchikey("AAA", min_pchembl=5.0, min_confidence=7)
+    assert hits == []
+    assert all("/data/activity" not in str(r.url) for r in httpx_mock.get_requests())
+
+
+@pytest.mark.asyncio
 async def test_zero_qualifying_activities_returns_empty(httpx_mock):
+    httpx_mock.add_response(url=_MOLECULE_RE, json=_MOLECULE_HIT)
     httpx_mock.add_response(
         url=_ACTIVITY_RE,
         json={"activities": [], "page_meta": {"next": None}},
@@ -114,10 +149,10 @@ async def test_zero_qualifying_activities_returns_empty(httpx_mock):
 
 @pytest.mark.asyncio
 async def test_outage_raises_service_unavailable(httpx_mock):
-    # attempts=3 consumes exactly three 503s on the first /activity call.
-    httpx_mock.add_response(url=_ACTIVITY_RE, status_code=503)
-    httpx_mock.add_response(url=_ACTIVITY_RE, status_code=503)
-    httpx_mock.add_response(url=_ACTIVITY_RE, status_code=503)
+    # attempts=3 consumes exactly three 503s on the first (/molecule) call.
+    httpx_mock.add_response(url=_MOLECULE_RE, status_code=503)
+    httpx_mock.add_response(url=_MOLECULE_RE, status_code=503)
+    httpx_mock.add_response(url=_MOLECULE_RE, status_code=503)
     async with httpx.AsyncClient() as c:
         with pytest.raises(ServiceUnavailableError):
             await ChemblClient(c).targets_for_inchikey("AAA", min_pchembl=5.0, min_confidence=7)

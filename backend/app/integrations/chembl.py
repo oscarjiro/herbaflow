@@ -1,16 +1,20 @@
 """ChEMBL client — measured compound→target bioactivities (human, single-protein).
 
 The ChEMBL ``/activity`` endpoint does NOT carry the target-confidence score or the
-UniProt accession, so a single-resource read is impossible. This client performs the
-correct multi-resource join:
+UniProt accession, so a single-resource read is impossible. It also **silently ignores**
+an InChIKey filter (``molecule_structures__standard_inchi_key`` is not a valid filter on
+``/activity`` — it returns the entire activity table), so the InChIKey must first be
+resolved to a ``molecule_chembl_id``. This client performs the correct multi-resource join:
 
-  1. ``/activity`` — paginated by InChIKey; yields pchembl, standard_type, organism,
-     ``target_chembl_id`` and ``assay_chembl_id`` (cheap pre-filters applied here).
+  0. ``/molecule`` — resolves the InChIKey to its ``molecule_chembl_id`` (the InChIKey
+     filter IS valid here). No molecule -> the compound is absent from ChEMBL (uncovered).
+  1. ``/activity`` — paginated by ``molecule_chembl_id__in``; yields pchembl, standard_type,
+     organism, ``target_chembl_id`` and ``assay_chembl_id`` (cheap pre-filters applied here).
   2. ``/assay`` — batch-resolves ``assay_chembl_id -> confidence_score``.
   3. ``/target`` — batch-resolves ``target_chembl_id -> target_components[0].accession``
      for human SINGLE PROTEIN targets.
 
-The three resources are then joined, keeping the strongest pchembl per accession.
+The resources are then joined, keeping the strongest pchembl per accession.
 """
 
 from __future__ import annotations
@@ -57,11 +61,16 @@ class ChemblClient:
     ) -> list[ChemblHit]:
         """All measured single-protein human targets for a compound, filtered.
 
-        Joins ``/activity`` (pchembl, type), ``/assay`` (confidence) and ``/target``
-        (UniProt accession). Raises ServiceUnavailableError on outage (load-bearing).
+        Resolves the InChIKey to its ``molecule_chembl_id`` via ``/molecule``, then joins
+        ``/activity`` (pchembl, type), ``/assay`` (confidence) and ``/target`` (UniProt
+        accession). Raises ServiceUnavailableError on outage (load-bearing).
         """
         try:
-            candidates = await self._candidate_activities(inchikey, min_pchembl=min_pchembl)
+            molecule_ids = await self._molecule_ids(inchikey)
+            if not molecule_ids:
+                logger.info("ChEMBL %s: not in ChEMBL (no molecule record)", inchikey)
+                return []
+            candidates = await self._candidate_activities(molecule_ids, min_pchembl=min_pchembl)
             confidence = await self._assay_confidence(sorted({c[1] for c in candidates}))
             kept = [c for c in candidates if confidence.get(c[1], -1) >= min_confidence]
             accessions = await self._target_accessions(sorted({c[0] for c in kept}))
@@ -80,31 +89,40 @@ class ChemblClient:
         logger.info("ChEMBL %s: %d measured human target(s)", inchikey, len(hits))
         return list(hits.values())
 
+    async def _molecule_ids(self, inchikey: str) -> list[str]:
+        """Resolve an InChIKey to its ChEMBL ``molecule_chembl_id``(s).
+
+        The InChIKey filter is valid on ``/molecule`` (unlike ``/activity``). A standard
+        InChIKey is structure-specific, so this is normally 1 id; salts/parents may add a
+        few, hence a list fed to ``molecule_chembl_id__in``.
+        """
+        ids: list[str] = []
+        async for mol in self._paginate(
+            "/molecule",
+            "molecules",
+            {
+                "molecule_structures__standard_inchi_key": inchikey,
+                "only": "molecule_chembl_id",
+            },
+        ):
+            mid = mol.get("molecule_chembl_id")
+            if mid:
+                ids.append(mid)
+        return ids
+
     async def _candidate_activities(
-        self, inchikey: str, *, min_pchembl: float
+        self, molecule_ids: list[str], *, min_pchembl: float
     ) -> list[tuple[str, str, float, str]]:
-        """Paginate /activity; return (target_id, assay_id, pchembl, std_type) candidates."""
+        """Paginate /activity by molecule id; return (target_id, assay_id, pchembl, std_type)."""
         candidates: list[tuple[str, str, float, str]] = []
-        offset = 0
-        while True:
-            body = await self._get_json(
-                "/activity",
-                {
-                    "molecule_structures__standard_inchi_key": inchikey,
-                    "limit": str(_PAGE),
-                    "offset": str(offset),
-                    "format": "json",
-                },
-            )
-            page = body.get("activities") or []
-            for row in page:
-                cand = self._candidate(row, min_pchembl=min_pchembl)
-                if cand is not None:
-                    candidates.append(cand)
-            nxt = (body.get("page_meta") or {}).get("next")
-            if not nxt or not page:
-                break
-            offset += _PAGE
+        async for row in self._paginate(
+            "/activity",
+            "activities",
+            {"molecule_chembl_id__in": ",".join(molecule_ids)},
+        ):
+            cand = self._candidate(row, min_pchembl=min_pchembl)
+            if cand is not None:
+                candidates.append(cand)
         return candidates
 
     @staticmethod
