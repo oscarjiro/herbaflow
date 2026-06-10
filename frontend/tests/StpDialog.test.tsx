@@ -75,5 +75,7 @@ test("import resolves via /targets/validate and adds only fresh targets to the r
   expect(onAddTargets).toHaveBeenCalledWith([expect.objectContaining({ target_id: "t1" })]);
 
   // Counters reflect added / already-in-run / failed.
-  await screen.findByText(/Added 1 target\(s\) to the run; 1 already present; 0 failed to resolve\./);
+  await screen.findByText(
+    /Added 1 target\(s\) to the run; 1 already present; 0 failed to resolve\./,
+  );
 });

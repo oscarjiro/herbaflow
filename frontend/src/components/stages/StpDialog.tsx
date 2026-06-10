@@ -124,8 +124,8 @@ export function StpDialog({
       <h3>SwissTargetPrediction (manual paste-back)</h3>
       <p className="hf-muted">
         Pick the least-covered compounds, copy their SMILES into SwissTargetPrediction, then paste
-        the result CSV here. The resolved targets are added to this run only (not stored as
-        measured compound–target links).
+        the result CSV here. The resolved targets are added to this run only (not stored as measured
+        compound–target links).
       </p>
 
       {/* Compound picker — least-covered first (copy-SMILES convenience only) */}
@@ -184,15 +184,15 @@ export function StpDialog({
           aria-label="Paste SwissTargetPrediction CSV"
           value={pasteText}
           onChange={(e) => setPasteText(e.target.value)}
-          placeholder={'Target,Common name,Uniprot ID,…,Probability*,…\n…'}
+          placeholder={"Target,Common name,Uniprot ID,…,Probability*,…\n…"}
           rows={6}
         />
       </div>
 
       {parse.error && pasteText.trim().length > 0 && (
         <p className="hf-error" role="alert">
-          {parse.error} Expected SwissTargetPrediction columns include{" "}
-          <code>Uniprot ID</code>, <code>Common name</code>, and <code>Probability*</code>.
+          {parse.error} Expected SwissTargetPrediction columns include <code>Uniprot ID</code>,{" "}
+          <code>Common name</code>, and <code>Probability*</code>.
         </p>
       )}
 
