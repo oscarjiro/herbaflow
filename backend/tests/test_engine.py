@@ -46,7 +46,11 @@ def _compounds(n):
     return [{"compound_id": f"c{i}", "canonical_name": f"C{i}"} for i in range(n)]
 
 
-def _runners(stage1_count, stage2_count):
+def _targets(n):
+    return [{"target_id": f"t{i}", "canonical_name": f"T{i}"} for i in range(n)]
+
+
+def _runners(stage1_count, stage2_count, stage3_count=1, stage4_count=1):
     async def stage1_runner(r):
         return {
             "count": stage1_count,
@@ -66,19 +70,19 @@ def _runners(stage1_count, stage2_count):
 
     async def stage3_runner(r):
         return {
-            "targets": [],
+            "targets": _targets(stage3_count),
             "compound_targets": [],
             "per_compound": {},
             "coverage_pct": 0.0,
-            "count": 0,
+            "count": stage3_count,
             "state": "computed",
         }
 
     async def stage4_runner(r):
         return {
-            "targets": [],
+            "targets": _targets(stage4_count),
             "disease_targets": [],
-            "count": 0,
+            "count": stage4_count,
             "min_score_applied": 0.3,
             "state": "computed",
         }
@@ -140,3 +144,39 @@ async def test_advance_rejects_wrong_state() -> None:
     repo = FakeRepo(run)
     with pytest.raises(ConflictProblem):
         await engine.advance_run(repo, run.analysis_id, _runners(1, 1))
+
+
+@pytest.mark.asyncio
+async def test_auto_fails_on_empty_stage3() -> None:
+    run = _run("auto")
+    repo = FakeRepo(run)
+    await engine.execute_run(repo, run.analysis_id, _runners(2, 2, stage3_count=0))
+    assert run.status == "failed"
+    assert "step 3" in run.error_message.lower()
+
+
+@pytest.mark.asyncio
+async def test_auto_fails_on_empty_stage4() -> None:
+    run = _run("auto")
+    repo = FakeRepo(run)
+    await engine.execute_run(repo, run.analysis_id, _runners(2, 2, stage4_count=0))
+    assert run.status == "failed"
+    assert "step 4" in run.error_message.lower()
+
+
+@pytest.mark.asyncio
+async def test_guided_parks_empty_stage3_then_refuses_advance() -> None:
+    run = _run("guided")
+    repo = FakeRepo(run)
+    runners = _runners(1, 1, stage3_count=0)
+
+    await engine.execute_run(repo, run.analysis_id, runners)  # park S1
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S2, park S2
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S3 (0), park S3
+    assert run.status == "stage_3_awaiting_approval"
+    assert run.stage_results["3"]["count"] == 0
+
+    # Approving an empty stage is refused.
+    with pytest.raises(ConflictProblem):
+        await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_3_awaiting_approval"  # unchanged

@@ -105,19 +105,19 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
 
     async def stage3(_run: SimpleNamespace) -> dict:
         return {
-            "targets": [],
+            "targets": [{"target_id": "t0", "canonical_name": "T0"}],
             "compound_targets": [],
             "per_compound": {},
             "coverage_pct": 0.0,
-            "count": 0,
+            "count": 1,
             "state": "computed",
         }
 
     async def stage4(_run: SimpleNamespace) -> dict:
         return {
-            "targets": [],
+            "targets": [{"target_id": "t0", "canonical_name": "T0"}],
             "disease_targets": [],
-            "count": 0,
+            "count": 1,
             "min_score_applied": 0.3,
             "state": "computed",
         }

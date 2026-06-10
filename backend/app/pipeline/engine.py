@@ -24,6 +24,27 @@ logger = logging.getLogger("herbaflow.pipeline")
 StageRunner = Callable[[Any], Awaitable[dict[str, Any]]]
 
 
+def _empty_stage_message(stage: int, run: Any) -> str:
+    """Auto-mode hard-stop message for an entity/gate stage that produced 0 results."""
+    if stage == 2:
+        n_in = run.stage_results.get("1", {}).get("count", 0)
+        return (
+            f"0 of {n_in} compounds passed ADME; adjust parameters or enable "
+            "skip_adme, then re-run from Step 2."
+        )
+    if stage == 3:
+        return (
+            "No targets were identified for the screened compounds; adjust the target "
+            "parameters or add a target, then re-run from Step 3."
+        )
+    if stage == 4:
+        return (
+            "No disease targets at this score floor; lower min_score or add a target, "
+            "then re-run from Step 4."
+        )
+    return f"Stage {stage} produced no results."
+
+
 # ---------------------------------------------------------------------------
 # Dependency DAG: direct downstream consumers of each stage.
 # S1->S2->S3 and S4 both feed S5; S5 feeds S6 AND S8; S6 feeds S7; S7 and S8 are leaves.
@@ -122,19 +143,15 @@ async def execute_run(
 
         await repo.set_stage_result(run, stage, result)
 
-        # Stage 2 zero-pass (AD-6): guided -> normal checkpoint; auto -> hard-stop empty-state.
-        if stage == 2 and result["count"] == 0:
+        # Empty downstream entity/gate stage (S2/S3/S4; S1 hard-failed above):
+        # guided -> blocking checkpoint (advance is refused); auto -> hard-stop.
+        if result["count"] == 0:
             if run.mode == "guided":
-                logger.info("run %s: stage 2 passed 0 — awaiting approval (guided)", rid)
-                await repo.set_status(run, state.stage_status(2, "awaiting_approval"))
+                logger.info("run %s: stage %d produced 0 — parking (blocking)", rid, stage)
+                await repo.set_status(run, state.stage_status(stage, "awaiting_approval"))
                 return
-            n_in = run.stage_results.get("1", {}).get("count", 0)
-            msg = (
-                f"0 of {n_in} compounds passed ADME; adjust parameters or enable "
-                "skip_adme, then re-run from Step 2."
-            )
-            logger.warning("run %s: stage 2 passed 0 — failing (auto)", rid)
-            await repo.fail(run, msg)
+            logger.warning("run %s: stage %d produced 0 — failing (auto)", rid, stage)
+            await repo.fail(run, _empty_stage_message(stage, run))
             return
 
         logger.info("run %s: stage %d done (%d)", rid, stage, result["count"])
@@ -166,6 +183,14 @@ async def advance_run(
     if not state.is_settled(run.status) or not (run.status or "").endswith("_awaiting_approval"):
         raise ConflictProblem(detail="Run is not awaiting approval.")
     current = run.current_stage or 0
+    cur = run.stage_results.get(str(current))
+    if cur is not None and cur.get("count", 0) == 0:
+        raise ConflictProblem(
+            detail=(
+                f"Step {current} has no results to carry forward — lower its parameters "
+                "and Redo, or add an entry, before continuing."
+            )
+        )
     nxt = next((s for s in RUNNABLE_STAGES if s > current), None)
     if nxt is None:
         await repo.set_status(run, state.stage_status(current, "complete"))

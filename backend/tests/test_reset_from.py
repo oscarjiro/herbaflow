@@ -156,11 +156,11 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
             passed = run.stage_results["2"]["passed"]
             calls["3"].append([p["compound_id"] for p in passed])
             return {
-                "targets": [],
+                "targets": [{"target_id": "t0", "canonical_name": "T0"}],
                 "compound_targets": [],
                 "per_compound": {},
                 "coverage_pct": 0.0,
-                "count": 0,
+                "count": 1,
                 "state": "computed",
             }
 
@@ -168,9 +168,9 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
             # Disease-side read; independent of the compound chain (idempotent S4 re-run).
             calls["4"].append(True)
             return {
-                "targets": [],
+                "targets": [{"target_id": "t0", "canonical_name": "T0"}],
                 "disease_targets": [],
-                "count": 0,
+                "count": 1,
                 "min_score_applied": 0.3,
                 "state": "computed",
             }

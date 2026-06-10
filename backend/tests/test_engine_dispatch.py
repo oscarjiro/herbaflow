@@ -51,7 +51,13 @@ def _compounds(n: int) -> list[dict]:
     return [{"compound_id": f"c{i}", "canonical_name": f"C{i}"} for i in range(n)]
 
 
-def _runners(stage1_count: int, stage2_count: int) -> dict[int, object]:
+def _targets(n: int) -> list[dict]:
+    return [{"target_id": f"t{i}", "canonical_name": f"T{i}"} for i in range(n)]
+
+
+def _runners(
+    stage1_count: int, stage2_count: int, stage3_count: int = 1, stage4_count: int = 1
+) -> dict[int, object]:
     async def stage1_runner(run: SimpleNamespace) -> dict:
         return {"count": stage1_count, "compounds": _compounds(stage1_count), "state": "computed"}
 
@@ -66,19 +72,19 @@ def _runners(stage1_count: int, stage2_count: int) -> dict[int, object]:
 
     async def stage3_runner(run: SimpleNamespace) -> dict:
         return {
-            "targets": [],
+            "targets": _targets(stage3_count),
             "compound_targets": [],
             "per_compound": {},
             "coverage_pct": 0.0,
-            "count": 0,
+            "count": stage3_count,
             "state": "computed",
         }
 
     async def stage4_runner(run: SimpleNamespace) -> dict:
         return {
-            "targets": [],
+            "targets": _targets(stage4_count),
             "disease_targets": [],
-            "count": 0,
+            "count": stage4_count,
             "min_score_applied": 0.3,
             "state": "computed",
         }

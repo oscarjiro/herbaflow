@@ -1,4 +1,5 @@
-"""Stage 4 registration: guided checkpoint at S4; an empty side proceeds, not fails.
+"""Stage 4 registration: guided checkpoint at S4; an empty side parks (Approve refused),
+it does not fail.
 
 Reuses ``FakeRepo`` from ``tests.test_engine`` (its method set — get/set_status/
 set_stage_result/complete/fail — is exactly what the inline dispatch path here needs).
@@ -57,7 +58,7 @@ def _awaiting_s3_run() -> SimpleNamespace:
         stage_results={
             "1": {"count": 1},
             "2": {"count": 1, "passed": []},
-            "3": {"count": 0, "targets": []},
+            "3": {"count": 1, "targets": [{"target_id": "t0", "canonical_name": "T0"}]},
         },
     )
 
@@ -79,8 +80,14 @@ async def test_stage4_empty_side_proceeds_to_awaiting_not_failed() -> None:
         "min_score_applied": 0.9,
         "state": "computed",
     }
-    start = await engine.advance_run(repo, run.analysis_id, _runners(empty_s4), defer=False)
+    runners = _runners(empty_s4)
+    start = await engine.advance_run(repo, run.analysis_id, runners, defer=False)
     assert start is None
-    # Empty side is weak-but-valid: it checkpoints (honesty flag), it does NOT fail (B6/DT4-8).
+    # Empty side parks at the checkpoint (honesty flag); it does NOT fail (guided).
     assert run.status == "stage_4_awaiting_approval"
     assert run.stage_results["4"]["count"] == 0
+    # But the empty checkpoint refuses Approve & Continue.
+    from app.errors import ConflictProblem
+
+    with pytest.raises(ConflictProblem):
+        await engine.advance_run(repo, run.analysis_id, runners, defer=False)
