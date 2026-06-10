@@ -4,6 +4,7 @@ import { useAnalysisStatus } from "../hooks/useAnalysisStatus";
 import { ApprovalBar } from "./stages/ApprovalBar";
 import { Stage1View } from "./stages/Stage1View";
 import { Stage2View } from "./stages/Stage2View";
+import { Stage3View } from "./stages/Stage3View";
 
 /** Returns true when the run is settled (not actively executing a stage). */
 function isSettled(status: string | null | undefined): boolean {
@@ -58,6 +59,8 @@ export function RunView({ analysisId }: { analysisId: string }) {
       )}
 
       {Boolean(data.stage_results?.["2"]) && <Stage2View data={data} />}
+
+      {Boolean(data.stage_results?.["3"]) && <Stage3View data={data} />}
     </section>
   );
 }

@@ -28,11 +28,20 @@ export function ParamPanel({
   meta,
   onRedo,
   disabled = false,
+  numericKeys = ADME_NUMERIC_PARAMS,
+  booleanKeys = ADME_BOOLEAN_PARAMS,
+  title = "ADME parameters",
 }: {
   params: Record<string, number | boolean>;
   meta: Record<string, ParamMeta>;
   onRedo: (changed: Record<string, number | boolean>) => void;
   disabled?: boolean;
+  /** Ordered numeric param keys to render (defaults to the ADME set). */
+  numericKeys?: readonly string[];
+  /** Ordered boolean param keys to render (defaults to the ADME set). */
+  booleanKeys?: readonly string[];
+  /** Collapsible panel title. */
+  title?: string;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -48,7 +57,7 @@ export function ParamPanel({
 
   // Compute hard-bound violations per field
   const violations: Record<string, string> = {};
-  for (const key of ADME_NUMERIC_PARAMS) {
+  for (const key of numericKeys) {
     const m = meta[key];
     if (!m) continue;
     const raw = localStr[key];
@@ -77,7 +86,7 @@ export function ParamPanel({
   // Compute whether any value differs from the frozen params
   const getChanged = useCallback((): Record<string, number | boolean> => {
     const changed: Record<string, number | boolean> = {};
-    for (const key of ADME_NUMERIC_PARAMS) {
+    for (const key of numericKeys) {
       const frozen = params[key];
       const raw = localStr[key];
       if (raw === undefined) continue;
@@ -86,7 +95,7 @@ export function ParamPanel({
         changed[key] = n;
       }
     }
-    for (const key of ADME_BOOLEAN_PARAMS) {
+    for (const key of booleanKeys) {
       const frozen = params[key];
       const raw = localStr[key];
       if (raw === undefined) continue;
@@ -96,7 +105,7 @@ export function ParamPanel({
       }
     }
     return changed;
-  }, [params, localStr]);
+  }, [params, localStr, numericKeys, booleanKeys]);
 
   const changed = getChanged();
   const hasChanges = Object.keys(changed).length > 0;
@@ -123,12 +132,12 @@ export function ParamPanel({
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        {open ? "▾" : "▸"} ADME parameters
+        {open ? "▾" : "▸"} {title}
       </button>
 
       {open && (
         <div className="param-panel__body">
-          {ADME_NUMERIC_PARAMS.map((key) => {
+          {numericKeys.map((key) => {
             const m = meta[key];
             if (!m) return null;
             const err = violations[key];
@@ -163,7 +172,7 @@ export function ParamPanel({
             );
           })}
 
-          {ADME_BOOLEAN_PARAMS.map((key) => {
+          {booleanKeys.map((key) => {
             const m = meta[key];
             if (!m) return null;
             return (
