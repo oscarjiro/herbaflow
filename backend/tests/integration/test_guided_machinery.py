@@ -77,7 +77,7 @@ async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) 
         f"/analyses/{run_id}/stages/1/edit",
         json={"add": [str(ids["c2"])], "remove": [str(ids["c1"])]},
     )
-    assert edit_resp.status_code == 200
+    assert edit_resp.status_code == 202
     # The edit triggers a re-run from S2; wait for it to settle.
     state = await _poll(c, run_id, until="stage_2_awaiting_approval")
     assert state["status"] == "stage_2_awaiting_approval"
@@ -95,7 +95,7 @@ async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) 
         f"/analyses/{run_id}/reset-from/2",
         json={"parameters": {"2": {"skip_adme": True}}},
     )
-    assert reset_resp.status_code == 200
+    assert reset_resp.status_code == 202
     state = await _poll(c, run_id, until="stage_2_awaiting_approval")
     assert state["status"] == "stage_2_awaiting_approval"
 
@@ -132,7 +132,7 @@ async def test_zero_pass_s2_guided_is_checkpoint_not_failure(client) -> None:
     state = await _poll(c, run_id, until="stage_1_awaiting_approval")
     assert state["status"] == "stage_1_awaiting_approval"
     adv = await c.post(f"/analyses/{run_id}/advance")
-    assert adv.status_code == 200
+    assert adv.status_code == 202
     state = await _poll(c, run_id, until="stage_2_awaiting_approval")
     assert state["status"] == "stage_2_awaiting_approval"
 
@@ -142,7 +142,7 @@ async def test_zero_pass_s2_guided_is_checkpoint_not_failure(client) -> None:
         f"/analyses/{run_id}/reset-from/2",
         json={"parameters": {"2": {"max_mw": 1, "max_violations": 0}}},
     )
-    assert reset_resp.status_code == 200
+    assert reset_resp.status_code == 202
     state = await _poll(c, run_id, until="stage_2_awaiting_approval")
     assert (
         state["status"] == "stage_2_awaiting_approval"
@@ -156,7 +156,7 @@ async def test_zero_pass_s2_guided_is_checkpoint_not_failure(client) -> None:
         f"/analyses/{run_id}/reset-from/2",
         json={"parameters": {"2": {"skip_adme": True}}},
     )
-    assert recover_resp.status_code == 200
+    assert recover_resp.status_code == 202
     state = await _poll(c, run_id, until="stage_2_awaiting_approval")
     assert state["status"] == "stage_2_awaiting_approval"
     assert state["stage_results"]["2"]["count"] == 2, "Both compounds pass with skip_adme=true"
@@ -186,7 +186,7 @@ async def test_zero_pass_s2_auto_is_hard_failure(client) -> None:
         f"/analyses/{run_id}/reset-from/2",
         json={"parameters": {"2": {"max_mw": 1, "max_violations": 0}}},
     )
-    assert reset_resp.status_code == 200
+    assert reset_resp.status_code == 202
     state = await _poll(c, run_id)
     assert state["status"] == "failed", "Auto zero-pass S2 must hard-fail (no guided checkpoint)"
     assert (

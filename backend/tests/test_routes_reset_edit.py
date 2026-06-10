@@ -71,8 +71,13 @@ def test_reset_from_409_when_conflict(monkeypatch) -> None:
             return cls()
 
         async def reset_from(
-            self, analysis_id: uuid.UUID, stage: int, param_overrides: dict | None
-        ) -> None:
+            self,
+            analysis_id: uuid.UUID,
+            stage: int,
+            param_overrides: dict | None,
+            *,
+            defer: bool = False,
+        ) -> int | None:
             raise ConflictProblem(detail="Run is still running.")
 
         async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
@@ -99,8 +104,13 @@ def test_reset_from_422_on_bad_param(monkeypatch) -> None:
             return cls()
 
         async def reset_from(
-            self, analysis_id: uuid.UUID, stage: int, param_overrides: dict | None
-        ) -> None:
+            self,
+            analysis_id: uuid.UUID,
+            stage: int,
+            param_overrides: dict | None,
+            *,
+            defer: bool = False,
+        ) -> int | None:
             raise ValidationProblem(detail="max_mw must be positive.")
 
         async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
@@ -119,10 +129,10 @@ def test_reset_from_422_on_bad_param(monkeypatch) -> None:
     assert body["status"] == 422
 
 
-def test_reset_from_200_happy_path_passes_stage_overrides(monkeypatch) -> None:
+def test_reset_from_202_happy_path_passes_stage_overrides(monkeypatch) -> None:
     """
-    200 on success; the route extracts the per-stage dict from the body's ``parameters``
-    and passes it as ``param_overrides`` to the service.
+    202 on success (the re-run is scheduled as a BackgroundTask); the route extracts the
+    per-stage dict from the body's ``parameters`` and passes it as ``param_overrides``.
     """
     from app.routers import analyses
 
@@ -139,9 +149,12 @@ def test_reset_from_200_happy_path_passes_stage_overrides(monkeypatch) -> None:
             analysis_id: uuid.UUID,
             stage: int,
             param_overrides: dict | None,
-        ) -> None:
+            *,
+            defer: bool = False,
+        ) -> int | None:
             captured["stage"] = stage
             captured["param_overrides"] = param_overrides
+            return None
 
         async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
             return updated
@@ -154,7 +167,7 @@ def test_reset_from_200_happy_path_passes_stage_overrides(monkeypatch) -> None:
         f"/analyses/{AID}/reset-from/{STAGE}",
         json={"parameters": {str(STAGE): {"max_violations": 0}}},
     )
-    assert resp.status_code == 200
+    assert resp.status_code == 202
     # Route must extract the inner dict for the targeted stage.
     assert captured["stage"] == STAGE
     assert captured["param_overrides"] == {"max_violations": 0}
@@ -162,7 +175,7 @@ def test_reset_from_200_happy_path_passes_stage_overrides(monkeypatch) -> None:
     assert resp.json()["status"] == "complete"
 
 
-def test_reset_from_200_no_parameters_body(monkeypatch) -> None:
+def test_reset_from_202_no_parameters_body(monkeypatch) -> None:
     """When body omits ``parameters``, param_overrides is None (plain Redo, no override)."""
     from app.routers import analyses
 
@@ -179,8 +192,11 @@ def test_reset_from_200_no_parameters_body(monkeypatch) -> None:
             analysis_id: uuid.UUID,
             stage: int,
             param_overrides: dict | None,
-        ) -> None:
+            *,
+            defer: bool = False,
+        ) -> int | None:
             captured["param_overrides"] = param_overrides
+            return None
 
         async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
             return updated
@@ -190,7 +206,7 @@ def test_reset_from_200_no_parameters_body(monkeypatch) -> None:
 
     client = TestClient(app, raise_server_exceptions=False)
     resp = client.post(f"/analyses/{AID}/reset-from/{STAGE}", json={})
-    assert resp.status_code == 200
+    assert resp.status_code == 202
     assert captured["param_overrides"] is None
 
 
@@ -215,7 +231,8 @@ def test_edit_stage_409_when_not_settled(monkeypatch) -> None:
             *,
             add: list,
             remove: list,
-        ) -> None:
+            defer: bool = False,
+        ) -> int | None:
             raise ConflictProblem(detail="Run is still running.")
 
         async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
@@ -251,7 +268,8 @@ def test_edit_stage_422_on_unknown_add_id(monkeypatch) -> None:
             *,
             add: list,
             remove: list,
-        ) -> None:
+            defer: bool = False,
+        ) -> int | None:
             raise ValidationProblem(
                 detail="Unknown compound ids.",
                 invalid_compound_ids=[str(unknown)],
@@ -290,7 +308,8 @@ def test_edit_stage_422_on_cap_overflow(monkeypatch) -> None:
             *,
             add: list,
             remove: list,
-        ) -> None:
+            defer: bool = False,
+        ) -> int | None:
             raise ValidationProblem(
                 detail="Too many compounds for this stage (max 2000, have 1999, adding 5)."
             )
@@ -313,8 +332,8 @@ def test_edit_stage_422_on_cap_overflow(monkeypatch) -> None:
     assert "max 2000" in body["detail"]
 
 
-def test_edit_stage_200_happy_path_passes_add_remove(monkeypatch) -> None:
-    """200 on success; the route passes add/remove lists through to the service."""
+def test_edit_stage_202_happy_path_passes_add_remove(monkeypatch) -> None:
+    """202 on success (downstream re-run scheduled); route passes add/remove to the service."""
     from app.routers import analyses
 
     captured: dict = {}
@@ -332,7 +351,8 @@ def test_edit_stage_200_happy_path_passes_add_remove(monkeypatch) -> None:
             *,
             add: list,
             remove: list,
-        ) -> None:
+            defer: bool = False,
+        ) -> int | None:
             captured["stage"] = stage
             captured["add"] = add
             captured["remove"] = remove
@@ -348,7 +368,7 @@ def test_edit_stage_200_happy_path_passes_add_remove(monkeypatch) -> None:
         f"/analyses/{AID}/stages/1/edit",
         json={"add": [str(C1)], "remove": [str(C2)]},
     )
-    assert resp.status_code == 200
+    assert resp.status_code == 202
     assert captured["stage"] == 1
     assert C1 in captured["add"]
     assert C2 in captured["remove"]

@@ -8,7 +8,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
-from app.pipeline.engine import run_analysis_task
+from app.pipeline.engine import run_analysis_task, run_stages_task
 from app.schemas.analysis import AnalysisCreate, AnalysisRead, ResetFromRequest, StageEditRequest
 from app.schemas.target import StpImportRequest, StpImportResponse
 from app.services.analysis import AnalysisService
@@ -39,40 +39,56 @@ async def get_analysis(
     return await AnalysisService.from_session(session).get(analysis_id)
 
 
-@router.post("/analyses/{analysis_id}/advance", response_model=AnalysisRead)
+@router.post("/analyses/{analysis_id}/advance", response_model=AnalysisRead, status_code=202)
 async def advance_analysis(
-    analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
+    analysis_id: uuid.UUID,
+    background: BackgroundTasks,
+    session: AsyncSession = Depends(get_session),
 ) -> AnalysisRead:
     service = AnalysisService.from_session(session)
-    await service.advance(analysis_id)
+    start = await service.advance(analysis_id, defer=True)
     await _commit(session)
+    if start is not None:
+        background.add_task(run_stages_task, analysis_id, start)
     return await service.get(analysis_id)
 
 
-@router.post("/analyses/{analysis_id}/reset-from/{stage}", response_model=AnalysisRead)
+@router.post(
+    "/analyses/{analysis_id}/reset-from/{stage}", response_model=AnalysisRead, status_code=202
+)
 async def reset_from(
     analysis_id: uuid.UUID,
     stage: int,
     payload: ResetFromRequest,
+    background: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
 ) -> AnalysisRead:
     service = AnalysisService.from_session(session)
     overrides = payload.parameters.get(str(stage)) if payload.parameters else None
-    await service.reset_from(analysis_id, stage, overrides)
+    start = await service.reset_from(analysis_id, stage, overrides, defer=True)
     await _commit(session)
+    if start is not None:
+        background.add_task(run_stages_task, analysis_id, start)
     return await service.get(analysis_id)
 
 
-@router.post("/analyses/{analysis_id}/stages/{stage}/edit", response_model=AnalysisRead)
+@router.post(
+    "/analyses/{analysis_id}/stages/{stage}/edit", response_model=AnalysisRead, status_code=202
+)
 async def edit_stage(
     analysis_id: uuid.UUID,
     stage: int,
     payload: StageEditRequest,
+    background: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
 ) -> AnalysisRead:
     service = AnalysisService.from_session(session)
-    await service.edit_stage(analysis_id, stage, add=payload.add, remove=payload.remove)
+    start = await service.edit_stage(
+        analysis_id, stage, add=payload.add, remove=payload.remove, defer=True
+    )
     await _commit(session)
+    if start is not None:
+        background.add_task(run_stages_task, analysis_id, start)
     return await service.get(analysis_id)
 
 
@@ -80,9 +96,13 @@ async def edit_stage(
 async def import_stp_targets(
     analysis_id: uuid.UUID,
     payload: StpImportRequest,
+    background: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
 ) -> StpImportResponse:
     service = AnalysisService.from_session(session)
-    out = await service.import_stp(analysis_id, payload.compound_ids, payload.rows)
+    out = await service.import_stp(analysis_id, payload.compound_ids, payload.rows, defer=True)
     await _commit(session)
+    start = out.pop("start", None)
+    if start is not None:
+        background.add_task(run_stages_task, analysis_id, start)
     return StpImportResponse(**out)

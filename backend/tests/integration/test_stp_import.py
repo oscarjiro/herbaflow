@@ -125,11 +125,11 @@ async def test_import_stp_writes_predicted_edges_and_skips_measured(
 
     st = await _poll(c, run_id, until="stage_1_awaiting_approval")
     assert st["status"] == "stage_1_awaiting_approval"
-    assert (await c.post(f"/analyses/{run_id}/advance")).status_code == 200
+    assert (await c.post(f"/analyses/{run_id}/advance")).status_code == 202
 
     st = await _poll(c, run_id, until="stage_2_awaiting_approval")
     assert st["status"] == "stage_2_awaiting_approval"
-    assert (await c.post(f"/analyses/{run_id}/advance")).status_code == 200
+    assert (await c.post(f"/analyses/{run_id}/advance")).status_code == 202
 
     st = await _poll(c, run_id, until="stage_3_awaiting_approval")
     assert st["status"] == "stage_3_awaiting_approval", "guided run must checkpoint at S3"

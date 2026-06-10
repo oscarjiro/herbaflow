@@ -1,5 +1,27 @@
 import pytest
 
+_SETTLED = frozenset(
+    {
+        "complete",
+        "failed",
+        "stage_1_awaiting_approval",
+        "stage_2_awaiting_approval",
+        "stage_3_awaiting_approval",
+    }
+)
+
+
+async def _poll(c, run_id: str, *, until: str | None = None, max_iters: int = 80) -> str:
+    """Poll GET /analyses/{id} for the run status until ``until`` (or any settled status)."""
+    status = ""
+    for _ in range(max_iters):
+        status = (await c.get(f"/analyses/{run_id}")).json()["status"]
+        if until is not None and status == until:
+            break
+        if until is None and status in _SETTLED:
+            break
+    return status
+
 
 @pytest.mark.asyncio
 async def test_auto_run_completes(client) -> None:
@@ -40,26 +62,26 @@ async def test_guided_pauses_then_advances(client) -> None:
     )
     run_id = resp.json()["analysis_id"]
 
-    status = None
-    for _ in range(50):
-        status = (await c.get(f"/analyses/{run_id}")).json()["status"]
-        if status == "stage_1_awaiting_approval":
-            break
-    assert status == "stage_1_awaiting_approval"
+    assert await _poll(c, run_id, until="stage_1_awaiting_approval") == "stage_1_awaiting_approval"
 
+    # advance is now non-blocking: 202 + the *_running start state; the stage runs in a
+    # BackgroundTask, so the settled status is read via a follow-up GET (poll), not the body.
     adv1 = await c.post(f"/analyses/{run_id}/advance")
-    assert adv1.status_code == 200
-    assert adv1.json()["status"] == "stage_2_awaiting_approval"
+    assert adv1.status_code == 202
+    assert adv1.json()["status"] == "stage_2_running"
+    assert await _poll(c, run_id, until="stage_2_awaiting_approval") == "stage_2_awaiting_approval"
 
     # Stage 3 runs with the seeded compounds (no InChIKey -> coverage 0) and pauses
     # at the guided S3 checkpoint.
     adv2 = await c.post(f"/analyses/{run_id}/advance")
-    assert adv2.status_code == 200
-    assert adv2.json()["status"] == "stage_3_awaiting_approval"
+    assert adv2.status_code == 202
+    assert adv2.json()["status"] == "stage_3_running"
+    assert await _poll(c, run_id, until="stage_3_awaiting_approval") == "stage_3_awaiting_approval"
 
     adv3 = await c.post(f"/analyses/{run_id}/advance")
-    assert adv3.status_code == 200
-    assert adv3.json()["status"] == "complete"
+    assert adv3.status_code == 202
+    # Last runnable stage: advance completes synchronously in prepare (nothing to schedule).
+    assert await _poll(c, run_id, until="complete") == "complete"
 
 
 @pytest.mark.asyncio

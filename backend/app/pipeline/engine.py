@@ -148,8 +148,18 @@ async def execute_run(
     await repo.complete(run)
 
 
-async def advance_run(repo: _Repo, analysis_id: uuid.UUID, runners: dict[int, StageRunner]) -> None:
-    """Guided approval: resume from the stage after ``current_stage``."""
+async def advance_run(
+    repo: _Repo,
+    analysis_id: uuid.UUID,
+    runners: dict[int, StageRunner],
+    *,
+    defer: bool = False,
+) -> int | None:
+    """Guided approval: resume from the stage after ``current_stage``.
+
+    Returns the start stage the caller should schedule (``defer=True``) or ``None``
+    (nothing left to run, or already executed inline when ``defer=False``).
+    """
     run = await repo.get(analysis_id)
     if run is None:
         raise ConflictProblem(detail="Run not found.")
@@ -160,8 +170,15 @@ async def advance_run(repo: _Repo, analysis_id: uuid.UUID, runners: dict[int, St
     if nxt is None:
         await repo.set_status(run, state.stage_status(current, "complete"))
         await repo.complete(run)
-        return
+        return None
+    if defer:
+        # Commit the *_running start state synchronously (closes the double-submit race
+        # and makes the running status immediately visible to pollers); the stage runs
+        # in a BackgroundTask scheduled by the router.
+        await repo.set_status(run, state.stage_status(nxt, "running"), current_stage=nxt)
+        return nxt
     await execute_run(repo, analysis_id, runners, start_stage=nxt)
+    return None
 
 
 def _validate_overrides(group: str, overrides: dict[str, Any]) -> None:
@@ -203,7 +220,8 @@ async def reset_from(
     runners: dict[int, StageRunner],
     *,
     param_overrides: dict[str, Any] | None = None,
-) -> None:
+    defer: bool = False,
+) -> int | None:
     """Dependency-aware destructive re-run from ``stage``.
 
     Two modes:
@@ -218,6 +236,12 @@ async def reset_from(
 
     The invalidated stages are cleared BEFORE the re-run (E2), and any re-run failure marks the run
     failed while leaving the cleared downstream cleared (idempotent on outage).
+
+    Returns the start stage the caller should schedule (``defer=True``) or ``None`` (a no-op, no
+    runnable dependent, or already executed inline when ``defer=False``). In ``defer`` mode the
+    clear + the ``*_running`` start state are committed synchronously and the stage is run in a
+    BackgroundTask; the cleared-downstream-stays-cleared invariant still holds because the clear
+    is durable before the background run starts.
     """
     run = await repo.get(analysis_id)
     if run is None:
@@ -245,7 +269,7 @@ async def reset_from(
         current = dict(run.parameters.get(group, {}))
         merged = {**current, **param_overrides}
         if merged == current:  # E7: nothing changed -> no clear, no re-run.
-            return
+            return None
         new_params = dict(run.parameters)
         new_params[group] = merged
         run.parameters = new_params
@@ -259,17 +283,24 @@ async def reset_from(
             # Nothing runnable depends on this stage; clear downstream and settle.
             produced = {int(k) for k in run.stage_results}
             await repo.clear_stage_results(run, invalidate & produced)
-            return
+            return None
         start = min(runnable_dependents)
 
     # E2: destructive clear of (invalidate ∩ produced) BEFORE re-running.
     produced = {int(k) for k in run.stage_results}
     await repo.clear_stage_results(run, invalidate & produced)
 
+    if defer:
+        # Commit the cleared downstream + the *_running start state synchronously; the re-run
+        # happens in a BackgroundTask scheduled by the router.
+        await repo.set_status(run, state.stage_status(start, "running"), current_stage=start)
+        return start
+
     try:
         await execute_run(repo, analysis_id, runners, start_stage=start)
     except Exception as exc:  # noqa: BLE001 — re-run failure must be idempotent
         await repo.fail(run, f"Re-run from stage {start} failed: {exc}")
+    return None
 
 
 def build_runners(session: Any) -> dict[int, StageRunner]:
@@ -296,10 +327,27 @@ def build_runners(session: Any) -> dict[int, StageRunner]:
     return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner}
 
 
-async def run_analysis_task(analysis_id: uuid.UUID) -> None:
-    """Background entrypoint: own session, run the engine, commit."""
+async def run_stages_task(analysis_id: uuid.UUID, start_stage: int = 1) -> None:
+    """Background entrypoint: own session, run stages from ``start_stage``, commit.
+
+    Wraps the run in a top-level guard so an uncaught stage error (e.g. a provider
+    outage) marks the run ``failed`` instead of leaving it stuck in ``*_running``.
+    Used by every scheduling path: create (start_stage=1) and the four mutating
+    endpoints (advance / reset-from / edit / import-stp).
+    """
     async with db.session_scope() as session:
         repo = AnalysisRepository(session)
         runners = build_runners(session)
-        await execute_run(repo, analysis_id, runners)
+        run = await repo.get(analysis_id)
+        if run is None:
+            return
+        try:
+            await execute_run(repo, analysis_id, runners, start_stage=start_stage)
+        except Exception as exc:  # noqa: BLE001 — must not leave a stuck *_running status
+            await repo.fail(run, f"Stage execution failed: {exc}")
         await session.commit()
+
+
+async def run_analysis_task(analysis_id: uuid.UUID) -> None:
+    """Background entrypoint for ``create``: run the whole pipeline from stage 1."""
+    await run_stages_task(analysis_id, 1)

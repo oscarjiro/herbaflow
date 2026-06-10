@@ -115,20 +115,31 @@ class AnalysisService:
             raise GoneProblem(detail="Analysis run has expired.")
         return AnalysisRead.model_validate(run)
 
-    async def advance(self, analysis_id: uuid.UUID) -> None:
+    async def advance(self, analysis_id: uuid.UUID, *, defer: bool = False) -> int | None:
         runners = engine.build_runners(self.analysis_repo.session)
-        await engine.advance_run(self.analysis_repo, analysis_id, runners)
+        return await engine.advance_run(self.analysis_repo, analysis_id, runners, defer=defer)
 
     async def reset_from(
         self,
         analysis_id: uuid.UUID,
         stage: int,
         param_overrides: dict[str, Any] | None,
-    ) -> None:
-        """Re-run a settled run from ``stage`` (param Redo or set edit) via the engine."""
+        *,
+        defer: bool = False,
+    ) -> int | None:
+        """Re-run a settled run from ``stage`` (param Redo or set edit) via the engine.
+
+        Returns the start stage to schedule (``defer=True``) or ``None`` (no-op / no runnable
+        dependent / executed inline).
+        """
         runners = engine.build_runners(self.analysis_repo.session)
-        await engine.reset_from(
-            self.analysis_repo, analysis_id, stage, runners, param_overrides=param_overrides
+        return await engine.reset_from(
+            self.analysis_repo,
+            analysis_id,
+            stage,
+            runners,
+            param_overrides=param_overrides,
+            defer=defer,
         )
 
     async def edit_stage(
@@ -138,12 +149,14 @@ class AnalysisService:
         *,
         add: list[uuid.UUID],
         remove: list[uuid.UUID],
-    ) -> None:
+        defer: bool = False,
+    ) -> int | None:
         """Apply a durable in-stage entity edit (add/remove) and re-run downstream.
 
         Validates added ids exist, enforces the entity cap on net additions, folds the edit into
         the durable edit layer, re-derives the edited stage's stored result, and either fails the
-        run (empty effective set, E3) or triggers a dependency-aware set-edit re-run.
+        run (empty effective set, E3) or triggers a dependency-aware set-edit re-run. Returns the
+        start stage to schedule (``defer=True``) or ``None``.
         """
         entity_keys = _STAGE_ENTITY.get(stage)
         if entity_keys is None:
@@ -235,14 +248,19 @@ class AnalysisService:
             await self.analysis_repo.fail(
                 run, f"No {entity}s remain after editing; add at least one {entity}."
             )
-            return
+            return None
 
         # Set-edit re-run: clears downstream, re-runs from the nearest runnable dependent.
         runners = engine.build_runners(self.analysis_repo.session)
-        await engine.reset_from(self.analysis_repo, analysis_id, stage, runners)
+        return await engine.reset_from(self.analysis_repo, analysis_id, stage, runners, defer=defer)
 
     async def import_stp(
-        self, analysis_id: uuid.UUID, compound_ids: list[uuid.UUID], rows: list[Any]
+        self,
+        analysis_id: uuid.UUID,
+        compound_ids: list[uuid.UUID],
+        rows: list[Any],
+        *,
+        defer: bool = False,
     ) -> dict[str, Any]:
         """Import SwissTargetPrediction paste-back rows as ``stp_import`` edges.
 
@@ -251,6 +269,10 @@ class AnalysisService:
         target) pair UNLESS a measured edge already covers it (those count as ``skipped_measured``,
         never overwritten), and adds the resolved targets to the run's Stage-3 set (an entity edit
         that re-runs from the nearest runnable dependent — S5).
+
+        The import counters (``imported``/``failed``/``skipped_measured``) are computed
+        synchronously and returned; ``start`` is the stage to schedule for the downstream re-run
+        (``defer=True``) or ``None``.
         """
         run = await self.analysis_repo.get(analysis_id)
         if run is None:
@@ -304,7 +326,15 @@ class AnalysisService:
                 imported += 1
 
         # Add the resolved targets to the run's stage-3 set (entity edit -> re-run from S5).
+        start: int | None = None
         if resolved:
-            await self.edit_stage(analysis_id, 3, add=[t.target_id for t in resolved], remove=[])
+            start = await self.edit_stage(
+                analysis_id, 3, add=[t.target_id for t in resolved], remove=[], defer=defer
+            )
 
-        return {"imported": imported, "failed": failed, "skipped_measured": skipped}
+        return {
+            "imported": imported,
+            "failed": failed,
+            "skipped_measured": skipped,
+            "start": start,
+        }

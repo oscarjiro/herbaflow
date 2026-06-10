@@ -255,7 +255,7 @@ export type AdvanceAnalysisResponses = {
     /**
      * Successful Response
      */
-    200: AnalysisRead;
+    202: AnalysisRead;
 };
 
 export type AdvanceAnalysisResponse = AdvanceAnalysisResponses[keyof AdvanceAnalysisResponses];
@@ -283,7 +283,7 @@ export type ResetFromResponses = {
     /**
      * Successful Response
      */
-    200: AnalysisRead;
+    202: AnalysisRead;
 };
 
 export type ResetFromResponse = ResetFromResponses[keyof ResetFromResponses];
@@ -311,7 +311,7 @@ export type EditStageResponses = {
     /**
      * Successful Response
      */
-    200: AnalysisRead;
+    202: AnalysisRead;
 };
 
 export type EditStageResponse = EditStageResponses[keyof EditStageResponses];

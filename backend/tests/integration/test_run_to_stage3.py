@@ -102,13 +102,17 @@ async def test_guided_run_reaches_stage3_and_param_redo_reruns_s3_only(
     assert state["status"] == "stage_1_awaiting_approval"
 
     adv1 = await c.post(f"/analyses/{run_id}/advance")
-    assert adv1.status_code == 200
+    assert adv1.status_code == 202
+    # Non-blocking proof: advance returns immediately with the *_running start state; the
+    # slow stage runs in a BackgroundTask (the prior committed status is no longer returned).
+    assert adv1.json()["status"] == "stage_2_running"
     state = await _poll(c, run_id, until="stage_2_awaiting_approval")
     assert state["status"] == "stage_2_awaiting_approval"
     assert state["stage_results"]["2"]["count"] == 2
 
     adv2 = await c.post(f"/analyses/{run_id}/advance")
-    assert adv2.status_code == 200
+    assert adv2.status_code == 202
+    assert adv2.json()["status"] == "stage_3_running"
     state = await _poll(c, run_id, until="stage_3_awaiting_approval")
     assert state["status"] == "stage_3_awaiting_approval", "guided run must checkpoint at S3"
 
@@ -142,7 +146,8 @@ async def test_guided_run_reaches_stage3_and_param_redo_reruns_s3_only(
         f"/analyses/{run_id}/reset-from/3",
         json={"parameters": {"3": {"min_pchembl": 6.0}}},
     )
-    assert reset.status_code == 200
+    assert reset.status_code == 202
+    assert reset.json()["status"] == "stage_3_running"
     state = await _poll(c, run_id, until="stage_3_awaiting_approval")
     assert state["status"] == "stage_3_awaiting_approval"
 
