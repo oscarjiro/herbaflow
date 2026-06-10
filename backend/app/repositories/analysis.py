@@ -81,6 +81,20 @@ class AnalysisRepository:
         run.updated_at = now_utc()
         await self.session.flush()
 
+    async def mark_stages_stale(self, run: AnalysisRun, stages: set[int]) -> None:
+        """Flag stored results for ``stages`` as out-of-date (jsonb dirty via dict reassign).
+
+        Only already-produced stages are touched; a stage with no stored result is skipped.
+        """
+        merged = dict(run.stage_results)
+        for s in stages:
+            key = str(s)
+            if key in merged:
+                merged[key] = {**merged[key], "stale": True}
+        run.stage_results = merged
+        run.updated_at = now_utc()
+        await self.session.flush()
+
     async def set_parameters(self, run: AnalysisRun) -> None:
         """Flush a re-assigned ``run.parameters`` dict (jsonb dirty)."""
         run.updated_at = now_utc()
