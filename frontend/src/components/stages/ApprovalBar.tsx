@@ -1,28 +1,41 @@
 /**
- * ApprovalBar — shows the "Approve & Continue" button only when the run is
- * awaiting approval for the given stage.  Renders nothing otherwise.
+ * ApprovalBar — the "Approve & Continue" control for one stage's checkpoint.
  *
- * Visibility rule: status === `stage_${currentStage}_awaiting_approval`
+ * Renders only when the run is awaiting approval AND this view is the current
+ * stage (`currentStage === stage`), so stacked stage views never show more than
+ * one Approve button. When `disabled`, the button is inert and `disabledReason`
+ * is shown (used for the empty-stage blocking-stop).
  */
 
 export function ApprovalBar({
+  stage,
   status,
   currentStage,
   onApprove,
+  disabled = false,
+  disabledReason,
 }: {
+  stage: number;
   status: string | null | undefined;
   currentStage: number | null | undefined;
   onApprove: () => void;
+  disabled?: boolean;
+  disabledReason?: string;
 }) {
   if (!status || currentStage == null) return null;
-  const expected = `stage_${currentStage}_awaiting_approval`;
-  if (status !== expected) return null;
+  if (currentStage !== stage) return null;
+  if (status !== `stage_${stage}_awaiting_approval`) return null;
 
   return (
     <div className="approval-bar">
-      <button className="hf-btn hf-btn-primary" onClick={onApprove}>
+      <button className="hf-btn hf-btn-primary" onClick={onApprove} disabled={disabled}>
         Approve &amp; Continue
       </button>
+      {disabled && disabledReason && (
+        <p className="hf-muted" role="status">
+          {disabledReason}
+        </p>
+      )}
     </div>
   );
 }
