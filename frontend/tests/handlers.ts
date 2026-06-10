@@ -138,6 +138,50 @@ export const ANALYSIS_STAGE1_AT_CAP = {
   error_message: null,
 };
 
+const ANALYSIS_EMPTY_STAGE4 = {
+  analysis_id: "r-empty4",
+  analysis_name: null,
+  disease_id: "d1",
+  mode: "guided",
+  status: "stage_4_awaiting_approval",
+  current_stage: 4,
+  parameters: {
+    adme: ADME_FROZEN_DEFAULTS,
+    disease_targets: { min_score: 0.9 },
+  },
+  stage_results: {
+    "1": {
+      count: 2,
+      compounds: [
+        { compound_id: "c1", canonical_name: "Curcumin", tag: "computed" },
+        { compound_id: "c2", canonical_name: "Berberine", tag: "computed" },
+      ],
+      per_plant: {},
+      state: "computed",
+    },
+    "2": SAMPLE_STAGE2_RESULTS,
+    "3": {
+      targets: [{ target_id: "t1", canonical_name: "TP53", tag: "computed" }],
+      compound_targets: [],
+      per_compound: {},
+      coverage_pct: 0.0,
+      count: 1,
+      state: "computed",
+    },
+    "4": {
+      targets: [],
+      disease_targets: [],
+      count: 0,
+      min_score_applied: 0.9,
+      state: "computed",
+    },
+  },
+  created_at: null,
+  completed_at: null,
+  expires_at: null,
+  error_message: null,
+};
+
 const ANALYSIS_WITH_STAGE2 = {
   analysis_id: "r2",
   analysis_name: null,
@@ -253,6 +297,7 @@ export const server = setupServer(
   http.get(`${BASE}/analyses/r2`, () => HttpResponse.json(ANALYSIS_WITH_STAGE2)),
   http.get(`${BASE}/analyses/r3`, () => HttpResponse.json(ANALYSIS_STAGE1_AWAITING)),
   http.get(`${BASE}/analyses/r4`, () => HttpResponse.json(ANALYSIS_STAGE1_AT_CAP)),
+  http.get(`${BASE}/analyses/r-empty4`, () => HttpResponse.json(ANALYSIS_EMPTY_STAGE4)),
   // reset-from: echo back the same run with updated adme params
   http.post(`${BASE}/analyses/:id/reset-from/:stage`, () =>
     HttpResponse.json({ ...ANALYSIS_WITH_STAGE2, status: "stage_2_awaiting_approval" }),

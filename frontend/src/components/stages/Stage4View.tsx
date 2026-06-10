@@ -317,8 +317,11 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       )}
 
       <ApprovalBar
+        stage={4}
         status={data.status}
         currentStage={data.current_stage}
+        disabled={stage4.count === 0}
+        disabledReason="No disease targets — lower min score and Redo, or add one to continue."
         onApprove={() => advance.mutate()}
       />
 

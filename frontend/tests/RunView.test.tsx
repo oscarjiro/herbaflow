@@ -176,3 +176,11 @@ describe("Step-1 cap enforcement (r4: count at 2000)", () => {
     expect(addTextarea).toBeDisabled();
   });
 });
+
+describe("empty Stage 4 checkpoint (r-empty4)", () => {
+  it("shows the Approve button disabled at an empty stage", async () => {
+    wrap("r-empty4");
+    await screen.findByRole("heading", { name: /step 4/i });
+    expect(screen.getByRole("button", { name: /approve/i })).toBeDisabled();
+  });
+});

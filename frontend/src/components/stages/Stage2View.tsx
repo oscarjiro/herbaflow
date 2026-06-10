@@ -341,8 +341,11 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
 
       {/* Approval */}
       <ApprovalBar
+        stage={2}
         status={data.status}
         currentStage={data.current_stage}
+        disabled={stage2.count === 0}
+        disabledReason="No compounds passed ADME — adjust parameters and Redo to continue."
         onApprove={() => advance.mutate()}
       />
 

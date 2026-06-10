@@ -51,16 +51,15 @@ export function RunView({ analysisId }: { analysisId: string }) {
               </ul>
             </>
           )}
-          {/* RunView owns the approval bar for Stage 1 only; Stages 2+ render
-              their own bar inside the per-stage view, so gating here avoids two
-              identical "Approve & Continue" buttons at an awaiting checkpoint. */}
-          {data.current_stage === 1 && (
-            <ApprovalBar
-              status={data.status}
-              currentStage={data.current_stage}
-              onApprove={() => advance.mutate()}
-            />
-          )}
+          {/* ApprovalBar self-gates to the current stage, so stacked views show a single button. */}
+          <ApprovalBar
+            stage={1}
+            status={data.status}
+            currentStage={data.current_stage}
+            disabled={(stage1.count ?? 0) === 0}
+            disabledReason="No compounds — add one to continue."
+            onApprove={() => advance.mutate()}
+          />
         </>
       )}
 

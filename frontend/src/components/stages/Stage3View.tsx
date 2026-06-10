@@ -457,8 +457,11 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
 
       {/* Approval */}
       <ApprovalBar
+        stage={3}
         status={data.status}
         currentStage={data.current_stage}
+        disabled={stage3.count === 0}
+        disabledReason="No targets — adjust parameters or add one to continue."
         onApprove={() => advance.mutate()}
       />
 
