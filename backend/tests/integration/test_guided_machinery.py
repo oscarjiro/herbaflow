@@ -218,3 +218,28 @@ async def test_edit_stage_422_on_unknown_add_id(client) -> None:
     body = resp.json()
     assert body["status"] == 422
     assert str(unknown) in body.get("invalid_compound_ids", [])
+
+
+# ---------------------------------------------------------------------------
+# 422 — an edit may never empty a stage (remove the last remaining entity)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_remove_last_compound_is_rejected(client) -> None:
+    """An edit may never empty a stage: removing the last remaining entity is
+    rejected (422) and the run is left untouched."""
+    c, ids = client
+    run_id = await _create(c, ids, mode="guided", plant="plant_empty", manual=[ids["c1"]])
+    state = await _poll(c, run_id, until="stage_1_awaiting_approval")
+    assert state["stage_results"]["1"]["count"] == 1
+
+    resp = await c.post(
+        f"/analyses/{run_id}/stages/1/edit",
+        json={"add": [], "remove": [str(ids["c1"])]},
+    )
+    assert resp.status_code == 422
+
+    after = (await c.get(f"/analyses/{run_id}")).json()
+    assert after["status"] == "stage_1_awaiting_approval"
+    assert after["stage_results"]["1"]["count"] == 1

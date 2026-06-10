@@ -154,9 +154,10 @@ class AnalysisService:
         """Apply a durable in-stage entity edit (add/remove) and re-run downstream.
 
         Validates added ids exist, enforces the entity cap on net additions, folds the edit into
-        the durable edit layer, re-derives the edited stage's stored result, and either fails the
-        run (empty effective set, E3) or triggers a dependency-aware set-edit re-run. Returns the
-        start stage to schedule (``defer=True``) or ``None``.
+        the durable edit layer, and re-derives the edited stage's stored result. An edit may never
+        empty a stage: removing the last remaining entity is rejected (422) and nothing is
+        persisted. Otherwise it persists the edit and triggers a dependency-aware set-edit re-run.
+        Returns the start stage to schedule (``defer=True``) or ``None``.
         """
         entity_keys = _STAGE_ENTITY.get(stage)
         if entity_keys is None:
@@ -217,19 +218,13 @@ class AnalysisService:
                     }
                 )
 
-        # Fold into the durable edit layer.
+        # Fold into the durable edit layer (computed; not yet persisted).
         prior_edit = run.parameters.get("stage_edits", {}).get(skey, edits.empty_edit())
         new_edit = edits.normalize_edit(
             prior_edit, add_entries, [str(r) for r in remove], id_key=id_key
         )
-        new_params = dict(run.parameters)
-        stage_edits = dict(new_params.get("stage_edits", {}))
-        stage_edits[skey] = new_edit
-        new_params["stage_edits"] = stage_edits
-        run.parameters = new_params
-        await self.analysis_repo.set_parameters(run)
 
-        # Re-derive the edited stage's stored result from its RAW computed entities + the new edit.
+        # Re-derive the edited stage's stored result from its RAW computed entities + new edit.
         computed_ids = existing_result["computed_ids"]
         names = {c[id_key]: c.get("canonical_name") for c in existing_result[list_key]}
         for entry in new_edit["added"]:
@@ -240,15 +235,27 @@ class AnalysisService:
         frag = edits.build_stage_entities(
             computed_entities, new_edit, id_key=id_key, list_key=list_key
         )
+
+        # Guard: an edit may never empty an entity stage. Reject the removal of the last
+        # remaining entity (a stage must keep >= 1). Nothing is persisted on rejection.
+        if frag["count"] == 0:
+            raise ValidationProblem(
+                detail=(
+                    f"Cannot remove the last remaining {entity}; a stage must keep at "
+                    f"least one {entity}. Add another before removing this one."
+                )
+            )
+
+        # Persist the new edit + re-derived stored result.
+        new_params = dict(run.parameters)
+        stage_edits = dict(new_params.get("stage_edits", {}))
+        stage_edits[skey] = new_edit
+        new_params["stage_edits"] = stage_edits
+        run.parameters = new_params
+        await self.analysis_repo.set_parameters(run)
+
         preserved = {k: v for k, v in existing_result.items() if k not in frag and k != list_key}
         await self.analysis_repo.set_stage_result(run, stage, {**preserved, **frag})
-
-        # E3: empty effective set -> fail, no re-run.
-        if frag["count"] == 0:
-            await self.analysis_repo.fail(
-                run, f"No {entity}s remain after editing; add at least one {entity}."
-            )
-            return None
 
         # Set-edit re-run: clears downstream, re-runs from the nearest runnable dependent.
         runners = engine.build_runners(self.analysis_repo.session)
