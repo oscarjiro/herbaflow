@@ -10,13 +10,19 @@
  *  2. Copy their SMILES to the clipboard and open SwissTargetPrediction.
  *  3. Paste the STP result CSV; it is parsed (parseStpCsv) at the chosen
  *     probability threshold and previewed.
- *  4. Import → POST /import-stp-targets for the selected compounds.
+ *  4. Import → the pasted accessions are resolved via POST /targets/validate and the
+ *     resolved targets are added to the run's Stage-3 target set — exactly like a
+ *     manual target add. STP is user-asserted, so NO canonical compound→target edge
+ *     is written; the targets are run-scoped only.
+ *
+ * The compound picker is purely a convenience for copying SMILES into STP; it does
+ * not scope the import (the resolved targets join the run's flat target set).
  */
 
 import { useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { importStpTargets } from "../../api/sdk.gen";
-import type { StpImportResponse } from "../../api/types.gen";
+import { useMutation } from "@tanstack/react-query";
+import { validateTargets } from "../../api/sdk.gen";
+import type { ResolvedTarget, ValidateTargetsResponse } from "../../api/types.gen";
 import { parseStpCsv, type StpRow } from "../../lib/stp";
 
 const STP_URL = "http://www.swisstargetprediction.ch/";
@@ -27,17 +33,19 @@ export type StpCompound = {
   smiles: string | null;
 };
 
+type ImportSummary = { added: number; alreadyInRun: number; failed: number };
+
 export function StpDialog({
-  analysisId,
   compounds,
   perCompound,
+  existingTargetIds,
+  onAddTargets,
 }: {
-  analysisId: string;
   compounds: StpCompound[];
   perCompound: Record<string, { coverage: number }>;
+  existingTargetIds: string[];
+  onAddTargets: (resolved: ResolvedTarget[]) => void;
 }) {
-  const qc = useQueryClient();
-
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [threshold, setThreshold] = useState(0.6);
   const [pasteText, setPasteText] = useState("");
@@ -56,16 +64,29 @@ export function StpDialog({
   const parse = useMemo(() => parseStpCsv(pasteText, threshold), [pasteText, threshold]);
   const parsedRows: StpRow[] = parse.error ? [] : parse.rows;
 
+  const existing = useMemo(() => new Set(existingTargetIds), [existingTargetIds]);
+
   const importMut = useMutation({
-    mutationFn: async () => {
-      const res = await importStpTargets({
-        path: { analysis_id: analysisId },
-        body: { compound_ids: Array.from(selected), rows: parsedRows },
+    mutationFn: async (): Promise<ImportSummary> => {
+      // Resolve the pasted accessions through the SAME path as a manual target add.
+      const res = await validateTargets({
+        body: {
+          inputs: parsedRows.map((r) => ({ type: "uniprot" as const, value: r.uniprot })),
+        },
       });
-      return res.data as unknown as StpImportResponse;
+      const data = res.data as unknown as ValidateTargetsResponse;
+      const resolved = data?.resolved ?? [];
+      const failed = data?.failed ?? [];
+      // Only add targets not already in the run's set (the edit layer de-dupes too).
+      const fresh = resolved.filter((t) => !existing.has(t.target_id));
+      if (fresh.length > 0) onAddTargets(fresh);
+      return {
+        added: fresh.length,
+        alreadyInRun: resolved.length - fresh.length,
+        failed: failed.length,
+      };
     },
     onSuccess: () => {
-      qc.invalidateQueries();
       setSelected(new Set());
       setPasteText("");
     },
@@ -95,7 +116,7 @@ export function StpDialog({
     }
   }
 
-  const canImport = selected.size > 0 && parsedRows.length > 0 && !importMut.isPending;
+  const canImport = parsedRows.length > 0 && !importMut.isPending;
   const result = importMut.data;
 
   return (
@@ -103,10 +124,11 @@ export function StpDialog({
       <h3>SwissTargetPrediction (manual paste-back)</h3>
       <p className="hf-muted">
         Pick the least-covered compounds, copy their SMILES into SwissTargetPrediction, then paste
-        the result CSV here to add predicted targets.
+        the result CSV here. The resolved targets are added to this run only (not stored as
+        measured compound–target links).
       </p>
 
-      {/* Compound picker — least-covered first */}
+      {/* Compound picker — least-covered first (copy-SMILES convenience only) */}
       <ul className="stp-compound-list" aria-label="Compounds to screen">
         {sorted.map((c) => {
           const coverage = perCompound[c.compound_id]?.coverage ?? 0;
@@ -162,14 +184,15 @@ export function StpDialog({
           aria-label="Paste SwissTargetPrediction CSV"
           value={pasteText}
           onChange={(e) => setPasteText(e.target.value)}
-          placeholder="Uniprot ID,Common name,Probability&#10;..."
+          placeholder={'Target,Common name,Uniprot ID,…,Probability*,…\n…'}
           rows={6}
         />
       </div>
 
       {parse.error && pasteText.trim().length > 0 && (
         <p className="hf-error" role="alert">
-          {parse.error}
+          {parse.error} Expected SwissTargetPrediction columns include{" "}
+          <code>Uniprot ID</code>, <code>Common name</code>, and <code>Probability*</code>.
         </p>
       )}
 
@@ -208,8 +231,8 @@ export function StpDialog({
 
       {result && (
         <p className="stp-import-result" role="status">
-          Imported {result.imported}; skipped (already measured) {result.skipped_measured}; failed{" "}
-          {result.failed.length}.
+          Added {result.added} target(s) to the run; {result.alreadyInRun} already present;{" "}
+          {result.failed} failed to resolve.
         </p>
       )}
     </section>

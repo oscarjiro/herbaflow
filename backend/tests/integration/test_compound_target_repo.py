@@ -31,40 +31,17 @@ async def test_measured_upsert_then_overwrite(session, seed_compound, seed_targe
 
 
 @pytest.mark.asyncio
-async def test_stp_replace_is_whole_compound(session, seed_compound, seed_target):
+async def test_targets_for_compound_lists_measured_edges(session, seed_compound, seed_target):
     repo = CompoundTargetRepository(session)
     cid, tid = seed_compound, seed_target
-    await repo.insert_stp(
-        {
-            "compound_target_id": uuid.uuid4(),
-            "compound_id": cid,
-            "target_id": tid,
-            "prediction_method": "stp_import",
-            "score": 0.7,
-        }
-    )
-    await repo.delete_stp_for_compounds([cid])
-    await session.flush()
-    assert await repo.targets_for_compound(cid) == []
-
-
-@pytest.mark.asyncio
-async def test_insert_stp_does_not_overwrite_measured(session, seed_compound, seed_target):
-    repo = CompoundTargetRepository(session)
-    cid, tid = seed_compound, seed_target
-    base = {"compound_target_id": uuid.uuid4(), "compound_id": cid, "target_id": tid}
     await repo.upsert_measured(
-        {**base, "prediction_method": "chembl_bioactivity", "pchembl_value": 6.5}
-    )
-    await repo.insert_stp(
         {
             "compound_target_id": uuid.uuid4(),
             "compound_id": cid,
             "target_id": tid,
-            "prediction_method": "stp_import",
-            "score": 0.9,
+            "prediction_method": "chembl_bioactivity",
+            "pchembl_value": 6.5,
         }
     )
     await session.flush()
-    methods = await repo.methods_for_pairs([cid])
-    assert methods[(cid, tid)] == "chembl_bioactivity"  # measured not clobbered by insert_stp
+    assert await repo.targets_for_compound(cid) == [tid]

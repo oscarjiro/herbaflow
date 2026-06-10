@@ -1,4 +1,4 @@
-"""Target resolution + STP-import DTOs."""
+"""Target resolution DTOs."""
 
 from __future__ import annotations
 
@@ -14,9 +14,6 @@ __all__ = [
     "ResolvedTarget",
     "ValidateTargetsRequest",
     "ValidateTargetsResponse",
-    "StpRow",
-    "StpImportRequest",
-    "StpImportResponse",
     "FailedInput",
 ]
 
@@ -41,20 +38,3 @@ class ValidateTargetsRequest(BaseModel):
 class ValidateTargetsResponse(BaseModel):
     resolved: list[ResolvedTarget]
     failed: list[FailedInput]
-
-
-class StpRow(BaseModel):
-    uniprot: str
-    common_name: str | None = None
-    probability: float
-
-
-class StpImportRequest(BaseModel):
-    compound_ids: list[uuid.UUID]
-    rows: list[StpRow]
-
-
-class StpImportResponse(BaseModel):
-    imported: int
-    failed: list[FailedInput]
-    skipped_measured: int

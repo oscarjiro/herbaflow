@@ -446,9 +446,12 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       {/* STP paste-back — computed runs only */}
       {!isUserProvided && (
         <StpDialog
-          analysisId={data.analysis_id}
           compounds={stpCompounds}
           perCompound={stage3.per_compound}
+          existingTargetIds={stage3.targets
+            .filter((t) => t.tag !== "user-removed")
+            .map((t) => t.target_id)}
+          onAddTargets={handleAddTargets}
         />
       )}
 

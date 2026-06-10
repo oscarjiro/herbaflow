@@ -3,7 +3,7 @@
 The background task owns its session and MUST mark the run ``failed`` if any stage
 runner raises — otherwise a crash (e.g. a provider outage) leaves the run stuck in a
 ``*_running`` status forever. This guard covers the create path AND the four mutating
-endpoints (advance / reset-from / edit / import-stp), which all schedule this task.
+endpoints (advance / reset-from / edit), which all schedule this task.
 """
 
 from __future__ import annotations

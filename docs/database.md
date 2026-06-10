@@ -101,8 +101,9 @@ compounds satisfy the `source_id` FK; their per-row `source_url` is null (no ext
 
 Stage 3 (compound→target) attributes edges and target rows to four sources. `ChEMBL`,
 `UniProt`, and `PubChem` already exist; `PubChem BioAssay` (`api`; distinct from `PubChem`,
-which serves compound structures) and `SwissTargetPrediction` (`manual`; user-pasted
-`stp_import` edges) are seeded by `20260610000001_seed_target_sources.sql`.
+which serves compound structures) and `SwissTargetPrediction` (`manual`; seeded but no longer
+used for edges — STP paste-back is run-scoped, see `compound_targets`) are seeded by
+`20260610000001_seed_target_sources.sql`.
 
 ---
 
@@ -327,7 +328,7 @@ Pair-grain junction. Answers: which targets are linked to which compounds?
 | `compound_id` | uuid FK → `compounds` | NO | |
 | `target_id` | uuid FK → `targets` | NO | |
 | `source_id` | uuid FK → `source_systems` | YES | Attribute; not part of pair grain |
-| `prediction_method` | text | YES | CHECK: `NULL` or `chembl_bioactivity` / `pubchem_bioassay` / `stp_import` |
+| `prediction_method` | text | YES | CHECK below. Only `chembl_bioactivity` / `pubchem_bioassay` are written; `stp_import` is **legacy** — the CHECK still permits it, but STP is now run-scoped and writes no edge (see precedence rule) |
 | `score` | double precision | YES | Source-specific activity score |
 | `pchembl_value` | double precision | YES | −log₁₀(IC50 in molar) from ChEMBL; ≥ 5.0 means IC50 ≤ 10µM; null for non-ChEMBL sources |
 | `source_url` | text | YES | Per-row deep link; authoritative |
@@ -347,15 +348,16 @@ Pair-grain junction. Answers: which targets are linked to which compounds?
 - `compound_targets_compound_id_idx` (btree, `compound_id`)
 - `compound_targets_target_id_idx` (btree, `target_id`)
 
-**Edge precedence rule:** `chembl_bioactivity` > `pubchem_bioassay` > `stp_import`. A measured
-upsert (ChEMBL or PubChem BioAssay) overwrites any lower-precedence edge for the same
-(compound, target) pair on re-run (idempotent). An `stp_import` edge from STP paste-back is
-**never** written if a measured edge already exists for the pair (reported as `skipped_measured`
-by `AnalysisService.import_stp`).
+**Edge precedence rule:** `chembl_bioactivity` > `pubchem_bioassay`. A measured upsert (ChEMBL or
+PubChem BioAssay) overwrites the lower-precedence edge for the same (compound, target) pair on
+re-run (idempotent). **SwissTargetPrediction (STP) paste-back and manual target adds write NO edge**
+— their resolved targets are run-scoped only (the run's Stage-3 set), since a user-asserted,
+unverifiable link must never be canonical (B4). The `stp_import` value is kept in the CHECK for any
+legacy rows but is no longer produced (revised 2026-06-10).
 
-**Provenance:** ChEMBL edges carry a `source_url` deep-link to the ChEMBL activity record;
-PubChem BioAssay edges link to the BioAssay page; `stp_import` edges have no deep link
-(`source_url` null; `source_id` → `SwissTargetPrediction` row).
+**Provenance:** ChEMBL edges carry a `source_url` deep-link to the ChEMBL activity record; PubChem
+BioAssay edges link to the BioAssay page. No `stp_import` edges are written; the seeded
+`SwissTargetPrediction` source row is retained but unused for edges.
 
 ---
 

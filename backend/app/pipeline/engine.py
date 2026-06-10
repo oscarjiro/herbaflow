@@ -333,7 +333,7 @@ async def run_stages_task(analysis_id: uuid.UUID, start_stage: int = 1) -> None:
     Wraps the run in a top-level guard so an uncaught stage error (e.g. a provider
     outage) marks the run ``failed`` instead of leaving it stuck in ``*_running``.
     Used by every scheduling path: create (start_stage=1) and the four mutating
-    endpoints (advance / reset-from / edit / import-stp).
+    endpoints (advance / reset-from / edit).
     """
     async with db.session_scope() as session:
         repo = AnalysisRepository(session)
