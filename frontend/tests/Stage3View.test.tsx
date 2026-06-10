@@ -182,6 +182,11 @@ describe("Stage3View", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("does not render a stale STP edges summary card", () => {
+    wrap(<Stage3View data={makeRun()} />);
+    expect(screen.queryByText(/^STP$/)).not.toBeInTheDocument();
+  });
+
   it("keeps STP dialog + coverage when the edit layer marks the result user_provided", () => {
     // A computed run that has been edited: the durable edit layer sets the stored
     // stage-3 result.state to "user_provided", but there is NO entry-mode stage_state.

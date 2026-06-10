@@ -3,7 +3,7 @@
  *
  * Renders:
  *  - Summary cards: target count, coverage %, and per-source edge counts
- *    (ChEMBL bioactivity / PubChem BioAssay / STP import)
+ *    (ChEMBL bioactivity / PubChem BioAssay)
  *  - Targets table (one row per target): gene symbol, UniProt accession (linked),
  *    evidence/method(s), # compounds, and an edit tag badge
  *  - Pagination (10 / 20 / 50 / all) and a CSV download keyed on gene symbol +
@@ -87,7 +87,6 @@ const PAGE_SIZES = [10, 20, 50] as const;
 const METHOD_LABELS: Record<string, string> = {
   chembl_bioactivity: "ChEMBL",
   pubchem_bioassay: "PubChem BioAssay",
-  stp_import: "STP",
 };
 
 function methodLabel(m: string): string {
@@ -290,13 +289,6 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         >
           <span className="summary-card__value">{sourceCounts.pubchem_bioassay ?? 0}</span>
           <span className="summary-card__label">PubChem BioAssay</span>
-        </div>
-        <div
-          className="summary-card summary-card--muted"
-          aria-label={`${sourceCounts.stp_import ?? 0} STP edges`}
-        >
-          <span className="summary-card__value">{sourceCounts.stp_import ?? 0}</span>
-          <span className="summary-card__label">STP</span>
         </div>
       </div>
 
