@@ -115,3 +115,24 @@ def target_param_meta() -> dict[str, Any]:
             "description": spec.get("description"),
         }
     return out
+
+
+def disease_targets_defaults() -> dict[str, Any]:
+    """The frozen-at-create defaults for the disease_targets param group (from the contract)."""
+    props = pipeline_parameters()["disease_targets"]["properties"]
+    return {name: spec["default"] for name, spec in props.items()}
+
+
+def disease_targets_param_meta() -> dict[str, Any]:
+    """Per-param UI metadata for the disease_targets group (bounds, advisory range, description)."""
+    out: dict[str, Any] = {}
+    for name, spec in pipeline_parameters()["disease_targets"]["properties"].items():
+        out[name] = {
+            "default": spec.get("default"),
+            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
+            "max": spec.get("maximum"),
+            "recommended_min": spec.get("recommended_min"),
+            "recommended_max": spec.get("recommended_max"),
+            "description": spec.get("description"),
+        }
+    return out

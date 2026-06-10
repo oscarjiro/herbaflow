@@ -79,7 +79,15 @@
         "disease_targets": {
           "type": "object",
           "properties": {
-            "min_score": { "type": "number", "minimum": 0, "maximum": 1 }
+            "min_score": {
+              "type": "number",
+              "description": "Open Targets overall disease-target association score floor (Methodology Lock §4.4).",
+              "default": 0.3,
+              "minimum": 0,
+              "maximum": 1,
+              "recommended_min": 0.1,
+              "recommended_max": 0.5
+            }
           }
         },
         "ppi": {

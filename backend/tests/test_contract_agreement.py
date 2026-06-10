@@ -47,3 +47,15 @@ def test_target_defaults_match_contract():
     meta = contracts.target_param_meta()
     assert meta["min_pchembl"]["recommended_max"] == 7.0
     assert meta["min_assay_confidence"]["max"] == 9
+
+
+def test_disease_targets_defaults_match_contract():
+    d = contracts.disease_targets_defaults()
+    assert d == {"min_score": 0.3}
+    meta = contracts.disease_targets_param_meta()
+    assert meta["min_score"]["min"] == 0
+    assert meta["min_score"]["max"] == 1
+    assert meta["min_score"]["recommended_min"] == 0.1
+    assert meta["min_score"]["recommended_max"] == 0.5
+    assert meta["min_score"]["default"] == 0.3
+    assert meta["min_score"]["description"]
