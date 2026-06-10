@@ -103,8 +103,8 @@ async def test_advance_defer_returns_next_stage_and_sets_running_without_executi
 @pytest.mark.asyncio
 async def test_advance_defer_at_last_stage_completes_and_returns_none() -> None:
     run = _awaiting_run()
-    run.status = "stage_3_awaiting_approval"
-    run.current_stage = 3
+    run.status = "stage_4_awaiting_approval"
+    run.current_stage = 4
 
     repo = _FakeRepo(run)
 

@@ -113,9 +113,20 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
             "state": "computed",
         }
 
+    async def stage4(_run: SimpleNamespace) -> dict:
+        return {
+            "targets": [],
+            "disease_targets": [],
+            "count": 0,
+            "min_score_applied": 0.3,
+            "state": "computed",
+        }
+
     monkeypatch.setattr(engine.db, "session_scope", fake_scope)
     monkeypatch.setattr(engine, "AnalysisRepository", lambda session: _FakeRepo(run))
-    monkeypatch.setattr(engine, "build_runners", lambda session: {1: stage1, 2: stage2, 3: stage3})
+    monkeypatch.setattr(
+        engine, "build_runners", lambda session: {1: stage1, 2: stage2, 3: stage3, 4: stage4}
+    )
 
     await engine.run_stages_task(run.analysis_id, 1)
 

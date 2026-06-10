@@ -74,7 +74,16 @@ def _runners(stage1_count, stage2_count):
             "state": "computed",
         }
 
-    return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner}
+    async def stage4_runner(r):
+        return {
+            "targets": [],
+            "disease_targets": [],
+            "count": 0,
+            "min_score_applied": 0.3,
+            "state": "computed",
+        }
+
+    return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner, 4: stage4_runner}
 
 
 @pytest.mark.asyncio
@@ -104,6 +113,10 @@ async def test_guided_pauses_for_approval() -> None:
     # Approving stage 2 runs stage 3, which (guided) pauses at the S3 checkpoint.
     await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "stage_3_awaiting_approval"
+
+    # Approving stage 3 runs stage 4, which (guided) pauses at the S4 checkpoint.
+    await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_4_awaiting_approval"
 
     # Approving the last runnable stage completes the run.
     await engine.advance_run(repo, run.analysis_id, runners)

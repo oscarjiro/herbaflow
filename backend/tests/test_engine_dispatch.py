@@ -74,7 +74,16 @@ def _runners(stage1_count: int, stage2_count: int) -> dict[int, object]:
             "state": "computed",
         }
 
-    return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner}
+    async def stage4_runner(run: SimpleNamespace) -> dict:
+        return {
+            "targets": [],
+            "disease_targets": [],
+            "count": 0,
+            "min_score_applied": 0.3,
+            "state": "computed",
+        }
+
+    return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner, 4: stage4_runner}
 
 
 @pytest.mark.asyncio
@@ -96,6 +105,10 @@ async def test_guided_pauses_then_advances_through_all_stages() -> None:
     assert run.current_stage == 3
 
     await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_4_awaiting_approval"
+    assert run.current_stage == 4
+
+    await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "complete"
 
 
@@ -110,7 +123,8 @@ async def test_auto_chains_to_complete() -> None:
     assert run.stage_results["1"]["count"] == 3
     assert run.stage_results["2"]["count"] == 2
     assert run.stage_results["3"]["state"] == "computed"
-    assert run.current_stage == 3
+    assert run.stage_results["4"]["state"] == "computed"
+    assert run.current_stage == 4
 
 
 @pytest.mark.asyncio

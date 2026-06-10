@@ -179,4 +179,6 @@ async def test_create_freezes_adme_defaults() -> None:
     fake_analysis_repo = svc.analysis_repo
     await svc.create(AnalysisCreate(plant_ids=[P], disease_id=D))
     assert fake_analysis_repo.created_parameters.get("adme") == contracts.adme_defaults()
+    # Stage 4's disease_targets defaults are frozen into the run parameters at create too.
+    assert fake_analysis_repo.created_parameters.get("disease_targets") == {"min_score": 0.3}
     assert fake_analysis_repo.created_parameters.get("stage_edits") == {}

@@ -95,6 +95,7 @@ class AnalysisService:
         pipeline_parameters = {
             "adme": contracts.adme_defaults(),
             "target": contracts.target_defaults(),
+            "disease_targets": contracts.disease_targets_defaults(),
         }
         run = await self.analysis_repo.create(
             analysis_name=payload.analysis_name,

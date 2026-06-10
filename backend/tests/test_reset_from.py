@@ -129,7 +129,7 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
     stage1 emits a computed fragment from the *effective* S1 set already stored (it is
     never recomputed in this chunk); stage2 emits a count = size of the effective S1 set.
     """
-    calls: dict[str, list] = {"1": [], "2": [], "3": []}
+    calls: dict[str, list] = {"1": [], "2": [], "3": [], "4": []}
 
     def fake_build_runners(session: Any) -> dict[int, Any]:
         async def stage1_runner(run: SimpleNamespace) -> dict:
@@ -164,7 +164,18 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
                 "state": "computed",
             }
 
-        return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner}
+        async def stage4_runner(run: SimpleNamespace) -> dict:
+            # Disease-side read; independent of the compound chain (idempotent S4 re-run).
+            calls["4"].append(True)
+            return {
+                "targets": [],
+                "disease_targets": [],
+                "count": 0,
+                "min_score_applied": 0.3,
+                "state": "computed",
+            }
+
+        return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner, 4: stage4_runner}
 
     monkeypatch.setattr(engine, "build_runners", fake_build_runners)
     return calls
