@@ -459,3 +459,19 @@ async def test_edit_add_beyond_cap_is_422(monkeypatch: pytest.MonkeyPatch) -> No
     with pytest.raises(ValidationProblem) as e:
         await svc.edit_stage(run.analysis_id, 1, add=[new_id], remove=[])
     assert str(cap) in (e.value.detail or "")
+
+
+# ---------------------------------------------------------------------------
+# stale guard — advance refused while any stage is stale
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_advance_refused_while_any_stage_stale(monkeypatch: pytest.MonkeyPatch) -> None:
+    _patch_runners(monkeypatch)
+    run = _run(computed=["a", "b"], mode="guided")
+    run.status = "stage_3_awaiting_approval"
+    run.current_stage = 3
+    run.stage_results["3"] = {"count": 1, "state": "computed"}
+    run.stage_results["2"]["stale"] = True  # an upstream edit left S2 stale
+    svc = _service(run, {})
+    with pytest.raises(ConflictProblem):
+        await svc.advance(run.analysis_id)

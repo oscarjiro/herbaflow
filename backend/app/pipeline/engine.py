@@ -196,6 +196,13 @@ async def advance_run(
         raise ConflictProblem(detail="Run not found.")
     if not state.is_settled(run.status) or not (run.status or "").endswith("_awaiting_approval"):
         raise ConflictProblem(detail="Run is not awaiting approval.")
+    # Any produced stage stale: Step 4 is a parallel root not in the compound chain's closure,
+    # so an upstream edit can leave Step 3 stale while Step 4 is current; the any-stale check is
+    # branch- and future-proof.
+    if any(isinstance(v, dict) and v.get("stale") for v in run.stage_results.values()):
+        raise ConflictProblem(
+            detail="You have unconfirmed edits — re-run from the edited step before continuing."
+        )
     current = run.current_stage or 0
     cur = run.stage_results.get(str(current))
     if cur is not None and cur.get("count", 0) == 0:
