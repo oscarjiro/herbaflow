@@ -26,4 +26,20 @@ describe("parseStpCsv", () => {
     const { rows } = parseStpCsv(CSV);
     expect(rows).toHaveLength(1);
   });
+
+  it("parses a real SwissTargetPrediction export (quoted header, 'Probability*')", () => {
+    // Exact header shape exported by SwissTargetPrediction: quoted fields, the
+    // probability column carries a trailing asterisk footnote ("Probability*").
+    const REAL = `"Target","Common name","Uniprot ID","ChEMBL ID","Target Class","Probability*","Known actives (3D/2D)"
+"Cyclin-dependent kinase 2","CDK2","P24941","CHEMBL301","Kinase","0.95","12"
+"Carbonic anhydrase 2","CA2","P00918","CHEMBL205","Lyase","0.30","4"`;
+    const { rows, error } = parseStpCsv(REAL, 0.6);
+    expect(error).toBeUndefined();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      uniprot: "P24941",
+      common_name: "CDK2",
+      probability: 0.95,
+    });
+  });
 });
