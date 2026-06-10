@@ -218,7 +218,12 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     );
   }
 
-  const isUserProvided = stageState === "user_provided" || stage3.state === "user_provided";
+  // Entry-mode "manual targets" plant input hides compounds/coverage/STP (no compounds exist).
+  // Key this ONLY on the entry-mode stage_state — NOT on stage3.state, which the durable edit
+  // layer flips to "user_provided" merely because the computed set was edited (a manual add or
+  // an STP import). Conflating the two would make the STP dialog and coverage table vanish after
+  // the first edit, breaking the recall-mitigation loop.
+  const isUserProvided = stageState === "user_provided";
 
   // Per-source edge counts (tallied over compound_targets).
   const sourceCounts = stage3.compound_targets.reduce<Record<string, number>>((acc, e) => {

@@ -181,4 +181,21 @@ describe("Stage3View", () => {
       screen.queryByRole("region", { name: /swisstargetprediction import/i }),
     ).not.toBeInTheDocument();
   });
+
+  it("keeps STP dialog + coverage when the edit layer marks the result user_provided", () => {
+    // A computed run that has been edited: the durable edit layer sets the stored
+    // stage-3 result.state to "user_provided", but there is NO entry-mode stage_state.
+    // The view must stay the full computed view so the STP/coverage workflow survives edits.
+    const data = makeRun({
+      stage_results: {
+        "2": SAMPLE_STAGE2_PASSED,
+        "3": { ...SAMPLE_STAGE3_RESULTS, state: "user_provided" },
+      },
+    });
+    wrap(<Stage3View data={data} />);
+    expect(screen.getByText(/per-compound coverage/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: /swisstargetprediction import/i }),
+    ).toBeInTheDocument();
+  });
 });
