@@ -44,6 +44,27 @@ async def test_resolve_nonhuman_or_missing_returns_none(httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_resolve_malformed_accession_400_returns_none(httpx_mock):
+    # A non-UniProt accession (e.g. a ChEMBL target carrying a GenBank id) makes UniProt
+    # 400; the client skips it (None) instead of crashing the run.
+    httpx_mock.add_response(status_code=400)
+    async with httpx.AsyncClient() as c:
+        rec = await UniProtClient(c).resolve("AAI32679")
+    assert rec is None
+
+
+@pytest.mark.asyncio
+async def test_resolve_retries_transient_5xx_then_succeeds(httpx_mock):
+    # raise_for_status is INSIDE _call, so a transient 503 is retried rather than propagated.
+    httpx_mock.add_response(status_code=503)
+    httpx_mock.add_response(json=_HIT)
+    async with httpx.AsyncClient() as c:
+        rec = await UniProtClient(c).resolve("P04637")
+    assert rec is not None
+    assert rec.uniprot_accession == "P04637"
+
+
+@pytest.mark.asyncio
 async def test_resolve_symbol_human_hit(httpx_mock):
     httpx_mock.add_response(json=_HIT)
     async with httpx.AsyncClient() as c:

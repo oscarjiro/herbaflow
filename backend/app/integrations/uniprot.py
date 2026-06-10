@@ -44,10 +44,21 @@ class UniProtClient:
 
         async def _call() -> httpx.Response:
             async with _SEM:
-                return await self._client.get(_BASE, params=params, timeout=30.0)
+                resp = await self._client.get(_BASE, params=params, timeout=30.0)
+            resp.raise_for_status()  # raise INSIDE so with_retry retries transient 429/5xx
+            return resp
 
-        resp = await with_retry(_call)
-        resp.raise_for_status()
+        try:
+            resp = await with_retry(_call)
+        except httpx.HTTPStatusError as exc:
+            # A 400 means the value is not a resolvable UniProt query — e.g. a ChEMBL target
+            # whose accession is a non-UniProt id (GenBank etc.). Treat as "no human record"
+            # and skip, rather than failing the whole run. 5xx (a real outage) still raises.
+            if exc.response.status_code == 400:
+                logger.info("UniProt: unresolvable accession %s (400) — skipping", label)
+                return None
+            raise
+
         results = resp.json().get("results", [])
         if not results:
             logger.info("UniProt: no human record for %s", label)
