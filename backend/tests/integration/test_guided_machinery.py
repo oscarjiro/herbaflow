@@ -176,8 +176,11 @@ async def test_zero_pass_s2_auto_is_hard_failure(client) -> None:
     c, ids = client
 
     run_id = await _create(c, ids, mode="auto", plant="plant_full")
-    state = await _poll(c, run_id, until="complete")
-    assert state["status"] == "complete"
+    # The seeded compounds have no findable targets, so an auto run now hard-stops at the
+    # empty S3 (don't-waste-downstream). That settled (failed) state is enough to reset-from-2
+    # and exercise the S2 zero-pass path that this test is actually about.
+    state = await _poll(c, run_id)
+    assert state["status"] in {"complete", "failed"}
 
     # Trigger a zero-pass S2 via reset-from.
     # Use max_mw=1 + max_violations=0 so all compounds fail (default max_violations=1 would

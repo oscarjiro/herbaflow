@@ -24,7 +24,9 @@ async def _poll(c, run_id: str, *, until: str | None = None, max_iters: int = 80
 
 
 @pytest.mark.asyncio
-async def test_auto_run_completes(client) -> None:
+async def test_auto_run_hard_stops_on_empty_targets(client) -> None:
+    """An auto run executes S1 + S2, then hard-stops at the empty S3 (the seeded compounds
+    have no findable targets) — don't-waste-downstream. S1/S2 still ran correctly."""
     c, ids = client
     resp = await c.post(
         "/analyses",
@@ -43,10 +45,10 @@ async def test_auto_run_completes(client) -> None:
         final = poll.json()
         if final["status"] in ("complete", "failed"):
             break
-    assert final["status"] == "complete"
+    assert final["status"] == "failed"
+    assert "step 3" in final["error_message"].lower()
     assert final["stage_results"]["1"]["count"] == 2
     assert final["stage_results"]["2"]["count"] == 2
-    assert final["expires_at"] is not None
 
 
 @pytest.mark.asyncio
@@ -78,17 +80,12 @@ async def test_guided_pauses_then_advances(client) -> None:
     assert adv2.json()["status"] == "stage_3_running"
     assert await _poll(c, run_id, until="stage_3_awaiting_approval") == "stage_3_awaiting_approval"
 
-    # Approving stage 3 now schedules stage 4 (disease-target read), which pauses at the
-    # guided S4 checkpoint.
+    # Stage 3 is empty in this env (seeded compounds have no findable targets), so the guided
+    # checkpoint now refuses Approve & Continue (blocking-stop): advancing returns 409 and the
+    # run stays parked at the S3 checkpoint.
     adv3 = await c.post(f"/analyses/{run_id}/advance")
-    assert adv3.status_code == 202
-    assert adv3.json()["status"] == "stage_4_running"
-    assert await _poll(c, run_id, until="stage_4_awaiting_approval") == "stage_4_awaiting_approval"
-
-    # Last runnable stage: approving stage 4 completes in prepare (nothing left to schedule).
-    adv4 = await c.post(f"/analyses/{run_id}/advance")
-    assert adv4.status_code == 202
-    assert await _poll(c, run_id, until="complete") == "complete"
+    assert adv3.status_code == 409
+    assert (await c.get(f"/analyses/{run_id}")).json()["status"] == "stage_3_awaiting_approval"
 
 
 @pytest.mark.asyncio
@@ -128,7 +125,9 @@ async def test_manual_compound_unions_into_stage1(client) -> None:
         final = (await c.get(f"/analyses/{run_id}")).json()
         if final["status"] in ("complete", "failed"):
             break
-    assert final["status"] == "complete"
+    # The manual compound unions into S1 (the assertion of intent); the run then hard-stops at
+    # the empty S3, which is fine — S1/S2 ran with the unioned compound.
+    assert final["status"] == "failed"
     assert final["stage_results"]["1"]["count"] == 1
     assert str(ids["c1"]) in final["stage_results"]["1"]["per_plant"]["manual"]
     assert final["stage_results"]["2"]["count"] == 1
