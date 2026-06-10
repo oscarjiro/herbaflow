@@ -303,9 +303,20 @@ async def reset_from(
         start = stage
     else:
         invalidate = downstream_closure(stage)
+        # A guided run parked awaiting approval AT the very stage being edited must NOT advance
+        # past its own approval checkpoint. The caller already re-derived this stage's set in
+        # place; advancing to a dependent would skip the checkpoint (an implicit approve). Treat
+        # it like the no-runnable-dependent case: clear any stale downstream and settle, leaving
+        # the run parked at ``stage_N_awaiting_approval`` for the user to review and approve.
+        parked_at_edited_stage = (
+            run.mode == "guided"
+            and (run.status or "").endswith("_awaiting_approval")
+            and (run.current_stage or 0) == stage
+        )
         runnable_dependents = [s for s in DEPENDENTS[stage] if s in RUNNABLE_STAGES]
-        if not runnable_dependents:
-            # Nothing runnable depends on this stage; clear downstream and settle.
+        if parked_at_edited_stage or not runnable_dependents:
+            # Re-park at the edited checkpoint, or nothing runnable depends on this stage:
+            # clear stale downstream and settle.
             produced = {int(k) for k in run.stage_results}
             await repo.clear_stage_results(run, invalidate & produced)
             return None

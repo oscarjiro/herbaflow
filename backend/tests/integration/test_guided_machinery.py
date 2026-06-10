@@ -55,8 +55,9 @@ async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) 
     """
     Scenario E6:
     1. Create guided run on plant_empty with c1 as manual compound -> S1 awaiting (c1 effective).
-    2. Stage-edit S1: add c2, remove c1 -> re-run from S2; reach stage_2_awaiting_approval; c2
-       effective, c1 tagged user-removed.
+    2. Stage-edit S1: add c2, remove c1 -> a guided edit of the CURRENT awaiting stage re-parks
+       AT stage_1_awaiting_approval (it must not advance past S1's own checkpoint); c2 effective,
+       c1 tagged user-removed. Then Approve to advance into stage_2_awaiting_approval.
     3. reset-from/2 with skip_adme=true -> re-run from S2 again; S1 edit layer survives (c2
        effective, c1 user-removed) and parameters["stage_edits"]["1"] is preserved.
     """
@@ -72,15 +73,15 @@ async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) 
         if comp.get("tag") != "user-removed"
     ), "c1 should be effective in S1 before edit"
 
-    # Step 2: edit S1 — add c2, remove c1
+    # Step 2: edit S1 — add c2, remove c1. A guided edit of the current awaiting stage
+    # re-parks AT S1 (it must not advance past S1's own checkpoint).
     edit_resp = await c.post(
         f"/analyses/{run_id}/stages/1/edit",
         json={"add": [str(ids["c2"])], "remove": [str(ids["c1"])]},
     )
     assert edit_resp.status_code == 202
-    # The edit triggers a re-run from S2; wait for it to settle.
-    state = await _poll(c, run_id, until="stage_2_awaiting_approval")
-    assert state["status"] == "stage_2_awaiting_approval"
+    state = await _poll(c, run_id, until="stage_1_awaiting_approval")
+    assert state["status"] == "stage_1_awaiting_approval"
 
     s1_compounds = state["stage_results"]["1"]["compounds"]
     c2_entries = [x for x in s1_compounds if x["compound_id"] == str(ids["c2"])]
@@ -89,6 +90,12 @@ async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) 
     assert c2_entries[0].get("tag") != "user-removed", "c2 should be effective"
     assert c1_entries, "c1 should remain in S1 compounds list (tagged user-removed)"
     assert c1_entries[0].get("tag") == "user-removed", "c1 should be tagged user-removed"
+
+    # Approve S1 to advance into S2 (the edit did not auto-advance past the checkpoint).
+    adv = await c.post(f"/analyses/{run_id}/advance")
+    assert adv.status_code == 202
+    state = await _poll(c, run_id, until="stage_2_awaiting_approval")
+    assert state["status"] == "stage_2_awaiting_approval"
 
     # Step 3: reset-from/2 with skip_adme=true — edit layer must survive
     reset_resp = await c.post(

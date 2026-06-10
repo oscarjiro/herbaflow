@@ -8,7 +8,7 @@ Edge cases:
 - set edit S1 clears downstream {2}, re-runs from 2 (NOT 1); the S1 stored result tags the edit.
 - E6 end-to-end: edit S1 (add) -> S2 includes it; then param Redo S2 -> the S1 add survives.
 - E2: a re-run that raises leaves cleared-downstream cleared and the run failed.
-- E3: edit S1 removing all compounds -> effective 0 -> run failed (no S2 re-run).
+- never-empty: edit S1 removing every compound is rejected (422); nothing persisted, no S2 re-run.
 - cap: edit_stage add beyond the compound cap -> 422 with the cap.
 """
 
@@ -297,6 +297,44 @@ async def test_set_edit_s1_remove_clears_2_reruns_from_2(
 
 
 # ---------------------------------------------------------------------------
+# Guided edit of the CURRENT awaiting stage re-parks (must NOT advance past its checkpoint)
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_guided_edit_of_current_awaiting_stage_reparks_without_advancing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = _patch_runners(monkeypatch)
+    # Guided run parked awaiting approval AT stage 1 (S2 not computed yet).
+    run = SimpleNamespace(
+        analysis_id=uuid.uuid4(),
+        mode="guided",
+        status="stage_1_awaiting_approval",
+        current_stage=1,
+        error_message=None,
+        parameters={
+            "plant_ids": [str(uuid.uuid4())],
+            "manual_compounds": [],
+            "stage_edits": {},
+            "adme": _adme(),
+        },
+        stage_results={"1": _stage1_fragment(["a", "b"])},
+    )
+    new_id = uuid.uuid4()
+    svc = _service(run, {new_id: "NewCompound"})
+
+    await svc.edit_stage(run.analysis_id, 1, add=[new_id], remove=[])
+
+    # The added compound is folded into S1's set...
+    s1 = run.stage_results["1"]
+    assert any(c["compound_id"] == str(new_id) for c in s1["compounds"])
+    # ...but the run STAYS parked at S1: an edit of the current checkpoint must not
+    # advance past it (no implicit approve, no S2 run).
+    assert run.status == "stage_1_awaiting_approval"
+    assert run.current_stage == 1
+    assert calls["2"] == []
+
+
+# ---------------------------------------------------------------------------
 # E6 end-to-end — edit S1 add survives a later S2 param Redo
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
@@ -351,10 +389,10 @@ async def test_e2_rerun_failure_is_idempotent(monkeypatch: pytest.MonkeyPatch) -
 
 
 # ---------------------------------------------------------------------------
-# E3 — edit S1 removing all compounds -> effective 0 -> failed, no S2 re-run
+# never-empty — edit S1 removing every compound is rejected (422), nothing persisted
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_e3_remove_all_compounds_fails_without_rerun(
+async def test_edit_removing_all_compounds_is_rejected_and_persists_nothing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = _patch_runners(monkeypatch)
@@ -363,13 +401,20 @@ async def test_e3_remove_all_compounds_fails_without_rerun(
     run.stage_results["1"]["compounds"][0]["compound_id"] = str(r1)
     run.stage_results["1"]["compounds"][1]["compound_id"] = str(r2)
     run.stage_results["1"]["computed_ids"] = [str(r1), str(r2)]
+    before_status = run.status
     svc = _service(run, {})
+    repo = svc.analysis_repo
 
-    await svc.edit_stage(run.analysis_id, 1, add=[], remove=[r1, r2])
+    # An edit may never empty a stage: removing the last remaining entity is rejected and
+    # nothing is persisted (no status change, no clear, no S2 re-run).
+    with pytest.raises(ValidationProblem) as e:
+        await svc.edit_stage(run.analysis_id, 1, add=[], remove=[r1, r2])
 
-    assert run.status == "failed"
-    assert "compound" in (run.error_message or "").lower()
+    assert "least one compound" in (e.value.detail or "")
+    assert run.status == before_status  # untouched
+    assert run.stage_results["1"]["count"] == 2  # S1 set unchanged
     assert calls["2"] == []  # no S2 re-run
+    assert repo.cleared == []  # nothing cleared
 
 
 # ---------------------------------------------------------------------------
