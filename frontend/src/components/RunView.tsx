@@ -19,7 +19,7 @@ type Stage1Data = {
   state?: string;
 };
 
-export function RunView({ analysisId }: { analysisId: string }) {
+export function RunView({ analysisId, onReset }: { analysisId: string; onReset?: () => void }) {
   const { data } = useAnalysisStatus(analysisId);
   const qc = useQueryClient();
   const advance = useMutation({
@@ -35,7 +35,16 @@ export function RunView({ analysisId }: { analysisId: string }) {
     <section>
       <h1>Run {analysisId}</h1>
       <p>Status: {data.status}</p>
-      {data.status === "failed" && <p role="alert">{data.error_message}</p>}
+      {data.status === "failed" && (
+        <div role="alert">
+          <p>{data.error_message}</p>
+          {onReset && (
+            <button className="hf-btn" onClick={onReset}>
+              Back to setup
+            </button>
+          )}
+        </div>
+      )}
 
       {stage1 && (
         <>

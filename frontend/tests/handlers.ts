@@ -298,6 +298,22 @@ export const server = setupServer(
   http.get(`${BASE}/analyses/r3`, () => HttpResponse.json(ANALYSIS_STAGE1_AWAITING)),
   http.get(`${BASE}/analyses/r4`, () => HttpResponse.json(ANALYSIS_STAGE1_AT_CAP)),
   http.get(`${BASE}/analyses/r-empty4`, () => HttpResponse.json(ANALYSIS_EMPTY_STAGE4)),
+  http.get(`${BASE}/analyses/r-failed`, () =>
+    HttpResponse.json({
+      analysis_id: "r-failed",
+      analysis_name: null,
+      disease_id: "d1",
+      mode: "guided",
+      status: "failed",
+      current_stage: 1,
+      parameters: {},
+      stage_results: {},
+      created_at: null,
+      completed_at: null,
+      expires_at: null,
+      error_message: "No compounds found for the selected plants.",
+    }),
+  ),
   // reset-from: echo back the same run with updated adme params
   http.post(`${BASE}/analyses/:id/reset-from/:stage`, () =>
     HttpResponse.json({ ...ANALYSIS_WITH_STAGE2, status: "stage_2_awaiting_approval" }),

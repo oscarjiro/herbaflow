@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it, test } from "vitest";
+import { describe, expect, it, test, vi } from "vitest";
 import { RunView } from "../src/components/RunView";
 import "../src/lib/api";
 import { server } from "./handlers";
@@ -182,5 +182,20 @@ describe("empty Stage 4 checkpoint (r-empty4)", () => {
     wrap("r-empty4");
     await screen.findByRole("heading", { name: /step 4/i });
     expect(screen.getByRole("button", { name: /approve/i })).toBeDisabled();
+  });
+});
+
+describe("failed run recovery (r-failed)", () => {
+  it("shows a Back to setup button that calls onReset", async () => {
+    const onReset = vi.fn();
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <RunView analysisId="r-failed" onReset={onReset} />
+      </QueryClientProvider>,
+    );
+    const btn = await screen.findByRole("button", { name: /back to setup/i });
+    await userEvent.click(btn);
+    expect(onReset).toHaveBeenCalledTimes(1);
   });
 });

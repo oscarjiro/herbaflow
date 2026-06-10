@@ -4,5 +4,13 @@ import { SetupView } from "./components/SetupView";
 
 export function App() {
   const [runId, setRunId] = useState<string | null>(null);
-  return <main>{runId ? <RunView analysisId={runId} /> : <SetupView onCreated={setRunId} />}</main>;
+  return (
+    <main>
+      {runId ? (
+        <RunView analysisId={runId} onReset={() => setRunId(null)} />
+      ) : (
+        <SetupView onCreated={setRunId} />
+      )}
+    </main>
+  );
 }
