@@ -91,6 +91,10 @@ async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) 
     assert c1_entries, "c1 should remain in S1 compounds list (tagged user-removed)"
     assert c1_entries[0].get("tag") == "user-removed", "c1 should be tagged user-removed"
 
+    # The edit did NOT run S2: S1 is fresh (not stale) and S2 has no result yet.
+    assert not state["stage_results"]["1"].get("stale"), "S1 must not be stale after editing it"
+    assert "2" not in state["stage_results"], "edit of current stage must not run S2"
+
     # Approve S1 to advance into S2 (the edit did not auto-advance past the checkpoint).
     adv = await c.post(f"/analyses/{run_id}/advance")
     assert adv.status_code == 202
@@ -253,3 +257,55 @@ async def test_remove_last_compound_is_rejected(client) -> None:
     after = (await c.get(f"/analyses/{run_id}")).json()
     assert after["status"] == "stage_1_awaiting_approval"
     assert after["stage_results"]["1"]["count"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Upstream edit while parked at S2 → stale → 409 → reset-from → recomputed
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_upstream_edit_stages_stale_then_reset_recomputes(client) -> None:
+    """Parked at S2, edit S1: S2 is marked stale and NOT re-run; advance is refused (409);
+    an explicit reset-from/1 recomputes and clears the stale flag."""
+    c, ids = client
+
+    # Guided run with plant_empty + c1 manual → parks at stage_1_awaiting_approval.
+    run_id = await _create(c, ids, mode="guided", plant="plant_empty", manual=[ids["c1"]])
+    await _poll(c, run_id, until="stage_1_awaiting_approval")
+    assert (await c.post(f"/analyses/{run_id}/advance")).status_code == 202
+    await _poll(c, run_id, until="stage_2_awaiting_approval")
+
+    # Edit S1 (add c2) while parked at S2 — stages the change, does NOT re-run.
+    edit = await c.post(
+        f"/analyses/{run_id}/stages/1/edit",
+        json={"add": [str(ids["c2"])], "remove": []},
+    )
+    assert edit.status_code == 202
+    state = (await c.get(f"/analyses/{run_id}")).json()
+    assert (
+        state["status"] == "stage_2_awaiting_approval"
+    ), "run must stay parked at S2 after upstream edit"
+    assert state["stage_results"]["2"].get("stale") is True, "S2 must be flagged stale"
+    assert state["parameters"]["rerun_from"] == 1, "rerun_from must record the edited stage number"
+
+    # Approve is refused while a downstream stage is stale.
+    blocked = await c.post(f"/analyses/{run_id}/advance")
+    assert blocked.status_code == 409
+
+    # Explicit reset-from/1 re-runs S2 and clears stale + rerun_from.
+    assert (await c.post(f"/analyses/{run_id}/reset-from/1", json={})).status_code == 202
+    state = await _poll(c, run_id, until="stage_2_awaiting_approval")
+    assert state["stage_results"]["2"].get("stale") in (
+        None,
+        False,
+    ), "stale must be cleared after reset"
+    assert "rerun_from" not in state["parameters"], "rerun_from must be removed after reset"
+
+    # c2 (the staged add) is now in the screened S1 result.
+    c2_eff = [
+        x
+        for x in state["stage_results"]["1"]["compounds"]
+        if x["compound_id"] == str(ids["c2"]) and x.get("tag") != "user-removed"
+    ]
+    assert c2_eff, "c2 must be effective in S1 after reset-from recomputes"
