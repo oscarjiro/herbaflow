@@ -5,13 +5,23 @@ import { ApprovalBar } from "../src/components/stages/ApprovalBar";
 describe("ApprovalBar", () => {
   it("renders only for the matching stage at an awaiting checkpoint", () => {
     const { rerender } = render(
-      <ApprovalBar stage={4} status="stage_4_awaiting_approval" currentStage={4} onApprove={() => {}} />,
+      <ApprovalBar
+        stage={4}
+        status="stage_4_awaiting_approval"
+        currentStage={4}
+        onApprove={() => {}}
+      />,
     );
     expect(screen.getByRole("button", { name: /approve/i })).toBeInTheDocument();
 
     // A view whose stage is not the current stage renders nothing.
     rerender(
-      <ApprovalBar stage={2} status="stage_4_awaiting_approval" currentStage={4} onApprove={() => {}} />,
+      <ApprovalBar
+        stage={2}
+        status="stage_4_awaiting_approval"
+        currentStage={4}
+        onApprove={() => {}}
+      />,
     );
     expect(screen.queryByRole("button", { name: /approve/i })).not.toBeInTheDocument();
   });
