@@ -16,7 +16,14 @@ from app.services import canonical, gene_symbols, structure
 
 logger = logging.getLogger("herbaflow.resolution")
 
-_ACCESSION_RE = re.compile(r"^[A-Z0-9]{6,10}$")
+# Official UniProtKB accession grammar (https://www.uniprot.org/help/accession_numbers).
+# Used to classify a typeless manual target as an accession vs a gene symbol. A loose
+# "[A-Z0-9]{6,10}" wrongly matched real human gene symbols shaped like accessions (e.g.
+# TAS2R38), routing them to an accession lookup that 400s and falsely reports "not human";
+# the strict grammar lets such symbols fall through to the gene-symbol resolver.
+_ACCESSION_RE = re.compile(
+    r"^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$"
+)
 
 
 async def resolve_compounds(

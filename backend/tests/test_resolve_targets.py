@@ -56,6 +56,22 @@ async def test_symbol_resolves_via_resolve_symbol():
 
 
 @pytest.mark.asyncio
+async def test_gene_symbol_shaped_like_accession_resolves_via_symbol():
+    # A real human gene symbol that happens to be 6-10 alphanumeric chars (TAS2R38, a taste
+    # receptor, UniProt P59533) must be classified as a SYMBOL — NOT misread as a UniProt
+    # accession. With no explicit type, the accession-shape test must be strict enough to let
+    # it fall through to the gene-symbol resolver. (Loose "[A-Z0-9]{6,10}" wrongly matched it,
+    # routing it to an accession lookup that 400s -> "not a human accession".)
+    tas2r38 = UniProtRecord("P59533", "TAS2R38", "Taste receptor type 2 member 38")
+    up = FakeUniProt({"P59533": tas2r38})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"value": "TAS2R38"}], repo, up)
+    assert not failed
+    assert resolved and resolved[0].uniprot_accession == "P59533"
+    assert resolved[0].gene_symbol == "TAS2R38"
+
+
+@pytest.mark.asyncio
 async def test_nonhuman_unresolved_lands_in_failed_with_line():
     up = FakeUniProt({})
     repo = FakeTargetRepo()
