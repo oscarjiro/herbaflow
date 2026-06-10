@@ -30,13 +30,17 @@ class PubChemBioAssayClient:
 
         async def _call() -> httpx.Response:
             async with _SEM:
-                return await self._client.get(url, timeout=30.0)
+                resp = await self._client.get(url, timeout=30.0)
+            # 404 = no assay data for this compound (handled by the caller as []). Any other
+            # error is raised INSIDE so with_retry retries transient 429/5xx before degrading.
+            if resp.status_code != 404:
+                resp.raise_for_status()
+            return resp
 
         try:
             resp = await with_retry(_call)
             if resp.status_code == 404:
                 return []
-            resp.raise_for_status()
             table = resp.json().get("Table") or {}
         except httpx.HTTPError as exc:
             logger.warning("PubChem BioAssay degraded for %s: %s", inchikey, exc)

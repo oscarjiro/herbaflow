@@ -37,9 +37,11 @@ async def test_no_data_404_degrades_to_empty(httpx_mock):
 
 
 @pytest.mark.asyncio
-async def test_outage_degrades_to_empty(httpx_mock):
-    # raise_for_status is OUTSIDE _call, so the 503 is returned (not raised) by _call;
-    # with_retry does not retry -> a single 503 response degrades to [].
+async def test_outage_retries_then_degrades_to_empty(httpx_mock):
+    # raise_for_status is INSIDE _call, so a transient 503 is retried (attempts=3) before the
+    # supplementary client degrades to []. Three 503s exhaust the retries.
+    httpx_mock.add_response(status_code=503)
+    httpx_mock.add_response(status_code=503)
     httpx_mock.add_response(status_code=503)
     async with httpx.AsyncClient() as c:
         accs = await PubChemBioAssayClient(c).active_targets_for_inchikey("AAA")
