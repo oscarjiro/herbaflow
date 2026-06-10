@@ -58,6 +58,8 @@ def _compound_dict(
     return {
         "compound_id": str(obj.compound_id),
         "canonical_name": _read(obj, "canonical_name"),
+        "smiles": _read(obj, "smiles"),
+        "inchi_key": _read(obj, "inchi_key"),
         "descriptor_source": descriptor_source,
         "molecular_weight": _read(obj, "molecular_weight"),
         "logp": _read(obj, "logp"),
