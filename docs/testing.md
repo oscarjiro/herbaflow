@@ -102,3 +102,22 @@ New features and bug fixes follow Red-Green-Refactor:
 - **Stage 6 / Stage 7 Cytoscape rendering**: canvas not available in jsdom. Unit tests mock the Cytoscape component. Visual rendering is only verified in E2E.
 - **E2E tests without live stack**: `full-pipeline.spec.ts` and `stage-results-visible.spec.ts` require a running backend + database. They are not run in unit CI.
 - **Scientific tests**: require live external APIs (PubChem, STRING, UniProt) and a fully seeded database. Run manually before major releases.
+
+### Stage 3 — Target Identification
+
+- **Human-only (9606) is a fixed-scope limitation.** All target resolution (UniProt client, ChEMBL
+  client, PubChem BioAssay client, Stage-3 resolution) filters to `organism_id:9606` internally.
+  A non-human UniProt accession is skipped and never persisted. This is not a user-tunable
+  parameter — `human_only` was deliberately removed from the contract's `target` param block.
+- **ChEMBL is load-bearing; PubChem BioAssay is supplementary.** If ChEMBL is unreachable, Stage 3
+  raises `ServiceUnavailableError` (503) and the stage fails. If PubChem BioAssay is unreachable,
+  it degrades to an empty result (`[]`) and Stage 3 continues with ChEMBL data only.
+- **Two manual-target paths with different persistence.** (1) Plain add via the Step-3 edit
+  control (`POST /analyses/{id}/stages/3/edit`) is run-scoped: the target is included in the
+  stage's effective set but no `compound_targets` edge is written to the DB. (2) STP paste-back
+  via `POST /analyses/{id}/import-stp-targets` writes real `compound_targets` edges with
+  `prediction_method='stp_import'`. The difference is intentional: edit-layer additions are
+  ephemeral curation; STP import is evidence with a source attribution.
+- **Edge precedence:** `chembl_bioactivity` > `pubchem_bioassay` > `stp_import`. A measured
+  upsert never downgrades to a lower-precedence method; STP import skips any pair that already
+  has a measured edge (`skipped_measured` in the import response).

@@ -242,6 +242,34 @@ A **CSV download** button exports the full passed + filtered compound list with 
 columns. A tools-and-data-sources footer lists the screening rules applied (Lipinski / Veber /
 NP-bypass / PAINS) and the parameter values used for the run.
 
+### Step 3 — Target Identification
+
+**Components:** `src/components/stages/Stage3View.tsx`, `src/components/stages/StpDialog.tsx`,
+`src/components/TargetValidateBox.tsx`.
+
+**Results view:** Renders a target table keyed by **UniProt accession + gene symbol** (never
+a DB UUID). Each row carries an explicit `prediction_method` column (`chembl_bioactivity`,
+`pubchem_bioassay`, or `stp_import`) and a `pchembl_value` for ChEMBL rows. A **per-compound
+coverage** summary is always visible; compounds with zero targets are surfaced explicitly.
+
+**CSV export:** Columns are UniProt accession + gene symbol — the stable external identifiers —
+not internal DB UUIDs.
+
+**STP dialog (`StpDialog.tsx`):** A modal for pasting SwissTargetPrediction results.
+- Compound selector orders by ascending target-count (least-covered first).
+- Selected compound's SMILES is shown with a copy button (populated from `stage_results["2"].passed`
+  rows, which now expose `smiles` + `inchi_key`).
+- Paste area is parsed by `src/lib/stp.ts` (the canonical home for the STP CSV parser; expects
+  `Uniprot ID` / `Common name` / `Probability` columns; default probability threshold 0.6).
+- Preview table shows parsed rows before import; submits to `POST /analyses/{id}/import-stp-targets`.
+
+**Edit controls:** The `EditableEntityList` / `ParamPanel` machinery is now param-group-generic;
+Step 3 uses the `target` param group (parameters `min_pchembl` + `min_assay_confidence`). Manual
+target addition via `TargetValidateBox` → `POST /targets/validate` writes a run-scoped inclusion
+in the stage set (no `compound_targets` edge); STP paste-back via `StpDialog` writes real
+`compound_targets` edges with `prediction_method='stp_import'`. This persistence difference is
+intentional — see Limitations in `docs/testing.md`.
+
 ---
 
 ## Summary

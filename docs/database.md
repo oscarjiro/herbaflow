@@ -347,6 +347,16 @@ Pair-grain junction. Answers: which targets are linked to which compounds?
 - `compound_targets_compound_id_idx` (btree, `compound_id`)
 - `compound_targets_target_id_idx` (btree, `target_id`)
 
+**Edge precedence rule:** `chembl_bioactivity` > `pubchem_bioassay` > `stp_import`. A measured
+upsert (ChEMBL or PubChem BioAssay) overwrites any lower-precedence edge for the same
+(compound, target) pair on re-run (idempotent). An `stp_import` edge from STP paste-back is
+**never** written if a measured edge already exists for the pair (reported as `skipped_measured`
+by `AnalysisService.import_stp`).
+
+**Provenance:** ChEMBL edges carry a `source_url` deep-link to the ChEMBL activity record;
+PubChem BioAssay edges link to the BioAssay page; `stp_import` edges have no deep link
+(`source_url` null; `source_id` → `SwissTargetPrediction` row).
+
 ---
 
 ### `diseases`
