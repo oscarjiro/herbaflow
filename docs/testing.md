@@ -112,12 +112,32 @@ New features and bug fixes follow Red-Green-Refactor:
 - **ChEMBL is load-bearing; PubChem BioAssay is supplementary.** If ChEMBL is unreachable, Stage 3
   raises `ServiceUnavailableError` (503) and the stage fails. If PubChem BioAssay is unreachable,
   it degrades to an empty result (`[]`) and Stage 3 continues with ChEMBL data only.
-- **Two manual-target paths with different persistence.** (1) Plain add via the Step-3 edit
-  control (`POST /analyses/{id}/stages/3/edit`) is run-scoped: the target is included in the
-  stage's effective set but no `compound_targets` edge is written to the DB. (2) STP paste-back
-  via `POST /analyses/{id}/import-stp-targets` writes real `compound_targets` edges with
-  `prediction_method='stp_import'`. The difference is intentional: edit-layer additions are
-  ephemeral curation; STP import is evidence with a source attribution.
-- **Edge precedence:** `chembl_bioactivity` > `pubchem_bioassay` > `stp_import`. A measured
-  upsert never downgrades to a lower-precedence method; STP import skips any pair that already
-  has a measured edge (`skipped_measured` in the import response).
+- **Manual targets are run-scoped (no edge).** Both ways of adding a target by hand at Step 3 —
+  the plain add control and the SwissTargetPrediction (STP) paste-back — go through the same edit
+  path (`POST /analyses/{id}/stages/3/edit`, after resolving accessions via `POST /targets/validate`).
+  The target joins the stage's effective set and the **Target entity** persists as a canonical row,
+  but **no `compound_targets` edge is written** — a user-asserted/predicted link must never be
+  canonical (B4). There is no STP import endpoint.
+- **Edge precedence (measured edges only):** `chembl_bioactivity` > `pubchem_bioassay`. A measured
+  upsert never downgrades to a lower-precedence method. The `stp_import` value is legacy — the DB
+  CHECK still permits it, but no code writes it (STP is run-scoped; see above).
+
+### Stage 4 — Disease Target Collection
+
+- **Open Targets is an ETL-time source, not a live call.** Stage 4 reads the ETL-seeded
+  `disease_targets` snapshot (filtered by `min_score`, joined to `targets`, ordered by score) —
+  analogous to KNApSAcK on the compound side. A **live / dynamic disease-target fetch is future
+  work** (D1); the current stage is a database read of what the ETL loaded.
+- **Seeded diseases only; non-seeded diseases use the manual path.** A disease with no seeded
+  `disease_targets` rows yields an empty stage; targets are then added through the manual
+  disease-target path (`POST /analyses/{id}/stages/4/edit`, resolved via `POST /targets/validate`).
+  This is weak-but-valid — Stage 4 proceeds to its approval checkpoint with a count-0 honesty note
+  rather than hard-stopping (the only unconditional hard-stop is Stage 5, zero overlap).
+- **Overall association score only.** Datatype-filtered evidence scope (e.g. restricting to genetic
+  or known-drug evidence) is **not supported** (D2) — Stage 4 reads the single overall association
+  score the ETL seeded (`association_type = open_targets_overall`).
+- **Manual disease-targets carry no association score** (D3) and write **no `disease_targets`
+  edge**: the manual path persists the **Target** entity (canonical row) but the disease→target
+  link is run-scoped only (Software Lock §6.2-E).
+- **Human-only (9606) is fixed.** Stage 4 collects human targets only; this is not a tunable
+  parameter.

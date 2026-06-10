@@ -248,8 +248,9 @@ NP-bypass / PAINS) and the parameter values used for the run.
 `src/components/TargetValidateBox.tsx`.
 
 **Results view:** Renders a target table keyed by **UniProt accession + gene symbol** (never
-a DB UUID). Each row carries an explicit `prediction_method` column (`chembl_bioactivity`,
-`pubchem_bioassay`, or `stp_import`) and a `pchembl_value` for ChEMBL rows. A **per-compound
+a DB UUID). Each computed row carries an explicit `prediction_method` column (`chembl_bioactivity`
+or `pubchem_bioassay` — the only methods written as edges) and a `pchembl_value` for ChEMBL rows.
+Manually added targets (including STP paste-back) are run-scoped and carry no edge/method. A **per-compound
 coverage** summary is always visible; compounds with zero targets are surfaced explicitly.
 
 **CSV export:** Columns are UniProt accession + gene symbol — the stable external identifiers —
@@ -259,16 +260,50 @@ not internal DB UUIDs.
 - Compound selector orders by ascending target-count (least-covered first).
 - Selected compound's SMILES is shown with a copy button (populated from `stage_results["2"].passed`
   rows, which now expose `smiles` + `inchi_key`).
-- Paste area is parsed by `src/lib/stp.ts` (the canonical home for the STP CSV parser; expects
-  `Uniprot ID` / `Common name` / `Probability` columns; default probability threshold 0.6).
-- Preview table shows parsed rows before import; submits to `POST /analyses/{id}/import-stp-targets`.
+- Paste area is parsed by `src/lib/stp.ts` (the canonical home for the STP CSV parser; keys on the
+  SwissTargetPrediction `Probability*` header, also accepting plain `Probability`, with
+  `Uniprot ID` / `Common name`).
+- Preview table shows parsed rows; the resolved accessions are added to the run's Stage-3 set via the
+  manual target-add path (`POST /targets/validate` → `POST /analyses/{id}/stages/3/edit`). There is no
+  STP import endpoint.
 
 **Edit controls:** The `EditableEntityList` / `ParamPanel` machinery is now param-group-generic;
 Step 3 uses the `target` param group (parameters `min_pchembl` + `min_assay_confidence`). Manual
 target addition via `TargetValidateBox` → `POST /targets/validate` writes a run-scoped inclusion
-in the stage set (no `compound_targets` edge); STP paste-back via `StpDialog` writes real
-`compound_targets` edges with `prediction_method='stp_import'`. This persistence difference is
-intentional — see Limitations in `docs/testing.md`.
+in the stage set (no `compound_targets` edge); STP paste-back via `StpDialog` resolves the pasted
+accessions the same way and adds them to the run's Stage-3 set through the manual target-add path
+(`POST /analyses/{id}/stages/3/edit`) — also run-scoped, no `compound_targets` edge. See
+Limitations in `docs/testing.md`.
+
+### Step 4 — Disease Target Collection
+
+**Component:** `src/components/stages/Stage4View.tsx`.
+
+**Results view:** Renders the disease→target set collected from the ETL-seeded `disease_targets`
+read. Summary **cards** lead (e.g. target count, the `min_score` in effect); a **score table**
+lists each target keyed by UniProt accession + gene symbol with its Open Targets association
+score, ordered by score descending. Manual disease-targets have no score (shown as `—`). The
+table offers **add / remove** controls via the shared manual target-add path (`TargetValidateBox`
+→ `POST /targets/validate` → `POST /analyses/{id}/stages/4/edit`). An empty disease-target side is
+surfaced as an honesty note (count 0), not an error.
+
+**CSV export:** Columns are UniProt accession + gene symbol + association score — stable external
+identifiers, never internal DB UUIDs.
+
+**Param panel + Redo:** A collapsible param panel exposes `min_score` (the
+`DISEASE_TARGETS_PARAMS` group; default 0.3, hard range 0–1, advisory band 0.1–0.5). Redo submits
+`POST /analyses/{id}/reset-from/4` and re-runs from Step 4.
+
+**Footer:** A tools-and-data-sources footer attributes the data to Open Targets (consumed as an
+ETL-time source) and lists the `min_score` used for the run.
+
+**Rendering:** Like the other stages, the view renders by `stage_state` (`computed` vs
+`user_provided`) — a non-empty edit layer marks the set user-provided.
+
+> **Forward note (Stage 5 overlap):** Stage 5 will consume the **run-scoped** Stage-3 (compound→target)
+> and Stage-4 (disease→target) target sets from `analysis_runs.stage_results` — **including
+> user-added targets** — and intersect those, **not** the global `compound_targets` / `disease_targets`
+> edges. The run's curated sets are authoritative for overlap.
 
 ---
 

@@ -443,6 +443,24 @@ Pair-grain junction. Answers: which targets are implicated in which diseases?
 - `disease_targets_target_id_idx` (btree, `target_id`)
 - `idx_disease_targets_score` (btree, `score`)
 
+**Pipeline read (Step 4):** Stage 4 (disease→target collection) is a **filtered read** of this
+table — not a live Open Targets call. Open Targets is an ETL-time source (analogous to KNApSAcK on
+the compound side); Step 4 reads the seeded snapshot. The read filters `score >= min_score`
+(contract default 0.3), joins `targets` for the gene symbol / accession / protein name, and orders
+by `score` descending (`idx_disease_targets_score`). It reads the run's `analysis_runs.disease_id`;
+targets are human-only (9606), fixed. An empty result (filter too strict or thin ETL coverage) is
+weak-but-valid — Step 4 proceeds to its approval checkpoint with a count-0 honesty note, it does
+**not** hard-stop. The per-row link surfaced in the UI is the joined Target's UniProt deep link
+(`targets.source_url`).
+
+**Manual disease-target adds write NO edge.** A manual disease-target addition goes through the
+shared manual target-add path (resolved via `POST /targets/validate`, applied via
+`POST /analyses/{id}/stages/4/edit`): it persists the **Target** entity (canonical row) but writes
+**no `disease_targets` row** — the disease→target relationship is run-scoped only (Software Lock
+§6.2-E: added entities persist as canonical rows but not as relationships, since a user-asserted,
+unverifiable disease link must never be canonical). Manual disease-targets therefore carry **no
+association score**.
+
 ---
 
 ### `analysis_runs`
