@@ -29,9 +29,17 @@ class UniProtClient:
         self._client = client
 
     async def resolve(self, accession: str) -> UniProtRecord | None:
-        """Resolve an accession to its human (organism_id:9606) record, or None."""
+        """Resolve an accession (primary OR secondary) to its human (9606) record, or None.
+
+        ``accession:`` matches only the primary accession; ``sec_acc:`` matches secondary
+        (merged/retired) accessions. Searching both means any alias of an entry resolves to
+        the same record (whose ``primaryAccession`` is returned), so callers can canonicalize
+        identity on the primary. See https://www.uniprot.org/help/query-fields.
+        """
         acc = accession.strip().upper()
-        return await self._top_human(f"accession:{acc} AND organism_id:9606", label=acc)
+        return await self._top_human(
+            f"(accession:{acc} OR sec_acc:{acc}) AND organism_id:9606", label=acc
+        )
 
     async def resolve_symbol(self, symbol: str) -> UniProtRecord | None:
         """Resolve a gene symbol to its top human (organism_id:9606) record, or None."""

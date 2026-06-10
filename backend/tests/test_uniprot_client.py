@@ -36,6 +36,21 @@ async def test_resolve_accession_human_hit(httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_resolve_queries_secondary_accession_field(httpx_mock):
+    # A secondary (merged/retired) accession must still resolve to its entry, whose
+    # primaryAccession is returned — so identity converges on the primary. The query
+    # searches `sec_acc:` (secondary) in addition to `accession:` (primary).
+    # See https://www.uniprot.org/help/query-fields.
+    httpx_mock.add_response(json=_HIT)
+    async with httpx.AsyncClient() as c:
+        rec = await UniProtClient(c).resolve("Q14225")
+    assert rec is not None
+    assert rec.uniprot_accession == "P04637"  # the primary, not the queried secondary
+    sent = str(httpx_mock.get_requests()[0].url)
+    assert "sec_acc%3AQ14225" in sent or "sec_acc:Q14225" in sent
+
+
+@pytest.mark.asyncio
 async def test_resolve_nonhuman_or_missing_returns_none(httpx_mock):
     httpx_mock.add_response(json={"results": []})
     async with httpx.AsyncClient() as c:

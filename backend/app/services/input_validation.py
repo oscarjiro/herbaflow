@@ -122,6 +122,84 @@ async def resolve_compounds(
     return list(resolved.values()), failed
 
 
+async def resolve_target_accession(
+    accession: str,
+    repo: Any,
+    uniprot: Any,
+    *,
+    uniprot_source_id: uuid.UUID | None = None,
+) -> ResolvedTarget | None:
+    """Resolve a single UniProt accession (primary OR secondary) to a human (9606) target.
+
+    DB-first, persisting on a fresh hit. Returns ``None`` when the accession is not a
+    resolvable human target (skip — human-only). Identity is canonicalized on the entry's
+    **primary** accession (``rec.uniprot_accession``), so every alias/secondary accession of
+    one protein converges to one ``target_id`` — which prevents duplicate target rows for the
+    same protein reached via different accessions.
+
+    This is the single home for accession→target resolution: both manual/STP resolution
+    (``resolve_targets``) and Stage 3 (``stage3.run``) call it instead of duplicating the
+    resolve+canonicalize+persist logic.
+    """
+    acc = accession.strip().upper()
+
+    # Fast path: a target already stored under this exact accession's key — no network call.
+    input_key = canonical.target_canonical_key(uniprot=acc)
+    existing = await repo.get_by_key(input_key)
+    if existing is not None:
+        return ResolvedTarget(
+            target_id=existing.target_id,
+            canonical_key=existing.canonical_key,
+            gene_symbol=existing.gene_symbol,
+            uniprot_accession=existing.uniprot_accession,
+            validation_status="db_hit",
+        )
+
+    rec = await uniprot.resolve(acc)
+    if rec is None:
+        return None  # non-human / non-UniProt accession -> skip
+
+    # Canonicalize on the PRIMARY accession so aliases of one entry converge to one id.
+    primary = rec.uniprot_accession
+    key = canonical.target_canonical_key(uniprot=primary)
+    tid = uuid.UUID(canonical.target_id_from_key(key))
+
+    existing = await repo.get_by_key(key)
+    if existing is not None:
+        return ResolvedTarget(
+            target_id=existing.target_id,
+            canonical_key=existing.canonical_key,
+            gene_symbol=existing.gene_symbol,
+            uniprot_accession=existing.uniprot_accession,
+            validation_status="db_hit",
+        )
+
+    source_id = (
+        uniprot_source_id
+        if uniprot_source_id is not None
+        else await repo.source_id_by_name("UniProt")
+    )
+    await repo.upsert(
+        {
+            "target_id": tid,
+            "canonical_key": key,
+            "gene_symbol": rec.gene_symbol,
+            "protein_name": rec.protein_name,
+            "uniprot_accession": primary,
+            "source_id": source_id,
+            "source_url": f"https://www.uniprot.org/uniprotkb/{primary}/entry",
+            "retrieved_at": now_utc(),
+        }
+    )
+    return ResolvedTarget(
+        target_id=tid,
+        canonical_key=key,
+        gene_symbol=rec.gene_symbol,
+        uniprot_accession=primary,
+        validation_status="externally_validated",
+    )
+
+
 async def resolve_targets(
     inputs: Sequence[TargetInput | dict[str, Any]],
     repo: Any,
@@ -139,6 +217,7 @@ async def resolve_targets(
     resolved: dict[str, ResolvedTarget] = {}
     failed: list[FailedInput] = []
     gene_to_acc = gene_to_acc or {}
+    uniprot_source_id = await repo.source_id_by_name("UniProt")
 
     for idx, raw in enumerate(inputs, start=1):
         item = raw if isinstance(raw, TargetInput) else TargetInput(**raw)
@@ -179,50 +258,15 @@ async def resolve_targets(
                 )
                 continue
 
-        canonical_key = canonical.target_canonical_key(uniprot=acc)
-        if canonical_key in resolved:
-            continue
-        tid = uuid.UUID(canonical.target_id_from_key(canonical_key))
-
-        existing = await repo.get_by_key(canonical_key)
-        if existing is not None:
-            resolved[canonical_key] = ResolvedTarget(
-                target_id=existing.target_id,
-                canonical_key=existing.canonical_key,
-                gene_symbol=existing.gene_symbol,
-                uniprot_accession=existing.uniprot_accession,
-                validation_status="db_hit",
-            )
-            continue
-
-        rec = await uniprot.resolve(acc)
-        if rec is None:
+        rt = await resolve_target_accession(acc, repo, uniprot, uniprot_source_id=uniprot_source_id)
+        if rt is None:
             failed.append(
                 FailedInput(
                     value=item.value, reason="not a human (9606) UniProt accession", line=idx
                 )
             )
             continue
-
-        await repo.upsert(
-            {
-                "target_id": tid,
-                "canonical_key": canonical_key,
-                "gene_symbol": rec.gene_symbol,
-                "protein_name": rec.protein_name,
-                "uniprot_accession": rec.uniprot_accession,
-                "source_id": await repo.source_id_by_name("UniProt"),
-                "source_url": f"https://www.uniprot.org/uniprotkb/{rec.uniprot_accession}/entry",
-                "retrieved_at": now_utc(),
-            }
-        )
-        resolved[canonical_key] = ResolvedTarget(
-            target_id=tid,
-            canonical_key=canonical_key,
-            gene_symbol=rec.gene_symbol,
-            uniprot_accession=rec.uniprot_accession,
-            validation_status="externally_validated",
-        )
+        resolved[rt.canonical_key] = rt  # dedup on the primary key — aliases collapse
 
     logger.info("target resolution complete: %d resolved, %d failed", len(resolved), len(failed))
     return list(resolved.values()), failed

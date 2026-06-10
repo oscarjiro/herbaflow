@@ -36,6 +36,7 @@ from app.repositories.compound import CompoundRepository
 from app.repositories.compound_target import CompoundTargetRepository
 from app.repositories.target import TargetRepository
 from app.services import canonical
+from app.services.input_validation import resolve_target_accession
 
 logger = logging.getLogger("herbaflow.pipeline")
 
@@ -149,27 +150,15 @@ async def run(
 
     async def _go(chembl_c: Any, pubchem_c: Any, uniprot_c: Any) -> dict[str, Any]:
         async def _resolve(accession: str) -> tuple[uuid.UUID, str | None, str] | None:
-            key = canonical.target_canonical_key(uniprot=accession)
-            tid = uuid.UUID(canonical.target_id_from_key(key))
-            existing = await target_repo.get_by_key(key)
-            if existing is not None:
-                return tid, existing.gene_symbol, key
-            rec = await uniprot_c.resolve(accession)
-            if rec is None:
-                return None  # non-human / unresolvable -> skip
-            await target_repo.upsert(
-                {
-                    "target_id": tid,
-                    "canonical_key": key,
-                    "gene_symbol": rec.gene_symbol,
-                    "protein_name": rec.protein_name,
-                    "uniprot_accession": accession,
-                    "source_id": uniprot_src,
-                    "source_url": f"https://www.uniprot.org/uniprotkb/{accession}/entry",
-                    "retrieved_at": now_utc(),
-                }
+            # Shared canonical resolver: identity is keyed on the UniProt primary accession,
+            # so a measured accession and a manually-added alias of the same protein map to
+            # one target_id (no duplicate rows). See input_validation.resolve_target_accession.
+            rt = await resolve_target_accession(
+                accession, target_repo, uniprot_c, uniprot_source_id=uniprot_src
             )
-            return tid, rec.gene_symbol, key
+            if rt is None:
+                return None  # non-human / unresolvable -> skip
+            return rt.target_id, rt.gene_symbol, rt.canonical_key
 
         return await compute(
             compounds,
