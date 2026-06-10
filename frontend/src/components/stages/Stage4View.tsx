@@ -28,9 +28,11 @@ import {
   DISEASE_TARGETS_PARAMS,
   MAX_TARGETS,
 } from "../../contract";
+import { useStaleState } from "../../hooks/useStaleState";
 import { ApprovalBar } from "./ApprovalBar";
 import { EditableEntityList } from "./EditableEntityList";
 import { ParamPanel } from "./ParamPanel";
+import { StaleNotice } from "./StaleNotice";
 import { TargetValidateBox } from "../TargetValidateBox";
 
 type TargetTag = "computed" | "user-added" | "user-removed" | string;
@@ -117,6 +119,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   const dtParams = (data.parameters as Record<string, unknown> | undefined)?.disease_targets as
     | Record<string, number | boolean>
     | undefined;
+  const { anyStale, rerunFrom } = useStaleState(data);
 
   const qc = useQueryClient();
   const advance = useMutation({
@@ -317,12 +320,19 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         />
       )}
 
+      {(stage4 as { stale?: boolean }).stale && rerunFrom != null && (
+        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
+      )}
       <ApprovalBar
         stage={4}
         status={data.status}
         currentStage={data.current_stage}
-        disabled={stage4.count === 0}
-        disabledReason="No disease targets — lower min score and Redo, or add one to continue."
+        disabled={stage4.count === 0 || anyStale}
+        disabledReason={
+          anyStale
+            ? "Re-run the out-of-date step before continuing."
+            : "No disease targets — lower min score and Redo, or add one to continue."
+        }
         onApprove={() => advance.mutate()}
       />
 

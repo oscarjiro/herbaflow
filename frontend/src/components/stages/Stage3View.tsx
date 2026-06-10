@@ -24,9 +24,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
 import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contract";
+import { useStaleState } from "../../hooks/useStaleState";
 import { ApprovalBar } from "./ApprovalBar";
 import { EditableEntityList } from "./EditableEntityList";
 import { ParamPanel } from "./ParamPanel";
+import { StaleNotice } from "./StaleNotice";
 import { StpDialog, type StpCompound } from "./StpDialog";
 import { TargetValidateBox } from "../TargetValidateBox";
 
@@ -176,6 +178,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   const targetParams = (data.parameters as Record<string, unknown> | undefined)?.target as
     | Record<string, number | boolean>
     | undefined;
+  const { anyStale, rerunFrom } = useStaleState(data);
 
   const qc = useQueryClient();
 
@@ -448,12 +451,19 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       )}
 
       {/* Approval */}
+      {(stage3 as { stale?: boolean }).stale && rerunFrom != null && (
+        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
+      )}
       <ApprovalBar
         stage={3}
         status={data.status}
         currentStage={data.current_stage}
-        disabled={stage3.count === 0}
-        disabledReason="No targets — adjust parameters or add one to continue."
+        disabled={stage3.count === 0 || anyStale}
+        disabledReason={
+          anyStale
+            ? "Re-run the out-of-date step before continuing."
+            : "No targets — adjust parameters or add one to continue."
+        }
         onApprove={() => advance.mutate()}
       />
 

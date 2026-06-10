@@ -19,8 +19,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
 import { ADME_PARAMS } from "../../contract";
+import { useStaleState } from "../../hooks/useStaleState";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
+import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 2 result shape (narrowed from unknown)
@@ -144,6 +146,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   const admeParams = (data.parameters as Record<string, unknown> | undefined)?.adme as
     | Record<string, number | boolean>
     | undefined;
+  const { anyStale, rerunFrom } = useStaleState(data);
 
   const qc = useQueryClient();
 
@@ -340,12 +343,19 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       )}
 
       {/* Approval */}
+      {(stage2 as { stale?: boolean }).stale && rerunFrom != null && (
+        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
+      )}
       <ApprovalBar
         stage={2}
         status={data.status}
         currentStage={data.current_stage}
-        disabled={stage2.count === 0}
-        disabledReason="No compounds passed ADME — adjust parameters and Redo to continue."
+        disabled={stage2.count === 0 || anyStale}
+        disabledReason={
+          anyStale
+            ? "Re-run the out-of-date step before continuing."
+            : "No compounds passed ADME — adjust parameters and Redo to continue."
+        }
         onApprove={() => advance.mutate()}
       />
 

@@ -1,11 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { advanceAnalysis } from "../api/sdk.gen";
 import { useAnalysisStatus } from "../hooks/useAnalysisStatus";
+import { useStaleState } from "../hooks/useStaleState";
 import { ApprovalBar } from "./stages/ApprovalBar";
 import { Stage1View } from "./stages/Stage1View";
 import { Stage2View } from "./stages/Stage2View";
 import { Stage3View } from "./stages/Stage3View";
 import { Stage4View } from "./stages/Stage4View";
+import { StaleNotice } from "./stages/StaleNotice";
 
 /** Returns true when the run is settled (not actively executing a stage). */
 function isSettled(status: string | null | undefined): boolean {
@@ -30,6 +32,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
   if (!data) return <p>Loading…</p>;
 
   const stage1 = data.stage_results?.["1"] as Stage1Data | undefined;
+  const { anyStale, rerunFrom } = useStaleState(data);
 
   return (
     <section>
@@ -61,12 +64,19 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
             </>
           )}
           {/* ApprovalBar self-gates to the current stage, so stacked views show a single button. */}
+          {(stage1 as { stale?: boolean }).stale && rerunFrom != null && (
+            <StaleNotice analysisId={analysisId} fromStage={rerunFrom} />
+          )}
           <ApprovalBar
             stage={1}
             status={data.status}
             currentStage={data.current_stage}
-            disabled={(stage1.count ?? 0) === 0}
-            disabledReason="No compounds — add one to continue."
+            disabled={(stage1.count ?? 0) === 0 || anyStale}
+            disabledReason={
+              anyStale
+                ? "Re-run the out-of-date step before continuing."
+                : "No compounds — add one to continue."
+            }
             onApprove={() => advance.mutate()}
           />
         </>

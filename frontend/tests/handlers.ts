@@ -182,6 +182,39 @@ const ANALYSIS_EMPTY_STAGE4 = {
   error_message: null,
 };
 
+const ANALYSIS_STALE = {
+  analysis_id: "r-stale",
+  analysis_name: null,
+  disease_id: "d1",
+  mode: "guided",
+  status: "stage_2_awaiting_approval",
+  current_stage: 2,
+  parameters: {
+    adme: ADME_FROZEN_DEFAULTS,
+    rerun_from: 1,
+  },
+  stage_results: {
+    "1": {
+      count: 2,
+      compounds: [
+        { compound_id: "c1", canonical_name: "Curcumin", tag: "computed" },
+        { compound_id: "c2", canonical_name: "Berberine", tag: "computed" },
+      ],
+      per_plant: {},
+      state: "computed",
+      stale: false,
+    },
+    "2": {
+      ...SAMPLE_STAGE2_RESULTS,
+      stale: true,
+    },
+  },
+  created_at: null,
+  completed_at: null,
+  expires_at: null,
+  error_message: null,
+};
+
 const ANALYSIS_WITH_STAGE2 = {
   analysis_id: "r2",
   analysis_name: null,
@@ -298,6 +331,7 @@ export const server = setupServer(
   http.get(`${BASE}/analyses/r3`, () => HttpResponse.json(ANALYSIS_STAGE1_AWAITING)),
   http.get(`${BASE}/analyses/r4`, () => HttpResponse.json(ANALYSIS_STAGE1_AT_CAP)),
   http.get(`${BASE}/analyses/r-empty4`, () => HttpResponse.json(ANALYSIS_EMPTY_STAGE4)),
+  http.get(`${BASE}/analyses/r-stale`, () => HttpResponse.json(ANALYSIS_STALE)),
   http.get(`${BASE}/analyses/r-failed`, () =>
     HttpResponse.json({
       analysis_id: "r-failed",

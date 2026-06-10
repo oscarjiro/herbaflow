@@ -185,6 +185,14 @@ describe("empty Stage 4 checkpoint (r-empty4)", () => {
   });
 });
 
+describe("stale stage (r-stale)", () => {
+  it("disables Approve and shows a re-run control while a stage is stale", async () => {
+    wrap("r-stale");
+    expect(await screen.findByRole("button", { name: /re-run from step 1/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+  });
+});
+
 describe("failed run recovery (r-failed)", () => {
   it("shows a Back to setup button that calls onReset", async () => {
     const onReset = vi.fn();
