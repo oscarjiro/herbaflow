@@ -78,14 +78,9 @@ async def edit_stage(
     analysis_id: uuid.UUID,
     stage: int,
     payload: StageEditRequest,
-    background: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
 ) -> AnalysisRead:
     service = AnalysisService.from_session(session)
-    start = await service.edit_stage(
-        analysis_id, stage, add=payload.add, remove=payload.remove, defer=True
-    )
+    await service.edit_stage(analysis_id, stage, add=payload.add, remove=payload.remove)
     await _commit(session)
-    if start is not None:
-        background.add_task(run_stages_task, analysis_id, start)
     return await service.get(analysis_id)

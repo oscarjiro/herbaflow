@@ -149,15 +149,15 @@ class AnalysisService:
         *,
         add: list[uuid.UUID],
         remove: list[uuid.UUID],
-        defer: bool = False,
-    ) -> int | None:
-        """Apply a durable in-stage entity edit (add/remove) and re-run downstream.
+    ) -> None:
+        """Apply a durable in-stage entity edit (add/remove) and stage the change.
 
         Validates added ids exist, enforces the entity cap on net additions, folds the edit into
         the durable edit layer, and re-derives the edited stage's stored result. An edit may never
         empty a stage: removing the last remaining entity is rejected (422) and nothing is
-        persisted. Otherwise it persists the edit and triggers a dependency-aware set-edit re-run.
-        Returns the start stage to schedule (``defer=True``) or ``None``.
+        persisted. Otherwise it persists the edit, flags produced downstream stages stale, and
+        records ``parameters.rerun_from``; nothing is re-run (D3). Recompute happens only on an
+        explicit reset-from.
         """
         entity_keys = _STAGE_ENTITY.get(stage)
         if entity_keys is None:
@@ -257,6 +257,15 @@ class AnalysisService:
         preserved = {k: v for k, v in existing_result.items() if k not in frag and k != list_key}
         await self.analysis_repo.set_stage_result(run, stage, {**preserved, **frag})
 
-        # Set-edit re-run: clears downstream, re-runs from the nearest runnable dependent.
-        runners = engine.build_runners(self.analysis_repo.session)
-        return await engine.reset_from(self.analysis_repo, analysis_id, stage, runners, defer=defer)
+        # Stage the edit only (D3): the edited stage was re-derived in place above; the
+        # produced downstream is flagged stale and NOT re-run. Recompute happens only on an
+        # explicit reset-from. Record the lowest pending edit as the reset-from target.
+        await engine.mark_downstream_stale(self.analysis_repo, run, stage)
+        produced = {int(k) for k in run.stage_results}
+        if engine.downstream_closure(stage) & produced:
+            params = dict(run.parameters)
+            prior = params.get("rerun_from")
+            params["rerun_from"] = stage if prior is None else min(prior, stage)
+            run.parameters = params
+            await self.analysis_repo.set_parameters(run)
+        return None

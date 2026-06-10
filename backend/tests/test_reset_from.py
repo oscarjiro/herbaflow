@@ -57,6 +57,14 @@ class FakeRepo:
         merged = {k: v for k, v in run.stage_results.items() if int(k) not in stages}
         run.stage_results = merged
 
+    async def mark_stages_stale(self, run: SimpleNamespace, stages: set[int]) -> None:
+        merged = dict(run.stage_results)
+        for s in stages:
+            key = str(s)
+            if key in merged:
+                merged[key] = {**merged[key], "stale": True}
+        run.stage_results = merged
+
     async def set_parameters(self, run: SimpleNamespace) -> None:
         return None
 
@@ -267,15 +275,14 @@ async def test_param_override_outside_recommended_but_in_hard_is_accepted(
 
 
 # ---------------------------------------------------------------------------
-# set edit S1 — clears {2}, re-runs from 2 (NOT 1), tags the edit
+# set edit S1 — stages the change: marks S2 stale, runs nothing, records rerun_from
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_set_edit_s1_remove_clears_2_reruns_from_2(
+async def test_set_edit_s1_marks_s2_stale_without_rerun(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = _patch_runners(monkeypatch)
     run = _run(computed=["a", "b", "c"])
-    # Map the computed id "b" to a real uuid for removal.
     rid = uuid.uuid4()
     run.stage_results["1"]["compounds"][1]["compound_id"] = str(rid)
     run.stage_results["1"]["computed_ids"][1] = str(rid)
@@ -284,16 +291,15 @@ async def test_set_edit_s1_remove_clears_2_reruns_from_2(
 
     await svc.edit_stage(run.analysis_id, 1, add=[], remove=[rid])
 
-    assert {2} in repo.cleared
-    assert calls["1"] == []  # S1 NOT re-run by the loop
-    assert len(calls["2"]) == 1  # S2 re-ran
+    assert calls["1"] == [] and calls["2"] == []  # nothing re-ran
+    assert repo.cleared == []  # nothing cleared
+    assert run.stage_results["2"]["stale"] is True  # downstream flagged
+    assert run.parameters["rerun_from"] == 1  # confirm target recorded
     s1 = run.stage_results["1"]
-    removed_entry = next(c for c in s1["compounds"] if c["compound_id"] == str(rid))
-    assert removed_entry["tag"] == "user-removed"
-    # The effective set S2 screened excludes the removed id.
-    assert str(rid) not in calls["2"][0]
+    removed = next(c for c in s1["compounds"] if c["compound_id"] == str(rid))
+    assert removed["tag"] == "user-removed"  # edit still applied in place
+    assert s1.get("stale") is None  # the edited stage itself is fresh
     assert s1["count"] == 2
-    assert s1["state"] == "user_provided"
 
 
 # ---------------------------------------------------------------------------
@@ -332,34 +338,34 @@ async def test_guided_edit_of_current_awaiting_stage_reparks_without_advancing(
     assert run.status == "stage_1_awaiting_approval"
     assert run.current_stage == 1
     assert calls["2"] == []
+    assert run.stage_results["1"].get("stale") is None  # edited stage is fresh
+    assert "2" not in run.stage_results  # nothing downstream existed to stale
+    assert "rerun_from" not in run.parameters  # no downstream -> no confirm target
 
 
 # ---------------------------------------------------------------------------
 # E6 end-to-end — edit S1 add survives a later S2 param Redo
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_e6_s1_add_survives_s2_param_redo(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_e6_s1_add_survives_a_later_rerun(monkeypatch: pytest.MonkeyPatch) -> None:
     calls = _patch_runners(monkeypatch)
     run = _run(computed=["a", "b"])
     new_id = uuid.uuid4()
     svc = _service(run, {new_id: "NewCompound"})
 
-    # Step 1: add a compound to S1.
+    # Stage an S1 add: applied in place, S2 marked stale, nothing re-runs.
     await svc.edit_stage(run.analysis_id, 1, add=[new_id], remove=[])
     s1 = run.stage_results["1"]
-    added_entry = next(c for c in s1["compounds"] if c["compound_id"] == str(new_id))
-    assert added_entry["tag"] == "user-added"
-    assert str(new_id) in calls["2"][-1]  # S2 screened the added compound
+    assert any(c["compound_id"] == str(new_id) for c in s1["compounds"])
+    assert run.stage_results["2"]["stale"] is True
+    assert calls["2"] == []
 
-    # Step 2: param Redo S2.
+    # Confirm with an explicit reset-from/2 param Redo: it runs, and the S1 add survives.
     await svc.reset_from(run.analysis_id, 2, {"max_violations": 0})
-
-    # The S1 add is still present after the S2 re-run.
     s1_after = run.stage_results["1"]
-    assert any(c["compound_id"] == str(new_id) for c in s1_after["compounds"])
     still = next(c for c in s1_after["compounds"] if c["compound_id"] == str(new_id))
     assert still["tag"] == "user-added"
-    assert str(new_id) in calls["2"][-1]  # the second S2 re-run still includes it
+    assert str(new_id) in calls["2"][-1]  # the re-run screened the added compound
 
 
 # ---------------------------------------------------------------------------
