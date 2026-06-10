@@ -14,4 +14,13 @@ def test_all_datetime_columns_are_timezone_aware() -> None:
 
 def test_expected_tables_present() -> None:
     names = {t.name for t in ALL_TABLES}
-    assert {"diseases", "plants", "compounds", "plant_compounds", "analysis_runs"} <= names
+    assert {
+        "diseases",
+        "plants",
+        "compounds",
+        "plant_compounds",
+        "analysis_runs",
+        "targets",
+        "compound_targets",
+        "disease_targets",
+    } <= names
