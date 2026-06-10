@@ -13,9 +13,10 @@ Output (uniform entity-stage shape; the engine's edit-layer fold tags ``targets`
                           association_type, source_url}]`` carrying the association score (DT4-9).
   - ``count`` / ``state`` / ``min_score_applied``.
 
-An empty side (filter too strict / thin coverage) is weak-but-valid: ``count`` 0 flows through
-to the awaiting checkpoint with an honesty flag — the unconditional hard-stop is S5 (0 overlap),
-never S4 (B6 / DT4-8). The user recovers by lowering ``min_score`` (Redo) or adding manual targets.
+An empty side (filter too strict / thin coverage) parks the run at the Step-4 checkpoint with a
+``count`` 0 honesty flag; in guided mode the engine **refuses Approve & Continue** until the user
+recovers by lowering ``min_score`` (Redo) or adding a manual target. In auto mode an empty side is a
+hard-stop (don't waste downstream). The terminal scientific hard-stop is still S5 (0 overlap) (B6).
 """
 
 from __future__ import annotations

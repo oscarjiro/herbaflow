@@ -7,7 +7,8 @@
  *    association type, edit tag badge; pagination (10/20/50/all); CSV keyed on
  *    gene_symbol + uniprot_accession + score + association_type + source_url (NEVER a UUID)
  *  - Target add/remove via EditableEntityList + TargetValidateBox (editStage stage 4)
- *  - ParamPanel (min_score) + Redo (resetFrom stage 4) and ApprovalBar
+ *  - ParamPanel (min_score) + Redo (resetFrom stage 4) and ApprovalBar — at count 0 the
+ *    ApprovalBar is disabled with a reason (blocking-stop); recover via Redo or a manual add
  *  - Footer: "Open Targets (database snapshot); human targets only."
  *
  * State (stage_state["4"]):
