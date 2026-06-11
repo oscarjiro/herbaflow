@@ -14,12 +14,14 @@ import { useState, useCallback } from "react";
 import { ADME_BOOLEAN_PARAMS, ADME_NUMERIC_PARAMS } from "../../contract";
 
 export type ParamMeta = {
-  default: number | boolean;
+  default: number | boolean | string;
   min: number | undefined;
   minExclusive: boolean;
   max: number | undefined;
   recommended_min: number | undefined;
   recommended_max: number | undefined;
+  /** Allowed values for enum (select) params; undefined for free numeric/boolean params. */
+  enum?: (number | string)[] | undefined;
   description: string;
 };
 
@@ -30,16 +32,19 @@ export function ParamPanel({
   disabled = false,
   numericKeys = ADME_NUMERIC_PARAMS,
   booleanKeys = ADME_BOOLEAN_PARAMS,
+  selectKeys = [],
   title = "ADME parameters",
 }: {
-  params: Record<string, number | boolean>;
+  params: Record<string, number | boolean | string>;
   meta: Record<string, ParamMeta>;
-  onRedo: (changed: Record<string, number | boolean>) => void;
+  onRedo: (changed: Record<string, number | boolean | string>) => void;
   disabled?: boolean;
   /** Ordered numeric param keys to render (defaults to the ADME set). */
   numericKeys?: readonly string[];
   /** Ordered boolean param keys to render (defaults to the ADME set). */
   booleanKeys?: readonly string[];
+  /** Ordered enum param keys to render as a <select> of their meta.enum (default none). */
+  selectKeys?: readonly string[];
   /** Collapsible panel title. */
   title?: string;
 }) {
@@ -84,8 +89,8 @@ export function ParamPanel({
   const hasViolations = Object.keys(violations).length > 0;
 
   // Compute whether any value differs from the frozen params
-  const getChanged = useCallback((): Record<string, number | boolean> => {
-    const changed: Record<string, number | boolean> = {};
+  const getChanged = useCallback((): Record<string, number | boolean | string> => {
+    const changed: Record<string, number | boolean | string> = {};
     for (const key of numericKeys) {
       const frozen = params[key];
       const raw = localStr[key];
@@ -104,8 +109,19 @@ export function ParamPanel({
         changed[key] = b;
       }
     }
+    for (const key of selectKeys) {
+      const frozen = params[key];
+      const raw = localStr[key];
+      if (raw === undefined) continue;
+      // Recover the native enum value (number or string) from its string form.
+      const options = meta[key]?.enum ?? [];
+      const value = options.find((o) => String(o) === raw) ?? raw;
+      if (value !== frozen) {
+        changed[key] = value;
+      }
+    }
     return changed;
-  }, [params, localStr, numericKeys, booleanKeys]);
+  }, [params, localStr, numericKeys, booleanKeys, selectKeys, meta]);
 
   const changed = getChanged();
   const hasChanges = Object.keys(changed).length > 0;
@@ -117,6 +133,10 @@ export function ParamPanel({
 
   function handleBooleanChange(key: string, checked: boolean) {
     setLocalStr((s) => ({ ...s, [key]: String(checked) }));
+  }
+
+  function handleSelectChange(key: string, value: string) {
+    setLocalStr((s) => ({ ...s, [key]: value }));
   }
 
   function handleRedo() {
@@ -188,6 +208,37 @@ export function ParamPanel({
                   {key}
                 </label>
                 <p className="param-row__description">{m.description}</p>
+              </div>
+            );
+          })}
+
+          {selectKeys.map((key) => {
+            const m = meta[key];
+            if (!m) return null;
+            const options = m.enum ?? [];
+            return (
+              <div key={key} className="param-row">
+                <label htmlFor={`param-${key}`} className="param-row__label">
+                  {key}
+                </label>
+                <p className="param-row__description">
+                  {m.description}
+                  <span className="param-row__hint"> (default {String(m.default)})</span>
+                </p>
+                <select
+                  id={`param-${key}`}
+                  aria-label={key}
+                  value={localStr[key] ?? String(m.default)}
+                  disabled={disabled}
+                  onChange={(e) => handleSelectChange(key, e.target.value)}
+                  className="param-input"
+                >
+                  {options.map((o) => (
+                    <option key={String(o)} value={String(o)}>
+                      {String(o)}
+                    </option>
+                  ))}
+                </select>
               </div>
             );
           })}

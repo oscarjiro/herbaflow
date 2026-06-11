@@ -7,6 +7,7 @@ const STAGE_SOURCES: Record<number, string[]> = {
     "Overlap of Stage 3 ∩ Stage 4 (target_id)",
     "Jaccard + one-sided hypergeometric (N=20,000, α=0.05)",
   ],
+  6: ["STRING (protein–protein interactions)", "Human only (species 9606); functional or physical"],
 };
 
 export function StageDataSources({ stage }: { stage: number }) {

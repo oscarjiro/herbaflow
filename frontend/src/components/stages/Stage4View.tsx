@@ -128,7 +128,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
     onSuccess: () => qc.invalidateQueries(),
   });
   const redo = useMutation({
-    mutationFn: (changed: Record<string, number | boolean>) =>
+    mutationFn: (changed: Record<string, number | boolean | string>) =>
       resetFrom({
         path: { analysis_id: data.analysis_id, stage: 4 },
         body: { parameters: { "4": changed } },

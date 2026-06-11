@@ -157,7 +157,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   });
 
   const redo = useMutation({
-    mutationFn: (changed: Record<string, number | boolean>) =>
+    mutationFn: (changed: Record<string, number | boolean | string>) =>
       resetFrom({
         path: { analysis_id: data.analysis_id, stage: 2 },
         body: { parameters: { "2": changed } },

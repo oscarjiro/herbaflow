@@ -13,7 +13,7 @@ export const DEFAULT_MODE = contract.$defs.mode.default as (typeof MODES)[number
 // ---------------------------------------------------------------------------
 
 type AdmeParamMeta = {
-  default: number | boolean;
+  default: number | boolean | string;
   /** Hard lower bound (inclusive unless minExclusive is true). */
   min: number | undefined;
   /** True when the lower bound from the contract is exclusiveMinimum. */
@@ -21,6 +21,8 @@ type AdmeParamMeta = {
   max: number | undefined;
   recommended_min: number | undefined;
   recommended_max: number | undefined;
+  /** Allowed values for enum (select) params; undefined for free numeric/boolean params. */
+  enum: (number | string)[] | undefined;
   description: string;
 };
 
@@ -45,6 +47,7 @@ function admeEntry(key: keyof typeof admeProps): AdmeParamMeta {
     max,
     recommended_min,
     recommended_max,
+    enum: undefined,
     description: p.description as string,
   };
 }
@@ -102,6 +105,7 @@ function targetEntry(key: keyof typeof targetProps): AdmeParamMeta {
     max,
     recommended_min,
     recommended_max,
+    enum: undefined,
     description: p.description as string,
   };
 }
@@ -139,6 +143,7 @@ function diseaseTargetsEntry(key: keyof typeof diseaseTargetsProps): AdmeParamMe
     max,
     recommended_min,
     recommended_max,
+    enum: undefined,
     description: p.description as string,
   };
 }
@@ -148,3 +153,49 @@ export const DISEASE_TARGETS_PARAMS = {
 } satisfies Record<string, AdmeParamMeta>;
 
 export const DISEASE_TARGETS_NUMERIC_PARAMS = ["min_score"] as const;
+
+// ---------------------------------------------------------------------------
+// PPI (Stage 6 — STRING network) parameter metadata — derived from the contract.
+//
+// Two of the four ppi params are enum-bounded (min_confidence numeric enum,
+// network_type string enum) and render as <select>; max_proteins is a plain
+// numeric input; allow_top_n_cap is a checkbox.
+// ---------------------------------------------------------------------------
+
+const ppiProps = contract.$defs.pipeline_parameters.properties.ppi.properties;
+
+function ppiEntry(key: keyof typeof ppiProps): AdmeParamMeta {
+  const p = ppiProps[key] as Record<string, unknown>;
+  const minExclusive = "exclusiveMinimum" in p && !("minimum" in p);
+  const min =
+    "minimum" in p
+      ? (p.minimum as number)
+      : "exclusiveMinimum" in p
+        ? (p.exclusiveMinimum as number)
+        : undefined;
+  const max = "maximum" in p ? (p.maximum as number) : undefined;
+  const recommended_min = "recommended_min" in p ? (p.recommended_min as number) : undefined;
+  const recommended_max = "recommended_max" in p ? (p.recommended_max as number) : undefined;
+  const enumVals = "enum" in p ? (p.enum as (number | string)[]) : undefined;
+  return {
+    default: p.default as number | boolean | string,
+    min,
+    minExclusive,
+    max,
+    recommended_min,
+    recommended_max,
+    enum: enumVals,
+    description: p.description as string,
+  };
+}
+
+export const PPI_PARAMS = {
+  min_confidence: ppiEntry("min_confidence"),
+  max_proteins: ppiEntry("max_proteins"),
+  allow_top_n_cap: ppiEntry("allow_top_n_cap"),
+  network_type: ppiEntry("network_type"),
+} satisfies Record<string, AdmeParamMeta>;
+
+export const PPI_NUMERIC_PARAMS = ["max_proteins"] as const;
+export const PPI_BOOLEAN_PARAMS = ["allow_top_n_cap"] as const;
+export const PPI_SELECT_PARAMS = ["min_confidence", "network_type"] as const;

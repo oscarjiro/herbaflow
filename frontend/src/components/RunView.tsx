@@ -8,6 +8,7 @@ import { Stage2View } from "./stages/Stage2View";
 import { Stage3View } from "./stages/Stage3View";
 import { Stage4View } from "./stages/Stage4View";
 import { Stage5View } from "./stages/Stage5View";
+import { Stage6View } from "./stages/Stage6View";
 import { StaleNotice } from "./stages/StaleNotice";
 
 /** Returns true when the run is settled (not actively executing a stage). */
@@ -90,6 +91,8 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
       {Boolean(data.stage_results?.["4"]) && <Stage4View data={data} />}
 
       {Boolean(data.stage_results?.["5"]) && <Stage5View data={data} />}
+
+      {Boolean(data.stage_results?.["6"]) && <Stage6View data={data} />}
     </section>
   );
 }
