@@ -22,6 +22,7 @@ import logging
 from typing import Any
 
 from scipy.stats import hypergeom
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger("herbaflow.pipeline")
 
@@ -92,3 +93,25 @@ def compute(stage3: dict[str, Any], stage4: dict[str, Any]) -> dict[str, Any]:
         "state": "computed",
         "flags": flags,
     }
+
+
+async def run(session: AsyncSession | None, run: Any) -> dict[str, Any]:
+    """Compute the overlap from the run's stored Stage-3 and Stage-4 results.
+
+    Pure read of ``stage_results`` — the gene info needed downstream already rides on those
+    fragments (S3 ``targets`` and S4 ``disease_targets`` both carry gene_symbol/uniprot_accession),
+    so no DB round-trip is required (OV-2). ``session`` is accepted for runner-signature symmetry.
+    """
+    stage3 = run.stage_results["3"]
+    stage4 = run.stage_results["4"]
+    result = compute(stage3, stage4)
+    logger.info(
+        "stage 5: %d overlap of %d compound / %d disease targets (J=%.4f, p=%.2e, sig=%s)",
+        result["count"],
+        result["compound_target_count"],
+        result["disease_target_count"],
+        result["jaccard"],
+        result["hypergeometric"]["p_value"],
+        result["hypergeometric"]["significant"],
+    )
+    return result

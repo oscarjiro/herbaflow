@@ -64,7 +64,7 @@ def _awaiting_s3_run() -> SimpleNamespace:
 
 
 def test_stage4_is_registered() -> None:
-    assert engine.RUNNABLE_STAGES == (1, 2, 3, 4)
+    assert 4 in engine.RUNNABLE_STAGES
     assert 4 in engine.NEEDS_APPROVAL
     assert engine.STAGE_PARAM_GROUP[4] == "disease_targets"
 

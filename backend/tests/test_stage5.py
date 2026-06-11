@@ -1,5 +1,7 @@
 import math
 
+import pytest
+
 from app.pipeline.stages import stage5
 
 
@@ -83,3 +85,30 @@ def test_unmapped_gene_symbol_kept_and_counted():
     assert out["count"] == 2
     assert out["unmapped_count"] == 1
     assert "unmapped_targets" in out["flags"]
+
+
+@pytest.mark.asyncio
+async def test_run_reads_prior_stage_results():
+    run = type("R", (), {})()
+    run.stage_results = {
+        "3": {
+            "targets": [{"target_id": "t1", "gene_symbol": "AKT1", "uniprot_accession": "P31749"}],
+            "count": 1,
+            "state": "computed",
+        },
+        "4": {
+            "disease_targets": [
+                {
+                    "target_id": "t1",
+                    "gene_symbol": "AKT1",
+                    "uniprot_accession": "P31749",
+                    "score": 0.8,
+                }
+            ],
+            "count": 1,
+            "state": "computed",
+        },
+    }
+    out = await stage5.run(None, run)
+    assert out["count"] == 1
+    assert out["overlap"][0]["disease_association_score"] == 0.8

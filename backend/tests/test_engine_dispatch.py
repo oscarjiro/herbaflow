@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.pipeline import engine
+from app.pipeline.stages import stage5
 
 
 class FakeRepo:
@@ -83,13 +84,22 @@ def _runners(
     async def stage4_runner(run: SimpleNamespace) -> dict:
         return {
             "targets": _targets(stage4_count),
-            "disease_targets": [],
+            "disease_targets": [{"target_id": f"t{i}", "score": 0.5} for i in range(stage4_count)],
             "count": stage4_count,
             "min_score_applied": 0.3,
             "state": "computed",
         }
 
-    return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner, 4: stage4_runner}
+    async def stage5_runner(run: SimpleNamespace) -> dict:
+        return await stage5.run(None, run)
+
+    return {
+        1: stage1_runner,
+        2: stage2_runner,
+        3: stage3_runner,
+        4: stage4_runner,
+        5: stage5_runner,
+    }
 
 
 @pytest.mark.asyncio
@@ -115,6 +125,10 @@ async def test_guided_pauses_then_advances_through_all_stages() -> None:
     assert run.current_stage == 4
 
     await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_5_awaiting_approval"
+    assert run.current_stage == 5
+
+    await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "complete"
 
 
@@ -130,7 +144,8 @@ async def test_auto_chains_to_complete() -> None:
     assert run.stage_results["2"]["count"] == 2
     assert run.stage_results["3"]["state"] == "computed"
     assert run.stage_results["4"]["state"] == "computed"
-    assert run.current_stage == 4
+    assert run.stage_results["5"]["state"] == "computed"
+    assert run.current_stage == 5
 
 
 @pytest.mark.asyncio

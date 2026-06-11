@@ -23,6 +23,7 @@ import pytest
 from app import contracts
 from app.errors import ConflictProblem, ValidationProblem
 from app.pipeline import edits, engine
+from app.pipeline.stages import stage5
 from app.services.analysis import AnalysisService
 
 
@@ -117,6 +118,18 @@ def _run(*, computed: list[str], mode: str = "auto") -> SimpleNamespace:
         stage_results={
             "1": _stage1_fragment(computed),
             "2": {"count": len(computed), "passed": [], "filtered": [], "state": "computed"},
+            # A completed run carries S3/S4 (their target sets share t0 so a pulled-in S5
+            # re-run finds a non-empty overlap rather than terminal-failing on KeyError).
+            "3": {
+                "targets": [{"target_id": "t0", "canonical_name": "T0"}],
+                "count": 1,
+                "state": "computed",
+            },
+            "4": {
+                "disease_targets": [{"target_id": "t0", "score": 0.5}],
+                "count": 1,
+                "state": "computed",
+            },
         },
     )
 
@@ -137,7 +150,7 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
     stage1 emits a computed fragment from the *effective* S1 set already stored (it is
     never recomputed in this chunk); stage2 emits a count = size of the effective S1 set.
     """
-    calls: dict[str, list] = {"1": [], "2": [], "3": [], "4": []}
+    calls: dict[str, list] = {"1": [], "2": [], "3": [], "4": [], "5": []}
 
     def fake_build_runners(session: Any) -> dict[int, Any]:
         async def stage1_runner(run: SimpleNamespace) -> dict:
@@ -177,13 +190,24 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
             calls["4"].append(True)
             return {
                 "targets": [{"target_id": "t0", "canonical_name": "T0"}],
-                "disease_targets": [],
+                "disease_targets": [{"target_id": "t0", "score": 0.5}],
                 "count": 1,
                 "min_score_applied": 0.3,
                 "state": "computed",
             }
 
-        return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner, 4: stage4_runner}
+        async def stage5_runner(run: SimpleNamespace) -> dict:
+            # Overlap of the stored S3 / S4 target sets (both carry t0 -> count 1).
+            calls["5"].append(True)
+            return await stage5.run(None, run)
+
+        return {
+            1: stage1_runner,
+            2: stage2_runner,
+            3: stage3_runner,
+            4: stage4_runner,
+            5: stage5_runner,
+        }
 
     monkeypatch.setattr(engine, "build_runners", fake_build_runners)
     return calls
@@ -242,8 +266,11 @@ async def test_param_redo_change_clears_2_and_reruns(monkeypatch: pytest.MonkeyP
 
     await svc.reset_from(run.analysis_id, 2, {"max_violations": 0})
 
-    assert {2} in repo.cleared
+    # param Redo of S2 clears its produced downstream closure (2 + the produced 3); S5 is in
+    # the closure but was not produced, so it is re-run (and S4 is read from its stored result).
+    assert {2, 3} in repo.cleared
     assert len(calls["2"]) == 1  # re-ran stage 2
+    assert len(calls["5"]) == 1  # re-ran stage 5 (pulled in via the S3->S5 dependency)
     assert calls["1"] == []  # did NOT re-run stage 1
     assert run.parameters["adme"]["max_violations"] == 0
     assert run.status == "complete"

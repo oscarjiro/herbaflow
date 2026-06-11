@@ -15,6 +15,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.pipeline import engine
+from app.pipeline.stages import stage5
 
 
 class _FakeRepo:
@@ -116,16 +117,22 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
     async def stage4(_run: SimpleNamespace) -> dict:
         return {
             "targets": [{"target_id": "t0", "canonical_name": "T0"}],
-            "disease_targets": [],
+            "disease_targets": [{"target_id": "t0", "score": 0.5}],
             "count": 1,
             "min_score_applied": 0.3,
             "state": "computed",
         }
 
+    async def stage5_runner(r: SimpleNamespace) -> dict:
+        # S3/S4 both carry t0 -> overlap count 1 -> S5 succeeds and the run completes.
+        return await stage5.run(None, r)
+
     monkeypatch.setattr(engine.db, "session_scope", fake_scope)
     monkeypatch.setattr(engine, "AnalysisRepository", lambda session: _FakeRepo(run))
     monkeypatch.setattr(
-        engine, "build_runners", lambda session: {1: stage1, 2: stage2, 3: stage3, 4: stage4}
+        engine,
+        "build_runners",
+        lambda session: {1: stage1, 2: stage2, 3: stage3, 4: stage4, 5: stage5_runner},
     )
 
     await engine.run_stages_task(run.analysis_id, 1)
