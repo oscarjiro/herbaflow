@@ -250,7 +250,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
             <tr>
               <th>Gene symbol</th>
               <th>UniProt</th>
-              <th>Score</th>
+              <th>Open Targets score</th>
               <th>Association</th>
               <th></th>
             </tr>
