@@ -64,10 +64,10 @@ async def reset_from(
 ) -> AnalysisRead:
     service = AnalysisService.from_session(session)
     overrides = payload.parameters.get(str(stage)) if payload.parameters else None
-    start = await service.reset_from(analysis_id, stage, overrides, defer=True)
+    run_set = await service.reset_from(analysis_id, stage, overrides, defer=True)
     await _commit(session)
-    if start is not None:
-        background.add_task(run_stages_task, analysis_id, start)
+    if run_set:
+        background.add_task(run_stages_task, analysis_id, min(run_set), run_set)
     return await service.get(analysis_id)
 
 

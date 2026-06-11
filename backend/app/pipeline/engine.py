@@ -126,13 +126,22 @@ async def execute_run(
     runners: dict[int, StageRunner],
     *,
     start_stage: int = 1,
+    run_stages: frozenset[int] | None = None,
 ) -> None:
-    """Run runnable stages from ``start_stage`` onward, driving the state machine per mode."""
+    """Run runnable stages per mode.
+
+    ``run_stages`` restricts execution to a specific dependency-closure set (a reset/Redo
+    re-run). ``None`` = the full linear set from ``start_stage`` (create/advance). The set is
+    always intersected with ``RUNNABLE_STAGES`` and iterated in stage order.
+    """
     run = await repo.get(analysis_id)
     if run is None:
         return
     rid = str(analysis_id)[:8]
-    for stage in (s for s in RUNNABLE_STAGES if s >= start_stage):
+    stages = [
+        s for s in RUNNABLE_STAGES if s >= start_stage and (run_stages is None or s in run_stages)
+    ]
+    for stage in stages:
         await repo.set_status(run, state.stage_status(stage, "running"), current_stage=stage)
         result = await runners[stage](run)
 
@@ -155,6 +164,35 @@ async def execute_run(
             await repo.fail(run, "No compounds found for the selected plants.")
             return
 
+        # Stage 5 0-overlap is the terminal scientific hard-stop (OV-4 / ledger B6):
+        # unconditional fail in BOTH modes — NOT the generic guided-park empty branch.
+        if stage == 5 and result.get("count", 0) == 0:
+            logger.warning("run %s: stage 5 found 0 overlap — failing (terminal)", rid)
+            await repo.set_stage_result(run, stage, result)
+            await repo.fail(
+                run,
+                "No shared targets between the compounds and the disease — "
+                "cannot build a network.",
+            )
+            return
+
+        # Stage 6 blocked (overlap > cap, opt-in off): AD-6 mechanism — guided parks at the
+        # S6 checkpoint (FE prompts narrow/enable-top-N); auto hard-fails.
+        if stage == 6 and result.get("blocked"):
+            await repo.set_stage_result(run, stage, result)
+            if run.mode == "guided":
+                logger.info("run %s: stage 6 blocked (overlap too large) — parking", rid)
+                await repo.set_status(run, state.stage_status(stage, "awaiting_approval"))
+                return
+            logger.warning("run %s: stage 6 blocked (overlap too large) — failing (auto)", rid)
+            await repo.fail(
+                run,
+                f"The overlap ({result['overlap_count']} proteins) exceeds the STRING "
+                f"ceiling ({result['max_proteins']}); narrow the inputs or enable the "
+                "top-N cap, then re-run from Step 6.",
+            )
+            return
+
         await repo.set_stage_result(run, stage, result)
 
         # Empty downstream entity/gate stage (S2/S3/S4; S1 hard-failed above):
@@ -173,10 +211,10 @@ async def execute_run(
             await repo.set_status(run, state.stage_status(stage, "awaiting_approval"))
             return
 
-    # auto reached the end of the runnable stages
-    last = RUNNABLE_STAGES[-1]
-    await repo.set_status(run, state.stage_status(last, "complete"))
-    await repo.complete(run)
+    if stages:
+        last = stages[-1]
+        await repo.set_status(run, state.stage_status(last, "complete"))
+        await repo.complete(run)
 
 
 async def advance_run(
@@ -267,27 +305,27 @@ async def reset_from(
     *,
     param_overrides: dict[str, Any] | None = None,
     defer: bool = False,
-) -> int | None:
+) -> frozenset[int] | None:
     """Dependency-aware destructive re-run from ``stage``.
+
+    Returns the **run-set** to schedule (``defer=True``) or ``None`` (no-op / no runnable
+    dependent / executed inline). The run-set is ``(invalidate ∩ RUNNABLE_STAGES)`` — the
+    dependency closure, NOT "this stage + every later stage" (F3).
 
     Two modes:
 
-    - **param Redo** (``param_overrides is not None``): inclusive — the edited stage itself is
-      recomputed. Overrides are validated against the group's HARD bounds, merged into the frozen
-      param group, and the stage + its downstream closure are invalidated. A no-op (overrides equal
-      the current group) returns early without clearing or re-running (E7).
+    - **param Redo** (``param_overrides is not None``): inclusive — the edited stage is recomputed.
+      Overrides are validated against the group's HARD bounds, merged into the frozen param group,
+      and the stage + its downstream closure are invalidated. A no-op (overrides equal the current
+      group) returns early without clearing or re-running (E7).
     - **set edit** (``param_overrides is None``): exclusive — the edited stage's stored result was
-      already updated by the caller; only its downstream closure is invalidated and the re-run
-      starts at the nearest runnable dependent (for stage 1 -> stage 2).
+      already updated by the caller; only its downstream closure is invalidated and the re-run runs
+      exactly the runnable members of that closure.
 
-    The invalidated stages are cleared BEFORE the re-run (E2), and any re-run failure marks the run
-    failed while leaving the cleared downstream cleared (idempotent on outage).
-
-    Returns the start stage the caller should schedule (``defer=True``) or ``None`` (a no-op, no
-    runnable dependent, or already executed inline when ``defer=False``). In ``defer`` mode the
-    clear + the ``*_running`` start state are committed synchronously and the stage is run in a
-    BackgroundTask; the cleared-downstream-stays-cleared invariant still holds because the clear
-    is durable before the background run starts.
+    The invalidated stages are cleared BEFORE the re-run (E2); a re-run failure marks the run failed
+    while leaving the cleared downstream cleared (idempotent on outage). In ``defer`` mode the clear
+    + the ``*_running`` start state are committed synchronously and the run-set is scheduled in a
+    BackgroundTask.
     """
     run = await repo.get(analysis_id)
     if run is None:
@@ -321,16 +359,17 @@ async def reset_from(
         run.parameters = new_params
         await repo.set_parameters(run)
         invalidate = {stage} | downstream_closure(stage)
-        start = stage
     else:
         invalidate = downstream_closure(stage)
-        runnable_dependents = [s for s in DEPENDENTS[stage] if s in RUNNABLE_STAGES]
-        if not runnable_dependents:
-            # Nothing runnable depends on this stage; clear downstream and settle.
-            produced = {int(k) for k in run.stage_results}
-            await repo.clear_stage_results(run, invalidate & produced)
-            return None
-        start = min(runnable_dependents)
+
+    run_set = frozenset(s for s in invalidate if s in RUNNABLE_STAGES)
+    if not run_set:
+        # Nothing runnable to re-run (param Redo of a leaf, or set-edit with no runnable
+        # dependent): clear the produced downstream and settle.
+        produced = {int(k) for k in run.stage_results}
+        await repo.clear_stage_results(run, invalidate & produced)
+        return None
+    start = min(run_set)
 
     # The explicit re-run confirms any staged edits: drop the reset-from target marker.
     if "rerun_from" in run.parameters:
@@ -344,13 +383,11 @@ async def reset_from(
     await repo.clear_stage_results(run, invalidate & produced)
 
     if defer:
-        # Commit the cleared downstream + the *_running start state synchronously; the re-run
-        # happens in a BackgroundTask scheduled by the router.
         await repo.set_status(run, state.stage_status(start, "running"), current_stage=start)
-        return start
+        return run_set
 
     try:
-        await execute_run(repo, analysis_id, runners, start_stage=start)
+        await execute_run(repo, analysis_id, runners, start_stage=start, run_stages=run_set)
     except Exception as exc:  # noqa: BLE001 — re-run failure must be idempotent
         await repo.fail(run, f"Re-run from stage {start} failed: {exc}")
     return None
@@ -383,14 +420,15 @@ def build_runners(session: Any) -> dict[int, StageRunner]:
     return {1: stage1_runner, 2: stage2_runner, 3: stage3_runner, 4: stage4_runner}
 
 
-async def run_stages_task(analysis_id: uuid.UUID, start_stage: int = 1) -> None:
-    """Background entrypoint: own session, run stages from ``start_stage``, commit.
-
-    Wraps the run in a top-level guard so an uncaught stage error (e.g. a provider
-    outage) marks the run ``failed`` instead of leaving it stuck in ``*_running``.
-    Used by every scheduling path: create (start_stage=1) and the four mutating
-    endpoints (advance / reset-from / edit).
-    """
+async def run_stages_task(
+    analysis_id: uuid.UUID,
+    start_stage: int = 1,
+    run_stages: frozenset[int] | None = None,
+) -> None:
+    """Background entrypoint: own session, run ``run_stages`` (or the full linear set) from
+    ``start_stage``, commit. Wraps the run so an uncaught stage error marks the run failed
+    instead of leaving it stuck in ``*_running``. Used by every scheduling path: create
+    (full linear set) and the mutating endpoints (advance full-linear; reset-from run-set)."""
     async with db.session_scope() as session:
         repo = AnalysisRepository(session)
         runners = build_runners(session)
@@ -398,7 +436,9 @@ async def run_stages_task(analysis_id: uuid.UUID, start_stage: int = 1) -> None:
         if run is None:
             return
         try:
-            await execute_run(repo, analysis_id, runners, start_stage=start_stage)
+            await execute_run(
+                repo, analysis_id, runners, start_stage=start_stage, run_stages=run_stages
+            )
         except Exception as exc:  # noqa: BLE001 — must not leave a stuck *_running status
             await repo.fail(run, f"Stage execution failed: {exc}")
         await session.commit()

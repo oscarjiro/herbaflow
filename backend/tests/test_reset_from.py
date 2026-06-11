@@ -475,3 +475,75 @@ async def test_advance_refused_while_any_stage_stale(monkeypatch: pytest.MonkeyP
     svc = _service(run, {})
     with pytest.raises(ConflictProblem):
         await svc.advance(run.analysis_id)
+
+
+# ---------------------------------------------------------------------------
+# F3 — dependency-closure run-set: a reset re-runs only the DAG closure, not
+# "this stage + every later runnable stage". Proven over a monkeypatched
+# RUNNABLE_STAGES spanning 1..8 (the Chunk-6 world where 7 and 8 are leaves).
+# ---------------------------------------------------------------------------
+def _multistage_run(mode: str = "auto") -> SimpleNamespace:
+    """A settled run with stage_results 1..8 all computed, current_stage=8."""
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        mode=mode,
+        status="complete",
+        current_stage=8,
+        parameters={},
+        stage_results={str(i): {"count": 1, "state": "computed"} for i in range(1, 9)},
+    )
+
+
+def _recording_runners(called: list[int]) -> dict[int, object]:
+    def make(stage: int):
+        async def _runner(run: object) -> dict:
+            called.append(stage)
+            return {"count": 1, "state": "computed"}
+
+        return _runner
+
+    return {i: make(i) for i in range(1, 9)}
+
+
+@pytest.mark.asyncio
+async def test_reset_from_6_set_edit_reruns_only_7_not_8(monkeypatch):
+    # Simulate the Chunk-6 world where 7 and 8 are runnable parallel leaves.
+    monkeypatch.setattr(engine, "RUNNABLE_STAGES", (1, 2, 3, 4, 5, 6, 7, 8))
+    monkeypatch.setattr(engine, "NEEDS_APPROVAL", frozenset())  # auto chain, no pause
+    run = _multistage_run("auto")
+    repo = FakeRepo(run)
+    called: list[int] = []
+    # set-edit path (param_overrides=None): downstream_closure(6) = {7}; 8 is NOT downstream of 6.
+    run_set = await engine.reset_from(
+        repo, run.id, 6, _recording_runners(called), param_overrides=None, defer=False
+    )
+    assert called == [7]  # S8 must NOT re-run (it depends on S5, not S6)
+    assert repo.cleared == [{7}]  # only the closure was cleared
+    assert run_set is None  # inline mode returns None
+
+
+@pytest.mark.asyncio
+async def test_reset_from_5_set_edit_reruns_full_downstream(monkeypatch):
+    monkeypatch.setattr(engine, "RUNNABLE_STAGES", (1, 2, 3, 4, 5, 6, 7, 8))
+    monkeypatch.setattr(engine, "NEEDS_APPROVAL", frozenset())
+    run = _multistage_run("auto")
+    repo = FakeRepo(run)
+    called: list[int] = []
+    await engine.reset_from(
+        repo, run.id, 5, _recording_runners(called), param_overrides=None, defer=False
+    )
+    assert called == [6, 7, 8]  # closure(5) = {6,7,8}, all re-run, in order
+    assert repo.cleared == [{6, 7, 8}]
+
+
+@pytest.mark.asyncio
+async def test_reset_from_defer_returns_run_set(monkeypatch):
+    monkeypatch.setattr(engine, "RUNNABLE_STAGES", (1, 2, 3, 4, 5, 6, 7, 8))
+    monkeypatch.setattr(engine, "NEEDS_APPROVAL", frozenset())
+    run = _multistage_run("auto")
+    repo = FakeRepo(run)
+    run_set = await engine.reset_from(
+        repo, run.id, 6, _recording_runners([]), param_overrides=None, defer=True
+    )
+    assert run_set == frozenset({7})  # the caller schedules exactly this set
+    assert run.status == "stage_7_running"  # *_running committed at min(run_set)

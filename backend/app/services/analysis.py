@@ -126,10 +126,10 @@ class AnalysisService:
         param_overrides: dict[str, Any] | None,
         *,
         defer: bool = False,
-    ) -> int | None:
+    ) -> frozenset[int] | None:
         """Re-run a settled run from ``stage`` (param Redo or set edit) via the engine.
 
-        Returns the start stage to schedule (``defer=True``) or ``None`` (no-op / no runnable
+        Returns the run-set to schedule (``defer=True``) or ``None`` (no-op / no runnable
         dependent / executed inline).
         """
         runners = engine.build_runners(self.analysis_repo.session)

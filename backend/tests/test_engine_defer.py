@@ -133,8 +133,9 @@ async def test_reset_from_defer_param_redo_returns_start_and_clears_downstream()
         defer=True,
     )
 
-    assert start == 2
-    assert run.status == "stage_2_running"
+    # defer now returns the run-set (invalidate ∩ runnable): closure(2) ∩ {1,2,3,4} = {2,3}.
+    assert start == frozenset({2, 3})
+    assert run.status == "stage_2_running"  # *_running committed at min(run_set)
     assert {2} in repo.cleared
     assert run.parameters["adme"]["max_violations"] == 0
 
@@ -147,11 +148,11 @@ async def test_reset_from_defer_set_edit_s1_returns_runnable_dependent() -> None
     run.stage_results["2"] = {"count": 2, "passed": [], "filtered": [], "state": "computed"}
     repo = _FakeRepo(run)
 
-    # set edit (param_overrides=None) on stage 1 -> nearest runnable dependent is stage 2.
+    # set edit (param_overrides=None) on stage 1 -> run-set is the runnable closure {2,3}.
     start = await engine.reset_from(
         repo, run.analysis_id, 1, _runners_that_must_not_run(), defer=True
     )
 
-    assert start == 2
+    assert start == frozenset({2, 3})  # closure(1) ∩ {1,2,3,4}; scheduled from min = stage 2
     assert run.status == "stage_2_running"
     assert {2} in repo.cleared
