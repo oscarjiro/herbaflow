@@ -93,8 +93,23 @@
         "ppi": {
           "type": "object",
           "properties": {
-            "min_confidence": { "type": "number", "enum": [0.15, 0.4, 0.7, 0.9] },
-            "community_resolution": { "type": "number", "minimum": 0.1, "maximum": 3.0 }
+            "min_confidence": {
+              "description": "STRING edge-confidence floor (0–1; tiers 0.15/0.4/0.7/0.9). Default 0.4 = medium.",
+              "type": "number", "enum": [0.15, 0.4, 0.7, 0.9], "default": 0.4
+            },
+            "max_proteins": {
+              "description": "Self-imposed STRING ceiling; overlaps above this require allow_top_n_cap.",
+              "type": "integer", "default": 2000,
+              "minimum": 50, "maximum": 2000, "recommended_min": 200, "recommended_max": 2000
+            },
+            "allow_top_n_cap": {
+              "description": "If the overlap exceeds max_proteins, proceed on the top-N by disease-association score.",
+              "type": "boolean", "default": false
+            },
+            "network_type": {
+              "description": "STRING network: functional (all association evidence) or physical (binding only).",
+              "type": "string", "enum": ["functional", "physical"], "default": "functional"
+            }
           }
         },
         "hub_genes": {

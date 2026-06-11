@@ -136,3 +136,25 @@ def disease_targets_param_meta() -> dict[str, Any]:
             "description": spec.get("description"),
         }
     return out
+
+
+def ppi_defaults() -> dict[str, Any]:
+    """The frozen-at-create defaults for the ppi param group (from the contract)."""
+    props = pipeline_parameters()["ppi"]["properties"]
+    return {name: spec["default"] for name, spec in props.items()}
+
+
+def ppi_param_meta() -> dict[str, Any]:
+    """Per-param UI metadata for the ppi group (bounds, advisory range, enum, description)."""
+    out: dict[str, Any] = {}
+    for name, spec in pipeline_parameters()["ppi"]["properties"].items():
+        out[name] = {
+            "default": spec.get("default"),
+            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
+            "max": spec.get("maximum"),
+            "recommended_min": spec.get("recommended_min"),
+            "recommended_max": spec.get("recommended_max"),
+            "enum": spec.get("enum"),
+            "description": spec.get("description"),
+        }
+    return out

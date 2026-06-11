@@ -96,6 +96,7 @@ class AnalysisService:
             "adme": contracts.adme_defaults(),
             "target": contracts.target_defaults(),
             "disease_targets": contracts.disease_targets_defaults(),
+            "ppi": contracts.ppi_defaults(),
         }
         run = await self.analysis_repo.create(
             analysis_name=payload.analysis_name,

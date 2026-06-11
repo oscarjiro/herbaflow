@@ -59,3 +59,30 @@ def test_disease_targets_defaults_match_contract():
     assert meta["min_score"]["recommended_max"] == 0.5
     assert meta["min_score"]["default"] == 0.3
     assert meta["min_score"]["description"]
+
+
+def test_ppi_defaults_match_contract():
+    d = contracts.ppi_defaults()
+    assert d == {
+        "min_confidence": 0.4,
+        "max_proteins": 2000,
+        "allow_top_n_cap": False,
+        "network_type": "functional",
+    }
+    assert "community_resolution" not in contracts.pipeline_param_bounds("ppi")
+
+
+def test_ppi_param_meta_matches_contract():
+    meta = contracts.ppi_param_meta()
+    assert meta["min_confidence"]["default"] == 0.4
+    assert meta["min_confidence"]["enum"] == [0.15, 0.4, 0.7, 0.9]
+    assert meta["min_confidence"]["description"]
+    assert meta["max_proteins"]["default"] == 2000
+    assert meta["max_proteins"]["min"] == 50
+    assert meta["max_proteins"]["max"] == 2000
+    assert meta["max_proteins"]["recommended_min"] == 200
+    assert meta["max_proteins"]["recommended_max"] == 2000
+    assert meta["allow_top_n_cap"]["default"] is False
+    assert meta["network_type"]["default"] == "functional"
+    assert meta["network_type"]["enum"] == ["functional", "physical"]
+    assert meta["network_type"]["description"]
