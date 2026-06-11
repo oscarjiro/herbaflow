@@ -86,3 +86,29 @@ def test_ppi_param_meta_matches_contract():
     assert meta["network_type"]["default"] == "functional"
     assert meta["network_type"]["enum"] == ["functional", "physical"]
     assert meta["network_type"]["description"]
+
+
+def test_hub_genes_defaults_match_contract():
+    d = contracts.hub_genes_defaults()
+    assert d == {"top_n": 20, "use_hub_bottleneck": True, "composite_weight": 0.5}
+    meta = contracts.hub_genes_param_meta()
+    assert meta["top_n"]["min"] == 1
+    assert meta["top_n"]["max"] == 200
+    assert meta["composite_weight"]["min"] == 0.0
+    assert meta["composite_weight"]["max"] == 1.0
+    assert meta["use_hub_bottleneck"]["default"] is True
+
+
+def test_enrichment_defaults_match_contract():
+    d = contracts.enrichment_defaults()
+    assert d == {
+        "fdr_threshold": 0.05,
+        "sources": ["GO:BP", "GO:MF", "GO:CC", "KEGG"],
+        "correction": "fdr",
+        "min_term_size": 5,
+    }
+    meta = contracts.enrichment_param_meta()
+    assert meta["fdr_threshold"]["default"] == 0.05
+    assert meta["correction"]["enum"] == ["fdr", "g_SCS", "bonferroni"]
+    assert meta["min_term_size"]["min"] == 1
+    assert meta["sources"]["default"] == ["GO:BP", "GO:MF", "GO:CC", "KEGG"]

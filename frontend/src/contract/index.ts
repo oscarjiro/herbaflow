@@ -199,3 +199,85 @@ export const PPI_PARAMS = {
 export const PPI_NUMERIC_PARAMS = ["max_proteins"] as const;
 export const PPI_BOOLEAN_PARAMS = ["allow_top_n_cap"] as const;
 export const PPI_SELECT_PARAMS = ["min_confidence", "network_type"] as const;
+
+// ---------------------------------------------------------------------------
+// Hub-genes (Stage 7) parameter metadata — derived from the contract.
+// ---------------------------------------------------------------------------
+
+const hubGenesProps = contract.$defs.pipeline_parameters.properties.hub_genes.properties;
+
+function hubGenesEntry(key: keyof typeof hubGenesProps): AdmeParamMeta {
+  const p = hubGenesProps[key] as Record<string, unknown>;
+  const minExclusive = "exclusiveMinimum" in p && !("minimum" in p);
+  const min =
+    "minimum" in p
+      ? (p.minimum as number)
+      : "exclusiveMinimum" in p
+        ? (p.exclusiveMinimum as number)
+        : undefined;
+  const max = "maximum" in p ? (p.maximum as number) : undefined;
+  const recommended_min = "recommended_min" in p ? (p.recommended_min as number) : undefined;
+  const recommended_max = "recommended_max" in p ? (p.recommended_max as number) : undefined;
+  return {
+    default: p.default as number | boolean,
+    min,
+    minExclusive,
+    max,
+    recommended_min,
+    recommended_max,
+    enum: undefined,
+    description: p.description as string,
+  };
+}
+
+export const HUB_GENES_PARAMS = {
+  top_n: hubGenesEntry("top_n"),
+  use_hub_bottleneck: hubGenesEntry("use_hub_bottleneck"),
+  composite_weight: hubGenesEntry("composite_weight"),
+} satisfies Record<string, AdmeParamMeta>;
+
+export const HUB_GENES_NUMERIC_PARAMS = ["top_n", "composite_weight"] as const;
+export const HUB_GENES_BOOLEAN_PARAMS = ["use_hub_bottleneck"] as const;
+
+// ---------------------------------------------------------------------------
+// Enrichment (Stage 8) parameter metadata — derived from the contract.
+//
+// `sources` (array) is intentionally NOT modelled here: it stays at its frozen
+// default this chunk; a multi-select control is deferred to Phase 5 FE polish.
+// ---------------------------------------------------------------------------
+
+const enrichmentProps = contract.$defs.pipeline_parameters.properties.enrichment.properties;
+
+function enrichmentEntry(key: "fdr_threshold" | "min_term_size" | "correction"): AdmeParamMeta {
+  const p = enrichmentProps[key] as Record<string, unknown>;
+  const minExclusive = "exclusiveMinimum" in p && !("minimum" in p);
+  const min =
+    "minimum" in p
+      ? (p.minimum as number)
+      : "exclusiveMinimum" in p
+        ? (p.exclusiveMinimum as number)
+        : undefined;
+  const max = "maximum" in p ? (p.maximum as number) : undefined;
+  const recommended_min = "recommended_min" in p ? (p.recommended_min as number) : undefined;
+  const recommended_max = "recommended_max" in p ? (p.recommended_max as number) : undefined;
+  const enumVals = "enum" in p ? (p.enum as (number | string)[]) : undefined;
+  return {
+    default: p.default as number | boolean | string,
+    min,
+    minExclusive,
+    max,
+    recommended_min,
+    recommended_max,
+    enum: enumVals,
+    description: p.description as string,
+  };
+}
+
+export const ENRICHMENT_PARAMS = {
+  fdr_threshold: enrichmentEntry("fdr_threshold"),
+  min_term_size: enrichmentEntry("min_term_size"),
+  correction: enrichmentEntry("correction"),
+} satisfies Record<string, AdmeParamMeta>;
+
+export const ENRICHMENT_NUMERIC_PARAMS = ["fdr_threshold", "min_term_size"] as const;
+export const ENRICHMENT_SELECT_PARAMS = ["correction"] as const;

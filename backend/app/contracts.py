@@ -158,3 +158,46 @@ def ppi_param_meta() -> dict[str, Any]:
             "description": spec.get("description"),
         }
     return out
+
+
+def hub_genes_defaults() -> dict[str, Any]:
+    """The frozen-at-create defaults for the hub_genes param group (from the contract)."""
+    props = pipeline_parameters()["hub_genes"]["properties"]
+    return {name: spec["default"] for name, spec in props.items()}
+
+
+def hub_genes_param_meta() -> dict[str, Any]:
+    """Per-param UI metadata for the hub_genes group (bounds, advisory range, description)."""
+    out: dict[str, Any] = {}
+    for name, spec in pipeline_parameters()["hub_genes"]["properties"].items():
+        out[name] = {
+            "default": spec.get("default"),
+            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
+            "max": spec.get("maximum"),
+            "recommended_min": spec.get("recommended_min"),
+            "recommended_max": spec.get("recommended_max"),
+            "description": spec.get("description"),
+        }
+    return out
+
+
+def enrichment_defaults() -> dict[str, Any]:
+    """The frozen-at-create defaults for the enrichment param group (from the contract)."""
+    props = pipeline_parameters()["enrichment"]["properties"]
+    return {name: spec["default"] for name, spec in props.items()}
+
+
+def enrichment_param_meta() -> dict[str, Any]:
+    """Per-param UI metadata for the enrichment group (bounds, enum, advisory range)."""
+    out: dict[str, Any] = {}
+    for name, spec in pipeline_parameters()["enrichment"]["properties"].items():
+        out[name] = {
+            "default": spec.get("default"),
+            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
+            "max": spec.get("maximum"),
+            "recommended_min": spec.get("recommended_min"),
+            "recommended_max": spec.get("recommended_max"),
+            "enum": spec.get("enum"),
+            "description": spec.get("description"),
+        }
+    return out

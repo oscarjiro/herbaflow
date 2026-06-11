@@ -115,15 +115,44 @@
         "hub_genes": {
           "type": "object",
           "properties": {
-            "top_n": { "type": "integer", "minimum": 1 },
-            "use_hub_bottleneck": { "type": "boolean" }
+            "top_n": {
+              "description": "Number of top-ranked hub genes reported (a descriptive cut, not a significance test).",
+              "type": "integer", "default": 20,
+              "minimum": 1, "maximum": 200, "recommended_min": 5, "recommended_max": 50
+            },
+            "use_hub_bottleneck": {
+              "description": "Rank by the weighted hub-bottleneck composite (true) or plain degree (false).",
+              "type": "boolean", "default": true
+            },
+            "composite_weight": {
+              "description": "Degree share w of the composite w·degree + (1−w)·betweenness (Yu 2007; 0.5 = equal).",
+              "type": "number", "default": 0.5,
+              "minimum": 0.0, "maximum": 1.0, "recommended_min": 0.0, "recommended_max": 1.0
+            }
           }
         },
         "enrichment": {
           "type": "object",
           "properties": {
-            "fdr_threshold": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
-            "sources": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+            "fdr_threshold": {
+              "description": "Corrected-p significance cutoff for enriched terms.",
+              "type": "number", "default": 0.05,
+              "exclusiveMinimum": 0, "maximum": 1, "recommended_min": 0.01, "recommended_max": 0.10
+            },
+            "sources": {
+              "description": "Annotation vocabularies to query (GO branches + KEGG; Reactome/WikiPathways selectable).",
+              "type": "array", "items": {"type": "string"}, "minItems": 1,
+              "default": ["GO:BP", "GO:MF", "GO:CC", "KEGG"]
+            },
+            "correction": {
+              "description": "Multiple-testing correction: BH-FDR (default), g:SCS (GO-aware), or Bonferroni.",
+              "type": "string", "enum": ["fdr", "g_SCS", "bonferroni"], "default": "fdr"
+            },
+            "min_term_size": {
+              "description": "Drop terms smaller than this (avoids tiny, unstable annotations).",
+              "type": "integer", "default": 5,
+              "minimum": 1, "recommended_min": 3, "recommended_max": 10
+            }
           }
         }
       }

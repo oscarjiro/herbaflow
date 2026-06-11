@@ -97,6 +97,8 @@ class AnalysisService:
             "target": contracts.target_defaults(),
             "disease_targets": contracts.disease_targets_defaults(),
             "ppi": contracts.ppi_defaults(),
+            "hub_genes": contracts.hub_genes_defaults(),
+            "enrichment": contracts.enrichment_defaults(),
         }
         run = await self.analysis_repo.create(
             analysis_name=payload.analysis_name,
