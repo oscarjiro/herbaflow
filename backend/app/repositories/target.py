@@ -21,6 +21,17 @@ class TargetRepository:
         stmt = select(Target).where(Target.canonical_key == canonical_key)
         return (await self.session.execute(stmt)).scalar_one_or_none()
 
+    async def get_by_gene_symbol(self, gene_symbol: str) -> Target | None:
+        """Return the single stored human target for this exact gene symbol, or None.
+
+        Returns None when there is no row OR more than one row (ambiguous) so the caller
+        falls back to the authoritative UniProt lookup. Identity stays canonicalized on the
+        primary accession; this is a DB-first cache for the symbol->accession hop only.
+        """
+        stmt = select(Target).where(Target.gene_symbol == gene_symbol).limit(2)
+        rows = (await self.session.execute(stmt)).scalars().all()
+        return rows[0] if len(rows) == 1 else None
+
     async def upsert(self, row: dict[str, Any]) -> None:
         stmt = insert(Target).values(**row).on_conflict_do_nothing(index_elements=["canonical_key"])
         await self.session.execute(stmt)

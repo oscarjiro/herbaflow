@@ -153,9 +153,10 @@ async def run(
             # Shared canonical resolver: identity is keyed on the UniProt primary accession,
             # so a measured accession and a manually-added alias of the same protein map to
             # one target_id (no duplicate rows). See input_validation.resolve_target_accession.
-            rt = await resolve_target_accession(
+            acc_res = await resolve_target_accession(
                 accession, target_repo, uniprot_c, uniprot_source_id=uniprot_src
             )
+            rt = acc_res.target
             if rt is None:
                 return None  # non-human / unresolvable -> skip
             return rt.target_id, rt.gene_symbol, rt.canonical_key

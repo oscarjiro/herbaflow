@@ -14,7 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.integrations.chembl import ChemblHit
-from app.integrations.uniprot import UniProtRecord
+from app.integrations.uniprot import UniProtReason, UniProtRecord, UniProtResolution
 from app.pipeline.stages import stage3
 
 # Stages that have settled (terminal or paused). Includes the Stage-3 checkpoint.
@@ -42,7 +42,9 @@ class _FakePubchem:
 
 class _FakeUniProt:
     async def resolve(self, acc):
-        return UniProtRecord(acc, "TP53", "p53") if acc == "P04637" else None
+        if acc == "P04637":
+            return UniProtResolution(UniProtRecord(acc, "TP53", "p53"), None)
+        return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
 
 
 async def _poll(c, run_id: str, *, until=None, max_iters: int = 80) -> dict:

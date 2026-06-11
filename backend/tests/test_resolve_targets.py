@@ -2,17 +2,21 @@ import uuid
 
 import pytest
 
-from app.integrations.uniprot import UniProtRecord
+from app.integrations.uniprot import UniProtReason, UniProtRecord, UniProtResolution
 from app.services import canonical
 from app.services.input_validation import resolve_target_accession, resolve_targets
 
 
 class FakeTargetRepo:
-    def __init__(self, by_key=None):
+    def __init__(self, by_key=None, by_symbol=None):
         self._by_key = by_key or {}
+        self._by_symbol = by_symbol or {}
 
     async def get_by_key(self, key):
         return self._by_key.get(key)
+
+    async def get_by_gene_symbol(self, gene_symbol):
+        return self._by_symbol.get(gene_symbol)
 
     async def upsert(self, row):
         self._by_key[row["canonical_key"]] = type("T", (), row)
@@ -26,14 +30,17 @@ class FakeUniProt:
         self._table = table
 
     async def resolve(self, acc):
-        return self._table.get(acc.upper())
+        rec = self._table.get(acc.upper())
+        if rec is not None:
+            return UniProtResolution(record=rec, reason=None)
+        return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
 
     async def resolve_symbol(self, sym):
         # map symbol -> accession via a reverse lookup over the table's gene_symbols
         for rec in self._table.values():
             if rec.gene_symbol == sym:
-                return rec
-        return None
+                return UniProtResolution(record=rec, reason=None)
+        return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
 
 
 @pytest.mark.asyncio
@@ -112,18 +119,35 @@ async def test_resolve_target_accession_canonicalizes_on_primary():
     egfr = UniProtRecord("P00533", "EGFR", "Epidermal growth factor receptor")
     up = FakeUniProt({"P00533": egfr, "Q14225": egfr})
     repo = FakeTargetRepo()
-    via_primary = await resolve_target_accession("P00533", repo, up)
-    via_secondary = await resolve_target_accession("Q14225", repo, up)
+    via_primary = (await resolve_target_accession("P00533", repo, up)).target
+    via_secondary = (await resolve_target_accession("Q14225", repo, up)).target
     assert via_primary is not None and via_secondary is not None
     assert via_primary.target_id == via_secondary.target_id  # one entity, one id
     assert via_secondary.uniprot_accession == "P00533"  # stored under the primary
 
 
 @pytest.mark.asyncio
-async def test_resolve_target_accession_none_when_unresolvable():
-    # A non-UniProt id (e.g. a ChEMBL target carrying a GenBank accession) -> skip, not crash.
+async def test_resolve_target_accession_invalid_id_reports_reason():
+    # A non-UniProt id (e.g. a ChEMBL target carrying a GenBank accession) -> 400 -> skip,
+    # not crash. The miss carries the INVALID_ID reason so the caller can word it honestly.
     repo = FakeTargetRepo()
-    assert await resolve_target_accession("AAI32679", repo, FakeUniProt({})) is None
+
+    class FourHundredUniProt:
+        async def resolve(self, acc):
+            return UniProtResolution(None, UniProtReason.INVALID_ID)
+
+    res = await resolve_target_accession("AAI32679", repo, FourHundredUniProt())
+    assert res.target is None
+    assert res.reason is UniProtReason.INVALID_ID
+
+
+@pytest.mark.asyncio
+async def test_resolve_target_accession_no_human_record_reports_reason():
+    # A valid query with zero 9606 results -> NO_HUMAN_RECORD, surfaced to the caller.
+    repo = FakeTargetRepo()
+    res = await resolve_target_accession("Q99999", repo, FakeUniProt({}))
+    assert res.target is None
+    assert res.reason is UniProtReason.NO_HUMAN_RECORD
 
 
 @pytest.mark.asyncio
@@ -142,7 +166,84 @@ async def test_resolve_target_accession_db_fast_path_skips_uniprot():
         async def resolve(self, acc):
             raise AssertionError("UniProt must not be called on a DB fast-path hit")
 
-    rt = await resolve_target_accession("P00533", repo, BoomUniProt())
-    assert rt is not None
-    assert rt.uniprot_accession == "P00533"
-    assert rt.validation_status == "db_hit"
+    res = await resolve_target_accession("P00533", repo, BoomUniProt())
+    assert res.target is not None
+    assert res.reason is None
+    assert res.target.uniprot_accession == "P00533"
+    assert res.target.validation_status == "db_hit"
+
+
+@pytest.mark.asyncio
+async def test_accession_invalid_id_reports_honest_message():
+    # An accession-shaped input UniProt 400s on (not a resolvable UniProt query) must be
+    # reported as "not a UniProt accession" — NOT conflated with a genuine no-human miss.
+    class FourHundredUniProt:
+        async def resolve(self, acc):
+            return UniProtResolution(None, UniProtReason.INVALID_ID)
+
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets(
+        [{"type": "uniprot", "value": "P12345"}], repo, FourHundredUniProt()
+    )
+    assert not resolved
+    assert failed[0].reason == "not a UniProt accession"
+    assert failed[0].line == 1
+
+
+@pytest.mark.asyncio
+async def test_accession_no_human_record_reports_honest_message():
+    # A valid UniProt query with zero 9606 results -> "no human (9606) UniProt record".
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets(
+        [{"type": "uniprot", "value": "Q99999"}], repo, FakeUniProt({})
+    )
+    assert not resolved
+    assert failed[0].reason == "no human (9606) UniProt record"
+    assert failed[0].line == 1
+
+
+@pytest.mark.asyncio
+async def test_unknown_symbol_reports_honest_message():
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets(
+        [{"type": "symbol", "value": "NOTAGENE"}], repo, FakeUniProt({})
+    )
+    assert not resolved
+    assert failed[0].reason == "gene symbol not found in human (9606) UniProt"
+    assert failed[0].line == 1
+
+
+@pytest.mark.asyncio
+async def test_known_symbol_db_first_skips_uniprot():
+    # A gene symbol whose target is already stored (any prior run) resolves to its accession
+    # via the DB — the UniProt client's resolve_symbol/resolve must NOT be called (G-4).
+    key = canonical.target_canonical_key(uniprot="P04637")
+    row = {
+        "target_id": uuid.UUID(canonical.target_id_from_key(key)),
+        "canonical_key": key,
+        "gene_symbol": "TP53",
+        "uniprot_accession": "P04637",
+    }
+    stored = type("T", (), row)
+    repo = FakeTargetRepo(by_key={key: stored}, by_symbol={"TP53": stored})
+
+    class CountingUniProt:
+        def __init__(self):
+            self.resolve_calls = 0
+            self.symbol_calls = 0
+
+        async def resolve(self, acc):  # pragma: no cover - asserted to be 0
+            self.resolve_calls += 1
+            return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
+
+        async def resolve_symbol(self, sym):  # pragma: no cover - asserted to be 0
+            self.symbol_calls += 1
+            return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
+
+    up = CountingUniProt()
+    resolved, failed = await resolve_targets([{"type": "symbol", "value": "tp53"}], repo, up)
+    assert not failed
+    assert resolved and resolved[0].uniprot_accession == "P04637"
+    assert resolved[0].gene_symbol == "TP53"
+    assert up.resolve_calls == 0
+    assert up.symbol_calls == 0

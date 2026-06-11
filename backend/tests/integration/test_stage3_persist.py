@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import select, text
 
 from app.integrations.chembl import ChemblHit
-from app.integrations.uniprot import UniProtRecord
+from app.integrations.uniprot import UniProtReason, UniProtRecord, UniProtResolution
 from app.models.compound_target import CompoundTarget
 from app.models.target import Target
 from app.pipeline.stages import stage3
@@ -31,7 +31,10 @@ class FakeUniProt:
         self.table = table
 
     async def resolve(self, accession):
-        return self.table.get(accession)
+        rec = self.table.get(accession)
+        if rec is not None:
+            return UniProtResolution(rec, None)
+        return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
 
 
 @pytest.mark.asyncio

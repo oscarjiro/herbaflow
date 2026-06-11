@@ -7,14 +7,25 @@ import logging
 import re
 import uuid
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Any
 
 from app.clock import now_utc
+from app.integrations.uniprot import UniProtReason, UniProtResolution
 from app.schemas.compound import CompoundInput, FailedInput, ResolvedCompound
 from app.schemas.target import ResolvedTarget, TargetInput
 from app.services import canonical, gene_symbols, structure
 
 logger = logging.getLogger("herbaflow.resolution")
+
+
+@dataclass(frozen=True)
+class AccessionResolution:
+    """Result of accession→target resolution: the target, or why it could not resolve."""
+
+    target: ResolvedTarget | None
+    reason: UniProtReason | None  # set iff target is None
+
 
 # Official UniProtKB accession grammar (https://www.uniprot.org/help/accession_numbers).
 # Used to classify a typeless manual target as an accession vs a gene symbol. A loose
@@ -24,6 +35,13 @@ logger = logging.getLogger("herbaflow.resolution")
 _ACCESSION_RE = re.compile(
     r"^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$"
 )
+
+# Honest accession-failure wording, distinguishing the two causes the UniProt client already
+# separates: a 400 (not a resolvable UniProt query at all) vs a valid query with no human hit.
+_ACCESSION_FAIL_MSG = {
+    UniProtReason.INVALID_ID: "not a UniProt accession",
+    UniProtReason.NO_HUMAN_RECORD: "no human (9606) UniProt record",
+}
 
 
 async def resolve_compounds(
@@ -135,14 +153,16 @@ async def resolve_target_accession(
     uniprot: Any,
     *,
     uniprot_source_id: uuid.UUID | None = None,
-) -> ResolvedTarget | None:
+) -> AccessionResolution:
     """Resolve a single UniProt accession (primary OR secondary) to a human (9606) target.
 
-    DB-first, persisting on a fresh hit. Returns ``None`` when the accession is not a
-    resolvable human target (skip — human-only). Identity is canonicalized on the entry's
-    **primary** accession (``rec.uniprot_accession``), so every alias/secondary accession of
-    one protein converges to one ``target_id`` — which prevents duplicate target rows for the
-    same protein reached via different accessions.
+    DB-first, persisting on a fresh hit. Returns ``AccessionResolution(target=None, reason=...)``
+    when the accession is not a resolvable human target (skip — human-only); the ``reason``
+    distinguishes a non-UniProt id (``INVALID_ID``) from a genuine no-human miss
+    (``NO_HUMAN_RECORD``). Identity is canonicalized on the entry's **primary** accession
+    (``rec.uniprot_accession``), so every alias/secondary accession of one protein converges to
+    one ``target_id`` — which prevents duplicate target rows for the same protein reached via
+    different accessions.
 
     This is the single home for accession→target resolution: both manual/STP resolution
     (``resolve_targets``) and Stage 3 (``stage3.run``) call it instead of duplicating the
@@ -154,32 +174,21 @@ async def resolve_target_accession(
     input_key = canonical.target_canonical_key(uniprot=acc)
     existing = await repo.get_by_key(input_key)
     if existing is not None:
-        return ResolvedTarget(
-            target_id=existing.target_id,
-            canonical_key=existing.canonical_key,
-            gene_symbol=existing.gene_symbol,
-            uniprot_accession=existing.uniprot_accession,
-            validation_status="db_hit",
-        )
+        return AccessionResolution(_db_hit(existing), None)
 
-    rec = await uniprot.resolve(acc)
-    if rec is None:
-        return None  # non-human / non-UniProt accession -> skip
+    rec_res: UniProtResolution = await uniprot.resolve(acc)
+    if rec_res.record is None:
+        return AccessionResolution(None, rec_res.reason)  # non-human / non-UniProt -> skip
 
     # Canonicalize on the PRIMARY accession so aliases of one entry converge to one id.
+    rec = rec_res.record
     primary = rec.uniprot_accession
     key = canonical.target_canonical_key(uniprot=primary)
     tid = uuid.UUID(canonical.target_id_from_key(key))
 
     existing = await repo.get_by_key(key)
     if existing is not None:
-        return ResolvedTarget(
-            target_id=existing.target_id,
-            canonical_key=existing.canonical_key,
-            gene_symbol=existing.gene_symbol,
-            uniprot_accession=existing.uniprot_accession,
-            validation_status="db_hit",
-        )
+        return AccessionResolution(_db_hit(existing), None)
 
     source_id = (
         uniprot_source_id
@@ -198,12 +207,25 @@ async def resolve_target_accession(
             "retrieved_at": now_utc(),
         }
     )
+    return AccessionResolution(
+        ResolvedTarget(
+            target_id=tid,
+            canonical_key=key,
+            gene_symbol=rec.gene_symbol,
+            uniprot_accession=primary,
+            validation_status="externally_validated",
+        ),
+        None,
+    )
+
+
+def _db_hit(existing: Any) -> ResolvedTarget:
     return ResolvedTarget(
-        target_id=tid,
-        canonical_key=key,
-        gene_symbol=rec.gene_symbol,
-        uniprot_accession=primary,
-        validation_status="externally_validated",
+        target_id=existing.target_id,
+        canonical_key=existing.canonical_key,
+        gene_symbol=existing.gene_symbol,
+        uniprot_accession=existing.uniprot_accession,
+        validation_status="db_hit",
     )
 
 
@@ -249,31 +271,39 @@ async def resolve_targets(
             sym = gene_symbols.normalize(token).canonical
             acc = gene_to_acc.get(sym, "")
             if not acc:
-                rec0 = (
+                cached = await repo.get_by_gene_symbol(sym)  # DB-first: skip UniProt if known
+                if cached is not None and cached.uniprot_accession:
+                    acc = cached.uniprot_accession
+                    gene_to_acc[sym] = acc
+            if not acc:
+                sym_res = (
                     await uniprot.resolve_symbol(sym)
                     if hasattr(uniprot, "resolve_symbol")
-                    else None
+                    else UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
                 )
-                acc = rec0.uniprot_accession if rec0 else ""
+                acc = sym_res.record.uniprot_accession if sym_res.record else ""
             if not acc:
                 failed.append(
                     FailedInput(
                         value=item.value,
-                        reason="gene symbol not resolved to a human UniProt accession",
+                        reason="gene symbol not found in human (9606) UniProt",
                         line=idx,
                     )
                 )
                 continue
 
-        rt = await resolve_target_accession(acc, repo, uniprot, uniprot_source_id=uniprot_source_id)
-        if rt is None:
-            failed.append(
-                FailedInput(
-                    value=item.value, reason="not a human (9606) UniProt accession", line=idx
-                )
+        acc_res = await resolve_target_accession(
+            acc, repo, uniprot, uniprot_source_id=uniprot_source_id
+        )
+        if acc_res.target is None:
+            reason = (
+                _ACCESSION_FAIL_MSG.get(acc_res.reason, "not a human (9606) UniProt accession")
+                if acc_res.reason is not None
+                else "not a human (9606) UniProt accession"
             )
+            failed.append(FailedInput(value=item.value, reason=reason, line=idx))
             continue
-        resolved[rt.canonical_key] = rt  # dedup on the primary key — aliases collapse
+        resolved[acc_res.target.canonical_key] = acc_res.target  # dedup on primary key
 
     logger.info("target resolution complete: %d resolved, %d failed", len(resolved), len(failed))
     return list(resolved.values()), failed
