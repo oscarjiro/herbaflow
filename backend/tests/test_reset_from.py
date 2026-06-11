@@ -608,3 +608,49 @@ def test_validate_overrides_rejects_off_enum_string() -> None:
 def test_validate_overrides_rejects_non_string_for_string_param() -> None:
     with pytest.raises(ValidationProblem):
         engine._validate_overrides("ppi", {"network_type": 123})
+
+
+# ---------------------------------------------------------------------------
+# Array param overrides (enrichment.sources): ADJUST-3
+# ---------------------------------------------------------------------------
+def test_validate_overrides_accepts_array_param() -> None:
+    # enrichment.sources is an array of strings -> must validate, not 422.
+    engine._validate_overrides("enrichment", {"sources": ["GO:BP", "KEGG"]})
+
+
+def test_validate_overrides_rejects_non_array_for_array_param() -> None:
+    with pytest.raises(ValidationProblem):
+        engine._validate_overrides("enrichment", {"sources": "GO:BP"})
+
+
+def test_validate_overrides_rejects_non_string_array_items() -> None:
+    with pytest.raises(ValidationProblem):
+        engine._validate_overrides("enrichment", {"sources": [1, 2]})
+
+
+# ---------------------------------------------------------------------------
+# Terminal-leaf empty-gate exemption: ADJUST-4
+# Stage 8 with count==0 (honest null) must COMPLETE, not park/fail.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_stage8_zero_terms_completes_not_parked(monkeypatch) -> None:
+    monkeypatch.setattr(engine, "RUNNABLE_STAGES", (8,))
+    monkeypatch.setattr(engine, "NEEDS_APPROVAL", frozenset())  # auto chain
+    run = SimpleNamespace(
+        id=uuid.uuid4(),
+        mode="auto",
+        status="stage_8_running",
+        current_stage=8,
+        parameters={},
+        stage_results={},
+    )
+    repo = FakeRepo(run)
+
+    async def _s8(_run: Any) -> dict:
+        return {"terms": [], "count": 0, "state": "computed", "flags": ["empty_input"]}
+
+    await engine.execute_run(repo, run.id, {8: _s8})
+    # Stage 8 with 0 terms is NOT empty-gated: the run completes rather than parking/failing.
+    assert run.status == "complete"
+    assert run.status != "stage_8_awaiting_approval"  # not parked as an empty stage
+    assert run.status != "failed"
