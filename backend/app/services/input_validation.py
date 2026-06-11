@@ -170,6 +170,16 @@ async def resolve_target_accession(
     """
     acc = accession.strip().upper()
 
+    # Non-UniProt-grammar id (e.g. a PubChem BioAssay RefSeq NP_*/YP_*/XP_*, PDB 1VRU_A, or
+    # GenBank AAK85233 accession): it can neither key a stored target (identity canonicalizes on a
+    # UniProt primary accession) nor resolve via uniprot.resolve (which searches only
+    # accession:/sec_acc: and would 400). Short-circuit without a DB or network round-trip — this
+    # removes the dominant Stage-3 runtime cost (thousands of doomed UniProt calls). Reuses the
+    # same strict UniProtKB grammar used to classify manual targets. Secondary accessions share
+    # the grammar, so they still flow through.
+    if not _ACCESSION_RE.match(acc):
+        return AccessionResolution(None, UniProtReason.INVALID_ID)
+
     # Fast path: a target already stored under this exact accession's key — no network call.
     input_key = canonical.target_canonical_key(uniprot=acc)
     existing = await repo.get_by_key(input_key)

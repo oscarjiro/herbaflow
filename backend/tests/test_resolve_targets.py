@@ -202,6 +202,55 @@ async def test_accession_no_human_record_reports_honest_message():
     assert failed[0].line == 1
 
 
+# ---------------------------------------------------------------------------
+# D6: non-UniProt-grammar accessions must be short-circuited before any
+#     DB or network call (removes thousands of doomed round-trips in Stage 3).
+# ---------------------------------------------------------------------------
+
+
+class _CountingUniProt_d6:
+    """Records whether resolve() was hit, so we can prove D6 avoids the network."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def resolve(self, acc: str) -> UniProtResolution:
+        self.calls += 1
+        return UniProtResolution(None, UniProtReason.INVALID_ID)
+
+
+class _EmptyRepo_d6:
+    async def get_by_key(self, key):  # no DB hit
+        return None
+
+    async def source_id_by_name(self, name):
+        return None
+
+    async def upsert(self, row):  # pragma: no cover - not reached in this test
+        return None
+
+
+@pytest.mark.asyncio
+async def test_resolve_target_accession_skips_non_uniprot_without_network():
+    # A PubChem-BioAssay RefSeq/PDB/GenBank id is not a UniProt accession: it can neither key a
+    # stored target (targets canonicalize on a UniProt primary) nor resolve via accession:/sec_acc:
+    # (it 400s). It must be skipped with INVALID_ID and ZERO UniProt calls.
+    up = _CountingUniProt_d6()
+    res = await resolve_target_accession("NP_001234", _EmptyRepo_d6(), up, uniprot_source_id=None)
+    assert res.target is None
+    assert res.reason is UniProtReason.INVALID_ID
+    assert up.calls == 0
+
+
+@pytest.mark.asyncio
+async def test_resolve_target_accession_still_calls_uniprot_for_real_accession():
+    # A UniProt-grammar accession is NOT skipped — it proceeds to resolve (DB-miss -> network).
+    up = _CountingUniProt_d6()
+    res = await resolve_target_accession("P00533", _EmptyRepo_d6(), up, uniprot_source_id=None)
+    assert up.calls == 1  # the guard does not block real accessions
+    assert res.target is None  # _CountingUniProt_d6 returns no record, but the call was made
+
+
 @pytest.mark.asyncio
 async def test_unknown_symbol_reports_honest_message():
     repo = FakeTargetRepo()
