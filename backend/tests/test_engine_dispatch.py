@@ -93,12 +93,24 @@ def _runners(
     async def stage5_runner(run: SimpleNamespace) -> dict:
         return await stage5.run(None, run)
 
+    async def stage6_runner(run: SimpleNamespace) -> dict:
+        # Engine-dispatch fake: a ready-made computed PPI result (no STRING call).
+        return {
+            "state": "computed",
+            "nodes": [{"gene_symbol": "G0", "string_id": None}],
+            "edges": [],
+            "node_count": 1,
+            "edge_count": 0,
+            "count": 1,
+        }
+
     return {
         1: stage1_runner,
         2: stage2_runner,
         3: stage3_runner,
         4: stage4_runner,
         5: stage5_runner,
+        6: stage6_runner,
     }
 
 
@@ -129,6 +141,10 @@ async def test_guided_pauses_then_advances_through_all_stages() -> None:
     assert run.current_stage == 5
 
     await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_6_awaiting_approval"
+    assert run.current_stage == 6
+
+    await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "complete"
 
 
@@ -145,7 +161,8 @@ async def test_auto_chains_to_complete() -> None:
     assert run.stage_results["3"]["state"] == "computed"
     assert run.stage_results["4"]["state"] == "computed"
     assert run.stage_results["5"]["state"] == "computed"
-    assert run.current_stage == 5
+    assert run.stage_results["6"]["state"] == "computed"
+    assert run.current_stage == 6
 
 
 @pytest.mark.asyncio

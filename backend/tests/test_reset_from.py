@@ -150,7 +150,7 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
     stage1 emits a computed fragment from the *effective* S1 set already stored (it is
     never recomputed in this chunk); stage2 emits a count = size of the effective S1 set.
     """
-    calls: dict[str, list] = {"1": [], "2": [], "3": [], "4": [], "5": []}
+    calls: dict[str, list] = {"1": [], "2": [], "3": [], "4": [], "5": [], "6": []}
 
     def fake_build_runners(session: Any) -> dict[int, Any]:
         async def stage1_runner(run: SimpleNamespace) -> dict:
@@ -201,12 +201,25 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
             calls["5"].append(True)
             return await stage5.run(None, run)
 
+        async def stage6_runner(run: SimpleNamespace) -> dict:
+            # Ready-made computed PPI result (no STRING call) -> count 1.
+            calls["6"].append(True)
+            return {
+                "state": "computed",
+                "nodes": [{"gene_symbol": "G0", "string_id": None}],
+                "edges": [],
+                "node_count": 1,
+                "edge_count": 0,
+                "count": 1,
+            }
+
         return {
             1: stage1_runner,
             2: stage2_runner,
             3: stage3_runner,
             4: stage4_runner,
             5: stage5_runner,
+            6: stage6_runner,
         }
 
     monkeypatch.setattr(engine, "build_runners", fake_build_runners)
@@ -266,11 +279,13 @@ async def test_param_redo_change_clears_2_and_reruns(monkeypatch: pytest.MonkeyP
 
     await svc.reset_from(run.analysis_id, 2, {"max_violations": 0})
 
-    # param Redo of S2 clears its produced downstream closure (2 + the produced 3); S5 is in
-    # the closure but was not produced, so it is re-run (and S4 is read from its stored result).
+    # param Redo of S2 clears its produced downstream closure (2 + the produced 3); S5 and S6
+    # are in the closure but were not produced, so they are re-run (S4 is read from its stored
+    # result).
     assert {2, 3} in repo.cleared
     assert len(calls["2"]) == 1  # re-ran stage 2
     assert len(calls["5"]) == 1  # re-ran stage 5 (pulled in via the S3->S5 dependency)
+    assert len(calls["6"]) == 1  # re-ran stage 6 (pulled in via the S5->S6 dependency)
     assert calls["1"] == []  # did NOT re-run stage 1
     assert run.parameters["adme"]["max_violations"] == 0
     assert run.status == "complete"

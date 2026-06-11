@@ -124,15 +124,33 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
         }
 
     async def stage5_runner(r: SimpleNamespace) -> dict:
-        # S3/S4 both carry t0 -> overlap count 1 -> S5 succeeds and the run completes.
+        # S3/S4 both carry t0 -> overlap count 1 -> S5 succeeds and feeds S6.
         return await stage5.run(None, r)
+
+    async def stage6(_run: SimpleNamespace) -> dict:
+        # Ready-made computed PPI result (no STRING call) -> the run completes.
+        return {
+            "state": "computed",
+            "nodes": [{"gene_symbol": "G0", "string_id": None}],
+            "edges": [],
+            "node_count": 1,
+            "edge_count": 0,
+            "count": 1,
+        }
 
     monkeypatch.setattr(engine.db, "session_scope", fake_scope)
     monkeypatch.setattr(engine, "AnalysisRepository", lambda session: _FakeRepo(run))
     monkeypatch.setattr(
         engine,
         "build_runners",
-        lambda session: {1: stage1, 2: stage2, 3: stage3, 4: stage4, 5: stage5_runner},
+        lambda session: {
+            1: stage1,
+            2: stage2,
+            3: stage3,
+            4: stage4,
+            5: stage5_runner,
+            6: stage6,
+        },
     )
 
     await engine.run_stages_task(run.analysis_id, 1)

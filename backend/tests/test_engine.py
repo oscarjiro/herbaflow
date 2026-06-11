@@ -91,12 +91,24 @@ def _runners(stage1_count, stage2_count, stage3_count=1, stage4_count=1):
     async def stage5_runner(r):
         return await stage5.run(None, r)
 
+    async def stage6_runner(r):
+        # Engine-dispatch fake: a ready-made computed PPI result (no STRING call).
+        return {
+            "state": "computed",
+            "nodes": [{"gene_symbol": "G0", "string_id": None}],
+            "edges": [],
+            "node_count": 1,
+            "edge_count": 0,
+            "count": 1,
+        }
+
     return {
         1: stage1_runner,
         2: stage2_runner,
         3: stage3_runner,
         4: stage4_runner,
         5: stage5_runner,
+        6: stage6_runner,
     }
 
 
@@ -135,6 +147,10 @@ async def test_guided_pauses_for_approval() -> None:
     # Approving stage 4 runs stage 5 (overlap), which (guided) pauses at the S5 checkpoint.
     await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "stage_5_awaiting_approval"
+
+    # Approving stage 5 runs stage 6 (PPI), which (guided) pauses at the S6 checkpoint.
+    await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_6_awaiting_approval"
 
     # Approving the last runnable stage completes the run.
     await engine.advance_run(repo, run.analysis_id, runners)
