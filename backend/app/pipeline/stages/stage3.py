@@ -81,7 +81,11 @@ async def compute(
         for h in chembl_hits:
             winner[h.uniprot_accession] = ("chembl_bioactivity", h.pchembl_value)
 
-        coverage = 0
+        # Collapse resolved accessions to ONE edge per distinct target_id, ChEMBL > PubChem.
+        # Two different accessions (e.g. a primary + a secondary of one protein) can resolve to
+        # the same target_id; counting raw accessions overcounts coverage and emits duplicate
+        # in-memory edges (the DB upsert is pair-keyed, so durable data was already correct).
+        by_target: dict[str, dict[str, Any]] = {}
         for acc, (method, pchembl) in winner.items():
             resolved = await resolve_target(acc)
             if resolved is None:
@@ -89,19 +93,22 @@ async def compute(
             tid, gene, _key = resolved
             tid_s = str(tid)
             targets.setdefault(tid_s, {"target_id": tid_s, "canonical_name": gene or acc})
-            edges.append(
-                {
-                    "compound_id": cid,
-                    "target_id": tid_s,
-                    "prediction_method": method,
-                    "pchembl_value": pchembl,
-                    "score": pchembl,
-                    "source_url": f"https://www.uniprot.org/uniprotkb/{acc}/entry",
-                    "uniprot_accession": acc,
-                }
-            )
-            coverage += 1
-        per_compound[cid] = {"coverage": coverage}
+            cand = {
+                "compound_id": cid,
+                "target_id": tid_s,
+                "prediction_method": method,
+                "pchembl_value": pchembl,
+                "score": pchembl,
+                "source_url": f"https://www.uniprot.org/uniprotkb/{acc}/entry",
+                "uniprot_accession": acc,
+            }
+            prev = by_target.get(tid_s)
+            if prev is None or (
+                method == "chembl_bioactivity" and prev["prediction_method"] != "chembl_bioactivity"
+            ):
+                by_target[tid_s] = cand
+        edges.extend(by_target.values())
+        per_compound[cid] = {"coverage": len(by_target)}
 
     await asyncio.gather(*(_one(c) for c in compounds))
 

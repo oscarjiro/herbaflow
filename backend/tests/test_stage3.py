@@ -90,3 +90,37 @@ async def test_nonhuman_accession_skipped():
     accs = {e["uniprot_accession"] for e in result["compound_targets"]}
     assert accs == {"P04637"}
     assert result["per_compound"]["11111111-1111-5111-8111-111111111111"]["coverage"] == 1
+
+
+@pytest.mark.asyncio
+async def test_coverage_counts_distinct_targets_not_accessions():
+    # ChEMBL reports the primary (P04637); PubChem reports a SECONDARY accession (Q14225) of the
+    # SAME protein. Both resolve to one target_id -> coverage must be 1 (distinct targets), and a
+    # single edge is emitted with ChEMBL winning the precedence.
+    async def _resolve_alias(acc):
+        primary = "P04637" if acc in ("P04637", "Q14225") else acc
+        key = canonical.target_canonical_key(uniprot=primary)
+        return uuid.UUID(canonical.target_id_from_key(key)), "TP53", key
+
+    compounds = [
+        {
+            "compound_id": "11111111-1111-5111-8111-111111111111",
+            "inchi_key": "IKA",
+            "canonical_name": "A",
+        }
+    ]
+    chembl = FakeChembl({"IKA": [("P04637", 6.0)]})
+    pubchem = FakePubchem({"IKA": ["Q14225"]})
+    result = await stage3.compute(
+        compounds,
+        chembl,
+        pubchem,
+        resolve_target=_resolve_alias,
+        min_pchembl=5.0,
+        min_confidence=7,
+    )
+    cid = "11111111-1111-5111-8111-111111111111"
+    assert result["per_compound"][cid]["coverage"] == 1  # one distinct target, not two accessions
+    edges = result["compound_targets"]
+    assert len(edges) == 1  # one edge per (compound, target)
+    assert edges[0]["prediction_method"] == "chembl_bioactivity"  # ChEMBL wins
