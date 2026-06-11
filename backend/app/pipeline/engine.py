@@ -282,6 +282,17 @@ def _validate_overrides(group: str, overrides: dict[str, Any]) -> None:
             if not isinstance(value, bool):
                 raise ValidationProblem(detail=f"{name} must be a boolean.")
             continue
+        if kind == "string":
+            # String params (e.g. network_type) carry a closed enum vocabulary; enforce it
+            # (unlike a numeric tier, an off-list string is meaningless to the downstream API).
+            if not isinstance(value, str):
+                raise ValidationProblem(detail=f"{name} must be a string.")
+            allowed = spec.get("enum")
+            if allowed is not None and value not in allowed:
+                raise ValidationProblem(
+                    detail=f"{name} must be one of: {', '.join(map(str, allowed))}."
+                )
+            continue
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValidationProblem(detail=f"{name} must be a number.")
         if kind == "integer" and isinstance(value, float) and not value.is_integer():

@@ -589,3 +589,22 @@ async def test_reset_from_defer_returns_run_set(monkeypatch):
     )
     assert run_set == frozenset({7})  # the caller schedules exactly this set
     assert run.status == "stage_7_running"  # *_running committed at min(run_set)
+
+
+# ---------------------------------------------------------------------------
+# String/enum param overrides (ppi.network_type): validated as a string against its
+# enum, not rejected by the numeric fallthrough ("must be a number").
+# ---------------------------------------------------------------------------
+def test_validate_overrides_accepts_enum_string_param() -> None:
+    engine._validate_overrides("ppi", {"network_type": "physical"})  # valid enum member
+    engine._validate_overrides("ppi", {"min_confidence": 0.7})  # numeric tier still fine
+
+
+def test_validate_overrides_rejects_off_enum_string() -> None:
+    with pytest.raises(ValidationProblem):
+        engine._validate_overrides("ppi", {"network_type": "bogus"})
+
+
+def test_validate_overrides_rejects_non_string_for_string_param() -> None:
+    with pytest.raises(ValidationProblem):
+        engine._validate_overrides("ppi", {"network_type": 123})
