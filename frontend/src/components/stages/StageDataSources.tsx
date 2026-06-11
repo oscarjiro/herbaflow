@@ -3,6 +3,10 @@ const STAGE_SOURCES: Record<number, string[]> = {
   2: ["RDKit (descriptors, PAINS)"],
   3: ["ChEMBL", "PubChem BioAssay", "UniProt"],
   4: ["Open Targets (ETL-seeded disease–target associations)"],
+  5: [
+    "Overlap of Stage 3 ∩ Stage 4 (target_id)",
+    "Jaccard + one-sided hypergeometric (N=20,000, α=0.05)",
+  ],
 };
 
 export function StageDataSources({ stage }: { stage: number }) {
