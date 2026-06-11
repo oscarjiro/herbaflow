@@ -92,7 +92,15 @@ async def compute(
                 continue  # not a human UniProt target -> skip (human-only)
             tid, gene, _key = resolved
             tid_s = str(tid)
-            targets.setdefault(tid_s, {"target_id": tid_s, "canonical_name": gene or acc})
+            targets.setdefault(
+                tid_s,
+                {
+                    "target_id": tid_s,
+                    "canonical_name": gene or acc,
+                    "gene_symbol": gene,
+                    "uniprot_accession": acc,
+                },
+            )
             cand = {
                 "compound_id": cid,
                 "target_id": tid_s,

@@ -45,8 +45,8 @@ def _mappable(overlap: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def select_inputs(
     stage5: dict[str, Any], *, max_proteins: int, allow_top_n_cap: bool
-) -> tuple[list[str], dict[str, Any]]:
-    """Distinct mappable gene symbols + the cap metadata (assumes n <= cap OR opt-in on)."""
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Distinct mappable overlap ROWS + the cap metadata (assumes n <= cap OR opt-in on)."""
     rows = _mappable(stage5.get("overlap", []))
     capped = {
         "applied": False,
@@ -58,13 +58,13 @@ def select_inputs(
             :max_proteins
         ]
         capped["applied"] = True
-    return [r["gene_symbol"] for r in rows], capped
+    return rows, capped
 
 
 def compute_blocked_or_inputs(
     stage5: dict[str, Any], *, max_proteins: int, allow_top_n_cap: bool
 ) -> dict[str, Any]:
-    """Either the BLOCKED marker (overflow, opt-in off) or the selected-inputs envelope."""
+    """Either the BLOCKED marker (overflow, opt-in off) or the selected-rows envelope."""
     n = len(_mappable(stage5.get("overlap", [])))
     if n > max_proteins and not allow_top_n_cap:
         return {
@@ -73,30 +73,42 @@ def compute_blocked_or_inputs(
             "overlap_count": n,
             "max_proteins": max_proteins,
         }
-    symbols, capped = select_inputs(
-        stage5, max_proteins=max_proteins, allow_top_n_cap=allow_top_n_cap
-    )
-    return {"blocked": False, "symbols": symbols, "capped": capped}
+    rows, capped = select_inputs(stage5, max_proteins=max_proteins, allow_top_n_cap=allow_top_n_cap)
+    return {"blocked": False, "rows": rows, "capped": capped}
 
 
 def build_result(
-    symbols: list[str],
+    rows: list[dict[str, Any]],
     edges: list[StringEdge],
     *,
     min_confidence: float,
     network_type: str,
     capped: dict[str, Any],
 ) -> dict[str, Any]:
-    """Shape STRING edges + the input gene set into the stored Stage-6 result.
+    """Shape STRING edges + the input overlap rows into the stored Stage-6 result.
 
-    Nodes = the mappable input genes (isolated nodes are reported, honest); genes STRING could
-    not place still appear as nodes here (the input set), while genes STRING dropped from edges
-    are simply edge-absent. ``unmapped`` records input genes STRING returned in NO edge AND no
-    node id (none, since multi-protein queries echo only edges — kept for forward-compat).
+    Nodes carry the overlap identity (gene_symbol + target_id + uniprot_accession) so Stage 7
+    can rank hubs and link each to UniProt. Isolated nodes are reported (honest); genes STRING
+    dropped from edges are simply edge-absent. ``unmapped`` records input genes STRING returned
+    in NO edge AND no node id (none, since multi-protein queries echo only edges — kept for
+    forward-compat).
     """
-    node_syms = list(dict.fromkeys(symbols))
-    nodes = [{"gene_symbol": g, "string_id": None} for g in node_syms]
-    node_set = set(node_syms)
+    seen: set[str] = set()
+    nodes: list[dict[str, Any]] = []
+    for r in rows:
+        g = r["gene_symbol"]
+        if g in seen:
+            continue
+        seen.add(g)
+        nodes.append(
+            {
+                "gene_symbol": g,
+                "target_id": r.get("target_id"),
+                "uniprot_accession": r.get("uniprot_accession"),
+                "string_id": None,
+            }
+        )
+    node_set = set(seen)
     edge_rows = [
         {"source": e.source, "target": e.target, "confidence": e.confidence}
         for e in edges
@@ -146,7 +158,8 @@ async def run(
         )
         return envelope
 
-    symbols = envelope["symbols"]
+    rows = envelope["rows"]
+    symbols = [r["gene_symbol"] for r in rows]
     if client is not None:
         edges = await client.network(
             symbols, min_confidence=min_confidence, network_type=network_type
@@ -157,7 +170,7 @@ async def run(
                 symbols, min_confidence=min_confidence, network_type=network_type
             )
     result = build_result(
-        symbols,
+        rows,
         edges,
         min_confidence=min_confidence,
         network_type=network_type,

@@ -40,7 +40,12 @@ import { StaleNotice } from "./StaleNotice";
 // Local types for the Stage 6 result shapes (narrowed from unknown)
 // ---------------------------------------------------------------------------
 
-type Stage6Node = { gene_symbol: string; string_id: string };
+type Stage6Node = {
+  gene_symbol: string;
+  string_id: string | null;
+  target_id?: string | null;
+  uniprot_accession?: string | null;
+};
 type Stage6Edge = { source: string; target: string; confidence: number };
 
 type Stage6Computed = {

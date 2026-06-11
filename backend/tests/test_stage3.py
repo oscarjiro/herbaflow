@@ -124,3 +124,37 @@ async def test_coverage_counts_distinct_targets_not_accessions():
     edges = result["compound_targets"]
     assert len(edges) == 1  # one edge per (compound, target)
     assert edges[0]["prediction_method"] == "chembl_bioactivity"  # ChEMBL wins
+
+
+@pytest.mark.asyncio
+async def test_targets_carry_gene_symbol_and_accession():
+    """Each target row in compute() output must expose gene_symbol + uniprot_accession."""
+
+    async def _resolve(acc):
+        if acc == "P00533":
+            key = canonical.target_canonical_key(uniprot="P00533")
+            return uuid.UUID(canonical.target_id_from_key(key)), "EGFR", key
+        return None
+
+    compounds = [
+        {
+            "compound_id": "11111111-1111-1111-1111-111111111111",
+            "inchi_key": "IK",
+            "canonical_name": "TestCompound",
+        }
+    ]
+    chembl = FakeChembl({"IK": [("P00533", 6.5)]})
+    pubchem = FakePubchem({})
+    result = await stage3.compute(
+        compounds,
+        chembl,
+        pubchem,
+        resolve_target=_resolve,
+        min_pchembl=5.0,
+        min_confidence=8,
+    )
+    assert len(result["targets"]) == 1
+    t = result["targets"][0]
+    assert t["gene_symbol"] == "EGFR"
+    assert t["uniprot_accession"] == "P00533"
+    assert t["canonical_name"] == "EGFR"  # gene or acc, unchanged semantics
