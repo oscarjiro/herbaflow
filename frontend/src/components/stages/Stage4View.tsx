@@ -19,7 +19,7 @@
  * score/UniProt columns render "—" (symmetric with Stage 3 user-added targets).
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
@@ -142,6 +142,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [page, setPage] = useState(0);
+  const [alreadyInRun, setAlreadyInRun] = useState<ResolvedTarget[]>([]);
 
   const rows = useMemo(() => (stage4 ? buildRows(stage4) : []), [stage4]);
   const csvHref = useMemo(() => {
@@ -175,9 +176,18 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
     tag: t.tag,
   }));
 
-  function handleAddTargets(resolved: ResolvedTarget[]) {
-    edit.mutate({ add: resolved.map((r) => r.target_id), remove: [] });
-  }
+  const handleAddTargets = useCallback(
+    (resolved: ResolvedTarget[]) => {
+      const currentIds = new Set((stage4?.targets ?? []).map((t) => t.target_id));
+      const already = resolved.filter((r) => currentIds.has(r.target_id));
+      const fresh = resolved.filter((r) => !currentIds.has(r.target_id));
+      setAlreadyInRun(already);
+      if (fresh.length > 0) {
+        edit.mutate({ add: fresh.map((r) => r.target_id), remove: [] });
+      }
+    },
+    [stage4, edit],
+  );
 
   return (
     <section className="stage-view stage-view--4">
@@ -307,6 +317,14 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
           />
         }
       />
+
+      {/* Already-in-run note */}
+      {alreadyInRun.length > 0 && (
+        <p className="hf-muted" role="status">
+          {alreadyInRun.length} already in run:{" "}
+          {alreadyInRun.map((t) => t.gene_symbol ?? t.uniprot_accession ?? t.target_id).join(", ")}
+        </p>
+      )}
 
       {dtParams && (
         <ParamPanel
