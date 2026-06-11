@@ -574,6 +574,66 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
   persisted back to the `compounds` table after computation.
 - `"unscreened"` — `skip_adme` was on; no descriptor access took place.
 
+**Overlap stage** (Stage 5 — no parameters):
+
+```jsonc
+{
+  "overlap": [
+    {"target_id": "<uuid>", "gene_symbol": "<str|null>",
+     "uniprot_accession": "<str|null>", "disease_association_score": <float|null>},
+    ...
+  ],
+  "count": <int>,                  // overlap size; 0 = terminal hard-stop (BOTH modes)
+  "compound_target_count": <int>,  // |Stage-3 target set|
+  "disease_target_count": <int>,   // |Stage-4 target set|
+  "union_count": <int>,
+  "jaccard": <float>,              // |A∩B| / |A∪B|, rounded to 6dp
+  "hypergeometric": {
+    "background_n": 20000, "K": <int>, "n": <int>, "k": <int>,
+    "p_value": <float>, "alpha": 0.05, "significant": <bool>
+  },
+  "unmapped_count": <int>,         // overlap targets with no gene_symbol (cannot go to STRING)
+  "state": "computed",
+  "flags": [ /* "non_significant_overlap" | "unmapped_targets" | "set_exceeds_background" */ ]
+}
+```
+
+Stage 5 intersects the Stage-3 compound-target set with the Stage-4 disease-target set on the
+canonical `target_id` (both columns are FKs to `targets.target_id`). It has **no parameters** — the
+background universe (N = 20,000 human protein-coding genes) and significance threshold (α = 0.05)
+are fixed method constants, not configuration. A **0-overlap result is a terminal scientific
+hard-stop in both guided and auto modes** (the run fails — there is nothing downstream to build).
+
+**PPI stage** (Stage 6 — STRING network; `parameters.ppi`).
+
+Computed result:
+
+```jsonc
+{
+  "state": "computed",
+  "nodes": [{"gene_symbol": "<str>", "string_id": null}, ...],   // the mappable input genes
+  "edges": [{"source": "<gene>", "target": "<gene>", "confidence": <float 0–1>}, ...],
+  "node_count": <int>, "edge_count": <int>,
+  "min_confidence": <float>, "network_type": "functional|physical",
+  "unmapped": [],
+  "capped": {"applied": <bool>, "max_proteins": <int>, "ranked_by": "disease_association_score"},
+  "count": <int>,                  // = node_count
+  "flags": [ /* "sparse_or_empty_network" */ ]
+}
+```
+
+Blocked result (overlap exceeds `max_proteins` with `allow_top_n_cap` off):
+
+```jsonc
+{"blocked": true, "reason": "overlap_too_large", "overlap_count": <int>, "max_proteins": <int>}
+```
+
+The blocked marker drives the AD-6 mechanism: a **guided** run parks at the Stage-6 checkpoint (the
+UI prompts to enable the top-N cap or narrow the inputs); an **auto** run hard-fails. Recover by
+Redoing Stage 6 with `allow_top_n_cap: true` (proceeds on the top-N overlap targets ranked by
+disease-association score) or by raising `max_proteins`. Community/module detection is deferred
+(future work) — Stage 6 delivers the PPI-source network only.
+
 ---
 
 #### ADME parameters and gate semantics
@@ -640,6 +700,25 @@ Current `adme` parameters (all sourced from `shared/contracts/analysis.json`):
 
 ---
 
+#### `parameters.ppi` block (Stage 6)
+
+Frozen from the contract defaults at run-creation (like `adme`). Two of the four are enum-bounded
+and render as selects in the UI:
+
+| Parameter | Type | Default | Bounds / enum | Notes |
+|---|---|---|---|---|
+| `min_confidence` | number | 0.4 | enum {0.15, 0.4, 0.7, 0.9} | STRING edge-confidence floor → `required_score = round(× 1000)` |
+| `max_proteins` | integer | 2000 | ≥50, ≤2000 (rec. 200–2000) | Self-imposed STRING ceiling; over it requires `allow_top_n_cap` |
+| `allow_top_n_cap` | boolean | false | — | Proceed on the top-N overlap targets (by disease score) when over the ceiling |
+| `network_type` | string | functional | enum {functional, physical} | STRING network: all association evidence vs binding-only |
+
+`min_confidence` carries no hard `minimum`/`maximum` (the UI restricts it to the tiers; the backend
+accepts any number). `network_type` IS enum-validated on Redo — a string outside the closed
+vocabulary is rejected **422**. The original `community_resolution` param (module detection) was
+dropped; module detection is deferred future work.
+
+---
+
 #### Dependency DAG and re-run rules
 
 Re-runs follow a **dependency DAG**, not raw stage numbering:
@@ -654,13 +733,20 @@ S4 ────────────┘    └──────→ S8
 parallel leaves.
 
 **Param Redo** (changing a param-bearing stage's parameters via `POST /analyses/{id}/reset-from/{stage}`
-with a `param_overrides` body): re-runs from **that stage, inclusive**, plus its downstream closure.
-A no-op Redo (overrides equal the current frozen values) returns immediately without clearing or
-re-running.
+with a `param_overrides` body): re-runs **that stage plus its downstream closure** (the stage itself
+is inclusive). A no-op Redo (overrides equal the current frozen values) returns immediately without
+clearing or re-running.
 
 **Set edit** (adding/removing entities on an entity stage via `POST /analyses/{id}/stages/{stage}/edit`):
-re-runs from the **next dependent stage(s), exclusive** — the edit is itself the new output. For
-example, editing Step-1 compounds re-runs from Step 2.
+**stages** the change — it re-derives the edited stage in place, flags the produced downstream stages
+`stale`, and re-runs **nothing**. The subsequent `reset-from` is the sole recompute; it re-runs the
+runnable members of the dependency closure, **exclusive** of the edited stage (editing Step-1
+compounds → the closure re-run starts at Step 2).
+
+**Closure, not a linear range (F3):** a re-run executes exactly the runnable members of the
+dependency *closure* — never "every later-numbered stage". Because Stage 4 (disease targets) is an
+independent root, a compound-chain edit or a Step-2/3 Redo re-runs `{…, 5, 6}` but **not** Stage 4;
+conversely a Stage-4 Redo re-runs `{5, 6}` without touching the compound chain.
 
 Both `reset-from` and stage-edit are rejected with **409 Conflict** unless the run is settled
 (`*_awaiting_approval` / `complete` / `failed`). `reset-from` is destructive: the downstream

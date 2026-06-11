@@ -300,10 +300,49 @@ ETL-time source) and lists the `min_score` used for the run.
 **Rendering:** Like the other stages, the view renders by `stage_state` (`computed` vs
 `user_provided`) — a non-empty edit layer marks the set user-provided.
 
-> **Forward note (Stage 5 overlap):** Stage 5 will consume the **run-scoped** Stage-3 (compound→target)
-> and Stage-4 (disease→target) target sets from `analysis_runs.stage_results` — **including
-> user-added targets** — and intersect those, **not** the global `compound_targets` / `disease_targets`
-> edges. The run's curated sets are authoritative for overlap.
+---
+
+### Step 5 — Target Overlap
+
+**Component:** `src/components/stages/Stage5View.tsx`.
+
+**Results view:** Read-only — Stage 5 has **no parameters** and is not an entity stage. Summary
+**cards** lead: overlap count, the Jaccard index, the hypergeometric p-value, and a clear
+**significant / not-significant badge** (driven by `hypergeometric.significant` and the
+`non_significant_overlap` flag). An **overlap table** lists each shared target by gene symbol +
+UniProt accession (linked to the UniProt entry) with its disease-association score, paginated like
+the other stages. Stage 5 intersects the **run-scoped** Stage-3 (compound→target) and Stage-4
+(disease→target) sets from `stage_results` — including user-added targets — on the canonical
+`target_id`, **not** the global edge tables. A 0-overlap run is a terminal hard-stop.
+
+**CSV export:** gene symbol + UniProt accession + disease-association score + UniProt source URL.
+
+**No param panel.** The data-sources footer states the fixed method (Jaccard + one-sided
+hypergeometric, N = 20,000, α = 0.05) — method constants, not configuration.
+
+---
+
+### Step 6 — PPI Network
+
+**Component:** `src/components/stages/Stage6View.tsx`.
+
+**Results view (computed):** Summary **cards** lead (node count, edge count, `min_confidence`,
+`network_type`, unmapped count); an **edge-list table** lists each STRING interaction (source,
+target, confidence 0–1), paginated, with **CSV export**. A "capped" note appears when the top-N cap
+was applied.
+
+**Overlap-too-large (blocked):** when `stage_results["6"].blocked` is true, the edge table is
+replaced by a prompt explaining the overlap (`overlap_count`) exceeds the STRING ceiling
+(`max_proteins`), with an **"Enable top-N & Redo"** action (Redo with `allow_top_n_cap: true`) and a
+hint to narrow the inputs upstream. A guided run parks here; an auto run hard-fails (AD-6).
+
+**Param panel + Redo:** the `ppi` group is exposed via the generic `ParamPanel` — `max_proteins`
+(numeric), `allow_top_n_cap` (checkbox), and `min_confidence` / `network_type` as **enum selects**
+(`ParamPanel` was extended with generic `selectKeys` support for this). Redo submits
+`POST /analyses/{id}/reset-from/6`.
+
+**Footer:** attributes the network to STRING (human only, species 9606). Graph *visualisation* is
+deferred to the Phase-5 design pass — the edge list is the current surface.
 
 ---
 
