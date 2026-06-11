@@ -32,6 +32,7 @@ import { useStaleState } from "../../hooks/useStaleState";
 import { ApprovalBar } from "./ApprovalBar";
 import { EditableEntityList } from "./EditableEntityList";
 import { ParamPanel } from "./ParamPanel";
+import { StageDataSources } from "./StageDataSources";
 import { StaleNotice } from "./StaleNotice";
 import { TargetValidateBox } from "../TargetValidateBox";
 
@@ -192,6 +193,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   return (
     <section className="stage-view stage-view--4">
       <h2>Step 4 — Disease Targets</h2>
+      <StageDataSources stage={4} />
 
       <div className="stage-summary">
         <div className="summary-card" aria-label={`${stage4.count} targets`}>

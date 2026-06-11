@@ -28,6 +28,7 @@ import { useStaleState } from "../../hooks/useStaleState";
 import { ApprovalBar } from "./ApprovalBar";
 import { EditableEntityList } from "./EditableEntityList";
 import { ParamPanel } from "./ParamPanel";
+import { StageDataSources } from "./StageDataSources";
 import { StaleNotice } from "./StaleNotice";
 import { StpDialog, type StpCompound } from "./StpDialog";
 import { TargetValidateBox } from "../TargetValidateBox";
@@ -278,6 +279,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   return (
     <section className="stage-view stage-view--3">
       <h2>Step 3 — Target Identification</h2>
+      <StageDataSources stage={3} />
 
       {/* Summary cards */}
       <div className="stage-summary">

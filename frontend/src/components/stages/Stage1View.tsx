@@ -4,6 +4,7 @@ import type { ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
 import { CompoundValidateBox } from "../CompoundValidateBox";
 import { EditableEntityList } from "./EditableEntityList";
+import { StageDataSources } from "./StageDataSources";
 
 type Stage1Compound = {
   compound_id: string;
@@ -50,6 +51,7 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
         Compounds ({current})
         {isEdited && <span className="hf-badge hf-badge--edited"> edited</span>}
       </h2>
+      <StageDataSources stage={1} />
       <EditableEntityList
         entities={entities}
         onRemove={handleRemove}

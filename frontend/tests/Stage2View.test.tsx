@@ -65,11 +65,11 @@ describe("Stage2View", () => {
     expect(screen.getByText("0.55")).toBeInTheDocument();
   });
 
-  it("shows descriptor source column", () => {
+  it("does not render descriptor_source values as table cells", () => {
     wrap(<Stage2View data={makeRun()} />);
-    // "rdkit" and "etl" sources
-    expect(screen.getAllByText("rdkit").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("etl").length).toBeGreaterThan(0);
+    // The Source column was removed; descriptor_source is kept in the type and CSV export only.
+    expect(screen.queryByText("rdkit")).toBeNull();
+    expect(screen.queryByText("etl")).toBeNull();
   });
 
   it("renders PAINS badge for a positive compound", () => {

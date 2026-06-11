@@ -22,6 +22,7 @@ import { ADME_PARAMS } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
+import { StageDataSources } from "./StageDataSources";
 import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
@@ -201,6 +202,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   return (
     <section className="stage-view stage-view--2">
       <h2>Step 2 — ADME Screening</h2>
+      <StageDataSources stage={2} />
 
       {/* Summary cards */}
       <div className="stage-summary">
@@ -272,7 +274,6 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
               <th>QED</th>
               <th>NP score</th>
               <th>RO5 viol.</th>
-              <th>Source</th>
               <th>Reason</th>
             </tr>
           </thead>
@@ -301,7 +302,6 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
                 <td>{fmt(row.qed_score)}</td>
                 <td>{fmt(row.np_likeness_score)}</td>
                 <td>{row.num_ro5_violations ?? "—"}</td>
-                <td>{row.descriptor_source}</td>
                 <td>{row.reason ?? ""}</td>
               </tr>
             ))}
@@ -362,8 +362,8 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       {/* Footer */}
       <footer className="stage-footer hf-muted">
         <p>
-          Descriptors computed with <strong>RDKit</strong>. Filters: Lipinski RO5, Veber (TPSA +
-          rotatable bonds), Ertl NP-likeness, Baell &amp; Holloway PAINS.
+          Filters: Lipinski RO5, Veber (TPSA + rotatable bonds), Ertl NP-likeness, Baell &amp;
+          Holloway PAINS.
         </p>
       </footer>
     </section>
