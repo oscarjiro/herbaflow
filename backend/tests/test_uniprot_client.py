@@ -94,3 +94,45 @@ async def test_resolve_symbol_human_hit(httpx_mock):
     sent = str(httpx_mock.get_requests()[0].url)
     assert "organism_id%3A9606" in sent or "organism_id:9606" in sent
     assert "gene_exact%3ATP53" in sent or "gene_exact:TP53" in sent
+
+
+_HIT_TREMBL = {
+    "results": [
+        {
+            "primaryAccession": "A0A0A0",
+            "genes": [{"geneName": {"value": "OBSC1"}}],
+            "proteinDescription": {"recommendedName": {"fullName": {"value": "Obscure protein"}}},
+        }
+    ]
+}
+
+
+@pytest.mark.asyncio
+async def test_resolve_symbol_prefers_reviewed(httpx_mock):
+    # A reviewed (Swiss-Prot) entry exists -> the FIRST query carries reviewed:true and is used,
+    # with no fallback call. Guards against EGFR -> A2VCQ7 (unreviewed) instead of P00533.
+    httpx_mock.add_response(json=_HIT)
+    async with httpx.AsyncClient() as c:
+        res = await UniProtClient(c).resolve_symbol("TP53")
+    assert res.record is not None
+    assert res.record.uniprot_accession == "P04637"
+    reqs = httpx_mock.get_requests()
+    assert len(reqs) == 1  # reviewed hit -> no fallback
+    sent = str(reqs[0].url)
+    assert "reviewed%3Atrue" in sent or "reviewed:true" in sent
+
+
+@pytest.mark.asyncio
+async def test_resolve_symbol_falls_back_to_unreviewed(httpx_mock):
+    # No reviewed entry, but an unreviewed (TrEMBL) human record exists -> fall back (drop
+    # reviewed:true) so the gene still resolves rather than reporting "not found".
+    httpx_mock.add_response(json={"results": []})  # reviewed query: empty
+    httpx_mock.add_response(json=_HIT_TREMBL)  # unreviewed query: a hit
+    async with httpx.AsyncClient() as c:
+        res = await UniProtClient(c).resolve_symbol("OBSC1")
+    assert res.record is not None
+    assert res.record.uniprot_accession == "A0A0A0"
+    reqs = httpx_mock.get_requests()
+    assert len(reqs) == 2
+    assert "reviewed%3Atrue" in str(reqs[0].url) or "reviewed:true" in str(reqs[0].url)
+    assert "reviewed" not in str(reqs[1].url)  # fallback drops the reviewed filter

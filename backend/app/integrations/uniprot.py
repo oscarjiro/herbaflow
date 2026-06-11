@@ -61,8 +61,23 @@ class UniProtClient:
         )
 
     async def resolve_symbol(self, symbol: str) -> UniProtResolution:
-        """Resolve a gene symbol to its top human (organism_id:9606) record."""
+        """Resolve a gene symbol to its top human (9606) record, preferring reviewed (Swiss-Prot).
+
+        UniProt search returns ``size=1`` with no inherent reviewed-first ordering, so a gene's
+        top hit can be an unreviewed TrEMBL entry (e.g. EGFR -> A2VCQ7 instead of reviewed
+        P00533). Query reviewed entries first; only on a genuine no-human miss fall back to the
+        unreviewed pool, so a gene with a TrEMBL-only human record still resolves.
+        ``reviewed:true`` is the documented UniProtKB query field
+        (https://www.uniprot.org/help/query-fields).
+        """
         sym = symbol.strip().upper()
+        reviewed = await self._top_human(
+            f"gene_exact:{sym} AND organism_id:9606 AND reviewed:true", label=sym
+        )
+        # Only fall back when reviewed genuinely had no human record. A 400 (INVALID_ID) is
+        # surfaced, not silently retried.
+        if reviewed.record is not None or reviewed.reason is not UniProtReason.NO_HUMAN_RECORD:
+            return reviewed
         return await self._top_human(f"gene_exact:{sym} AND organism_id:9606", label=sym)
 
     async def _top_human(self, query: str, *, label: str) -> UniProtResolution:
