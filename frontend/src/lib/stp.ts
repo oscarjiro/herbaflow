@@ -29,16 +29,38 @@ function splitCsvLine(line: string): string[] {
   return out.map((s) => s.trim());
 }
 
+/**
+ * The canonical SwissTargetPrediction export header columns this parser requires.
+ * Exported so tests and error messages can reference the same list without duplication.
+ */
+export const STP_EXPECTED_COLUMNS = ["Target", "Common name", "Uniprot ID", "Probability*"] as const;
+
+/**
+ * Human-readable description of the expected STP header for error messages.
+ * Built from STP_EXPECTED_COLUMNS so there is exactly one source of truth.
+ */
+const STP_HEADER_HINT =
+  `Expected SwissTargetPrediction columns: ${STP_EXPECTED_COLUMNS.join(", ")} ` +
+  `(also accepts "Probability" without the asterisk).`;
+
 export function parseStpCsv(text: string, threshold = 0.6): StpParseResult {
   const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length === 0) return { rows: [], error: "Empty CSV." };
   const header = splitCsvLine(lines[0]!);
   const idx = (name: string) => header.indexOf(name);
   const ui = idx("Uniprot ID");
-  if (ui === -1) return { rows: [], error: "Missing required column: Uniprot ID." };
+  if (ui === -1)
+    return {
+      rows: [],
+      error: `Missing required column: Uniprot ID. ${STP_HEADER_HINT}`,
+    };
   // Real STP exports the probability column as "Probability*"; tolerate the plain name too.
   const pi = header.findIndex((h) => h === "Probability" || h === "Probability*");
-  if (pi === -1) return { rows: [], error: "Missing required column: Probability." };
+  if (pi === -1)
+    return {
+      rows: [],
+      error: `Missing required column: Probability. ${STP_HEADER_HINT}`,
+    };
   const ci = idx("Common name");
   const rows: StpRow[] = [];
   for (const line of lines.slice(1)) {

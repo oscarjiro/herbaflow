@@ -22,6 +22,23 @@ describe("parseStpCsv", () => {
     expect(error).toMatch(/Uniprot ID/);
   });
 
+  it("D11: header-mismatch error names the expected STP columns", () => {
+    // A CSV that is missing Uniprot ID and Probability should tell the user
+    // what the expected STP header columns are.
+    const { error: e1 } = parseStpCsv("Target,Score\np53,0.9", 0.6);
+    expect(e1).toMatch(/Uniprot ID/);
+    expect(e1).toMatch(/Probability/);
+    expect(e1).toMatch(/Common name/);
+  });
+
+  it("D11: Probability-missing error also names the expected STP columns", () => {
+    // Has Uniprot ID but is missing the probability column.
+    const { error } = parseStpCsv("Target,Common name,Uniprot ID\np53,TP53,P04637", 0.6);
+    expect(error).toMatch(/Uniprot ID/);
+    expect(error).toMatch(/Probability/);
+    expect(error).toMatch(/Common name/);
+  });
+
   it("default threshold is 0.6", () => {
     const { rows } = parseStpCsv(CSV);
     expect(rows).toHaveLength(1);

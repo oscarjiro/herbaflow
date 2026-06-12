@@ -220,14 +220,21 @@ export function StpDialog({
         </div>
       )}
 
-      <button
-        type="button"
-        className="hf-btn hf-btn-primary"
-        disabled={!canImport}
-        onClick={() => importMut.mutate()}
-      >
-        Import
-      </button>
+      <div className="stp-import-row">
+        <button
+          type="button"
+          className="hf-btn hf-btn-primary"
+          disabled={!canImport}
+          onClick={() => importMut.mutate()}
+        >
+          Import
+        </button>
+        {!canImport && !importMut.isPending && (
+          <span className="hf-muted stp-import-hint">
+            Paste a valid CSV to import
+          </span>
+        )}
+      </div>
 
       {result && (
         <p className="stp-import-result" role="status">
