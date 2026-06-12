@@ -2,10 +2,16 @@
 
 export type AnalysisCreate = {
     analysis_name?: string | null;
-    plant_ids: Array<string>;
-    disease_id: string;
+    plant_input_mode?: PlantInputMode;
+    disease_input_mode?: DiseaseInputMode;
+    plant_ids?: Array<string>;
+    disease_id?: string | null;
     mode?: Mode;
     manual_compound_ids?: Array<string>;
+    manual_target_ids?: Array<string>;
+    manual_disease_target_ids?: Array<string>;
+    plant_label?: string | null;
+    disease_label?: string | null;
 };
 
 export type AnalysisRead = {
@@ -32,6 +38,8 @@ export type CompoundInput = {
     value: string;
 };
 
+export type DiseaseInputMode = 'selection' | 'manual_disease_targets';
+
 export type DiseaseRead = {
     disease_id: string;
     canonical_key: string;
@@ -53,6 +61,8 @@ export type HttpValidationError = {
 };
 
 export type Mode = 'auto' | 'guided';
+
+export type PlantInputMode = 'selection' | 'manual_compounds' | 'manual_targets';
 
 export type PlantRead = {
     plant_id: string;

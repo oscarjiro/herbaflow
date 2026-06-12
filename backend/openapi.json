@@ -427,6 +427,14 @@
             ],
             "title": "Analysis Name"
           },
+          "plant_input_mode": {
+            "$ref": "#/components/schemas/PlantInputMode",
+            "default": "selection"
+          },
+          "disease_input_mode": {
+            "$ref": "#/components/schemas/DiseaseInputMode",
+            "default": "selection"
+          },
           "plant_ids": {
             "items": {
               "type": "string",
@@ -434,12 +442,18 @@
             },
             "type": "array",
             "maxItems": 20,
-            "minItems": 1,
             "title": "Plant Ids"
           },
           "disease_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Disease Id"
           },
           "mode": {
@@ -453,13 +467,49 @@
             },
             "type": "array",
             "title": "Manual Compound Ids"
+          },
+          "manual_target_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Manual Target Ids"
+          },
+          "manual_disease_target_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Manual Disease Target Ids"
+          },
+          "plant_label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plant Label"
+          },
+          "disease_label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disease Label"
           }
         },
         "type": "object",
-        "required": [
-          "plant_ids",
-          "disease_id"
-        ],
         "title": "AnalysisCreate"
       },
       "AnalysisRead": {
@@ -619,6 +669,14 @@
         ],
         "title": "CompoundInput"
       },
+      "DiseaseInputMode": {
+        "type": "string",
+        "enum": [
+          "selection",
+          "manual_disease_targets"
+        ],
+        "title": "DiseaseInputMode"
+      },
       "DiseaseRead": {
         "properties": {
           "disease_id": {
@@ -748,6 +806,15 @@
           "guided"
         ],
         "title": "Mode"
+      },
+      "PlantInputMode": {
+        "type": "string",
+        "enum": [
+          "selection",
+          "manual_compounds",
+          "manual_targets"
+        ],
+        "title": "PlantInputMode"
       },
       "PlantRead": {
         "properties": {

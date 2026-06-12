@@ -7,13 +7,35 @@ export const zAnalysisCreate = z.object({
         z.string(),
         z.null()
     ]).optional(),
-    plant_ids: z.array(z.string().uuid()).min(1).max(20),
-    disease_id: z.string().uuid(),
+    plant_input_mode: z.enum([
+        'selection',
+        'manual_compounds',
+        'manual_targets'
+    ]).optional(),
+    disease_input_mode: z.enum([
+        'selection',
+        'manual_disease_targets'
+    ]).optional(),
+    plant_ids: z.array(z.string().uuid()).max(20).optional(),
+    disease_id: z.union([
+        z.string().uuid(),
+        z.null()
+    ]).optional(),
     mode: z.enum([
         'auto',
         'guided'
     ]).optional(),
-    manual_compound_ids: z.array(z.string().uuid()).optional()
+    manual_compound_ids: z.array(z.string().uuid()).optional(),
+    manual_target_ids: z.array(z.string().uuid()).optional(),
+    manual_disease_target_ids: z.array(z.string().uuid()).optional(),
+    plant_label: z.union([
+        z.string().max(200),
+        z.null()
+    ]).optional(),
+    disease_label: z.union([
+        z.string().max(200),
+        z.null()
+    ]).optional()
 });
 
 export const zAnalysisRead = z.object({
@@ -69,6 +91,11 @@ export const zCompoundInput = z.object({
     value: z.string()
 });
 
+export const zDiseaseInputMode = z.enum([
+    'selection',
+    'manual_disease_targets'
+]);
+
 export const zDiseaseRead = z.object({
     disease_id: z.string().uuid(),
     canonical_key: z.string(),
@@ -116,6 +143,12 @@ export const zHttpValidationError = z.object({
 export const zMode = z.enum([
     'auto',
     'guided'
+]);
+
+export const zPlantInputMode = z.enum([
+    'selection',
+    'manual_compounds',
+    'manual_targets'
 ]);
 
 export const zPlantRead = z.object({
