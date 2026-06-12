@@ -346,6 +346,60 @@ deferred to the Phase-5 design pass — the edge list is the current surface.
 
 ---
 
+### Step 7 — Hub Genes
+
+**Component:** `src/components/stages/Stage7View.tsx`.
+
+**Results view (computed):** Summary **cards** lead (node count, ranked count, ranking metric,
+`composite_weight`); a **hub table** lists each hub-ranked protein with columns for rank, gene
+symbol (linked to UniProt via `source_url`), and all four centrality values (degree, betweenness,
+closeness, eigenvector) plus the composite score, ordered by rank ascending. The `"network_too_small"`
+flag renders as a dismissible notice (tiny/sparse network — informational, not an error). The
+`"eigenvector_fallback"` flag is surfaced as a footnote on the eigenvector column header.
+
+**CSV export:** columns are rank + gene symbol + UniProt accession + degree + betweenness +
+closeness + eigenvector + composite score.
+
+**Param panel + Redo:** the `hub_genes` group is exposed via `ParamPanel` — `top_n` (numeric),
+`use_hub_bottleneck` (checkbox), and `composite_weight` (numeric; disabled and greyed when
+`use_hub_bottleneck` is false). Redo submits `POST /analyses/{id}/reset-from/7`.
+
+**Footer:** attributes the centrality computation to networkx (Python, undirected graph) and cites
+the Yu 2007 hub-bottleneck composite.
+
+---
+
+### Step 8 — Pathway Enrichment (terminal)
+
+**Component:** `src/components/stages/Stage8View.tsx`.
+
+**Results view (computed):** Summary **cards** lead (enriched-term count, input gene count,
+background gene count, FDR threshold, correction method); an **enrichment table** lists each
+significant term with columns for source (GO:BP / GO:MF / GO:CC / KEGG), term ID, term name,
+FDR-corrected p-value (rendered as `−log₁₀(p)`; clamped to a minimum of 1.0 to prevent `Infinity`
+from underflowing), term size, intersection size, and the intersection gene list. Paginated and
+CSV-exportable. A **0-term result** renders as an honest-null notice (no enrichment found at the
+current threshold — not an error; the run is still `complete`). A **degraded result**
+(`stage_results["8"].degraded = true`) renders a distinct notice (g:Profiler outage; pipeline
+completed but enrichment unavailable — the run is still `complete`).
+
+**CSV export:** columns are source + term ID + term name + p-value + term size + intersection
+size + intersection genes (pipe-delimited).
+
+**Param panel + Redo:** the `enrichment` group is exposed via `ParamPanel` — `fdr_threshold`
+(numeric), `min_term_size` (numeric), and `correction` as an **enum select**
+(`g_SCS` / `fdr` / `bonferroni`). The `sources` multi-select is deferred to Phase 5 — the panel
+exposes only the three scalar params. Redo submits `POST /analyses/{id}/reset-from/8`.
+
+**Pipeline-complete affordance:** when `analysis.status === "complete"` and Stage 8 is the
+active stage, the view surfaces a **"Pipeline complete"** banner (distinct from the per-stage
+approval bar) with the run's `completed_at` timestamp and a link to the (future) export page.
+
+**Footer:** attributes enrichment to g:Profiler (Raudvere 2019), lists the sources queried and
+the custom background (Stage-3 compound-target universe).
+
+---
+
 ## Summary
 
 Herbaflow's frontend is architected around the 8-stage pipeline abstraction. TypeScript ensures

@@ -606,6 +606,7 @@ hard-stop in both guided and auto modes** (the run fails — there is nothing do
 
 **PPI stage** (Stage 6 — STRING network; `parameters.ppi`).
 
+
 Computed result:
 
 ```jsonc
@@ -633,6 +634,54 @@ UI prompts to enable the top-N cap or narrow the inputs); an **auto** run hard-f
 Redoing Stage 6 with `allow_top_n_cap: true` (proceeds on the top-N overlap targets ranked by
 disease-association score) or by raising `max_proteins`. Community/module detection is deferred
 (future work) — Stage 6 delivers the PPI-source network only.
+
+**Hub-genes stage** (Stage 7 — `parameters.hub_genes`).
+
+```jsonc
+"7": {
+  "state": "computed",
+  "hubs": [
+    { "rank": 1, "target_id": "<uuid>", "gene_symbol": "TNF",
+      "degree": 0.41, "betweenness": 0.33, "closeness": 0.58, "eigenvector": 0.29,
+      "composite": 0.37, "source_url": "https://www.uniprot.org/uniprotkb/<acc>/entry" }
+  ],
+  "ranking_metric": "hub_bottleneck_composite",  // or "degree" when use_hub_bottleneck=false
+  "composite_weight": 0.5, "normalization": "min_max",
+  "node_count": <int>, "top_n": <int>, "count": <int>,  // count = hubs reported
+  "flags": [ /* "network_too_small" | "eigenvector_fallback" */ ]
+}
+```
+
+Stage 7 ranks the Stage-6 PPI proteins by four networkx centralities (degree/betweenness/
+closeness/eigenvector, undirected graph) and a min-max hub-bottleneck composite
+(`w·degree + (1−w)·betweenness`, Yu 2007). `top_n` is a descriptive cut, not a significance
+test. Tiny/sparse networks are flagged (reported, never a hard-stop).
+
+**Enrichment stage** (Stage 8 — `parameters.enrichment`; TERMINAL).
+
+```jsonc
+"8": {
+  "state": "computed",
+  "terms": [
+    { "source": "KEGG", "term_id": "KEGG:04151", "name": "PI3K-Akt signaling pathway",
+      "p_value": 3.1e-6, "term_size": 354, "query_size": 118, "intersection_size": 22,
+      "intersection": ["AKT1", "TNF", "IL6"] }
+  ],
+  "input_gene_count": <int>, "background_gene_count": <int>,
+  "background_source": "compound_target_universe",
+  "correction": "fdr", "fdr_threshold": 0.05, "min_term_size": 5,
+  "sources": ["GO:BP","GO:MF","GO:CC","KEGG"],
+  "degraded": false, "count": <int>,  // count = enriched terms (0 = honest null, still complete)
+  "flags": [ /* "empty_input" | "no_enriched_terms" | "source_degraded" */ ]
+}
+```
+
+Stage 8 enriches the Stage-5 overlap gene symbols against the **Stage-3 compound-target
+universe** gene symbols (custom statistical background — method, not config) via g:Profiler
+(GO + KEGG, cumulative hypergeometric, `p_value` already corrected). `min_term_size` is filtered
+client-side. Empty input → honest null; a g:Profiler outage **degrades** (no terms) but the run
+**still completes** — Stage 8 is the terminal stage, so its completion marks the run `complete`
+and sets `completed_at`. A 0-term result is a valid completion, never an empty-gate stop.
 
 ---
 
@@ -719,6 +768,42 @@ dropped; module detection is deferred future work.
 
 ---
 
+#### `parameters.hub_genes` block (Stage 7)
+
+Frozen from the contract defaults at run-creation (like `adme` and `ppi`). `normalization` is
+hardcoded `"min_max"` — not a user param; `use_hub_bottleneck` drives the ranking metric.
+
+| Parameter | Type | Default | Bounds / enum | Notes |
+|---|---|---|---|---|
+| `top_n` | integer | 10 | ≥1, ≤100 (rec. 5–20) | Descriptive hub cut; not a significance test |
+| `use_hub_bottleneck` | boolean | true | — | Use composite hub-bottleneck (`w·degree+(1−w)·betweenness`); false = degree only |
+| `composite_weight` | number | 0.5 | ≥0, ≤1 (rec. 0.3–0.7) | Weight `w` on degree in the composite; `(1−w)` on betweenness |
+
+Min-max normalization is a fixed method constant, not configuration. Tiny/sparse networks (fewer
+nodes than the minimum required for eigenvector convergence) emit the `"network_too_small"` flag
+and fall back to degree-only — reported, never a hard-stop.
+
+---
+
+#### `parameters.enrichment` block (Stage 8)
+
+Frozen from the contract defaults at run-creation. `sources` is stored but its UI multi-select is
+deferred to Phase 5 — the Stage-8 param panel exposes only the three scalar params below.
+Background is hardcoded to the Stage-3 compound-target universe (custom statistical background —
+method constant, not configuration).
+
+| Parameter | Type | Default | Bounds / enum | Notes |
+|---|---|---|---|---|
+| `fdr_threshold` | number | 0.05 | >0, ≤1 (rec. 0.01–0.1) | FDR significance threshold applied after correction |
+| `min_term_size` | integer | 5 | ≥1, ≤500 (rec. 3–20) | Minimum gene-set size; filtered client-side from g:Profiler results |
+| `correction` | string | `g_SCS` | enum {`g_SCS`, `fdr`, `bonferroni`} | Multiple-testing correction method; `g_SCS` = g:Profiler's adaptive threshold |
+| `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | subset of the four | Ontology sources queried; multi-select deferred to Phase 5 |
+
+`correction` value is `g_SCS` (verbatim g:Profiler API spelling). `sources` IS enum/array-validated
+on Redo — elements outside the closed vocabulary are rejected **422**.
+
+---
+
 #### Dependency DAG and re-run rules
 
 Re-runs follow a **dependency DAG**, not raw stage numbering:
@@ -731,6 +816,19 @@ S4 ────────────┘    └──────→ S8
 
 `S1→S2→S3` and `S4` both feed `S5`; `S5` feeds `S6` and `S8`; `S6` feeds `S7`; `S7` and `S8` are
 parallel leaves.
+
+**Closure examples by reset-from stage:**
+
+| `reset-from/N` | Re-runs (closure ∩ runnable) |
+|---|---|
+| `reset-from/1` | S1, S2, S3, S5, S6, S7, S8 (not S4) |
+| `reset-from/2` | S2, S3, S5, S6, S7, S8 (not S4) |
+| `reset-from/3` | S3, S5, S6, S7, S8 (not S4) |
+| `reset-from/4` | S4, S5, S6, S7, S8 |
+| `reset-from/5` | S5, S6, S7, S8 |
+| `reset-from/6` | S6, S7 (not S8 — S8 depends on S5, not S6) |
+| `reset-from/7` | S7 only |
+| `reset-from/8` | S8 only |
 
 **Param Redo** (changing a param-bearing stage's parameters via `POST /analyses/{id}/reset-from/{stage}`
 with a `param_overrides` body): re-runs **that stage plus its downstream closure** (the stage itself
