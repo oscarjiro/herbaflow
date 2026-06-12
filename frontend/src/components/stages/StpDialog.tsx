@@ -230,9 +230,7 @@ export function StpDialog({
           Import
         </button>
         {!canImport && !importMut.isPending && (
-          <span className="hf-muted stp-import-hint">
-            Paste a valid CSV to import
-          </span>
+          <span className="hf-muted stp-import-hint">Paste a valid CSV to import</span>
         )}
       </div>
 

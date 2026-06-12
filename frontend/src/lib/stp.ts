@@ -33,7 +33,12 @@ function splitCsvLine(line: string): string[] {
  * The canonical SwissTargetPrediction export header columns this parser requires.
  * Exported so tests and error messages can reference the same list without duplication.
  */
-export const STP_EXPECTED_COLUMNS = ["Target", "Common name", "Uniprot ID", "Probability*"] as const;
+export const STP_EXPECTED_COLUMNS = [
+  "Target",
+  "Common name",
+  "Uniprot ID",
+  "Probability*",
+] as const;
 
 /**
  * Human-readable description of the expected STP header for error messages.

@@ -34,8 +34,6 @@ describe("StpDialog — D10: disabled Import reason hint", () => {
     expect(importBtn).toBeDisabled();
 
     // A reason hint must be present when import is disabled
-    expect(
-      screen.getByText(/paste a valid csv to import/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/paste a valid csv to import/i)).toBeInTheDocument();
   });
 });
