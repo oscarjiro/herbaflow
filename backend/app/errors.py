@@ -70,13 +70,29 @@ async def _problem_handler(request: Request, exc: ProblemException) -> JSONRespo
     return _problem(exc.status, exc.title, exc.detail, exc.type_, **exc.extra)
 
 
+def _sanitize_validation_errors(errors: Any) -> list[Any]:
+    """Strip non-JSON-serializable values from Pydantic error dicts.
+
+    Pydantic v2 includes the raw exception object in ``ctx["error"]`` for
+    ``value_error`` / ``assertion_error`` entries raised via ``raise ValueError()``.
+    That object is a ``ValueError`` instance, which ``json.dumps`` cannot serialize.
+    Replace it with its string representation so the response body is always valid JSON.
+    """
+    sanitized = []
+    for err in errors:
+        if "ctx" in err and "error" in err["ctx"] and not isinstance(err["ctx"]["error"], str):
+            err = {**err, "ctx": {**err["ctx"], "error": str(err["ctx"]["error"])}}
+        sanitized.append(err)
+    return sanitized
+
+
 async def _validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     return _problem(
         422,
         "Unprocessable Entity",
         "Request validation failed.",
         "about:blank",
-        errors=exc.errors(),
+        errors=_sanitize_validation_errors(exc.errors()),
     )
 
 
