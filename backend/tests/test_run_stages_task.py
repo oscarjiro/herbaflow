@@ -128,14 +128,47 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
         return await stage5.run(None, r)
 
     async def stage6(_run: SimpleNamespace) -> dict:
-        # Ready-made computed PPI result (no STRING call) -> the run completes.
+        # Ready-made computed PPI result (no STRING call).
         return {
             "state": "computed",
-            "nodes": [{"gene_symbol": "G0", "string_id": None}],
+            "nodes": [
+                {
+                    "gene_symbol": "G0",
+                    "target_id": "t0",
+                    "uniprot_accession": None,
+                    "string_id": None,
+                },
+            ],
             "edges": [],
             "node_count": 1,
             "edge_count": 0,
             "count": 1,
+        }
+
+    async def stage7(_run: SimpleNamespace) -> dict:
+        # Hub-ranking fake: one hub -> the run completes.
+        return {
+            "state": "computed",
+            "hubs": [
+                {
+                    "rank": 1,
+                    "gene_symbol": "G0",
+                    "target_id": "t0",
+                    "degree": 0.0,
+                    "betweenness": 0.0,
+                    "closeness": 0.0,
+                    "eigenvector": 0.0,
+                    "composite": 0.0,
+                    "source_url": None,
+                }
+            ],
+            "ranking_metric": "hub_bottleneck_composite",
+            "composite_weight": 0.5,
+            "normalization": "min_max",
+            "node_count": 1,
+            "top_n": 20,
+            "count": 1,
+            "flags": ["network_too_small"],
         }
 
     monkeypatch.setattr(engine.db, "session_scope", fake_scope)
@@ -150,6 +183,7 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
             4: stage4,
             5: stage5_runner,
             6: stage6,
+            7: stage7,
         },
     )
 

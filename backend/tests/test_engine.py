@@ -95,11 +95,44 @@ def _runners(stage1_count, stage2_count, stage3_count=1, stage4_count=1):
         # Engine-dispatch fake: a ready-made computed PPI result (no STRING call).
         return {
             "state": "computed",
-            "nodes": [{"gene_symbol": "G0", "string_id": None}],
+            "nodes": [
+                {
+                    "gene_symbol": "G0",
+                    "target_id": "t0",
+                    "uniprot_accession": None,
+                    "string_id": None,
+                },
+            ],
             "edges": [],
             "node_count": 1,
             "edge_count": 0,
             "count": 1,
+        }
+
+    async def stage7_runner(r):
+        # Hub-ranking fake: one hub from the stage-6 node (no networkx call needed).
+        return {
+            "state": "computed",
+            "hubs": [
+                {
+                    "rank": 1,
+                    "gene_symbol": "G0",
+                    "target_id": "t0",
+                    "degree": 0.0,
+                    "betweenness": 0.0,
+                    "closeness": 0.0,
+                    "eigenvector": 0.0,
+                    "composite": 0.0,
+                    "source_url": None,
+                }
+            ],
+            "ranking_metric": "hub_bottleneck_composite",
+            "composite_weight": 0.5,
+            "normalization": "min_max",
+            "node_count": 1,
+            "top_n": 20,
+            "count": 1,
+            "flags": ["network_too_small"],
         }
 
     return {
@@ -109,6 +142,7 @@ def _runners(stage1_count, stage2_count, stage3_count=1, stage4_count=1):
         4: stage4_runner,
         5: stage5_runner,
         6: stage6_runner,
+        7: stage7_runner,
     }
 
 
@@ -151,6 +185,10 @@ async def test_guided_pauses_for_approval() -> None:
     # Approving stage 5 runs stage 6 (PPI), which (guided) pauses at the S6 checkpoint.
     await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "stage_6_awaiting_approval"
+
+    # Approving stage 6 runs stage 7 (hub ranking), which (guided) pauses at the S7 checkpoint.
+    await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_7_awaiting_approval"
 
     # Approving the last runnable stage completes the run.
     await engine.advance_run(repo, run.analysis_id, runners)

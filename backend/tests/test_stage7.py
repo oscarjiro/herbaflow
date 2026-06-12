@@ -1,3 +1,5 @@
+import pytest
+
 from app.pipeline.stages import stage7
 
 
@@ -73,3 +75,36 @@ def test_empty_network_is_count_zero_with_flag():
     out = stage7.compute(_s6([], []), top_n=20, use_hub_bottleneck=True, composite_weight=0.5)
     assert out["count"] == 0 and out["hubs"] == []
     assert "network_too_small" in out["flags"]
+
+
+@pytest.mark.asyncio
+async def test_run_reads_stage6_results():
+    run = type("R", (), {})()
+    run.stage_results = {
+        "6": {
+            "state": "computed",
+            "nodes": [
+                {
+                    "gene_symbol": "HUB",
+                    "target_id": "t0",
+                    "uniprot_accession": "P0",
+                    "string_id": None,
+                },
+                {
+                    "gene_symbol": "A",
+                    "target_id": "t1",
+                    "uniprot_accession": "P1",
+                    "string_id": None,
+                },
+            ],
+            "edges": [{"source": "HUB", "target": "A", "confidence": 0.9}],
+            "node_count": 2,
+            "edge_count": 1,
+        },
+    }
+    run.parameters = {
+        "hub_genes": {"top_n": 20, "use_hub_bottleneck": True, "composite_weight": 0.5}
+    }
+    out = await stage7.run(None, run)
+    assert out["count"] == 2
+    assert out["hubs"][0]["gene_symbol"] in {"HUB", "A"}

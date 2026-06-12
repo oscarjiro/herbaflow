@@ -27,6 +27,7 @@ import logging
 from typing import Any
 
 import networkx as nx
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger("herbaflow.pipeline")
 
@@ -139,3 +140,24 @@ def compute(
         "count": len(hubs),
         "flags": flags,
     }
+
+
+async def run(session: AsyncSession | None, run: Any) -> dict[str, Any]:
+    """Rank hubs from the run's stored Stage-6 network. Pure read; ``session`` is for symmetry."""
+    stage6 = run.stage_results["6"]
+    params = run.parameters["hub_genes"]
+    result = compute(
+        stage6,
+        top_n=int(params["top_n"]),
+        use_hub_bottleneck=bool(params["use_hub_bottleneck"]),
+        composite_weight=float(params["composite_weight"]),
+    )
+    logger.info(
+        "stage 7: %d hub(s) of %d node(s) (metric=%s, w=%.2f)%s",
+        result["count"],
+        result["node_count"],
+        result["ranking_metric"],
+        result["composite_weight"],
+        f" flags={result['flags']}" if result["flags"] else "",
+    )
+    return result

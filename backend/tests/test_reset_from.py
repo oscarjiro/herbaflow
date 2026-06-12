@@ -102,6 +102,10 @@ def _stage1_fragment(ids: list[str]) -> dict[str, Any]:
     return edits.build_stage_entities(entities, None)
 
 
+def _hub_genes() -> dict[str, Any]:
+    return {"top_n": 20, "use_hub_bottleneck": True, "composite_weight": 0.5}
+
+
 def _run(*, computed: list[str], mode: str = "auto") -> SimpleNamespace:
     return SimpleNamespace(
         analysis_id=uuid.uuid4(),
@@ -114,6 +118,7 @@ def _run(*, computed: list[str], mode: str = "auto") -> SimpleNamespace:
             "manual_compounds": [],
             "stage_edits": {},
             "adme": _adme(),
+            "hub_genes": _hub_genes(),
         },
         stage_results={
             "1": _stage1_fragment(computed),
@@ -150,7 +155,7 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
     stage1 emits a computed fragment from the *effective* S1 set already stored (it is
     never recomputed in this chunk); stage2 emits a count = size of the effective S1 set.
     """
-    calls: dict[str, list] = {"1": [], "2": [], "3": [], "4": [], "5": [], "6": []}
+    calls: dict[str, list] = {"1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": []}
 
     def fake_build_runners(session: Any) -> dict[int, Any]:
         async def stage1_runner(run: SimpleNamespace) -> dict:
@@ -206,11 +211,45 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
             calls["6"].append(True)
             return {
                 "state": "computed",
-                "nodes": [{"gene_symbol": "G0", "string_id": None}],
+                "nodes": [
+                    {
+                        "gene_symbol": "G0",
+                        "target_id": "t0",
+                        "uniprot_accession": None,
+                        "string_id": None,
+                    },
+                ],
                 "edges": [],
                 "node_count": 1,
                 "edge_count": 0,
                 "count": 1,
+            }
+
+        async def stage7_runner(run: SimpleNamespace) -> dict:
+            # Hub-ranking fake: one hub from the stage-6 single node (no networkx call needed).
+            calls["7"].append(True)
+            return {
+                "state": "computed",
+                "hubs": [
+                    {
+                        "rank": 1,
+                        "gene_symbol": "G0",
+                        "target_id": "t0",
+                        "degree": 0.0,
+                        "betweenness": 0.0,
+                        "closeness": 0.0,
+                        "eigenvector": 0.0,
+                        "composite": 0.0,
+                        "source_url": None,
+                    }
+                ],
+                "ranking_metric": "hub_bottleneck_composite",
+                "composite_weight": 0.5,
+                "normalization": "min_max",
+                "node_count": 1,
+                "top_n": 20,
+                "count": 1,
+                "flags": ["network_too_small"],
             }
 
         return {
@@ -220,6 +259,7 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
             4: stage4_runner,
             5: stage5_runner,
             6: stage6_runner,
+            7: stage7_runner,
         }
 
     monkeypatch.setattr(engine, "build_runners", fake_build_runners)

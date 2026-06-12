@@ -97,11 +97,44 @@ def _runners(
         # Engine-dispatch fake: a ready-made computed PPI result (no STRING call).
         return {
             "state": "computed",
-            "nodes": [{"gene_symbol": "G0", "string_id": None}],
+            "nodes": [
+                {
+                    "gene_symbol": "G0",
+                    "target_id": "t0",
+                    "uniprot_accession": None,
+                    "string_id": None,
+                },
+            ],
             "edges": [],
             "node_count": 1,
             "edge_count": 0,
             "count": 1,
+        }
+
+    async def stage7_runner(run: SimpleNamespace) -> dict:
+        # Hub-ranking fake: one hub from the single stage-6 node.
+        return {
+            "state": "computed",
+            "hubs": [
+                {
+                    "rank": 1,
+                    "gene_symbol": "G0",
+                    "target_id": "t0",
+                    "degree": 0.0,
+                    "betweenness": 0.0,
+                    "closeness": 0.0,
+                    "eigenvector": 0.0,
+                    "composite": 0.0,
+                    "source_url": None,
+                }
+            ],
+            "ranking_metric": "hub_bottleneck_composite",
+            "composite_weight": 0.5,
+            "normalization": "min_max",
+            "node_count": 1,
+            "top_n": 20,
+            "count": 1,
+            "flags": ["network_too_small"],
         }
 
     return {
@@ -111,6 +144,7 @@ def _runners(
         4: stage4_runner,
         5: stage5_runner,
         6: stage6_runner,
+        7: stage7_runner,
     }
 
 
@@ -145,6 +179,10 @@ async def test_guided_pauses_then_advances_through_all_stages() -> None:
     assert run.current_stage == 6
 
     await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_7_awaiting_approval"
+    assert run.current_stage == 7
+
+    await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "complete"
 
 
@@ -162,7 +200,8 @@ async def test_auto_chains_to_complete() -> None:
     assert run.stage_results["4"]["state"] == "computed"
     assert run.stage_results["5"]["state"] == "computed"
     assert run.stage_results["6"]["state"] == "computed"
-    assert run.current_stage == 6
+    assert run.stage_results["7"]["state"] == "computed"
+    assert run.current_stage == 7
 
 
 @pytest.mark.asyncio

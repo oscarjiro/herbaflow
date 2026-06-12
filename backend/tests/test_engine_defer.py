@@ -103,8 +103,8 @@ async def test_advance_defer_returns_next_stage_and_sets_running_without_executi
 @pytest.mark.asyncio
 async def test_advance_defer_at_last_stage_completes_and_returns_none() -> None:
     run = _awaiting_run()
-    run.status = "stage_6_awaiting_approval"
-    run.current_stage = 6
+    run.status = "stage_7_awaiting_approval"
+    run.current_stage = 7
 
     repo = _FakeRepo(run)
 
@@ -134,8 +134,8 @@ async def test_reset_from_defer_param_redo_returns_start_and_clears_downstream()
     )
 
     # defer returns the run-set (invalidate ∩ runnable):
-    # {2} | closure(2) ∩ {1,2,3,4,5,6} = {2,3,5,6}.
-    assert start == frozenset({2, 3, 5, 6})
+    # {2} | closure(2) ∩ {1,2,3,4,5,6,7} = {2,3,5,6,7}.
+    assert start == frozenset({2, 3, 5, 6, 7})
     assert run.status == "stage_2_running"  # *_running committed at min(run_set)
     assert {2} in repo.cleared
     assert run.parameters["adme"]["max_violations"] == 0
@@ -149,12 +149,12 @@ async def test_reset_from_defer_set_edit_s1_returns_runnable_dependent() -> None
     run.stage_results["2"] = {"count": 2, "passed": [], "filtered": [], "state": "computed"}
     repo = _FakeRepo(run)
 
-    # set edit (param_overrides=None) on stage 1 -> run-set is the runnable closure {2,3,5,6}.
+    # set edit (param_overrides=None) on stage 1 -> run-set is the runnable closure {2,3,5,6,7}.
     start = await engine.reset_from(
         repo, run.analysis_id, 1, _runners_that_must_not_run(), defer=True
     )
 
-    # closure(1) ∩ {1,2,3,4,5,6}; scheduled from min = stage 2.
-    assert start == frozenset({2, 3, 5, 6})
+    # closure(1) ∩ {1,2,3,4,5,6,7}; scheduled from min = stage 2.
+    assert start == frozenset({2, 3, 5, 6, 7})
     assert run.status == "stage_2_running"
     assert {2} in repo.cleared
