@@ -31,6 +31,17 @@ export type AnalysisRead = {
     completed_at: string | null;
     expires_at: string | null;
     error_message: string | null;
+    /**
+     * Per-stage entry-mode state (``computed``/``user_provided``/``not_applicable``) derived
+     * from the run's ``input_modes`` via the canonical matrix. This is the entry-mode-INTENDED
+     * state for the FE (greyed N/A stages + the "provided by you" badge), distinct from the
+     * presentational ``stage_results[n].state`` — which the durable edit layer also flips to
+     * ``user_provided`` when a *computed* entity stage is merely edited. A run with no
+     * ``input_modes`` (legacy / all-selection) yields all ``computed``.
+     */
+    readonly stage_state: {
+        [key: string]: string;
+    };
 };
 
 export type CompoundInput = {

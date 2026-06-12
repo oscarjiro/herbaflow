@@ -623,6 +623,15 @@
               }
             ],
             "title": "Error Message"
+          },
+          "stage_state": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Stage State",
+            "description": "Per-stage entry-mode state (``computed``/``user_provided``/``not_applicable``) derived\nfrom the run's ``input_modes`` via the canonical matrix. This is the entry-mode-INTENDED\nstate for the FE (greyed N/A stages + the \"provided by you\" badge), distinct from the\npresentational ``stage_results[n].state`` \u2014 which the durable edit layer also flips to\n``user_provided`` when a *computed* entity stage is merely edited. A run with no\n``input_modes`` (legacy / all-selection) yields all ``computed``.",
+            "readOnly": true
           }
         },
         "type": "object",
@@ -637,7 +646,8 @@
           "created_at",
           "completed_at",
           "expires_at",
-          "error_message"
+          "error_message",
+          "stage_state"
         ],
         "title": "AnalysisRead"
       },

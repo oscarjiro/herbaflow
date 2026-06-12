@@ -77,7 +77,8 @@ export const zAnalysisRead = z.object({
     error_message: z.union([
         z.string(),
         z.null()
-    ])
+    ]),
+    stage_state: z.object({}).readonly()
 });
 
 export const zCompoundInput = z.object({

@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
 from app import contracts
 
@@ -111,3 +111,24 @@ class AnalysisRead(BaseModel):
     completed_at: datetime | None
     expires_at: datetime | None
     error_message: str | None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def stage_state(self) -> dict[str, str]:
+        """Per-stage entry-mode state (``computed``/``user_provided``/``not_applicable``) derived
+        from the run's ``input_modes`` via the canonical matrix. This is the entry-mode-INTENDED
+        state for the FE (greyed N/A stages + the "provided by you" badge), distinct from the
+        presentational ``stage_results[n].state`` — which the durable edit layer also flips to
+        ``user_provided`` when a *computed* entity stage is merely edited. A run with no
+        ``input_modes`` (legacy / all-selection) yields all ``computed``.
+        """
+        from app.pipeline import entry_modes
+
+        im = self.parameters.get("input_modes") or {}
+        plant = im.get("plant", "selection")
+        disease = im.get("disease", "selection")
+        try:
+            smap = entry_modes.stage_state_map(plant, disease)
+        except ValueError:
+            return {}
+        return {str(s): st for s, st in smap.items()}
