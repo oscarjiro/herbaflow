@@ -7,6 +7,7 @@ import { CompoundValidateBox } from "../CompoundValidateBox";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EditableEntityList } from "./EditableEntityList";
 import { StageDataSources } from "./StageDataSources";
+import { StageEntityContext } from "./StageEntityContext";
 
 type Stage1Compound = {
   compound_id: string;
@@ -72,6 +73,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
         )}
       </h2>
       <StageDataSources stage={1} />
+      <StageEntityContext data={data} side="plant" />
       <EditableEntityList
         entities={entities}
         onRemove={handleRemove}
