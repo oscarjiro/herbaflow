@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { editStage } from "../../api/sdk.gen";
-import type { ResolvedCompound } from "../../api/types.gen";
+import type { AnalysisRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { CompoundValidateBox } from "../CompoundValidateBox";
@@ -20,7 +20,11 @@ type Stage1Data = {
   state?: string;
 };
 
-export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1: Stage1Data }) {
+export function Stage1View({ data }: { data: AnalysisRead }) {
+  const stage1 = (data.stage_results?.["1"] ?? {}) as Stage1Data;
+  const analysisId = data.analysis_id;
+  const stageState = (data as { stage_state?: Record<string, string> }).stage_state?.["1"];
+
   const qc = useQueryClient();
 
   // Hooks must be called unconditionally before any early return.
@@ -37,7 +41,7 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
     onAddIds: (ids) => edit.mutate({ add: ids, remove: [] }),
   });
 
-  if (stage1.state === "not_applicable") {
+  if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
         <h2>Step 1 — Compounds</h2>
@@ -48,7 +52,6 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
 
   const compounds = stage1.compounds ?? [];
   const current = stage1.count ?? compounds.filter((c) => c.tag !== "user-removed").length;
-  const isEdited = stage1.state === "user_provided";
 
   const entities = compounds.map((c) => ({
     id: c.compound_id,
@@ -64,8 +67,7 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
     <div className="stage1-view">
       <h2>
         Step 1 — Compounds ({current})
-        {isEdited && <span className="hf-badge hf-badge--edited"> edited</span>}
-        {stage1.state === "user_provided" && (
+        {stageState === "user_provided" && (
           <span className="hf-badge hf-badge--provided"> Provided by you</span>
         )}
       </h2>

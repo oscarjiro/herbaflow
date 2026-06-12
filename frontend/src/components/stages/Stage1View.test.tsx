@@ -4,17 +4,34 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { Stage1View } from "./Stage1View";
 import * as sdk from "../../api/sdk.gen";
+import type { AnalysisRead } from "../../api/types.gen";
 
 // ---------------------------------------------------------------------------
 // Fixture
 // ---------------------------------------------------------------------------
 
-/** Minimal stage1 data whose compound set already contains C1/Quercetin. */
-function makeStage1(overrides?: Partial<Parameters<typeof Stage1View>[0]["stage1"]>) {
+/** Minimal AnalysisRead whose Stage 1 compound set already contains C1/Quercetin. */
+function makeRun(overrides: Partial<AnalysisRead> = {}): AnalysisRead {
   return {
-    count: 1,
-    compounds: [{ compound_id: "C1", canonical_name: "Quercetin", tag: "computed" }],
-    state: "computed",
+    analysis_id: "a1",
+    analysis_name: null,
+    disease_id: "d1",
+    mode: "guided",
+    status: "stage_1_awaiting_approval",
+    current_stage: 1,
+    parameters: {},
+    stage_results: {
+      "1": {
+        count: 1,
+        compounds: [{ compound_id: "C1", canonical_name: "Quercetin", tag: "computed" }],
+        state: "computed",
+      },
+    },
+    stage_state: { "1": "computed" },
+    created_at: null,
+    completed_at: null,
+    expires_at: null,
+    error_message: null,
     ...overrides,
   };
 }
@@ -23,6 +40,87 @@ function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
+
+// ---------------------------------------------------------------------------
+// Badge behaviour (L-12 / F-DUP-3 fix)
+// ---------------------------------------------------------------------------
+
+describe("Stage1View — badge source (stage_state not presentational state)", () => {
+  it("does not show 'Provided by you' for a computed-then-edited Stage 1", () => {
+    // stage_state["1"] === "computed" but presentational state === "user_provided"
+    render(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <Stage1View
+          data={
+            {
+              analysis_id: "x",
+              analysis_name: null,
+              disease_id: "d1",
+              mode: "guided",
+              status: "stage_1_awaiting_approval",
+              current_stage: 1,
+              parameters: {},
+              stage_results: {
+                "1": {
+                  state: "user_provided",
+                  count: 1,
+                  compounds: [{ compound_id: "c1", canonical_name: "curcumin", tag: "user-added" }],
+                },
+              },
+              stage_state: { "1": "computed" },
+              created_at: null,
+              completed_at: null,
+              expires_at: null,
+              error_message: null,
+            } as unknown as AnalysisRead
+          }
+        />
+      </QueryClientProvider>,
+    );
+    expect(screen.queryByText(/Provided by you/)).toBeNull();
+  });
+
+  it('shows exactly one \'Provided by you\' badge when stage_state["1"] === "user_provided"', () => {
+    render(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <Stage1View
+          data={
+            {
+              analysis_id: "y",
+              analysis_name: null,
+              disease_id: "d1",
+              mode: "guided",
+              status: "stage_1_awaiting_approval",
+              current_stage: 1,
+              parameters: {},
+              stage_results: {
+                "1": {
+                  state: "user_provided",
+                  count: 1,
+                  compounds: [{ compound_id: "c1", canonical_name: "curcumin", tag: "user-added" }],
+                },
+              },
+              stage_state: { "1": "user_provided" },
+              created_at: null,
+              completed_at: null,
+              expires_at: null,
+              error_message: null,
+            } as unknown as AnalysisRead
+          }
+        />
+      </QueryClientProvider>,
+    );
+    // Exactly one "Provided by you" badge
+    const badges = screen.getAllByText(/Provided by you/);
+    expect(badges).toHaveLength(1);
+    // No separate "edited" badge
+    expect(screen.queryByText(/edited/)).toBeNull();
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -48,7 +146,7 @@ describe("Stage1View — already-in-run deduplication", () => {
       },
     } as never);
 
-    wrap(<Stage1View analysisId="a1" stage1={makeStage1()} />);
+    wrap(<Stage1View data={makeRun()} />);
 
     // Type something in the CompoundValidateBox textarea and click Validate
     const textarea = screen.getByRole("textbox", { name: /add compounds/i });
@@ -86,7 +184,7 @@ describe("Stage1View — already-in-run deduplication", () => {
       },
     } as never);
 
-    wrap(<Stage1View analysisId="a1" stage1={makeStage1()} />);
+    wrap(<Stage1View data={makeRun()} />);
 
     const textarea = screen.getByRole("textbox", { name: /add compounds/i });
     await userEvent.type(textarea, "Rutin");
@@ -116,7 +214,7 @@ describe("Stage1View — already-in-run deduplication", () => {
       },
     } as never);
 
-    wrap(<Stage1View analysisId="a1" stage1={makeStage1()} />);
+    wrap(<Stage1View data={makeRun()} />);
 
     const textarea = screen.getByRole("textbox", { name: /add compounds/i });
     await userEvent.type(textarea, "Quercetin");

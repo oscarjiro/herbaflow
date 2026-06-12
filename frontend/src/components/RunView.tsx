@@ -40,6 +40,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
 
   if (!data) return <p>Loading…</p>;
 
+  // stage1 is still used below for the inline (unsettled) fallback rendering and ApprovalBar.
   const stage1 = data.stage_results?.["1"] as Stage1Data | undefined;
   const { anyStale, rerunFrom } = useStaleState(data);
 
@@ -97,7 +98,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
       {stage1 && (
         <>
           {isSettled(data.status) || stage1.state === "not_applicable" ? (
-            <Stage1View analysisId={analysisId} stage1={stage1} />
+            <Stage1View data={data} />
           ) : (
             <>
               <h2>Compounds ({stage1.compounds?.length ?? 0})</h2>

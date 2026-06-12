@@ -61,10 +61,10 @@ describe("Step-1 in-stage compound editor (r3: stage_1_awaiting_approval)", () =
     expect(removedEl.closest("li")).toHaveClass("entity-row--removed");
   });
 
-  it("shows 'edited' indicator when stage state is user_provided", async () => {
+  it("shows 'Provided by you' badge when stage_state[\"1\"] is user_provided", async () => {
     wrap("r3");
     await screen.findByText("Curcumin");
-    expect(screen.getByText(/edited/i)).toBeInTheDocument();
+    expect(screen.getByText(/provided by you/i)).toBeInTheDocument();
   });
 
   it("clicking Remove calls editStage with remove body and refetches", async () => {

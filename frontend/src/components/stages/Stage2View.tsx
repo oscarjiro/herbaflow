@@ -170,7 +170,11 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
 
   if (!stage2) return null;
 
-  const isNA = stage2.state === "not_applicable";
+  // Read the single canonical entry-mode source (stage_state), like Stages 1/3/4.
+  // S2 is always computed, so stage_state["2"] is normally "computed" — but never key UI off
+  // the presentational stage2.state (it flips to user_provided on edits).
+  const stageState = (data as { stage_state?: Record<string, string> }).stage_state?.["2"];
+  const isNA = stageState === "not_applicable";
   if (isNA) {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
@@ -199,7 +203,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   const filteredCount = stage2.filtered.length;
   const unscreenedCount = stage2.annotations.unscreened.length;
 
-  const isUserProvided = stage2.state === "user_provided";
+  const isUserProvided = stageState === "user_provided";
 
   return (
     <section className="stage-view stage-view--2">

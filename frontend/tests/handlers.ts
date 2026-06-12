@@ -109,6 +109,7 @@ export const ANALYSIS_STAGE1_AWAITING = {
       state: "user_provided",
     },
   },
+  stage_state: { "1": "user_provided" },
   created_at: null,
   completed_at: null,
   expires_at: null,

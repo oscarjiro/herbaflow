@@ -147,9 +147,7 @@ describe("Stage2View", () => {
 
   it("renders not_applicable state defensively (greyed)", () => {
     const data = makeRun({
-      stage_results: {
-        "2": { ...SAMPLE_STAGE2_RESULTS, state: "not_applicable" },
-      },
+      stage_state: { "2": "not_applicable" },
     });
     wrap(<Stage2View data={data} />);
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
