@@ -99,6 +99,20 @@ def test_hub_genes_defaults_match_contract():
     assert meta["use_hub_bottleneck"]["default"] is True
 
 
+def test_plant_input_modes_match_contract() -> None:
+    from app import contracts
+
+    assert contracts.plant_input_modes() == ("selection", "manual_compounds", "manual_targets")
+    assert contracts.default_plant_input_mode() == "selection"
+
+
+def test_disease_input_modes_match_contract() -> None:
+    from app import contracts
+
+    assert contracts.disease_input_modes() == ("selection", "manual_disease_targets")
+    assert contracts.default_disease_input_mode() == "selection"
+
+
 def test_enrichment_defaults_match_contract():
     d = contracts.enrichment_defaults()
     assert d == {
