@@ -209,17 +209,22 @@ class AnalysisService:
                 ) from e
 
         # Resolve added entities' names (self-contained edit layer); targets fall back to
-        # gene_symbol when no canonical_name attribute is present.
+        # gene_symbol when no canonical_name attribute is present. Target rows also carry
+        # gene_symbol and uniprot_accession so the durable edit layer keeps them for
+        # downstream stages (Stage 8 custom background, Stage 3 view).
         add_entries: list[dict[str, Any]] = []
         if add:
             for obj in await repo.get_many(add):
-                add_entries.append(
-                    {
-                        id_key: str(getattr(obj, id_key)),
-                        "canonical_name": getattr(obj, "canonical_name", None)
-                        or getattr(obj, "gene_symbol", None),
-                    }
-                )
+                entry: dict[str, Any] = {
+                    id_key: str(getattr(obj, id_key)),
+                    "canonical_name": getattr(obj, "canonical_name", None)
+                    or getattr(obj, "gene_symbol", None),
+                }
+                if getattr(obj, "gene_symbol", None) is not None:
+                    entry["gene_symbol"] = obj.gene_symbol
+                if getattr(obj, "uniprot_accession", None) is not None:
+                    entry["uniprot_accession"] = obj.uniprot_accession
+                add_entries.append(entry)
 
         # Fold into the durable edit layer (computed; not yet persisted).
         prior_edit = run.parameters.get("stage_edits", {}).get(skey, edits.empty_edit())

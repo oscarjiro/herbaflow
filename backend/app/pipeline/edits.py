@@ -19,6 +19,10 @@ from typing import Any
 
 _EMPTY_EDIT: dict[str, Any] = {"added": [], "removed": []}
 
+# Identity fields the edit layer carries through from the runner output (when present) so
+# downstream stages keep them after entity rows are rebuilt. Targets expose these; compounds don't.
+_CARRY_FIELDS: tuple[str, ...] = ("gene_symbol", "uniprot_accession")
+
 
 def empty_edit() -> dict[str, Any]:
     """A fresh, empty edit record."""
@@ -42,21 +46,30 @@ def normalize_edit(
     - Removing an id currently in ``added`` clears it from ``added`` (re-removing undoes an add).
     - Otherwise the id unions into the respective list. ``added`` is de-duped by ``id_key``;
       the last name wins. ``added`` and ``removed`` end disjoint.
+    - Carry-fields (gene_symbol, uniprot_accession) are preserved on added entries when present,
+      so user-added targets keep their identity through round-trips.
     """
+
+    def _added_entry(entry: dict[str, Any]) -> dict[str, Any]:
+        out: dict[str, Any] = {
+            id_key: str(entry[id_key]),
+            "canonical_name": entry.get("canonical_name"),
+        }
+        for f in _CARRY_FIELDS:
+            if f in entry and entry[f] is not None:
+                out[f] = entry[f]
+        return out
+
     # Start from copies of the existing state, keyed by id for O(1) updates.
     added: dict[str, dict[str, Any]] = {
-        str(e[id_key]): {
-            id_key: str(e[id_key]),
-            "canonical_name": e.get("canonical_name"),
-        }
-        for e in existing.get("added", [])
+        str(e[id_key]): _added_entry(e) for e in existing.get("added", [])
     }
     removed: set[str] = {str(r) for r in existing.get("removed", [])}
 
     for entry in add:
         cid = str(entry[id_key])
         removed.discard(cid)  # re-adding clears a pending removal
-        added[cid] = {id_key: cid, "canonical_name": entry.get("canonical_name")}
+        added[cid] = _added_entry(entry)
 
     for rid in remove:
         rid_s = str(rid)
@@ -103,11 +116,6 @@ def apply_edits(
     return {"effective": effective, "tags": tags}
 
 
-# Identity fields the edit layer carries through from the runner output (when present) so
-# downstream stages keep them after entity rows are rebuilt. Targets expose these; compounds don't.
-_CARRY_FIELDS: tuple[str, ...] = ("gene_symbol", "uniprot_accession")
-
-
 def build_stage_entities(
     computed_entities: list[dict[str, Any]],
     edit: dict[str, Any] | None,
@@ -150,13 +158,15 @@ def build_stage_entities(
         if aid in by_id:
             # Already represented as a computed entry above.
             continue
-        entities.append(
-            {
-                id_key: aid,
-                "canonical_name": entry.get("canonical_name"),
-                "tag": "user-added",
-            }
-        )
+        added_row: dict[str, Any] = {
+            id_key: aid,
+            "canonical_name": entry.get("canonical_name"),
+            "tag": "user-added",
+        }
+        for field in _CARRY_FIELDS:
+            if field in entry and entry[field] is not None:
+                added_row[field] = entry[field]
+        entities.append(added_row)
 
     count = sum(1 for c in entities if c["tag"] != "user-removed")
     state = "computed" if _is_empty(edit) else "user_provided"
