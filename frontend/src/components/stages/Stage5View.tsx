@@ -14,6 +14,7 @@
 import { useState } from "react";
 import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis } from "../../api/sdk.gen";
 import { useStaleState } from "../../hooks/useStaleState";
@@ -212,9 +213,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
                       "—"
                     )}
                   </td>
-                  <td>
-                    {row.disease_association_score == null ? "—" : row.disease_association_score}
-                  </td>
+                  <td>{formatSig(row.disease_association_score)}</td>
                 </tr>
               );
             })}

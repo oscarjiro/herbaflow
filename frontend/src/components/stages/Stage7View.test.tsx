@@ -99,4 +99,33 @@ describe("Stage7View", () => {
     expect(screen.getByText("Closeness")).toBeInTheDocument();
     expect(screen.getByText("Eigenvector")).toBeInTheDocument();
   });
+
+  it("rounds centralities to 4 sig figs", () => {
+    const result = {
+      state: "computed",
+      hubs: [
+        {
+          rank: 1,
+          target_id: "t1",
+          gene_symbol: "PPARG",
+          degree: 0.123456789,
+          betweenness: 0.5,
+          closeness: 0.5,
+          eigenvector: 0.5,
+          composite: 0.987654321,
+          source_url: null,
+        },
+      ],
+      ranking_metric: "composite",
+      composite_weight: 0.5,
+      normalization: "min-max",
+      node_count: 5,
+      top_n: 10,
+      count: 1,
+      flags: [],
+    };
+    wrap(<Stage7View data={makeData(result)} />);
+    expect(screen.getByText("0.1235")).toBeInTheDocument();
+    expect(screen.getByText("0.9877")).toBeInTheDocument();
+  });
 });

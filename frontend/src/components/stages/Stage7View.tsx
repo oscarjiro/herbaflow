@@ -10,6 +10,7 @@
 import { useMemo, useState } from "react";
 import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
 import {
@@ -213,11 +214,11 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
                     h.gene_symbol
                   )}
                 </td>
-                <td>{h.composite}</td>
-                <td>{h.degree}</td>
-                <td>{h.betweenness}</td>
-                <td>{h.closeness}</td>
-                <td>{h.eigenvector}</td>
+                <td>{formatSig(h.composite)}</td>
+                <td>{formatSig(h.degree)}</td>
+                <td>{formatSig(h.betweenness)}</td>
+                <td>{formatSig(h.closeness)}</td>
+                <td>{formatSig(h.eigenvector)}</td>
               </tr>
             ))}
           </tbody>
