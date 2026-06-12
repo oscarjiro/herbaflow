@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { advanceAnalysis } from "../api/sdk.gen";
-import { listDiseasesOptions, listPlantsOptions } from "../api/@tanstack/react-query.gen";
 import { useAnalysisStatus } from "../hooks/useAnalysisStatus";
+import { useEntitySubjects } from "../hooks/useEntitySubjects";
 import { useStaleState } from "../hooks/useStaleState";
 import { ApprovalBar } from "./stages/ApprovalBar";
 import { Stage1View } from "./stages/Stage1View";
@@ -33,49 +33,13 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
     mutationFn: async () => advanceAnalysis({ path: { analysis_id: analysisId } }),
     onSuccess: () => qc.invalidateQueries(),
   });
-
-  // Catalogs for resolving display names. TanStack Query dedupes these with SetupView.
-  const { data: plantsData } = useQuery(listPlantsOptions());
-  const { data: diseasesData } = useQuery(listDiseasesOptions());
+  const { plant: plantDisplay, disease: diseaseDisplay } = useEntitySubjects(data);
 
   if (!data) return <p>Loading…</p>;
 
   // stage1 is still used below for the inline (unsettled) fallback rendering and ApprovalBar.
   const stage1 = data.stage_results?.["1"] as Stage1Data | undefined;
   const { anyStale, rerunFrom } = useStaleState(data);
-
-  // ---------------------------------------------------------------------------
-  // Per-side display name
-  // ---------------------------------------------------------------------------
-  const params = data.parameters as Record<string, unknown> | undefined;
-  const inputModes = params?.input_modes as { plant?: string; disease?: string } | undefined;
-  const labels = params?.labels as { plant?: string; disease?: string } | undefined;
-  const plantIds = params?.plant_ids as string[] | undefined;
-
-  // Plant display: selection (or legacy no-input_modes) → join names from catalog;
-  // manual mode → label ?? "N/A".
-  const plantDisplay: string = (() => {
-    if (!inputModes || inputModes.plant === "selection") {
-      if (!plantIds || plantIds.length === 0) return "—";
-      const byId = new Map((plantsData ?? []).map((p) => [p.plant_id, p]));
-      const names = plantIds.map(
-        (id) => byId.get(id)?.canonical_scientific_name ?? byId.get(id)?.plant_id ?? id,
-      );
-      return names.join(", ") || "—";
-    }
-    return labels?.plant ?? "N/A";
-  })();
-
-  // Disease display: selection (or legacy) → name from catalog for disease_id;
-  // manual mode → label ?? "N/A".
-  const diseaseDisplay: string = (() => {
-    if (!inputModes || inputModes.disease === "selection") {
-      if (!data.disease_id) return "—";
-      const byId = new Map((diseasesData ?? []).map((d) => [d.disease_id, d]));
-      return byId.get(data.disease_id)?.disease_name ?? data.disease_id;
-    }
-    return labels?.disease ?? "N/A";
-  })();
 
   return (
     <section>
