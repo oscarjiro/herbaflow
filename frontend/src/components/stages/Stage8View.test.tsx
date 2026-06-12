@@ -82,6 +82,8 @@ describe("Stage8View", () => {
       },
     } as unknown as AnalysisRead;
     render(wrap(<Stage8View data={data} />));
-    expect(screen.getByText(/g:Profiler/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/g:Profiler was unavailable — enrichment was skipped/i),
+    ).toBeInTheDocument();
   });
 });

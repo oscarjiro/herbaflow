@@ -136,7 +136,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   return (
     <section className="stage-view stage-view--8">
       <h2>Step 8 — Functional Enrichment</h2>
-      {!stage8.degraded && <StageDataSources stage={8} />}
+      <StageDataSources stage={8} />
 
       {/* Summary cards */}
       <div className="stage-summary">
@@ -302,14 +302,12 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         />
       )}
 
-      {!stage8.degraded && (
-        <footer className="stage-footer hf-muted">
-          <p>
-            Enrichment: g:Profiler (GO BP/MF/CC + KEGG), cumulative hypergeometric, custom
-            background = the compound-target universe. Human only (species 9606).
-          </p>
-        </footer>
-      )}
+      <footer className="stage-footer hf-muted">
+        <p>
+          Enrichment: g:Profiler (GO BP/MF/CC + KEGG), cumulative hypergeometric, custom background
+          = the compound-target universe. Human only (species 9606).
+        </p>
+      </footer>
     </section>
   );
 }
