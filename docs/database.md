@@ -569,6 +569,17 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
   `manual_targets` mode, or Stage 4 disease-target DB read in `manual_disease_targets` mode).
   Downstream stages treat this as an empty-but-valid input; it does **not** hard-stop the run.
 
+**Stage 1 jsonb notes:**
+- `stage_results["1"].compounds[*].canonical_name` is populated from the compound row on a
+  `manual_compounds` prefill (was previously `null` — Stage 1 was showing the UUID). Display only;
+  no schema change. Symmetric with the Stage-3 target prefill which already carried names.
+- The `POST /compounds/validate` response `FailedInput` objects carry an optional 1-based **`line`**
+  field on compound failures (parity with `resolve_targets` which already reported line indices;
+  Software Lock §4.5 per-line reason). No schema change — the `line` field is in the response body
+  only, not persisted to `stage_results` or `parameters`.
+- **No migration** — all of the above is display / CSV / response-body only; no column or jsonb
+  structure change.
+
 **Stage 4 (`stage_results["4"]`) shape — ONE enriched `targets` list:**
 
 Stage 4 emits a single edit-layer `targets` list; each row carries the Open Targets association
