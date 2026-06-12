@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { editStage } from "../../api/sdk.gen";
 import type { ResolvedCompound } from "../../api/types.gen";
@@ -28,6 +29,8 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
     onSuccess: () => qc.invalidateQueries(),
   });
 
+  const [alreadyInRun, setAlreadyInRun] = useState<ResolvedCompound[]>([]);
+
   if (stage1.state === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
@@ -51,9 +54,18 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
     edit.mutate({ add: [], remove: [id] });
   }
 
-  function handleAdd(resolved: ResolvedCompound[]) {
-    edit.mutate({ add: resolved.map((r) => r.compound_id), remove: [] });
-  }
+  const handleAdd = useCallback(
+    (resolved: ResolvedCompound[]) => {
+      const currentIds = new Set((stage1.compounds ?? []).map((c) => c.compound_id));
+      const already = resolved.filter((r) => currentIds.has(r.compound_id));
+      const fresh = resolved.filter((r) => !currentIds.has(r.compound_id));
+      setAlreadyInRun(already);
+      if (fresh.length > 0) {
+        edit.mutate({ add: fresh.map((r) => r.compound_id), remove: [] });
+      }
+    },
+    [stage1.compounds, edit],
+  );
 
   return (
     <div className="stage1-view">
@@ -74,6 +86,14 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
           <CompoundValidateBox label="Add compounds" onResolved={handleAdd} showAddButton />
         }
       />
+
+      {/* Already-in-run note */}
+      {alreadyInRun.length > 0 && (
+        <p className="hf-muted" role="status">
+          {alreadyInRun.length} already in run:{" "}
+          {alreadyInRun.map((c) => c.canonical_name ?? c.canonical_key ?? c.compound_id).join(", ")}
+        </p>
+      )}
     </div>
   );
 }

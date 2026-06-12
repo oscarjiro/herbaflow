@@ -117,6 +117,21 @@ describe("Step-1 in-stage compound editor (r3: stage_1_awaiting_approval)", () =
   it("adding via validate box calls editStage with add body", async () => {
     const editRequests: unknown[] = [];
     server.use(
+      // Override validate to return a compound NOT already in r3's stage-1 set (c1/c2/c3).
+      // Without this, the dedup check would catch c1 (already in run) and skip the edit call.
+      http.post("http://localhost:8000/compounds/validate", () =>
+        HttpResponse.json({
+          resolved: [
+            {
+              compound_id: "c99",
+              canonical_key: "inchikey:LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
+              canonical_name: "ethanol",
+              validation_status: "externally_validated",
+            },
+          ],
+          failed: [],
+        }),
+      ),
       http.post("http://localhost:8000/analyses/r3/stages/1/edit", async ({ request }) => {
         editRequests.push(await request.json());
         return HttpResponse.json({
@@ -161,7 +176,7 @@ describe("Step-1 in-stage compound editor (r3: stage_1_awaiting_approval)", () =
     await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
 
     await waitFor(() => expect(editRequests).toHaveLength(1));
-    expect(editRequests[0]).toEqual({ add: ["c1"], remove: [] });
+    expect(editRequests[0]).toEqual({ add: ["c99"], remove: [] });
   });
 });
 
