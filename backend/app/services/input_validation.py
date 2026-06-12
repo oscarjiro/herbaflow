@@ -281,6 +281,18 @@ async def resolve_targets(
                 )
                 continue
         else:
+            if structure.is_inchikey(token):
+                # A compound InChIKey pasted into a target box is neither a gene symbol nor a
+                # UniProt accession; report it as such rather than as a non-human (9606) miss.
+                failed.append(
+                    FailedInput(
+                        value=item.value,
+                        reason="looks like a compound InChIKey, not a gene symbol or "
+                        "UniProt accession",
+                        line=idx,
+                    )
+                )
+                continue
             sym = gene_symbols.normalize(token).canonical
             acc = gene_to_acc.get(sym, "")
             if not acc:
@@ -299,7 +311,7 @@ async def resolve_targets(
                 failed.append(
                     FailedInput(
                         value=item.value,
-                        reason="gene symbol not found in human (9606) UniProt",
+                        reason="not a recognized human (9606) gene symbol or UniProt accession",
                         line=idx,
                     )
                 )

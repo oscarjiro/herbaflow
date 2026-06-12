@@ -258,8 +258,32 @@ async def test_unknown_symbol_reports_honest_message():
         [{"type": "symbol", "value": "NOTAGENE"}], repo, FakeUniProt({})
     )
     assert not resolved
-    assert failed[0].reason == "gene symbol not found in human (9606) UniProt"
+    assert failed[0].reason == "not a recognized human (9606) gene symbol or UniProt accession"
     assert failed[0].line == 1
+
+
+@pytest.mark.asyncio
+async def test_resolve_targets_reports_inchikey_honestly():
+    # A compound InChIKey pasted into a target box is not a UniProt accession and not a gene
+    # symbol; it must be reported as such — NOT as a non-human/organism miss.
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets(
+        [{"value": "RYYVLZVUVIJVGH-UHFFFAOYSA-N"}], repo, FakeUniProt({})
+    )
+    assert resolved == []
+    assert len(failed) == 1
+    assert "InChIKey" in failed[0].reason
+    assert "human" not in failed[0].reason.lower() and "9606" not in failed[0].reason
+    assert failed[0].line == 1
+
+
+@pytest.mark.asyncio
+async def test_resolve_targets_unknown_symbol_does_not_blame_organism():
+    # An unresolvable, non-InChIKey token is an unrecognized identifier, not an organism problem.
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"value": "NOTAGENE123"}], repo, FakeUniProt({}))
+    assert resolved == []
+    assert failed[0].reason == "not a recognized human (9606) gene symbol or UniProt accession"
 
 
 @pytest.mark.asyncio
