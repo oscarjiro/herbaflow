@@ -51,7 +51,7 @@ async def resolve_compounds(
     resolved: dict[str, ResolvedCompound] = {}
     failed: list[FailedInput] = []
 
-    for item in inputs:
+    for idx, item in enumerate(inputs, start=1):
         token = item.value.strip()
         if not token:
             continue
@@ -61,14 +61,16 @@ async def resolve_compounds(
         if is_key:
             if not structure.is_inchikey(token):
                 logger.info("  rejected %r: invalid InChIKey format", item.value)
-                failed.append(FailedInput(value=item.value, reason="invalid InChIKey format"))
+                failed.append(
+                    FailedInput(value=item.value, reason="invalid InChIKey format", line=idx)
+                )
                 continue
             inchikey, smiles = token.upper(), None
         else:
             ident = await asyncio.to_thread(structure.identity_from_smiles, token)
             if ident is None:
                 logger.info("  rejected %r: invalid structure", item.value)
-                failed.append(FailedInput(value=item.value, reason="invalid structure"))
+                failed.append(FailedInput(value=item.value, reason="invalid structure", line=idx))
                 continue
             inchikey, smiles = ident.inchikey, ident.canonical_smiles
 
@@ -131,6 +133,7 @@ async def resolve_compounds(
                     value=item.value,
                     reason="not found in the database or PubChem. "
                     "If it is a real compound, paste its SMILES (structure) instead.",
+                    line=idx,
                 )
             )
             continue

@@ -249,3 +249,18 @@ async def test_malformed_inchikey_typed_failed() -> None:
     assert failed[0].reason == "invalid InChIKey format"
     assert pubchem.calls == []
     assert repo.upserted == []
+
+
+@pytest.mark.asyncio
+async def test_resolve_compounds_records_line_on_failure() -> None:
+    """Line index (1-based) is recorded on every compound resolution failure."""
+    repo = FakeRepo()
+    pubchem = FakePubChem(record=None)
+
+    # Line 1 is blank (skipped, no failure); line 2 is an invalid SMILES structure.
+    inputs = [CompoundInput(value=""), CompoundInput(value="@@@not-a-smiles@@@")]
+    resolved, failed = await resolve_compounds(inputs, repo=repo, pubchem=pubchem)
+
+    assert resolved == []
+    assert len(failed) == 1
+    assert failed[0].line == 2
