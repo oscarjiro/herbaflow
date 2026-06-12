@@ -305,6 +305,19 @@ export const server = setupServer(
       ],
     }),
   ),
+  http.post(`${BASE}/targets/validate`, () =>
+    HttpResponse.json({
+      resolved: [
+        {
+          target_id: "t1",
+          canonical_key: "uniprot:P00533",
+          gene_symbol: "EGFR",
+          uniprot_accession: "P00533",
+        },
+      ],
+      failed: [],
+    }),
+  ),
   http.get(`${BASE}/analyses/r1`, () =>
     HttpResponse.json({
       analysis_id: "r1",

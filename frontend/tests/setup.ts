@@ -1,6 +1,8 @@
 import "@testing-library/jest-dom/vitest";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { server } from "./handlers";
+// Configure the generated API client to point at localhost:8000 (where MSW intercepts).
+import "../src/lib/api";
 
 // In vitest's jsdom environment, globalThis.AbortController is jsdom's own
 // implementation. Node's built-in Request (undici, used by hey-api) validates

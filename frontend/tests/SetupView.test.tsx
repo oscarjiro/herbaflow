@@ -31,6 +31,9 @@ test("defaults mode to guided, validates compounds, and sends manual_compound_id
   // Mode defaults to guided
   expect((screen.getByLabelText("Mode") as HTMLSelectElement).value).toBe("guided");
 
+  // Switch plant input mode to manual_compounds to reveal CompoundValidateBox
+  await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+
   // Type two lines into the manual compounds textarea
   await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO\nNOTAKEY");
 
@@ -67,9 +70,9 @@ test("defaults mode to guided, validates compounds, and sends manual_compound_id
     }),
   );
 
-  await screen.findByText("Aaa bbb");
+  // Select a disease (disease section is still in selection mode)
+  await waitFor(() => screen.getByLabelText("Disease"));
   await userEvent.selectOptions(screen.getByLabelText("Disease"), "d1");
-  await userEvent.click(screen.getByRole("checkbox"));
   await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
 
   await waitFor(() => expect(createdId).toBe("r1"));
