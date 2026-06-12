@@ -8,6 +8,7 @@ const STAGE_SOURCES: Record<number, string[]> = {
     "Jaccard + one-sided hypergeometric (N=20,000, α=0.05)",
   ],
   6: ["STRING (protein–protein interactions)", "Human only (species 9606); functional or physical"],
+  7: ["networkx (centrality analysis)", "STRING PPI network (undirected)"],
 };
 
 export function StageDataSources({ stage }: { stage: number }) {
