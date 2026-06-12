@@ -27,12 +27,11 @@ def test_select_empty_is_zero() -> None:
     assert result["compounds"] == []
 
 
-def test_select_compounds_unions_manual_attribution() -> None:
-    p, c1, cm = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
+def test_select_compounds_no_manual_bucket() -> None:
+    """select_compounds no longer accepts a manual arg; the result has no 'manual' per-plant key."""
+    p, c1 = uuid.uuid4(), uuid.uuid4()
     out = stage1.select_compounds(
         rows=[stage1.CompoundRow(plant_id=p, compound_id=c1, canonical_name="a")],
-        manual=[{"compound_id": str(cm), "canonical_name": "ethanol"}],
     )
-    assert out["count"] == 2
-    assert any(c["compound_id"] == str(cm) for c in out["compounds"])
-    assert str(cm) in out["per_plant"].get("manual", [])
+    assert out["count"] == 1
+    assert "manual" not in out["per_plant"]

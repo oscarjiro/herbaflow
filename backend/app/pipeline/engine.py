@@ -449,8 +449,7 @@ def build_runners(session: Any) -> dict[int, StageRunner]:
 
     async def stage1_runner(run: Any) -> dict[str, Any]:
         plant_ids = [uuid.UUID(p) for p in run.parameters["plant_ids"]]
-        manual_ids = [uuid.UUID(c) for c in run.parameters.get("manual_compounds", [])]
-        return await stage1.run(session, plant_ids, manual_ids)
+        return await stage1.run(session, plant_ids)
 
     async def stage2_runner(run: Any) -> dict[str, Any]:
         # Screen only the EFFECTIVE S1 set: drop user-removed entries, pass id+name to stage 2.

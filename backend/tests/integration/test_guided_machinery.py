@@ -32,14 +32,12 @@ async def _poll(c, run_id: str, *, until=None, max_iters: int = 80) -> dict:
     return final
 
 
-async def _create(c, ids, *, mode: str = "guided", plant: str = "plant_full", manual=None):
+async def _create(c, ids, *, mode: str = "guided", plant: str = "plant_full"):
     body = {
         "plant_ids": [str(ids[plant])],
         "disease_id": str(ids["disease"]),
         "mode": mode,
     }
-    if manual:
-        body["manual_compound_ids"] = [str(m) for m in manual]
     resp = await c.post("/analyses", json=body)
     assert resp.status_code == 202
     return resp.json()["analysis_id"]
@@ -63,8 +61,8 @@ async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) 
     """
     c, ids = client
 
-    # Step 1: guided, plant_empty + manual c1
-    run_id = await _create(c, ids, mode="guided", plant="plant_empty", manual=[ids["c1"]])
+    # Step 1: guided, plant_full — parks at S1 with c1 and c2 effective (both plant-linked).
+    run_id = await _create(c, ids, mode="guided", plant="plant_full")
     state = await _poll(c, run_id, until="stage_1_awaiting_approval")
     assert state["status"] == "stage_1_awaiting_approval"
     assert any(
@@ -73,11 +71,11 @@ async def test_edit_s1_add_remove_and_reset_from_s2_edit_layer_survives(client) 
         if comp.get("tag") != "user-removed"
     ), "c1 should be effective in S1 before edit"
 
-    # Step 2: edit S1 — add c2, remove c1. A guided edit of the current awaiting stage
-    # re-parks AT S1 (it must not advance past S1's own checkpoint).
+    # Step 2: edit S1 — remove c1 (c2 remains effective). A guided edit of the current
+    # awaiting stage re-parks AT S1 (must not advance past S1's own checkpoint).
     edit_resp = await c.post(
         f"/analyses/{run_id}/stages/1/edit",
-        json={"add": [str(ids["c2"])], "remove": [str(ids["c1"])]},
+        json={"add": [], "remove": [str(ids["c1"])]},
     )
     assert edit_resp.status_code == 202
     state = await _poll(c, run_id, until="stage_1_awaiting_approval")
@@ -244,10 +242,22 @@ async def test_remove_last_compound_is_rejected(client) -> None:
     """An edit may never empty a stage: removing the last remaining entity is
     rejected (422) and the run is left untouched."""
     c, ids = client
-    run_id = await _create(c, ids, mode="guided", plant="plant_empty", manual=[ids["c1"]])
+    # plant_full has c1 and c2; remove c2 first to leave c1 as the sole entity,
+    # then the remove-c1 edit must be rejected (never-empty guard).
+    run_id = await _create(c, ids, mode="guided", plant="plant_full")
+    state = await _poll(c, run_id, until="stage_1_awaiting_approval")
+    assert state["stage_results"]["1"]["count"] == 2
+
+    # Remove c2 — leaves c1 as the only effective compound.
+    rm_c2 = await c.post(
+        f"/analyses/{run_id}/stages/1/edit",
+        json={"add": [], "remove": [str(ids["c2"])]},
+    )
+    assert rm_c2.status_code == 202
     state = await _poll(c, run_id, until="stage_1_awaiting_approval")
     assert state["stage_results"]["1"]["count"] == 1
 
+    # Now try to remove c1 — must be rejected (would empty the stage).
     resp = await c.post(
         f"/analyses/{run_id}/stages/1/edit",
         json={"add": [], "remove": [str(ids["c1"])]},
@@ -270,16 +280,16 @@ async def test_upstream_edit_stages_stale_then_reset_recomputes(client) -> None:
     an explicit reset-from/1 recomputes and clears the stale flag."""
     c, ids = client
 
-    # Guided run with plant_empty + c1 manual → parks at stage_1_awaiting_approval.
-    run_id = await _create(c, ids, mode="guided", plant="plant_empty", manual=[ids["c1"]])
+    # Guided run with plant_full → parks at stage_1_awaiting_approval with c1 and c2.
+    run_id = await _create(c, ids, mode="guided", plant="plant_full")
     await _poll(c, run_id, until="stage_1_awaiting_approval")
     assert (await c.post(f"/analyses/{run_id}/advance")).status_code == 202
     await _poll(c, run_id, until="stage_2_awaiting_approval")
 
-    # Edit S1 (add c2) while parked at S2 — stages the change, does NOT re-run.
+    # Edit S1 (remove c1) while parked at S2 — stages the change, does NOT re-run.
     edit = await c.post(
         f"/analyses/{run_id}/stages/1/edit",
-        json={"add": [str(ids["c2"])], "remove": []},
+        json={"add": [], "remove": [str(ids["c1"])]},
     )
     assert edit.status_code == 202
     state = (await c.get(f"/analyses/{run_id}")).json()
@@ -302,7 +312,7 @@ async def test_upstream_edit_stages_stale_then_reset_recomputes(client) -> None:
     ), "stale must be cleared after reset"
     assert "rerun_from" not in state["parameters"], "rerun_from must be removed after reset"
 
-    # c2 (the staged add) is now in the screened S1 result.
+    # c2 is still effective in S1 after the reset-from recomputes (c1 was removed).
     c2_eff = [
         x
         for x in state["stage_results"]["1"]["compounds"]

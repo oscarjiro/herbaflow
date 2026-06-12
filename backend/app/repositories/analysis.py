@@ -29,7 +29,6 @@ class AnalysisRepository:
         disease_id: uuid.UUID | None,
         plant_ids: list[uuid.UUID],
         mode: str,
-        manual_compound_ids: list[uuid.UUID],
         pipeline_parameters: dict[str, Any] | None = None,
         extra_parameters: dict[str, Any] | None = None,
         stage_edits: dict[str, Any] | None = None,
@@ -41,7 +40,6 @@ class AnalysisRepository:
             disease_id=disease_id,
             parameters={
                 "plant_ids": [str(p) for p in plant_ids],
-                "manual_compounds": [str(c) for c in manual_compound_ids],
                 "stage_edits": stage_edits or {},
                 **(extra_parameters or {}),
                 **(pipeline_parameters or {}),

@@ -48,6 +48,11 @@ class AnalysisCreate(BaseModel):
         if p is PlantInputMode.selection:
             if not self.plant_ids:
                 raise ValueError("selection mode requires at least one plant_ids.")
+            if self.manual_compound_ids:
+                raise ValueError(
+                    "selection mode forbids manual_compound_ids; add or remove compounds "
+                    "in Stage 1 after the run is created."
+                )
             if self.plant_label is not None:
                 raise ValueError("plant_label is only allowed in a manual plant mode.")
         elif p is PlantInputMode.manual_compounds:

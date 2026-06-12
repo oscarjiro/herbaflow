@@ -103,6 +103,16 @@ def test_manual_disease_forbids_disease_id_requires_targets() -> None:
         AnalysisCreate(plant_ids=[PID], disease_input_mode="manual_disease_targets")
 
 
+def test_selection_mode_forbids_manual_compound_ids() -> None:
+    with pytest.raises(ValidationError, match="selection mode forbids manual_compound_ids"):
+        AnalysisCreate(
+            plant_input_mode="selection",
+            plant_ids=[PID],
+            disease_id=DID,
+            manual_compound_ids=[CID],
+        )
+
+
 def test_label_rejected_on_selection_mode() -> None:
     with pytest.raises(ValidationError):
         AnalysisCreate(plant_ids=[PID], disease_id=DID, plant_label="custom")

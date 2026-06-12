@@ -106,7 +106,9 @@ async def test_zero_compounds_fails(client) -> None:
 
 
 @pytest.mark.asyncio
-async def test_manual_compound_unions_into_stage1(client) -> None:
+async def test_selection_mode_forbids_manual_compound_ids_at_create(client) -> None:
+    # plant selection mode + manual_compound_ids is now forbidden (schema 422).
+    # Compounds are added/removed in Stage 1 after the run is created.
     c, ids = client
     resp = await c.post(
         "/analyses",
@@ -117,20 +119,8 @@ async def test_manual_compound_unions_into_stage1(client) -> None:
             "manual_compound_ids": [str(ids["c1"])],
         },
     )
-    assert resp.status_code == 202
-    run_id = resp.json()["analysis_id"]
-
-    final = None
-    for _ in range(50):
-        final = (await c.get(f"/analyses/{run_id}")).json()
-        if final["status"] in ("complete", "failed"):
-            break
-    # The manual compound unions into S1 (the assertion of intent); the run then hard-stops at
-    # the empty S3, which is fine — S1/S2 ran with the unioned compound.
-    assert final["status"] == "failed"
-    assert final["stage_results"]["1"]["count"] == 1
-    assert str(ids["c1"]) in final["stage_results"]["1"]["per_plant"]["manual"]
-    assert final["stage_results"]["2"]["count"] == 1
+    assert resp.status_code == 422
+    assert resp.headers["content-type"].startswith("application/problem+json")
 
 
 @pytest.mark.asyncio
@@ -138,10 +128,11 @@ async def test_unknown_manual_compound_is_422(client) -> None:
     import uuid
 
     c, ids = client
+    # manual_compounds mode with an unknown compound id → service rejects with 422.
     resp = await c.post(
         "/analyses",
         json={
-            "plant_ids": [str(ids["plant_full"])],
+            "plant_input_mode": "manual_compounds",
             "disease_id": str(ids["disease"]),
             "manual_compound_ids": [str(uuid.uuid4())],
         },

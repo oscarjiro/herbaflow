@@ -35,11 +35,9 @@ class FakeAnalysisRepo:
 
         pipeline_parameters = kwargs.get("pipeline_parameters") or {}
         plant_ids = kwargs.get("plant_ids") or []
-        manual_compound_ids = kwargs.get("manual_compound_ids") or []
         # Mirror real repo parameter-building so tests assert the stored shape
         self.created_parameters = {
             "plant_ids": [str(p) for p in plant_ids],
-            "manual_compounds": [str(c) for c in manual_compound_ids],
             "stage_edits": {},
             **pipeline_parameters,
         }
@@ -104,10 +102,11 @@ def test_create_default_mode_matches_contract() -> None:
 
 @pytest.mark.asyncio
 async def test_create_rejects_unknown_manual_compounds() -> None:
+    # manual_compounds mode: unknown compound id → service rejects.
     svc = _service(compound_existing=[])
     bad = uuid.uuid4()
     payload = AnalysisCreate(
-        plant_ids=[uuid.uuid4()],
+        plant_input_mode="manual_compounds",
         disease_id=uuid.uuid4(),
         mode=Mode.auto,
         manual_compound_ids=[bad],
@@ -124,7 +123,7 @@ async def test_create_rejects_too_many_manual_compounds() -> None:
     ids = [uuid.uuid4() for _ in range(over)]
     svc = _service(compound_existing=ids)  # all "exist" — only the cap should reject
     payload = AnalysisCreate(
-        plant_ids=[uuid.uuid4()],
+        plant_input_mode="manual_compounds",
         disease_id=uuid.uuid4(),
         mode=Mode.auto,
         manual_compound_ids=ids,
@@ -141,7 +140,7 @@ async def test_create_allows_manual_compounds_at_cap() -> None:
     ids = [uuid.uuid4() for _ in range(at_cap)]
     svc = _service(compound_existing=ids)
     payload = AnalysisCreate(
-        plant_ids=[uuid.uuid4()],
+        plant_input_mode="manual_compounds",
         disease_id=uuid.uuid4(),
         mode=Mode.auto,
         manual_compound_ids=ids,

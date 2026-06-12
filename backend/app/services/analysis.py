@@ -75,16 +75,15 @@ class AnalysisService:
 
         # Referential existence — only the lists relevant to the chosen modes (the schema already
         # enforced which lists are present/forbidden per mode). Selection plants are validated by
-        # the plant repo; manual compounds (whether the S1 entities in manual_compounds mode OR
-        # the Chunk-1 manual additions unioned into a selection-mode Stage 1) and manual targets
-        # are validated for cap + existence.
+        # the plant repo; manual compounds (the S1 entities in manual_compounds mode) and manual
+        # targets are validated for cap + existence.
         if plant_mode == "selection":
             missing = await self.plant_repo.missing_ids(payload.plant_ids)
             if missing:
                 raise ValidationProblem(
                     detail="Unknown plant ids.", invalid_plant_ids=[str(p) for p in missing]
                 )
-        if payload.manual_compound_ids:
+        if plant_mode == "manual_compounds":
             await self._verify_entities("compound", self.compound_repo, payload.manual_compound_ids)
         if plant_mode == "manual_targets":
             await self._verify_entities("target", self.target_repo, payload.manual_target_ids)
@@ -160,7 +159,6 @@ class AnalysisService:
             disease_id=payload.disease_id,
             plant_ids=payload.plant_ids,
             mode=payload.mode.value,
-            manual_compound_ids=payload.manual_compound_ids,
             pipeline_parameters=pipeline_parameters,
             extra_parameters=extra_parameters,
             stage_edits=stage_edits,

@@ -38,7 +38,6 @@ class _FakeAnalysisRepo:
             # extra_parameters spread (input_modes / labels), then the pipeline params.
             parameters = {
                 "plant_ids": [str(p) for p in kwargs["plant_ids"]],
-                "manual_compounds": [str(c) for c in kwargs["manual_compound_ids"]],
                 "stage_edits": kwargs.get("stage_edits") or {},
                 **(kwargs.get("extra_parameters") or {}),
                 **(kwargs.get("pipeline_parameters") or {}),
