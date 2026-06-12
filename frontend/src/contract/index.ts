@@ -9,6 +9,26 @@ export const modeSchema = z.enum(MODES);
 export const DEFAULT_MODE = contract.$defs.mode.default as (typeof MODES)[number];
 
 // ---------------------------------------------------------------------------
+// Input-mode vocabularies — derived from the shared contract.
+// ---------------------------------------------------------------------------
+
+export const PLANT_INPUT_MODES = contract.$defs.plant_input_mode.enum as [
+  "selection",
+  "manual_compounds",
+  "manual_targets",
+];
+export const DISEASE_INPUT_MODES = contract.$defs.disease_input_mode.enum as [
+  "selection",
+  "manual_disease_targets",
+];
+export const plantInputModeSchema = z.enum(PLANT_INPUT_MODES);
+export const diseaseInputModeSchema = z.enum(DISEASE_INPUT_MODES);
+export const DEFAULT_PLANT_INPUT_MODE = contract.$defs.plant_input_mode
+  .default as (typeof PLANT_INPUT_MODES)[number];
+export const DEFAULT_DISEASE_INPUT_MODE = contract.$defs.disease_input_mode
+  .default as (typeof DISEASE_INPUT_MODES)[number];
+
+// ---------------------------------------------------------------------------
 // ADME parameter metadata — derived from the shared contract.
 // ---------------------------------------------------------------------------
 
