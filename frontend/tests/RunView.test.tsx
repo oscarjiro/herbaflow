@@ -50,15 +50,13 @@ describe("RunView with Stage 2 data", () => {
 });
 
 describe("Step-1 in-stage compound editor (r3: stage_1_awaiting_approval)", () => {
-  it("renders tagged compounds with user-removed shown as struck/greyed", async () => {
+  it("hides user-removed compounds", async () => {
     wrap("r3");
-    // All compounds are rendered
+    // Non-removed compounds are visible
     expect(await screen.findByText("Curcumin")).toBeInTheDocument();
     expect(await screen.findByText("Berberine")).toBeInTheDocument();
-    expect(await screen.findByText("RemovedOne")).toBeInTheDocument();
-    // The user-removed compound has the visual treatment class
-    const removedEl = screen.getByText("RemovedOne");
-    expect(removedEl.closest("li")).toHaveClass("entity-row--removed");
+    // The user-removed compound is hidden (not rendered)
+    expect(screen.queryByText("RemovedOne")).not.toBeInTheDocument();
   });
 
   it("shows 'Provided by you' badge when stage_state[\"1\"] is user_provided", async () => {

@@ -214,19 +214,6 @@ describe("EditableEntityList primitive", () => {
     expect(getByRole("textbox", { name: /add item/i })).toBeDisabled();
   });
 
-  it("applies struck/greyed treatment for user-removed tag", () => {
-    const { getByText } = render(
-      <EditableEntityList
-        entities={[{ id: "e1", label: "Removed One", tag: "user-removed" }]}
-        onRemove={() => {}}
-        cap={10}
-        current={0}
-      />,
-    );
-    const el = getByText("Removed One");
-    // Should have the struck/greyed class
-    expect(el).toHaveClass("user-removed");
-  });
 });
 
 describe("RunView with Stage 2", () => {
