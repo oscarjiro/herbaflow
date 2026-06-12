@@ -349,10 +349,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
           </thead>
           <tbody>
             {visibleRows.map((row) => (
-              <tr
-                key={row.target_id}
-                className={row.tag === "user-removed" ? "row--removed" : undefined}
-              >
+              <tr key={row.target_id}>
                 <td>{row.gene_symbol}</td>
                 <td>
                   {row.uniprot_accession ? (
