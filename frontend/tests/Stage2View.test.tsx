@@ -213,7 +213,6 @@ describe("EditableEntityList primitive", () => {
     // The add control should be disabled when at cap
     expect(getByRole("textbox", { name: /add item/i })).toBeDisabled();
   });
-
 });
 
 describe("RunView with Stage 2", () => {
