@@ -67,6 +67,11 @@ class FakeCompoundRepo:
     async def existing_ids(self, ids):
         return {i for i in ids if i in self._existing}
 
+    async def get_many(self, ids):
+        from types import SimpleNamespace
+
+        return [SimpleNamespace(compound_id=i, canonical_name=f"compound-{i}") for i in ids]
+
 
 def _service(plant_missing=None, disease_exists=True, run=None, compound_existing=None):
     return AnalysisService(

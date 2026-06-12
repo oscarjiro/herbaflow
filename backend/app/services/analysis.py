@@ -114,7 +114,9 @@ class AnalysisService:
         # edits + reset-from. S1 = manual compounds; S3 = manual targets; S4 = manual disease
         # targets (one enriched edit-layer targets list — S5 reads it directly).
         if smap[1] == entry_modes.USER_PROVIDED:
-            self._prefill_compound_stage(1, payload.manual_compound_ids, stage_edits, stage_results)
+            await self._prefill_compound_stage(
+                1, payload.manual_compound_ids, stage_edits, stage_results
+            )
         if smap[3] == entry_modes.USER_PROVIDED:
             await self._prefill_target_stage(
                 3, payload.manual_target_ids, stage_edits, stage_results
@@ -183,17 +185,24 @@ class AnalysisService:
                 **{f"invalid_{entity}_ids": [str(i) for i in missing]},
             )
 
-    def _prefill_compound_stage(
+    async def _prefill_compound_stage(
         self,
         stage: int,
         ids: list[uuid.UUID],
         stage_edits: dict[str, Any],
         stage_results: dict[str, Any],
     ) -> None:
-        """Seed a user-provided compound stage (S1) through the durable edit layer."""
+        """Seed a user-provided compound stage (S1) through the durable edit layer.
+
+        Carries each compound's canonical_name so Stage 1 shows the name, not the UUID
+        (symmetric with selection mode + the Stage-3 target prefill). Existence was
+        verified upstream in ``create`` (``_verify_entities``), so every id resolves.
+        """
+        rows = await self.compound_repo.get_many(ids)
+        name_by_id = {str(c.compound_id): c.canonical_name for c in rows}
         edit = edits.normalize_edit(
             edits.empty_edit(),
-            [{"compound_id": str(i), "canonical_name": None} for i in ids],
+            [{"compound_id": str(i), "canonical_name": name_by_id.get(str(i))} for i in ids],
             [],
             id_key="compound_id",
         )
