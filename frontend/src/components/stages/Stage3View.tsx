@@ -9,7 +9,8 @@
  *  - Pagination (10 / 20 / 50 / all) and a CSV download keyed on gene symbol +
  *    UniProt accession + method + source_url (NEVER a UUID column)
  *  - Per-compound coverage table (0-coverage rows always visible)
- *  - Target add/remove via EditableEntityList + TargetValidateBox (editStage)
+ *  - Target remove via an in-table delete column; add via a standalone EntityAddControl +
+ *    TargetValidateBox (editStage). User-removed rows are hidden from the table and the CSV.
  *  - ParamPanel + Redo (resetFrom) and ApprovalBar
  *  - StpDialog for manual SwissTargetPrediction paste-back
  *
@@ -25,13 +26,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
 import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contract";
+import { atMinEntities, isUserRemoved } from "../../lib/entities";
+import { formatSig } from "../../lib/format";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStaleState } from "../../hooks/useStaleState";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { ApprovalBar } from "./ApprovalBar";
-import { EditableEntityList } from "./EditableEntityList";
+import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
+import { StageEntityContext } from "./StageEntityContext";
 import { StaleNotice } from "./StaleNotice";
 import { StpDialog, type StpCompound } from "./StpDialog";
 import { TargetValidateBox } from "../TargetValidateBox";
@@ -81,6 +85,7 @@ type TargetRow = {
   source_url: string | null;
   methods: string[];
   compound_count: number;
+  source_compounds: string[];
   tag: TargetTag;
 };
 
@@ -99,8 +104,12 @@ function methodLabel(m: string): string {
   return METHOD_LABELS[m] ?? m;
 }
 
-/** Group edges by target_id, join with the tagged targets list. */
-function buildTargetRows(stage3: Stage3Result): TargetRow[] {
+/**
+ * Group edges by target_id, join with the tagged targets list. User-removed targets are filtered
+ * out of the view (and so out of the CSV); their data still persists for re-run / both-sides
+ * exclusion. `nameById` maps a compound_id → its display name for the source-compounds column.
+ */
+function buildTargetRows(stage3: Stage3Result, nameById: Map<string, string | null>): TargetRow[] {
   const edgesByTarget = new Map<string, CompoundTargetEdge[]>();
   for (const edge of stage3.compound_targets) {
     const list = edgesByTarget.get(edge.target_id) ?? [];
@@ -108,34 +117,38 @@ function buildTargetRows(stage3: Stage3Result): TargetRow[] {
     edgesByTarget.set(edge.target_id, list);
   }
 
-  return stage3.targets.map((t) => {
-    const edges = edgesByTarget.get(t.target_id) ?? [];
-    const methods = Array.from(new Set(edges.map((e) => e.prediction_method)));
-    const compoundCount = new Set(edges.map((e) => e.compound_id)).size;
-    const accEdge = edges.find((e) => e.uniprot_accession);
-    return {
-      target_id: t.target_id,
-      gene_symbol: t.canonical_name ?? t.target_id,
-      uniprot_accession: accEdge?.uniprot_accession ?? null,
-      source_url: accEdge?.source_url ?? null,
-      methods,
-      compound_count: compoundCount,
-      tag: t.tag,
-    };
-  });
+  return stage3.targets
+    .filter((t) => !isUserRemoved(t.tag)) // hidden; data still persists
+    .map((t) => {
+      const edges = edgesByTarget.get(t.target_id) ?? [];
+      const methods = Array.from(new Set(edges.map((e) => e.prediction_method)));
+      const compoundIds = Array.from(new Set(edges.map((e) => e.compound_id)));
+      const accEdge = edges.find((e) => e.uniprot_accession);
+      return {
+        target_id: t.target_id,
+        gene_symbol: t.canonical_name ?? t.target_id,
+        uniprot_accession: accEdge?.uniprot_accession ?? null,
+        source_url: accEdge?.source_url ?? null,
+        methods,
+        compound_count: compoundIds.length,
+        source_compounds: compoundIds.map((cid) => nameById.get(cid) ?? cid),
+        tag: t.tag,
+      };
+    });
 }
 
-const S3_CSV_HEADER = "gene_symbol,uniprot_accession,prediction_method,source_url";
+const S3_CSV_HEADER = "gene_symbol,uniprot_accession,prediction_method,source_compounds,source_url";
 
 /**
- * CSV keyed on gene symbol + UniProt accession + method + source_url.
- * NEVER includes a UUID column (hard requirement).
+ * CSV keyed on gene symbol + UniProt accession + method + source compounds + source_url.
+ * NEVER includes a UUID column (hard requirement). Values stay RAW (no display rounding).
  */
 function buildS3CsvRows(rows: TargetRow[]): unknown[][] {
   return rows.map((r) => [
     r.gene_symbol,
     r.uniprot_accession,
     r.methods.map(methodLabel).join("; "),
+    r.source_compounds.join("; "),
     r.source_url,
   ]);
 }
@@ -195,7 +208,16 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     onAddIds: (ids) => edit.mutate({ add: ids, remove: [] }),
   });
 
-  const targetRows = useMemo(() => (stage3 ? buildTargetRows(stage3) : []), [stage3]);
+  const passed = useMemo(() => stage2?.passed ?? [], [stage2]);
+  const nameById = useMemo(
+    () => new Map(passed.map((c) => [c.compound_id, c.canonical_name])),
+    [passed],
+  );
+
+  const targetRows = useMemo(
+    () => (stage3 ? buildTargetRows(stage3, nameById) : []),
+    [stage3, nameById],
+  );
   const csvHref = useCsvBlobUrl(S3_CSV_HEADER, buildS3CsvRows(targetRows));
 
   if (!stage3) return null;
@@ -232,18 +254,8 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
-  // Compound name lookup for the coverage table.
-  const passed = stage2?.passed ?? [];
-  const nameById = new Map(passed.map((c) => [c.compound_id, c.canonical_name]));
-
   // Effective target count for cap enforcement (exclude user-removed).
   const effectiveCount = stage3.targets.filter((t) => t.tag !== "user-removed").length;
-
-  const entities = stage3.targets.map((t) => ({
-    id: t.target_id,
-    label: t.canonical_name ?? t.target_id,
-    tag: t.tag,
-  }));
 
   const stpCompounds: StpCompound[] = passed.map((c) => ({
     compound_id: c.compound_id,
@@ -258,6 +270,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
       </h2>
       <StageDataSources stage={3} />
+      <StageEntityContext data={data} side="plant" />
 
       {/* Summary cards */}
       <div className="stage-summary">
@@ -265,24 +278,31 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
           <span className="summary-card__value">{stage3.count}</span>
           <span className="summary-card__label">targets</span>
         </div>
-        <div className="summary-card" aria-label={`${stage3.coverage_pct}% coverage`}>
-          <span className="summary-card__value">{stage3.coverage_pct}%</span>
-          <span className="summary-card__label">coverage</span>
-        </div>
-        <div
-          className="summary-card summary-card--muted"
-          aria-label={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL edges`}
-        >
-          <span className="summary-card__value">{sourceCounts.chembl_bioactivity ?? 0}</span>
-          <span className="summary-card__label">ChEMBL</span>
-        </div>
-        <div
-          className="summary-card summary-card--muted"
-          aria-label={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay edges`}
-        >
-          <span className="summary-card__value">{sourceCounts.pubchem_bioassay ?? 0}</span>
-          <span className="summary-card__label">PubChem BioAssay</span>
-        </div>
+        {!isUserProvided && (
+          <>
+            <div
+              className="summary-card"
+              aria-label={`${formatSig(stage3.coverage_pct)}% coverage`}
+            >
+              <span className="summary-card__value">{formatSig(stage3.coverage_pct)}%</span>
+              <span className="summary-card__label">coverage</span>
+            </div>
+            <div
+              className="summary-card summary-card--muted"
+              aria-label={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL edges`}
+            >
+              <span className="summary-card__value">{sourceCounts.chembl_bioactivity ?? 0}</span>
+              <span className="summary-card__label">ChEMBL</span>
+            </div>
+            <div
+              className="summary-card summary-card--muted"
+              aria-label={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay edges`}
+            >
+              <span className="summary-card__value">{sourceCounts.pubchem_bioassay ?? 0}</span>
+              <span className="summary-card__label">PubChem BioAssay</span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Table controls */}
@@ -324,6 +344,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
               <th>Evidence</th>
               <th># compounds</th>
               <th></th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -349,6 +370,21 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
                 <td>{row.methods.length > 0 ? row.methods.map(methodLabel).join(", ") : "—"}</td>
                 <td>{row.compound_count}</td>
                 <td>{tagBadge(row.tag)}</td>
+                <td>
+                  <button
+                    className="hf-btn hf-btn-icon"
+                    aria-label={`Remove ${row.gene_symbol}`}
+                    onClick={() => edit.mutate({ add: [], remove: [row.target_id] })}
+                    disabled={atMinEntities(effectiveCount)}
+                    title={
+                      atMinEntities(effectiveCount)
+                        ? "A stage must keep at least one entry."
+                        : undefined
+                    }
+                  >
+                    ✕
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -404,16 +440,10 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         </div>
       )}
 
-      {/* Target add / remove */}
-      <EditableEntityList
-        entities={entities}
-        onRemove={(id) => edit.mutate({ add: [], remove: [id] })}
-        cap={MAX_TARGETS}
-        current={effectiveCount}
-        addControl={
-          <TargetValidateBox label="Add targets" onResolved={handleAddTargets} showAddButton />
-        }
-      />
+      {/* Target add (the table above owns remove) */}
+      <EntityAddControl current={effectiveCount} cap={MAX_TARGETS}>
+        <TargetValidateBox label="Add targets" onResolved={handleAddTargets} showAddButton />
+      </EntityAddControl>
 
       {/* Already-in-run note */}
       <AlreadyInRunNote
@@ -421,7 +451,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       />
 
       {/* Param panel */}
-      {targetParams && (
+      {targetParams && !isUserProvided && (
         <ParamPanel
           params={targetParams}
           meta={TARGET_PARAMS}

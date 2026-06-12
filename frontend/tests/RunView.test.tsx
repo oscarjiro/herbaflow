@@ -261,7 +261,8 @@ describe("run header display names", () => {
   it("manual_targets mode shows plant label from parameters.labels.plant", async () => {
     wrap("r-na-s1");
     await screen.findByRole("heading", { name: /step 3/i });
-    expect(await screen.findByText(/My plant label/i)).toBeInTheDocument();
+    // The label renders in the run header AND in the Stage 3 plant context line.
+    expect((await screen.findAllByText(/My plant label/i)).length).toBeGreaterThan(0);
   });
 
   it("manual_disease_targets mode shows disease label from parameters.labels.disease", async () => {

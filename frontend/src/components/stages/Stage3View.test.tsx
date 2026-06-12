@@ -170,3 +170,40 @@ describe("Stage3View — already-in-run deduplication", () => {
     expect(editSpy).not.toHaveBeenCalled();
   });
 });
+
+describe("Stage3View — removed-row hiding + delete column", () => {
+  /** Stage-3 data with one computed row and one user-removed row. */
+  function makeDataWithRemoved(): AnalysisRead {
+    return {
+      analysis_id: "a1",
+      status: "awaiting_approval",
+      current_stage: 3,
+      parameters: {},
+      stage_results: {
+        "3": {
+          targets: [
+            { target_id: "t1", canonical_name: "PPARG", tag: "computed" },
+            { target_id: "t2", canonical_name: "TP53", tag: "user-removed" },
+          ],
+          compound_targets: [],
+          per_compound: {},
+          coverage_pct: 0,
+          count: 1,
+          state: "computed",
+        },
+        "2": { passed: [] },
+      },
+      stage_state: { "3": "computed" },
+      plants: [],
+      diseases: [],
+      compounds: [],
+    } as unknown as AnalysisRead;
+  }
+
+  it("hides user-removed rows and shows a delete column", () => {
+    wrap(<Stage3View data={makeDataWithRemoved()} />);
+    expect(screen.getByText("PPARG")).toBeInTheDocument();
+    expect(screen.queryByText("TP53")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove PPARG" })).toBeInTheDocument();
+  });
+});
