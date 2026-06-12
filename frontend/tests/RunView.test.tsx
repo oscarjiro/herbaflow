@@ -268,13 +268,15 @@ describe("run header display names", () => {
   it("manual_disease_targets mode shows disease label from parameters.labels.disease", async () => {
     wrap("r-manual-disease");
     await screen.findByRole("heading", { name: /step 4/i });
-    expect(await screen.findByText(/My disease label/i)).toBeInTheDocument();
+    // The label renders in the run header AND in the Stage 4 disease context line.
+    expect((await screen.findAllByText(/My disease label/i)).length).toBeGreaterThan(0);
   });
 
   it("manual mode with no label shows N/A", async () => {
     wrap("r-manual-nolabel");
     await screen.findByRole("heading", { name: /step 4/i });
-    expect(await screen.findByText(/N\/A/)).toBeInTheDocument();
+    // "N/A" renders in the run header AND in the Stage 4 disease context line.
+    expect((await screen.findAllByText(/N\/A/)).length).toBeGreaterThan(0);
   });
 });
 

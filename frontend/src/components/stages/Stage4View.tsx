@@ -2,13 +2,17 @@
  * Stage4View — disease → target collection results (DB read of the seeded Open Targets snapshot).
  *
  * Renders:
- *  - Summary cards: target count + the applied min_score
- *  - Disease-targets table (one row per target): gene symbol, UniProt accession (linked), score,
- *    association type, edit tag badge; pagination (10/20/50/all); CSV keyed on
- *    gene_symbol + uniprot_accession + score + association_type + source_url (NEVER a UUID)
- *  - Target add/remove via EditableEntityList + TargetValidateBox (editStage stage 4)
- *  - ParamPanel (min_score) + Redo (resetFrom stage 4) and ApprovalBar — at count 0 the
- *    ApprovalBar is disabled with a reason (blocking-stop); recover via Redo or a manual add
+ *  - Summary cards: target count + the applied min_score (min_score hidden for user_provided)
+ *  - Disease-targets table (one row per target): gene symbol, UniProt accession (linked), Open
+ *    Targets score (display-rounded), edit tag badge, in-table delete; pagination (10/20/50/all);
+ *    CSV keyed on gene_symbol + uniprot_accession + score + source_url (NEVER a UUID; the
+ *    near-constant association_type is kept on the data type but no longer surfaced or exported)
+ *  - User-removed rows are hidden from the table AND the CSV (data still persists)
+ *  - Target remove via the in-table delete column; add via a standalone EntityAddControl +
+ *    TargetValidateBox (editStage stage 4)
+ *  - ParamPanel (min_score) + Redo (resetFrom stage 4) and ApprovalBar — both the ParamPanel and
+ *    the min-score card are hidden for user_provided; at count 0 the ApprovalBar is disabled with a
+ *    reason (blocking-stop); recover via Redo or a manual add
  *  - Footer: "Open Targets (database snapshot); human targets only."
  *
  * State (stage_state["4"]):
@@ -31,13 +35,16 @@ import {
   DISEASE_TARGETS_PARAMS,
   MAX_TARGETS,
 } from "../../contract";
+import { atMinEntities, isUserRemoved } from "../../lib/entities";
+import { formatSig } from "../../lib/format";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStaleState } from "../../hooks/useStaleState";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { ApprovalBar } from "./ApprovalBar";
-import { EditableEntityList } from "./EditableEntityList";
+import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
+import { StageEntityContext } from "./StageEntityContext";
 import { StaleNotice } from "./StaleNotice";
 import { TargetValidateBox } from "../TargetValidateBox";
 
@@ -68,7 +75,6 @@ type Row = {
   gene_symbol: string;
   uniprot_accession: string | null;
   score: number | null;
-  association_type: string | null;
   source_url: string | null;
   tag: TargetTag;
 };
@@ -76,27 +82,24 @@ type Row = {
 const PAGE_SIZES = [10, 20, 50] as const;
 
 function buildRows(stage4: Stage4Result): Row[] {
-  return stage4.targets.map((t) => ({
-    target_id: t.target_id,
-    gene_symbol: t.canonical_name ?? t.gene_symbol ?? t.target_id,
-    uniprot_accession: t.uniprot_accession ?? null,
-    score: t.score ?? null,
-    association_type: t.association_type ?? null,
-    source_url: t.source_url ?? null,
-    tag: t.tag,
-  }));
+  return stage4.targets
+    .filter((t) => !isUserRemoved(t.tag)) // hidden; data still persists
+    .map((t) => ({
+      target_id: t.target_id,
+      gene_symbol: t.canonical_name ?? t.gene_symbol ?? t.target_id,
+      uniprot_accession: t.uniprot_accession ?? null,
+      score: t.score ?? null,
+      source_url: t.source_url ?? null,
+      tag: t.tag,
+    }));
 }
 
-const S4_CSV_HEADER = "gene_symbol,uniprot_accession,score,association_type,source_url";
+// CSV keyed on gene symbol + UniProt accession + score + source_url (NEVER a UUID, and the
+// near-constant association_type is no longer surfaced). Values stay RAW (no display rounding).
+const S4_CSV_HEADER = "gene_symbol,uniprot_accession,score,source_url";
 
 function buildS4CsvRows(rows: Row[]): unknown[][] {
-  return rows.map((r) => [
-    r.gene_symbol,
-    r.uniprot_accession,
-    r.score,
-    r.association_type,
-    r.source_url,
-  ]);
+  return rows.map((r) => [r.gene_symbol, r.uniprot_accession, r.score, r.source_url]);
 }
 
 function tagBadge(tag: TargetTag): React.ReactElement | null {
@@ -166,11 +169,6 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   );
 
   const effectiveCount = stage4.targets.filter((t) => t.tag !== "user-removed").length;
-  const entities = stage4.targets.map((t) => ({
-    id: t.target_id,
-    label: t.canonical_name ?? t.target_id,
-    tag: t.tag,
-  }));
 
   const isUserProvided = stageState === "user_provided";
 
@@ -181,19 +179,22 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
       </h2>
       <StageDataSources stage={4} />
+      <StageEntityContext data={data} side="disease" />
 
       <div className="stage-summary">
         <div className="summary-card" aria-label={`${stage4.count} targets`}>
           <span className="summary-card__value">{stage4.count}</span>
           <span className="summary-card__label">targets</span>
         </div>
-        <div
-          className="summary-card summary-card--muted"
-          aria-label={`min score ${stage4.min_score_applied}`}
-        >
-          <span className="summary-card__value">{stage4.min_score_applied}</span>
-          <span className="summary-card__label">min score</span>
-        </div>
+        {!isUserProvided && (
+          <div
+            className="summary-card summary-card--muted"
+            aria-label={`min score ${stage4.min_score_applied}`}
+          >
+            <span className="summary-card__value">{stage4.min_score_applied}</span>
+            <span className="summary-card__label">min score</span>
+          </div>
+        )}
       </div>
 
       {stage4.count === 0 && (
@@ -238,7 +239,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
               <th>Gene symbol</th>
               <th>UniProt</th>
               <th>Open Targets score</th>
-              <th>Association</th>
+              <th></th>
               <th></th>
             </tr>
           </thead>
@@ -262,9 +263,23 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
                     "—"
                   )}
                 </td>
-                <td>{row.score == null ? "—" : row.score}</td>
-                <td>{row.association_type ?? "—"}</td>
+                <td>{formatSig(row.score)}</td>
                 <td>{tagBadge(row.tag)}</td>
+                <td>
+                  <button
+                    className="hf-btn hf-btn-icon"
+                    aria-label={`Remove ${row.gene_symbol}`}
+                    onClick={() => edit.mutate({ add: [], remove: [row.target_id] })}
+                    disabled={atMinEntities(effectiveCount)}
+                    title={
+                      atMinEntities(effectiveCount)
+                        ? "A stage must keep at least one entry."
+                        : undefined
+                    }
+                  >
+                    ✕
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -293,26 +308,21 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         </div>
       )}
 
-      <EditableEntityList
-        entities={entities}
-        onRemove={(id) => edit.mutate({ add: [], remove: [id] })}
-        cap={MAX_TARGETS}
-        current={effectiveCount}
-        addControl={
-          <TargetValidateBox
-            label="Add disease targets"
-            onResolved={handleAddTargets}
-            showAddButton
-          />
-        }
-      />
+      {/* Disease-target add (the table above owns remove) */}
+      <EntityAddControl current={effectiveCount} cap={MAX_TARGETS}>
+        <TargetValidateBox
+          label="Add disease targets"
+          onResolved={handleAddTargets}
+          showAddButton
+        />
+      </EntityAddControl>
 
       {/* Already-in-run note */}
       <AlreadyInRunNote
         labels={alreadyInRun.map((t) => t.gene_symbol ?? t.uniprot_accession ?? t.target_id)}
       />
 
-      {dtParams && (
+      {dtParams && !isUserProvided && (
         <ParamPanel
           params={dtParams}
           meta={DISEASE_TARGETS_PARAMS}
