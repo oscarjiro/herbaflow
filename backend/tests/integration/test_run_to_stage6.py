@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from app.integrations.chembl import ChemblHit
 from app.integrations.string_db import StringEdge
 from app.integrations.uniprot import UniProtReason, UniProtRecord, UniProtResolution
-from app.pipeline.stages import stage3, stage6
+from app.pipeline.stages import stage3, stage6, stage8
 
 SETTLED = frozenset(
     {
@@ -29,6 +29,8 @@ SETTLED = frozenset(
         "stage_4_awaiting_approval",
         "stage_5_awaiting_approval",
         "stage_6_awaiting_approval",
+        "stage_7_awaiting_approval",
+        "stage_8_awaiting_approval",
     }
 )
 
@@ -68,11 +70,20 @@ class _FakeString:
         return list(self._edges)
 
 
-def _patch_stage_clients(monkeypatch, string_fake):
+class _FakeGprofiler:
+    """Minimal g:Profiler stub — returns empty terms (valid honest-null completion)."""
+
+    async def profile(self, *, query, background, sources, correction, user_threshold):
+        return []
+
+
+def _patch_stage_clients(monkeypatch, string_fake, gprofiler_fake=None):
     monkeypatch.setattr(stage3, "ChemblClient", lambda http: _FakeChembl())
     monkeypatch.setattr(stage3, "PubChemBioAssayClient", lambda http: _FakePubchem())
     monkeypatch.setattr(stage3, "UniProtClient", lambda http: _FakeUniProt())
     monkeypatch.setattr(stage6, "StringClient", lambda http: string_fake)
+    _gprofiler = gprofiler_fake if gprofiler_fake is not None else _FakeGprofiler()
+    monkeypatch.setattr(stage8, "GprofilerClient", lambda http: _gprofiler)
 
 
 async def _seed_source_systems(s, c1, c2):
@@ -191,7 +202,17 @@ async def test_guided_run_reaches_stage5_then_stage6(client, engine, monkeypatch
     assert s6["node_count"] == 2
     assert s6["edge_count"] == 1
 
-    # Final advance: S6 is the last runnable stage -> run completes (optional tail check).
+    # S6 -> S7: parks at the S7 checkpoint (hub centralities, pure compute).
+    assert (await c.post(f"/analyses/{run_id}/advance")).json()["status"] == "stage_7_running"
+    state = await _poll(c, run_id, until="stage_7_awaiting_approval")
+    assert state["status"] == "stage_7_awaiting_approval"
+
+    # S7 -> S8: parks at the S8 checkpoint (enrichment, g:Profiler mocked -> 0 terms).
+    assert (await c.post(f"/analyses/{run_id}/advance")).json()["status"] == "stage_8_running"
+    state = await _poll(c, run_id, until="stage_8_awaiting_approval")
+    assert state["status"] == "stage_8_awaiting_approval"
+
+    # Final advance: S8 is the terminal stage -> run completes.
     assert (await c.post(f"/analyses/{run_id}/advance")).json()["status"] == "complete"
 
 
