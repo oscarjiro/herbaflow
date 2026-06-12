@@ -31,9 +31,20 @@ ALPHA = 0.05  # conventional significance threshold (Methodology §5.4 default)
 
 
 def compute(stage3: dict[str, Any], stage4: dict[str, Any]) -> dict[str, Any]:
-    """Pure overlap math from the Stage-3 and Stage-4 stored results."""
-    s3_targets = {t["target_id"]: t for t in stage3.get("targets", [])}
-    s4_targets = {t["target_id"]: t for t in stage4.get("disease_targets", [])}
+    """Pure overlap math from the Stage-3 and Stage-4 stored results.
+
+    Both sides are the edit-layer ``targets`` list (Stage 4 no longer keeps a separate
+    ``disease_targets`` view — B-DUP-2/L-11). The overlap is built on the EFFECTIVE sets: rows
+    tagged ``"user-removed"`` are excluded on BOTH sides, so the intersection reflects what the
+    user actually has now (and S3/S4 stay symmetric). Untagged rows (raw computed / fixtures) have
+    no ``tag`` and are kept. The disease association score rides on each S4 row.
+    """
+    s3_targets = {
+        t["target_id"]: t for t in stage3.get("targets", []) if t.get("tag") != "user-removed"
+    }
+    s4_targets = {
+        t["target_id"]: t for t in stage4.get("targets", []) if t.get("tag") != "user-removed"
+    }
     a_ids = set(s3_targets)
     b_ids = set(s4_targets)
     overlap_ids = a_ids & b_ids
@@ -99,8 +110,10 @@ async def run(session: AsyncSession | None, run: Any) -> dict[str, Any]:
     """Compute the overlap from the run's stored Stage-3 and Stage-4 results.
 
     Pure read of ``stage_results`` — the gene info needed downstream already rides on those
-    fragments (S3 ``targets`` and S4 ``disease_targets`` both carry gene_symbol/uniprot_accession),
-    so no DB round-trip is required (OV-2). ``session`` is accepted for runner-signature symmetry.
+    fragments (S3 and S4 both expose an edit-layer ``targets`` list carrying gene_symbol/
+    uniprot_accession, and S4 rows also carry the disease association ``score``), so no DB
+    round-trip is required (OV-2). ``compute`` filters out ``user-removed`` rows on both sides.
+    ``session`` is accepted for runner-signature symmetry.
     """
     stage3 = run.stage_results["3"]
     stage4 = run.stage_results["4"]

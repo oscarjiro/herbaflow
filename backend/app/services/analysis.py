@@ -112,7 +112,7 @@ class AnalysisService:
 
         # Pre-fill user-provided ENTITY stages THROUGH the durable edit layer so they survive
         # edits + reset-from. S1 = manual compounds; S3 = manual targets; S4 = manual disease
-        # targets (which also writes the disease_targets view list S5 reads).
+        # targets (one enriched edit-layer targets list — S5 reads it directly).
         if smap[1] == entry_modes.USER_PROVIDED:
             self._prefill_compound_stage(1, payload.manual_compound_ids, stage_edits, stage_results)
         if smap[3] == entry_modes.USER_PROVIDED:
@@ -232,26 +232,20 @@ class AnalysisService:
         stage_edits: dict[str, Any],
         stage_results: dict[str, Any],
     ) -> None:
-        """Seed user-provided Stage 4 through BOTH the edit layer AND the ``disease_targets`` view.
+        """Seed user-provided Stage 4 through the durable edit layer (one ``targets`` list).
 
-        Stage 5 reads ``stage4["disease_targets"]`` (a separate view list), NOT the edit-layer
-        ``targets`` — so both are written, each carrying the target's real gene_symbol /
-        uniprot_accession. The disease→target relationship is run-scoped only (no canonical edge,
-        no association score; Software Lock §6.2-E).
+        Stage 5 reads the edit-layer ``targets`` list directly (there is no separate
+        ``disease_targets`` view list any more — B-DUP-2/L-11), so the edit layer carries each
+        target's full identity. A manual disease-target has NO disease edge → no association score
+        or type (omitted; consumers use ``.get``), but it carries the UniProt ``source_url`` so the
+        FE table + CSV match a computed row. The disease→target relationship is run-scoped only (no
+        canonical edge, no score; Software Lock §6.2-E). ``_target_add_entry`` is shared with Stage
+        3, so the S4-only ``source_url`` is added locally — never to that helper.
         """
         rows = await self.target_repo.get_many(ids)
-        edit = edits.normalize_edit(
-            edits.empty_edit(), [self._target_add_entry(t) for t in rows], [], id_key="target_id"
-        )
-        stage_edits["4"] = edit
-        frag = edits.build_stage_entities([], edit, id_key="target_id", list_key="targets")
-        disease_targets = [
+        add_entries = [
             {
-                "target_id": str(t.target_id),
-                "gene_symbol": t.gene_symbol,
-                "uniprot_accession": t.uniprot_accession,
-                "score": None,
-                "association_type": None,
+                **self._target_add_entry(t),
                 "source_url": (
                     f"https://www.uniprot.org/uniprotkb/{t.uniprot_accession}/entry"
                     if t.uniprot_accession
@@ -260,7 +254,12 @@ class AnalysisService:
             }
             for t in rows
         ]
-        stage_results["4"] = {**frag, "disease_targets": disease_targets, "min_score_applied": None}
+        edit = edits.normalize_edit(edits.empty_edit(), add_entries, [], id_key="target_id")
+        stage_edits["4"] = edit
+        stage_results["4"] = {
+            **edits.build_stage_entities([], edit, id_key="target_id", list_key="targets"),
+            "min_score_applied": None,
+        }
 
     @staticmethod
     def _target_add_entry(t: Any) -> dict[str, Any]:

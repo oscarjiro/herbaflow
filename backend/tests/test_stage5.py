@@ -17,9 +17,9 @@ def _s3(targets):
 
 
 def _s4(rows):
-    # Stage-4 result shape: disease_targets carry target_id + score (+ gene info).
+    # Stage-4 result shape: ONE enriched edit-layer targets list (target_id + score + gene info).
     return {
-        "disease_targets": [
+        "targets": [
             {"target_id": t, "gene_symbol": g, "uniprot_accession": u, "score": s}
             for (t, g, u, s) in rows
         ],
@@ -97,7 +97,7 @@ async def test_run_reads_prior_stage_results():
             "state": "computed",
         },
         "4": {
-            "disease_targets": [
+            "targets": [
                 {
                     "target_id": "t1",
                     "gene_symbol": "AKT1",
@@ -112,3 +112,68 @@ async def test_run_reads_prior_stage_results():
     out = await stage5.run(None, run)
     assert out["count"] == 1
     assert out["overlap"][0]["disease_association_score"] == 0.8
+
+
+def test_reads_edit_layer_targets_and_carries_score():
+    """S5 reads the single edit-layer Stage-4 ``targets`` list (not a disease_targets view)."""
+    s3 = _s3([("t1", "EGFR", "P00533")])
+    s4 = _s4([("t1", "EGFR", "P00533", 0.7), ("t2", "TP53", "P04637", 0.9)])
+    out = stage5.compute(s3, s4)
+    ids = {o["target_id"] for o in out["overlap"]}
+    assert ids == {"t1"}
+    by_id = {o["target_id"]: o for o in out["overlap"]}
+    assert by_id["t1"]["disease_association_score"] == 0.7
+
+
+def test_user_removed_targets_excluded_on_both_sides():
+    """Effective filtering: a target tagged ``user-removed`` on EITHER side is not in the overlap,
+    and the reported set sizes are the effective sizes (CRITICAL — avoids a fresh S3/S4 asymmetry).
+    """
+    # t1 shared+kept; t2 shared but user-removed on S4; t3 shared but user-removed on S3.
+    s3 = {
+        "targets": [
+            {"target_id": "t1", "gene_symbol": "A", "uniprot_accession": "P1", "tag": "computed"},
+            {"target_id": "t2", "gene_symbol": "B", "uniprot_accession": "P2", "tag": "computed"},
+            {
+                "target_id": "t3",
+                "gene_symbol": "C",
+                "uniprot_accession": "P3",
+                "tag": "user-removed",
+            },
+        ],
+        "count": 2,
+        "state": "user_provided",
+    }
+    s4 = {
+        "targets": [
+            {
+                "target_id": "t1",
+                "gene_symbol": "A",
+                "uniprot_accession": "P1",
+                "score": 0.7,
+                "tag": "computed",
+            },
+            {
+                "target_id": "t2",
+                "gene_symbol": "B",
+                "uniprot_accession": "P2",
+                "score": 0.6,
+                "tag": "user-removed",
+            },
+            {
+                "target_id": "t3",
+                "gene_symbol": "C",
+                "uniprot_accession": "P3",
+                "score": 0.5,
+                "tag": "computed",
+            },
+        ],
+        "count": 2,
+        "state": "user_provided",
+    }
+    out = stage5.compute(s3, s4)
+    ids = {o["target_id"] for o in out["overlap"]}
+    assert ids == {"t1"}  # t2 removed on S4, t3 removed on S3 -> only t1 effective on both
+    assert out["count"] == 1
+    assert out["compound_target_count"] == 2  # t1, t2 effective on S3
+    assert out["disease_target_count"] == 2  # t1, t3 effective on S4

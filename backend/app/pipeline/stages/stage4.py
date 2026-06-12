@@ -8,9 +8,10 @@ persist per analysis; §6.2-E).
 
 Output (uniform entity-stage shape; the engine's edit-layer fold tags ``targets`` and overwrites
 ``count``/``state``):
-  - ``targets``:         entity list ``[{target_id, canonical_name}]`` for the edit layer.
-  - ``disease_targets``: per-row view data ``[{target_id, gene_symbol, uniprot_accession, score,
-                          association_type, source_url}]`` carrying the association score (DT4-9).
+  - ``targets``: ONE enriched entity list ``[{target_id, canonical_name, gene_symbol,
+    uniprot_accession, score, association_type, source_url}]`` (DT4-9). The edit layer preserves
+    every field on each row, so the disease association ``score`` survives the fold and is read by
+    Stage 5 / ranked by Stage 6 — there is no separate ``disease_targets`` view list (B-DUP-2/L-11).
   - ``count`` / ``state`` / ``min_score_applied``.
 
 An empty side (filter too strict / thin coverage) parks the run at the Step-4 checkpoint with a
@@ -33,17 +34,16 @@ logger = logging.getLogger("herbaflow.pipeline")
 
 
 def compute(rows: list[dict[str, Any]], min_score: float) -> dict[str, Any]:
-    """Pure shape: rows (from the repo read) -> the stored Stage-4 result fragment."""
+    """Pure shape: rows (from the repo read) -> the stored Stage-4 result fragment.
+
+    Emits ONE enriched ``targets`` list carrying the Open Targets association fields. The edit
+    layer preserves these on the row, so the score reaches Stage 5/6 even after a post-create edit
+    (B-DUP-2/L-11); there is no separate ``disease_targets`` view list.
+    """
     targets = [
         {
             "target_id": r["target_id"],
             "canonical_name": r["gene_symbol"] or r["uniprot_accession"] or r["target_id"],
-        }
-        for r in rows
-    ]
-    disease_targets = [
-        {
-            "target_id": r["target_id"],
             "gene_symbol": r["gene_symbol"],
             "uniprot_accession": r["uniprot_accession"],
             "score": r["score"],
@@ -54,7 +54,6 @@ def compute(rows: list[dict[str, Any]], min_score: float) -> dict[str, Any]:
     ]
     return {
         "targets": targets,
-        "disease_targets": disease_targets,
         "count": len(targets),
         "min_score_applied": min_score,
         "state": "computed",

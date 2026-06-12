@@ -373,3 +373,98 @@ async def test_string_outage_fails_run(client, engine, monkeypatch):
     assert state["status"] == "failed"
     # The overlap WAS real (S5 computed 2) before STRING took the run down at S6.
     assert state["stage_results"]["5"]["count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_stage4_edit_reaches_stage5_overlap(client, engine, monkeypatch):
+    """L-11 proof: a post-create Stage-4 ADD/REMOVE must reach Stage 5 (the edit-layer ``targets``
+    list S5 now reads). ChEMBL resolves THREE targets (TP53, EGFR, AKT1); only TP53+EGFR are seeded
+    disease_targets. AKT1 is an S3 target but NOT a computed S4 target, so it is OUT of the overlap
+    until the user adds it to Stage 4 by hand. Adding it (then reset-from/4) must grow the S5
+    overlap to 3; removing it must shrink it back to 2 (effective-filtering on the S4 side)."""
+    c, ids = client
+
+    # ChEMBL returns all three accessions; UniProt resolves AKT1 too.
+    async def _three(self, ik, *, min_pchembl, min_confidence):
+        if not ik:
+            return []
+        return [
+            ChemblHit("P04637", 6.5, "IC50"),
+            ChemblHit("P00533", 6.5, "IC50"),
+            ChemblHit("P31749", 6.5, "IC50"),
+        ]
+
+    async def _resolve3(self, acc):
+        table = {
+            "P04637": ("TP53", "p53"),
+            "P00533": ("EGFR", "egfr"),
+            "P31749": ("AKT1", "akt1"),
+        }
+        if acc in table:
+            g, p = table[acc]
+            return UniProtResolution(UniProtRecord(acc, g, p), None)
+        return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
+
+    monkeypatch.setattr(_FakeChembl, "targets_for_inchikey", _three)
+    monkeypatch.setattr(_FakeUniProt, "resolve", _resolve3)
+    _patch_stage_clients(monkeypatch, _FakeString([StringEdge("TP53", "EGFR", 0.9)]))
+
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    async with maker() as s:
+        await _seed_source_systems(s, ids["c1"], ids["c2"])
+        t_tp53 = await _insert_target(s, acc="P04637", gene="TP53")
+        t_egfr = await _insert_target(s, acc="P00533", gene="EGFR")
+        # AKT1 is a canonical target (so S3 resolves it) but NOT a disease_target.
+        t_akt1 = await _insert_target(s, acc="P31749", gene="AKT1")
+        await _insert_disease_target(s, disease_id=ids["disease"], target_id=t_tp53, score=0.8)
+        await _insert_disease_target(s, disease_id=ids["disease"], target_id=t_egfr, score=0.7)
+        await s.commit()
+
+    resp = await c.post(
+        "/analyses",
+        json={
+            "plant_ids": [str(ids["plant_full"])],
+            "disease_id": str(ids["disease"]),
+            "mode": "guided",
+        },
+    )
+    assert resp.status_code == 202
+    run_id = resp.json()["analysis_id"]
+
+    await _drive_to_stage4(c, run_id)
+
+    # Baseline overlap (before any S4 edit) is the 2 seeded disease targets.
+    assert (await c.post(f"/analyses/{run_id}/advance")).json()["status"] == "stage_5_running"
+    state = await _poll(c, run_id, until="stage_5_awaiting_approval")
+    s5 = state["stage_results"]["5"]
+    assert s5["count"] == 2
+    assert sorted(o["gene_symbol"] for o in s5["overlap"]) == ["EGFR", "TP53"]
+    assert str(t_akt1) not in {o["target_id"] for o in s5["overlap"]}
+
+    # --- ADD AKT1 to Stage 4 by hand, then reset-from/4: the edit must REACH S5 (L-11). ---
+    edit = await c.post(
+        f"/analyses/{run_id}/stages/4/edit",
+        json={"add": [str(t_akt1)], "remove": []},
+    )
+    assert edit.status_code == 202
+    await _poll(c, run_id, until="stage_4_awaiting_approval")
+    reset = await c.post(f"/analyses/{run_id}/reset-from/4", json={"parameters": None})
+    assert reset.status_code == 202
+    state = await _poll(c, run_id, until="stage_5_awaiting_approval")
+    s5 = state["stage_results"]["5"]
+    assert s5["count"] == 3, "the manual Stage-4 add did not reach Stage 5 (L-11 regression)"
+    assert str(t_akt1) in {o["target_id"] for o in s5["overlap"]}
+
+    # --- REMOVE AKT1 from Stage 4, reset-from/4: effective-filtering shrinks the overlap back. ---
+    edit = await c.post(
+        f"/analyses/{run_id}/stages/4/edit",
+        json={"add": [], "remove": [str(t_akt1)]},
+    )
+    assert edit.status_code == 202
+    await _poll(c, run_id, until="stage_4_awaiting_approval")
+    reset = await c.post(f"/analyses/{run_id}/reset-from/4", json={"parameters": None})
+    assert reset.status_code == 202
+    state = await _poll(c, run_id, until="stage_5_awaiting_approval")
+    s5 = state["stage_results"]["5"]
+    assert s5["count"] == 2
+    assert str(t_akt1) not in {o["target_id"] for o in s5["overlap"]}

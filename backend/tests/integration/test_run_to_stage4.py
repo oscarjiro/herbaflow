@@ -133,8 +133,10 @@ async def test_guided_run_reaches_stage4_with_scores(client, engine, monkeypatch
     # min_score 0.3 keeps the 0.8 target, drops the 0.2 one.
     assert s4["count"] == 1
     assert s4["min_score_applied"] == 0.3
-    assert [d["gene_symbol"] for d in s4["disease_targets"]] == ["GENEZ"]
-    assert s4["disease_targets"][0]["score"] == 0.8
+    # One enriched edit-layer targets list (no separate disease_targets view — B-DUP-2/L-11).
+    assert "disease_targets" not in s4
+    assert [t["gene_symbol"] for t in s4["targets"]] == ["GENEZ"]
+    assert s4["targets"][0]["score"] == 0.8
 
     # --- min_score Redo re-filters (reset-from/4 re-runs S4 only) ---
     reset = await c.post(

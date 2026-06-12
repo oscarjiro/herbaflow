@@ -49,7 +49,8 @@ async def test_stage4_reads_filtered_rows_and_writes_nothing(session):
     await session.flush()
 
     assert result["count"] == 2
-    assert [d["gene_symbol"] for d in result["disease_targets"]] == ["GA", "GB"]
+    assert "disease_targets" not in result  # one enriched targets list now (B-DUP-2/L-11)
+    assert [t["gene_symbol"] for t in result["targets"]] == ["GA", "GB"]
     # No new disease_targets rows written by Stage 4 (read-only).
     after = (await session.execute(text("select count(*) from disease_targets"))).scalar_one()
     assert after == before

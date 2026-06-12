@@ -7,10 +7,14 @@ disjoint lists. The entity id key is parameterized (``id_key``); it defaults to
     {"added": [{<id_key>: str, "canonical_name": str | None}], "removed": [str, ...]}
 
 Added entries carry their resolved name so the layer is self-contained — rendering or
-reapplying an edit never needs an external lookup. The edit is *durable*: it is applied
-on top of whatever the stage computes, so it survives re-runs that recompute the stage
-(E6). Re-adding a removed id clears the removal; re-removing an added id clears the add;
-``added`` and ``removed`` always end disjoint (E5).
+reapplying an edit never needs an external lookup. The layer also **preserves whatever fields
+the runner attaches** to each row (no fixed allowlist): a Stage-4 target row keeps its
+gene_symbol / uniprot_accession / score / association_type / source_url, so the disease
+association score survives the fold and reaches Stage 5/6; a Stage-1 compound row stays minimal
+because its runner attaches nothing extra. The edit is *durable*: it is applied on top of whatever
+the stage computes, so it survives re-runs that recompute the stage (E6). Re-adding a removed id
+clears the removal; re-removing an added id clears the add; ``added`` and ``removed`` always end
+disjoint (E5).
 """
 
 from __future__ import annotations
@@ -18,10 +22,6 @@ from __future__ import annotations
 from typing import Any
 
 _EMPTY_EDIT: dict[str, Any] = {"added": [], "removed": []}
-
-# Identity fields the edit layer carries through from the runner output (when present) so
-# downstream stages keep them after entity rows are rebuilt. Targets expose these; compounds don't.
-_CARRY_FIELDS: tuple[str, ...] = ("gene_symbol", "uniprot_accession")
 
 
 def empty_edit() -> dict[str, Any]:
@@ -46,18 +46,16 @@ def normalize_edit(
     - Removing an id currently in ``added`` clears it from ``added`` (re-removing undoes an add).
     - Otherwise the id unions into the respective list. ``added`` is de-duped by ``id_key``;
       the last name wins. ``added`` and ``removed`` end disjoint.
-    - Carry-fields (gene_symbol, uniprot_accession) are preserved on added entries when present,
-      so user-added targets keep their identity through round-trips.
+    - The layer preserves whatever fields the runner attaches to each added entry (e.g. a target's
+      gene_symbol / uniprot_accession / score / association_type / source_url), so user-added
+      entries keep their full identity + view data through round-trips. None values are dropped to
+      stay tidy.
     """
 
     def _added_entry(entry: dict[str, Any]) -> dict[str, Any]:
-        out: dict[str, Any] = {
-            id_key: str(entry[id_key]),
-            "canonical_name": entry.get("canonical_name"),
-        }
-        for f in _CARRY_FIELDS:
-            if f in entry and entry[f] is not None:
-                out[f] = entry[f]
+        out: dict[str, Any] = {k: v for k, v in entry.items() if v is not None}
+        out[id_key] = str(entry[id_key])
+        out.setdefault("canonical_name", entry.get("canonical_name"))
         return out
 
     # Start from copies of the existing state, keyed by id for O(1) updates.
@@ -141,31 +139,24 @@ def build_stage_entities(
     entities: list[dict[str, Any]] = []
     for cid in computed_ids:
         src = by_id.get(cid, {})
+        # Preserve every field the runner attached to this row (Stage 4 carries the disease
+        # association score / type / source_url; Stage 3/4 carry gene_symbol / uniprot_accession),
+        # then stamp the canonical id / name / tag. Compounds attach nothing extra, so the spread
+        # leaves them at {compound_id, canonical_name, tag}.
         row: dict[str, Any] = {
+            **src,
             id_key: cid,
             "canonical_name": src.get("canonical_name"),
             "tag": tags[cid],
         }
-        # Carry the runner's identity fields through the edit layer (targets expose
-        # gene_symbol / uniprot_accession) so downstream stages — the Stage 8 custom
-        # background and the Stage 3 view — keep them. Absent on compounds (left minimal).
-        for field in _CARRY_FIELDS:
-            if field in src:
-                row[field] = src[field]
         entities.append(row)
     for entry in (edit or _EMPTY_EDIT).get("added", []):
         aid = str(entry[id_key])
         if aid in by_id:
             # Already represented as a computed entry above.
             continue
-        added_row: dict[str, Any] = {
-            id_key: aid,
-            "canonical_name": entry.get("canonical_name"),
-            "tag": "user-added",
-        }
-        for field in _CARRY_FIELDS:
-            if field in entry and entry[field] is not None:
-                added_row[field] = entry[field]
+        added_row: dict[str, Any] = {**entry, id_key: aid, "tag": "user-added"}
+        added_row.setdefault("canonical_name", entry.get("canonical_name"))
         entities.append(added_row)
 
     count = sum(1 for c in entities if c["tag"] != "user-removed")

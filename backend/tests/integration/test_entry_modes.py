@@ -381,7 +381,9 @@ async def test_selection_plant_manual_disease_skips_stage4(client, engine, monke
     # S4 is the frozen user-provided stage; it carries gene symbols and was never recomputed.
     s4 = state["stage_results"]["4"]
     assert s4["state"] == "user_provided"
-    s4_genes = sorted(d["gene_symbol"] for d in s4["disease_targets"])
+    # Gene symbols ride on the single enriched targets list (no disease_targets view; L-11).
+    assert "disease_targets" not in s4
+    s4_genes = sorted(t["gene_symbol"] for t in s4["targets"])
     assert s4_genes == ["EGFR", "TP53"]
 
     # The selection plant side (S1-S3) computed normally; the overlap is real.

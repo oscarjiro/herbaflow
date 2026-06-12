@@ -82,7 +82,6 @@ def _runners(stage1_count, stage2_count, stage3_count=1, stage4_count=1):
     async def stage4_runner(r):
         return {
             "targets": _targets(stage4_count),
-            "disease_targets": [{"target_id": f"t{i}", "score": 0.5} for i in range(stage4_count)],
             "count": stage4_count,
             "min_score_applied": 0.3,
             "state": "computed",

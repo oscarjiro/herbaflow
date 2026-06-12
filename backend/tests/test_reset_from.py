@@ -141,7 +141,7 @@ def _run(*, computed: list[str], mode: str = "auto") -> SimpleNamespace:
                 "state": "computed",
             },
             "4": {
-                "disease_targets": [{"target_id": "t0", "score": 0.5}],
+                "targets": [{"target_id": "t0", "score": 0.5}],
                 "count": 1,
                 "state": "computed",
             },
@@ -213,8 +213,7 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
             # Disease-side read; independent of the compound chain (idempotent S4 re-run).
             calls["4"].append(True)
             return {
-                "targets": [{"target_id": "t0", "canonical_name": "T0"}],
-                "disease_targets": [{"target_id": "t0", "score": 0.5}],
+                "targets": [{"target_id": "t0", "canonical_name": "T0", "score": 0.5}],
                 "count": 1,
                 "min_score_applied": 0.3,
                 "state": "computed",

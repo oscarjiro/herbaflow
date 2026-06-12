@@ -569,26 +569,40 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
   `manual_targets` mode, or Stage 4 disease-target DB read in `manual_disease_targets` mode).
   Downstream stages treat this as an empty-but-valid input; it does **not** hard-stop the run.
 
-**Stage 4 (`stage_results["4"]`) in `manual_disease_targets` mode:**
+**Stage 4 (`stage_results["4"]`) shape — ONE enriched `targets` list:**
 
-When the run uses `manual_disease_targets`, the seeded Stage-4 result carries an extended shape:
+Stage 4 emits a single edit-layer `targets` list; each row carries the Open Targets association
+fields. There is **no separate `disease_targets` view list** — the edit layer preserves every field
+on each row, so the disease association `score` survives a post-create Stage-4 edit and reaches
+Stage 5 / is ranked by Stage 6 (B-DUP-2/L-11; previously a second view list was folded separately
+and never saw edits):
 
 ```jsonc
 {
-  "state": "user_provided",
+  "state": "computed | user_provided",
   "count": <int>,
-  "targets": [                             // edit-layer list (same shape as other entity stages)
-    {"target_id": "<uuid>", "gene_symbol": "<str|null>", "uniprot_accession": "<str|null>"}
-  ],
-  "disease_targets": [                     // view list Stage 5 reads — one row per target
-    {"target_id": "<uuid>", "gene_symbol": "<str|null>", "uniprot_accession": "<str|null>"}
+  "min_score_applied": <float|null>,       // null for a manual (user_provided) Stage 4
+  "targets": [
+    {
+      "target_id": "<uuid>",
+      "canonical_name": "<str>",           // gene_symbol -> uniprot_accession -> target_id
+      "gene_symbol": "<str|null>",
+      "uniprot_accession": "<str|null>",
+      "score": <float|null>,               // Open Targets association score (DT4-9)
+      "association_type": "<str|null>",
+      "source_url": "<str|null>",          // UniProt deep link
+      "tag": "computed | user-added | user-removed"
+    }
   ]
 }
 ```
 
-`disease_targets` is the list that Stage 5 intersects against the Stage-3 set. Each row carries
-`gene_symbol` and `uniprot_accession`. There is **no association score** (no `disease_targets`
-table edge; the link is run-scoped only — see the `disease_targets` table note above).
+Stage 5 intersects this list (excluding `user-removed` rows on both sides) against the Stage-3 set
+on `target_id`, carrying the `score` into the overlap. A **manually-added** disease target has no
+disease edge: its `score`/`association_type` are absent (consumers use `.get`) — there is **no
+association score** for a manual target (no `disease_targets` table edge; the link is run-scoped
+only — see the `disease_targets` table note above) — but it still carries the UniProt `source_url`
+so the FE table and CSV match a computed row.
 
 **ADME stage** (Stage 2):
 

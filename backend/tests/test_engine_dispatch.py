@@ -84,7 +84,6 @@ def _runners(
     async def stage4_runner(run: SimpleNamespace) -> dict:
         return {
             "targets": _targets(stage4_count),
-            "disease_targets": [{"target_id": f"t{i}", "score": 0.5} for i in range(stage4_count)],
             "count": stage4_count,
             "min_score_applied": 0.3,
             "state": "computed",

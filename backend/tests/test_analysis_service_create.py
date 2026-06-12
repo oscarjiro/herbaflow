@@ -147,8 +147,15 @@ async def test_manual_disease_prefills_s4_disease_targets() -> None:
     assert c["current_stage"] == 1
     sr = c["stage_results"]
     assert sr["4"]["state"] == "user_provided"
-    assert sr["4"]["disease_targets"][0]["gene_symbol"] == "EGFR"
-    assert sr["4"]["disease_targets"][0]["uniprot_accession"] == "P00533"
-    # S5 reads the disease_targets view list; the edit layer also seeds stage_edits["4"].
+    # One enriched edit-layer targets list (no separate disease_targets view — B-DUP-2/L-11).
+    assert "disease_targets" not in sr["4"]
+    t4 = sr["4"]["targets"][0]
+    assert t4["target_id"] == str(tid)
+    assert t4["gene_symbol"] == "EGFR"
+    assert t4["uniprot_accession"] == "P00533"
+    # A manual disease-target has no edge -> no score (omitted), but carries the UniProt link.
+    assert "score" not in t4
+    assert t4["source_url"] == "https://www.uniprot.org/uniprotkb/P00533/entry"
+    # S5 reads this targets list directly; the edit layer also seeds stage_edits["4"].
     assert c["stage_edits"]["4"]["added"][0]["target_id"] == str(tid)
     assert c["extra_parameters"]["labels"] == {"disease": "psoriasis"}

@@ -15,8 +15,10 @@
  *  - "not_applicable" → greyed note
  *  - "user_provided"  → manual disease-targets (no score emphasis)
  *  - otherwise (computed) → full view
- * Manually-added targets appear in `targets` (tagged) but NOT in `disease_targets`, so their
- * score/UniProt columns render "—" (symmetric with Stage 3 user-added targets).
+ * Stage 4 emits ONE enriched `targets` list — each row carries gene_symbol / uniprot_accession /
+ * score / association_type / source_url (no separate `disease_targets` view list; B-DUP-2/L-11).
+ * A manually-added target has no disease edge, so its score column renders "—" (symmetric with
+ * Stage 3 user-added targets).
  */
 
 import { useMemo, useState } from "react";
@@ -41,20 +43,21 @@ import { TargetValidateBox } from "../TargetValidateBox";
 
 type TargetTag = "computed" | "user-added" | "user-removed" | string;
 
-type TargetEntry = { target_id: string; canonical_name: string | null; tag: TargetTag };
-
-type DiseaseTargetRow = {
+// One enriched edit-layer targets list — each row carries the Open Targets association fields
+// (no separate disease_targets view list; B-DUP-2/L-11). A user-added target has no score.
+type TargetEntry = {
   target_id: string;
-  gene_symbol: string | null;
-  uniprot_accession: string | null;
-  score: number | null;
-  association_type: string | null;
-  source_url: string | null;
+  canonical_name: string | null;
+  gene_symbol?: string | null;
+  uniprot_accession?: string | null;
+  score?: number | null;
+  association_type?: string | null;
+  source_url?: string | null;
+  tag: TargetTag;
 };
 
 type Stage4Result = {
   targets: TargetEntry[];
-  disease_targets: DiseaseTargetRow[];
   count: number;
   min_score_applied: number;
   state: string;
@@ -73,19 +76,15 @@ type Row = {
 const PAGE_SIZES = [10, 20, 50] as const;
 
 function buildRows(stage4: Stage4Result): Row[] {
-  const byId = new Map(stage4.disease_targets.map((d) => [d.target_id, d]));
-  return stage4.targets.map((t) => {
-    const d = byId.get(t.target_id);
-    return {
-      target_id: t.target_id,
-      gene_symbol: t.canonical_name ?? d?.gene_symbol ?? t.target_id,
-      uniprot_accession: d?.uniprot_accession ?? null,
-      score: d?.score ?? null,
-      association_type: d?.association_type ?? null,
-      source_url: d?.source_url ?? null,
-      tag: t.tag,
-    };
-  });
+  return stage4.targets.map((t) => ({
+    target_id: t.target_id,
+    gene_symbol: t.canonical_name ?? t.gene_symbol ?? t.target_id,
+    uniprot_accession: t.uniprot_accession ?? null,
+    score: t.score ?? null,
+    association_type: t.association_type ?? null,
+    source_url: t.source_url ?? null,
+    tag: t.tag,
+  }));
 }
 
 const S4_CSV_HEADER = "gene_symbol,uniprot_accession,score,association_type,source_url";
