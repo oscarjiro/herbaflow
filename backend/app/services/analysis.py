@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import contracts
 from app.clock import now_utc
 from app.errors import ConflictProblem, GoneProblem, NotFoundProblem, ValidationProblem
-from app.pipeline import edits, engine, state
+from app.pipeline import edits, engine, entry_modes, state
 from app.pipeline.limits import EntityCapExceeded, check_entity_cap
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
@@ -62,36 +62,80 @@ class AnalysisService:
         )
 
     async def create(self, payload: AnalysisCreate) -> AnalysisRead:
+        plant_mode = payload.plant_input_mode.value
+        disease_mode = payload.disease_input_mode.value
         logger.info(
-            "creating analysis: %d plant(s), disease %s, %d manual compound(s), mode=%s",
+            "creating analysis: plant_mode=%s, disease_mode=%s, %d plant(s), disease %s, mode=%s",
+            plant_mode,
+            disease_mode,
             len(payload.plant_ids),
             str(payload.disease_id)[:8],
-            len(payload.manual_compound_ids),
             payload.mode.value,
         )
-        missing = await self.plant_repo.missing_ids(payload.plant_ids)
-        if missing:
-            raise ValidationProblem(
-                detail="Unknown plant ids.", invalid_plant_ids=[str(p) for p in missing]
-            )
-        if not await self.disease_repo.exists(payload.disease_id):
-            raise ValidationProblem(
-                detail="Unknown disease id.", invalid_disease_id=str(payload.disease_id)
-            )
-        if payload.manual_compound_ids:
-            try:
-                check_entity_cap("compound", current=0, adding=len(payload.manual_compound_ids))
-            except EntityCapExceeded as e:
-                raise ValidationProblem(
-                    detail=f"Too many manual compounds (max {e.cap}, got {e.adding})."
-                ) from e
-            existing = await self.compound_repo.existing_ids(payload.manual_compound_ids)
-            missing = [c for c in payload.manual_compound_ids if c not in existing]
+
+        # Referential existence — only the lists relevant to the chosen modes (the schema already
+        # enforced which lists are present/forbidden per mode). Selection plants are validated by
+        # the plant repo; manual compounds (whether the S1 entities in manual_compounds mode OR
+        # the Chunk-1 manual additions unioned into a selection-mode Stage 1) and manual targets
+        # are validated for cap + existence.
+        if plant_mode == "selection":
+            missing = await self.plant_repo.missing_ids(payload.plant_ids)
             if missing:
                 raise ValidationProblem(
-                    detail="Unknown compound ids.",
-                    invalid_compound_ids=[str(c) for c in missing],
+                    detail="Unknown plant ids.", invalid_plant_ids=[str(p) for p in missing]
                 )
+        if payload.manual_compound_ids:
+            await self._verify_entities("compound", self.compound_repo, payload.manual_compound_ids)
+        if plant_mode == "manual_targets":
+            await self._verify_entities("target", self.target_repo, payload.manual_target_ids)
+
+        if disease_mode == "selection":
+            if not await self.disease_repo.exists(payload.disease_id):
+                raise ValidationProblem(
+                    detail="Unknown disease id.", invalid_disease_id=str(payload.disease_id)
+                )
+        else:  # manual_disease_targets
+            await self._verify_entities(
+                "target", self.target_repo, payload.manual_disease_target_ids
+            )
+
+        # Stage-state matrix + run cursor (first computed stage), derived from the chosen modes.
+        smap = entry_modes.stage_state_map(plant_mode, disease_mode)
+        current_stage = entry_modes.first_computed_stage(plant_mode, disease_mode)
+
+        stage_edits: dict[str, Any] = {}
+        stage_results: dict[str, Any] = {}
+
+        # Stamp not_applicable stages (no entities flow through them at all).
+        for stage, st in smap.items():
+            if st == entry_modes.NOT_APPLICABLE:
+                stage_results[str(stage)] = {"state": entry_modes.NOT_APPLICABLE, "count": 0}
+
+        # Pre-fill user-provided ENTITY stages THROUGH the durable edit layer so they survive
+        # edits + reset-from. S1 = manual compounds; S3 = manual targets; S4 = manual disease
+        # targets (which also writes the disease_targets view list S5 reads).
+        if smap[1] == entry_modes.USER_PROVIDED:
+            self._prefill_compound_stage(1, payload.manual_compound_ids, stage_edits, stage_results)
+        if smap[3] == entry_modes.USER_PROVIDED:
+            await self._prefill_target_stage(
+                3, payload.manual_target_ids, stage_edits, stage_results
+            )
+        if smap[4] == entry_modes.USER_PROVIDED:
+            await self._prefill_disease_target_stage(
+                payload.manual_disease_target_ids, stage_edits, stage_results
+            )
+
+        # Atomicity guard: a user-provided stage that resolved to zero usable entities is an
+        # empty pipeline — reject the whole create (422), nothing is persisted.
+        for stage, st in smap.items():
+            if st == entry_modes.USER_PROVIDED and stage_results[str(stage)].get("count", 0) == 0:
+                raise ValidationProblem(
+                    detail=(
+                        f"No usable entities resolved for the user-provided stage {stage}; "
+                        "the run would be empty."
+                    )
+                )
+
         pipeline_parameters = {
             "adme": contracts.adme_defaults(),
             "target": contracts.target_defaults(),
@@ -100,6 +144,17 @@ class AnalysisService:
             "hub_genes": contracts.hub_genes_defaults(),
             "enrichment": contracts.enrichment_defaults(),
         }
+        extra_parameters: dict[str, Any] = {
+            "input_modes": {"plant": plant_mode, "disease": disease_mode}
+        }
+        labels: dict[str, str] = {}
+        if payload.plant_label is not None:
+            labels["plant"] = payload.plant_label
+        if payload.disease_label is not None:
+            labels["disease"] = payload.disease_label
+        if labels:
+            extra_parameters["labels"] = labels
+
         run = await self.analysis_repo.create(
             analysis_name=payload.analysis_name,
             disease_id=payload.disease_id,
@@ -107,8 +162,121 @@ class AnalysisService:
             mode=payload.mode.value,
             manual_compound_ids=payload.manual_compound_ids,
             pipeline_parameters=pipeline_parameters,
+            extra_parameters=extra_parameters,
+            stage_edits=stage_edits,
+            stage_results=stage_results,
+            current_stage=current_stage,
         )
         return AnalysisRead.model_validate(run)
+
+    async def _verify_entities(self, entity: str, repo: Any, ids: list[uuid.UUID]) -> None:
+        """Enforce the entity cap then existence for a manual-input id list (422 on failure)."""
+        try:
+            check_entity_cap(entity, current=0, adding=len(ids))
+        except EntityCapExceeded as e:
+            raise ValidationProblem(
+                detail=f"Too many manual {entity}s (max {e.cap}, got {e.adding})."
+            ) from e
+        existing = await repo.existing_ids(ids)
+        missing = [i for i in ids if i not in existing]
+        if missing:
+            raise ValidationProblem(
+                detail=f"Unknown {entity} ids.",
+                **{f"invalid_{entity}_ids": [str(i) for i in missing]},
+            )
+
+    def _prefill_compound_stage(
+        self,
+        stage: int,
+        ids: list[uuid.UUID],
+        stage_edits: dict[str, Any],
+        stage_results: dict[str, Any],
+    ) -> None:
+        """Seed a user-provided compound stage (S1) through the durable edit layer."""
+        edit = edits.normalize_edit(
+            edits.empty_edit(),
+            [{"compound_id": str(i), "canonical_name": None} for i in ids],
+            [],
+            id_key="compound_id",
+        )
+        stage_edits[str(stage)] = edit
+        stage_results[str(stage)] = edits.build_stage_entities(
+            [], edit, id_key="compound_id", list_key="compounds"
+        )
+
+    async def _prefill_target_stage(
+        self,
+        stage: int,
+        ids: list[uuid.UUID],
+        stage_edits: dict[str, Any],
+        stage_results: dict[str, Any],
+    ) -> None:
+        """Seed a user-provided target stage (S3) through the edit layer + the Stage-3 view extras.
+
+        Target rows carry gene_symbol / uniprot_accession so the edit layer keeps them (the linchpin
+        the downstream STRING / g:Profiler stages depend on).
+        """
+        rows = await self.target_repo.get_many(ids)
+        edit = edits.normalize_edit(
+            edits.empty_edit(), [self._target_add_entry(t) for t in rows], [], id_key="target_id"
+        )
+        stage_edits[str(stage)] = edit
+        stage_results[str(stage)] = {
+            **edits.build_stage_entities([], edit, id_key="target_id", list_key="targets"),
+            "compound_targets": [],
+            "per_compound": {},
+            "coverage_pct": 0.0,
+        }
+
+    async def _prefill_disease_target_stage(
+        self,
+        ids: list[uuid.UUID],
+        stage_edits: dict[str, Any],
+        stage_results: dict[str, Any],
+    ) -> None:
+        """Seed user-provided Stage 4 through BOTH the edit layer AND the ``disease_targets`` view.
+
+        Stage 5 reads ``stage4["disease_targets"]`` (a separate view list), NOT the edit-layer
+        ``targets`` — so both are written, each carrying the target's real gene_symbol /
+        uniprot_accession. The disease→target relationship is run-scoped only (no canonical edge,
+        no association score; Software Lock §6.2-E).
+        """
+        rows = await self.target_repo.get_many(ids)
+        edit = edits.normalize_edit(
+            edits.empty_edit(), [self._target_add_entry(t) for t in rows], [], id_key="target_id"
+        )
+        stage_edits["4"] = edit
+        frag = edits.build_stage_entities([], edit, id_key="target_id", list_key="targets")
+        disease_targets = [
+            {
+                "target_id": str(t.target_id),
+                "gene_symbol": t.gene_symbol,
+                "uniprot_accession": t.uniprot_accession,
+                "score": None,
+                "association_type": None,
+                "source_url": (
+                    f"https://www.uniprot.org/uniprotkb/{t.uniprot_accession}/entry"
+                    if t.uniprot_accession
+                    else None
+                ),
+            }
+            for t in rows
+        ]
+        stage_results["4"] = {**frag, "disease_targets": disease_targets, "min_score_applied": None}
+
+    @staticmethod
+    def _target_add_entry(t: Any) -> dict[str, Any]:
+        """Edit-layer add entry for a target, carrying its identity fields.
+
+        The display name uses the real ``Target`` attributes (there is no ``canonical_name``
+        column): gene_symbol, then protein_name, then the accession.
+        """
+        return {
+            "target_id": str(t.target_id),
+            "canonical_name": t.gene_symbol or t.protein_name or t.uniprot_accession,
+            "gene_symbol": t.gene_symbol,
+            "uniprot_accession": t.uniprot_accession,
+        }
 
     async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
         run = await self.analysis_repo.get(analysis_id)
