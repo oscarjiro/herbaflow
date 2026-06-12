@@ -15,7 +15,7 @@ from typing import Any, Protocol
 
 from app import contracts, db
 from app.errors import ConflictProblem, ValidationProblem
-from app.pipeline import edits, state
+from app.pipeline import edits, entry_modes, state
 from app.pipeline.stages import stage1, stage2, stage3, stage4, stage5, stage6, stage7, stage8
 from app.repositories.analysis import AnalysisRepository
 
@@ -145,8 +145,14 @@ async def execute_run(
     if run is None:
         return
     rid = str(analysis_id)[:8]
+    # Entry-modes: never compute a user-provided / not-applicable stage — it is pre-filled (or N/A)
+    # and frozen for the run's lifetime. Empty for selection / pre-entry-modes runs (no
+    # input_modes).
+    frozen = entry_modes.frozen_stages_from_params(run.parameters)
     stages = [
-        s for s in RUNNABLE_STAGES if s >= start_stage and (run_stages is None or s in run_stages)
+        s
+        for s in RUNNABLE_STAGES
+        if s >= start_stage and (run_stages is None or s in run_stages) and s not in frozen
     ]
     for stage in stages:
         await repo.set_status(run, state.stage_status(stage, "running"), current_stage=stage)
@@ -259,7 +265,9 @@ async def advance_run(
                 "and Redo, or add an entry, before continuing."
             )
         )
-    nxt = next((s for s in RUNNABLE_STAGES if s > current), None)
+    # Skip frozen (user-provided / not-applicable) stages when picking the next stage to run.
+    frozen = entry_modes.frozen_stages_from_params(run.parameters)
+    nxt = next((s for s in RUNNABLE_STAGES if s > current and s not in frozen), None)
     if nxt is None:
         await repo.set_status(run, state.stage_status(current, "complete"))
         await repo.complete(run)
@@ -377,6 +385,14 @@ async def reset_from(
     if stage > (run.current_stage or 0):
         raise ValidationProblem(detail=f"Stage {stage} is beyond the run's progress.")
 
+    # Entry-modes: a user-provided / not-applicable stage is frozen — it can never be the
+    # reset-from target (it has no runner to recompute) and is never cleared by a re-run.
+    frozen = entry_modes.frozen_stages_from_params(run.parameters)
+    if stage in frozen:
+        raise ValidationProblem(
+            detail=f"Stage {stage} was provided by you and cannot be recomputed."
+        )
+
     if param_overrides is not None:
         group = STAGE_PARAM_GROUP.get(stage)
         if group is None:
@@ -394,12 +410,14 @@ async def reset_from(
     else:
         invalidate = downstream_closure(stage)
 
-    run_set = frozenset(s for s in invalidate if s in RUNNABLE_STAGES)
+    # Exclude frozen stages from BOTH the run-set and any clear: a user-provided stage in the
+    # closure is never recomputed and never wiped.
+    run_set = frozenset(s for s in invalidate if s in RUNNABLE_STAGES and s not in frozen)
     if not run_set:
         # Nothing runnable to re-run (param Redo of a leaf, or set-edit with no runnable
         # dependent): clear the produced downstream and settle.
         produced = {int(k) for k in run.stage_results}
-        await repo.clear_stage_results(run, invalidate & produced)
+        await repo.clear_stage_results(run, (invalidate & produced) - frozen)
         return None
     start = min(run_set)
 
@@ -410,9 +428,10 @@ async def reset_from(
         run.parameters = params
         await repo.set_parameters(run)
 
-    # E2: destructive clear of (invalidate ∩ produced) BEFORE re-running.
+    # E2: destructive clear of (invalidate ∩ produced) BEFORE re-running, minus the frozen
+    # (user-provided) stages, which are never recomputed and so must keep their stored result.
     produced = {int(k) for k in run.stage_results}
-    await repo.clear_stage_results(run, invalidate & produced)
+    await repo.clear_stage_results(run, (invalidate & produced) - frozen)
 
     if defer:
         await repo.set_status(run, state.stage_status(start, "running"), current_stage=start)
