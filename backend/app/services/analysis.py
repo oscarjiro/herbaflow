@@ -397,14 +397,20 @@ class AnalysisService:
             prior_edit, add_entries, [str(r) for r in remove], id_key=id_key
         )
 
-        # Re-derive the edited stage's stored result from its RAW computed entities + new edit.
+        # Re-derive the edited stage's stored result from its computed entities + new edit.
+        # Preserve EVERY field the runner attached to each computed row (Stage 4 carries the
+        # disease association score / type / source_url; Stage 3/4 carry gene_symbol /
+        # uniprot_accession) so an edit never strips them — Stage 5/6 read the score and
+        # Stage 8 reads gene_symbol off this list (B-DUP-2/L-11). The `tag` is re-derived by
+        # build_stage_entities, so drop the stored one.
         computed_ids = existing_result["computed_ids"]
-        names = {c[id_key]: c.get("canonical_name") for c in existing_result[list_key]}
-        for entry in new_edit["added"]:
-            names.setdefault(entry[id_key], entry.get("canonical_name"))
-        computed_entities = [
-            {id_key: cid, "canonical_name": names.get(cid)} for cid in computed_ids
-        ]
+        by_id = {c[id_key]: c for c in existing_result[list_key]}
+        computed_entities: list[dict[str, Any]] = []
+        for cid in computed_ids:
+            row = {k: v for k, v in by_id.get(cid, {}).items() if k != "tag"}
+            row[id_key] = cid
+            row.setdefault("canonical_name", None)
+            computed_entities.append(row)
         frag = edits.build_stage_entities(
             computed_entities, new_edit, id_key=id_key, list_key=list_key
         )

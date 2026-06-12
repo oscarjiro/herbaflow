@@ -453,7 +453,14 @@ async def test_stage4_edit_reaches_stage5_overlap(client, engine, monkeypatch):
     state = await _poll(c, run_id, until="stage_5_awaiting_approval")
     s5 = state["stage_results"]["5"]
     assert s5["count"] == 3, "the manual Stage-4 add did not reach Stage 5 (L-11 regression)"
-    assert str(t_akt1) in {o["target_id"] for o in s5["overlap"]}
+    by_id = {o["target_id"]: o for o in s5["overlap"]}
+    assert str(t_akt1) in by_id
+    # The disease association score must SURVIVE the edit + reset: a Stage-4 edit must not strip
+    # the enriched fields off the computed rows (else Stage 6's score-ranked cap ranks on nulls).
+    assert by_id[str(t_tp53)]["disease_association_score"] == 0.8
+    assert by_id[str(t_egfr)]["disease_association_score"] == 0.7
+    # The user-added target legitimately has no disease association score.
+    assert by_id[str(t_akt1)]["disease_association_score"] is None
 
     # --- REMOVE AKT1 from Stage 4, reset-from/4: effective-filtering shrinks the overlap back. ---
     edit = await c.post(
