@@ -193,6 +193,77 @@ describe("stale stage (r-stale)", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// not_applicable + user_provided stage rendering
+// ---------------------------------------------------------------------------
+
+describe("not_applicable stages (r-na-s1: manual_targets plant mode)", () => {
+  it("Stage 1 renders a greyed not-applicable block, not the compound table", async () => {
+    wrap("r-na-s1");
+    // Should show the N/A heading for step 1
+    expect(await screen.findByRole("heading", { name: /step 1/i })).toBeInTheDocument();
+    // Should show the not-applicable message (multiple N/A stages expected — use getAllByText)
+    expect(screen.getAllByText(/not applicable for this run/i).length).toBeGreaterThan(0);
+    // The normal entity list / add-compounds control must NOT appear
+    expect(screen.queryByLabelText(/add compounds/i)).not.toBeInTheDocument();
+  });
+
+  it("Stage 2 renders a greyed not-applicable block", async () => {
+    wrap("r-na-s1");
+    expect(await screen.findByRole("heading", { name: /step 2/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/not applicable for this run/i).length).toBeGreaterThan(0);
+    // The ADME compound table must NOT appear (no ADME-specific content like "passed" count card)
+    expect(screen.queryByRole("generic", { name: /\d+ passed/i })).not.toBeInTheDocument();
+  });
+
+  it("Stage 3 shows a 'Provided by you' badge (user_provided)", async () => {
+    wrap("r-na-s1");
+    expect(await screen.findByRole("heading", { name: /step 3/i })).toBeInTheDocument();
+    expect(screen.getByText(/provided by you/i)).toBeInTheDocument();
+  });
+});
+
+describe("user_provided Stage 4 (r-manual-disease)", () => {
+  it("Stage 4 shows a 'Provided by you' badge", async () => {
+    wrap("r-manual-disease");
+    expect(await screen.findByRole("heading", { name: /step 4/i })).toBeInTheDocument();
+    expect(screen.getByText(/provided by you/i)).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Run header display names
+// ---------------------------------------------------------------------------
+
+describe("run header display names", () => {
+  it("selection mode shows catalog plant name (Aaa bbb) and disease name (Test Disease)", async () => {
+    // r2 uses selection mode (no input_modes) with disease_id=d1 and plant_ids=[p1 implicit]
+    wrap("r2");
+    await screen.findByRole("heading", { name: /step 2/i });
+    // Plant "Aaa bbb" from the /plants catalog (p1)
+    // Disease "Test Disease" from the /diseases catalog (d1)
+    expect(await screen.findByText(/Test Disease/i)).toBeInTheDocument();
+  });
+
+  it("manual_targets mode shows plant label from parameters.labels.plant", async () => {
+    wrap("r-na-s1");
+    await screen.findByRole("heading", { name: /step 3/i });
+    expect(await screen.findByText(/My plant label/i)).toBeInTheDocument();
+  });
+
+  it("manual_disease_targets mode shows disease label from parameters.labels.disease", async () => {
+    wrap("r-manual-disease");
+    await screen.findByRole("heading", { name: /step 4/i });
+    expect(await screen.findByText(/My disease label/i)).toBeInTheDocument();
+  });
+
+  it("manual mode with no label shows N/A", async () => {
+    wrap("r-manual-nolabel");
+    await screen.findByRole("heading", { name: /step 4/i });
+    expect(await screen.findByText(/N\/A/)).toBeInTheDocument();
+  });
+});
+
 describe("failed run recovery (r-failed)", () => {
   it("shows a Back to setup button that calls onReset", async () => {
     const onReset = vi.fn();

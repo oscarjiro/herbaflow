@@ -21,11 +21,21 @@ type Stage1Data = {
 export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1: Stage1Data }) {
   const qc = useQueryClient();
 
+  // Hooks must be called unconditionally before any early return.
   const edit = useMutation({
     mutationFn: (body: { add: string[]; remove: string[] }) =>
       editStage({ path: { analysis_id: analysisId, stage: 1 }, body }),
     onSuccess: () => qc.invalidateQueries(),
   });
+
+  if (stage1.state === "not_applicable") {
+    return (
+      <section className="stage-view stage-view--na" aria-disabled>
+        <h2>Step 1 — Compounds</h2>
+        <p className="hf-muted">Not applicable for this run.</p>
+      </section>
+    );
+  }
 
   const compounds = stage1.compounds ?? [];
   const current = stage1.count ?? compounds.filter((c) => c.tag !== "user-removed").length;
@@ -48,8 +58,11 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
   return (
     <div className="stage1-view">
       <h2>
-        Compounds ({current})
+        Step 1 — Compounds ({current})
         {isEdited && <span className="hf-badge hf-badge--edited"> edited</span>}
+        {stage1.state === "user_provided" && (
+          <span className="hf-badge hf-badge--provided"> Provided by you</span>
+        )}
       </h2>
       <StageDataSources stage={1} />
       <EditableEntityList

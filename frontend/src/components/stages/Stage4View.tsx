@@ -155,9 +155,9 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
 
   if (stageState === "not_applicable") {
     return (
-      <section className="stage-view stage-view--na">
+      <section className="stage-view stage-view--na" aria-disabled>
         <h2>Step 4 — Disease Targets</h2>
-        <p className="hf-muted">Not applicable</p>
+        <p className="hf-muted">Not applicable for this run.</p>
       </section>
     );
   }
@@ -190,9 +190,14 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
     [stage4, edit],
   );
 
+  const isUserProvided = stageState === "user_provided";
+
   return (
     <section className="stage-view stage-view--4">
-      <h2>Step 4 — Disease Targets</h2>
+      <h2>
+        Step 4 — Disease Targets
+        {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
+      </h2>
       <StageDataSources stage={4} />
 
       <div className="stage-summary">

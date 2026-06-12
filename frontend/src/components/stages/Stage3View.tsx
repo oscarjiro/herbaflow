@@ -215,9 +215,9 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   // not_applicable → greyed note.
   if (stageState === "not_applicable") {
     return (
-      <section className="stage-view stage-view--na">
+      <section className="stage-view stage-view--na" aria-disabled>
         <h2>Step 3 — Target Identification</h2>
-        <p className="hf-muted">Not applicable</p>
+        <p className="hf-muted">Not applicable for this run.</p>
       </section>
     );
   }
@@ -278,7 +278,10 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="stage-view stage-view--3">
-      <h2>Step 3 — Target Identification</h2>
+      <h2>
+        Step 3 — Target Identification
+        {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
+      </h2>
       <StageDataSources stage={3} />
 
       {/* Summary cards */}

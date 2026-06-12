@@ -173,9 +173,9 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   const isNA = stage2.state === "not_applicable";
   if (isNA) {
     return (
-      <section className="stage-view stage-view--na">
+      <section className="stage-view stage-view--na" aria-disabled>
         <h2>Step 2 — ADME Screening</h2>
-        <p className="hf-muted">Not applicable</p>
+        <p className="hf-muted">Not applicable for this run.</p>
       </section>
     );
   }
@@ -199,9 +199,14 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   const filteredCount = stage2.filtered.length;
   const unscreenedCount = stage2.annotations.unscreened.length;
 
+  const isUserProvided = stage2.state === "user_provided";
+
   return (
     <section className="stage-view stage-view--2">
-      <h2>Step 2 — ADME Screening</h2>
+      <h2>
+        Step 2 — ADME Screening
+        {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
+      </h2>
       <StageDataSources stage={2} />
 
       {/* Summary cards */}

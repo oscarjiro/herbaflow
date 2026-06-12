@@ -115,6 +115,137 @@ export const ANALYSIS_STAGE1_AWAITING = {
   error_message: null,
 };
 
+// r-na-s1: manual_targets plant mode — S1+S2 are not_applicable, S3 is user_provided
+export const ANALYSIS_MANUAL_TARGETS = {
+  analysis_id: "r-na-s1",
+  analysis_name: null,
+  disease_id: "d1",
+  mode: "guided",
+  status: "stage_3_awaiting_approval",
+  current_stage: 3,
+  parameters: {
+    input_modes: { plant: "manual_targets", disease: "selection" },
+    labels: { plant: "My plant label" },
+    plant_ids: [],
+  },
+  stage_results: {
+    "1": {
+      count: 0,
+      compounds: [],
+      per_plant: {},
+      state: "not_applicable",
+    },
+    "2": {
+      count: 0,
+      state: "not_applicable",
+      passed: [],
+      filtered: [],
+      annotations: { pains: [], np_bypass: [], unscreened: [], could_not_screen: [] },
+    },
+    "3": {
+      targets: [{ target_id: "t1", canonical_name: "EGFR", tag: "computed" }],
+      compound_targets: [],
+      per_compound: {},
+      coverage_pct: 100,
+      count: 1,
+      state: "user_provided",
+    },
+  },
+  stage_state: { "1": "not_applicable", "2": "not_applicable", "3": "user_provided" },
+  created_at: null,
+  completed_at: null,
+  expires_at: null,
+  error_message: null,
+};
+
+// r-manual-disease: manual_disease_targets mode — S4 is user_provided, no disease_id
+export const ANALYSIS_MANUAL_DISEASE = {
+  analysis_id: "r-manual-disease",
+  analysis_name: null,
+  disease_id: null,
+  mode: "guided",
+  status: "stage_4_awaiting_approval",
+  current_stage: 4,
+  parameters: {
+    input_modes: { plant: "selection", disease: "manual_disease_targets" },
+    labels: { disease: "My disease label" },
+    plant_ids: ["p1"],
+  },
+  stage_results: {
+    "1": {
+      count: 1,
+      compounds: [{ compound_id: "c1", canonical_name: "Curcumin", tag: "computed" }],
+      per_plant: {},
+      state: "computed",
+    },
+    "2": { ...SAMPLE_STAGE2_RESULTS },
+    "3": {
+      targets: [{ target_id: "t1", canonical_name: "EGFR", tag: "computed" }],
+      compound_targets: [],
+      per_compound: {},
+      coverage_pct: 100,
+      count: 1,
+      state: "computed",
+    },
+    "4": {
+      targets: [{ target_id: "t2", canonical_name: "TP53", tag: "user-added" }],
+      disease_targets: [],
+      count: 1,
+      min_score_applied: 0.3,
+      state: "user_provided",
+    },
+  },
+  stage_state: { "4": "user_provided" },
+  created_at: null,
+  completed_at: null,
+  expires_at: null,
+  error_message: null,
+};
+
+// r-manual-nolabel: manual mode with no label (should show "N/A")
+export const ANALYSIS_MANUAL_NO_LABEL = {
+  analysis_id: "r-manual-nolabel",
+  analysis_name: null,
+  disease_id: null,
+  mode: "guided",
+  status: "stage_4_awaiting_approval",
+  current_stage: 4,
+  parameters: {
+    input_modes: { plant: "selection", disease: "manual_disease_targets" },
+    // no labels key at all
+    plant_ids: ["p1"],
+  },
+  stage_results: {
+    "1": {
+      count: 1,
+      compounds: [{ compound_id: "c1", canonical_name: "Curcumin", tag: "computed" }],
+      per_plant: {},
+      state: "computed",
+    },
+    "2": { ...SAMPLE_STAGE2_RESULTS },
+    "3": {
+      targets: [{ target_id: "t1", canonical_name: "EGFR", tag: "computed" }],
+      compound_targets: [],
+      per_compound: {},
+      coverage_pct: 100,
+      count: 1,
+      state: "computed",
+    },
+    "4": {
+      targets: [{ target_id: "t2", canonical_name: "TP53", tag: "user-added" }],
+      disease_targets: [],
+      count: 1,
+      min_score_applied: 0.3,
+      state: "user_provided",
+    },
+  },
+  stage_state: { "4": "user_provided" },
+  created_at: null,
+  completed_at: null,
+  expires_at: null,
+  error_message: null,
+};
+
 // r4: stage_1_awaiting_approval — count at cap (2000) to test disabled add
 export const ANALYSIS_STAGE1_AT_CAP = {
   analysis_id: "r4",
@@ -361,6 +492,9 @@ export const server = setupServer(
       error_message: "No compounds found for the selected plants.",
     }),
   ),
+  http.get(`${BASE}/analyses/r-na-s1`, () => HttpResponse.json(ANALYSIS_MANUAL_TARGETS)),
+  http.get(`${BASE}/analyses/r-manual-disease`, () => HttpResponse.json(ANALYSIS_MANUAL_DISEASE)),
+  http.get(`${BASE}/analyses/r-manual-nolabel`, () => HttpResponse.json(ANALYSIS_MANUAL_NO_LABEL)),
   // reset-from: echo back the same run with updated adme params
   http.post(`${BASE}/analyses/:id/reset-from/:stage`, () =>
     HttpResponse.json({ ...ANALYSIS_WITH_STAGE2, status: "stage_2_awaiting_approval" }),
