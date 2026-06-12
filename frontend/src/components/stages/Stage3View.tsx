@@ -19,13 +19,15 @@
  *  - otherwise (computed) → full view
  */
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
 import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contract";
+import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStaleState } from "../../hooks/useStaleState";
+import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { ApprovalBar } from "./ApprovalBar";
 import { EditableEntityList } from "./EditableEntityList";
 import { ParamPanel } from "./ParamPanel";
@@ -185,7 +187,13 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [page, setPage] = useState(0);
-  const [alreadyInRun, setAlreadyInRun] = useState<ResolvedTarget[]>([]);
+
+  const currentTargetIds = new Set((stage3?.targets ?? []).map((t) => t.target_id));
+  const { alreadyInRun, handleAdd: handleAddTargets } = useAddWithDedup<ResolvedTarget>({
+    currentIds: currentTargetIds,
+    getId: (r) => r.target_id,
+    onAddIds: (ids) => edit.mutate({ add: ids, remove: [] }),
+  });
 
   const targetRows = useMemo(() => (stage3 ? buildTargetRows(stage3) : []), [stage3]);
   const csvHref = useCsvBlobUrl(S3_CSV_HEADER, buildS3CsvRows(targetRows));
@@ -236,19 +244,6 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     label: t.canonical_name ?? t.target_id,
     tag: t.tag,
   }));
-
-  const handleAddTargets = useCallback(
-    (resolved: ResolvedTarget[]) => {
-      const currentIds = new Set((stage3?.targets ?? []).map((t) => t.target_id));
-      const already = resolved.filter((r) => currentIds.has(r.target_id));
-      const fresh = resolved.filter((r) => !currentIds.has(r.target_id));
-      setAlreadyInRun(already);
-      if (fresh.length > 0) {
-        edit.mutate({ add: fresh.map((r) => r.target_id), remove: [] });
-      }
-    },
-    [stage3, edit],
-  );
 
   const stpCompounds: StpCompound[] = passed.map((c) => ({
     compound_id: c.compound_id,
@@ -421,12 +416,9 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       />
 
       {/* Already-in-run note */}
-      {alreadyInRun.length > 0 && (
-        <p className="hf-muted" role="status">
-          {alreadyInRun.length} already in run:{" "}
-          {alreadyInRun.map((t) => t.gene_symbol ?? t.uniprot_accession ?? t.target_id).join(", ")}
-        </p>
-      )}
+      <AlreadyInRunNote
+        labels={alreadyInRun.map((t) => t.gene_symbol ?? t.uniprot_accession ?? t.target_id)}
+      />
 
       {/* Param panel */}
       {targetParams && (

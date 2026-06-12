@@ -1,9 +1,10 @@
-import { useCallback, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { editStage } from "../../api/sdk.gen";
 import type { ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
+import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { CompoundValidateBox } from "../CompoundValidateBox";
+import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EditableEntityList } from "./EditableEntityList";
 import { StageDataSources } from "./StageDataSources";
 
@@ -29,7 +30,12 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
     onSuccess: () => qc.invalidateQueries(),
   });
 
-  const [alreadyInRun, setAlreadyInRun] = useState<ResolvedCompound[]>([]);
+  const currentCompoundIds = new Set((stage1.compounds ?? []).map((c) => c.compound_id));
+  const { alreadyInRun, handleAdd } = useAddWithDedup<ResolvedCompound>({
+    currentIds: currentCompoundIds,
+    getId: (r) => r.compound_id,
+    onAddIds: (ids) => edit.mutate({ add: ids, remove: [] }),
+  });
 
   if (stage1.state === "not_applicable") {
     return (
@@ -54,19 +60,6 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
     edit.mutate({ add: [], remove: [id] });
   }
 
-  const handleAdd = useCallback(
-    (resolved: ResolvedCompound[]) => {
-      const currentIds = new Set((stage1.compounds ?? []).map((c) => c.compound_id));
-      const already = resolved.filter((r) => currentIds.has(r.compound_id));
-      const fresh = resolved.filter((r) => !currentIds.has(r.compound_id));
-      setAlreadyInRun(already);
-      if (fresh.length > 0) {
-        edit.mutate({ add: fresh.map((r) => r.compound_id), remove: [] });
-      }
-    },
-    [stage1.compounds, edit],
-  );
-
   return (
     <div className="stage1-view">
       <h2>
@@ -88,12 +81,9 @@ export function Stage1View({ analysisId, stage1 }: { analysisId: string; stage1:
       />
 
       {/* Already-in-run note */}
-      {alreadyInRun.length > 0 && (
-        <p className="hf-muted" role="status">
-          {alreadyInRun.length} already in run:{" "}
-          {alreadyInRun.map((c) => c.canonical_name ?? c.canonical_key ?? c.compound_id).join(", ")}
-        </p>
-      )}
+      <AlreadyInRunNote
+        labels={alreadyInRun.map((c) => c.canonical_name ?? c.canonical_key ?? c.compound_id)}
+      />
     </div>
   );
 }
