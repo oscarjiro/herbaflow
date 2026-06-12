@@ -103,6 +103,11 @@ def apply_edits(
     return {"effective": effective, "tags": tags}
 
 
+# Identity fields the edit layer carries through from the runner output (when present) so
+# downstream stages keep them after entity rows are rebuilt. Targets expose these; compounds don't.
+_CARRY_FIELDS: tuple[str, ...] = ("gene_symbol", "uniprot_accession")
+
+
 def build_stage_entities(
     computed_entities: list[dict[str, Any]],
     edit: dict[str, Any] | None,
@@ -121,18 +126,28 @@ def build_stage_entities(
     iff the edit is non-empty, else ``"computed"``.
     """
     computed_ids = [str(e[id_key]) for e in computed_entities]
-    names: dict[str, str | None] = {
-        str(e[id_key]): e.get("canonical_name") for e in computed_entities
-    }
+    by_id: dict[str, dict[str, Any]] = {str(e[id_key]): e for e in computed_entities}
     applied = apply_edits(computed_ids, edit, id_key=id_key)
     tags = applied["tags"]
 
     entities: list[dict[str, Any]] = []
     for cid in computed_ids:
-        entities.append({id_key: cid, "canonical_name": names.get(cid), "tag": tags[cid]})
+        src = by_id.get(cid, {})
+        row: dict[str, Any] = {
+            id_key: cid,
+            "canonical_name": src.get("canonical_name"),
+            "tag": tags[cid],
+        }
+        # Carry the runner's identity fields through the edit layer (targets expose
+        # gene_symbol / uniprot_accession) so downstream stages — the Stage 8 custom
+        # background and the Stage 3 view — keep them. Absent on compounds (left minimal).
+        for field in _CARRY_FIELDS:
+            if field in src:
+                row[field] = src[field]
+        entities.append(row)
     for entry in (edit or _EMPTY_EDIT).get("added", []):
         aid = str(entry[id_key])
-        if aid in names:
+        if aid in by_id:
             # Already represented as a computed entry above.
             continue
         entities.append(

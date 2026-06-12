@@ -230,6 +230,38 @@ def test_build_stage_entities_targets_no_edit_is_all_computed() -> None:
     assert all(t["tag"] == "computed" for t in frag["targets"])
 
 
+def test_build_stage_entities_preserves_target_identity_fields() -> None:
+    # The edit layer must carry the runner's identity fields (gene_symbol / uniprot_accession)
+    # through to the stored rows so Stage 8's custom background and the Stage 3 view keep them.
+    fresh = [
+        {
+            "target_id": _eid(1),
+            "canonical_name": "EGFR",
+            "gene_symbol": "EGFR",
+            "uniprot_accession": "P00533",
+        },
+        {
+            "target_id": _eid(2),
+            "canonical_name": "TP53",
+            "gene_symbol": "TP53",
+            "uniprot_accession": "P04637",
+        },
+    ]
+    frag = edits.build_stage_entities(fresh, None, id_key="target_id", list_key="targets")
+    rows = {t["target_id"]: t for t in frag["targets"]}
+    assert rows[_eid(1)]["gene_symbol"] == "EGFR"
+    assert rows[_eid(1)]["uniprot_accession"] == "P00533"
+    assert rows[_eid(2)]["gene_symbol"] == "TP53"
+    assert rows[_eid(2)]["uniprot_accession"] == "P04637"
+
+
+def test_build_stage_entities_compounds_gain_no_identity_keys() -> None:
+    # Compound rows (no gene_symbol/uniprot_accession on the runner output) stay minimal.
+    fresh = [{"compound_id": _eid(1), "canonical_name": "curcumin"}]
+    frag = edits.build_stage_entities(fresh, None)
+    assert set(frag["compounds"][0].keys()) == {"compound_id", "canonical_name", "tag"}
+
+
 def test_e6_target_add_reapplied_and_remove_resuppressed() -> None:
     # Fresh set drops the added id (re-applied) and re-introduces the removed id (re-suppressed).
     added = _eid(9)

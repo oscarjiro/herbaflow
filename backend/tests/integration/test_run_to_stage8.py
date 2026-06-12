@@ -203,6 +203,10 @@ async def test_auto_run_completes_through_stage8(client, engine, monkeypatch):
     assert s8["count"] == 1
     assert s8["terms"][0]["term_id"] == "KEGG:04151"
     assert s8["background_source"] == "compound_target_universe"
+    # The Stage-3 universe gene symbols must survive the edit layer into the custom background
+    # (regression guard: an empty background silently degraded Stage 8 against the live API).
+    assert s8["background_gene_count"] == 2
+    assert s8["input_gene_count"] == 2
     assert s8["degraded"] is False
 
 
