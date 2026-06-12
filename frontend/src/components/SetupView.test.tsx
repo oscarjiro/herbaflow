@@ -162,7 +162,6 @@ describe("SetupView — create payload per mode", () => {
     await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
 
     await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const body = createSpy.mock.calls[0]![0].body;
     expect(body.plant_input_mode).toBe("selection");
     expect(body.disease_input_mode).toBe("selection");
@@ -205,7 +204,6 @@ describe("SetupView — create payload per mode", () => {
     await userEvent.type(plantTextarea, "EGFR");
     // There are now two Validate buttons (one per TargetValidateBox); click the first
     const validateBtns = screen.getAllByRole("button", { name: /^validate$/i });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await userEvent.click(validateBtns[0]!);
     // Wait for the resolved list from MSW
     await waitFor(() => {
@@ -216,7 +214,6 @@ describe("SetupView — create payload per mode", () => {
     const diseaseTextarea = screen.getByRole("textbox", { name: /disease targets/i });
     await userEvent.type(diseaseTextarea, "EGFR");
     const validateBtns2 = screen.getAllByRole("button", { name: /^validate$/i });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await userEvent.click(validateBtns2[validateBtns2.length - 1]!);
     await waitFor(() => {
       expect(
@@ -232,7 +229,6 @@ describe("SetupView — create payload per mode", () => {
     await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
 
     await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const body = createSpy.mock.calls[0]![0].body;
     expect(body.plant_input_mode).toBe("manual_targets");
     expect(body.disease_input_mode).toBe("manual_disease_targets");

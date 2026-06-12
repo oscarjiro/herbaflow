@@ -187,6 +187,57 @@ frontend/
 └── package.json
 ```
 
+## Setup Form — Input Modes
+
+The setup form (`SetupView.tsx`) lets the researcher choose how to supply the plant-side and
+disease-side inputs independently, via a radio-button fieldset for each side.
+
+### Plant input modes (3 options)
+
+| Mode | Control shown | What it contributes |
+|---|---|---|
+| `selection` (default) | Plant multiselect (catalog search) | Selected plant UUIDs → `plant_ids`; Stage 1 runs the KNApSAcK compound lookup |
+| `manual_compounds` | `CompoundValidateBox` (SMILES/name resolve) | Resolved compound UUIDs seeded into Stage 1 via `stage_edits`; Stage 1 lookup is skipped (`not_applicable`) |
+| `manual_targets` | `TargetValidateBox` (gene-symbol/accession resolve) | Resolved target UUIDs seeded into Stage 3 via `stage_edits`; Stages 1 and 2 are skipped (`not_applicable`) |
+
+### Disease input modes (2 options)
+
+| Mode | Control shown | What it contributes |
+|---|---|---|
+| `selection` (default) | Disease single-select (catalog combobox) | Selected disease UUID → `disease_id`; Stage 4 reads the seeded `disease_targets` table |
+| `manual_disease_targets` | `TargetValidateBox` (gene-symbol/accession resolve) | Resolved target UUIDs seeded into Stage 4 via `stage_edits`; `disease_id` is NULL; Stage 4's DB read is skipped |
+
+In both manual modes an **optional free-text label** field appears (≤ 200 chars). The label is
+display-only — it is stored in `parameters.labels` but is never canonicalized and is never used as
+an identity. Manual entities create **no catalog rows** (`plants` / `diseases`); they exist only
+within the run.
+
+### Run header display name
+
+The run header shows a per-side display name:
+- **Selection mode** — the catalog name(s) of the selected plants or disease.
+- **Manual mode with a label** — the free-text label the researcher supplied.
+- **Manual mode without a label** — "N/A".
+
+---
+
+## Stage rendering — `not_applicable` and `user_provided` states
+
+### `not_applicable` stages
+
+When a stage does not apply to the chosen input mode (e.g. Stage 1 in `manual_targets` mode),
+`stage_results[n].state` is `"not_applicable"`. The stage panel renders a **greyed "Not applicable
+for this run" block** in place of the normal results view; no approval bar or param panel is shown.
+
+### `user_provided` stages
+
+When a stage was pre-filled by the user at setup (or later edited), `stage_results[n].state` is
+`"user_provided"`. The stage panel shows the normal results view but adds a **"Provided by you"
+badge** next to the stage heading to signal that the content came from the researcher, not from a
+pipeline computation.
+
+---
+
 ## Guided Machinery UX
 
 ### Param panel (param-bearing stages)

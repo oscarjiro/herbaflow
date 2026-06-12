@@ -493,7 +493,7 @@ guard accordingly.
 
 ```jsonc
 {
-  "plant_ids":        ["<uuid>", ...],          // selected plant UUIDs
+  "plant_ids":        ["<uuid>", ...],          // selected plant UUIDs (selection mode only; [] in manual modes)
   "manual_compounds": ["<uuid>", ...],          // pre-resolved compound UUIDs injected into Stage 1
   "stage_edits": {                              // durable in-stage add/remove decisions; keyed by stage number string
     "<stage>": {
@@ -502,8 +502,16 @@ guard accordingly.
     }
     // ...
   },
+  "input_modes": {                              // stamped at create; ABSENT on pre-feature runs → treated as selection/selection
+    "plant":    "selection | manual_compounds | manual_targets",
+    "disease":  "selection | manual_disease_targets"
+  },
+  "labels": {                                   // display-only free text (≤200 chars); present only when a manual mode supplied a label
+    "plant":   "<str>",                         // NEVER canonicalized, NEVER used as an identity
+    "disease": "<str>"
+  },
   "adme": { /* frozen ADME parameters; see below */ }
-  // further param groups added per chunk (e.g. "target", "disease_targets", "ppi", …)
+  // further param groups: "target", "disease_targets", "ppi", "hub_genes", "enrichment"
 }
 ```
 
@@ -512,6 +520,23 @@ clears a pending removal; re-removing clears a pending add). The edit layer is *
 survives a re-run's clear of `stage_results` and is reapplied every time the stage recomputes.
 Defaults for each param-bearing stage are frozen into `parameters` at run-creation time; a Redo
 overrides them within the contract's hard bounds.
+
+`parameters.stage_edits` may be **seeded at run-creation** for manual input modes: Stage 1 (manual
+compound IDs seeded into the S1 entity layer), Stage 3 (manual plant targets), and Stage 4 (manual
+disease targets). Previously, `stage_edits` was only ever written by in-stage edit calls;
+manual input modes write it at create time so the pipeline's edit-layer reapplication logic is
+reused without special-casing.
+
+`parameters.input_modes` is absent on runs created before this feature was introduced; the
+backend treats absent `input_modes` as `{plant: "selection", disease: "selection"}` (fully
+backward compatible). `parameters.labels` is absent when no manual mode supplied a label.
+
+**Manual entities and catalog rows:** manual plant and disease entities supplied via a manual input
+mode create **no catalog row** — there is no `plants` row and no `diseases` row for a free-text
+manual plant or disease. The pipeline operates entirely on the run's `stage_results` and
+`stage_edits`. For `manual_disease_targets` mode, `analysis_runs.disease_id` is **NULL** (the
+column was already a nullable FK; no schema migration required). All of the above lives in the
+existing jsonb columns; no schema migration is needed for any input-modes field.
 
 #### `stage_results` jsonb shape
 
@@ -529,10 +554,41 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
   ],
   "computed_ids": ["<uuid>", ...],   // the raw runner output before edit-layer application
   "count": <int>,                    // effective count (excludes "user-removed"); 0 hard-stops the run
-  "state": "<stage_state>",          // "computed" (no edit) | "user_provided" (non-empty edit layer)
+  "state": "<stage_state>",          // "computed" | "user_provided" | "not_applicable"
   "per_plant": { "<plant_id>": ["<compound_id>", ...], ... }  // Stage 1 only
 }
 ```
+
+`state` values:
+- `"computed"` — the stage ran normally (no or empty edit layer).
+- `"user_provided"` — the stage was pre-filled by the user via a manual input mode (seeded via
+  `stage_edits` at create time) **or** the user later edited the computed result (non-empty edit
+  layer). Both produce the same state marker.
+- `"not_applicable"` — the stage does not apply to the chosen input mode. Pre-filled at create
+  as `{"state": "not_applicable", "count": 0}` (e.g., Stage 1 compound lookup in
+  `manual_targets` mode, or Stage 4 disease-target DB read in `manual_disease_targets` mode).
+  Downstream stages treat this as an empty-but-valid input; it does **not** hard-stop the run.
+
+**Stage 4 (`stage_results["4"]`) in `manual_disease_targets` mode:**
+
+When the run uses `manual_disease_targets`, the seeded Stage-4 result carries an extended shape:
+
+```jsonc
+{
+  "state": "user_provided",
+  "count": <int>,
+  "targets": [                             // edit-layer list (same shape as other entity stages)
+    {"target_id": "<uuid>", "gene_symbol": "<str|null>", "uniprot_accession": "<str|null>"}
+  ],
+  "disease_targets": [                     // view list Stage 5 reads — one row per target
+    {"target_id": "<uuid>", "gene_symbol": "<str|null>", "uniprot_accession": "<str|null>"}
+  ]
+}
+```
+
+`disease_targets` is the list that Stage 5 intersects against the Stage-3 set. Each row carries
+`gene_symbol` and `uniprot_accession`. There is **no association score** (no `disease_targets`
+table edge; the link is run-scoped only — see the `disease_targets` table note above).
 
 **ADME stage** (Stage 2):
 
