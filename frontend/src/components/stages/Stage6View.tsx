@@ -21,6 +21,7 @@
  */
 
 import { useMemo, useState } from "react";
+import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
@@ -83,18 +84,10 @@ function isBlocked(r: Stage6Result): r is Stage6Blocked {
   return (r as Stage6Blocked).blocked === true;
 }
 
-function escapeCsv(v: unknown): string {
-  if (v == null) return "";
-  const s = String(v);
-  return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
-}
+const S6_CSV_HEADER = "source,target,confidence";
 
-function buildCsv(edges: Stage6Edge[]): string {
-  const header = "source,target,confidence";
-  const body = edges
-    .map((e) => [escapeCsv(e.source), escapeCsv(e.target), escapeCsv(e.confidence)].join(","))
-    .join("\n");
-  return `${header}\n${body}`;
+function buildS6CsvRows(edges: Stage6Edge[]): unknown[][] {
+  return edges.map((e) => [e.source, e.target, e.confidence]);
 }
 
 // ---------------------------------------------------------------------------
@@ -127,10 +120,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
 
   const computed = stage6 && !isBlocked(stage6) ? stage6 : undefined;
   const edges = useMemo(() => computed?.edges ?? [], [computed]);
-  const csvHref = useMemo(() => {
-    const blob = new Blob([buildCsv(edges)], { type: "text/csv" });
-    return URL.createObjectURL(blob);
-  }, [edges]);
+  const csvHref = useCsvBlobUrl(S6_CSV_HEADER, buildS6CsvRows(edges));
 
   if (!stage6) return null;
 

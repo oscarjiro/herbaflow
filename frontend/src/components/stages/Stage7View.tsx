@@ -8,6 +8,7 @@
  */
 
 import { useMemo, useState } from "react";
+import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
@@ -59,29 +60,20 @@ type HubParams = Record<string, number | boolean | string>;
 
 const PAGE_SIZES = [10, 20, 50] as const;
 
-function escapeCsv(v: unknown): string {
-  if (v == null) return "";
-  const s = String(v);
-  return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
-}
+const S7_CSV_HEADER =
+  "rank,gene_symbol,composite,degree,betweenness,closeness,eigenvector,source_url";
 
-function buildCsv(hubs: Hub[]): string {
-  const header = "rank,gene_symbol,composite,degree,betweenness,closeness,eigenvector,source_url";
-  const body = hubs
-    .map((h) =>
-      [
-        h.rank,
-        escapeCsv(h.gene_symbol),
-        h.composite,
-        h.degree,
-        h.betweenness,
-        h.closeness,
-        h.eigenvector,
-        escapeCsv(h.source_url),
-      ].join(","),
-    )
-    .join("\n");
-  return `${header}\n${body}`;
+function buildS7CsvRows(hubs: Hub[]): unknown[][] {
+  return hubs.map((h) => [
+    h.rank,
+    h.gene_symbol,
+    h.composite,
+    h.degree,
+    h.betweenness,
+    h.closeness,
+    h.eigenvector,
+    h.source_url,
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -113,10 +105,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   const [page, setPage] = useState(0);
 
   const hubs = useMemo(() => stage7?.hubs ?? [], [stage7]);
-  const csvHref = useMemo(() => {
-    const blob = new Blob([buildCsv(hubs)], { type: "text/csv" });
-    return URL.createObjectURL(blob);
-  }, [hubs]);
+  const csvHref = useCsvBlobUrl(S7_CSV_HEADER, buildS7CsvRows(hubs));
 
   if (!stage7) return null;
 

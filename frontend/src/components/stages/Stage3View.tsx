@@ -20,6 +20,7 @@
  */
 
 import { useMemo, useState, useCallback } from "react";
+import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
@@ -122,40 +123,19 @@ function buildTargetRows(stage3: Stage3Result): TargetRow[] {
   });
 }
 
-function escapeCsv(v: unknown): string {
-  if (v == null) return "";
-  const s = String(v);
-  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-    return `"${s.replace(/"/g, '""')}"`;
-  }
-  return s;
-}
+const S3_CSV_HEADER = "gene_symbol,uniprot_accession,prediction_method,source_url";
 
 /**
  * CSV keyed on gene symbol + UniProt accession + method + source_url.
  * NEVER includes a UUID column (hard requirement).
  */
-function buildCsv(rows: TargetRow[]): string {
-  const header = "gene_symbol,uniprot_accession,prediction_method,source_url";
-  const body = rows
-    .map((r) =>
-      [
-        escapeCsv(r.gene_symbol),
-        escapeCsv(r.uniprot_accession),
-        escapeCsv(r.methods.map(methodLabel).join("; ")),
-        escapeCsv(r.source_url),
-      ].join(","),
-    )
-    .join("\n");
-  return `${header}\n${body}`;
-}
-
-function useCsvDownload(rows: TargetRow[]) {
-  return useMemo(() => {
-    const csv = buildCsv(rows);
-    const blob = new Blob([csv], { type: "text/csv" });
-    return URL.createObjectURL(blob);
-  }, [rows]);
+function buildS3CsvRows(rows: TargetRow[]): unknown[][] {
+  return rows.map((r) => [
+    r.gene_symbol,
+    r.uniprot_accession,
+    r.methods.map(methodLabel).join("; "),
+    r.source_url,
+  ]);
 }
 
 function tagBadge(tag: TargetTag): React.ReactElement | null {
@@ -208,7 +188,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   const [alreadyInRun, setAlreadyInRun] = useState<ResolvedTarget[]>([]);
 
   const targetRows = useMemo(() => (stage3 ? buildTargetRows(stage3) : []), [stage3]);
-  const csvHref = useCsvDownload(targetRows);
+  const csvHref = useCsvBlobUrl(S3_CSV_HEADER, buildS3CsvRows(targetRows));
 
   if (!stage3) return null;
 

@@ -9,6 +9,7 @@
  */
 
 import { useMemo, useState } from "react";
+import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
@@ -62,28 +63,18 @@ type EnrichmentParams = Record<string, number | boolean | string>;
 
 const PAGE_SIZES = [10, 20, 50] as const;
 
-function escapeCsv(v: unknown): string {
-  if (v == null) return "";
-  const s = String(v);
-  return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
-}
+const S8_CSV_HEADER = "source,term_id,name,p_value,term_size,intersection_size,intersection";
 
-function buildCsv(terms: Term[]): string {
-  const header = "source,term_id,name,p_value,term_size,intersection_size,intersection";
-  const body = terms
-    .map((t) =>
-      [
-        escapeCsv(t.source),
-        escapeCsv(t.term_id),
-        escapeCsv(t.name),
-        t.p_value,
-        t.term_size,
-        t.intersection_size,
-        escapeCsv((t.intersection ?? []).join(" ")),
-      ].join(","),
-    )
-    .join("\n");
-  return `${header}\n${body}`;
+function buildS8CsvRows(terms: Term[]): unknown[][] {
+  return terms.map((t) => [
+    t.source,
+    t.term_id,
+    t.name,
+    t.p_value,
+    t.term_size,
+    t.intersection_size,
+    (t.intersection ?? []).join(" "),
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -115,10 +106,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   const [page, setPage] = useState(0);
 
   const terms = useMemo(() => stage8?.terms ?? [], [stage8]);
-  const csvHref = useMemo(() => {
-    const blob = new Blob([buildCsv(terms)], { type: "text/csv" });
-    return URL.createObjectURL(blob);
-  }, [terms]);
+  const csvHref = useCsvBlobUrl(S8_CSV_HEADER, buildS8CsvRows(terms));
 
   if (!stage8) return null;
 

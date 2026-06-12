@@ -11,7 +11,8 @@
  * No param panel, no Redo, no entity add/remove, no TargetValidateBox.
  */
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis } from "../../api/sdk.gen";
@@ -60,27 +61,14 @@ type Stage5Result = {
 
 const PAGE_SIZES = [10, 20, 50] as const;
 
-function escapeCsv(v: unknown): string {
-  if (v == null) return "";
-  const s = String(v);
-  return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
-}
+const S5_CSV_HEADER = "gene_symbol,uniprot_accession,disease_association_score,source_url";
 
-function buildCsv(rows: OverlapRow[]): string {
-  const header = "gene_symbol,uniprot_accession,disease_association_score,source_url";
-  const body = rows
-    .map((r) => {
-      const acc = r.uniprot_accession;
-      const sourceUrl = acc ? `https://www.uniprot.org/uniprotkb/${acc}/entry` : null;
-      return [
-        escapeCsv(r.gene_symbol),
-        escapeCsv(acc),
-        escapeCsv(r.disease_association_score),
-        escapeCsv(sourceUrl),
-      ].join(",");
-    })
-    .join("\n");
-  return `${header}\n${body}`;
+function buildS5CsvRows(rows: OverlapRow[]): unknown[][] {
+  return rows.map((r) => {
+    const acc = r.uniprot_accession;
+    const sourceUrl = acc ? `https://www.uniprot.org/uniprotkb/${acc}/entry` : null;
+    return [r.gene_symbol, acc, r.disease_association_score, sourceUrl];
+  });
 }
 
 function formatPValue(p: number): string {
@@ -105,11 +93,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [page, setPage] = useState(0);
 
-  const csvHref = useMemo(() => {
-    if (!stage5) return "#";
-    const blob = new Blob([buildCsv(stage5.overlap)], { type: "text/csv" });
-    return URL.createObjectURL(blob);
-  }, [stage5]);
+  const csvHref = useCsvBlobUrl(S5_CSV_HEADER, buildS5CsvRows(stage5?.overlap ?? []));
 
   if (!stage5) return null;
 

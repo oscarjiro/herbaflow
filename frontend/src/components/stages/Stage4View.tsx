@@ -20,6 +20,7 @@
  */
 
 import { useMemo, useState, useCallback } from "react";
+import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
@@ -85,26 +86,16 @@ function buildRows(stage4: Stage4Result): Row[] {
   });
 }
 
-function escapeCsv(v: unknown): string {
-  if (v == null) return "";
-  const s = String(v);
-  return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
-}
+const S4_CSV_HEADER = "gene_symbol,uniprot_accession,score,association_type,source_url";
 
-function buildCsv(rows: Row[]): string {
-  const header = "gene_symbol,uniprot_accession,score,association_type,source_url";
-  const body = rows
-    .map((r) =>
-      [
-        escapeCsv(r.gene_symbol),
-        escapeCsv(r.uniprot_accession),
-        escapeCsv(r.score),
-        escapeCsv(r.association_type),
-        escapeCsv(r.source_url),
-      ].join(","),
-    )
-    .join("\n");
-  return `${header}\n${body}`;
+function buildS4CsvRows(rows: Row[]): unknown[][] {
+  return rows.map((r) => [
+    r.gene_symbol,
+    r.uniprot_accession,
+    r.score,
+    r.association_type,
+    r.source_url,
+  ]);
 }
 
 function tagBadge(tag: TargetTag): React.ReactElement | null {
@@ -146,10 +137,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   const [alreadyInRun, setAlreadyInRun] = useState<ResolvedTarget[]>([]);
 
   const rows = useMemo(() => (stage4 ? buildRows(stage4) : []), [stage4]);
-  const csvHref = useMemo(() => {
-    const blob = new Blob([buildCsv(rows)], { type: "text/csv" });
-    return URL.createObjectURL(blob);
-  }, [rows]);
+  const csvHref = useCsvBlobUrl(S4_CSV_HEADER, buildS4CsvRows(rows));
 
   if (!stage4) return null;
 
