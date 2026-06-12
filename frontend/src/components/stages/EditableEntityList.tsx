@@ -1,20 +1,14 @@
 /**
- * EditableEntityList — generic reusable list of entities with remove controls
- * and an optional add affordance.
+ * EditableEntityList — Stage 1's editable entity list: rows with a remove control + a cap-aware add
+ * box (EntityAddControl). Stage 3/4 use the rich table's own delete column instead. Hides
+ * user-removed rows; undo = re-add via the add box.
  *
- * Props:
- *  - entities: array of { id, label, tag? }
- *  - onRemove(id): called when the remove button is clicked
- *  - onAdd?: optional callback when add is triggered (wired externally)
- *  - cap: maximum number of entities allowed
- *  - current: current count (used for cap enforcement display)
- *  - addControl?: optional React node rendered as the add affordance; it will
- *    receive a `disabled` attribute when current >= cap via the wrapper
- *    (for <input> / <button> children the parent should pass disabled
- *    themselves, or use the `addControl` slot only when cap not reached)
+ * NOTE: the full unification of ALL tables onto the shared table primitive is later design-phase
+ * work. This component is the interim Stage-1 editor.
  */
-
-import React from "react";
+import type React from "react";
+import { atMinEntities, isUserRemoved } from "../../lib/entities";
+import { EntityAddControl } from "./EntityAddControl";
 
 export type EditableEntity = {
   id: string;
@@ -31,36 +25,25 @@ export function EditableEntityList({
 }: {
   entities: EditableEntity[];
   onRemove: (id: string) => void;
-  onAdd?: (...args: unknown[]) => void;
   cap: number;
   current: number;
   addControl?: React.ReactNode;
 }) {
-  const atCap = current >= cap;
-  const atMin = current <= 1;
+  const atMin = atMinEntities(current);
+  const visible = entities.filter((e) => !isUserRemoved(e.tag));
 
   return (
     <div className="editable-entity-list">
-      <p className="hf-caption">
-        {current} / {cap}
-      </p>
       <ul>
-        {entities.map((e) => (
-          <li
-            key={e.id}
-            className={e.tag === "user-removed" ? "entity-row entity-row--removed" : "entity-row"}
-          >
-            <span className={e.tag === "user-removed" ? "user-removed" : undefined}>{e.label}</span>
+        {visible.map((e) => (
+          <li key={e.id} className="entity-row">
+            <span>{e.label}</span>
             <button
               className="hf-btn hf-btn-icon"
               aria-label={`Remove ${e.label}`}
               onClick={() => onRemove(e.id)}
-              disabled={atMin && e.tag !== "user-removed"}
-              title={
-                atMin && e.tag !== "user-removed"
-                  ? "A stage must keep at least one entry."
-                  : undefined
-              }
+              disabled={atMin}
+              title={atMin ? "A stage must keep at least one entry." : undefined}
             >
               ✕
             </button>
@@ -68,19 +51,9 @@ export function EditableEntityList({
         ))}
       </ul>
       {addControl && (
-        <div className={`entity-add-control${atCap ? " entity-add-control--disabled" : ""}`}>
-          {atCap
-            ? React.Children.map(addControl, (child) => {
-                if (React.isValidElement(child)) {
-                  // Propagate disabled to form elements when at cap
-                  return React.cloneElement(child as React.ReactElement<{ disabled?: boolean }>, {
-                    disabled: true,
-                  });
-                }
-                return child;
-              })
-            : addControl}
-        </div>
+        <EntityAddControl current={current} cap={cap}>
+          {addControl}
+        </EntityAddControl>
       )}
     </div>
   );
