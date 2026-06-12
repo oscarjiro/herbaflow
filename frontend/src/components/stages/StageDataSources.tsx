@@ -9,6 +9,7 @@ const STAGE_SOURCES: Record<number, string[]> = {
   ],
   6: ["STRING (protein–protein interactions)", "Human only (species 9606); functional or physical"],
   7: ["networkx (centrality analysis)", "STRING PPI network (undirected)"],
+  8: ["g:Profiler (GO + KEGG enrichment)"],
 };
 
 export function StageDataSources({ stage }: { stage: number }) {
