@@ -33,6 +33,7 @@ function makeRun(overrides: Partial<AnalysisRead> = {}): AnalysisRead {
     current_stage: 2,
     parameters: { adme: ADME_FROZEN },
     stage_results: { "2": SAMPLE_STAGE2_RESULTS },
+    stage_state: {},
     created_at: null,
     completed_at: null,
     expires_at: null,

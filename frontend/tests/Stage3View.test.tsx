@@ -57,6 +57,7 @@ function makeRun(overrides: Partial<AnalysisRead> = {}): AnalysisRead {
     current_stage: 3,
     parameters: { target: TARGET_FROZEN },
     stage_results: { "2": SAMPLE_STAGE2_PASSED, "3": SAMPLE_STAGE3_RESULTS },
+    stage_state: {},
     created_at: null,
     completed_at: null,
     expires_at: null,
