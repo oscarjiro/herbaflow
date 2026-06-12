@@ -77,6 +77,13 @@ def test_adme_defaults_match_methodology_lock() -> None:
     }
 
 
+def test_input_mode_accessors() -> None:
+    assert contracts.plant_input_modes() == ("selection", "manual_compounds", "manual_targets")
+    assert contracts.disease_input_modes() == ("selection", "manual_disease_targets")
+    assert contracts.default_plant_input_mode() == "selection"
+    assert contracts.default_disease_input_mode() == "selection"
+
+
 def test_apply_adme_to_manual_is_removed() -> None:
     from app import contracts
 

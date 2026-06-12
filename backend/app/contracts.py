@@ -32,6 +32,24 @@ def stage_states() -> tuple[str, ...]:
     return tuple(_defs()["stage_state"]["enum"])
 
 
+def plant_input_modes() -> tuple[str, ...]:
+    return tuple(_defs()["plant_input_mode"]["enum"])
+
+
+def disease_input_modes() -> tuple[str, ...]:
+    return tuple(_defs()["disease_input_mode"]["enum"])
+
+
+@lru_cache(maxsize=1)
+def default_plant_input_mode() -> str:
+    return cast(str, _defs()["plant_input_mode"]["default"])
+
+
+@lru_cache(maxsize=1)
+def default_disease_input_mode() -> str:
+    return cast(str, _defs()["disease_input_mode"]["default"])
+
+
 def run_status_flat() -> tuple[str, ...]:
     return tuple(_defs()["run_status_flat"]["enum"])
 

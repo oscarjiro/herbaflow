@@ -16,6 +16,18 @@
       "type": "string",
       "enum": ["computed", "user_provided", "not_applicable"]
     },
+    "plant_input_mode": {
+      "description": "How the plant/compound side of the run is supplied (Software Lock §5.5).",
+      "type": "string",
+      "enum": ["selection", "manual_compounds", "manual_targets"],
+      "default": "selection"
+    },
+    "disease_input_mode": {
+      "description": "How the disease side of the run is supplied (Software Lock §5.5).",
+      "type": "string",
+      "enum": ["selection", "manual_disease_targets"],
+      "default": "selection"
+    },
     "run_status_flat": {
       "description": "Non-composite analysis_runs.status values.",
       "type": "string",
