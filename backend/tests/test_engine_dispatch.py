@@ -137,6 +137,23 @@ def _runners(
             "flags": ["network_too_small"],
         }
 
+    async def stage8_runner(run: SimpleNamespace) -> dict:
+        # Enrichment fake: honest null — valid terminal completion.
+        return {
+            "state": "computed",
+            "terms": [],
+            "count": 0,
+            "degraded": False,
+            "flags": ["empty_input"],
+            "input_gene_count": 0,
+            "background_gene_count": 1,
+            "background_source": "compound_target_universe",
+            "correction": "fdr",
+            "fdr_threshold": 0.05,
+            "min_term_size": 5,
+            "sources": ["GO:BP"],
+        }
+
     return {
         1: stage1_runner,
         2: stage2_runner,
@@ -145,6 +162,7 @@ def _runners(
         5: stage5_runner,
         6: stage6_runner,
         7: stage7_runner,
+        8: stage8_runner,
     }
 
 
@@ -183,6 +201,10 @@ async def test_guided_pauses_then_advances_through_all_stages() -> None:
     assert run.current_stage == 7
 
     await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_8_awaiting_approval"
+    assert run.current_stage == 8
+
+    await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "complete"
 
 
@@ -201,7 +223,8 @@ async def test_auto_chains_to_complete() -> None:
     assert run.stage_results["5"]["state"] == "computed"
     assert run.stage_results["6"]["state"] == "computed"
     assert run.stage_results["7"]["state"] == "computed"
-    assert run.current_stage == 7
+    assert run.stage_results["8"]["state"] == "computed"
+    assert run.current_stage == 8
 
 
 @pytest.mark.asyncio

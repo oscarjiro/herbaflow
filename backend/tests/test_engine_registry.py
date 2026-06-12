@@ -21,3 +21,11 @@ def test_stage7_registered_and_checkpoint():
     assert engine.STAGE_PARAM_GROUP[7] == "hub_genes"
     assert engine.DEPENDENTS[6] == {7}
     assert engine.DEPENDENTS[7] == set()
+
+
+def test_stage8_registered_and_terminal():
+    assert 8 in engine.RUNNABLE_STAGES
+    assert 8 in engine.NEEDS_APPROVAL
+    assert engine.STAGE_PARAM_GROUP[8] == "enrichment"
+    assert engine.DEPENDENTS[8] == set()
+    assert engine.RUNNABLE_STAGES[-1] == 8  # Stage 8 is the terminal stage

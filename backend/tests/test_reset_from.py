@@ -106,6 +106,15 @@ def _hub_genes() -> dict[str, Any]:
     return {"top_n": 20, "use_hub_bottleneck": True, "composite_weight": 0.5}
 
 
+def _enrichment() -> dict[str, Any]:
+    return {
+        "fdr_threshold": 0.05,
+        "sources": ["GO:BP", "KEGG"],
+        "correction": "fdr",
+        "min_term_size": 5,
+    }
+
+
 def _run(*, computed: list[str], mode: str = "auto") -> SimpleNamespace:
     return SimpleNamespace(
         analysis_id=uuid.uuid4(),
@@ -119,6 +128,7 @@ def _run(*, computed: list[str], mode: str = "auto") -> SimpleNamespace:
             "stage_edits": {},
             "adme": _adme(),
             "hub_genes": _hub_genes(),
+            "enrichment": _enrichment(),
         },
         stage_results={
             "1": _stage1_fragment(computed),
@@ -155,7 +165,16 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
     stage1 emits a computed fragment from the *effective* S1 set already stored (it is
     never recomputed in this chunk); stage2 emits a count = size of the effective S1 set.
     """
-    calls: dict[str, list] = {"1": [], "2": [], "3": [], "4": [], "5": [], "6": [], "7": []}
+    calls: dict[str, list] = {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": [],
+        "5": [],
+        "6": [],
+        "7": [],
+        "8": [],
+    }
 
     def fake_build_runners(session: Any) -> dict[int, Any]:
         async def stage1_runner(run: SimpleNamespace) -> dict:
@@ -252,6 +271,24 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
                 "flags": ["network_too_small"],
             }
 
+        async def stage8_runner(run: SimpleNamespace) -> dict:
+            # Enrichment fake: honest null — valid terminal completion.
+            calls["8"].append(True)
+            return {
+                "state": "computed",
+                "terms": [],
+                "count": 0,
+                "degraded": False,
+                "flags": ["empty_input"],
+                "input_gene_count": 0,
+                "background_gene_count": 1,
+                "background_source": "compound_target_universe",
+                "correction": "fdr",
+                "fdr_threshold": 0.05,
+                "min_term_size": 5,
+                "sources": ["GO:BP"],
+            }
+
         return {
             1: stage1_runner,
             2: stage2_runner,
@@ -260,6 +297,7 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
             5: stage5_runner,
             6: stage6_runner,
             7: stage7_runner,
+            8: stage8_runner,
         }
 
     monkeypatch.setattr(engine, "build_runners", fake_build_runners)

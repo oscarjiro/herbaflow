@@ -146,7 +146,7 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
         }
 
     async def stage7(_run: SimpleNamespace) -> dict:
-        # Hub-ranking fake: one hub -> the run completes.
+        # Hub-ranking fake: one hub -> the run continues to stage 8.
         return {
             "state": "computed",
             "hubs": [
@@ -171,6 +171,23 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
             "flags": ["network_too_small"],
         }
 
+    async def stage8(_run: SimpleNamespace) -> dict:
+        # Enrichment fake: honest null — valid terminal completion.
+        return {
+            "state": "computed",
+            "terms": [],
+            "count": 0,
+            "degraded": False,
+            "flags": ["empty_input"],
+            "input_gene_count": 0,
+            "background_gene_count": 1,
+            "background_source": "compound_target_universe",
+            "correction": "fdr",
+            "fdr_threshold": 0.05,
+            "min_term_size": 5,
+            "sources": ["GO:BP"],
+        }
+
     monkeypatch.setattr(engine.db, "session_scope", fake_scope)
     monkeypatch.setattr(engine, "AnalysisRepository", lambda session: _FakeRepo(run))
     monkeypatch.setattr(
@@ -184,6 +201,7 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
             5: stage5_runner,
             6: stage6,
             7: stage7,
+            8: stage8,
         },
     )
 

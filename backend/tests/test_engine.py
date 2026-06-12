@@ -135,6 +135,23 @@ def _runners(stage1_count, stage2_count, stage3_count=1, stage4_count=1):
             "flags": ["network_too_small"],
         }
 
+    async def stage8_runner(r):
+        # Enrichment fake: honest null (empty overlap) — valid terminal completion.
+        return {
+            "state": "computed",
+            "terms": [],
+            "count": 0,
+            "degraded": False,
+            "flags": ["empty_input"],
+            "input_gene_count": 0,
+            "background_gene_count": 1,
+            "background_source": "compound_target_universe",
+            "correction": "fdr",
+            "fdr_threshold": 0.05,
+            "min_term_size": 5,
+            "sources": ["GO:BP"],
+        }
+
     return {
         1: stage1_runner,
         2: stage2_runner,
@@ -143,6 +160,7 @@ def _runners(stage1_count, stage2_count, stage3_count=1, stage4_count=1):
         5: stage5_runner,
         6: stage6_runner,
         7: stage7_runner,
+        8: stage8_runner,
     }
 
 
@@ -189,6 +207,10 @@ async def test_guided_pauses_for_approval() -> None:
     # Approving stage 6 runs stage 7 (hub ranking), which (guided) pauses at the S7 checkpoint.
     await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "stage_7_awaiting_approval"
+
+    # Approving stage 7 runs stage 8 (enrichment), which (guided) pauses at the S8 checkpoint.
+    await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_8_awaiting_approval"
 
     # Approving the last runnable stage completes the run.
     await engine.advance_run(repo, run.analysis_id, runners)
