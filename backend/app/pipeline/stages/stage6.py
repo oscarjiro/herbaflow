@@ -27,27 +27,16 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.integrations.string_db import StringClient, StringEdge
+from app.pipeline.genes import distinct_gene_symbol_rows
 
 logger = logging.getLogger("herbaflow.pipeline")
-
-
-def _mappable(overlap: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Overlap rows with a distinct non-null gene_symbol (first occurrence wins)."""
-    seen: set[str] = set()
-    out: list[dict[str, Any]] = []
-    for row in overlap:
-        g = row.get("gene_symbol")
-        if g and g not in seen:
-            seen.add(g)
-            out.append(row)
-    return out
 
 
 def select_inputs(
     stage5: dict[str, Any], *, max_proteins: int, allow_top_n_cap: bool
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Distinct mappable overlap ROWS + the cap metadata (assumes n <= cap OR opt-in on)."""
-    rows = _mappable(stage5.get("overlap", []))
+    rows = distinct_gene_symbol_rows(stage5.get("overlap", []))
     capped = {
         "applied": False,
         "max_proteins": max_proteins,
@@ -65,7 +54,7 @@ def compute_blocked_or_inputs(
     stage5: dict[str, Any], *, max_proteins: int, allow_top_n_cap: bool
 ) -> dict[str, Any]:
     """Either the BLOCKED marker (overflow, opt-in off) or the selected-rows envelope."""
-    n = len(_mappable(stage5.get("overlap", [])))
+    n = len(distinct_gene_symbol_rows(stage5.get("overlap", [])))
     if n > max_proteins and not allow_top_n_cap:
         return {
             "blocked": True,

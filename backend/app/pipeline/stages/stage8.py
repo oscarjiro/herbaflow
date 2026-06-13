@@ -32,20 +32,9 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.integrations.gprofiler import EnrichedTerm, GprofilerClient, GprofilerError
+from app.pipeline.genes import distinct_gene_symbols
 
 logger = logging.getLogger("herbaflow.pipeline")
-
-
-def _gene_symbols(rows: list[dict[str, Any]], key: str) -> list[str]:
-    """Distinct non-null gene symbols from a stage result list (preserves first-seen order)."""
-    seen: set[str] = set()
-    out: list[str] = []
-    for r in rows:
-        g = r.get(key)
-        if g and g not in seen:
-            seen.add(g)
-            out.append(g)
-    return out
 
 
 async def compute(
@@ -60,8 +49,8 @@ async def compute(
     no_iea: bool = False,
 ) -> dict[str, Any]:
     """Assemble query + custom background, call g:Profiler, filter, shape. Degrade on outage."""
-    query = _gene_symbols(stage5.get("overlap", []), "gene_symbol")
-    background = _gene_symbols(stage3.get("targets", []), "gene_symbol")
+    query = distinct_gene_symbols(stage5.get("overlap", []))
+    background = distinct_gene_symbols(stage3.get("targets", []))
 
     base = {
         "input_gene_count": len(query),
