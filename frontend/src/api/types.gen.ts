@@ -370,6 +370,131 @@ export type ValidateTargetsResponses = {
 
 export type ValidateTargetsResponse2 = ValidateTargetsResponses[keyof ValidateTargetsResponses];
 
+export type ExportBundleData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export';
+};
+
+export type ExportBundleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportBundleError = ExportBundleErrors[keyof ExportBundleErrors];
+
+export type ExportBundleResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ExportCtpNodesData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export/ctp-nodes.csv';
+};
+
+export type ExportCtpNodesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportCtpNodesError = ExportCtpNodesErrors[keyof ExportCtpNodesErrors];
+
+export type ExportCtpNodesResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ExportCtpEdgesData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export/ctp-edges.csv';
+};
+
+export type ExportCtpEdgesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportCtpEdgesError = ExportCtpEdgesErrors[keyof ExportCtpEdgesErrors];
+
+export type ExportCtpEdgesResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ExportDockingData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export/docking.csv';
+};
+
+export type ExportDockingErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportDockingError = ExportDockingErrors[keyof ExportDockingErrors];
+
+export type ExportDockingResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ExportReportData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export/report';
+};
+
+export type ExportReportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportReportError = ExportReportErrors[keyof ExportReportErrors];
+
+export type ExportReportResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type HealthData = {
     body?: never;
     path?: never;
