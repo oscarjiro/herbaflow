@@ -55,3 +55,24 @@ def test_ctp_edges_ct_into_overlap_and_tp_from_term_intersection():
     assert ct[0][3] in {"chembl_bioactivity", "pubchem_bioassay"}
     assert (tp[0][0], tp[0][1], tp[0][2]) == ("PPARG", "KEGG:04151", "target-pathway")
     assert tp[0][4] != ""
+
+
+def test_docking_table_one_row_per_hub_x_binding_compound_alphafold_is_accession():
+    text = rh.build_docking_table(SR_FULL, COMPOUNDS, TARGETS)
+    rows = _csv_rows(text)
+    header, data = rows[0], rows[1:]
+    assert header == [
+        "hub_gene_symbol", "hub_uniprot_accession", "alphafold_id",
+        "compound_name", "compound_inchikey", "compound_smiles", "prediction_method",
+    ]
+    assert len(data) == 2
+    assert all(r[0] == "PPARG" for r in data)
+    assert all(r[1] == "P37231" and r[2] == "P37231" for r in data)
+    assert {r[3] for r in data} == {"CURCUMIN", "ASPIRIN"}
+
+
+def test_docking_table_empty_hub_set_yields_header_plus_note():
+    sr = {**SR_FULL, "7": {"hubs": []}}
+    text = rh.build_docking_table(sr, COMPOUNDS, TARGETS)
+    assert text.splitlines()[0].startswith("hub_gene_symbol")
+    assert any(line.startswith("#") for line in text.splitlines())
