@@ -76,3 +76,28 @@ def test_docking_table_empty_hub_set_yields_header_plus_note():
     text = rh.build_docking_table(sr, COMPOUNDS, TARGETS)
     assert text.splitlines()[0].startswith("hub_gene_symbol")
     assert any(line.startswith("#") for line in text.splitlines())
+
+
+def test_report_has_inputs_counts_params_and_no_version_checksums():
+    run_meta = {
+        "analysis_id": "a1", "name": "Curcuma x T2DM", "mode": "guided",
+        "created_at": "2026-06-14T00:00:00Z", "completed_at": "2026-06-14T00:02:00Z",
+    }
+    params = {
+        "enrichment": {"significance_threshold": 0.05, "correction": "fdr",
+                       "sources": ["GO:BP", "KEGG"], "no_iea": False, "min_term_size": 5},
+    }
+    labels = {"plant": "Curcuma longa", "disease": "Type 2 Diabetes Mellitus"}
+    md = rh.build_report(run_meta, params, SR_FULL, labels)
+    assert "Curcuma longa" in md and "Type 2 Diabetes Mellitus" in md
+    assert "significance_threshold" in md and "no_iea" in md
+    assert "overlap" in md.lower()
+    assert "no source-version" in md.lower() or "no version" in md.lower()
+
+
+def test_report_partial_run_notes_na_stages_and_na_labels():
+    sr = {"3": SR_FULL["3"], "5": SR_FULL["5"]}
+    md = rh.build_report({"analysis_id": "a2", "name": "m", "mode": "auto",
+                          "created_at": "x", "completed_at": "y"},
+                         {}, sr, {"plant": None, "disease": None})
+    assert "N/A" in md
