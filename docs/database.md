@@ -881,12 +881,13 @@ method constant, not configuration).
 |---|---|---|---|---|
 | `significance_threshold` | number | 0.05 | >0, ≤1 (rec. 0.01–0.1) | Corrected-p significance cutoff for enriched terms (applies to whichever correction method is selected) |
 | `min_term_size` | integer | 5 | ≥1, ≤500 (rec. 3–20) | Minimum gene-set size; filtered client-side from g:Profiler results |
-| `correction` | string | `g_SCS` | enum {`g_SCS`, `fdr`, `bonferroni`} | Multiple-testing correction method; `g_SCS` = g:Profiler's adaptive threshold |
+| `correction` | string | `fdr` | enum {`fdr`, `g_SCS`, `bonferroni`} | Multiple-testing correction method; default BH-FDR; `g_SCS` = g:Profiler's adaptive threshold |
 | `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | enum items {`GO:BP`,`GO:MF`,`GO:CC`,`KEGG`,`REAC`,`WP`} | Annotation vocabularies; Reactome (REAC) + WikiPathways (WP) additionally selectable; multi-select UI deferred to Phase 5 |
 | `no_iea` | boolean | false | — | Exclude GO terms supported only by electronic (IEA) annotation |
 
-`correction` value is `g_SCS` (verbatim g:Profiler API spelling). `sources` IS enum/array-validated
-on Redo — elements outside the closed vocabulary are rejected **422**.
+`correction` defaults to `fdr` (BH-FDR); the `g_SCS` enum value uses g:Profiler's verbatim API
+spelling. `sources` IS enum/array-validated on Redo — elements outside the closed vocabulary are
+rejected **422**.
 
 ---
 
