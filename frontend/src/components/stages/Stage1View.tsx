@@ -51,6 +51,8 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
     );
   }
 
+  const isUserProvided = stageState === "user_provided";
+
   const compounds = stage1.compounds ?? [];
   const current = stage1.count ?? compounds.filter((c) => c.tag !== "user-removed").length;
 
@@ -68,11 +70,11 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
     <div className="stage1-view">
       <h2>
         Step 1 — Compounds ({current})
-        {stageState === "user_provided" && (
+        {isUserProvided && (
           <span className="hf-badge hf-badge--provided"> Provided by you</span>
         )}
       </h2>
-      <StageDataSources stage={1} />
+      <StageDataSources stage={1} userProvided={isUserProvided} />
       <StageEntityContext data={data} side="plant" />
       <EditableEntityList
         entities={entities}

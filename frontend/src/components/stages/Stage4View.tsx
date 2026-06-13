@@ -178,7 +178,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         Step 4 — Disease Targets
         {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
       </h2>
-      <StageDataSources stage={4} />
+      <StageDataSources stage={4} userProvided={isUserProvided} />
       <StageEntityContext data={data} side="disease" />
 
       <div className="stage-summary">

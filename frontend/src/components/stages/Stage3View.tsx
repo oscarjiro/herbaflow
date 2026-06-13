@@ -276,7 +276,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         Step 3 — Target Identification
         {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
       </h2>
-      <StageDataSources stage={3} />
+      <StageDataSources stage={3} userProvided={isUserProvided} />
       <StageEntityContext data={data} side="plant" />
 
       {/* Summary cards */}

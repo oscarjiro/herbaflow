@@ -20,3 +20,23 @@ it("renders nothing for an unknown stage", () => {
   const { container } = render(<StageDataSources stage={9} />);
   expect(container).toBeEmptyDOMElement();
 });
+
+it("shows only PubChem for a user-provided Stage 1 (manual compounds)", () => {
+  render(<StageDataSources stage={1} userProvided />);
+  expect(screen.getByText(/PubChem/)).toBeInTheDocument();
+  expect(screen.queryByText(/KNApSAcK/)).not.toBeInTheDocument();
+});
+
+it("shows only UniProt for a user-provided Stage 3 / Stage 4", () => {
+  const { rerender } = render(<StageDataSources stage={3} userProvided />);
+  expect(screen.getByText(/UniProt/)).toBeInTheDocument();
+  expect(screen.queryByText(/ChEMBL/)).not.toBeInTheDocument();
+  rerender(<StageDataSources stage={4} userProvided />);
+  expect(screen.getByText(/UniProt/)).toBeInTheDocument();
+  expect(screen.queryByText(/Open Targets/)).not.toBeInTheDocument();
+});
+
+it("shows the computed sources when not user-provided", () => {
+  render(<StageDataSources stage={3} />);
+  expect(screen.getByText(/ChEMBL/)).toBeInTheDocument();
+});

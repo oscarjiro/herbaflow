@@ -12,8 +12,16 @@ const STAGE_SOURCES: Record<number, string[]> = {
   8: ["g:Profiler (GO + KEGG enrichment)"],
 };
 
-export function StageDataSources({ stage }: { stage: number }) {
-  const sources = STAGE_SOURCES[stage];
+// When an entity stage is user-provided, only the manual-resolution source actually ran — the
+// computed-mode external sources (KNApSAcK / ChEMBL / PubChem BioAssay / Open Targets) did NOT.
+const USER_PROVIDED_SOURCES: Record<number, string[]> = {
+  1: ["PubChem (manual compound resolution)"],
+  3: ["UniProt (manual target resolution)"],
+  4: ["UniProt (manual target resolution)"],
+};
+
+export function StageDataSources({ stage, userProvided = false }: { stage: number; userProvided?: boolean }) {
+  const sources = (userProvided && USER_PROVIDED_SOURCES[stage]) ? USER_PROVIDED_SOURCES[stage] : STAGE_SOURCES[stage];
   if (!sources) return null;
   return (
     <div className="stage-data-sources hf-muted" aria-label="Data sources">
