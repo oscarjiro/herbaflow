@@ -158,3 +158,47 @@ async def test_targets_carry_gene_symbol_and_accession():
     assert t["gene_symbol"] == "EGFR"
     assert t["uniprot_accession"] == "P00533"
     assert t["canonical_name"] == "EGFR"  # gene or acc, unchanged semantics
+
+
+def _edge(method="chembl_bioactivity", pchembl=6.0, mp=5.0, mc=7):
+    return {
+        "target_id": "t1",
+        "prediction_method": method,
+        "pchembl_value": pchembl,
+        "min_pchembl": mp,
+        "min_assay_confidence": mc,
+        "gene_symbol": "TP53",
+        "uniprot_accession": "P04637",
+        "source_url": "u",
+    }
+
+
+def test_reuse_when_confidence_matches_and_pchembl_not_looser():
+    cached = [_edge(pchembl=6.0, mp=5.0, mc=7)]
+    out = stage3._reuse_edges(cached, min_pchembl=5.0, min_confidence=7)
+    assert out is not None and len(out) == 1
+
+
+def test_reuse_refilters_pchembl_when_run_is_stricter():
+    cached = [_edge(pchembl=5.5, mp=5.0, mc=7), _edge(pchembl=6.5, mp=5.0, mc=7)]
+    out = stage3._reuse_edges(cached, min_pchembl=6.0, min_confidence=7)
+    assert out is not None and [e["pchembl_value"] for e in out] == [6.5]
+
+
+def test_refetch_when_run_pchembl_looser_than_discovery():
+    cached = [_edge(pchembl=6.0, mp=5.0, mc=7)]
+    assert stage3._reuse_edges(cached, min_pchembl=3.0, min_confidence=7) is None
+
+
+def test_refetch_when_confidence_differs():
+    cached = [_edge(mc=7)]
+    assert stage3._reuse_edges(cached, min_pchembl=5.0, min_confidence=9) is None
+
+
+def test_refetch_when_no_cached_edges():
+    assert stage3._reuse_edges([], min_pchembl=5.0, min_confidence=7) is None
+
+
+def test_refetch_when_legacy_null_params():
+    cached = [_edge(mp=None, mc=None)]
+    assert stage3._reuse_edges(cached, min_pchembl=5.0, min_confidence=7) is None

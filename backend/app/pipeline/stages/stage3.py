@@ -35,7 +35,6 @@ from app.integrations.uniprot import UniProtClient
 from app.repositories.compound import CompoundRepository
 from app.repositories.compound_target import CompoundTargetRepository
 from app.repositories.target import TargetRepository
-from app.services import canonical
 from app.services.input_validation import resolve_target_accession
 
 logger = logging.getLogger("herbaflow.pipeline")
@@ -132,6 +131,35 @@ async def compute(
     }
 
 
+def _reuse_edges(
+    cached: list[dict[str, Any]], *, min_pchembl: float, min_confidence: int
+) -> list[dict[str, Any]] | None:
+    """Decide whether a compound's cached edges can serve this run, and re-filter if so.
+
+    Returns the reusable edge list, or ``None`` meaning "refetch". Reuse is sound only when the
+    cached set was discovered at the SAME assay confidence (not re-filterable from the edge) and an
+    EQUAL-OR-LOOSER pchembl (so re-filtering ``pchembl_value >= min_pchembl`` cannot miss edges that
+    were never fetched). PubChem edges (no pchembl) are always kept. Legacy null-param edges ->
+    refetch.
+    """
+    if not cached:
+        return None
+    for e in cached:
+        if e.get("min_assay_confidence") != min_confidence:
+            return None
+        dp = e.get("min_pchembl")
+        if dp is None or dp > min_pchembl:
+            return None
+    kept: list[dict[str, Any]] = []
+    for e in cached:
+        if e["prediction_method"] == "chembl_bioactivity":
+            pv = e.get("pchembl_value")
+            if pv is not None and pv < min_pchembl:
+                continue
+        kept.append(e)
+    return kept
+
+
 async def run(
     session: AsyncSession,
     step2_passed: list[dict[str, Any]],
@@ -163,6 +191,61 @@ async def run(
     pubchem_src = await target_repo.source_id_by_name("PubChem BioAssay")
     uniprot_src = await target_repo.source_id_by_name("UniProt")
 
+    min_pchembl = float(params["min_pchembl"])
+    min_confidence = int(params["min_assay_confidence"])
+
+    # Reuse persisted edges per compound when the run's discovery params are compatible (D9):
+    # confidence must match exactly (not re-derivable from the edge) and the cached pchembl floor
+    # must be equal-or-looser (so a tighter run can re-filter from the stored pchembl_value, but a
+    # looser run cannot recover edges that were never fetched). Otherwise the compound is refetched.
+    reused_targets: dict[str, dict[str, Any]] = {}
+    reused_edges: list[dict[str, Any]] = []
+    reused_per_compound: dict[str, dict[str, int]] = {}
+    to_fetch: list[dict[str, Any]] = []
+    for c in compounds:
+        cid = str(c["compound_id"])
+        cached = await edge_repo.edges_for_compound(uuid.UUID(cid))
+        kept = _reuse_edges(cached, min_pchembl=min_pchembl, min_confidence=min_confidence)
+        if kept is None:
+            to_fetch.append(c)
+            continue
+        # Build the SAME shapes compute() emits (one shaping path): one edge per distinct
+        # target_id with ChEMBL > PubChem precedence, and a target row whose canonical_name is
+        # derived gene_symbol -> uniprot_accession -> target_id (matching compute's `gene or acc`).
+        by_target: dict[str, dict[str, Any]] = {}
+        for e in kept:
+            tid = e["target_id"]
+            acc = e.get("uniprot_accession")
+            gene = e.get("gene_symbol")
+            cand = {
+                "compound_id": cid,
+                "target_id": tid,
+                "prediction_method": e["prediction_method"],
+                "pchembl_value": e.get("pchembl_value"),
+                "score": e.get("score"),
+                "source_url": e.get("source_url"),
+                "uniprot_accession": acc,
+            }
+            prev = by_target.get(tid)
+            if prev is None or (
+                e["prediction_method"] == "chembl_bioactivity"
+                and prev["prediction_method"] != "chembl_bioactivity"
+            ):
+                by_target[tid] = cand
+            reused_targets.setdefault(
+                tid,
+                {
+                    "target_id": tid,
+                    "canonical_name": gene or acc or tid,
+                    "gene_symbol": gene,
+                    "uniprot_accession": acc,
+                },
+            )
+        reused_edges.extend(by_target.values())
+        reused_per_compound[cid] = {"coverage": len(by_target)}
+
+    logger.info("stage 3: reuse %d compound(s), fetch %d", len(reused_per_compound), len(to_fetch))
+
     async def _go(chembl_c: Any, pubchem_c: Any, uniprot_c: Any) -> dict[str, Any]:
         async def _resolve(accession: str) -> tuple[uuid.UUID, str | None, str] | None:
             # Shared canonical resolver: identity is keyed on the UniProt primary accession,
@@ -177,15 +260,26 @@ async def run(
             return rt.target_id, rt.gene_symbol, rt.canonical_key
 
         return await compute(
-            compounds,
+            to_fetch,
             chembl_c,
             pubchem_c,
             resolve_target=_resolve,
-            min_pchembl=float(params["min_pchembl"]),
-            min_confidence=int(params["min_assay_confidence"]),
+            min_pchembl=min_pchembl,
+            min_confidence=min_confidence,
         )
 
-    if chembl is not None and pubchem is not None and uniprot is not None:
+    if not to_fetch:
+        # Nothing to fetch -> never touch the external clients (injected raise-if-called fakes
+        # must not be invoked when every compound reused its cached edges).
+        result: dict[str, Any] = {
+            "targets": [],
+            "compound_targets": [],
+            "per_compound": {},
+            "coverage_pct": 0.0,
+            "count": 0,
+            "state": "computed",
+        }
+    elif chembl is not None and pubchem is not None and uniprot is not None:
         result = await _go(chembl, pubchem, uniprot)
     else:
         async with httpx.AsyncClient() as client:
@@ -195,27 +289,50 @@ async def run(
                 uniprot or UniProtClient(client),
             )
 
+    # Replace (not upsert) each fetched compound's edges: drop its stale set, write the fresh one
+    # stamped with the discovery params. Replace-on-fetch keeps exactly one discovery-param pair per
+    # compound and removes edges that fell below a now-stricter threshold.
     src_by_method = {"chembl_bioactivity": chembl_src, "pubchem_bioassay": pubchem_src}
+    fresh_by_compound: dict[str, list[dict[str, Any]]] = {
+        str(c["compound_id"]): [] for c in to_fetch
+    }
     for e in result["compound_targets"]:
-        cid = uuid.UUID(e["compound_id"])
-        tid = uuid.UUID(e["target_id"])
-        await edge_repo.upsert_measured(
+        fresh_by_compound[e["compound_id"]].append(
             {
-                "compound_target_id": uuid.UUID(canonical.compound_target_id(str(cid), str(tid))),
-                "compound_id": cid,
-                "target_id": tid,
+                "target_id": e["target_id"],
                 "prediction_method": e["prediction_method"],
-                "score": e.get("score"),
                 "pchembl_value": e.get("pchembl_value"),
+                "score": e.get("score"),
                 "source_id": src_by_method.get(e["prediction_method"]),
                 "source_url": e.get("source_url"),
                 "retrieved_at": now_utc(),
+                "min_pchembl": min_pchembl,
+                "min_assay_confidence": min_confidence,
             }
         )
+    for cid, fresh_rows in fresh_by_compound.items():
+        await edge_repo.replace_for_compound(uuid.UUID(cid), fresh_rows)
+
+    # Merge reused + freshly-fetched into one result over ALL compounds (single shape).
+    merged_targets = {**reused_targets, **{t["target_id"]: t for t in result["targets"]}}
+    merged_edges = reused_edges + result["compound_targets"]
+    merged_per_compound = {**reused_per_compound, **result["per_compound"]}
+    covered = sum(1 for v in merged_per_compound.values() if v["coverage"] > 0)
+    coverage_pct = round(100.0 * covered / len(compounds), 1) if compounds else 0.0
+    final = {
+        "targets": list(merged_targets.values()),
+        "compound_targets": merged_edges,
+        "per_compound": merged_per_compound,
+        "coverage_pct": coverage_pct,
+        "count": len(merged_targets),
+        "state": "computed",
+    }
     logger.info(
-        "stage 3: %d target(s) across %d compound(s), coverage %.1f%%",
-        result["count"],
+        "stage 3: %d target(s) across %d compound(s) (%d reused, %d fetched), coverage %.1f%%",
+        final["count"],
         len(compounds),
-        result["coverage_pct"],
+        len(reused_per_compound),
+        len(to_fetch),
+        coverage_pct,
     )
-    return result
+    return final

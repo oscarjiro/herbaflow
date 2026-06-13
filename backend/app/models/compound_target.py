@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, String
+from sqlalchemy import DateTime, Float, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -24,3 +24,5 @@ class CompoundTarget(Base):
     pchembl_value: Mapped[float | None] = mapped_column(Float)
     source_url: Mapped[str | None] = mapped_column(String)
     retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    min_pchembl: Mapped[float | None] = mapped_column(Float)
+    min_assay_confidence: Mapped[int | None] = mapped_column(Integer)

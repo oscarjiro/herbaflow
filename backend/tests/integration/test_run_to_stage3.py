@@ -166,3 +166,140 @@ def canonical_target_id_for(accession: str) -> str:
 
     key = canonical.target_canonical_key(uniprot=accession)
     return canonical.target_id_from_key(key)
+
+
+@pytest.mark.asyncio
+async def test_replace_for_compound_roundtrips_discovery_params(
+    session, seed_compound, seed_target
+) -> None:
+    """replace_for_compound writes an edge carrying the discovery params; edges_for_compound
+    reads it back joined to the target; a subsequent empty replace clears the set (D9)."""
+    from app.repositories.compound_target import CompoundTargetRepository
+
+    repo = CompoundTargetRepository(session)
+    await repo.replace_for_compound(
+        seed_compound,
+        [
+            {
+                "target_id": str(seed_target),
+                "prediction_method": "chembl_bioactivity",
+                "pchembl_value": 6.5,
+                "score": 6.5,
+                "source_url": "https://example/p",
+                "min_pchembl": 5.0,
+                "min_assay_confidence": 7,
+            }
+        ],
+    )
+    await session.commit()
+
+    edges = await repo.edges_for_compound(seed_compound)
+    assert len(edges) == 1
+    e = edges[0]
+    assert e["target_id"] == str(seed_target)
+    assert e["prediction_method"] == "chembl_bioactivity"
+    assert e["pchembl_value"] == 6.5
+    assert e["min_pchembl"] == 5.0
+    assert e["min_assay_confidence"] == 7
+    assert e["gene_symbol"] == "CTGENE"  # joined from the seeded target
+
+    # Replacing with an empty set drops every existing edge for the compound.
+    await repo.replace_for_compound(seed_compound, [])
+    await session.commit()
+    assert await repo.edges_for_compound(seed_compound) == []
+
+
+class _RaiseChembl:
+    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence):
+        raise AssertionError("ChEMBL must not be called when the compound's edges are reused")
+
+
+class _RaisePubchem:
+    async def active_targets_for_inchikey(self, ik):
+        raise AssertionError("PubChem must not be called when the compound's edges are reused")
+
+
+class _RaiseUniProt:
+    async def resolve(self, acc):
+        raise AssertionError("UniProt must not be called when the compound's edges are reused")
+
+
+@pytest.mark.asyncio
+async def test_stage3_reuses_cached_edges_and_refetches_on_param_change(engine, seeded) -> None:
+    """A compound whose persisted edges match the run's discovery params is reused without any
+    external call; tightening assay confidence forces a refetch (D9)."""
+    from app.pipeline.stages import stage3
+    from app.repositories.compound_target import CompoundTargetRepository
+    from app.services import canonical
+
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    cid = str(seeded["c1"])
+    acc = "P04637"
+    tid = canonical_target_id_for(acc)
+
+    # Seed: a source row, a human target, and a cached edge discovered at (min_pchembl 5.0, conf 7).
+    async with maker() as s:
+        await s.execute(
+            text(
+                "insert into source_systems(source_name, source_type) values "
+                "('ChEMBL', 'api'),('PubChem BioAssay', 'api'),('UniProt', 'api') "
+                "on conflict (source_name) do nothing"
+            )
+        )
+        await s.execute(
+            text("update compounds set inchi_key = 'IKX' where compound_id = :c"),
+            {"c": seeded["c1"]},
+        )
+        await s.execute(
+            text(
+                "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession) "
+                "values (:t, :k, 'TP53', :a)"
+            ),
+            {"t": tid, "k": canonical.target_canonical_key(uniprot=acc), "a": acc},
+        )
+        repo = CompoundTargetRepository(s)
+        await repo.replace_for_compound(
+            seeded["c1"],
+            [
+                {
+                    "target_id": tid,
+                    "prediction_method": "chembl_bioactivity",
+                    "pchembl_value": 6.5,
+                    "score": 6.5,
+                    "source_url": f"https://www.uniprot.org/uniprotkb/{acc}/entry",
+                    "min_pchembl": 5.0,
+                    "min_assay_confidence": 7,
+                }
+            ],
+        )
+        await s.commit()
+
+    step2_passed = [{"compound_id": cid}]
+
+    # Compatible params -> reuse: the raise-if-called fakes must never be invoked.
+    async with maker() as s:
+        result = await stage3.run(
+            s,
+            step2_passed,
+            {"min_pchembl": 5.0, "min_assay_confidence": 7},
+            chembl=_RaiseChembl(),
+            pubchem=_RaisePubchem(),
+            uniprot=_RaiseUniProt(),
+        )
+        await s.commit()
+    assert {t["target_id"] for t in result["targets"]} == {tid}
+    assert result["per_compound"][cid]["coverage"] == 1
+    edge = next(e for e in result["compound_targets"] if e["compound_id"] == cid)
+    assert edge["prediction_method"] == "chembl_bioactivity"
+
+    # Stricter assay confidence (9 != 7) -> refetch: the fakes ARE called now.
+    async with maker() as s:
+        with pytest.raises(AssertionError, match="must not be called"):
+            await stage3.run(
+                s,
+                step2_passed,
+                {"min_pchembl": 5.0, "min_assay_confidence": 9},
+                chembl=_RaiseChembl(),
+                pubchem=_RaisePubchem(),
+                uniprot=_RaiseUniProt(),
+            )
