@@ -101,3 +101,16 @@ def test_report_partial_run_notes_na_stages_and_na_labels():
                           "created_at": "x", "completed_at": "y"},
                          {}, sr, {"plant": None, "disease": None})
     assert "N/A" in md
+
+
+def test_bundle_contains_the_four_named_files():
+    import io
+    import zipfile
+
+    data = rh.build_bundle(
+        ctp_nodes="id,label\n", ctp_edges="source,target\n",
+        docking="hub_gene_symbol\n", report="# r\n",
+    )
+    with zipfile.ZipFile(io.BytesIO(data)) as zf:
+        assert set(zf.namelist()) == {"ctp-nodes.csv", "ctp-edges.csv", "docking.csv", "report.md"}
+        assert zf.read("report.md").decode() == "# r\n"
