@@ -108,7 +108,7 @@ def _hub_genes() -> dict[str, Any]:
 
 def _enrichment() -> dict[str, Any]:
     return {
-        "fdr_threshold": 0.05,
+        "significance_threshold": 0.05,
         "sources": ["GO:BP", "KEGG"],
         "correction": "fdr",
         "min_term_size": 5,
@@ -283,7 +283,7 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
                 "background_gene_count": 1,
                 "background_source": "compound_target_universe",
                 "correction": "fdr",
-                "fdr_threshold": 0.05,
+                "significance_threshold": 0.05,
                 "min_term_size": 5,
                 "sources": ["GO:BP"],
             }

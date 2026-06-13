@@ -146,7 +146,7 @@ def _runners(stage1_count, stage2_count, stage3_count=1, stage4_count=1):
             "background_gene_count": 1,
             "background_source": "compound_target_universe",
             "correction": "fdr",
-            "fdr_threshold": 0.05,
+            "significance_threshold": 0.05,
             "min_term_size": 5,
             "sources": ["GO:BP"],
         }

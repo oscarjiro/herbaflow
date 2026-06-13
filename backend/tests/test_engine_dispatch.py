@@ -148,7 +148,7 @@ def _runners(
             "background_gene_count": 1,
             "background_source": "compound_target_universe",
             "correction": "fdr",
-            "fdr_threshold": 0.05,
+            "significance_threshold": 0.05,
             "min_term_size": 5,
             "sources": ["GO:BP"],
         }

@@ -182,7 +182,7 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
             "background_gene_count": 1,
             "background_source": "compound_target_universe",
             "correction": "fdr",
-            "fdr_threshold": 0.05,
+            "significance_threshold": 0.05,
             "min_term_size": 5,
             "sources": ["GO:BP"],
         }

@@ -20,7 +20,7 @@ honest null, NOT an empty-gate stop — the engine exempts stages 7/8):
   - ``terms``: [{source, term_id, name, p_value, term_size, query_size, intersection_size,
                 intersection}]
   - ``input_gene_count`` / ``background_gene_count`` / ``background_source`` / ``correction`` /
-    ``fdr_threshold`` / ``min_term_size`` / ``sources`` / ``degraded`` / ``flags``
+    ``significance_threshold`` / ``min_term_size`` / ``sources`` / ``degraded`` / ``flags``
 """
 
 from __future__ import annotations
@@ -53,7 +53,7 @@ async def compute(
     stage3: dict[str, Any],
     *,
     client: Any,
-    fdr_threshold: float,
+    significance_threshold: float,
     sources: list[str],
     correction: str,
     min_term_size: int,
@@ -67,7 +67,7 @@ async def compute(
         "background_gene_count": len(background),
         "background_source": "compound_target_universe",
         "correction": correction,
-        "fdr_threshold": fdr_threshold,
+        "significance_threshold": significance_threshold,
         "min_term_size": min_term_size,
         "sources": sources,
         "state": "computed",
@@ -82,7 +82,7 @@ async def compute(
             background=background,
             sources=sources,
             correction=correction,
-            user_threshold=fdr_threshold,
+            user_threshold=significance_threshold,
         )
     except GprofilerError:
         logger.warning("stage 8: g:Profiler degraded — completing with no terms")
@@ -123,7 +123,7 @@ async def run(
             stage5,
             stage3,
             client=client,
-            fdr_threshold=float(params["fdr_threshold"]),
+            significance_threshold=float(params["significance_threshold"]),
             sources=list(params["sources"]),
             correction=str(params["correction"]),
             min_term_size=int(params["min_term_size"]),
@@ -134,7 +134,7 @@ async def run(
                 stage5,
                 stage3,
                 client=GprofilerClient(http),
-                fdr_threshold=float(params["fdr_threshold"]),
+                significance_threshold=float(params["significance_threshold"]),
                 sources=list(params["sources"]),
                 correction=str(params["correction"]),
                 min_term_size=int(params["min_term_size"]),
