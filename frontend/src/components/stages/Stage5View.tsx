@@ -3,7 +3,7 @@
  *
  * Stage 5 has NO parameters and is NOT an entity stage. It is a read-only view:
  *  - Summary cards: overlap count, Jaccard index, p-value, and a significant/not-significant badge
- *  - Overlap table: gene symbol, UniProt accession (linked), disease_association_score; paginated
+ *  - Overlap table: gene symbol, UniProt accession (linked), opentargets_score; paginated
  *  - CSV download of the overlap rows
  *  - StageDataSources footer
  *  - ApprovalBar (self-gates to stage 5 being the current awaiting stage)
@@ -30,7 +30,7 @@ type OverlapRow = {
   target_id: string;
   gene_symbol: string | null;
   uniprot_accession: string | null;
-  disease_association_score: number | null;
+  opentargets_score: number | null;
 };
 
 type HypergeometricResult = {
@@ -62,13 +62,13 @@ type Stage5Result = {
 
 const PAGE_SIZES = [10, 20, 50] as const;
 
-const S5_CSV_HEADER = "gene_symbol,uniprot_accession,disease_association_score,source_url";
+const S5_CSV_HEADER = "gene_symbol,uniprot_accession,opentargets_score,source_url";
 
 function buildS5CsvRows(rows: OverlapRow[]): unknown[][] {
   return rows.map((r) => {
     const acc = r.uniprot_accession;
     const sourceUrl = acc ? `https://www.uniprot.org/uniprotkb/${acc}/entry` : null;
-    return [r.gene_symbol, acc, r.disease_association_score, sourceUrl];
+    return [r.gene_symbol, acc, r.opentargets_score, sourceUrl];
   });
 }
 
@@ -189,7 +189,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
             <tr>
               <th>Gene symbol</th>
               <th>UniProt</th>
-              <th>Disease assoc. score</th>
+              <th>Open Targets score</th>
             </tr>
           </thead>
           <tbody>
@@ -213,7 +213,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
                       "—"
                     )}
                   </td>
-                  <td>{formatSig(row.disease_association_score)}</td>
+                  <td>{formatSig(row.opentargets_score)}</td>
                 </tr>
               );
             })}

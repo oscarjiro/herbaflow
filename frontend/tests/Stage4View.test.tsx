@@ -38,7 +38,7 @@ it("renders disease-targets with score, min_score, CSV link and the Open Targets
             canonical_name: "GENEZ",
             gene_symbol: "GENEZ",
             uniprot_accession: "P55555",
-            score: 0.8,
+            opentargets_score: 0.8,
             association_type: "overall",
             source_url: "https://www.uniprot.org/uniprotkb/P55555/entry",
             tag: "computed",

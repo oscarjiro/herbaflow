@@ -5,7 +5,7 @@
  *  - Summary cards: target count + the applied min_score (min_score hidden for user_provided)
  *  - Disease-targets table (one row per target): gene symbol, UniProt accession (linked), Open
  *    Targets score (display-rounded), edit tag badge, in-table delete; pagination (10/20/50/all);
- *    CSV keyed on gene_symbol + uniprot_accession + score + source_url (NEVER a UUID; the
+ *    CSV keyed on gene_symbol + uniprot_accession + opentargets_score + source_url (NEVER a UUID; the
  *    near-constant association_type is kept on the data type but no longer surfaced or exported)
  *  - User-removed rows are hidden from the table AND the CSV (data still persists)
  *  - Target remove via the in-table delete column; add via a standalone EntityAddControl +
@@ -20,8 +20,8 @@
  *  - "user_provided"  → manual disease-targets (no score emphasis)
  *  - otherwise (computed) → full view
  * Stage 4 emits ONE enriched `targets` list — each row carries gene_symbol / uniprot_accession /
- * score / association_type / source_url (no separate `disease_targets` view list; B-DUP-2/L-11).
- * A manually-added target has no disease edge, so its score column renders "—" (symmetric with
+ * opentargets_score / association_type / source_url (no separate `disease_targets` view list; B-DUP-2/L-11).
+ * A manually-added target has no disease edge, so its opentargets_score column renders "—" (symmetric with
  * Stage 3 user-added targets).
  */
 
@@ -51,13 +51,13 @@ import { TargetValidateBox } from "../TargetValidateBox";
 type TargetTag = "computed" | "user-added" | "user-removed" | string;
 
 // One enriched edit-layer targets list — each row carries the Open Targets association fields
-// (no separate disease_targets view list; B-DUP-2/L-11). A user-added target has no score.
+// (no separate disease_targets view list; B-DUP-2/L-11). A user-added target has no opentargets_score.
 type TargetEntry = {
   target_id: string;
   canonical_name: string | null;
   gene_symbol?: string | null;
   uniprot_accession?: string | null;
-  score?: number | null;
+  opentargets_score?: number | null;
   association_type?: string | null;
   source_url?: string | null;
   tag: TargetTag;
@@ -74,7 +74,7 @@ type Row = {
   target_id: string;
   gene_symbol: string;
   uniprot_accession: string | null;
-  score: number | null;
+  opentargets_score: number | null;
   source_url: string | null;
   tag: TargetTag;
 };
@@ -88,18 +88,18 @@ function buildRows(stage4: Stage4Result): Row[] {
       target_id: t.target_id,
       gene_symbol: t.canonical_name ?? t.gene_symbol ?? t.target_id,
       uniprot_accession: t.uniprot_accession ?? null,
-      score: t.score ?? null,
+      opentargets_score: t.opentargets_score ?? null,
       source_url: t.source_url ?? null,
       tag: t.tag,
     }));
 }
 
-// CSV keyed on gene symbol + UniProt accession + score + source_url (NEVER a UUID, and the
-// near-constant association_type is no longer surfaced). Values stay RAW (no display rounding).
-const S4_CSV_HEADER = "gene_symbol,uniprot_accession,score,source_url";
+// CSV keyed on gene symbol + UniProt accession + opentargets_score + source_url (NEVER a UUID, and
+// the near-constant association_type is no longer surfaced). Values stay RAW (no display rounding).
+const S4_CSV_HEADER = "gene_symbol,uniprot_accession,opentargets_score,source_url";
 
 function buildS4CsvRows(rows: Row[]): unknown[][] {
-  return rows.map((r) => [r.gene_symbol, r.uniprot_accession, r.score, r.source_url]);
+  return rows.map((r) => [r.gene_symbol, r.uniprot_accession, r.opentargets_score, r.source_url]);
 }
 
 function tagBadge(tag: TargetTag): React.ReactElement | null {
@@ -260,7 +260,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
                     "—"
                   )}
                 </td>
-                <td>{formatSig(row.score)}</td>
+                <td>{formatSig(row.opentargets_score)}</td>
                 <td>{tagBadge(row.tag)}</td>
                 <td>
                   <button

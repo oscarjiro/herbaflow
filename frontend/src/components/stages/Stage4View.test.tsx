@@ -31,11 +31,16 @@ describe("Stage4View — single editable table", () => {
             {
               target_id: "t1",
               canonical_name: "PPARG",
-              score: 0.123456789,
+              opentargets_score: 0.123456789,
               association_type: "open_targets_overall",
               tag: "computed",
             },
-            { target_id: "t2", canonical_name: "TP53", score: 0.5, tag: "user-removed" },
+            {
+              target_id: "t2",
+              canonical_name: "TP53",
+              opentargets_score: 0.5,
+              tag: "user-removed",
+            },
           ],
           count: 1,
           min_score_applied: 0.3,
