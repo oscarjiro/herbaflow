@@ -20,8 +20,17 @@ const USER_PROVIDED_SOURCES: Record<number, string[]> = {
   4: ["UniProt (manual target resolution)"],
 };
 
-export function StageDataSources({ stage, userProvided = false }: { stage: number; userProvided?: boolean }) {
-  const sources = (userProvided && USER_PROVIDED_SOURCES[stage]) ? USER_PROVIDED_SOURCES[stage] : STAGE_SOURCES[stage];
+export function StageDataSources({
+  stage,
+  userProvided = false,
+}: {
+  stage: number;
+  userProvided?: boolean;
+}) {
+  const sources =
+    userProvided && USER_PROVIDED_SOURCES[stage]
+      ? USER_PROVIDED_SOURCES[stage]
+      : STAGE_SOURCES[stage];
   if (!sources) return null;
   return (
     <div className="stage-data-sources hf-muted" aria-label="Data sources">
