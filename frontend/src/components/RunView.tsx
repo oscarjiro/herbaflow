@@ -13,6 +13,7 @@ import { Stage6View } from "./stages/Stage6View";
 import { Stage7View } from "./stages/Stage7View";
 import { Stage8View } from "./stages/Stage8View";
 import { StaleNotice } from "./stages/StaleNotice";
+import { DownloadResults } from "./DownloadResults";
 
 /** Returns true when the run is settled (not actively executing a stage). */
 function isSettled(status: string | null | undefined): boolean {
@@ -45,6 +46,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
     <section>
       <h1>Run {analysisId}</h1>
       <p>Status: {data.status}</p>
+      <DownloadResults status={data.status} analysisId={analysisId} />
       <p className="run-header__subjects">
         Plant: {plantDisplay} · Disease: {diseaseDisplay}
       </p>
