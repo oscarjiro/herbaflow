@@ -11,10 +11,11 @@ def test_hub_genes_defaults_match_lock():
 
 def test_enrichment_defaults_match_lock():
     assert contracts.enrichment_defaults() == {
-        "fdr_threshold": 0.05,
+        "significance_threshold": 0.05,
         "sources": ["GO:BP", "GO:MF", "GO:CC", "KEGG"],
         "correction": "fdr",
         "min_term_size": 5,
+        "no_iea": False,
     }
 
 

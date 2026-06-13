@@ -146,14 +146,16 @@
         "enrichment": {
           "type": "object",
           "properties": {
-            "fdr_threshold": {
-              "description": "Corrected-p significance cutoff for enriched terms.",
+            "significance_threshold": {
+              "description": "Corrected-p significance cutoff for enriched terms (applies to whichever correction method is selected).",
               "type": "number", "default": 0.05,
               "exclusiveMinimum": 0, "maximum": 1, "recommended_min": 0.01, "recommended_max": 0.10
             },
             "sources": {
-              "description": "Annotation vocabularies to query (GO branches + KEGG; Reactome/WikiPathways selectable).",
-              "type": "array", "items": {"type": "string"}, "minItems": 1,
+              "description": "Annotation vocabularies to query. GO branches + KEGG are the default; Reactome (REAC) and WikiPathways (WP) are additionally selectable.",
+              "type": "array",
+              "items": {"type": "string", "enum": ["GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC", "WP"]},
+              "minItems": 1,
               "default": ["GO:BP", "GO:MF", "GO:CC", "KEGG"]
             },
             "correction": {
@@ -164,6 +166,10 @@
               "description": "Drop terms smaller than this (avoids tiny, unstable annotations).",
               "type": "integer", "default": 5,
               "minimum": 1, "recommended_min": 3, "recommended_max": 10
+            },
+            "no_iea": {
+              "description": "Exclude GO terms supported only by electronic (IEA) annotation, keeping curated evidence.",
+              "type": "boolean", "default": false
             }
           }
         }

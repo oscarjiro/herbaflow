@@ -262,13 +262,15 @@ export const HUB_GENES_BOOLEAN_PARAMS = ["use_hub_bottleneck"] as const;
 // ---------------------------------------------------------------------------
 // Enrichment (Stage 8) parameter metadata — derived from the contract.
 //
-// `sources` (array) is intentionally NOT modelled here: it stays at its frozen
-// default this chunk; a multi-select control is deferred to Phase 5 FE polish.
+// `no_iea` (boolean) is exposed to the panel. `sources` (array) stays at its
+// frozen default; a multi-select control is deferred to Phase 5 FE polish.
 // ---------------------------------------------------------------------------
 
 const enrichmentProps = contract.$defs.pipeline_parameters.properties.enrichment.properties;
 
-function enrichmentEntry(key: "fdr_threshold" | "min_term_size" | "correction"): AdmeParamMeta {
+function enrichmentEntry(
+  key: "significance_threshold" | "min_term_size" | "correction" | "no_iea",
+): AdmeParamMeta {
   const p = enrichmentProps[key] as Record<string, unknown>;
   const minExclusive = "exclusiveMinimum" in p && !("minimum" in p);
   const min =
@@ -294,10 +296,12 @@ function enrichmentEntry(key: "fdr_threshold" | "min_term_size" | "correction"):
 }
 
 export const ENRICHMENT_PARAMS = {
-  fdr_threshold: enrichmentEntry("fdr_threshold"),
+  significance_threshold: enrichmentEntry("significance_threshold"),
   min_term_size: enrichmentEntry("min_term_size"),
   correction: enrichmentEntry("correction"),
+  no_iea: enrichmentEntry("no_iea"),
 } satisfies Record<string, AdmeParamMeta>;
 
-export const ENRICHMENT_NUMERIC_PARAMS = ["fdr_threshold", "min_term_size"] as const;
+export const ENRICHMENT_NUMERIC_PARAMS = ["significance_threshold", "min_term_size"] as const;
+export const ENRICHMENT_BOOLEAN_PARAMS = ["no_iea"] as const;
 export const ENRICHMENT_SELECT_PARAMS = ["correction"] as const;

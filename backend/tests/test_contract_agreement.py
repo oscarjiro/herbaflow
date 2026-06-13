@@ -116,13 +116,18 @@ def test_disease_input_modes_match_contract() -> None:
 def test_enrichment_defaults_match_contract():
     d = contracts.enrichment_defaults()
     assert d == {
-        "fdr_threshold": 0.05,
+        "significance_threshold": 0.05,
         "sources": ["GO:BP", "GO:MF", "GO:CC", "KEGG"],
         "correction": "fdr",
         "min_term_size": 5,
+        "no_iea": False,
     }
     meta = contracts.enrichment_param_meta()
-    assert meta["fdr_threshold"]["default"] == 0.05
+    assert meta["significance_threshold"]["default"] == 0.05
     assert meta["correction"]["enum"] == ["fdr", "g_SCS", "bonferroni"]
     assert meta["min_term_size"]["min"] == 1
     assert meta["sources"]["default"] == ["GO:BP", "GO:MF", "GO:CC", "KEGG"]
+    assert meta["no_iea"]["default"] is False
+    # The allowed-values enum is nested inside sources.items (array schema) — read via raw bounds.
+    sources_spec = contracts.pipeline_param_bounds("enrichment")["sources"]
+    assert sources_spec["items"]["enum"] == ["GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC", "WP"]
