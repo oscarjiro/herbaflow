@@ -51,7 +51,9 @@ class _FakeGprofiler:
         self._fail = fail
         self.seen = {}
 
-    async def profile(self, *, query, background, sources, correction, user_threshold):
+    async def profile(
+        self, *, query, background, sources, correction, user_threshold, no_iea=False
+    ):
         if self._fail:
             raise GprofilerError("down")
         self.seen = {
@@ -60,6 +62,7 @@ class _FakeGprofiler:
             "sources": sources,
             "correction": correction,
             "user_threshold": user_threshold,
+            "no_iea": no_iea,
         }
         return list(self._terms)
 
@@ -120,3 +123,28 @@ async def test_compute_degrades_on_outage_without_raising():
     assert "source_degraded" in out["flags"]
     assert out["terms"] == [] and out["count"] == 0
     assert out["state"] == "computed"  # still a valid terminal result
+
+
+@pytest.mark.asyncio
+async def test_stage8_passes_no_iea_to_client():
+    captured = {}
+
+    class FakeClient:
+        async def profile(self, **kwargs):
+            captured.update(kwargs)
+            return []
+
+    stage5 = {"overlap": [{"gene_symbol": "TP53"}]}
+    stage3 = {"targets": [{"gene_symbol": "TP53"}, {"gene_symbol": "EGFR"}]}
+    result = await stage8.compute(
+        stage5,
+        stage3,
+        client=FakeClient(),
+        significance_threshold=0.05,
+        sources=["GO:BP"],
+        correction="fdr",
+        min_term_size=5,
+        no_iea=True,
+    )
+    assert captured["no_iea"] is True
+    assert result["no_iea"] is True

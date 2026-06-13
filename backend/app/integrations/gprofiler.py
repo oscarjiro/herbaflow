@@ -4,9 +4,10 @@ Written to the verified g:Profiler REST contract (biit.cs.ut.ee/gprofiler/page/a
 POST /api/gost/profile/; JSON body organism=hsapiens, query=[genes], sources=[ids],
 user_threshold=<corrected-p cutoff>, significance_threshold_method in {g_SCS,fdr,bonferroni},
 domain_scope='custom' + background=[genes] (the custom statistical background), no_evidences=false
-(so each term carries its per-query-gene ``intersections`` evidence). Response rows under
-``result`` carry name/native/source/p_value(corrected)/term_size/query_size/intersection_size/
-significant/intersections.
+(so each term carries its per-query-gene ``intersections`` evidence), no_iea=<bool> (excludes
+electronic-only GO annotations — IEA evidence codes — when true; default false keeps them in).
+Response rows under ``result`` carry name/native/source/p_value(corrected)/term_size/query_size/
+intersection_size/significant/intersections.
 
 Live-confirmed 2026-06-12: ``intersections`` is a list aligned to the submitted query order; each
 element is itself a list of evidence codes (non-empty = gene annotated to the term, empty = not).
@@ -62,6 +63,7 @@ class GprofilerClient:
         sources: list[str],
         correction: str,
         user_threshold: float,
+        no_iea: bool = False,
     ) -> list[EnrichedTerm]:
         """Run g:GOSt over ``query`` against the custom ``background``. Empty query -> []."""
         genes = [g for g in query if g]
@@ -77,6 +79,7 @@ class GprofilerClient:
             "domain_scope": "custom",
             "background": bg,
             "no_evidences": False,
+            "no_iea": no_iea,
         }
 
         async def _call() -> httpx.Response:

@@ -57,6 +57,7 @@ async def compute(
     sources: list[str],
     correction: str,
     min_term_size: int,
+    no_iea: bool = False,
 ) -> dict[str, Any]:
     """Assemble query + custom background, call g:Profiler, filter, shape. Degrade on outage."""
     query = _gene_symbols(stage5.get("overlap", []), "gene_symbol")
@@ -70,6 +71,7 @@ async def compute(
         "significance_threshold": significance_threshold,
         "min_term_size": min_term_size,
         "sources": sources,
+        "no_iea": no_iea,
         "state": "computed",
     }
 
@@ -83,6 +85,7 @@ async def compute(
             sources=sources,
             correction=correction,
             user_threshold=significance_threshold,
+            no_iea=no_iea,
         )
     except GprofilerError:
         logger.warning("stage 8: g:Profiler degraded — completing with no terms")
@@ -127,6 +130,7 @@ async def run(
             sources=list(params["sources"]),
             correction=str(params["correction"]),
             min_term_size=int(params["min_term_size"]),
+            no_iea=bool(params.get("no_iea", False)),
         )
     else:
         async with httpx.AsyncClient() as http:
@@ -138,6 +142,7 @@ async def run(
                 sources=list(params["sources"]),
                 correction=str(params["correction"]),
                 min_term_size=int(params["min_term_size"]),
+                no_iea=bool(params.get("no_iea", False)),
             )
     logger.info(
         "stage 8: %d term(s) for %d query / %d background genes (degraded=%s)",
