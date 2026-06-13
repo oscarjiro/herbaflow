@@ -77,7 +77,9 @@ class _FakeGprofiler:
         self._terms = terms or []
         self._fail = fail
 
-    async def profile(self, *, query, background, sources, correction, user_threshold):
+    async def profile(
+        self, *, query, background, sources, correction, user_threshold, no_iea=False
+    ):
         if self._fail:
             raise GprofilerError("service down")
         return list(self._terms)

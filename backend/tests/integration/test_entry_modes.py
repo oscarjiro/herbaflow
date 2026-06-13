@@ -80,7 +80,9 @@ class _FakeGprofiler:
     def __init__(self, terms=None):
         self._terms = terms or []
 
-    async def profile(self, *, query, background, sources, correction, user_threshold):
+    async def profile(
+        self, *, query, background, sources, correction, user_threshold, no_iea=False
+    ):
         return list(self._terms)
 
 

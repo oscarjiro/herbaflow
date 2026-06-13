@@ -73,7 +73,9 @@ class _FakeString:
 class _FakeGprofiler:
     """Minimal g:Profiler stub — returns empty terms (valid honest-null completion)."""
 
-    async def profile(self, *, query, background, sources, correction, user_threshold):
+    async def profile(
+        self, *, query, background, sources, correction, user_threshold, no_iea=False
+    ):
         return []
 
 
