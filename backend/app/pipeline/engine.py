@@ -321,6 +321,14 @@ def _validate_overrides(group: str, overrides: dict[str, Any]) -> None:
                 raise ValidationProblem(
                     detail=f"{name} must have at least {spec['minItems']} item(s)."
                 )
+            item_enum = (spec.get("items") or {}).get("enum")
+            if item_enum is not None:
+                bad = [v for v in value if v not in item_enum]
+                if bad:
+                    raise ValidationProblem(
+                        detail=f"{name} has invalid value(s): {', '.join(map(str, bad))}. "
+                        f"Allowed: {', '.join(map(str, item_enum))}."
+                    )
             continue
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValidationProblem(detail=f"{name} must be a number.")

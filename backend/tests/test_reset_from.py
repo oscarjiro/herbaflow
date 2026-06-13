@@ -705,6 +705,16 @@ def test_validate_overrides_rejects_non_string_array_items() -> None:
         engine._validate_overrides("enrichment", {"sources": [1, 2]})
 
 
+def test_sources_override_accepts_reac_wp() -> None:
+    # REAC + WP are in the contract item enum -> valid override
+    engine._validate_overrides("enrichment", {"sources": ["GO:BP", "REAC", "WP"]})
+
+
+def test_sources_override_rejects_unknown_value() -> None:
+    with pytest.raises(ValidationProblem):
+        engine._validate_overrides("enrichment", {"sources": ["NOT_A_SOURCE"]})
+
+
 # ---------------------------------------------------------------------------
 # Terminal-leaf empty-gate exemption: ADJUST-4
 # Stage 8 with count==0 (honest null) must COMPLETE, not park/fail.
