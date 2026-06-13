@@ -333,6 +333,10 @@ Pair-grain junction. Answers: which targets are linked to which compounds?
 | `pchembl_value` | double precision | YES | −log₁₀(IC50 in molar) from ChEMBL; ≥ 5.0 means IC50 ≤ 10µM; null for non-ChEMBL sources |
 | `source_url` | text | YES | Per-row deep link; authoritative |
 | `retrieved_at` | timestamptz | YES | |
+| `min_pchembl` | double precision | YES | Stage-3 discovery threshold that produced this edge (D9 reuse key); null = legacy/unknown |
+| `min_assay_confidence` | integer | YES | Stage-3 ChEMBL assay-confidence floor at discovery (D9 reuse key — not re-derivable from the edge); null = legacy/unknown |
+
+**Reuse (D9):** Stage 3 reuses a compound's persisted edges instead of re-calling ChEMBL/PubChem/UniProt when the run's discovery params are compatible. It **replaces** (deletes then re-inserts) a compound's edge set on fetch, so all of a compound's edges share one `(min_pchembl, min_assay_confidence)` pair; it reuses cached edges only when `min_assay_confidence` matches exactly and `min_pchembl` is equal-or-looser than the run's (then re-filters `pchembl_value >= min_pchembl`; PubChem edges, which have no pchembl, are always kept). Null discovery params → refetch. Limitations: a compound resolving to **zero** targets carries no edges → it re-resolves every run; a DB error mid-replace could leave a partial set (narrow, self-heals on the next refetch).
 
 **Constraints:**
 - PK: `compound_targets_pkey` on `compound_target_id`
@@ -425,7 +429,7 @@ Pair-grain junction. Answers: which targets are implicated in which diseases?
 | `target_id` | uuid FK → `targets` | NO | |
 | `source_id` | uuid FK → `source_systems` | YES | Attribute; not part of pair grain |
 | `association_type` | text | YES | Source-owned vocab; e.g. `open_targets_overall`; no DB CHECK |
-| `score` | double precision | YES | Open Targets overall association score |
+| `opentargets_score` | double precision | YES | Open Targets overall association score |
 | `source_url` | text | YES | Per-row deep link; authoritative |
 | `retrieved_at` | timestamptz | YES | |
 
@@ -441,13 +445,13 @@ Pair-grain junction. Answers: which targets are implicated in which diseases?
 - `disease_targets_pair_key` (unique, btree, `(disease_id, target_id)`)
 - `disease_targets_disease_id_idx` (btree, `disease_id`)
 - `disease_targets_target_id_idx` (btree, `target_id`)
-- `idx_disease_targets_score` (btree, `score`)
+- `idx_disease_targets_score` (btree, `opentargets_score`)
 
 **Pipeline read (Step 4):** Stage 4 (disease→target collection) is a **filtered read** of this
 table — not a live Open Targets call. Open Targets is an ETL-time source (analogous to KNApSAcK on
-the compound side); Step 4 reads the seeded snapshot. The read filters `score >= min_score`
+the compound side); Step 4 reads the seeded snapshot. The read filters `opentargets_score >= min_score`
 (contract default 0.3), joins `targets` for the gene symbol / accession / protein name, and orders
-by `score` descending (`idx_disease_targets_score`). It reads the run's `analysis_runs.disease_id`;
+by `opentargets_score` descending (`idx_disease_targets_score`). It reads the run's `analysis_runs.disease_id`;
 targets are human-only (9606), fixed. An empty result (filter too strict or thin ETL coverage) is
 weak-but-valid — Step 4 proceeds to its approval checkpoint with a count-0 honesty note, it does
 **not** hard-stop. The per-row link surfaced in the UI is the joined Target's UniProt deep link
@@ -584,7 +588,7 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
 
 Stage 4 emits a single edit-layer `targets` list; each row carries the Open Targets association
 fields. There is **no separate `disease_targets` view list** — the edit layer preserves every field
-on each row, so the disease association `score` survives a post-create Stage-4 edit and reaches
+on each row, so the disease association `opentargets_score` survives a post-create Stage-4 edit and reaches
 Stage 5 / is ranked by Stage 6 (B-DUP-2/L-11; previously a second view list was folded separately
 and never saw edits):
 
@@ -599,7 +603,7 @@ and never saw edits):
       "canonical_name": "<str>",           // gene_symbol -> uniprot_accession -> target_id
       "gene_symbol": "<str|null>",
       "uniprot_accession": "<str|null>",
-      "score": <float|null>,               // Open Targets association score (DT4-9)
+      "opentargets_score": <float|null>,     // Open Targets association score (DT4-9)
       "association_type": "<str|null>",
       "source_url": "<str|null>",          // UniProt deep link
       "tag": "computed | user-added | user-removed"
@@ -609,8 +613,8 @@ and never saw edits):
 ```
 
 Stage 5 intersects this list (excluding `user-removed` rows on both sides) against the Stage-3 set
-on `target_id`, carrying the `score` into the overlap. A **manually-added** disease target has no
-disease edge: its `score`/`association_type` are absent (consumers use `.get`) — there is **no
+on `target_id`, carrying the `opentargets_score` into the overlap. A **manually-added** disease target has no
+disease edge: its `opentargets_score`/`association_type` are absent (consumers use `.get`) — there is **no
 association score** for a manual target (no `disease_targets` table edge; the link is run-scoped
 only — see the `disease_targets` table note above) — but it still carries the UniProt `source_url`
 so the FE table and CSV match a computed row.
@@ -661,7 +665,7 @@ so the FE table and CSV match a computed row.
 {
   "overlap": [
     {"target_id": "<uuid>", "gene_symbol": "<str|null>",
-     "uniprot_accession": "<str|null>", "disease_association_score": <float|null>},
+     "uniprot_accession": "<str|null>", "opentargets_score": <float|null>},
     ...
   ],
   "count": <int>,                  // overlap size; 0 = terminal hard-stop (BOTH modes)
@@ -698,7 +702,7 @@ Computed result:
   "node_count": <int>, "edge_count": <int>,
   "min_confidence": <float>, "network_type": "functional|physical",
   "unmapped": [],
-  "capped": {"applied": <bool>, "max_proteins": <int>, "ranked_by": "disease_association_score"},
+  "capped": {"applied": <bool>, "max_proteins": <int>, "ranked_by": "opentargets_score"},
   "count": <int>,                  // = node_count
   "flags": [ /* "sparse_or_empty_network" */ ]
 }
@@ -713,7 +717,7 @@ Blocked result (overlap exceeds `max_proteins` with `allow_top_n_cap` off):
 The blocked marker drives the AD-6 mechanism: a **guided** run parks at the Stage-6 checkpoint (the
 UI prompts to enable the top-N cap or narrow the inputs); an **auto** run hard-fails. Recover by
 Redoing Stage 6 with `allow_top_n_cap: true` (proceeds on the top-N overlap targets ranked by
-disease-association score) or by raising `max_proteins`. Community/module detection is deferred
+`opentargets_score`) or by raising `max_proteins`. Community/module detection is deferred
 (future work) — Stage 6 delivers the PPI-source network only.
 
 **Hub-genes stage** (Stage 7 — `parameters.hub_genes`).
@@ -750,7 +754,7 @@ test. Tiny/sparse networks are flagged (reported, never a hard-stop).
   ],
   "input_gene_count": <int>, "background_gene_count": <int>,
   "background_source": "compound_target_universe",
-  "correction": "fdr", "fdr_threshold": 0.05, "min_term_size": 5,
+  "correction": "fdr", "significance_threshold": 0.05, "min_term_size": 5, "no_iea": false,
   "sources": ["GO:BP","GO:MF","GO:CC","KEGG"],
   "degraded": false, "count": <int>,  // count = enriched terms (0 = honest null, still complete)
   "flags": [ /* "empty_input" | "no_enriched_terms" | "source_degraded" */ ]
@@ -875,10 +879,11 @@ method constant, not configuration).
 
 | Parameter | Type | Default | Bounds / enum | Notes |
 |---|---|---|---|---|
-| `fdr_threshold` | number | 0.05 | >0, ≤1 (rec. 0.01–0.1) | FDR significance threshold applied after correction |
+| `significance_threshold` | number | 0.05 | >0, ≤1 (rec. 0.01–0.1) | Corrected-p significance cutoff for enriched terms (applies to whichever correction method is selected) |
 | `min_term_size` | integer | 5 | ≥1, ≤500 (rec. 3–20) | Minimum gene-set size; filtered client-side from g:Profiler results |
 | `correction` | string | `g_SCS` | enum {`g_SCS`, `fdr`, `bonferroni`} | Multiple-testing correction method; `g_SCS` = g:Profiler's adaptive threshold |
-| `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | subset of the four | Ontology sources queried; multi-select deferred to Phase 5 |
+| `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | enum items {`GO:BP`,`GO:MF`,`GO:CC`,`KEGG`,`REAC`,`WP`} | Annotation vocabularies; Reactome (REAC) + WikiPathways (WP) additionally selectable; multi-select UI deferred to Phase 5 |
+| `no_iea` | boolean | false | — | Exclude GO terms supported only by electronic (IEA) annotation |
 
 `correction` value is `g_SCS` (verbatim g:Profiler API spelling). `sources` IS enum/array-validated
 on Redo — elements outside the closed vocabulary are rejected **422**.

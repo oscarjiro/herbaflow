@@ -338,7 +338,7 @@ table offers **add / remove** controls via the shared manual target-add path (`T
 → `POST /targets/validate` → `POST /analyses/{id}/stages/4/edit`). An empty disease-target side is
 surfaced as an honesty note (count 0), not an error.
 
-**CSV export:** Columns are UniProt accession + gene symbol + association score — stable external
+**CSV export:** Columns are UniProt accession + gene symbol + Open Targets score — stable external
 identifiers, never internal DB UUIDs.
 
 **Param panel + Redo:** A collapsible param panel exposes `min_score` (the
@@ -361,12 +361,12 @@ ETL-time source) and lists the `min_score` used for the run.
 **cards** lead: overlap count, the Jaccard index, the hypergeometric p-value, and a clear
 **significant / not-significant badge** (driven by `hypergeometric.significant` and the
 `non_significant_overlap` flag). An **overlap table** lists each shared target by gene symbol +
-UniProt accession (linked to the UniProt entry) with its disease-association score, paginated like
+UniProt accession (linked to the UniProt entry) with its Open Targets score, paginated like
 the other stages. Stage 5 intersects the **run-scoped** Stage-3 (compound→target) and Stage-4
 (disease→target) sets from `stage_results` — including user-added targets — on the canonical
 `target_id`, **not** the global edge tables. A 0-overlap run is a terminal hard-stop.
 
-**CSV export:** gene symbol + UniProt accession + disease-association score + UniProt source URL.
+**CSV export:** gene symbol + UniProt accession + Open Targets score + UniProt source URL.
 
 **No param panel.** The data-sources footer states the fixed method (Jaccard + one-sided
 hypergeometric, N = 20,000, α = 0.05) — method constants, not configuration.
@@ -437,10 +437,10 @@ completed but enrichment unavailable — the run is still `complete`).
 **CSV export:** columns are source + term ID + term name + p-value + term size + intersection
 size + intersection genes (pipe-delimited).
 
-**Param panel + Redo:** the `enrichment` group is exposed via `ParamPanel` — `fdr_threshold`
-(numeric), `min_term_size` (numeric), and `correction` as an **enum select**
-(`g_SCS` / `fdr` / `bonferroni`). The `sources` multi-select is deferred to Phase 5 — the panel
-exposes only the three scalar params. Redo submits `POST /analyses/{id}/reset-from/8`.
+**Param panel + Redo:** the `enrichment` group is exposed via `ParamPanel` — `significance_threshold`
+(numeric), `min_term_size` (numeric), `correction` as an **enum select** (`g_SCS` / `fdr` /
+`bonferroni`), and `no_iea` (boolean). The `sources` multi-select is deferred to Phase 5. Redo
+submits `POST /analyses/{id}/reset-from/8`.
 
 **Pipeline-complete affordance:** when `analysis.status === "complete"` and Stage 8 is the
 active stage, the view surfaces a **"Pipeline complete"** banner (distinct from the per-stage
