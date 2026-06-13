@@ -66,7 +66,17 @@ def build_ctp_nodes(
             )
         )
     for t in terms:
-        rows.append((t["term_id"], t.get("name") or t["term_id"], "pathway", "", "", "", t.get("source") or ""))
+        rows.append(
+            (
+                t["term_id"],
+                t.get("name") or t["term_id"],
+                "pathway",
+                "",
+                "",
+                "",
+                t.get("source") or "",
+            )
+        )
     return _csv(rows)
 
 
@@ -82,13 +92,21 @@ def build_ctp_edges(stage_results: dict[str, Any]) -> str:
     overlap_by_tid = {o["target_id"]: o for o in overlap}
     overlap_node_ids = {_target_node_id(o) for o in overlap}
 
-    rows: list[tuple[Any, ...]] = [("source", "target", "interaction", "prediction_method", "p_value")]
+    rows: list[tuple[Any, ...]] = [
+        ("source", "target", "interaction", "prediction_method", "p_value")
+    ]
     for e in edges:
         tid = e["target_id"]
         if tid not in overlap_by_tid:
             continue
         rows.append(
-            (e["compound_id"], _target_node_id(overlap_by_tid[tid]), "compound-target", e.get("prediction_method") or "", "")
+            (
+                e["compound_id"],
+                _target_node_id(overlap_by_tid[tid]),
+                "compound-target",
+                e.get("prediction_method") or "",
+                "",
+            )
         )
     for t in terms:
         for gene in t.get("intersection", []):
@@ -207,8 +225,12 @@ def build_report(
         "",
         "## Provenance",
         "- Point-in-time only: `source_systems` names + per-stage `source_url`s.",
-        "- **No source-version checksums** (the `source_snapshots` table is not built — a documented "
-        "limitation: you get *when* data was fetched and a link to the record, not *which* external release).",
+        (
+            "- **No source-version checksums**"
+            " (the `source_snapshots` table is not built — a documented"
+            " limitation: you get *when* data was fetched and a link to the"
+            " record, not *which* external release)."
+        ),
         "- Fixed scope: human-only (9606); enrichment background = the compound-target universe.",
     ]
     return "\n".join(lines) + "\n"

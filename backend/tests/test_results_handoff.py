@@ -11,14 +11,48 @@ def _csv_rows(text: str) -> list[list[str]]:
 SR_FULL = {
     "3": {
         "compound_targets": [
-            {"compound_id": "c1", "target_id": "t1", "prediction_method": "chembl_bioactivity", "gene_symbol": "PPARG"},
-            {"compound_id": "c2", "target_id": "t1", "prediction_method": "pubchem_bioassay", "gene_symbol": "PPARG"},
-            {"compound_id": "c1", "target_id": "t9", "prediction_method": "chembl_bioactivity", "gene_symbol": "OFF"},
+            {
+                "compound_id": "c1",
+                "target_id": "t1",
+                "prediction_method": "chembl_bioactivity",
+                "gene_symbol": "PPARG",
+            },
+            {
+                "compound_id": "c2",
+                "target_id": "t1",
+                "prediction_method": "pubchem_bioassay",
+                "gene_symbol": "PPARG",
+            },
+            {
+                "compound_id": "c1",
+                "target_id": "t9",
+                "prediction_method": "chembl_bioactivity",
+                "gene_symbol": "OFF",
+            },
         ]
     },
-    "5": {"overlap": [{"target_id": "t1", "gene_symbol": "PPARG", "uniprot_accession": "P37231", "opentargets_score": 0.8}]},
+    "5": {
+        "overlap": [
+            {
+                "target_id": "t1",
+                "gene_symbol": "PPARG",
+                "uniprot_accession": "P37231",
+                "opentargets_score": 0.8,
+            }
+        ]
+    },
     "7": {"hubs": [{"rank": 1, "target_id": "t1", "gene_symbol": "PPARG"}]},
-    "8": {"terms": [{"source": "KEGG", "term_id": "KEGG:04151", "name": "PI3K-Akt", "p_value": 1.2e-4, "intersection": ["PPARG"]}]},
+    "8": {
+        "terms": [
+            {
+                "source": "KEGG",
+                "term_id": "KEGG:04151",
+                "name": "PI3K-Akt",
+                "p_value": 1.2e-4,
+                "intersection": ["PPARG"],
+            }
+        ]
+    },
 }
 COMPOUNDS = {
     "c1": {"name": "CURCUMIN", "inchi_key": "VFLDPWHFBUODDF-FCXRPNKRSA-N", "smiles": "CC=O"},
@@ -62,8 +96,13 @@ def test_docking_table_one_row_per_hub_x_binding_compound_alphafold_is_accession
     rows = _csv_rows(text)
     header, data = rows[0], rows[1:]
     assert header == [
-        "hub_gene_symbol", "hub_uniprot_accession", "alphafold_id",
-        "compound_name", "compound_inchikey", "compound_smiles", "prediction_method",
+        "hub_gene_symbol",
+        "hub_uniprot_accession",
+        "alphafold_id",
+        "compound_name",
+        "compound_inchikey",
+        "compound_smiles",
+        "prediction_method",
     ]
     assert len(data) == 2
     assert all(r[0] == "PPARG" for r in data)
@@ -80,12 +119,20 @@ def test_docking_table_empty_hub_set_yields_header_plus_note():
 
 def test_report_has_inputs_counts_params_and_no_version_checksums():
     run_meta = {
-        "analysis_id": "a1", "name": "Curcuma x T2DM", "mode": "guided",
-        "created_at": "2026-06-14T00:00:00Z", "completed_at": "2026-06-14T00:02:00Z",
+        "analysis_id": "a1",
+        "name": "Curcuma x T2DM",
+        "mode": "guided",
+        "created_at": "2026-06-14T00:00:00Z",
+        "completed_at": "2026-06-14T00:02:00Z",
     }
     params = {
-        "enrichment": {"significance_threshold": 0.05, "correction": "fdr",
-                       "sources": ["GO:BP", "KEGG"], "no_iea": False, "min_term_size": 5},
+        "enrichment": {
+            "significance_threshold": 0.05,
+            "correction": "fdr",
+            "sources": ["GO:BP", "KEGG"],
+            "no_iea": False,
+            "min_term_size": 5,
+        },
     }
     labels = {"plant": "Curcuma longa", "disease": "Type 2 Diabetes Mellitus"}
     md = rh.build_report(run_meta, params, SR_FULL, labels)
@@ -97,9 +144,12 @@ def test_report_has_inputs_counts_params_and_no_version_checksums():
 
 def test_report_partial_run_notes_na_stages_and_na_labels():
     sr = {"3": SR_FULL["3"], "5": SR_FULL["5"]}
-    md = rh.build_report({"analysis_id": "a2", "name": "m", "mode": "auto",
-                          "created_at": "x", "completed_at": "y"},
-                         {}, sr, {"plant": None, "disease": None})
+    md = rh.build_report(
+        {"analysis_id": "a2", "name": "m", "mode": "auto", "created_at": "x", "completed_at": "y"},
+        {},
+        sr,
+        {"plant": None, "disease": None},
+    )
     assert "N/A" in md
 
 
@@ -108,8 +158,10 @@ def test_bundle_contains_the_four_named_files():
     import zipfile
 
     data = rh.build_bundle(
-        ctp_nodes="id,label\n", ctp_edges="source,target\n",
-        docking="hub_gene_symbol\n", report="# r\n",
+        ctp_nodes="id,label\n",
+        ctp_edges="source,target\n",
+        docking="hub_gene_symbol\n",
+        report="# r\n",
     )
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
         assert set(zf.namelist()) == {"ctp-nodes.csv", "ctp-edges.csv", "docking.csv", "report.md"}
