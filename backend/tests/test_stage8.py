@@ -36,7 +36,7 @@ def _s5(genes):
                 "target_id": f"t{i}",
                 "gene_symbol": g,
                 "uniprot_accession": f"P{i}",
-                "disease_association_score": 0.5,
+                "opentargets_score": 0.5,
             }
             for i, g in enumerate(genes)
         ],

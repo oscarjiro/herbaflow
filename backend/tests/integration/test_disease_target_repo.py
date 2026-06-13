@@ -38,7 +38,8 @@ async def _seed(session, disease_id, rows):
         await session.execute(
             text(
                 "insert into disease_targets"
-                "(disease_target_id, disease_id, target_id, association_type, score, source_url) "
+                "(disease_target_id, disease_id, target_id,"
+                " association_type, opentargets_score, source_url) "
                 "values (:i, :d, :t, 'overall', :s, :u)"
             ),
             {
@@ -70,7 +71,7 @@ async def test_filtered_read_orders_by_score_and_joins_targets(session):
     rows = await repo.targets_for_disease(did, 0.3)
     # 0.2 filtered out, NULL filtered out, ordered desc.
     assert [r["gene_symbol"] for r in rows] == ["GENEA", "GENEB"]
-    assert rows[0]["score"] == 0.9
+    assert rows[0]["opentargets_score"] == 0.9
     assert rows[0]["uniprot_accession"] == "P11111"
     assert rows[0]["association_type"] == "overall"
     assert rows[0]["source_url"].endswith("/P11111/entry")  # the TARGET (UniProt) link

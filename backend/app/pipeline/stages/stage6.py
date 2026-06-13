@@ -10,7 +10,7 @@ Cap (PPI-2): n = |distinct mappable gene symbols|.
   - n > max_proteins and allow_top_n_cap=false -> BLOCKED ({"blocked": true, ...}); the engine
     drives the run status via the AD-6 mechanism (guided park / auto fail). Recover by Redoing
     S6 with allow_top_n_cap=true.
-  - allow_top_n_cap=true -> rank overlap by disease_association_score desc, take top max_proteins.
+  - allow_top_n_cap=true -> rank overlap by opentargets_score desc, take top max_proteins.
 
 Result fragment (``stage_results["6"]``):
   - computed: {state, nodes, edges, node_count, edge_count, min_confidence, network_type,
@@ -51,10 +51,10 @@ def select_inputs(
     capped = {
         "applied": False,
         "max_proteins": max_proteins,
-        "ranked_by": "disease_association_score",
+        "ranked_by": "opentargets_score",
     }
     if len(rows) > max_proteins and allow_top_n_cap:
-        rows = sorted(rows, key=lambda r: r.get("disease_association_score") or 0.0, reverse=True)[
+        rows = sorted(rows, key=lambda r: r.get("opentargets_score") or 0.0, reverse=True)[
             :max_proteins
         ]
         capped["applied"] = True

@@ -6,7 +6,7 @@ ROWS = [
         "gene_symbol": "GENEA",
         "uniprot_accession": "P11111",
         "source_url": "https://u/P11111/entry",
-        "score": 0.9,
+        "opentargets_score": 0.9,
         "association_type": "overall",
     },
     {
@@ -14,7 +14,7 @@ ROWS = [
         "gene_symbol": None,
         "uniprot_accession": "P22222",
         "source_url": None,
-        "score": 0.4,
+        "opentargets_score": 0.4,
         "association_type": "overall",
     },
 ]
@@ -38,7 +38,7 @@ def test_compute_emits_one_enriched_targets_list():
     # The association fields ride on the single targets list now.
     assert first["gene_symbol"] == "GENEA"
     assert first["uniprot_accession"] == "P11111"
-    assert first["score"] == 0.9
+    assert first["opentargets_score"] == 0.9
     assert first["association_type"] == "overall"
     assert first["source_url"] == "https://u/P11111/entry"
     # Missing gene symbol falls back to the accession for display.

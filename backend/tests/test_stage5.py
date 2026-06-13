@@ -17,10 +17,11 @@ def _s3(targets):
 
 
 def _s4(rows):
-    # Stage-4 result shape: ONE enriched edit-layer targets list (target_id + score + gene info).
+    # Stage-4 result shape: ONE enriched edit-layer targets list
+    # (target_id + opentargets_score + gene info).
     return {
         "targets": [
-            {"target_id": t, "gene_symbol": g, "uniprot_accession": u, "score": s}
+            {"target_id": t, "gene_symbol": g, "uniprot_accession": u, "opentargets_score": s}
             for (t, g, u, s) in rows
         ],
         "count": len(rows),
@@ -41,9 +42,9 @@ def test_overlap_intersection_and_jaccard():
     assert out["disease_target_count"] == 3
     assert out["union_count"] == 4  # t1,t2,t3,t9
     assert math.isclose(out["jaccard"], 2 / 4)
-    # disease_association_score is carried from S4
+    # opentargets_score is carried from S4
     by_id = {o["target_id"]: o for o in out["overlap"]}
-    assert by_id["t2"]["disease_association_score"] == 0.7
+    assert by_id["t2"]["opentargets_score"] == 0.7
     assert by_id["t2"]["gene_symbol"] == "TNF"
 
 
@@ -102,7 +103,7 @@ async def test_run_reads_prior_stage_results():
                     "target_id": "t1",
                     "gene_symbol": "AKT1",
                     "uniprot_accession": "P31749",
-                    "score": 0.8,
+                    "opentargets_score": 0.8,
                 }
             ],
             "count": 1,
@@ -111,7 +112,7 @@ async def test_run_reads_prior_stage_results():
     }
     out = await stage5.run(None, run)
     assert out["count"] == 1
-    assert out["overlap"][0]["disease_association_score"] == 0.8
+    assert out["overlap"][0]["opentargets_score"] == 0.8
 
 
 def test_reads_edit_layer_targets_and_carries_score():
@@ -122,7 +123,7 @@ def test_reads_edit_layer_targets_and_carries_score():
     ids = {o["target_id"] for o in out["overlap"]}
     assert ids == {"t1"}
     by_id = {o["target_id"]: o for o in out["overlap"]}
-    assert by_id["t1"]["disease_association_score"] == 0.7
+    assert by_id["t1"]["opentargets_score"] == 0.7
 
 
 def test_user_removed_targets_excluded_on_both_sides():
@@ -150,21 +151,21 @@ def test_user_removed_targets_excluded_on_both_sides():
                 "target_id": "t1",
                 "gene_symbol": "A",
                 "uniprot_accession": "P1",
-                "score": 0.7,
+                "opentargets_score": 0.7,
                 "tag": "computed",
             },
             {
                 "target_id": "t2",
                 "gene_symbol": "B",
                 "uniprot_accession": "P2",
-                "score": 0.6,
+                "opentargets_score": 0.6,
                 "tag": "user-removed",
             },
             {
                 "target_id": "t3",
                 "gene_symbol": "C",
                 "uniprot_accession": "P3",
-                "score": 0.5,
+                "opentargets_score": 0.5,
                 "tag": "computed",
             },
         ],

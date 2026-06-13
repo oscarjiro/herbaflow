@@ -25,6 +25,7 @@ _APPLY = [
     "20260608000004_baseline_junctions.sql",
     "20260608000005_baseline_operational.sql",
     "20260609000001_compound_validation_status.sql",
+    "20260613000001_rename_disease_target_score.sql",
 ]
 
 

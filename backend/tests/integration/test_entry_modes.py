@@ -148,7 +148,7 @@ async def _insert_disease_target(s, *, disease_id, target_id, score):
     await s.execute(
         text(
             "insert into disease_targets(disease_target_id, disease_id, target_id, "
-            "association_type, score) values (:i,:d,:t,'overall',:s)"
+            "association_type, opentargets_score) values (:i,:d,:t,'overall',:s)"
         ),
         {"i": uuid.uuid4(), "d": disease_id, "t": target_id, "s": score},
     )

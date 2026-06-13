@@ -9,7 +9,7 @@ Software Lock §2.2; a configurable background is §5.5 future work).
 
 Result fragment (``stage_results["5"]``); ``count`` is the overlap size (0 -> terminal hard-stop,
 OV-4, handled by the engine):
-  - ``overlap``: [{target_id, gene_symbol, uniprot_accession, disease_association_score}]
+  - ``overlap``: [{target_id, gene_symbol, uniprot_accession, opentargets_score}]
   - ``count``/``compound_target_count``/``disease_target_count``/``union_count``/``jaccard``
   - ``hypergeometric``: {background_n, K, n, k, p_value, alpha, significant}
   - ``unmapped_count`` (overlap targets with no gene_symbol -> can't go to STRING/g:Profiler)
@@ -60,7 +60,7 @@ def compute(stage3: dict[str, Any], stage4: dict[str, Any]) -> dict[str, Any]:
                 "gene_symbol": s4_row.get("gene_symbol") or s3_row.get("gene_symbol"),
                 "uniprot_accession": s4_row.get("uniprot_accession")
                 or s3_row.get("uniprot_accession"),
-                "disease_association_score": s4_row.get("score"),
+                "opentargets_score": s4_row.get("opentargets_score"),
             }
         )
 

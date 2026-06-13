@@ -30,7 +30,7 @@ async def _seed(session, did, rows):
         await session.execute(
             text(
                 "insert into disease_targets"
-                "(disease_target_id, disease_id, target_id, association_type, score) "
+                "(disease_target_id, disease_id, target_id, association_type, opentargets_score) "
                 "values (:i,:d,:t,'overall',:s)"
             ),
             {"i": uuid.uuid4(), "d": did, "t": tid, "s": score},

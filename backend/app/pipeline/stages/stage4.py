@@ -9,9 +9,10 @@ persist per analysis; §6.2-E).
 Output (uniform entity-stage shape; the engine's edit-layer fold tags ``targets`` and overwrites
 ``count``/``state``):
   - ``targets``: ONE enriched entity list ``[{target_id, canonical_name, gene_symbol,
-    uniprot_accession, score, association_type, source_url}]`` (DT4-9). The edit layer preserves
-    every field on each row, so the disease association ``score`` survives the fold and is read by
-    Stage 5 / ranked by Stage 6 — there is no separate ``disease_targets`` view list (B-DUP-2/L-11).
+    uniprot_accession, opentargets_score, association_type, source_url}]`` (DT4-9). The edit layer
+    preserves every field on each row, so the Open Targets association ``opentargets_score``
+    survives the fold and is read by Stage 5 / ranked by Stage 6 — there is no separate
+    ``disease_targets`` view list (B-DUP-2/L-11).
   - ``count`` / ``state`` / ``min_score_applied``.
 
 An empty side (filter too strict / thin coverage) parks the run at the Step-4 checkpoint with a
@@ -46,7 +47,7 @@ def compute(rows: list[dict[str, Any]], min_score: float) -> dict[str, Any]:
             "canonical_name": r["gene_symbol"] or r["uniprot_accession"] or r["target_id"],
             "gene_symbol": r["gene_symbol"],
             "uniprot_accession": r["uniprot_accession"],
-            "score": r["score"],
+            "opentargets_score": r["opentargets_score"],
             "association_type": r["association_type"],
             "source_url": r["source_url"],
         }

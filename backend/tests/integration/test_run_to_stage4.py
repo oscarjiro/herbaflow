@@ -87,7 +87,7 @@ async def test_guided_run_reaches_stage4_with_scores(client, engine, monkeypatch
         await s.execute(
             text(
                 "insert into disease_targets(disease_target_id, disease_id, target_id, "
-                "association_type, score) values (:i,:d,:t,'overall',0.8)"
+                "association_type, opentargets_score) values (:i,:d,:t,'overall',0.8)"
             ),
             {"i": uuid.uuid4(), "d": ids["disease"], "t": seeded_target_id},
         )
@@ -102,7 +102,7 @@ async def test_guided_run_reaches_stage4_with_scores(client, engine, monkeypatch
         await s.execute(
             text(
                 "insert into disease_targets(disease_target_id, disease_id, target_id, "
-                "association_type, score) values (:i,:d,:t,'overall',0.2)"
+                "association_type, opentargets_score) values (:i,:d,:t,'overall',0.2)"
             ),
             {"i": uuid.uuid4(), "d": ids["disease"], "t": low_t},
         )
@@ -136,7 +136,7 @@ async def test_guided_run_reaches_stage4_with_scores(client, engine, monkeypatch
     # One enriched edit-layer targets list (no separate disease_targets view — B-DUP-2/L-11).
     assert "disease_targets" not in s4
     assert [t["gene_symbol"] for t in s4["targets"]] == ["GENEZ"]
-    assert s4["targets"][0]["score"] == 0.8
+    assert s4["targets"][0]["opentargets_score"] == 0.8
 
     # --- min_score Redo re-filters (reset-from/4 re-runs S4 only) ---
     reset = await c.post(

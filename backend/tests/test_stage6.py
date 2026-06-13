@@ -9,7 +9,7 @@ def _overlap(n, base_score=0.5):
                 "target_id": f"t{i}",
                 "gene_symbol": f"G{i}",
                 "uniprot_accession": f"P{i}",
-                "disease_association_score": base_score + i * 0.001,
+                "opentargets_score": base_score + i * 0.001,
             }
             for i in range(n)
         ],
@@ -33,9 +33,9 @@ def test_over_cap_without_optin_is_blocked():
 
 def test_over_cap_with_optin_takes_top_n_by_score():
     rows, capped = stage6.select_inputs(_overlap(3), max_proteins=2, allow_top_n_cap=True)
-    # highest disease_association_score first: G2 (0.502), G1 (0.501)
+    # highest opentargets_score first: G2 (0.502), G1 (0.501)
     assert {r["gene_symbol"] for r in rows} == {"G2", "G1"}
-    assert capped["applied"] is True and capped["ranked_by"] == "disease_association_score"
+    assert capped["applied"] is True and capped["ranked_by"] == "opentargets_score"
 
 
 def test_build_result_parses_edges_and_nodes():
@@ -50,7 +50,7 @@ def test_build_result_parses_edges_and_nodes():
         edges,
         min_confidence=0.4,
         network_type="functional",
-        capped={"applied": False, "max_proteins": 2000, "ranked_by": "disease_association_score"},
+        capped={"applied": False, "max_proteins": 2000, "ranked_by": "opentargets_score"},
     )
     assert out["state"] == "computed"
     assert out["edge_count"] == 1 and out["node_count"] == 3
@@ -66,13 +66,13 @@ def test_nodes_carry_target_id_and_accession():
                 "target_id": "t1",
                 "gene_symbol": "AKT1",
                 "uniprot_accession": "P31749",
-                "disease_association_score": 0.7,
+                "opentargets_score": 0.7,
             },
             {
                 "target_id": "t2",
                 "gene_symbol": "TNF",
                 "uniprot_accession": "P01375",
-                "disease_association_score": 0.6,
+                "opentargets_score": 0.6,
             },
         ]
     }

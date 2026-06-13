@@ -130,7 +130,7 @@ async def _seed(s, ids):
         await s.execute(
             text(
                 "insert into disease_targets(disease_target_id, disease_id, target_id, "
-                "association_type, score) values (:i,:d,:t,'overall',:s)"
+                "association_type, opentargets_score) values (:i,:d,:t,'overall',:s)"
             ),
             {"i": uuid.uuid4(), "d": ids["disease"], "t": tids[gene], "s": score},
         )
