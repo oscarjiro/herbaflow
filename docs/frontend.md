@@ -444,10 +444,30 @@ submits `POST /analyses/{id}/reset-from/8`.
 
 **Pipeline-complete affordance:** when `analysis.status === "complete"` and Stage 8 is the
 active stage, the view surfaces a **"Pipeline complete"** banner (distinct from the per-stage
-approval bar) with the run's `completed_at` timestamp and a link to the (future) export page.
+approval bar) with the run's `completed_at` timestamp. The downloadable results bundle is offered
+by the run-level **Download results** action (see below).
 
 **Footer:** attributes enrichment to g:Profiler (Raudvere 2019), lists the sources queried and
 the custom background (Stage-3 compound-target universe).
+
+---
+
+## Results download (completed runs)
+
+`RunView` shows a single **Download results** action (`DownloadResults`) once the run is
+`complete`. It is a plain anchor with `download` pointing at `GET /analyses/{id}/export` — a
+**binary** zip, so it deliberately bypasses the typed query SDK and is fetched directly by the
+browser (the backend sets `Content-Disposition`). The export URL is built by
+`src/lib/exportUrl.ts` (`exportBundleUrl`) from the single `API_BASE_URL` exported by
+`src/lib/api.ts` — the same base the generated client uses (overridable via `VITE_API_BASE_URL`).
+
+The zip contains four files: `ctp-nodes.csv` + `ctp-edges.csv` (the compound–target–pathway
+network for Cytoscape), `docking.csv` (hub × binding-compound pairs, AlphaFold id = the hub's
+UniProt accession), and `report.md` (run identity, inputs, frozen params, per-stage counts,
+labels-only provenance). The backend also exposes each artifact at its own endpoint
+(`…/export/ctp-nodes.csv`, `…/export/ctp-edges.csv`, `…/export/docking.csv`, `…/export/report`).
+This run-level bundle is **distinct** from the per-stage CSV downloads each `StageNView` already
+offers (those export a single stage's table; this exports the assembled cross-stage handoff).
 
 ---
 

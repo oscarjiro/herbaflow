@@ -1048,6 +1048,27 @@ The pipeline traversal order is: `plants → compounds → targets → diseases 
 
 ---
 
+## Results-handoff export (read-only)
+
+The capstone export (`GET /analyses/{id}/export`, available only when `analysis_runs.status =
+'complete'`) is a **pure read** of the run's persisted `analysis_runs.stage_results` jsonb plus a
+batch lookup of the referenced `compounds` / `targets` rows. It adds **no table, no column, and no
+migration** — it reshapes data that already exists. The bundle (one zip) holds four artifacts:
+
+| Artifact | Built from | Shape |
+|---|---|---|
+| `ctp-nodes.csv` | `stage_results` 5 (overlap), 7 (hubs), 3 (compound_targets), 8 (terms) | `id, label, type, inchikey, uniprot_accession, is_hub, source` — one row per compound / target / pathway node. Compounds are those with a Stage-3 edge **into** a Stage-5 overlap target; targets are the overlap set (`is_hub` flags the Stage-7 hubs); pathways are the Stage-8 enriched terms. |
+| `ctp-edges.csv` | `stage_results` 3 + 5 + 8 | `source, target, interaction, prediction_method, p_value` — compound→target edges into the overlap (carry the winning `prediction_method`) and target→pathway edges from each term's `intersection` gene list (carry the corrected `p_value`). |
+| `docking.csv` | `stage_results` 7 + 3 + `targets` | `hub_gene_symbol, hub_uniprot_accession, alphafold_id, compound_name, compound_inchikey, compound_smiles, prediction_method` — one row per Stage-7 hub × binding compound. **`alphafold_id` = the hub's UniProt accession** (AlphaFold is keyed by accession; PDB structure ids are deferred). |
+| `report.md` | `run_meta` + `parameters` + `stage_results` + labels | Markdown: run identity, opaque input labels (plant/disease; may be `N/A`), frozen parameters, per-stage counts, and a provenance note. |
+
+**Provenance is labels-only.** The report records *when* data was fetched (`source_systems` names
++ per-stage `source_url`s) and links to each record, but **not** which external release produced it
+— there is no `source_snapshots` table (see "Tables that do not exist") and the export does not add
+one. This is a documented limitation, stated in `report.md` itself.
+
+---
+
 ## ETL build order
 
 ```
