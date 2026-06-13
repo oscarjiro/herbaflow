@@ -2,7 +2,7 @@ const STAGE_SOURCES: Record<number, string[]> = {
   1: ["KNApSAcK (plant–compound)", "PubChem (manual enrichment)"],
   2: ["RDKit (descriptors, PAINS)"],
   3: ["ChEMBL", "PubChem BioAssay", "UniProt"],
-  4: ["Open Targets (ETL-seeded disease–target associations)"],
+  4: ["Open Targets (ETL-seeded disease–target associations)", "UniProt"],
   5: [
     "Overlap of Stage 3 ∩ Stage 4 (target_id)",
     "Jaccard + one-sided hypergeometric (N=20,000, α=0.05)",
