@@ -207,3 +207,45 @@ describe("Stage3View — removed-row hiding + delete column", () => {
     expect(screen.getByRole("button", { name: "Remove PPARG" })).toBeInTheDocument();
   });
 });
+
+describe("Stage3View — UniProt accession from the target row (B2)", () => {
+  /** manual_targets: the row carries gene_symbol/uniprot_accession/source_url; no edges exist. */
+  function makeUserProvidedData(): AnalysisRead {
+    return {
+      analysis_id: "a1",
+      status: "failed",
+      current_stage: 5,
+      parameters: {},
+      stage_results: {
+        "3": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "AKT1",
+              gene_symbol: "AKT1",
+              uniprot_accession: "P31749",
+              source_url: "https://www.uniprot.org/uniprotkb/P31749/entry",
+              tag: "user-added",
+            },
+          ],
+          compound_targets: [],
+          per_compound: {},
+          coverage_pct: 0,
+          count: 1,
+          state: "user_provided",
+        },
+        "2": { passed: [] },
+      },
+      stage_state: { "3": "user_provided" },
+      plants: [],
+      diseases: [],
+      compounds: [],
+    } as unknown as AnalysisRead;
+  }
+
+  it("renders the linked accession from the row when there are no compound edges", () => {
+    wrap(<Stage3View data={makeUserProvidedData()} />);
+    const link = screen.getByRole("link", { name: "P31749" });
+    expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P31749/entry");
+  });
+});

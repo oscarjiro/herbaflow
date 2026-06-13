@@ -50,6 +50,10 @@ type TargetEntry = {
   target_id: string;
   canonical_name: string | null;
   tag: TargetTag;
+  // Carried on the row by the manual/edit prefill (user_provided mode has no edges); a computed
+  // row leaves these undefined and the accession comes from the compound_targets edges instead.
+  uniprot_accession?: string | null;
+  source_url?: string | null;
 };
 
 type CompoundTargetEdge = {
@@ -124,11 +128,14 @@ function buildTargetRows(stage3: Stage3Result, nameById: Map<string, string | nu
       const methods = Array.from(new Set(edges.map((e) => e.prediction_method)));
       const compoundIds = Array.from(new Set(edges.map((e) => e.compound_id)));
       const accEdge = edges.find((e) => e.uniprot_accession);
+      // Prefer the row's own identity (carried by the manual/edit prefill — user_provided mode has
+      // no edges); fall back to the edge for a computed row. Symmetric with Stage 4, which reads
+      // the accession straight off the row.
       return {
         target_id: t.target_id,
         gene_symbol: t.canonical_name ?? t.target_id,
-        uniprot_accession: accEdge?.uniprot_accession ?? null,
-        source_url: accEdge?.source_url ?? null,
+        uniprot_accession: t.uniprot_accession ?? accEdge?.uniprot_accession ?? null,
+        source_url: t.source_url ?? accEdge?.source_url ?? null,
         methods,
         compound_count: compoundIds.length,
         source_compounds: compoundIds.map((cid) => nameById.get(cid) ?? cid),

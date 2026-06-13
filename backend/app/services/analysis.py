@@ -246,23 +246,13 @@ class AnalysisService:
         Stage 5 reads the edit-layer ``targets`` list directly (there is no separate
         ``disease_targets`` view list any more — B-DUP-2/L-11), so the edit layer carries each
         target's full identity. A manual disease-target has NO disease edge → no association score
-        or type (omitted; consumers use ``.get``), but it carries the UniProt ``source_url`` so the
-        FE table + CSV match a computed row. The disease→target relationship is run-scoped only (no
-        canonical edge, no score; Software Lock §6.2-E). ``_target_add_entry`` is shared with Stage
-        3, so the S4-only ``source_url`` is added locally — never to that helper.
+        or type (omitted; consumers use ``.get``), but the shared ``_target_add_entry`` carries the
+        UniProt ``source_url`` so the FE table + CSV match a computed row — identical to the Stage-3
+        prefill (no per-call source_url duplication; B2-sym). The disease→target relationship is
+        run-scoped only (no canonical edge, no score; Software Lock §6.2-E).
         """
         rows = await self.target_repo.get_many(ids)
-        add_entries = [
-            {
-                **self._target_add_entry(t),
-                "source_url": (
-                    f"https://www.uniprot.org/uniprotkb/{t.uniprot_accession}/entry"
-                    if t.uniprot_accession
-                    else None
-                ),
-            }
-            for t in rows
-        ]
+        add_entries = [self._target_add_entry(t) for t in rows]
         edit = edits.normalize_edit(edits.empty_edit(), add_entries, [], id_key="target_id")
         stage_edits["4"] = edit
         stage_results["4"] = {
@@ -275,13 +265,21 @@ class AnalysisService:
         """Edit-layer add entry for a target, carrying its identity fields.
 
         The display name uses the real ``Target`` attributes (there is no ``canonical_name``
-        column): gene_symbol, then protein_name, then the accession.
+        column): gene_symbol, then protein_name, then the accession. Also carries the UniProt
+        ``source_url`` (derived from the accession) so EVERY target row — S3/S4 prefill and the
+        edit-add path, plant or disease side — renders the same UniProt link symmetrically. This
+        is the single home; callers must NOT add ``source_url`` themselves (B2-sym).
         """
         return {
             "target_id": str(t.target_id),
             "canonical_name": t.gene_symbol or t.protein_name or t.uniprot_accession,
             "gene_symbol": t.gene_symbol,
             "uniprot_accession": t.uniprot_accession,
+            "source_url": (
+                f"https://www.uniprot.org/uniprotkb/{t.uniprot_accession}/entry"
+                if t.uniprot_accession
+                else None
+            ),
         }
 
     async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
@@ -382,23 +380,23 @@ class AnalysisService:
                     )
                 ) from e
 
-        # Resolve added entities' names (self-contained edit layer); targets fall back to
-        # gene_symbol when no canonical_name attribute is present. Target rows also carry
-        # gene_symbol and uniprot_accession so the durable edit layer keeps them for
-        # downstream stages (Stage 8 custom background, Stage 3 view).
+        # Resolve added entities (self-contained edit layer). Targets go through the shared
+        # _target_add_entry so an ADDED target carries the SAME identity + UniProt source_url as a
+        # prefilled/computed one (gene_symbol/uniprot_accession kept for the Stage 8 background +
+        # the Stage 3/4 view link — B2-sym); no inline target-entry duplicate. Compounds carry just
+        # id + canonical_name (they attach nothing extra).
         add_entries: list[dict[str, Any]] = []
         if add:
             for obj in await repo.get_many(add):
-                entry: dict[str, Any] = {
-                    id_key: str(getattr(obj, id_key)),
-                    "canonical_name": getattr(obj, "canonical_name", None)
-                    or getattr(obj, "gene_symbol", None),
-                }
-                if getattr(obj, "gene_symbol", None) is not None:
-                    entry["gene_symbol"] = obj.gene_symbol
-                if getattr(obj, "uniprot_accession", None) is not None:
-                    entry["uniprot_accession"] = obj.uniprot_accession
-                add_entries.append(entry)
+                if entity == "target":
+                    add_entries.append(self._target_add_entry(obj))
+                else:
+                    add_entries.append(
+                        {
+                            id_key: str(getattr(obj, id_key)),
+                            "canonical_name": getattr(obj, "canonical_name", None),
+                        }
+                    )
 
         # Fold into the durable edit layer (computed; not yet persisted).
         prior_edit = run.parameters.get("stage_edits", {}).get(skey, edits.empty_edit())

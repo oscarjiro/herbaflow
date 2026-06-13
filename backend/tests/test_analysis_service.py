@@ -82,6 +82,37 @@ def _service(plant_missing=None, disease_exists=True, run=None, compound_existin
     )
 
 
+def test_target_add_entry_carries_uniprot_source_url() -> None:
+    """The shared target identity entry carries a UniProt ``source_url`` derived from the accession.
+
+    Single home for target identity used by the S3 + S4 prefills AND the edit-add path, so every
+    target row (created or added, plant or disease side) renders a UniProt link symmetrically — no
+    per-call source_url duplication (B2-sym).
+    """
+    from types import SimpleNamespace
+
+    t = SimpleNamespace(
+        target_id=uuid.uuid4(),
+        gene_symbol="AKT1",
+        protein_name="RAC-alpha serine/threonine-protein kinase",
+        uniprot_accession="P31749",
+    )
+    entry = AnalysisService._target_add_entry(t)
+    assert entry["uniprot_accession"] == "P31749"
+    assert entry["gene_symbol"] == "AKT1"
+    assert entry["source_url"] == "https://www.uniprot.org/uniprotkb/P31749/entry"
+
+
+def test_target_add_entry_source_url_none_without_accession() -> None:
+    """No accession → no UniProt link (honest null, not a broken URL)."""
+    from types import SimpleNamespace
+
+    t = SimpleNamespace(
+        target_id=uuid.uuid4(), gene_symbol="X", protein_name=None, uniprot_accession=None
+    )
+    assert AnalysisService._target_add_entry(t)["source_url"] is None
+
+
 @pytest.mark.asyncio
 async def test_create_rejects_unknown_plants() -> None:
     bad = uuid.uuid4()
