@@ -1,11 +1,11 @@
 /**
  * Stage8View — Stage 8 functional enrichment (g:Profiler, GO + KEGG). Terminal stage.
  *
- * Param-bearing (`enrichment`: fdr_threshold, min_term_size, correction; `sources` stays frozen —
- * the multi-select control is deferred to Phase 5). Renders summary cards (input/background gene
- * counts + the shown custom background source), the enriched-terms table + CSV, the param panel
- * (Redo via reset-from/8), honest-null + degraded notices, the data-sources footer, and the
- * ApprovalBar (approving completes the run).
+ * Param-bearing (`enrichment`: significance_threshold, min_term_size, correction, no_iea;
+ * `sources` stays frozen — the multi-select control is deferred to Phase 5). Renders summary
+ * cards (input/background gene counts + the shown custom background source), the enriched-terms
+ * table + CSV, the param panel (Redo via reset-from/8), honest-null + degraded notices, the
+ * data-sources footer, and the ApprovalBar (approving completes the run).
  */
 
 import { useMemo, useState } from "react";
@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
 import {
+  ENRICHMENT_BOOLEAN_PARAMS,
   ENRICHMENT_NUMERIC_PARAMS,
   ENRICHMENT_PARAMS,
   ENRICHMENT_SELECT_PARAMS,
@@ -46,7 +47,7 @@ type Stage8Result = {
   background_gene_count: number;
   background_source: string;
   correction: string;
-  fdr_threshold: number;
+  significance_threshold: number;
   min_term_size: number;
   sources: string[];
   degraded: boolean;
@@ -263,7 +264,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           params={enrichParams}
           meta={ENRICHMENT_PARAMS}
           numericKeys={ENRICHMENT_NUMERIC_PARAMS}
-          booleanKeys={[]}
+          booleanKeys={ENRICHMENT_BOOLEAN_PARAMS}
           selectKeys={ENRICHMENT_SELECT_PARAMS}
           title="Enrichment parameters"
           disabled={redo.isPending}

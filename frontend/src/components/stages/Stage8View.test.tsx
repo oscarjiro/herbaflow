@@ -14,10 +14,11 @@ const base = {
   current_stage: 8,
   parameters: {
     enrichment: {
-      fdr_threshold: 0.05,
+      significance_threshold: 0.05,
       sources: ["GO:BP", "KEGG"],
       correction: "fdr",
       min_term_size: 5,
+      no_iea: false,
     },
   },
 } as const;
@@ -46,7 +47,7 @@ describe("Stage8View", () => {
           background_gene_count: 800,
           background_source: "compound_target_universe",
           correction: "fdr",
-          fdr_threshold: 0.05,
+          significance_threshold: 0.05,
           min_term_size: 5,
           sources: ["GO:BP", "KEGG"],
           degraded: false,
@@ -58,6 +59,33 @@ describe("Stage8View", () => {
     render(wrap(<Stage8View data={data} />));
     expect(screen.getByText("Step 8 — Functional Enrichment")).toBeInTheDocument();
     expect(screen.getByText("PI3K-Akt")).toBeInTheDocument();
+  });
+
+  it("renders the enrichment param panel with no_iea control", () => {
+    const data = {
+      ...base,
+      status: "complete",
+      stage_results: {
+        "8": {
+          state: "computed",
+          terms: [],
+          input_gene_count: 3,
+          background_gene_count: 800,
+          background_source: "compound_target_universe",
+          correction: "fdr",
+          significance_threshold: 0.05,
+          min_term_size: 5,
+          sources: ["GO:BP", "KEGG"],
+          degraded: false,
+          count: 0,
+          flags: [],
+        },
+      },
+    } as unknown as AnalysisRead;
+    render(wrap(<Stage8View data={data} />));
+    expect(screen.getByLabelText("significance_threshold")).toBeInTheDocument();
+    expect(screen.getByLabelText("no_iea")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
   });
 
   it("shows the degraded notice", () => {
@@ -72,7 +100,7 @@ describe("Stage8View", () => {
           background_gene_count: 800,
           background_source: "compound_target_universe",
           correction: "fdr",
-          fdr_threshold: 0.05,
+          significance_threshold: 0.05,
           min_term_size: 5,
           sources: ["GO:BP"],
           degraded: true,
