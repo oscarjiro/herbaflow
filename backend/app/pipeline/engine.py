@@ -385,10 +385,12 @@ async def reset_from(
     if stage > (run.current_stage or 0):
         raise ValidationProblem(detail=f"Stage {stage} is beyond the run's progress.")
 
-    # Entry-modes: a user-provided / not-applicable stage is frozen — it can never be the
-    # reset-from target (it has no runner to recompute) and is never cleared by a re-run.
+    # Entry-modes: a user-provided / not-applicable stage is frozen. It can never be a PARAM-Redo
+    # target (it has no runner/params to recompute) — but a SET EDIT (param_overrides is None) may
+    # reset from it: edit_stage already re-derived the frozen stage in place, so the reset only
+    # re-runs its (non-frozen) downstream closure. A frozen stage is never cleared by a re-run.
     frozen = entry_modes.frozen_stages_from_params(run.parameters)
-    if stage in frozen:
+    if stage in frozen and param_overrides is not None:
         raise ValidationProblem(
             detail=f"Stage {stage} was provided by you and cannot be recomputed."
         )

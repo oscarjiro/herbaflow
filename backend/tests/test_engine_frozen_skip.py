@@ -1,8 +1,9 @@
 """Engine frozen-stage skip (entry-modes) — fake repo + recording runners.
 
 Proves the engine SKIPS user-provided / not-applicable stages (the frozen set derived from a
-run's ``input_modes``) on ``execute_run`` and refuses a frozen stage on ``reset_from``, while a
-run with no ``input_modes`` (pre-entry-modes / selection) keeps every stage runnable.
+run's ``input_modes``) on ``execute_run``; allows a frozen stage as a SET-EDIT reset target
+(reruns only its downstream closure) but refuses it as a PARAM-Redo target on ``reset_from``;
+while a run with no ``input_modes`` (pre-entry-modes / selection) keeps every stage runnable.
 """
 
 from __future__ import annotations
@@ -125,8 +126,33 @@ async def test_auto_skips_frozen_prefix_manual_targets() -> None:
 
 
 @pytest.mark.asyncio
-async def test_reset_from_refuses_frozen_stage() -> None:
-    """A frozen (user-provided) stage cannot be a reset-from target — it is not recomputable."""
+async def test_reset_from_set_edit_allows_frozen_stage() -> None:
+    """A SET EDIT (no param overrides) may reset from a frozen (user-provided) stage.
+
+    The frozen stage itself is never recomputed — ``edit_stage`` already re-derived it in place;
+    a set-edit reset only re-runs the (non-frozen) downstream closure. So re-running from a
+    user-provided S3 yields the downstream run-set S5..S8 (the recovery path after editing manual
+    targets), NOT a 422. Regression guard for the dead-recompute bug on user-provided entity stages.
+    """
+    run = _Run(
+        modes={"plant": "manual_targets", "disease": "selection"},
+        mode="guided",
+        stage_results={
+            "3": {"state": "user_provided", "count": 3},
+            "4": {"count": 5, "state": "computed"},
+        },
+    )
+    run.status = "stage_4_awaiting_approval"
+    run.current_stage = 4
+    run_set = await engine.reset_from(
+        _FakeRepo(run), uuid.uuid4(), 3, _recording_runners([]), param_overrides=None, defer=True
+    )
+    assert run_set == frozenset({5, 6, 7, 8})
+
+
+@pytest.mark.asyncio
+async def test_reset_from_param_redo_refuses_frozen_stage() -> None:
+    """A PARAM Redo of a frozen (user-provided) stage stays refused — nothing to recompute."""
     run = _Run(
         modes={"plant": "manual_targets", "disease": "selection"},
         mode="guided",
@@ -139,5 +165,9 @@ async def test_reset_from_refuses_frozen_stage() -> None:
     run.current_stage = 4
     with pytest.raises(ValidationProblem):
         await engine.reset_from(
-            _FakeRepo(run), uuid.uuid4(), 3, _recording_runners([]), param_overrides=None
+            _FakeRepo(run),
+            uuid.uuid4(),
+            3,
+            _recording_runners([]),
+            param_overrides={"min_pchembl": 6},
         )

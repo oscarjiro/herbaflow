@@ -920,7 +920,11 @@ clearing or re-running.
 **stages** the change — it re-derives the edited stage in place, flags the produced downstream stages
 `stale`, and re-runs **nothing**. The subsequent `reset-from` is the sole recompute; it re-runs the
 runnable members of the dependency closure, **exclusive** of the edited stage (editing Step-1
-compounds → the closure re-run starts at Step 2).
+compounds → the closure re-run starts at Step 2). Because the edited stage is never recomputed by a
+set edit (only its downstream closure is), this works for **user-provided (frozen) entity stages**
+too: editing manual compounds / manual targets / manual disease-targets and re-running recomputes
+the overlap onward — the recovery path for a 0-overlap `failed` run. (A **param** Redo of a frozen
+stage stays rejected — a user-provided stage has no parameters to recompute.)
 
 **Closure, not a linear range (F3):** a re-run executes exactly the runnable members of the
 dependency *closure* — never "every later-numbered stage". Because Stage 4 (disease targets) is an
