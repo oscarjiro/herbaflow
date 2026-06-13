@@ -21,7 +21,7 @@ function makeComputedResult() {
     min_confidence: 0.4,
     network_type: "functional",
     unmapped: [],
-    capped: { applied: false, max_proteins: 2000, ranked_by: "disease_association_score" },
+    capped: { applied: false, max_proteins: 2000, ranked_by: "opentargets_score" },
     count: 2,
     flags: [],
   };
