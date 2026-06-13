@@ -41,3 +41,17 @@ def test_ctp_nodes_has_binding_compounds_overlap_targets_and_pathways():
     assert by_type["target"][0][5] == "true"
     assert by_type["pathway"][0][0] == "KEGG:04151"
     assert by_type["pathway"][0][6] == "KEGG"
+
+
+def test_ctp_edges_ct_into_overlap_and_tp_from_term_intersection():
+    text = rh.build_ctp_edges(SR_FULL)
+    rows = _csv_rows(text)
+    header, data = rows[0], rows[1:]
+    assert header == ["source", "target", "interaction", "prediction_method", "p_value"]
+    ct = [r for r in data if r[2] == "compound-target"]
+    tp = [r for r in data if r[2] == "target-pathway"]
+    assert sorted((r[0], r[1]) for r in ct) == [("c1", "PPARG"), ("c2", "PPARG")]
+    assert all(r[1] != "OFF" for r in ct)
+    assert ct[0][3] in {"chembl_bioactivity", "pubchem_bioassay"}
+    assert (tp[0][0], tp[0][1], tp[0][2]) == ("PPARG", "KEGG:04151", "target-pathway")
+    assert tp[0][4] != ""
