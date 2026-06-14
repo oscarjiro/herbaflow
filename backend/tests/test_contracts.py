@@ -100,3 +100,16 @@ def test_adme_params_carry_description_bounds_and_recommendation() -> None:
     assert (meta["max_violations"]["min"], meta["max_violations"]["max"]) == (0, 4)
     assert (meta["np_exception_threshold"]["min"], meta["np_exception_threshold"]["max"]) == (-5, 5)
     assert meta["skip_adme"]["min"] is None and meta["skip_adme"]["max"] is None
+
+
+def test_stage_sources_computed():
+    assert contracts.stage_sources(3) == ["ChEMBL", "PubChem BioAssay", "UniProt"]
+
+
+def test_stage_sources_user_provided_overrides():
+    assert contracts.stage_sources(3, user_provided=True) == ["UniProt (manual target resolution)"]
+
+
+def test_stage_sources_user_provided_falls_back_to_computed():
+    # Stage 5 has no user_provided override -> computed list.
+    assert contracts.stage_sources(5, user_provided=True) == contracts.stage_sources(5)

@@ -219,3 +219,20 @@ def enrichment_param_meta() -> dict[str, Any]:
             "description": spec.get("description"),
         }
     return out
+
+
+def stage_sources(stage: int, *, user_provided: bool = False) -> list[str]:
+    """Per-stage data-source display names (contract-driven; one shared home with the FE).
+
+    ``user_provided`` returns only the manual-resolution source that actually runs for a
+    user-supplied entity stage (S1/S3/S4); falls back to the computed list when no manual
+    override is defined for that stage.
+    """
+    block = _defs()["stage_sources"]["properties"]
+    key = str(stage)
+    if user_provided:
+        up = block["user_provided"]["properties"].get(key)
+        if up is not None:
+            return list(up["default"])
+    comp = block["computed"]["properties"].get(key)
+    return list(comp["default"]) if comp is not None else []

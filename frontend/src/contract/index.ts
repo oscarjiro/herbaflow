@@ -305,3 +305,29 @@ export const ENRICHMENT_PARAMS = {
 export const ENRICHMENT_NUMERIC_PARAMS = ["significance_threshold", "min_term_size"] as const;
 export const ENRICHMENT_BOOLEAN_PARAMS = ["no_iea"] as const;
 export const ENRICHMENT_SELECT_PARAMS = ["correction"] as const;
+
+// ---------------------------------------------------------------------------
+// Per-stage data-source display names — one shared home in the contract.
+// ---------------------------------------------------------------------------
+
+const stageSourcesDefs = (
+  contract.$defs as unknown as {
+    stage_sources: {
+      properties: {
+        computed: { properties: Record<string, { default: string[] }> };
+        user_provided: { properties: Record<string, { default: string[] }> };
+      };
+    };
+  }
+).stage_sources.properties;
+
+function readStageSourceMap(
+  group: { properties: Record<string, { default: string[] }> },
+): Record<number, string[]> {
+  const out: Record<number, string[]> = {};
+  for (const [k, v] of Object.entries(group.properties)) out[Number(k)] = v.default;
+  return out;
+}
+
+export const STAGE_SOURCES = readStageSourceMap(stageSourcesDefs.computed);
+export const USER_PROVIDED_SOURCES = readStageSourceMap(stageSourcesDefs.user_provided);

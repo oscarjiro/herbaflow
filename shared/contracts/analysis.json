@@ -38,6 +38,33 @@
       "type": "string",
       "enum": ["starting", "running", "awaiting_approval", "complete"]
     },
+    "stage_sources": {
+      "description": "Per-stage data-source display names. 'computed' = the sources used in a normal run; 'user_provided' = only the manual-resolution source that runs when an entity stage is supplied by the user (Software Lock B3/B4-i). Read by the backend report and the FE StageDataSources.",
+      "type": "object",
+      "properties": {
+        "computed": {
+          "type": "object",
+          "properties": {
+            "1": { "type": "array", "items": { "type": "string" }, "default": ["KNApSAcK (plant–compound)", "PubChem (manual enrichment)"] },
+            "2": { "type": "array", "items": { "type": "string" }, "default": ["RDKit (descriptors, PAINS)"] },
+            "3": { "type": "array", "items": { "type": "string" }, "default": ["ChEMBL", "PubChem BioAssay", "UniProt"] },
+            "4": { "type": "array", "items": { "type": "string" }, "default": ["Open Targets (ETL-seeded disease–target associations)", "UniProt"] },
+            "5": { "type": "array", "items": { "type": "string" }, "default": ["Set intersection of Stage 3 ∩ Stage 4 (on target_id)"] },
+            "6": { "type": "array", "items": { "type": "string" }, "default": ["STRING (protein–protein interactions)", "Human only (species 9606); functional or physical"] },
+            "7": { "type": "array", "items": { "type": "string" }, "default": ["networkx (centrality analysis)", "STRING PPI network (undirected)"] },
+            "8": { "type": "array", "items": { "type": "string" }, "default": ["g:Profiler (GO + KEGG enrichment)"] }
+          }
+        },
+        "user_provided": {
+          "type": "object",
+          "properties": {
+            "1": { "type": "array", "items": { "type": "string" }, "default": ["PubChem (manual compound resolution)"] },
+            "3": { "type": "array", "items": { "type": "string" }, "default": ["UniProt (manual target resolution)"] },
+            "4": { "type": "array", "items": { "type": "string" }, "default": ["UniProt (manual target resolution)"] }
+          }
+        }
+      }
+    },
     "pipeline_parameters": {
       "type": "object",
       "additionalProperties": false,
