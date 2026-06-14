@@ -94,16 +94,39 @@ def test_user_removed_targets_excluded_on_both_sides():
         "targets": [
             {"target_id": "t1", "gene_symbol": "A", "uniprot_accession": "P1", "tag": "computed"},
             {"target_id": "t2", "gene_symbol": "B", "uniprot_accession": "P2", "tag": "computed"},
-            {"target_id": "t3", "gene_symbol": "C", "uniprot_accession": "P3", "tag": "user-removed"},
+            {
+                "target_id": "t3",
+                "gene_symbol": "C",
+                "uniprot_accession": "P3",
+                "tag": "user-removed",
+            },
         ],
         "count": 2,
         "state": "user_provided",
     }
     s4 = {
         "targets": [
-            {"target_id": "t1", "gene_symbol": "A", "uniprot_accession": "P1", "opentargets_score": 0.7, "tag": "computed"},
-            {"target_id": "t2", "gene_symbol": "B", "uniprot_accession": "P2", "opentargets_score": 0.6, "tag": "user-removed"},
-            {"target_id": "t3", "gene_symbol": "C", "uniprot_accession": "P3", "opentargets_score": 0.5, "tag": "computed"},
+            {
+                "target_id": "t1",
+                "gene_symbol": "A",
+                "uniprot_accession": "P1",
+                "opentargets_score": 0.7,
+                "tag": "computed",
+            },
+            {
+                "target_id": "t2",
+                "gene_symbol": "B",
+                "uniprot_accession": "P2",
+                "opentargets_score": 0.6,
+                "tag": "user-removed",
+            },
+            {
+                "target_id": "t3",
+                "gene_symbol": "C",
+                "uniprot_accession": "P3",
+                "opentargets_score": 0.5,
+                "tag": "computed",
+            },
         ],
         "count": 2,
         "state": "user_provided",
