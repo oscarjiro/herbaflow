@@ -65,26 +65,49 @@ def test_ctp_nodes_has_binding_compounds_overlap_targets_and_pathways():
     text = rh.build_ctp_nodes(SR_FULL, COMPOUNDS, TARGETS)
     rows = _csv_rows(text)
     header, data = rows[0], rows[1:]
-    assert header == ["id", "label", "type", "inchikey", "uniprot_accession", "is_hub", "source"]
+    assert header == [
+        "id",
+        "label",
+        "type",
+        "inchikey",
+        "smiles",
+        "uniprot_accession",
+        "is_hub",
+        "source",
+    ]
     by_type = {}
     for r in data:
         by_type.setdefault(r[2], []).append(r)
-    assert {r[0] for r in by_type["compound"]} == {"c1", "c2"}
+    # compound node id is now the de-UUID'd InChIKey, not the raw compound_id
+    assert {r[0] for r in by_type["compound"]} == {
+        COMPOUNDS["c1"]["inchi_key"],
+        COMPOUNDS["c2"]["inchi_key"],
+    }
+    assert {r[4] for r in by_type["compound"]} == {
+        COMPOUNDS["c1"]["smiles"],
+        COMPOUNDS["c2"]["smiles"],
+    }
     assert by_type["target"][0][0] == "PPARG"
-    assert by_type["target"][0][4] == "P37231"
-    assert by_type["target"][0][5] == "true"
+    assert by_type["target"][0][5] == "P37231"
+    assert by_type["target"][0][6] == "true"
     assert by_type["pathway"][0][0] == "KEGG:04151"
-    assert by_type["pathway"][0][6] == "KEGG"
+    assert by_type["pathway"][0][7] == "KEGG"
 
 
 def test_ctp_edges_ct_into_overlap_and_tp_from_term_intersection():
-    text = rh.build_ctp_edges(SR_FULL)
+    text = rh.build_ctp_edges(SR_FULL, COMPOUNDS, TARGETS)
     rows = _csv_rows(text)
     header, data = rows[0], rows[1:]
     assert header == ["source", "target", "interaction", "prediction_method", "p_value"]
     ct = [r for r in data if r[2] == "compound-target"]
     tp = [r for r in data if r[2] == "target-pathway"]
-    assert sorted((r[0], r[1]) for r in ct) == [("c1", "PPARG"), ("c2", "PPARG")]
+    # C-T edge source endpoints reference the de-UUID'd compound node ids (InChIKey)
+    assert sorted((r[0], r[1]) for r in ct) == sorted(
+        [
+            (COMPOUNDS["c1"]["inchi_key"], "PPARG"),
+            (COMPOUNDS["c2"]["inchi_key"], "PPARG"),
+        ]
+    )
     assert all(r[1] != "OFF" for r in ct)
     assert ct[0][3] in {"chembl_bioactivity", "pubchem_bioassay"}
     assert (tp[0][0], tp[0][1], tp[0][2]) == ("PPARG", "KEGG:04151", "target-pathway")
@@ -166,3 +189,49 @@ def test_bundle_contains_the_four_named_files():
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
         assert set(zf.namelist()) == {"ctp-nodes.csv", "ctp-edges.csv", "docking.csv", "report.md"}
         assert zf.read("report.md").decode() == "# r\n"
+
+
+_SR = {
+    "3": {
+        "compound_targets": [
+            {"compound_id": "c1", "target_id": "t1", "prediction_method": "chembl"},
+            {"compound_id": "c2", "target_id": "t9", "prediction_method": "chembl"},  # not overlap
+        ]
+    },
+    "5": {"overlap": [{"target_id": "t1", "gene_symbol": "PPARG", "uniprot_accession": "P37231"}]},
+    "7": {"hubs": [{"target_id": "t1", "gene_symbol": "PPARG"}]},
+    "8": {
+        "terms": [
+            {
+                "term_id": "GO:0001",
+                "name": "x",
+                "source": "GO:BP",
+                "p_value": 0.001,
+                "intersection": ["PPARG"],
+            }
+        ]
+    },
+}
+_COMP = {"c1": {"name": "Curcumin", "inchi_key": "VFLDPWHFBUODDF-FCXRPNKRSA-N", "smiles": "O=C"}}
+_TGT = {"t1": {"gene_symbol": "PPARG", "uniprot_accession": "P37231"}}
+
+
+def test_ctp_compound_node_id_is_inchikey_with_smiles():
+    graph = rh.build_ctp_graph(_SR, _COMP, _TGT)
+    comp = next(n for n in graph["nodes"] if n["type"] == "compound")
+    assert comp["id"] == "VFLDPWHFBUODDF-FCXRPNKRSA-N"
+    assert comp["smiles"] == "O=C"
+
+
+def test_ctp_edge_endpoints_match_node_ids():
+    graph = rh.build_ctp_graph(_SR, _COMP, _TGT)
+    node_ids = {n["id"] for n in graph["nodes"]}
+    for e in graph["edges"]:
+        assert e["source"] in node_ids
+        assert e["target"] in node_ids
+
+
+def test_ctp_nodes_csv_has_smiles_header():
+    assert rh.build_ctp_nodes(_SR, _COMP, _TGT).splitlines()[0] == (
+        "id,label,type,inchikey,smiles,uniprot_accession,is_hub,source"
+    )

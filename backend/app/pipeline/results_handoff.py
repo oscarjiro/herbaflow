@@ -31,87 +31,143 @@ def _csv(rows: list[tuple[Any, ...]]) -> str:
     return buf.getvalue()
 
 
-def build_ctp_nodes(
+# One canonical rule for a compound's graph-node id. De-UUID'd: the InChIKey is preferred (a stable
+# structural identifier), falling back to the human name, then the raw (UUID) compound_id. Used by
+# BOTH the node and edge builder so the C-T edge endpoints reference the same id the node declares.
+def _compound_node_id(cid: str, compounds_by_id: dict[str, Any]) -> str:
+    c = compounds_by_id.get(cid, {})
+    return str(c.get("inchi_key") or c.get("name") or cid)
+
+
+# Shared column order for the C-T-P node + edge CSVs (single source so the headers can't drift).
+_CTP_NODE_COLS = (
+    "id",
+    "label",
+    "type",
+    "inchikey",
+    "smiles",
+    "uniprot_accession",
+    "is_hub",
+    "source",
+)
+_CTP_EDGE_COLS = ("source", "target", "interaction", "prediction_method", "p_value")
+
+
+def build_ctp_graph(
     stage_results: dict[str, Any],
     compounds_by_id: dict[str, dict[str, Any]],
     targets_by_id: dict[str, dict[str, Any]],
-) -> str:
-    """Cytoscape node table: one row per compound / target / pathway node."""
+) -> dict[str, list[dict[str, Any]]]:
+    """Single C-T-P graph-data home: node + edge dicts shared by the CSV builders and the chart.
+    Node ids are de-UUID'd (compound=InChIKey, target=gene symbol, pathway=term id); edge endpoints
+    reference those same ids (graph-join rule)."""
     overlap = stage_results.get("5", {}).get("overlap", [])
     hubs = stage_results.get("7", {}).get("hubs", [])
     terms = stage_results.get("8", {}).get("terms", [])
     edges = stage_results.get("3", {}).get("compound_targets", [])
 
-    overlap_tids = {o["target_id"] for o in overlap}
+    overlap_by_tid = {o["target_id"]: o for o in overlap}
     hub_tids = {h["target_id"] for h in hubs}
-    binding_cids = sorted({e["compound_id"] for e in edges if e["target_id"] in overlap_tids})
+    binding_cids = sorted({e["compound_id"] for e in edges if e["target_id"] in overlap_by_tid})
 
-    rows: list[tuple[Any, ...]] = [
-        ("id", "label", "type", "inchikey", "uniprot_accession", "is_hub", "source")
-    ]
+    nodes: list[dict[str, Any]] = []
     for cid in binding_cids:
         c = compounds_by_id.get(cid, {})
-        rows.append((cid, c.get("name") or cid, "compound", c.get("inchi_key") or "", "", "", ""))
+        nodes.append(
+            {
+                "id": _compound_node_id(cid, compounds_by_id),
+                "label": c.get("name") or cid,
+                "type": "compound",
+                "inchikey": c.get("inchi_key") or "",
+                "smiles": c.get("smiles") or "",
+                "uniprot_accession": "",
+                "is_hub": "",
+                "source": "",
+            }
+        )
     for o in overlap:
-        node_id = _target_node_id(o)
-        rows.append(
-            (
-                node_id,
-                o.get("gene_symbol") or o.get("uniprot_accession") or o["target_id"],
-                "target",
-                "",
-                o.get("uniprot_accession") or "",
-                "true" if o["target_id"] in hub_tids else "false",
-                "",
-            )
+        nodes.append(
+            {
+                "id": _target_node_id(o),
+                "label": o.get("gene_symbol") or o.get("uniprot_accession") or o["target_id"],
+                "type": "target",
+                "inchikey": "",
+                "smiles": "",
+                "uniprot_accession": o.get("uniprot_accession") or "",
+                "is_hub": "true" if o["target_id"] in hub_tids else "false",
+                "source": "",
+            }
         )
     for t in terms:
-        rows.append(
-            (
-                t["term_id"],
-                t.get("name") or t["term_id"],
-                "pathway",
-                "",
-                "",
-                "",
-                t.get("source") or "",
-            )
+        nodes.append(
+            {
+                "id": t["term_id"],
+                "label": t.get("name") or t["term_id"],
+                "type": "pathway",
+                "inchikey": "",
+                "smiles": "",
+                "uniprot_accession": "",
+                "is_hub": "",
+                "source": t.get("source") or "",
+            }
         )
-    return _csv(rows)
 
-
-def build_ctp_edges(stage_results: dict[str, Any]) -> str:
-    """Cytoscape edge table. C-T edges = Stage-3 edges into an overlap target (carry the winning
-    prediction_method). T-P edges = each Stage-8 term linked to the overlap genes in its
-    ``intersection`` list (carry the term's corrected p_value — g:Profiler returns one corrected
-    value; the chosen correction is recorded in stage_results["8"]["correction"])."""
-    overlap = stage_results.get("5", {}).get("overlap", [])
-    edges = stage_results.get("3", {}).get("compound_targets", [])
-    terms = stage_results.get("8", {}).get("terms", [])
-
-    overlap_by_tid = {o["target_id"]: o for o in overlap}
     overlap_node_ids = {_target_node_id(o) for o in overlap}
-
-    rows: list[tuple[Any, ...]] = [
-        ("source", "target", "interaction", "prediction_method", "p_value")
-    ]
+    edge_rows: list[dict[str, Any]] = []
     for e in edges:
         tid = e["target_id"]
         if tid not in overlap_by_tid:
             continue
-        rows.append(
-            (
-                e["compound_id"],
-                _target_node_id(overlap_by_tid[tid]),
-                "compound-target",
-                e.get("prediction_method") or "",
-                "",
-            )
+        edge_rows.append(
+            {
+                "source": _compound_node_id(e["compound_id"], compounds_by_id),
+                "target": _target_node_id(overlap_by_tid[tid]),
+                "interaction": "compound-target",
+                "prediction_method": e.get("prediction_method") or "",
+                "p_value": "",
+            }
         )
     for t in terms:
         for gene in t.get("intersection", []):
             if gene in overlap_node_ids:
-                rows.append((gene, t["term_id"], "target-pathway", "", _fmt_p(t.get("p_value"))))
+                edge_rows.append(
+                    {
+                        "source": gene,
+                        "target": t["term_id"],
+                        "interaction": "target-pathway",
+                        "prediction_method": "",
+                        "p_value": _fmt_p(t.get("p_value")),
+                    }
+                )
+    return {"nodes": nodes, "edges": edge_rows}
+
+
+def build_ctp_nodes(
+    stage_results: dict[str, Any],
+    compounds_by_id: dict[str, dict[str, Any]],
+    targets_by_id: dict[str, dict[str, Any]],
+) -> str:
+    """Cytoscape node table CSV: one row per compound / target / pathway (see build_ctp_graph)."""
+    graph = build_ctp_graph(stage_results, compounds_by_id, targets_by_id)
+    rows: list[tuple[Any, ...]] = [_CTP_NODE_COLS]
+    rows += [tuple(n[c] for c in _CTP_NODE_COLS) for n in graph["nodes"]]
+    return _csv(rows)
+
+
+def build_ctp_edges(
+    stage_results: dict[str, Any],
+    compounds_by_id: dict[str, dict[str, Any]] | None = None,
+    targets_by_id: dict[str, dict[str, Any]] | None = None,
+) -> str:
+    """Cytoscape edge table CSV (see build_ctp_graph). C-T edges = Stage-3 edges into an overlap
+    target (carry the winning prediction_method). T-P edges = each Stage-8 term linked to the
+    overlap genes in its ``intersection`` list (carry the term's corrected p_value).
+
+    The graph builder needs the entity dicts to de-UUID compound endpoints; the two are optional
+    (default empty) so the existing single-arg caller in ``services/export.py`` keeps working."""
+    graph = build_ctp_graph(stage_results, compounds_by_id or {}, targets_by_id or {})
+    rows: list[tuple[Any, ...]] = [_CTP_EDGE_COLS]
+    rows += [tuple(e[c] for c in _CTP_EDGE_COLS) for e in graph["edges"]]
     return _csv(rows)
 
 
