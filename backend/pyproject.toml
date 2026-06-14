@@ -10,7 +10,6 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0.36",
     "asyncpg>=0.30",
     "rdkit>=2024.3",
-    "scipy>=1.13",
     "networkx>=3.2",
 ]
 
@@ -51,10 +50,6 @@ mypy_path = "typings"
 
 [[tool.mypy.overrides]]
 module = ["rdkit", "rdkit.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["scipy", "scipy.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
