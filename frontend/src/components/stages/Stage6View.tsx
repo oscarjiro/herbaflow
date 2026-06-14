@@ -32,6 +32,7 @@ import {
   PPI_SELECT_PARAMS,
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
+import { exportArtifactUrl } from "../../lib/exportUrl";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -136,6 +137,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   );
 
   const stale = (stage6 as { stale?: boolean }).stale === true;
+  const isComplete = data.status === "complete";
 
   const paramPanel = ppiParams ? (
     <ParamPanel
@@ -303,6 +305,17 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
             )}
           </>
         )
+      )}
+
+      {isComplete && (
+        <img
+          className="hf-stage-chart"
+          alt="PPI network"
+          src={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
       )}
 
       {/* PPI param panel — always shown (raise the cap / change settings + Redo) */}

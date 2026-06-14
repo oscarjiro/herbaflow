@@ -18,6 +18,7 @@ import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis } from "../../api/sdk.gen";
 import { useStaleState } from "../../hooks/useStaleState";
+import { exportArtifactUrl } from "../../lib/exportUrl";
 import { ApprovalBar } from "./ApprovalBar";
 import { StageDataSources } from "./StageDataSources";
 import { StaleNotice } from "./StaleNotice";
@@ -66,6 +67,7 @@ function buildS5CsvRows(rows: OverlapRow[]): unknown[][] {
 export function Stage5View({ data }: { data: AnalysisRead }) {
   const stage5 = data.stage_results?.["5"] as Stage5Result | undefined;
   const { anyStale, rerunFrom } = useStaleState(data);
+  const isComplete = data.status === "complete";
 
   const qc = useQueryClient();
   const advance = useMutation({
@@ -116,6 +118,17 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
           <span className="summary-card__label">disease-side targets</span>
         </div>
       </div>
+
+      {isComplete && (
+        <img
+          className="hf-stage-chart"
+          alt="Stage 5 target overlap"
+          src={exportArtifactUrl(data.analysis_id, "stage5_venn.png")}
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      )}
 
       {stage5.count === 0 && (
         <p className="hf-muted" role="status">

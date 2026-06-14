@@ -3,6 +3,7 @@ import { advanceAnalysis } from "../api/sdk.gen";
 import { useAnalysisStatus } from "../hooks/useAnalysisStatus";
 import { useEntitySubjects } from "../hooks/useEntitySubjects";
 import { useStaleState } from "../hooks/useStaleState";
+import { exportArtifactUrl } from "../lib/exportUrl";
 import { ApprovalBar } from "./stages/ApprovalBar";
 import { Stage1View } from "./stages/Stage1View";
 import { Stage2View } from "./stages/Stage2View";
@@ -47,6 +48,16 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
       <h1>Run {analysisId}</h1>
       <p>Status: {data.status}</p>
       <DownloadResults status={data.status} analysisId={analysisId} />
+      {data.status === "complete" && (
+        <img
+          className="hf-stage-chart"
+          alt="Compound-target-pathway network"
+          src={exportArtifactUrl(analysisId, "ctp-network.png")}
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+      )}
       <p className="run-header__subjects">
         Plant: {plantDisplay} · Disease: {diseaseDisplay}
       </p>

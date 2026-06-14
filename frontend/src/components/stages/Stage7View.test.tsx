@@ -128,4 +128,21 @@ describe("Stage7View", () => {
     expect(screen.getByText("0.1235")).toBeInTheDocument();
     expect(screen.getByText("0.9877")).toBeInTheDocument();
   });
+
+  it("shows the hub bar image when complete", () => {
+    const completeData: AnalysisRead = {
+      ...makeData(makeComputedResult()),
+      status: "complete",
+    } as unknown as AnalysisRead;
+    wrap(<Stage7View data={completeData} />);
+    expect(screen.getByRole("img", { name: /hub/i })).toHaveAttribute(
+      "src",
+      expect.stringContaining("/export/stage7_hub_bar.png"),
+    );
+  });
+
+  it("does not show the hub bar image when not complete", () => {
+    wrap(<Stage7View data={makeData(makeComputedResult())} />);
+    expect(screen.queryByRole("img", { name: /hub/i })).toBeNull();
+  });
 });

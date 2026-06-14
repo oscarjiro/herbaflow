@@ -20,6 +20,7 @@ import {
   ENRICHMENT_SELECT_PARAMS,
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
+import { exportArtifactUrl } from "../../lib/exportUrl";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -257,6 +258,28 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           )}
         </>
       )}
+
+      {isComplete &&
+        (
+          [
+            ["BP", "Biological process enrichment"],
+            ["MF", "Molecular function enrichment"],
+            ["CC", "Cellular component enrichment"],
+            ["KEGG", "KEGG pathway enrichment"],
+            ["REAC", "Reactome pathway enrichment"],
+            ["WP", "WikiPathways enrichment"],
+          ] as [string, string][]
+        ).map(([cat, altText]) => (
+          <img
+            key={cat}
+            className="hf-stage-chart"
+            alt={altText}
+            src={exportArtifactUrl(data.analysis_id, `stage8_enrichment_${cat}.png`)}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ))}
 
       {/* Enrichment param panel */}
       {enrichParams && (

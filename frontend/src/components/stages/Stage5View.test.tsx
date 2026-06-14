@@ -77,4 +77,21 @@ describe("Stage5View — overlap view", () => {
     expect(screen.queryByRole("button", { name: /redo/i })).toBeNull();
     expect(screen.queryByText(/parameters/i)).toBeNull();
   });
+
+  it("shows the venn image when complete", () => {
+    const completeData: AnalysisRead = {
+      ...makeData(),
+      status: "complete",
+    } as unknown as AnalysisRead;
+    wrap(<Stage5View data={completeData} />);
+    expect(screen.getByRole("img", { name: /overlap/i })).toHaveAttribute(
+      "src",
+      expect.stringContaining("/export/stage5_venn.png"),
+    );
+  });
+
+  it("does not show the venn image when not complete", () => {
+    wrap(<Stage5View data={makeData()} />);
+    expect(screen.queryByRole("img", { name: /overlap/i })).toBeNull();
+  });
 });

@@ -19,6 +19,7 @@ import {
   HUB_GENES_PARAMS,
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
+import { exportArtifactUrl } from "../../lib/exportUrl";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -120,6 +121,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
   const tooSmall = (stage7.flags ?? []).includes("network_too_small");
   const stale = stage7.stale === true;
+  const isComplete = data.status === "complete";
 
   return (
     <section className="stage-view stage-view--7">
@@ -156,6 +158,17 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         <p className="hf-muted" role="status">
           The network is small or sparse — centrality ranking is unreliable on trivial topology.
         </p>
+      )}
+
+      {isComplete && (
+        <img
+          className="hf-stage-chart"
+          alt="Top hub genes"
+          src={exportArtifactUrl(data.analysis_id, "stage7_hub_bar.png")}
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
       )}
 
       {/* Table controls */}
