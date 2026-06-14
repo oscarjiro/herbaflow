@@ -486,7 +486,7 @@ def test_all_results_superset_layout():
         stage_files={"stage5_overlap.csv": "o"},
     )
     names = _names(b)
-    assert "README.txt" in names and "report.md" in names
+    assert "README.md" in names and "report.md" in names  # root README is now .md
     assert "network-and-docking/ctp-nodes.csv" in names
     assert "stages/stage5_overlap.csv" in names
 
@@ -529,3 +529,29 @@ def test_report_threads_included_figures_into_stage_sections():
     )
     assert "`stage5_venn.png`" in md
     assert "stage7_hub_bar.png" not in md
+
+
+def test_all_results_bundle_embeds_subreadmes_as_md():
+    import io
+    import zipfile
+
+    blob = rh.build_all_results_bundle(
+        report="r",
+        network_files={"ctp-nodes.csv": "x"},
+        stage_files={"stage5_overlap.csv": "y"},
+    )
+    names = zipfile.ZipFile(io.BytesIO(blob)).namelist()
+    assert "README.md" in names  # root, .md not .txt
+    assert "network-and-docking/README.md" in names  # sub-readmes embedded
+    assert "stages/README.md" in names
+
+
+def test_network_readme_explains_docking_and_glossary():
+    r = rh.build_network_readme()
+    assert "docking.csv" in r and "SMILES" in r and "AlphaFold" in r and "Columns" in r
+
+
+def test_stages_readme_maps_pngs_and_is_accurate():
+    r = rh.build_stages_readme()
+    assert "stage5_venn.png" in r and "stage8_enrichment_" in r
+    assert "one combined" in r.lower()  # corrects the "one CSV per stage" claim for enrichment

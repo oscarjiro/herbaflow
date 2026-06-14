@@ -516,43 +516,253 @@ def build_stage_csv(
 
 
 def build_network_readme() -> str:
-    return (
-        "# Network & docking handoff\n\n"
-        "Files for downstream tools:\n\n"
-        "- `ctp-nodes.csv` / `ctp-edges.csv` — the compound–target–pathway network.\n"
-        "- `ctp-network.png` — a static rendering of that network.\n"
-        "- `docking.csv` — hub target × binding compound pairs"
-        " (AlphaFold id = the UniProt accession).\n\n"
-        "## Import the network into Cytoscape (desktop)\n\n"
-        "1. Open **File, Import Network from File** and choose `ctp-edges.csv`. "
-        "Map `source` and `target` to the source/target node columns;"
-        " `interaction` is the edge type.\n"
-        "2. Open **File, Import Table from File** and choose `ctp-nodes.csv`,"
-        " matched on the `id` column. "
-        "This attaches `label`, `type`, `is_hub`, etc. as node attributes you can style by.\n\n"
-        "The edge endpoint strings equal the node `id` strings, so the join is exact.\n"
-    )
+    return """\
+# Network & docking handoff
+
+This folder contains the compound–target–pathway (C-T-P) network in a format ready for
+Cytoscape, a static PNG rendering of that network, and a docking-preparation table that pairs
+each hub protein with the compounds that bind it.
+
+## Files
+
+- `ctp-nodes.csv` / `ctp-edges.csv` — the C-T-P network (Cytoscape node and edge tables).
+- `ctp-network.png` — a static rendering of the network (may be absent for very large networks).
+- `ppi-nodes.csv` / `ppi-edges.csv` — the protein–protein interaction (PPI) sub-network
+  (Stage 6); useful if you want to visualise only the target layer.
+- `docking.csv` — one row per hub protein × binding compound pair, ready to feed into a
+  structure-based docking tool (e.g. AutoDock Vina).
+
+## Import the network into Cytoscape (desktop)
+
+1. Open **File → Import Network from File** and choose `ctp-edges.csv`.
+   Map `source` and `target` to the source/target node columns; `interaction` is the edge type.
+2. Open **File → Import Table from File** and choose `ctp-nodes.csv`, matched on the `id` column.
+   This attaches `label`, `type`, `is_hub`, etc. as node attributes you can style by.
+
+The edge endpoint strings equal the node `id` strings, so the join is exact.
+
+## Columns
+
+### ctp-nodes.csv
+
+| Column | Meaning |
+|---|---|
+| `id` | Node id: compound InChIKey, target gene symbol, or pathway term id (e.g. `GO:0045944`). |
+| `label` | Human-readable display name (compound name, gene symbol, or term name). |
+| `type` | Node type: `compound`, `target`, or `pathway`. |
+| `inchikey` | InChIKey for compound nodes (27-char structural hash); blank otherwise. |
+| `smiles` | **SMILES** of the compound (2-D); ligand input for docking. Blank otherwise. |
+| `uniprot_accession` | UniProt accession (e.g. `P37231`) for target nodes; blank otherwise. |
+| `is_hub` | `true` if this target was ranked as a hub gene (Stage 7); blank for non-target nodes. |
+| `source` | Pathway DB source for pathway nodes (e.g. `KEGG`, `GO:BP`, `REAC`); blank otherwise. |
+
+### ctp-edges.csv
+
+| Column | Meaning |
+|---|---|
+| `source` | Node id of the edge's origin (compound InChIKey or target gene symbol). |
+| `target` | Node id of the edge's destination (target gene symbol or pathway term id). |
+| `interaction` | `compound-target` (Stage 3 bioactivity) or `target-pathway` (Stage 8). |
+| `prediction_method` | Compound–target evidence: `chembl_bioactivity` or `pubchem_bioassay`. |
+| `p_value` | Target–pathway edges: BH-corrected enrichment p-value (full precision); else blank. |
+
+### docking.csv
+
+| Column | Meaning |
+|---|---|
+| `hub_gene_symbol` | Gene symbol of the hub target (Stage 7 top-ranked proteins). |
+| `hub_uniprot_accession` | UniProt accession of the hub protein. |
+| `alphafold_id` | **AlphaFold** model id (= `hub_uniprot_accession`); predicted 3-D structure. |
+| `compound_name` | Common name of the binding compound. |
+| `compound_inchikey` | InChIKey of the binding compound (stable structural identifier). |
+| `compound_smiles` | **SMILES** of the binding compound — the ligand input for docking. |
+| `prediction_method` | Evidence source for the compound–target interaction. |
+| `source_url` | AlphaFold model page for the hub protein (links to the predicted structure). |
+
+## How to use docking.csv
+
+Each row in `docking.csv` describes one candidate docking experiment:
+
+- **Protein (receptor)**: download the **AlphaFold** predicted structure for the UniProt accession
+  in `hub_uniprot_accession` (the `source_url` column links directly to the model page). Save the
+  structure as PDB or mmCIF.
+- **Ligand**: the compound's **SMILES** string in `compound_smiles` encodes its 2-D chemical
+  structure. Convert it to a 3-D conformer using a tool such as RDKit or OpenBabel, then prepare
+  the ligand file in the format your docking tool expects (e.g. PDBQT for AutoDock Vina).
+- **Docking**: run your chosen docking tool (e.g. AutoDock Vina) with the AlphaFold receptor
+  structure and the prepared ligand. The predicted binding affinity (kcal/mol) is your primary
+  output.
+
+The table already filters to hub proteins only — these are the mechanistically central targets
+identified by the network analysis, so they are the highest-priority candidates for docking.
+"""
 
 
 def build_stages_readme() -> str:
-    rows = "\n".join(
-        f"- `stage{n}_{slug}` — {desc}"
-        for n, slug, desc in [
-            (1, "compounds.csv", "input/derived compounds"),
-            (2, "adme.csv", "ADME pass/fail + descriptors"),
-            (3, "compound_targets.csv", "predicted/measured compound targets"),
-            (4, "disease_targets.csv", "disease-associated targets"),
-            (5, "overlap.csv", "Stage 3 ∩ Stage 4 targets"),
-            (6, "ppi_edges.csv", "STRING PPI edges"),
-            (7, "hubs.csv", "ranked hub genes"),
-            (8, "enrichment.csv", "enriched GO/KEGG/Reactome/WP terms"),
-        ]
-    )
-    return (
-        "# Per-stage results\n\n"
-        "One CSV per pipeline stage (always present; an empty stage carries a `# note`). "
-        "PNG charts accompany the stages that have one.\n\n" + rows + "\n"
-    )
+    return """\
+# Per-stage results
+
+One CSV per pipeline stage (always present; an empty stage carries a `# note` line so you know
+it ran but produced no rows). PNG charts accompany the stages that generate one.
+
+---
+
+## Stage 1 — Compound resolution
+
+**`stage1_compounds.csv`**
+
+The compounds that entered the pipeline after resolving your plant selection (or manual compound
+list) through PubChem.
+
+| Column | Meaning |
+|---|---|
+| `compound` | Canonical compound name. |
+| `inchikey` | IUPAC InChIKey (stable structural identifier, 27 characters). |
+| `smiles` | SMILES string encoding the compound's 2-D chemical structure. |
+
+---
+
+## Stage 2 — ADME / drug-likeness filter
+
+**`stage2_adme.csv`**
+
+All compounds that were evaluated for drug-likeness. Both passing and filtered compounds are
+included; the `passed` column tells you which bucket each compound fell into.
+
+| Column | Meaning |
+|---|---|
+| `compound_id` | Internal compound identifier. |
+| `canonical_name` | Canonical compound name. |
+| `passed` | `true` if the compound passed the ADME gate; `false` if it was filtered out. |
+| `descriptor_source` | Where the molecular descriptors came from (e.g. `etl`, `rdkit`). |
+| `molecular_weight` | Molecular weight in Da. |
+| `logp` | Calculated partition coefficient (lipophilicity). |
+| `hbond_donors` | Number of hydrogen-bond donors. |
+| `hbond_acceptors` | Number of hydrogen-bond acceptors. |
+| `tpsa` | Topological polar surface area (Å²). |
+| `rotatable_bonds` | Number of rotatable bonds (flexibility indicator). |
+| `qed_score` | Quantitative Estimate of Drug-likeness (0–1; higher = more drug-like). |
+| `np_likeness_score` | Natural-product likeness score. |
+| `num_ro5_violations` | Number of Lipinski Rule-of-Five violations. |
+| `is_pains_positive` | `True` if the compound triggered a PAINS (pan-assay interference) alert. |
+| `source_url` | PubChem compound page URL. |
+| `reason` | Why a compound was filtered (blank if it passed). |
+
+---
+
+## Stage 3 — Compound → target identification
+
+**`stage3_compound_targets.csv`**
+
+Protein targets with measured or predicted bioactivity against the ADME-passing compounds.
+Evidence comes from ChEMBL (measured bioactivities) and PubChem BioAssay (active assay
+outcomes).
+
+| Column | Meaning |
+|---|---|
+| `gene_symbol` | HGNC gene symbol of the target protein. |
+| `uniprot_accession` | UniProt accession of the target protein. |
+| `prediction_method` | Evidence source: `chembl_bioactivity` or `pubchem_bioassay`. |
+| `source_url` | UniProt entry page for the target. |
+
+---
+
+## Stage 4 — Disease → target collection
+
+**`stage4_disease_targets.csv`**
+
+Targets associated with the disease of interest, sourced from the Open Targets database
+(ETL-loaded; not a live call).
+
+| Column | Meaning |
+|---|---|
+| `gene_symbol` | HGNC gene symbol. |
+| `uniprot_accession` | UniProt accession. |
+| `opentargets_score` | Open Targets association score (0–1; higher = stronger evidence). |
+| `source_url` | UniProt entry page for the target. |
+
+---
+
+## Stage 5 — Target overlap (mechanistic core)
+
+**`stage5_overlap.csv`** · **`stage5_venn.png`**
+
+The intersection of Stage 3 and Stage 4 targets — the proteins that are both active against
+the plant compounds AND implicated in the disease. This is the mechanistic core of the analysis.
+
+`stage5_venn.png` shows a Venn diagram of the two sets with the overlap highlighted.
+
+| Column | Meaning |
+|---|---|
+| `gene_symbol` | HGNC gene symbol. |
+| `uniprot_accession` | UniProt accession. |
+| `opentargets_score` | Open Targets association score carried forward from Stage 4. |
+
+---
+
+## Stage 6 — Protein–protein interaction (PPI) network
+
+**`stage6_ppi_edges.csv`** · **`stage6_ppi_network.png`**
+
+STRING PPI network built over the overlap targets. The per-stage CSV is the edge list
+(node metadata ships in the network bundle's `ppi-nodes.csv`).
+
+`stage6_ppi_network.png` shows the network with hub proteins highlighted.
+
+| Column | Meaning |
+|---|---|
+| `source` | Gene symbol of one interaction partner. |
+| `target` | Gene symbol of the other interaction partner. |
+| `confidence` | STRING combined interaction score (0–1). |
+
+---
+
+## Stage 7 — Hub gene ranking
+
+**`stage7_hubs.csv`** · **`stage7_hub_bar.png`**
+
+Targets ranked by their centrality in the PPI network using a composite of degree and
+betweenness centrality (hub-bottleneck method, Yu 2007). Higher composite = more central.
+
+`stage7_hub_bar.png` shows a bar chart of the top hub genes by composite score.
+
+| Column | Meaning |
+|---|---|
+| `rank` | Hub rank (1 = highest composite score). |
+| `gene_symbol` | HGNC gene symbol. |
+| `uniprot_accession` | UniProt accession. |
+| `degree` | Normalised degree centrality (fraction of possible connections). |
+| `betweenness` | Normalised betweenness centrality (fraction of shortest paths via this node). |
+| `closeness` | Normalised closeness centrality. |
+| `eigenvector` | Normalised eigenvector centrality (influence weighted by neighbour importance). |
+| `composite` | Hub-bottleneck composite score used for ranking. |
+
+---
+
+## Stage 8 — Functional enrichment
+
+**`stage8_enrichment.csv`** · **`stage8_enrichment_<CATEGORY>.png`**
+
+Functional enrichment of the overlap targets against the compound-target universe (custom
+background) using g:Profiler (over-representation analysis). Sources include Gene Ontology
+(GO:BP / GO:MF / GO:CC), KEGG, Reactome, and WikiPathways.
+
+This is **one combined** `stage8_enrichment.csv` containing results from all sources; the
+`source` column distinguishes them (e.g. `GO:BP`, `KEGG`, `REAC`, `WP`). Separate PNG charts
+are generated per category: for example `stage8_enrichment_GO:BP.png`, `stage8_enrichment_KEGG.png`,
+`stage8_enrichment_REAC.png`, `stage8_enrichment_WP.png` (a category PNG is omitted if it has
+no significant terms).
+
+| Column | Meaning |
+|---|---|
+| `term_id` | Pathway or ontology term identifier (e.g. `GO:0045944`, `KEGG:04151`). |
+| `name` | Human-readable term name. |
+| `source` | Database source: `GO:BP`, `GO:MF`, `GO:CC`, `KEGG`, `REAC`, or `WP`. |
+| `p_value` | BH-corrected enrichment p-value (full precision). |
+| `intersection_size` | Number of overlap genes annotated to this term. |
+| `intersection_genes` | Semicolon-separated list of those gene symbols. |
+| `source_url` | Link to the term's page in its source database. |
+"""
 
 
 def build_root_readme() -> str:
@@ -603,10 +813,16 @@ def build_all_results_bundle(
     network_files: dict[str, str | bytes | None],
     stage_files: dict[str, str | bytes | None],
 ) -> bytes:
-    """All-results superset zip: report + network-and-docking/ + stages/ subdirectories."""
+    """All-results superset zip: report + network-and-docking/ + stages/ subdirectories.
+
+    Embeds a README.md at the root and sub-READMEs in each subdirectory so the bundle is
+    self-contained — a reader opening any folder finds column-level documentation without
+    needing to consult an external source."""
     files: dict[str, str | bytes | None] = {
-        "README.txt": build_root_readme(),
+        "README.md": build_root_readme(),
         "report.md": report,
+        "network-and-docking/README.md": build_network_readme(),
+        "stages/README.md": build_stages_readme(),
     }
     for name, content in network_files.items():
         files[f"network-and-docking/{name}"] = content
