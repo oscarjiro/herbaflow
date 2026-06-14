@@ -72,3 +72,40 @@ def test_param_rows_pull_unit_and_description():
     rows = report.param_rows("adme", {"max_mw": 500, "apply_veber": True})
     mw = next(r for r in rows if r.label == "Max MW")
     assert mw.value == "500" and mw.unit == "Da" and "molecular weight" in mw.description.lower()
+
+
+SR = {
+    "1": {"count": 180, "compounds": []},
+    "2": {"count": 175, "passed": [1] * 175, "filtered": [1] * 5},
+    "3": {"count": 180, "targets": [], "coverage_pct": 70},
+    "4": {"count": 911, "targets": []},
+}
+
+
+def test_s1_finding_selection_single():
+    m = report.build_report_model(
+        {"mode": "auto", "created_at": "x", "completed_at": "2026-06-14T0:0:0+00:00"},
+        {"adme": {"max_mw": 500}},
+        SR,
+        {"plant": "Curcuma longa L.", "disease": "Type 2 Diabetes Mellitus"},
+        input_modes={"plant": "selection", "disease": "selection"},
+        frontend_url="http://localhost:5173",
+        figures=[],
+    )
+    s1 = next(s for s in m.stages if s.n == 1)
+    assert "Curcuma longa L." in s1.finding and "Result count" not in s1.finding
+
+
+def test_s2_skip_adme_finding():
+    sr = {**SR, "2": {"count": 180, "passed": [1] * 180, "filtered": []}}
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {"adme": {"skip_adme": True}},
+        sr,
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "selection", "disease": "selection"},
+        frontend_url="u",
+        figures=[],
+    )
+    s2 = next(s for s in m.stages if s.n == 2)
+    assert "skipped" in s2.finding.lower()

@@ -4,10 +4,12 @@ can consume the same model later."""
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
 from app import contracts
+from app.pipeline import entry_modes
 
 
 @dataclass
@@ -79,6 +81,52 @@ _SOURCE_NAME = {
     "REAC": "Reactome",
     "WP": "WikiPathways",
 }
+
+# Single home for the per-stage bundle CSV slug (the bundle nests stage CSVs under ``stages/``).
+# ``services/export.py`` imports this so there is exactly one slug map.
+STAGE_CSV_SLUG: dict[int, str] = {
+    1: "compounds",
+    2: "adme",
+    3: "compound_targets",
+    4: "disease_targets",
+    5: "overlap",
+    6: "ppi_edges",
+    7: "hubs",
+    8: "enrichment",
+}
+_STAGE_NAMES = {
+    1: "Compounds",
+    2: "ADME filter",
+    3: "Compound targets",
+    4: "Disease targets",
+    5: "Target overlap",
+    6: "PPI network",
+    7: "Hub genes",
+    8: "Functional enrichment",
+}
+_STAGE_PARAM_GROUP = {
+    2: "adme",
+    3: "target",
+    4: "disease_targets",
+    6: "ppi",
+    7: "hub_genes",
+    8: "enrichment",
+}
+_COUNT_KEY = {6: "node_count"}
+
+_ABOUT = [
+    "Scope: human proteins only (species 9606).",
+    "These are computational predictions to guide research — not clinical conclusions.",
+    "Enrichment is tested against the compound-target universe as background.",
+]
+_PROVENANCE = [
+    "Every compound, target, and pathway links back to the public database it came from; "
+    "the report records when each source was queried.",
+    "Limitation: we capture *when* and *where* data was fetched, not the exact release version "
+    "of each external database — so re-running later may differ slightly as sources update.",
+]
+
+_STAGE_FIG_RE = re.compile(r"^stage(\d+)")
 
 
 def humanize_label(key: str) -> str:
@@ -169,3 +217,198 @@ def render_markdown(m: ReportModel) -> str:
         out += ["## How to read these results", ""] + [f"- {p}" for p in m.provenance] + [""]
     out += ["---", m.footer, ""]
     return "\n".join(out) + "\n"
+
+
+def _state_map(input_modes: dict[str, Any]) -> dict[int, str]:
+    """The {stage -> state} map for a stored run; empty for pre-entry-modes / unknown modes."""
+    plant = (input_modes or {}).get("plant", "selection")
+    disease = (input_modes or {}).get("disease", "selection")
+    try:
+        return entry_modes.stage_state_map(plant, disease)
+    except ValueError:
+        return {}
+
+
+def _up_stages(input_modes: dict[str, Any]) -> set[int]:
+    """Stages the user supplied directly (their data sources are honest, not computed externals)."""
+    return {s for s, st in _state_map(input_modes).items() if st == entry_modes.USER_PROVIDED}
+
+
+def _na_stages(input_modes: dict[str, Any]) -> set[int]:
+    """Stages that do not apply for the chosen modes (e.g. S1/S2 in a manual-targets run)."""
+    return {s for s, st in _state_map(input_modes).items() if st == entry_modes.NOT_APPLICABLE}
+
+
+def _is_up(stage: int, input_modes: dict[str, Any]) -> bool:
+    return stage in _up_stages(input_modes)
+
+
+def _default_name(labels: dict[str, Any], completed_at: Any) -> str:
+    """The Herbaflow-branded default report title when the run has no user name."""
+    parts = [labels.get("plant"), labels.get("disease")]
+    subject = " and ".join(p for p in parts if p) or "Network analysis"
+    date = str(completed_at or "")[:10]
+    return f"Herbaflow Analysis — {subject}" + (f", {date}" if date else "")
+
+
+def _plant_phrase(labels: dict[str, Any]) -> str:
+    return labels.get("plant") or "the selected plant(s)"
+
+
+def _csv_pointer(n: int) -> str:
+    return f"stages/stage{n}_{STAGE_CSV_SLUG[n]}.csv"
+
+
+def _figure_index(figures: list[tuple[str, bool, str]]) -> dict[int, str]:
+    """Map ``stageN`` -> the included figure for that stage (first-wins). Names without a
+    ``stageN`` prefix (e.g. ``ctp-network.png``) map to no stage."""
+    idx: dict[int, str] = {}
+    for name, included, _reason in figures:
+        if not included:
+            continue
+        match = _STAGE_FIG_RE.match(name)
+        if match is None:
+            continue
+        n = int(match.group(1))
+        idx.setdefault(n, name)
+    return idx
+
+
+_NA_TARGETS = "Not applicable — this run started from user-supplied targets."
+
+
+def _s1_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
+    if 1 in _na_stages(im):
+        return _NA_TARGETS
+    n = (sr.get("1") or {}).get("count")
+    if _is_up(1, im):
+        who = labels.get("plant") or "user input"
+        return f"{fmt_num(n)} compounds supplied directly ({who})."
+    return (
+        f"{fmt_num(n)} candidate compounds catalogued from {_plant_phrase(labels)} — "
+        "the phytochemical space screened in this analysis."
+    )
+
+
+def _s2_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], p: Any) -> str:
+    s2 = sr.get("2") or {}
+    if 2 in _na_stages(im):
+        return _NA_TARGETS
+    if ((p or {}).get("adme") or {}).get("skip_adme"):
+        return (
+            f"ADME screening skipped — all {fmt_num(s2.get('count'))} compounds "
+            "carried forward unscreened."
+        )
+    passed = s2.get("passed")
+    filtered = s2.get("filtered")
+    n_passed: Any
+    n_total: Any
+    if isinstance(passed, list):
+        n_passed = len(passed)
+        n_total = n_passed + (len(filtered) if isinstance(filtered, list) else 0)
+    else:
+        n_passed = n_total = s2.get("count")
+    return (
+        f"{fmt_num(n_passed)} of {fmt_num(n_total)} compounds passed drug-likeness filtering "
+        "(Lipinski + Veber, natural-product exception applied), retaining the orally-plausible "
+        "chemical space."
+    )
+
+
+def _s3_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
+    s3 = sr.get("3") or {}
+    if _is_up(3, im):
+        return f"{fmt_num(s3.get('count'))} targets supplied directly."
+    cov = s3.get("coverage_pct")
+    clause = f" (target coverage {cov}%)" if cov is not None else ""
+    return (
+        f"{fmt_num(s3.get('count'))} protein targets identified across compounds{clause} "
+        "via measured bioactivities."
+    )
+
+
+def _s4_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], p: Any) -> str:
+    s4 = sr.get("4") or {}
+    if 4 in _na_stages(im):
+        return _NA_TARGETS
+    if _is_up(4, im):
+        return f"{fmt_num(s4.get('count'))} disease targets supplied directly."
+    min_score = ((p or {}).get("disease_targets") or {}).get("min_score", "—")
+    disease = labels.get("disease") or "the disease"
+    return (
+        f"{fmt_num(s4.get('count'))} proteins associated with {disease} "
+        f"(Open Targets, association score ≥ {min_score}) — the disease target space."
+    )
+
+
+# Stages 5-8 finders are stubbed here and filled in the next task; same signature as S2-S4.
+def _s5_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
+    return ""
+
+
+def _s6_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
+    return ""
+
+
+def _s7_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
+    return ""
+
+
+def _s8_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
+    return ""
+
+
+_FINDERS = {
+    1: _s1_finding,
+    2: _s2_finding,
+    3: _s3_finding,
+    4: _s4_finding,
+    5: _s5_finding,
+    6: _s6_finding,
+    7: _s7_finding,
+    8: _s8_finding,
+}
+
+
+def build_report_model(
+    run_meta: dict[str, Any],
+    params: dict[str, Any],
+    stage_results: dict[str, Any],
+    labels: dict[str, Any],
+    *,
+    input_modes: dict[str, Any],
+    frontend_url: str | None,
+    figures: list[tuple[str, bool, str]],
+) -> ReportModel:
+    """Assemble the human-readable report model for a complete run (pure — no DB/async/API)."""
+    im = input_modes or {}
+    p = params or {}
+    fig_for = _figure_index(figures)
+    stages: list[StageSection] = []
+    for n in range(1, 9):
+        group = _STAGE_PARAM_GROUP.get(n)
+        gvals = p.get(group) if group else None
+        stages.append(
+            StageSection(
+                n=n,
+                name=_STAGE_NAMES[n],
+                finding=_FINDERS[n](stage_results or {}, labels, im, p),
+                params=(
+                    param_rows(group, gvals)
+                    if group is not None and isinstance(gvals, dict) and gvals
+                    else []
+                ),
+                sources=[
+                    SourceLink(name=str(s["name"]), url=s.get("url"))
+                    for s in contracts.stage_sources(n, user_provided=_is_up(n, im))
+                ],
+                figure=fig_for.get(n),
+                csv=_csv_pointer(n),
+                preview=None,
+                notes=[],
+            )
+        )
+    title = run_meta.get("name") or _default_name(labels, run_meta.get("completed_at"))
+    subtitle = " · ".join(x for x in (labels.get("plant"), labels.get("disease")) if x) or None
+    footer = f"Generated by Herbaflow{(' — ' + frontend_url) if frontend_url else ''}"
+    return ReportModel(title, subtitle, list(_ABOUT), stages, list(_PROVENANCE), footer)

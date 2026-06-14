@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.errors import ConflictProblem, NotFoundProblem
-from app.pipeline import charts, state
+from app.pipeline import charts, report, state
 from app.pipeline import results_handoff as rh
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
@@ -41,16 +41,7 @@ class ExportArtifacts:
         }
 
     def _stage_files(self) -> dict[str, str | bytes | None]:
-        slug = {
-            1: "compounds",
-            2: "adme",
-            3: "compound_targets",
-            4: "disease_targets",
-            5: "overlap",
-            6: "ppi_edges",
-            7: "hubs",
-            8: "enrichment",
-        }
+        slug = report.STAGE_CSV_SLUG
         files: dict[str, str | bytes | None] = {
             f"stage{n}_{slug[n]}.csv": csv for n, csv in self.stage_csvs.items()
         }
