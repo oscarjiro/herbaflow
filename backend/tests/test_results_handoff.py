@@ -143,7 +143,10 @@ def test_docking_table_empty_hub_set_yields_header_plus_note():
     assert any(line.startswith("#") for line in text.splitlines())
 
 
-def test_report_has_inputs_counts_params_and_no_version_checksums():
+def test_build_report_is_interpretive():
+    # build_report is now a thin delegate to the report model + renderer (the single home for the
+    # run's human-readable science). The output is the new interpretive markdown, not the old
+    # "Result count: N" shape.
     run_meta = {
         "analysis_id": "a1",
         "name": "Curcuma x T2DM",
@@ -162,36 +165,17 @@ def test_report_has_inputs_counts_params_and_no_version_checksums():
     }
     labels = {"plant": "Curcuma longa", "disease": "Type 2 Diabetes Mellitus"}
     md = rh.build_report(
-        run_meta, params, SR_FULL, labels, input_modes={}, frontend_url="https://herbaflow.app"
-    )
-    # Inputs section + the B4 labels.
-    assert "## Inputs" in md
-    assert "Curcuma longa" in md and "Type 2 Diabetes Mellitus" in md
-    # Humanized frozen-parameter table (snake_case keys rendered readable; acronyms preserved).
-    assert "| Parameter | Value |" in md
-    assert "Significance Threshold" in md and "No IEA" in md
-    # Per-stage result counts.
-    assert "**Result count:**" in md
-    # Stage 5 section is present (the overlap stage name).
-    assert "Target overlap" in md
-    # Provenance: still the documented no-version-checksum limitation.
-    assert "no source-version" in md.lower() or "no version" in md.lower()
-
-
-def test_report_partial_run_notes_na_stages_and_na_labels():
-    sr = {"3": SR_FULL["3"], "5": SR_FULL["5"]}
-    md = rh.build_report(
-        {"analysis_id": "a2", "name": "m", "mode": "auto", "created_at": "x", "completed_at": "y"},
-        {},
-        sr,
-        {"plant": None, "disease": None},
+        run_meta,
+        params,
+        SR_FULL,
+        labels,
         input_modes={},
         frontend_url="https://herbaflow.app",
+        figures=[],
     )
-    # Missing labels -> N/A; un-run stages report an N/A result count.
-    assert "**Plant(s):** N/A" in md
-    assert "**Disease:** N/A" in md
-    assert "**Result count:** N/A" in md
+    assert "Result count:" not in md
+    assert "## Stage 5 — Target overlap" in md
+    assert "mechanistic core" in md
 
 
 _SR = {
@@ -430,11 +414,11 @@ def test_report_no_uuid_in_body_and_has_branding():
         {"plant": "Curcuma longa", "disease": "T2DM"},
         input_modes={},
         frontend_url="https://herbaflow.app",
+        figures=[],
     )
-    assert "abcd-uuid" not in md
-    assert md.startswith("# Herbaflow Analysis — Curcuma longa and T2DM")
-    assert "https://herbaflow.app" in md
-    assert "| Parameter | Value |" in md  # humanized param table
+    assert "abcd-uuid" not in md  # no analysis UUID in the body
+    assert md.startswith("# Herbaflow Analysis — Curcuma longa and T2DM")  # branded default title
+    assert "https://herbaflow.app" in md  # configurable Herbaflow link
     assert "ChEMBL" in md  # per-stage data sources (computed)
 
 
@@ -452,6 +436,7 @@ def test_report_honest_sources_for_user_provided_stage():
         {"plant": "P", "disease": "D"},
         input_modes={"plant": "manual_targets"},
         frontend_url="u",
+        figures=[],
     )
     # manual_targets => S3 user_provided => only UniProt named, not ChEMBL
     assert "UniProt (manual target resolution)" in md
@@ -505,7 +490,9 @@ def test_all_results_superset_layout():
     assert "stages/stage5_overlap.csv" in names
 
 
-def test_report_lists_included_and_omitted_figures():
+def test_report_threads_included_figures_into_stage_sections():
+    # The figures keyword flows through the delegate to the report model: an included figure is
+    # referenced inline under its stage; an omitted one is not surfaced.
     md = rh.build_report(
         {"name": "R", "mode": "auto", "created_at": "t", "completed_at": "t"},
         {},
@@ -518,6 +505,5 @@ def test_report_lists_included_and_omitted_figures():
             ("stage7_hub_bar.png", False, "no hub genes"),
         ],
     )
-    assert "## Figures" in md
     assert "`stage5_venn.png`" in md
-    assert "omitted (no hub genes)" in md
+    assert "stage7_hub_bar.png" not in md

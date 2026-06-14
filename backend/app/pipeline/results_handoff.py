@@ -16,8 +16,7 @@ import io
 import zipfile
 from typing import Any
 
-from app import contracts
-from app.pipeline import entry_modes
+from app.pipeline import report
 
 
 # One canonical rule for a target's graph-node id (gene symbol preferred; falls back to the
@@ -229,67 +228,6 @@ def build_docking_table(
     return out
 
 
-# Per-stage report wiring. Param group + human stage name + the result-count key (default "count";
-# Stage 6 reports the PPI node count). The acronym map keeps humanized param labels scientifically
-# correct (logP not Logp, MW not Mw) rather than naively title-casing.
-_STAGE_PARAM_GROUP = {
-    2: "adme",
-    3: "target",
-    4: "disease_targets",
-    6: "ppi",
-    7: "hub_genes",
-    8: "enrichment",
-}
-_STAGE_NAMES = {
-    1: "Compounds",
-    2: "ADME filter",
-    3: "Compound targets",
-    4: "Disease targets",
-    5: "Target overlap",
-    6: "PPI network",
-    7: "Hub genes",
-    8: "Functional enrichment",
-}
-_COUNT_KEY = {6: "node_count"}
-_ACRONYMS = {
-    "mw": "MW",
-    "logp": "logP",
-    "hba": "HBA",
-    "hbd": "HBD",
-    "tpsa": "TPSA",
-    "np": "NP",
-    "ppi": "PPI",
-    "iea": "IEA",
-}
-
-
-def _humanize(key: str) -> str:
-    """A snake_case param key -> a readable label (acronyms preserved, e.g. logP, MW, IEA)."""
-    return " ".join(_ACRONYMS.get(w, w.capitalize()) for w in key.split("_"))
-
-
-def _user_provided_stages(input_modes: dict[str, Any]) -> set[int]:
-    """The entity stages the user supplied directly (so their data sources are honest, not the
-    computed externals). Reuses the canonical input-mode -> per-stage-state matrix in
-    ``entry_modes`` (one home; no parallel mapping) instead of re-deriving it here. An unknown
-    stored mode degrades to "no user-provided stages" so report building never raises."""
-    plant = (input_modes or {}).get("plant", "selection")
-    disease = (input_modes or {}).get("disease", "selection")
-    try:
-        smap = entry_modes.stage_state_map(plant, disease)
-    except ValueError:
-        return set()
-    return {s for s, st in smap.items() if st == entry_modes.USER_PROVIDED}
-
-
-def _default_name(labels: dict[str, Any], completed_at: Any) -> str:
-    """The Herbaflow-branded default report title when the run has no user name."""
-    parts = [labels.get("plant"), labels.get("disease")]
-    subject = " and ".join(p for p in parts if p) or "Network analysis"
-    date = str(completed_at or "")[:10]
-    return f"Herbaflow Analysis — {subject}" + (f", {date}" if date else "")
-
-
 def build_report(
     run_meta: dict[str, Any],
     params: dict[str, Any],
@@ -300,65 +238,18 @@ def build_report(
     frontend_url: str,
     figures: list[tuple[str, bool, str]] | None = None,
 ) -> str:
-    """Human-readable markdown run report (no analysis UUID, no input_mode in the body).
-
-    Per-stage sections carry a humanized frozen-parameter table and contract-driven data sources;
-    a user-provided entity stage (manual compounds/targets/disease) names only its honest manual
-    resolution source, not the computed externals. Branded title (defaults to "Herbaflow Analysis —
-    {Plant} and {Disease}, {Date}"), a configurable Herbaflow link, and labels-only provenance (no
-    source_snapshots version checksums — Software Lock §6.4, a documented limitation)."""
-    s = stage_results
-    up = _user_provided_stages(input_modes or {})
-    title = run_meta.get("name") or _default_name(labels, run_meta.get("completed_at"))
-    lines: list[str] = [
-        f"# {title}",
-        "",
-        f"- **Mode:** {run_meta.get('mode')}",
-        f"- **Created:** {run_meta.get('created_at')}",
-        f"- **Completed:** {run_meta.get('completed_at')}",
-        "",
-        "## Inputs",
-        f"- **Plant(s):** {labels.get('plant') or 'N/A'}",
-        f"- **Disease:** {labels.get('disease') or 'N/A'}",
-        "",
-    ]
-    for n in range(1, 9):
-        stage = s.get(str(n))
-        lines.append(f"## Stage {n} — {_STAGE_NAMES[n]}")
-        cnt = "N/A" if not stage else stage.get(_COUNT_KEY.get(n, "count"), "N/A")
-        lines.append(f"- **Result count:** {cnt}")
-        group = _STAGE_PARAM_GROUP.get(n)
-        gvals = (params or {}).get(group) if group else None
-        if isinstance(gvals, dict) and gvals:
-            lines += ["", "| Parameter | Value |", "| --- | --- |"]
-            lines += [f"| {_humanize(k)} | {v} |" for k, v in gvals.items()]
-        srcs = contracts.stage_sources(n, user_provided=n in up)
-        if srcs:
-            lines.append("")
-            lines.append("- **Data sources:** " + "; ".join(str(s["name"]) for s in srcs))
-        lines.append("")
-    if figures:
-        lines.append("## Figures")
-        for name, included, reason in figures:
-            if included:
-                lines.append(f"- `{name}`")
-            else:
-                lines.append(f"- `{name}` — omitted ({reason})")
-        lines.append("")
-    lines += [
-        "## Provenance",
-        "- Point-in-time only: `source_systems` names + per-stage `source_url`s.",
-        (
-            "- **No source-version checksums** (a documented limitation — you get *when* data was "
-            "fetched and a link, not *which* external release)."
-        ),
-        "- Fixed scope: human-only (9606); enrichment background = the compound-target universe.",
-        "",
-        "---",
-        f"Generated by Herbaflow — visit Herbaflow at {frontend_url}",
-        "",
-    ]
-    return "\n".join(lines) + "\n"
+    """Render the run's research-grade markdown report. Thin delegate — the report model + renderer
+    live in ``app.pipeline.report`` (the single home for the run's human-readable science)."""
+    model = report.build_report_model(
+        run_meta,
+        params,
+        stage_results,
+        labels,
+        input_modes=input_modes,
+        frontend_url=frontend_url,
+        figures=figures or [],
+    )
+    return report.render_markdown(model)
 
 
 def build_ppi_graph(stage_results: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
