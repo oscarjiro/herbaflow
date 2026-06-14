@@ -158,10 +158,20 @@ def test_report_has_inputs_counts_params_and_no_version_checksums():
         },
     }
     labels = {"plant": "Curcuma longa", "disease": "Type 2 Diabetes Mellitus"}
-    md = rh.build_report(run_meta, params, SR_FULL, labels)
+    md = rh.build_report(
+        run_meta, params, SR_FULL, labels, input_modes={}, frontend_url="https://herbaflow.app"
+    )
+    # Inputs section + the B4 labels.
+    assert "## Inputs" in md
     assert "Curcuma longa" in md and "Type 2 Diabetes Mellitus" in md
-    assert "significance_threshold" in md and "no_iea" in md
-    assert "overlap" in md.lower()
+    # Humanized frozen-parameter table (snake_case keys rendered readable; acronyms preserved).
+    assert "| Parameter | Value |" in md
+    assert "Significance Threshold" in md and "No IEA" in md
+    # Per-stage result counts.
+    assert "**Result count:**" in md
+    # Stage 5 section is present (the overlap stage name).
+    assert "Target overlap" in md
+    # Provenance: still the documented no-version-checksum limitation.
     assert "no source-version" in md.lower() or "no version" in md.lower()
 
 
@@ -172,8 +182,13 @@ def test_report_partial_run_notes_na_stages_and_na_labels():
         {},
         sr,
         {"plant": None, "disease": None},
+        input_modes={},
+        frontend_url="https://herbaflow.app",
     )
-    assert "N/A" in md
+    # Missing labels -> N/A; un-run stages report an N/A result count.
+    assert "**Plant(s):** N/A" in md
+    assert "**Disease:** N/A" in md
+    assert "**Result count:** N/A" in md
 
 
 def test_bundle_contains_the_four_named_files():
@@ -409,3 +424,46 @@ _SR4 = {
         ]
     }
 }
+
+
+def test_report_no_uuid_in_body_and_has_branding():
+    meta = {
+        "analysis_id": "abcd-uuid",
+        "name": None,
+        "mode": "auto",
+        "created_at": "2026-06-14T00:00:00+00:00",
+        "completed_at": "2026-06-14T00:01:00+00:00",
+    }
+    params = {"disease_targets": {"min_score": 0.3}}
+    md = rh.build_report(
+        meta,
+        params,
+        _SR,
+        {"plant": "Curcuma longa", "disease": "T2DM"},
+        input_modes={},
+        frontend_url="https://herbaflow.app",
+    )
+    assert "abcd-uuid" not in md
+    assert md.startswith("# Herbaflow Analysis — Curcuma longa and T2DM")
+    assert "https://herbaflow.app" in md
+    assert "| Parameter | Value |" in md  # humanized param table
+    assert "ChEMBL" in md  # per-stage data sources (computed)
+
+
+def test_report_honest_sources_for_user_provided_stage():
+    md = rh.build_report(
+        {
+            "analysis_id": "x",
+            "name": "Run",
+            "mode": "auto",
+            "created_at": "t",
+            "completed_at": "t",
+        },
+        {},
+        _SR,
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "manual_targets"},
+        frontend_url="u",
+    )
+    # manual_targets => S3 user_provided => only UniProt named, not ChEMBL
+    assert "UniProt (manual target resolution)" in md

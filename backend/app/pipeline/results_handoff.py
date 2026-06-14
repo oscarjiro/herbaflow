@@ -15,6 +15,8 @@ import csv
 import io
 from typing import Any
 
+from app import contracts
+
 
 # One canonical rule for a target's graph-node id (gene symbol preferred; falls back to the
 # UniProt accession, then the raw target_id). Used by BOTH the node and the edge builder so the
@@ -225,10 +227,64 @@ def build_docking_table(
     return out
 
 
-def _count(stage: dict[str, Any] | None, key: str = "count") -> str:
-    if not stage:
-        return "N/A"
-    return str(stage.get(key, "N/A"))
+# Per-stage report wiring. Param group + human stage name + the result-count key (default "count";
+# Stage 6 reports the PPI node count). The acronym map keeps humanized param labels scientifically
+# correct (logP not Logp, MW not Mw) rather than naively title-casing.
+_STAGE_PARAM_GROUP = {
+    2: "adme",
+    3: "target",
+    4: "disease_targets",
+    6: "ppi",
+    7: "hub_genes",
+    8: "enrichment",
+}
+_STAGE_NAMES = {
+    1: "Compounds",
+    2: "ADME filter",
+    3: "Compound targets",
+    4: "Disease targets",
+    5: "Target overlap",
+    6: "PPI network",
+    7: "Hub genes",
+    8: "Functional enrichment",
+}
+_COUNT_KEY = {6: "node_count"}
+_ACRONYMS = {
+    "mw": "MW",
+    "logp": "logP",
+    "hba": "HBA",
+    "hbd": "HBD",
+    "tpsa": "TPSA",
+    "np": "NP",
+    "ppi": "PPI",
+    "iea": "IEA",
+}
+
+
+def _humanize(key: str) -> str:
+    """A snake_case param key -> a readable label (acronyms preserved, e.g. logP, MW, IEA)."""
+    return " ".join(_ACRONYMS.get(w, w.capitalize()) for w in key.split("_"))
+
+
+def _user_provided_stages(input_modes: dict[str, Any]) -> set[int]:
+    """The entity stages the user supplied directly (so their data sources are honest, not the
+    computed externals): manual compounds -> S1, manual targets -> S3, manual disease -> S4."""
+    out: set[int] = set()
+    if input_modes.get("plant") == "manual_compounds":
+        out.add(1)
+    if input_modes.get("plant") == "manual_targets":
+        out.add(3)
+    if input_modes.get("disease") == "manual_disease_targets":
+        out.add(4)
+    return out
+
+
+def _default_name(labels: dict[str, Any], completed_at: Any) -> str:
+    """The Herbaflow-branded default report title when the run has no user name."""
+    parts = [labels.get("plant"), labels.get("disease")]
+    subject = " and ".join(p for p in parts if p) or "Network analysis"
+    date = str(completed_at or "")[:10]
+    return f"Herbaflow Analysis — {subject}" + (f", {date}" if date else "")
 
 
 def build_report(
@@ -236,55 +292,59 @@ def build_report(
     params: dict[str, Any],
     stage_results: dict[str, Any],
     labels: dict[str, Any],
+    *,
+    input_modes: dict[str, Any],
+    frontend_url: str,
 ) -> str:
-    """Human-readable markdown: run identity, opaque B4 input labels (may be N/A), frozen params,
-    per-stage counts (N/A where the stage did not run), and labels-only provenance (no
+    """Human-readable markdown run report (no analysis UUID, no input_mode in the body).
+
+    Per-stage sections carry a humanized frozen-parameter table and contract-driven data sources;
+    a user-provided entity stage (manual compounds/targets/disease) names only its honest manual
+    resolution source, not the computed externals. Branded title (defaults to "Herbaflow Analysis —
+    {Plant} and {Disease}, {Date}"), a configurable Herbaflow link, and labels-only provenance (no
     source_snapshots version checksums — Software Lock §6.4, a documented limitation)."""
     s = stage_results
-    plant = labels.get("plant") or "N/A"
-    disease = labels.get("disease") or "N/A"
+    up = _user_provided_stages(input_modes or {})
+    title = run_meta.get("name") or _default_name(labels, run_meta.get("completed_at"))
     lines: list[str] = [
-        f"# Run report — {run_meta.get('name') or run_meta.get('analysis_id')}",
+        f"# {title}",
         "",
-        f"- **Run id:** {run_meta.get('analysis_id')}",
         f"- **Mode:** {run_meta.get('mode')}",
         f"- **Created:** {run_meta.get('created_at')}",
         f"- **Completed:** {run_meta.get('completed_at')}",
         "",
         "## Inputs",
-        f"- **Plant(s):** {plant}",
-        f"- **Disease:** {disease}",
+        f"- **Plant(s):** {labels.get('plant') or 'N/A'}",
+        f"- **Disease:** {labels.get('disease') or 'N/A'}",
         "",
-        "## Frozen parameters",
     ]
-    if params:
-        for group, vals in params.items():
-            if isinstance(vals, dict):
-                pretty = ", ".join(f"{k}={v}" for k, v in vals.items())
-                lines.append(f"- **{group}:** {pretty}")
-    else:
-        lines.append("- N/A")
+    for n in range(1, 9):
+        stage = s.get(str(n))
+        lines.append(f"## Stage {n} — {_STAGE_NAMES[n]}")
+        cnt = "N/A" if not stage else stage.get(_COUNT_KEY.get(n, "count"), "N/A")
+        lines.append(f"- **Result count:** {cnt}")
+        group = _STAGE_PARAM_GROUP.get(n)
+        gvals = (params or {}).get(group) if group else None
+        if isinstance(gvals, dict) and gvals:
+            lines += ["", "| Parameter | Value |", "| --- | --- |"]
+            lines += [f"| {_humanize(k)} | {v} |" for k, v in gvals.items()]
+        srcs = contracts.stage_sources(n, user_provided=n in up)
+        if srcs:
+            lines.append("")
+            lines.append("- **Data sources:** " + "; ".join(srcs))
+        lines.append("")
     lines += [
-        "",
-        "## Per-stage counts",
-        f"- Stage 1 compounds: {_count(s.get('1'))}",
-        f"- Stage 2 ADME-passed: {_count(s.get('2'))}",
-        f"- Stage 3 compound-targets: {_count(s.get('3'))}",
-        f"- Stage 4 disease-targets: {_count(s.get('4'))}",
-        f"- Stage 5 overlap: {_count(s.get('5'))}",
-        f"- Stage 6 PPI nodes: {_count(s.get('6'), 'node_count')}",
-        f"- Stage 7 hubs: {_count(s.get('7'))}",
-        f"- Stage 8 enriched terms: {_count(s.get('8'))}",
-        "",
         "## Provenance",
         "- Point-in-time only: `source_systems` names + per-stage `source_url`s.",
         (
-            "- **No source-version checksums**"
-            " (the `source_snapshots` table is not built — a documented"
-            " limitation: you get *when* data was fetched and a link to the"
-            " record, not *which* external release)."
+            "- **No source-version checksums** (a documented limitation — you get *when* data was "
+            "fetched and a link, not *which* external release)."
         ),
         "- Fixed scope: human-only (9606); enrichment background = the compound-target universe.",
+        "",
+        "---",
+        f"Generated by Herbaflow — visit Herbaflow at {frontend_url}",
+        "",
     ]
     return "\n".join(lines) + "\n"
 
