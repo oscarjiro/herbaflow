@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import csv
 import io
+import zipfile
 from typing import Any
 
 from app import contracts
@@ -642,14 +643,50 @@ def build_root_readme() -> str:
     )
 
 
-def build_bundle(*, ctp_nodes: str, ctp_edges: str, docking: str, report: str) -> bytes:
-    """In-memory zip of the four artifacts (deterministic file names)."""
+def _zip(files: dict[str, str | bytes | None]) -> bytes:
+    """Deterministic in-memory zip; None values are skipped (conditional-PNG rule)."""
     buf = io.BytesIO()
-    import zipfile
-
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("ctp-nodes.csv", ctp_nodes)
-        zf.writestr("ctp-edges.csv", ctp_edges)
-        zf.writestr("docking.csv", docking)
-        zf.writestr("report.md", report)
+        for name, content in files.items():
+            if content is None:
+                continue
+            zf.writestr(name, content)
     return buf.getvalue()
+
+
+def build_network_bundle(
+    *, ctp_nodes: str, ctp_edges: str, docking: str, network_png: bytes | None, readme: str
+) -> bytes:
+    """Network-and-docking zip: CSVs always present; PNG only when not None."""
+    return _zip(
+        {
+            "ctp-nodes.csv": ctp_nodes,
+            "ctp-edges.csv": ctp_edges,
+            "docking.csv": docking,
+            "ctp-network.png": network_png,
+            "README.md": readme,
+        }
+    )
+
+
+def build_stages_bundle(*, stage_files: dict[str, str | bytes | None], readme: str) -> bytes:
+    """Per-stage zip: one entry per stage CSV (and chart, where applicable)."""
+    return _zip({**stage_files, "README.md": readme})
+
+
+def build_all_results_bundle(
+    *,
+    report: str,
+    network_files: dict[str, str | bytes | None],
+    stage_files: dict[str, str | bytes | None],
+) -> bytes:
+    """All-results superset zip: report + network-and-docking/ + stages/ subdirectories."""
+    files: dict[str, str | bytes | None] = {
+        "README.txt": build_root_readme(),
+        "report.md": report,
+    }
+    for name, content in network_files.items():
+        files[f"network-and-docking/{name}"] = content
+    for name, content in stage_files.items():
+        files[f"stages/{name}"] = content
+    return _zip(files)

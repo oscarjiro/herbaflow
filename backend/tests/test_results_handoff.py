@@ -1,3 +1,6 @@
+import io as _io
+import zipfile as _zipfile
+
 from app.pipeline import results_handoff as rh
 
 
@@ -189,21 +192,6 @@ def test_report_partial_run_notes_na_stages_and_na_labels():
     assert "**Plant(s):** N/A" in md
     assert "**Disease:** N/A" in md
     assert "**Result count:** N/A" in md
-
-
-def test_bundle_contains_the_four_named_files():
-    import io
-    import zipfile
-
-    data = rh.build_bundle(
-        ctp_nodes="id,label\n",
-        ctp_edges="source,target\n",
-        docking="hub_gene_symbol\n",
-        report="# r\n",
-    )
-    with zipfile.ZipFile(io.BytesIO(data)) as zf:
-        assert set(zf.namelist()) == {"ctp-nodes.csv", "ctp-edges.csv", "docking.csv", "report.md"}
-        assert zf.read("report.md").decode() == "# r\n"
 
 
 _SR = {
@@ -484,3 +472,34 @@ def test_stages_readme_lists_files():
 def test_root_readme_lists_bundles():
     md = rh.build_root_readme()
     assert "report.md" in md and "network-and-docking" in md.lower() and "stages/" in md
+
+
+def _names(data: bytes) -> set[str]:
+    return set(_zipfile.ZipFile(_io.BytesIO(data)).namelist())
+
+
+def test_network_bundle_contents():
+    b = rh.build_network_bundle(
+        ctp_nodes="a", ctp_edges="b", docking="c", network_png=None, readme="r"
+    )
+    # network_png=None -> png omitted; CSVs + README always present
+    assert _names(b) == {"ctp-nodes.csv", "ctp-edges.csv", "docking.csv", "README.md"}
+
+
+def test_network_bundle_includes_png_when_present():
+    b = rh.build_network_bundle(
+        ctp_nodes="a", ctp_edges="b", docking="c", network_png=b"\x89PNG", readme="r"
+    )
+    assert "ctp-network.png" in _names(b)
+
+
+def test_all_results_superset_layout():
+    b = rh.build_all_results_bundle(
+        report="rep",
+        network_files={"ctp-nodes.csv": "n"},
+        stage_files={"stage5_overlap.csv": "o"},
+    )
+    names = _names(b)
+    assert "README.txt" in names and "report.md" in names
+    assert "network-and-docking/ctp-nodes.csv" in names
+    assert "stages/stage5_overlap.csv" in names
