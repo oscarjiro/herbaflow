@@ -466,12 +466,23 @@ bundle:
 | All results (.zip) | `…/export/all-results.zip` | `exportAllResultsUrl` |
 
 These are **binary** downloads, so they deliberately bypass the typed query SDK and are fetched
-directly by the browser (the backend sets `Content-Disposition`). The URLs are built by
-`src/lib/exportUrl.ts` (the helpers above, plus `exportArtifactUrl(id, filename)` for a single
-artifact) from the one `API_BASE_URL` exported by `src/lib/api.ts` — the same base the generated
-client uses (overridable via `VITE_API_BASE_URL`). This run-level handoff is **distinct** from the
-per-stage CSV downloads each `StageNView` already offers (those export a single stage's table; this
-exports the assembled cross-stage bundles).
+directly by the browser (the backend sets `Content-Disposition`). The saved filenames are
+**branded** — `herbaflow_{plant-slug}_{disease-slug}_{date}_…` (e.g.
+`herbaflow_curcuma-longa-l_type-2-diabetes-mellitus_2026-06-14_all-results.zip`) — with **no UUID**,
+derived server-side from the run labels. The URLs are built by `src/lib/exportUrl.ts` (the helpers
+above, plus `exportArtifactUrl(id, filename)` for a single artifact) from the one `API_BASE_URL`
+exported by `src/lib/api.ts` — the same base the generated client uses (overridable via
+`VITE_API_BASE_URL`). This run-level handoff is **distinct** from the per-stage CSV downloads each
+`StageNView` already offers (those export a single stage's table; this exports the assembled
+cross-stage bundles).
+
+The `report.md` is research-grade: each stage leads with an interpretive finding (not a bare count),
+parameters carry units + plain-language descriptions, data sources are markdown links, and small
+preview tables (top hubs, top enriched terms) point at the full per-stage CSVs. The bundle PNGs
+follow publication conventions (enrichplot-style enrichment dotplot, concentric compound–target–
+pathway network, PPI network with isolated nodes parked in a labelled tray and hubs coloured by
+composite score). Every bundle carries a `.md` README with a per-column glossary; the all-results zip
+embeds the two sub-bundle READMEs.
 
 ### Inline server-rendered charts
 
@@ -492,8 +503,11 @@ than showing a broken image. The wired charts are:
 `StageDataSources` no longer hardcodes its per-stage source names — it reads the `STAGE_SOURCES`
 and `USER_PROVIDED_SOURCES` maps from `src/contract` (derived from the shared
 `shared/contracts/analysis.json` `$defs.stage_sources`, the single home for these display names,
-read by both the FE and the backend report). The `userProvided` prop still selects the
-honest manual-mode source set when an entity stage is `user_provided`.
+read by both the FE and the backend report). Each entry is now a `{ name, url }` object: the
+component renders the `name` as an external link (`<a target="_blank">`) when a `url` is present and
+as plain text when it is `null` (pseudo-sources like the Stage-5 set-intersection have no page). The
+`userProvided` prop still selects the honest manual-mode source set when an entity stage is
+`user_provided`.
 
 ---
 
