@@ -324,9 +324,9 @@ const stageSourcesDefs = (
   }
 ).stage_sources.properties;
 
-function readStageSourceMap(
-  group: { properties: Record<string, { default: StageSourceEntry[] }> },
-): Record<number, StageSourceEntry[]> {
+function readStageSourceMap(group: {
+  properties: Record<string, { default: StageSourceEntry[] }>;
+}): Record<number, StageSourceEntry[]> {
   const out: Record<number, StageSourceEntry[]> = {};
   for (const [k, v] of Object.entries(group.properties)) out[Number(k)] = v.default;
   return out;
