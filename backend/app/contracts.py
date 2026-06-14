@@ -90,7 +90,12 @@ def adme_defaults() -> dict[str, Any]:
 
 
 def pipeline_param_bounds(group: str) -> dict[str, Any]:
-    """The JSON-Schema property map for a param group (used for override-bounds validation)."""
+    """The JSON-Schema property map for a param group (param_key -> {description, unit?, ...}).
+
+    The single generic accessor over ``pipeline_parameters[group].properties`` — backs both
+    override-bounds validation and report param metadata; the typed per-group accessors
+    (``adme_param_meta`` etc.) are specialisations of this read.
+    """
     return cast(dict[str, Any], pipeline_parameters()[group]["properties"])
 
 

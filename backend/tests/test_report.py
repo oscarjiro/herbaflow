@@ -51,3 +51,24 @@ def test_render_markdown_links_sources_and_pointers():
     assert "stages/stage8_enrichment.csv" in md
     assert "## Stage 8 — Functional enrichment" in md
     assert md.rstrip().endswith("http://localhost:5173")
+
+
+def test_humanize_value_enums_bools_lists():
+    assert (
+        report.humanize_value("network_type", "functional")
+        == "functional associations (not just physical binding)"
+    )
+    assert report.humanize_value("correction", "fdr") == "Benjamini-Hochberg FDR"
+    assert report.humanize_value("apply_veber", True) == "Yes"
+    assert report.humanize_value("sources", ["GO:BP", "KEGG"]) == "GO biological process, KEGG"
+
+
+def test_format_int_thousands():
+    assert report.fmt_num(2000) == "2,000"
+    assert report.fmt_num(0.8651) == "0.8651"
+
+
+def test_param_rows_pull_unit_and_description():
+    rows = report.param_rows("adme", {"max_mw": 500, "apply_veber": True})
+    mw = next(r for r in rows if r.label == "Max MW")
+    assert mw.value == "500" and mw.unit == "Da" and "molecular weight" in mw.description.lower()

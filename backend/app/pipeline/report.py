@@ -5,6 +5,9 @@ can consume the same model later."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
+
+from app import contracts
 
 
 @dataclass
@@ -49,6 +52,77 @@ class ReportModel:
     stages: list[StageSection]
     provenance: list[str]
     footer: str
+
+
+_ACRONYMS = {
+    "mw": "MW",
+    "logp": "logP",
+    "hba": "HBA",
+    "hbd": "HBD",
+    "tpsa": "TPSA",
+    "np": "NP",
+    "ppi": "PPI",
+    "iea": "IEA",
+}
+_ENUM = {
+    "functional": "functional associations (not just physical binding)",
+    "physical": "physical binding only",
+    "fdr": "Benjamini-Hochberg FDR",
+    "g_SCS": "g:SCS",
+    "bonferroni": "Bonferroni",
+}
+_SOURCE_NAME = {
+    "GO:BP": "GO biological process",
+    "GO:MF": "GO molecular function",
+    "GO:CC": "GO cellular component",
+    "KEGG": "KEGG",
+    "REAC": "Reactome",
+    "WP": "WikiPathways",
+}
+
+
+def humanize_label(key: str) -> str:
+    """Turn a snake_case param key into a human label, preserving science acronyms."""
+    return " ".join(_ACRONYMS.get(w, w.capitalize()) for w in key.split("_"))
+
+
+def humanize_value(key: str, value: Any) -> str:
+    """Render a param value for human display: bools as Yes/No, enums spelled out, lists named."""
+    if isinstance(value, bool):
+        return "Yes" if value else "No"
+    if isinstance(value, list):
+        return ", ".join(_SOURCE_NAME.get(str(v), str(v)) for v in value)
+    if isinstance(value, str):
+        return _ENUM.get(value, value)
+    if isinstance(value, int):
+        return f"{value:,}"
+    return str(value)
+
+
+def fmt_num(value: Any) -> str:
+    """Format a numeric display value: ints get thousands separators; everything else is str()."""
+    if isinstance(value, bool):
+        return "Yes" if value else "No"
+    if isinstance(value, int):
+        return f"{value:,}"
+    return str(value)
+
+
+def param_rows(group: str, values: dict[str, Any]) -> list[ParamRow]:
+    """Build ParamRows for a param group, pulling unit + description from the contract schema."""
+    schema = contracts.pipeline_param_bounds(group)
+    rows: list[ParamRow] = []
+    for k, v in values.items():
+        meta = schema.get(k, {})
+        rows.append(
+            ParamRow(
+                humanize_label(k),
+                humanize_value(k, v),
+                meta.get("unit"),
+                meta.get("description", ""),
+            )
+        )
+    return rows
 
 
 def _source_md(s: SourceLink) -> str:
