@@ -449,6 +449,22 @@ def _stage7_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> s
     return _csv_with_note(cols, rows, "no hub genes")
 
 
+def _term_url(source: str, term_id: str) -> str:
+    """Derive a public page URL for a g:Profiler enrichment term from its source + native id.
+    g:Profiler embeds the source as a prefix on non-GO ids (e.g. ``KEGG:04020``); GO keeps the
+    full ``GO:`` id for QuickGO."""
+    if source.startswith("GO"):
+        return f"https://www.ebi.ac.uk/QuickGO/term/{term_id}"
+    bare = term_id.split(":", 1)[1] if ":" in term_id else term_id
+    if source == "KEGG":
+        return f"https://www.kegg.jp/entry/{bare}"
+    if source == "REAC":
+        return f"https://reactome.org/content/detail/{bare}"
+    if source == "WP":
+        return f"https://www.wikipathways.org/pathways/{bare}"
+    return ""
+
+
 def _stage8_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
     cols = (
         "term_id",
@@ -457,6 +473,7 @@ def _stage8_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> s
         "p_value",
         "intersection_size",
         "intersection_genes",
+        "source_url",
     )
     rows: list[tuple[Any, ...]] = []
     for t in sr.get("8", {}).get("terms", []):
@@ -469,6 +486,7 @@ def _stage8_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> s
                 _fmt_p(t.get("p_value")),
                 len(genes),
                 ";".join(genes),
+                _term_url(t.get("source") or "", t["term_id"]),
             )
         )
     return _csv_with_note(cols, rows, "no enriched terms (valid completion)")

@@ -498,6 +498,20 @@ def test_docking_table_has_source_url():
     assert "alphafold.ebi.ac.uk" in csv
 
 
+def test_term_url_derivation():
+    assert rh._term_url("GO:BP", "GO:0003013") == "https://www.ebi.ac.uk/QuickGO/term/GO:0003013"
+    assert rh._term_url("KEGG", "KEGG:04020") == "https://www.kegg.jp/entry/04020"
+    assert (
+        rh._term_url("REAC", "REAC:R-HSA-1234") == "https://reactome.org/content/detail/R-HSA-1234"
+    )
+    assert rh._term_url("WP", "WP:WP1234") == "https://www.wikipathways.org/pathways/WP1234"
+
+
+def test_stage8_csv_has_source_url_column():
+    csv = rh.build_stage_csv(8, SR_FULL, COMPOUNDS, TARGETS)
+    assert csv.splitlines()[0].endswith("source_url")
+
+
 def test_report_threads_included_figures_into_stage_sections():
     # The figures keyword flows through the delegate to the report model: an included figure is
     # referenced inline under its stage; an omitted one is not surfaced.
