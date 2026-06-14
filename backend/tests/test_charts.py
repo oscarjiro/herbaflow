@@ -43,6 +43,12 @@ def test_hub_bar_none_when_empty():
     assert charts.render_hub_bar({"hubs": []}) is None
 
 
+def test_hub_bar_title_states_top_n():
+    s7 = {"hubs": [{"gene_symbol": "A", "composite": 1.0}, {"gene_symbol": "B", "composite": 0.2}]}
+    png = charts.render_hub_bar(s7)
+    assert png[:8] == b"\x89PNG\r\n\x1a\n"
+
+
 # Task 15 — Enrichment bubble per category (Stage 8)
 
 
