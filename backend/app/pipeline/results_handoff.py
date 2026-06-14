@@ -289,6 +289,52 @@ def build_report(
     return "\n".join(lines) + "\n"
 
 
+def build_ppi_graph(stage_results: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    """PPI graph data (Stage 6 nodes/edges + Stage 7 hub flag). Node id = gene symbol; STRING edge
+    endpoints are already gene symbols (graph-join holds natively)."""
+    s6 = stage_results.get("6", {})
+    hub_gids = {h.get("gene_symbol") for h in stage_results.get("7", {}).get("hubs", [])}
+    nodes = [
+        {
+            "id": n["gene_symbol"],
+            "gene_symbol": n["gene_symbol"],
+            "uniprot_accession": n.get("uniprot_accession") or "",
+            "is_hub": "true" if n["gene_symbol"] in hub_gids else "false",
+        }
+        for n in s6.get("nodes", [])
+    ]
+    edges = [
+        {"source": e["source"], "target": e["target"], "confidence": e.get("confidence")}
+        for e in s6.get("edges", [])
+    ]
+    return {"nodes": nodes, "edges": edges}
+
+
+_PPI_NODE_COLS = ("id", "gene_symbol", "uniprot_accession", "is_hub")
+
+
+def build_ppi_nodes(stage_results: dict[str, Any]) -> str:
+    """Cytoscape node table CSV for the PPI graph (Stage-6 network, Stage-7 hub flag)."""
+    g = build_ppi_graph(stage_results)
+    rows: list[tuple[Any, ...]] = [_PPI_NODE_COLS]
+    rows += [tuple(n[c] for c in _PPI_NODE_COLS) for n in g["nodes"]]
+    out = _csv(rows)
+    if len(g["nodes"]) == 0:
+        out += "# no PPI nodes for this run\n"
+    return out
+
+
+def build_ppi_edges(stage_results: dict[str, Any]) -> str:
+    """Cytoscape edge table CSV for the PPI graph (STRING confidence-scored edges)."""
+    g = build_ppi_graph(stage_results)
+    rows: list[tuple[Any, ...]] = [("source", "target", "confidence")]
+    rows += [(e["source"], e["target"], e["confidence"]) for e in g["edges"]]
+    out = _csv(rows)
+    if len(g["edges"]) == 0:
+        out += "# no PPI edges (sparse or empty network)\n"
+    return out
+
+
 def build_bundle(*, ctp_nodes: str, ctp_edges: str, docking: str, report: str) -> bytes:
     """In-memory zip of the four artifacts (deterministic file names)."""
     buf = io.BytesIO()

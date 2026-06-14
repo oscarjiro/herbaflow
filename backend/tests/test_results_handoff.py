@@ -235,3 +235,32 @@ def test_ctp_nodes_csv_has_smiles_header():
     assert rh.build_ctp_nodes(_SR, _COMP, _TGT).splitlines()[0] == (
         "id,label,type,inchikey,smiles,uniprot_accession,is_hub,source"
     )
+
+
+_SR6 = {
+    "6": {
+        "nodes": [
+            {"gene_symbol": "PPARG", "target_id": "t1", "uniprot_accession": "P37231"},
+            {"gene_symbol": "TP53", "target_id": "t2", "uniprot_accession": "P04637"},
+        ],
+        "edges": [{"source": "PPARG", "target": "TP53", "confidence": 0.92}],
+    },
+    "7": {"hubs": [{"target_id": "t1", "gene_symbol": "PPARG"}]},
+}
+
+
+def test_ppi_nodes_have_hub_flag_and_join():
+    graph = rh.build_ppi_graph(_SR6)
+    node_ids = {n["id"] for n in graph["nodes"]}
+    assert node_ids == {"PPARG", "TP53"}
+    assert next(n for n in graph["nodes"] if n["id"] == "PPARG")["is_hub"] == "true"
+    for e in graph["edges"]:
+        assert e["source"] in node_ids and e["target"] in node_ids
+
+
+def test_ppi_edges_csv_header():
+    assert rh.build_ppi_edges(_SR6).splitlines()[0] == "source,target,confidence"
+
+
+def test_ppi_nodes_csv_header():
+    assert rh.build_ppi_nodes(_SR6).splitlines()[0] == "id,gene_symbol,uniprot_accession,is_hub"
