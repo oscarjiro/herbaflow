@@ -129,7 +129,9 @@ async def test_complete_run_export_zip_has_four_files(client, seed_complete_run)
     with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
         names = set(zf.namelist())
     assert {
-        "README.txt",
+        "README.md",
+        "network-and-docking/README.md",
+        "stages/README.md",
         "report.md",
         "network-and-docking/ctp-nodes.csv",
         "stages/stage5_overlap.csv",
