@@ -341,21 +341,106 @@ def _s4_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
     )
 
 
-# Stages 5-8 finders are stubbed here and filled in the next task; same signature as S2-S4.
+def _ppi_connectivity(sr: dict[str, Any]) -> tuple[int, int]:
+    """Split the PPI nodes into (connected, isolated): isolated = nodes touched by no edge."""
+    s6 = sr.get("6") or {}
+    ids = [n.get("gene_symbol") for n in s6.get("nodes", [])]
+    endpoints: set[Any] = set()
+    for e in s6.get("edges", []):
+        endpoints.add(e.get("source"))
+        endpoints.add(e.get("target"))
+    isolated = sum(1 for i in ids if i not in endpoints)
+    return len(ids) - isolated, isolated
+
+
 def _s5_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
-    return ""
+    s5 = sr.get("5") or {}
+    return (
+        f"{fmt_num(s5.get('count'))} targets shared between the "
+        f"{fmt_num(s5.get('compound_target_count'))} compound targets and "
+        f"{fmt_num(s5.get('disease_target_count'))} disease targets — the candidate mechanistic "
+        f"core where {_plant_phrase(labels)} may act on {labels.get('disease') or 'the disease'}."
+    )
 
 
 def _s6_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
-    return ""
+    connected, isolated = _ppi_connectivity(sr)
+    n = (sr.get("6") or {}).get("node_count", connected + isolated)
+    return (
+        f"The {fmt_num(n)} shared targets form a STRING functional-association network: "
+        f"{connected} interconnected, {isolated} isolated. Interconnection suggests a coordinated "
+        f"module rather than independent action."
+    )
 
 
 def _s7_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
-    return ""
+    hubs = sorted(
+        (sr.get("7") or {}).get("hubs", []),
+        key=lambda h: h.get("composite") or 0.0,
+        reverse=True,
+    )
+    if not hubs:
+        return "No hub genes were identified (the shared-target network is too sparse to rank)."
+    top = ", ".join(h.get("gene_symbol") or str(h.get("target_id")) for h in hubs[:3])
+    return (
+        f"Hub-bottleneck ranking (degree + betweenness composite, Yu 2007) prioritises {top} "
+        f"as the most topologically central targets — the likely primary mediators."
+    )
 
 
 def _s8_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
-    return ""
+    terms = [t for t in (sr.get("8") or {}).get("terms", []) if t.get("p_value") is not None]
+    if not terms:
+        return (
+            "No functional enrichment terms reached significance for the shared targets "
+            "(a valid result)."
+        )
+    ordered = sorted(terms, key=lambda t: t["p_value"])
+    themes = ", ".join(t.get("name") or t["term_id"] for t in ordered[:3])
+    top = ordered[0]
+    by_cat: dict[str, int] = {}
+    for t in terms:
+        c = t.get("source", "?")
+        by_cat[c] = by_cat.get(c, 0) + 1
+    breakdown = ", ".join(f"{n} {_SOURCE_NAME.get(c, c)}" for c, n in by_cat.items())
+    return (
+        f"The shared targets are enriched for {themes} ({fmt_num(len(terms))} terms, FDR < 0.05) — "
+        f"the biological processes through which {_plant_phrase(labels)} may act on "
+        f"{labels.get('disease') or 'the disease'}. Strongest: {top.get('name') or top['term_id']} "
+        f"(adjusted p = {top['p_value']:.2g}, {len(top.get('intersection', []))} genes). "
+        f"By category: {breakdown}."
+    )
+
+
+def _hub_preview(sr: dict[str, Any]) -> PreviewTable | None:
+    """Top-5 hub genes by composite score (None when no hubs were ranked)."""
+    hubs = (sr.get("7") or {}).get("hubs", [])
+    if not hubs:
+        return None
+    ordered = sorted(hubs, key=lambda h: h.get("composite") or 0.0, reverse=True)[:5]
+    rows: list[tuple[str, ...]] = [
+        (str(h.get("gene_symbol") or h.get("target_id")), f"{(h.get('composite') or 0.0):.3f}")
+        for h in ordered
+    ]
+    return PreviewTable("Top hub genes", ["Gene", "Composite score"], rows)
+
+
+def _term_preview(sr: dict[str, Any]) -> PreviewTable | None:
+    """Top-5 enriched terms by adjusted p-value (None when no significant terms)."""
+    terms = [t for t in (sr.get("8") or {}).get("terms", []) if t.get("p_value") is not None]
+    if not terms:
+        return None
+    ordered = sorted(terms, key=lambda t: t["p_value"])[:5]
+    rows: list[tuple[str, ...]] = [
+        (
+            str(t.get("name") or t["term_id"]),
+            str(_SOURCE_NAME.get(t.get("source", "?"), t.get("source", "?"))),
+            f"{t['p_value']:.2g}",
+            str(len(t.get("intersection", []))),
+        )
+        for t in ordered
+    ]
+    return PreviewTable("Top enriched terms", ["Term", "Category", "Adjusted p", "Genes"], rows)
 
 
 _FINDERS = {
@@ -404,7 +489,11 @@ def build_report_model(
                 ],
                 figure=fig_for.get(n),
                 csv=_csv_pointer(n),
-                preview=None,
+                preview=(
+                    _hub_preview(stage_results or {})
+                    if n == 7
+                    else _term_preview(stage_results or {}) if n == 8 else None
+                ),
                 notes=[],
             )
         )

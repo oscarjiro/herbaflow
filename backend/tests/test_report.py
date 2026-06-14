@@ -109,3 +109,72 @@ def test_s2_skip_adme_finding():
     )
     s2 = next(s for s in m.stages if s.n == 2)
     assert "skipped" in s2.finding.lower()
+
+
+def test_s6_reports_connected_and_isolated():
+    sr = {
+        "5": {"count": 17, "compound_target_count": 180, "disease_target_count": 911},
+        "6": {
+            "node_count": 17,
+            "nodes": [{"gene_symbol": g} for g in ["A", "B", "C", "X"]],
+            "edges": [{"source": "A", "target": "B"}, {"source": "B", "target": "C"}],
+        },
+        "7": {"hubs": [{"gene_symbol": "A", "composite": 1.0}]},
+        "8": {
+            "terms": [
+                {
+                    "term_id": "GO:1",
+                    "name": "blood circulation",
+                    "source": "GO:BP",
+                    "p_value": 1e-5,
+                    "intersection": ["A", "B"],
+                }
+            ]
+        },
+    }
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        sr,
+        {"plant": "P", "disease": "D"},
+        input_modes={},
+        frontend_url="u",
+        figures=[],
+    )
+    s6 = next(s for s in m.stages if s.n == 6)
+    assert "3 interconnected" in s6.finding and "1 isolated" in s6.finding
+
+
+def test_s8_finding_and_preview():
+    sr = {
+        "5": {"count": 17},
+        "8": {
+            "terms": [
+                {
+                    "term_id": "GO:1",
+                    "name": "blood circulation",
+                    "source": "GO:BP",
+                    "p_value": 1e-5,
+                    "intersection": ["A"] * 10,
+                },
+                {
+                    "term_id": "KEGG:1",
+                    "name": "x",
+                    "source": "KEGG",
+                    "p_value": 0.01,
+                    "intersection": ["A"] * 3,
+                },
+            ]
+        },
+    }
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        sr,
+        {"plant": "P", "disease": "D"},
+        input_modes={},
+        frontend_url="u",
+        figures=[],
+    )
+    s8 = next(s for s in m.stages if s.n == 8)
+    assert "blood circulation" in s8.finding and s8.preview is not None
