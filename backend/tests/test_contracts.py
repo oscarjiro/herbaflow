@@ -103,13 +103,35 @@ def test_adme_params_carry_description_bounds_and_recommendation() -> None:
 
 
 def test_stage_sources_computed():
-    assert contracts.stage_sources(3) == ["ChEMBL", "PubChem BioAssay", "UniProt"]
+    srcs = contracts.stage_sources(3)
+    names = [s["name"] for s in srcs]
+    assert names == ["ChEMBL", "PubChem BioAssay", "UniProt"]
 
 
 def test_stage_sources_user_provided_overrides():
-    assert contracts.stage_sources(3, user_provided=True) == ["UniProt (manual target resolution)"]
+    srcs = contracts.stage_sources(3, user_provided=True)
+    assert len(srcs) == 1
+    assert srcs[0]["name"] == "UniProt (manual target resolution)"
 
 
 def test_stage_sources_user_provided_falls_back_to_computed():
     # Stage 5 has no user_provided override -> computed list.
     assert contracts.stage_sources(5, user_provided=True) == contracts.stage_sources(5)
+
+
+def test_stage_sources_carry_name_and_url():
+    srcs = contracts.stage_sources(3, user_provided=False)
+    assert {"name": "ChEMBL", "url": "https://www.ebi.ac.uk/chembl/"} in srcs
+    # pseudo-source (set-intersection text) has no page
+    s5 = contracts.stage_sources(5, user_provided=False)
+    assert all(s["url"] is None or s["url"].startswith("http") for s in s5)
+
+
+def test_stage_sources_user_provided_unchanged_shape():
+    up = contracts.stage_sources(1, user_provided=True)
+    assert up[0]["name"].startswith("PubChem")
+
+
+def test_adme_param_has_unit():
+    p = contracts.adme_param_meta()["max_mw"]
+    assert p.get("unit") == "Da"

@@ -109,6 +109,7 @@ def adme_param_meta() -> dict[str, Any]:
             "max": spec.get("maximum"),
             "recommended_min": spec.get("recommended_min"),
             "recommended_max": spec.get("recommended_max"),
+            "unit": spec.get("unit"),
             "description": spec.get("description"),
         }
     return out
@@ -221,8 +222,11 @@ def enrichment_param_meta() -> dict[str, Any]:
     return out
 
 
-def stage_sources(stage: int, *, user_provided: bool = False) -> list[str]:
-    """Per-stage data-source display names (contract-driven; one shared home with the FE).
+def stage_sources(stage: int, *, user_provided: bool = False) -> list[dict[str, str | None]]:
+    """Per-stage data-source objects (contract-driven; one shared home with the FE).
+
+    Each entry is ``{"name": str, "url": str | None}`` where ``url`` is ``None`` for
+    pseudo-sources that have no canonical public page (e.g. set-intersection descriptions).
 
     ``user_provided`` returns only the manual-resolution source that actually runs for a
     user-supplied entity stage (S1/S3/S4); falls back to the computed list when no manual

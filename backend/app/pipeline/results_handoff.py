@@ -335,7 +335,7 @@ def build_report(
         srcs = contracts.stage_sources(n, user_provided=n in up)
         if srcs:
             lines.append("")
-            lines.append("- **Data sources:** " + "; ".join(srcs))
+            lines.append("- **Data sources:** " + "; ".join(str(s["name"]) for s in srcs))
         lines.append("")
     if figures:
         lines.append("## Figures")
