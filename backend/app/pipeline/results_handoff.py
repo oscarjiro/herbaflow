@@ -335,6 +335,202 @@ def build_ppi_edges(stage_results: dict[str, Any]) -> str:
     return out
 
 
+# ---------------------------------------------------------------------------
+# Per-stage CSV builders (S1–S8) — one CSV per pipeline stage, reusing the on-screen
+# column contracts. An empty stage -> header + a `# note` line (no silent blank file).
+# ---------------------------------------------------------------------------
+
+
+def _csv_with_note(header: tuple[str, ...], rows: list[tuple[Any, ...]], empty_note: str) -> str:
+    out = _csv([header] + rows)
+    if not rows:
+        out += f"# {empty_note}\n"
+    return out
+
+
+def _stage1_csv(sr: dict[str, Any], compounds_by_id: dict[str, Any], _t: dict[str, Any]) -> str:
+    cols = ("compound", "inchikey", "smiles")
+    rows: list[tuple[Any, ...]] = []
+    for c in sr.get("1", {}).get("compounds", []):
+        if c.get("tag") == "user-removed":
+            continue
+        meta = compounds_by_id.get(c.get("compound_id"), {})
+        rows.append(
+            (
+                c.get("canonical_name") or meta.get("name") or c.get("compound_id"),
+                meta.get("inchi_key") or "",
+                meta.get("smiles") or "",
+            )
+        )
+    return _csv_with_note(cols, rows, "no compounds")
+
+
+# Stage-2 row columns mirror the on-screen ADME CSV (Stage2View.buildCsv) verbatim — flat row
+# keys (no `descriptors` nesting), with a `passed` flag splitting the two stored buckets.
+_STAGE2_FIELDS = (
+    "compound_id",
+    "canonical_name",
+    "descriptor_source",
+    "molecular_weight",
+    "logp",
+    "hbond_donors",
+    "hbond_acceptors",
+    "tpsa",
+    "rotatable_bonds",
+    "qed_score",
+    "np_likeness_score",
+    "num_ro5_violations",
+    "is_pains_positive",
+    "source_url",
+    "reason",
+)
+
+
+def _stage2_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
+    cols = (
+        "compound_id",
+        "canonical_name",
+        "passed",
+        "descriptor_source",
+        "molecular_weight",
+        "logp",
+        "hbond_donors",
+        "hbond_acceptors",
+        "tpsa",
+        "rotatable_bonds",
+        "qed_score",
+        "np_likeness_score",
+        "num_ro5_violations",
+        "is_pains_positive",
+        "source_url",
+        "reason",
+    )
+    s2 = sr.get("2", {})
+    rows: list[tuple[Any, ...]] = []
+    for bucket, passed in (("passed", "true"), ("filtered", "false")):
+        for r in s2.get(bucket, []):
+            rows.append(
+                (
+                    r.get("compound_id"),
+                    r.get("canonical_name") or "",
+                    passed,
+                    *(r.get(f, "") for f in _STAGE2_FIELDS[2:]),
+                )
+            )
+    return _csv_with_note(cols, rows, "no ADME results")
+
+
+def _stage3_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
+    cols = ("gene_symbol", "uniprot_accession", "prediction_method", "source_url")
+    rows = [
+        (
+            t.get("gene_symbol") or "",
+            t.get("uniprot_accession") or "",
+            t.get("prediction_method") or "",
+            t.get("source_url") or "",
+        )
+        for t in sr.get("3", {}).get("targets", [])
+        if t.get("tag") != "user-removed"
+    ]
+    return _csv_with_note(cols, rows, "no compound targets")
+
+
+def _stage4_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
+    cols = ("gene_symbol", "uniprot_accession", "opentargets_score", "source_url")
+    rows = [
+        (
+            t.get("gene_symbol") or "",
+            t.get("uniprot_accession") or "",
+            "" if t.get("opentargets_score") is None else t["opentargets_score"],
+            t.get("source_url") or "",
+        )
+        for t in sr.get("4", {}).get("targets", [])
+        if t.get("tag") != "user-removed"
+    ]
+    return _csv_with_note(cols, rows, "no disease targets")
+
+
+def _stage5_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
+    cols = ("gene_symbol", "uniprot_accession", "opentargets_score")
+    rows = [
+        (
+            o.get("gene_symbol") or "",
+            o.get("uniprot_accession") or "",
+            "" if o.get("opentargets_score") is None else o["opentargets_score"],
+        )
+        for o in sr.get("5", {}).get("overlap", [])
+    ]
+    return _csv_with_note(cols, rows, "no overlap targets")
+
+
+def _stage6_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
+    # The PPI per-stage CSV is the edge list (nodes ship in the network bundle's PPI pair).
+    return build_ppi_edges(sr)
+
+
+def _stage7_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
+    cols = (
+        "rank",
+        "gene_symbol",
+        "uniprot_accession",
+        "degree",
+        "betweenness",
+        "closeness",
+        "eigenvector",
+        "composite",
+    )
+    rows = [tuple(h.get(c, "") for c in cols) for h in sr.get("7", {}).get("hubs", [])]
+    return _csv_with_note(cols, rows, "no hub genes")
+
+
+def _stage8_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
+    cols = (
+        "term_id",
+        "name",
+        "source",
+        "p_value",
+        "intersection_size",
+        "intersection_genes",
+    )
+    rows: list[tuple[Any, ...]] = []
+    for t in sr.get("8", {}).get("terms", []):
+        genes = t.get("intersection", [])
+        rows.append(
+            (
+                t["term_id"],
+                t.get("name") or "",
+                t.get("source") or "",
+                _fmt_p(t.get("p_value")),
+                len(genes),
+                ";".join(genes),
+            )
+        )
+    return _csv_with_note(cols, rows, "no enriched terms (valid completion)")
+
+
+_STAGE_CSV = {
+    1: _stage1_csv,
+    2: _stage2_csv,
+    3: _stage3_csv,
+    4: _stage4_csv,
+    5: _stage5_csv,
+    6: _stage6_csv,
+    7: _stage7_csv,
+    8: _stage8_csv,
+}
+
+
+def build_stage_csv(
+    stage: int,
+    stage_results: dict[str, Any],
+    compounds_by_id: dict[str, dict[str, Any]],
+    targets_by_id: dict[str, dict[str, Any]],
+) -> str:
+    """One CSV per pipeline stage (S1–S8), reusing the on-screen column contracts. Empty stage ->
+    header + a stated `# note` line. The S6 per-stage CSV is the PPI edge list."""
+    return _STAGE_CSV[stage](stage_results, compounds_by_id, targets_by_id)
+
+
 def build_bundle(*, ctp_nodes: str, ctp_edges: str, docking: str, report: str) -> bytes:
     """In-memory zip of the four artifacts (deterministic file names)."""
     buf = io.BytesIO()

@@ -264,3 +264,148 @@ def test_ppi_edges_csv_header():
 
 def test_ppi_nodes_csv_header():
     assert rh.build_ppi_nodes(_SR6).splitlines()[0] == "id,gene_symbol,uniprot_accession,is_hub"
+
+
+def test_stage5_csv_columns_and_values():
+    out = rh.build_stage_csv(5, _SR, _COMP, _TGT)
+    assert out.splitlines()[0] == "gene_symbol,uniprot_accession,opentargets_score"
+    assert "PPARG,P37231," in out  # opentargets_score may be blank in this fixture
+
+
+def test_stage7_csv_columns():
+    sr = {
+        "7": {
+            "hubs": [
+                {
+                    "rank": 1,
+                    "gene_symbol": "PPARG",
+                    "uniprot_accession": "P37231",
+                    "degree": 0.5,
+                    "betweenness": 0.2,
+                    "closeness": 0.4,
+                    "eigenvector": 0.3,
+                    "composite": 0.41,
+                }
+            ]
+        }
+    }
+    head = rh.build_stage_csv(7, sr, {}, {}).splitlines()[0]
+    assert head == (
+        "rank,gene_symbol,uniprot_accession,degree,betweenness,closeness,eigenvector,composite"
+    )
+
+
+def test_empty_stage_emits_note():
+    out = rh.build_stage_csv(8, {"8": {"terms": []}}, {}, {})
+    assert out.splitlines()[0].startswith("term_id")
+    assert "# no enriched terms" in out
+
+
+def test_stage1_csv_columns_and_values():
+    out = rh.build_stage_csv(1, _SR1, _COMP1, {})
+    assert out.splitlines()[0] == "compound,inchikey,smiles"
+    assert "Curcumin,VFLDPWHFBUODDF-FCXRPNKRSA-N,O=C" in out
+
+
+def test_stage1_csv_empty_note():
+    out = rh.build_stage_csv(1, {"1": {"compounds": []}}, {}, {})
+    assert out.splitlines()[0] == "compound,inchikey,smiles"
+    assert "# no compounds" in out
+
+
+def test_stage2_csv_columns_and_buckets():
+    out = rh.build_stage_csv(2, _SR2, {}, {})
+    assert out.splitlines()[0] == (
+        "compound_id,canonical_name,passed,descriptor_source,molecular_weight,logp,"
+        "hbond_donors,hbond_acceptors,tpsa,rotatable_bonds,qed_score,np_likeness_score,"
+        "num_ro5_violations,is_pains_positive,source_url,reason"
+    )
+    assert "c1,Curcumin,true," in out
+    assert "c2,Aspirin,false," in out
+
+
+def test_stage3_csv_columns():
+    head = rh.build_stage_csv(3, _SR3, {}, {}).splitlines()[0]
+    assert head == "gene_symbol,uniprot_accession,prediction_method,source_url"
+
+
+def test_stage4_csv_columns():
+    head = rh.build_stage_csv(4, _SR4, {}, {}).splitlines()[0]
+    assert head == "gene_symbol,uniprot_accession,opentargets_score,source_url"
+
+
+def test_stage6_csv_is_ppi_edge_list():
+    assert rh.build_stage_csv(6, _SR6, {}, {}).splitlines()[0] == "source,target,confidence"
+
+
+_SR1 = {"1": {"compounds": [{"compound_id": "c1", "canonical_name": "Curcumin"}]}}
+_COMP1 = {"c1": {"name": "Curcumin", "inchi_key": "VFLDPWHFBUODDF-FCXRPNKRSA-N", "smiles": "O=C"}}
+_SR2 = {
+    "2": {
+        "passed": [
+            {
+                "compound_id": "c1",
+                "canonical_name": "Curcumin",
+                "descriptor_source": "etl",
+                "molecular_weight": 368.38,
+                "logp": 3.2,
+                "hbond_donors": 2,
+                "hbond_acceptors": 6,
+                "tpsa": 93.06,
+                "rotatable_bonds": 8,
+                "qed_score": 0.5,
+                "np_likeness_score": 1.1,
+                "num_ro5_violations": 0,
+                "is_pains_positive": True,
+                "source_url": "https://pubchem.ncbi.nlm.nih.gov/compound/969516",
+                "badges": ["pains"],
+            }
+        ],
+        "filtered": [
+            {
+                "compound_id": "c2",
+                "canonical_name": "Aspirin",
+                "descriptor_source": "etl",
+                "molecular_weight": 180.16,
+                "logp": 1.2,
+                "hbond_donors": 1,
+                "hbond_acceptors": 4,
+                "tpsa": 63.6,
+                "rotatable_bonds": 3,
+                "qed_score": 0.55,
+                "np_likeness_score": -0.5,
+                "num_ro5_violations": 0,
+                "is_pains_positive": False,
+                "source_url": None,
+                "reason": "1 Lipinski violation(s)",
+            }
+        ],
+    }
+}
+_SR3 = {
+    "3": {
+        "targets": [
+            {
+                "target_id": "t1",
+                "gene_symbol": "PPARG",
+                "uniprot_accession": "P37231",
+                "prediction_method": "chembl_bioactivity",
+                "source_url": "https://www.uniprot.org/uniprotkb/P37231",
+            }
+        ]
+    }
+}
+_SR4 = {
+    "4": {
+        "targets": [
+            {
+                "target_id": "t1",
+                "gene_symbol": "PPARG",
+                "uniprot_accession": "P37231",
+                "opentargets_score": 0.8,
+                "association_type": "genetic_association",
+                "source_url": "https://www.uniprot.org/uniprotkb/P37231",
+            }
+        ]
+    }
+}
