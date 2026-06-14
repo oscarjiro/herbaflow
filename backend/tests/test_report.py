@@ -178,3 +178,36 @@ def test_s8_finding_and_preview():
     )
     s8 = next(s for s in m.stages if s.n == 8)
     assert "blood circulation" in s8.finding and s8.preview is not None
+
+
+def test_report_preserves_no_version_checksum_honesty():
+    # Software Lock §6.4: the provenance must keep the honest "we do not record the external
+    # database release version" limitation. Guards the v2 coverage dropped when build_report
+    # delegated to the report model.
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        {"5": {"count": 1}},
+        {"plant": "P", "disease": "D"},
+        input_modes={},
+        frontend_url="u",
+        figures=[],
+    )
+    md = report.render_markdown(m)
+    assert "## How to read these results" in md
+    assert "not the exact release version" in md
+
+
+def test_report_na_stage_finding_for_manual_targets():
+    # manual_targets => stages 1-2 are not_applicable => their findings say so (not a count).
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        {"3": {"count": 5}, "5": {"count": 1}},
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "manual_targets"},
+        frontend_url="u",
+        figures=[],
+    )
+    s1 = next(s for s in m.stages if s.n == 1)
+    assert "Not applicable" in s1.finding
