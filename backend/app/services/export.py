@@ -161,7 +161,15 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
     stage_pngs: dict[str, bytes] = {}
     if (venn := charts.render_venn(sr.get("5", {}))) is not None:
         stage_pngs["stage5_venn.png"] = venn
-    if (ppi := charts.render_network(ppi_graph, title="PPI network")) is not None:
+    hub_scores = {
+        h["gene_symbol"]: (h.get("composite") or 0.0) for h in sr.get("7", {}).get("hubs", [])
+    }
+    min_confidence = (params.get("ppi") or {}).get("min_confidence", 0.4)
+    if (
+        ppi := charts.render_ppi_network(
+            ppi_graph, hub_scores=hub_scores, min_confidence=min_confidence
+        )
+    ) is not None:
         stage_pngs["stage6_ppi_network.png"] = ppi
     if (bar := charts.render_hub_bar(sr.get("7", {}))) is not None:
         stage_pngs["stage7_hub_bar.png"] = bar

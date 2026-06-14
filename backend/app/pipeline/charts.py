@@ -158,33 +158,49 @@ def render_ctp_network(graph: dict[str, Any]) -> bytes | None:
     return _png(fig)
 
 
-def render_network(graph: dict[str, list[dict[str, Any]]], *, title: str) -> bytes | None:
-    edges = graph.get("edges", [])
-    if not edges:
+def render_ppi_network(
+    graph: dict[str, Any], *, hub_scores: dict[str, float], min_confidence: float
+) -> bytes | None:
+    """PPI network: connected nodes via kamada_kawai, isolated nodes in a bottom tray.
+    Node size ∝ degree; node colour = hub composite score (red→yellow autumn_r colourbar);
+    edge width ∝ confidence. Returns None when there are no nodes."""
+    nodes = [n["id"] for n in graph.get("nodes", [])]
+    if not nodes:
         return None
-    g = nx.Graph()
-    for n in graph.get("nodes", []):
-        g.add_node(n["id"], **n)
-    for e in edges:
-        g.add_edge(e["source"], e["target"])
-    pos = nx.spring_layout(g, seed=42)
-    colors = []
-    for _id, data in g.nodes(data=True):
-        if data.get("type") in _TYPE_COLOR:
-            colors.append(_TYPE_COLOR[data["type"]])
-        else:
-            colors.append("#E63946" if data.get("is_hub") == "true" else "#3066BE")
-    fig, ax = plt.subplots(figsize=(8, 8))
-    nx.draw_networkx(
+    g: nx.Graph = nx.Graph()
+    g.add_nodes_from(nodes)
+    for e in graph.get("edges", []):
+        g.add_edge(e["source"], e["target"], confidence=e.get("confidence") or 0.4)
+    connected = [n for n in nodes if g.degree(n) > 0]
+    isolated = [n for n in nodes if g.degree(n) == 0]
+    sub = g.subgraph(connected)
+    pos: dict[str, tuple[float, float]] = nx.kamada_kawai_layout(sub) if connected else {}
+    for i, n in enumerate(isolated):
+        pos[n] = ((i - (len(isolated) - 1) / 2) * 0.25, -1.4)
+    deg = dict(g.degree())
+    fig, ax = plt.subplots(figsize=(9, 9))
+    widths = [0.5 + 3 * (g[u][v].get("confidence") or 0.4) for u, v in g.edges()]
+    nx.draw_networkx_edges(g, pos, ax=ax, edge_color="#BBBBBB", width=widths)
+    sc = nx.draw_networkx_nodes(
         g,
         pos,
         ax=ax,
-        node_color=colors,
-        node_size=200,
-        font_size=7,
-        edge_color="#BBBBBB",
-        with_labels=True,
+        nodelist=nodes,
+        node_size=[150 + 80 * deg.get(n, 0) for n in nodes],
+        node_color=[hub_scores.get(n, 0.0) for n in nodes],
+        cmap="autumn_r",
     )
-    ax.set_title(title)
+    nx.draw_networkx_labels(g, pos, ax=ax, font_size=7)
+    if isolated:
+        ax.text(
+            0,
+            -1.75,
+            f"{len(isolated)} isolated — no STRING interactions at confidence ≥ {min_confidence}",
+            ha="center",
+            fontsize=8,
+            color="#666666",
+        )
+    fig.colorbar(sc, ax=ax, label="hub composite score")
+    ax.set_title("PPI network")
     ax.axis("off")
     return _png(fig)

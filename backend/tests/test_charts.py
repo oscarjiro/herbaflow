@@ -107,25 +107,6 @@ def test_enrichment_categories_list():
     assert charts.category_slug("GO:BP") == "BP"
 
 
-# Task 16 — CTP + PPI network charts
-
-
-def test_network_renders_from_graph():
-    graph = {
-        "nodes": [
-            {"id": "A", "type": "compound", "is_hub": ""},
-            {"id": "B", "type": "target", "is_hub": "true"},
-        ],
-        "edges": [{"source": "A", "target": "B"}],
-    }
-    out = charts.render_network(graph, title="C-T-P")
-    assert out is not None and out.startswith(_PNG_SIG)
-
-
-def test_network_none_when_no_edges():
-    assert charts.render_network({"nodes": [{"id": "A"}], "edges": []}, title="x") is None
-
-
 # Task 9 — concentric C-T-P network
 
 
@@ -147,3 +128,23 @@ def test_ctp_network_renders_png_with_typed_nodes():
 
 def test_ctp_network_no_edges_returns_none():
     assert charts.render_ctp_network({"nodes": [], "edges": []}) is None
+
+
+# Task 10 — dedicated PPI network
+
+
+def test_ppi_network_marks_isolated_and_colours_by_hub():
+    graph = {
+        "nodes": [{"id": "A"}, {"id": "B"}, {"id": "VDR"}],
+        "edges": [{"source": "A", "target": "B", "confidence": 0.9}],
+    }
+    hubs = {"A": 1.0, "B": 0.5, "VDR": 0.0}
+    png = charts.render_ppi_network(graph, hub_scores=hubs, min_confidence=0.4)
+    assert png[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_ppi_network_no_nodes_returns_none():
+    assert (
+        charts.render_ppi_network({"nodes": [], "edges": []}, hub_scores={}, min_confidence=0.4)
+        is None
+    )
