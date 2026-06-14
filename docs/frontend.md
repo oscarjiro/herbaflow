@@ -454,20 +454,46 @@ the custom background (Stage-3 compound-target universe).
 
 ## Results download (completed runs)
 
-`RunView` shows a single **Download results** action (`DownloadResults`) once the run is
-`complete`. It is a plain anchor with `download` pointing at `GET /analyses/{id}/export` — a
-**binary** zip, so it deliberately bypasses the typed query SDK and is fetched directly by the
-browser (the backend sets `Content-Disposition`). The export URL is built by
-`src/lib/exportUrl.ts` (`exportBundleUrl`) from the single `API_BASE_URL` exported by
-`src/lib/api.ts` — the same base the generated client uses (overridable via `VITE_API_BASE_URL`).
+`RunView` shows a **Download results** panel (`DownloadResults`) once the run is `complete` (it
+renders `null` otherwise). The panel is four plain `download` anchors — one per server-rendered
+bundle:
 
-The zip contains four files: `ctp-nodes.csv` + `ctp-edges.csv` (the compound–target–pathway
-network for Cytoscape), `docking.csv` (hub × binding-compound pairs, AlphaFold id = the hub's
-UniProt accession), and `report.md` (run identity, inputs, frozen params, per-stage counts,
-labels-only provenance). The backend also exposes each artifact at its own endpoint
-(`…/export/ctp-nodes.csv`, `…/export/ctp-edges.csv`, `…/export/docking.csv`, `…/export/report`).
-This run-level bundle is **distinct** from the per-stage CSV downloads each `StageNView` already
-offers (those export a single stage's table; this exports the assembled cross-stage handoff).
+| Link | Endpoint | Helper |
+|---|---|---|
+| Report (.md) | `…/export/report.md` | `exportReportUrl` |
+| Network & docking (.zip) | `…/export/network-and-docking.zip` | `exportNetworkBundleUrl` |
+| All stages (.zip) | `…/export/stages.zip` | `exportStagesBundleUrl` |
+| All results (.zip) | `…/export/all-results.zip` | `exportAllResultsUrl` |
+
+These are **binary** downloads, so they deliberately bypass the typed query SDK and are fetched
+directly by the browser (the backend sets `Content-Disposition`). The URLs are built by
+`src/lib/exportUrl.ts` (the helpers above, plus `exportArtifactUrl(id, filename)` for a single
+artifact) from the one `API_BASE_URL` exported by `src/lib/api.ts` — the same base the generated
+client uses (overridable via `VITE_API_BASE_URL`). This run-level handoff is **distinct** from the
+per-stage CSV downloads each `StageNView` already offers (those export a single stage's table; this
+exports the assembled cross-stage bundles).
+
+### Inline server-rendered charts
+
+The stage views and `RunView` embed the server-rendered chart PNGs as plain `<img>` tags pointed at
+`exportArtifactUrl(analysisId, "<filename>.png")` (the generalized `…/export/{filename}` endpoint).
+These render only on a `complete` run and are **`onError`-hidden**: a chart the backend chose not to
+draw (the conditional-PNG rule returns no artifact, so the endpoint 404s) simply disappears rather
+than showing a broken image. The wired charts are:
+
+- `RunView` — the C-T-P network (`ctp-network.png`).
+- `Stage5View` — the overlap Venn (`stage5_venn.png`).
+- `Stage6View` — the PPI network (`stage6_ppi_network.png`).
+- `Stage7View` — the hub bar chart (`stage7_hub_bar.png`).
+- `Stage8View` — one enrichment bubble per category (`stage8_enrichment_<category>.png`).
+
+### Per-stage data sources from the contract
+
+`StageDataSources` no longer hardcodes its per-stage source names — it reads the `STAGE_SOURCES`
+and `USER_PROVIDED_SOURCES` maps from `src/contract` (derived from the shared
+`shared/contracts/analysis.json` `$defs.stage_sources`, the single home for these display names,
+read by both the FE and the backend report). The `userProvided` prop still selects the
+honest manual-mode source set when an entity stage is `user_provided`.
 
 ---
 

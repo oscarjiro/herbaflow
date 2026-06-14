@@ -1045,17 +1045,36 @@ The pipeline traversal order is: `plants → compounds → targets → diseases 
 
 ## Results-handoff export (read-only)
 
-The capstone export (`GET /analyses/{id}/export`, available only when `analysis_runs.status =
-'complete'`) is a **pure read** of the run's persisted `analysis_runs.stage_results` jsonb plus a
-batch lookup of the referenced `compounds` / `targets` rows. It adds **no table, no column, and no
-migration** — it reshapes data that already exists. The bundle (one zip) holds four artifacts:
+The capstone export is a **stateless, on-demand read** of the run's persisted
+`analysis_runs.stage_results` jsonb plus a batch lookup of the referenced `compounds` / `targets`
+rows. It is available only when `analysis_runs.status = 'complete'` (else **409**). It adds **no
+table, no column, and no migration** — it reshapes data that already exists. The de-UUID node ids
+(compound = InChIKey, target = gene symbol, pathway = term id) are a **presentation transform**
+applied at read time, never persisted; the chart PNGs are **generated on the fly**, never stored.
+
+It is served as **four downloadable bundles** (each its own endpoint):
+
+| Bundle | Endpoint | Contents |
+|---|---|---|
+| Report | `…/export/report.md` | `report.md` only |
+| Network & docking | `…/export/network-and-docking.zip` | C-T-P node/edge CSVs + PPI node/edge CSVs + `docking.csv` + the network PNGs + a Cytoscape-import README |
+| Stages | `…/export/stages.zip` | per-stage S1–S8 CSVs (empty stage → header + `# note`) + the per-stage chart PNGs + a README |
+| All results | `…/export/all-results.zip` | everything above + the report + a root README |
+
+Per-artifact endpoints also exist: the graph/stage CSVs (`…/export/ctp-nodes.csv`,
+`…/export/ctp-edges.csv`, `…/export/docking.csv`, `…/export/stage6_ppi_nodes.csv`) and one
+generalized `…/export/{filename}` that serves any single per-stage CSV (`text/csv`) or rendered
+chart PNG (`image/png`) by its deterministic filename, 404-ing an unknown or undrawable artifact.
+
+Node-id and edge shapes (de-UUID'd; edge endpoints reference node ids, so Cytoscape imports them
+directly):
 
 | Artifact | Built from | Shape |
 |---|---|---|
-| `ctp-nodes.csv` | `stage_results` 5 (overlap), 7 (hubs), 3 (compound_targets), 8 (terms) | `id, label, type, inchikey, uniprot_accession, is_hub, source` — one row per compound / target / pathway node. Compounds are those with a Stage-3 edge **into** a Stage-5 overlap target; targets are the overlap set (`is_hub` flags the Stage-7 hubs); pathways are the Stage-8 enriched terms. |
-| `ctp-edges.csv` | `stage_results` 3 + 5 + 8 | `source, target, interaction, prediction_method, p_value` — compound→target edges into the overlap (carry the winning `prediction_method`) and target→pathway edges from each term's `intersection` gene list (carry the corrected `p_value`). |
-| `docking.csv` | `stage_results` 7 + 3 + `targets` | `hub_gene_symbol, hub_uniprot_accession, alphafold_id, compound_name, compound_inchikey, compound_smiles, prediction_method` — one row per Stage-7 hub × binding compound. **`alphafold_id` = the hub's UniProt accession** (AlphaFold is keyed by accession; PDB structure ids are deferred). |
-| `report.md` | `run_meta` + `parameters` + `stage_results` + labels | Markdown: run identity, opaque input labels (plant/disease; may be `N/A`), frozen parameters, per-stage counts, and a provenance note. |
+| `ctp-nodes.csv` | `stage_results` 5 (overlap), 7 (hubs), 3 (compound_targets), 8 (terms) | one row per compound / target / pathway node — node id is the InChIKey (compounds; a `smiles` column rides along) / gene symbol (targets) / term id (pathways). Compounds are those with a Stage-3 edge **into** a Stage-5 overlap target; targets are the overlap set (Stage-7 hubs flagged); pathways are the Stage-8 enriched terms. |
+| `ctp-edges.csv` | `stage_results` 3 + 5 + 8 | `source, target, interaction, …` — compound→target edges into the overlap (carry the winning `prediction_method`) and target→pathway edges from each term's `intersection` gene list (carry the corrected `p_value`); endpoints are node ids, not UUIDs. |
+| `docking.csv` | `stage_results` 7 + 3 + `targets` | one row per Stage-7 hub × binding compound. **`alphafold_id` = the hub's UniProt accession** (AlphaFold is keyed by accession; PDB structure ids are deferred). |
+| `report.md` | `run_meta` + `parameters` + `stage_results` + labels | Markdown: branded title, opaque input labels (plant/disease; may be `N/A`), per-stage humanized parameter tables, per-stage counts, contract-driven data sources, a `## Figures` inventory of included/omitted charts, and a provenance note. No UUIDs in the body. |
 
 **Provenance is labels-only.** The report records *when* data was fetched (`source_systems` names
 + per-stage `source_url`s) and links to each record, but **not** which external release produced it
