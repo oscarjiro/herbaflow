@@ -121,18 +121,24 @@ async def seed_incomplete_run(engine):
 async def test_complete_run_export_zip_has_four_files(client, seed_complete_run):
     c, _ = client
     aid = seed_complete_run
-    resp = await c.get(f"/analyses/{aid}/export")
+    resp = await c.get(f"/analyses/{aid}/export/all-results.zip")
     assert resp.status_code == 200
     assert resp.headers["content-type"] == "application/zip"
     with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
-        assert set(zf.namelist()) == {"ctp-nodes.csv", "ctp-edges.csv", "docking.csv", "report.md"}
+        names = set(zf.namelist())
+    assert {
+        "README.txt",
+        "report.md",
+        "network-and-docking/ctp-nodes.csv",
+        "stages/stage5_overlap.csv",
+    } <= names
 
 
 @pytest.mark.asyncio
 async def test_incomplete_run_export_409(client, seed_incomplete_run):
     c, _ = client
     aid = seed_incomplete_run
-    resp = await c.get(f"/analyses/{aid}/export")
+    resp = await c.get(f"/analyses/{aid}/export/all-results.zip")
     assert resp.status_code == 409
     assert resp.headers["content-type"].startswith("application/problem+json")
 
@@ -143,7 +149,7 @@ async def test_per_artifact_content_types(client, seed_complete_run):
     aid = seed_complete_run
     nodes = await c.get(f"/analyses/{aid}/export/ctp-nodes.csv")
     assert nodes.headers["content-type"].startswith("text/csv")
-    report = await c.get(f"/analyses/{aid}/export/report")
+    report = await c.get(f"/analyses/{aid}/export/report.md")
     assert report.headers["content-type"].startswith("text/markdown")
 
 
@@ -160,5 +166,46 @@ async def test_docking_csv_has_hub_compound_row(client, seed_complete_run):
 @pytest.mark.asyncio
 async def test_unknown_run_404(client):
     c, _ = client
-    resp = await c.get(f"/analyses/{uuid.uuid4()}/export")
+    resp = await c.get(f"/analyses/{uuid.uuid4()}/export/all-results.zip")
     assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_bundle_endpoints(client, seed_complete_run):
+    c, _ = client
+    aid = seed_complete_run
+    cases = [
+        ("report.md", "text/markdown"),
+        ("network-and-docking.zip", "application/zip"),
+        ("stages.zip", "application/zip"),
+        ("all-results.zip", "application/zip"),
+    ]
+    for name, expected_type in cases:
+        resp = await c.get(f"/analyses/{aid}/export/{name}")
+        assert resp.status_code == 200, name
+        assert expected_type in resp.headers["content-type"], name
+        assert "filename=" in resp.headers["content-disposition"], name
+
+
+@pytest.mark.asyncio
+async def test_assemble_export_shape(engine, seed_complete_run):
+    from app.services.export import assemble_export
+
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    async with maker() as session:
+        art = await assemble_export(session, seed_complete_run)
+    assert art.report.startswith("#")
+    assert art.stage_csvs[5].splitlines()[0] == "gene_symbol,uniprot_accession,opentargets_score"
+    assert art.ppi_edges.splitlines()[0] == "source,target,confidence"
+    with zipfile.ZipFile(io.BytesIO(art.network_bundle())) as zf:
+        assert "ctp-nodes.csv" in zf.namelist()
+
+
+@pytest.mark.asyncio
+async def test_stage_csv_endpoint(client, seed_complete_run):
+    c, _ = client
+    aid = seed_complete_run
+    resp = await c.get(f"/analyses/{aid}/export/stage5_overlap.csv")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/csv")
+    assert "gene_symbol" in resp.text

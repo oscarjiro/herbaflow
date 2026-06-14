@@ -4,11 +4,12 @@ the pure builders in ``app.pipeline.results_handoff``. The only place export tou
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.errors import ConflictProblem, NotFoundProblem
 from app.pipeline import results_handoff as rh
 from app.pipeline import state
@@ -21,17 +22,61 @@ from app.repositories.target import TargetRepository
 
 @dataclass(frozen=True)
 class ExportArtifacts:
+    report: str
+    stage_csvs: dict[int, str]
     ctp_nodes: str
     ctp_edges: str
+    ppi_nodes: str
+    ppi_edges: str
     docking: str
-    report: str
+    network_png: bytes | None = None
+    stage_pngs: dict[str, bytes] = field(default_factory=dict)
 
-    def bundle(self) -> bytes:
-        return rh.build_bundle(
+    def _network_files(self) -> dict[str, str | bytes | None]:
+        return {
+            "ctp-nodes.csv": self.ctp_nodes,
+            "ctp-edges.csv": self.ctp_edges,
+            "docking.csv": self.docking,
+            "ctp-network.png": self.network_png,
+        }
+
+    def _stage_files(self) -> dict[str, str | bytes | None]:
+        slug = {
+            1: "compounds",
+            2: "adme",
+            3: "compound_targets",
+            4: "disease_targets",
+            5: "overlap",
+            6: "ppi_edges",
+            7: "hubs",
+            8: "enrichment",
+        }
+        files: dict[str, str | bytes | None] = {
+            f"stage{n}_{slug[n]}.csv": csv for n, csv in self.stage_csvs.items()
+        }
+        files["stage6_ppi_nodes.csv"] = self.ppi_nodes
+        files.update(self.stage_pngs)  # e.g. stage5_venn.png -> bytes (wired in a later task)
+        return files
+
+    def network_bundle(self) -> bytes:
+        return rh.build_network_bundle(
             ctp_nodes=self.ctp_nodes,
             ctp_edges=self.ctp_edges,
             docking=self.docking,
+            network_png=self.network_png,
+            readme=rh.build_network_readme(),
+        )
+
+    def stages_bundle(self) -> bytes:
+        return rh.build_stages_bundle(
+            stage_files=self._stage_files(), readme=rh.build_stages_readme()
+        )
+
+    def all_results_bundle(self) -> bytes:
+        return rh.build_all_results_bundle(
             report=self.report,
+            network_files=self._network_files(),
+            stage_files=self._stage_files(),
         )
 
 
@@ -116,9 +161,23 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         "created_at": str(run.created_at),
         "completed_at": str(run.completed_at),
     }
+    params = run.parameters or {}
+    input_modes = params.get("input_modes") or {}
     return ExportArtifacts(
+        report=rh.build_report(
+            run_meta,
+            params,
+            sr,
+            labels,
+            input_modes=input_modes,
+            frontend_url=settings.frontend_url,
+        ),
+        stage_csvs={
+            n: rh.build_stage_csv(n, sr, compounds_by_id, targets_by_id) for n in range(1, 9)
+        },
         ctp_nodes=rh.build_ctp_nodes(sr, compounds_by_id, targets_by_id),
-        ctp_edges=rh.build_ctp_edges(sr),
+        ctp_edges=rh.build_ctp_edges(sr, compounds_by_id, targets_by_id),
+        ppi_nodes=rh.build_ppi_nodes(sr),
+        ppi_edges=rh.build_ppi_edges(sr),
         docking=rh.build_docking_table(sr, compounds_by_id, targets_by_id),
-        report=rh.build_report(run_meta, run.parameters or {}, sr, labels),
     )
