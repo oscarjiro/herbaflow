@@ -370,25 +370,100 @@ export type ValidateTargetsResponses = {
 
 export type ValidateTargetsResponse2 = ValidateTargetsResponses[keyof ValidateTargetsResponses];
 
-export type ExportBundleData = {
+export type ExportReportData = {
     body?: never;
     path: {
         analysis_id: string;
     };
     query?: never;
-    url: '/analyses/{analysis_id}/export';
+    url: '/analyses/{analysis_id}/export/report.md';
 };
 
-export type ExportBundleErrors = {
+export type ExportReportErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ExportBundleError = ExportBundleErrors[keyof ExportBundleErrors];
+export type ExportReportError = ExportReportErrors[keyof ExportReportErrors];
 
-export type ExportBundleResponses = {
+export type ExportReportResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ExportNetworkData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export/network-and-docking.zip';
+};
+
+export type ExportNetworkErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportNetworkError = ExportNetworkErrors[keyof ExportNetworkErrors];
+
+export type ExportNetworkResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ExportStagesData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export/stages.zip';
+};
+
+export type ExportStagesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportStagesError = ExportStagesErrors[keyof ExportStagesErrors];
+
+export type ExportStagesResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ExportAllData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export/all-results.zip';
+};
+
+export type ExportAllErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportAllError = ExportAllErrors[keyof ExportAllErrors];
+
+export type ExportAllResponses = {
     /**
      * Successful Response
      */
@@ -470,25 +545,51 @@ export type ExportDockingResponses = {
     200: unknown;
 };
 
-export type ExportReportData = {
+export type ExportPpiNodesData = {
     body?: never;
     path: {
         analysis_id: string;
     };
     query?: never;
-    url: '/analyses/{analysis_id}/export/report';
+    url: '/analyses/{analysis_id}/export/stage6_ppi_nodes.csv';
 };
 
-export type ExportReportErrors = {
+export type ExportPpiNodesErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ExportReportError = ExportReportErrors[keyof ExportReportErrors];
+export type ExportPpiNodesError = ExportPpiNodesErrors[keyof ExportPpiNodesErrors];
 
-export type ExportReportResponses = {
+export type ExportPpiNodesResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ExportStageCsvData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+        filename: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/export/{filename}';
+};
+
+export type ExportStageCsvErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportStageCsvError = ExportStageCsvErrors[keyof ExportStageCsvErrors];
+
+export type ExportStageCsvResponses = {
     /**
      * Successful Response
      */

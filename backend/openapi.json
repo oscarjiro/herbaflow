@@ -388,13 +388,136 @@
         }
       }
     },
-    "/analyses/{analysis_id}/export": {
+    "/analyses/{analysis_id}/export/report.md": {
       "get": {
         "tags": [
           "export"
         ],
-        "summary": "Export Bundle",
-        "operationId": "export_bundle",
+        "summary": "Export Report",
+        "operationId": "export_report",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyses/{analysis_id}/export/network-and-docking.zip": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Export Network",
+        "operationId": "export_network",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyses/{analysis_id}/export/stages.zip": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Export Stages",
+        "operationId": "export_stages",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyses/{analysis_id}/export/all-results.zip": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Export All",
+        "operationId": "export_all",
         "parameters": [
           {
             "name": "analysis_id",
@@ -552,13 +675,13 @@
         }
       }
     },
-    "/analyses/{analysis_id}/export/report": {
+    "/analyses/{analysis_id}/export/stage6_ppi_nodes.csv": {
       "get": {
         "tags": [
           "export"
         ],
-        "summary": "Export Report",
-        "operationId": "export_report",
+        "summary": "Export Ppi Nodes",
+        "operationId": "export_ppi_nodes",
         "parameters": [
           {
             "name": "analysis_id",
@@ -568,6 +691,57 @@
               "type": "string",
               "format": "uuid",
               "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyses/{analysis_id}/export/{filename}": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Export Stage Csv",
+        "description": "One per-stage CSV by its deterministic filename (e.g. ``stage5_overlap.csv``). The set of\nvalid filenames is the assembled stage-files allowlist \u2014 an unknown/None artifact 404s, so the\npath segment can never address an arbitrary file (Software \u00a78).",
+        "operationId": "export_stage_csv",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          },
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
             }
           }
         ],

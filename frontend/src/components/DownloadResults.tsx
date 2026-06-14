@@ -1,6 +1,11 @@
-import { exportBundleUrl } from "../lib/exportUrl";
+import {
+  exportAllResultsUrl,
+  exportNetworkBundleUrl,
+  exportReportUrl,
+  exportStagesBundleUrl,
+} from "../lib/exportUrl";
 
-/** "Download results" link — shown only once the run is complete. Binary download via the
+/** Download panel — shown only once the run is complete. Binary downloads via the
  * browser (Content-Disposition from the backend), not the typed SDK. */
 export function DownloadResults({
   status,
@@ -10,9 +15,19 @@ export function DownloadResults({
   analysisId: string;
 }) {
   if (status !== "complete") return null;
+  const links: [string, string][] = [
+    ["Report (.md)", exportReportUrl(analysisId)],
+    ["Network & docking (.zip)", exportNetworkBundleUrl(analysisId)],
+    ["All stages (.zip)", exportStagesBundleUrl(analysisId)],
+    ["All results (.zip)", exportAllResultsUrl(analysisId)],
+  ];
   return (
-    <a className="hf-download-results" href={exportBundleUrl(analysisId)} download>
-      Download results
-    </a>
+    <div className="hf-download-results">
+      {links.map(([label, href]) => (
+        <a key={href} href={href} download>
+          {label}
+        </a>
+      ))}
+    </div>
   );
 }
