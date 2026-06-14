@@ -2,7 +2,7 @@
  * Stage5View — overlap of Stage 3 (compound→target) ∩ Stage 4 (disease→target).
  *
  * Stage 5 has NO parameters and is NOT an entity stage. It is a read-only view:
- *  - Summary cards: overlap count, Jaccard index, p-value, and a significant/not-significant badge
+ *  - Summary cards: overlap count + compound-side / disease-side set sizes
  *  - Overlap table: gene symbol, UniProt accession (linked), opentargets_score; paginated
  *  - CSV download of the overlap rows
  *  - StageDataSources footer
@@ -33,24 +33,11 @@ type OverlapRow = {
   opentargets_score: number | null;
 };
 
-type HypergeometricResult = {
-  background_n: number;
-  K: number;
-  n: number;
-  k: number;
-  p_value: number;
-  alpha: number;
-  significant: boolean;
-};
-
 type Stage5Result = {
   overlap: OverlapRow[];
   count: number;
   compound_target_count: number;
   disease_target_count: number;
-  union_count: number;
-  jaccard: number;
-  hypergeometric: HypergeometricResult;
   unmapped_count: number;
   state: string;
   flags?: string[];
@@ -70,11 +57,6 @@ function buildS5CsvRows(rows: OverlapRow[]): unknown[][] {
     const sourceUrl = acc ? `https://www.uniprot.org/uniprotkb/${acc}/entry` : null;
     return [r.gene_symbol, acc, r.opentargets_score, sourceUrl];
   });
-}
-
-function formatPValue(p: number): string {
-  if (p < 0.0001) return p.toExponential(2);
-  return p.toFixed(4);
 }
 
 // ---------------------------------------------------------------------------
@@ -97,10 +79,6 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
   const csvHref = useCsvBlobUrl(S5_CSV_HEADER, buildS5CsvRows(stage5?.overlap ?? []));
 
   if (!stage5) return null;
-
-  const { hypergeometric: hg } = stage5;
-  const significant = hg.significant;
-  const nonSigFlag = stage5.flags?.includes("non_significant_overlap") ?? false;
 
   // Pagination
   const rows = stage5.overlap;
@@ -125,25 +103,17 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
         </div>
         <div
           className="summary-card summary-card--muted"
-          aria-label={`Jaccard ${stage5.jaccard.toFixed(3)}`}
+          aria-label={`${stage5.compound_target_count} compound-side targets`}
         >
-          <span className="summary-card__value">{stage5.jaccard.toFixed(3)}</span>
-          <span className="summary-card__label">Jaccard index</span>
+          <span className="summary-card__value">{stage5.compound_target_count}</span>
+          <span className="summary-card__label">compound-side targets</span>
         </div>
         <div
           className="summary-card summary-card--muted"
-          aria-label={`p-value ${formatPValue(hg.p_value)}`}
+          aria-label={`${stage5.disease_target_count} disease-side targets`}
         >
-          <span className="summary-card__value">{formatPValue(hg.p_value)}</span>
-          <span className="summary-card__label">p-value</span>
-        </div>
-        <div className="summary-card" aria-label={significant ? "significant" : "not significant"}>
-          {significant && !nonSigFlag ? (
-            <span className="hf-badge hf-badge--success">significant</span>
-          ) : (
-            <span className="hf-badge hf-badge--warn">not significant</span>
-          )}
-          <span className="summary-card__label">overlap</span>
+          <span className="summary-card__value">{stage5.disease_target_count}</span>
+          <span className="summary-card__label">disease-side targets</span>
         </div>
       </div>
 

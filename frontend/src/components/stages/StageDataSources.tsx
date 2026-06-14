@@ -3,10 +3,7 @@ const STAGE_SOURCES: Record<number, string[]> = {
   2: ["RDKit (descriptors, PAINS)"],
   3: ["ChEMBL", "PubChem BioAssay", "UniProt"],
   4: ["Open Targets (ETL-seeded disease–target associations)", "UniProt"],
-  5: [
-    "Overlap of Stage 3 ∩ Stage 4 (target_id)",
-    "Jaccard + one-sided hypergeometric (N=20,000, α=0.05)",
-  ],
+  5: ["Set intersection of Stage 3 ∩ Stage 4 (on target_id)"],
   6: ["STRING (protein–protein interactions)", "Human only (species 9606); functional or physical"],
   7: ["networkx (centrality analysis)", "STRING PPI network (undirected)"],
   8: ["g:Profiler (GO + KEGG enrichment)"],
