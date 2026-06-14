@@ -17,6 +17,7 @@ import zipfile
 from typing import Any
 
 from app import contracts
+from app.pipeline import entry_modes
 
 
 # One canonical rule for a target's graph-node id (gene symbol preferred; falls back to the
@@ -269,15 +270,16 @@ def _humanize(key: str) -> str:
 
 def _user_provided_stages(input_modes: dict[str, Any]) -> set[int]:
     """The entity stages the user supplied directly (so their data sources are honest, not the
-    computed externals): manual compounds -> S1, manual targets -> S3, manual disease -> S4."""
-    out: set[int] = set()
-    if input_modes.get("plant") == "manual_compounds":
-        out.add(1)
-    if input_modes.get("plant") == "manual_targets":
-        out.add(3)
-    if input_modes.get("disease") == "manual_disease_targets":
-        out.add(4)
-    return out
+    computed externals). Reuses the canonical input-mode -> per-stage-state matrix in
+    ``entry_modes`` (one home; no parallel mapping) instead of re-deriving it here. An unknown
+    stored mode degrades to "no user-provided stages" so report building never raises."""
+    plant = (input_modes or {}).get("plant", "selection")
+    disease = (input_modes or {}).get("disease", "selection")
+    try:
+        smap = entry_modes.stage_state_map(plant, disease)
+    except ValueError:
+        return set()
+    return {s for s, st in smap.items() if st == entry_modes.USER_PROVIDED}
 
 
 def _default_name(labels: dict[str, Any], completed_at: Any) -> str:
