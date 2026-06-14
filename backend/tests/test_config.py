@@ -21,9 +21,8 @@ def test_async_database_url_keeps_asyncpg() -> None:
     assert s.async_database_url == "postgresql+asyncpg://u:p@host/db"
 
 
-def test_frontend_url_default():
-    s = Settings(_env_file=None)
-    assert s.frontend_url == "https://herbaflow.app"
+def test_frontend_url_default_is_empty():
+    assert Settings(_env_file=None).frontend_url == ""
 
 
 def test_frontend_url_from_env(monkeypatch):

@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     app_name: str = "herbaflow"
     database_url: str = ""
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
-    frontend_url: str = "https://herbaflow.app"
+    frontend_url: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:
