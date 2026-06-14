@@ -19,3 +19,13 @@ def test_async_database_url_swaps_driver() -> None:
 def test_async_database_url_keeps_asyncpg() -> None:
     s = Settings(database_url="postgresql+asyncpg://u:p@host/db")
     assert s.async_database_url == "postgresql+asyncpg://u:p@host/db"
+
+
+def test_frontend_url_default():
+    s = Settings(_env_file=None)
+    assert s.frontend_url == "https://herbaflow.app"
+
+
+def test_frontend_url_from_env(monkeypatch):
+    monkeypatch.setenv("FRONTEND_URL", "https://example.test")
+    assert Settings(_env_file=None).frontend_url == "https://example.test"
