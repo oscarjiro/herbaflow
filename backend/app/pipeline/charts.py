@@ -99,6 +99,64 @@ def render_enrichment_bubble(
 
 _TYPE_COLOR = {"compound": "#4C9F70", "target": "#3066BE", "pathway": "#B5179E"}
 
+_TYPE_STYLE: dict[str, tuple[str, str]] = {
+    "compound": ("#2E8B57", "o"),
+    "target": ("#3066BE", "o"),
+    "pathway": ("#E07B39", "^"),
+}
+
+
+def _trunc(s: str, n: int = 22) -> str:
+    return s if len(s) <= n else s[: n - 1] + "…"
+
+
+def render_ctp_network(graph: dict[str, Any]) -> bytes | None:
+    """Concentric shell-layout C-T-P network (compounds centre → targets ring → pathways rim).
+    Node size ∝ degree; colour+shape by type with a legend; labels truncated to 22 chars.
+    Returns None when there are no edges (conditional-PNG rule)."""
+    edges = graph.get("edges", [])
+    if not edges:
+        return None
+    g: nx.Graph = nx.Graph()
+    for n in graph.get("nodes", []):
+        g.add_node(n["id"], **n)
+    for e in edges:
+        g.add_edge(e["source"], e["target"])
+    shells = [
+        [n["id"] for n in graph["nodes"] if n.get("type") == t]
+        for t in ("compound", "target", "pathway")
+    ]
+    shells = [s for s in shells if s]
+    pos = nx.shell_layout(g, nlist=shells)
+    deg = dict(g.degree())
+    fig, ax = plt.subplots(figsize=(11, 11))
+    nx.draw_networkx_edges(g, pos, ax=ax, edge_color="#CCCCCC", width=0.8)
+    for t, (color, marker) in _TYPE_STYLE.items():
+        ids = [n for n in g.nodes if g.nodes[n].get("type") == t]
+        if not ids:
+            continue
+        nx.draw_networkx_nodes(
+            g,
+            pos,
+            nodelist=ids,
+            ax=ax,
+            node_color=color,
+            node_shape=marker,
+            node_size=[120 + 60 * deg.get(i, 0) for i in ids],
+            label=t.capitalize(),
+        )
+    nx.draw_networkx_labels(
+        g,
+        pos,
+        ax=ax,
+        font_size=7,
+        labels={n: _trunc(str(g.nodes[n].get("label") or n)) for n in g.nodes},
+    )
+    ax.legend(scatterpoints=1)
+    ax.set_title("Compound–target–pathway network")
+    ax.axis("off")
+    return _png(fig)
+
 
 def render_network(graph: dict[str, list[dict[str, Any]]], *, title: str) -> bytes | None:
     edges = graph.get("edges", [])

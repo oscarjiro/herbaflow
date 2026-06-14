@@ -124,3 +124,26 @@ def test_network_renders_from_graph():
 
 def test_network_none_when_no_edges():
     assert charts.render_network({"nodes": [{"id": "A"}], "edges": []}, title="x") is None
+
+
+# Task 9 — concentric C-T-P network
+
+
+def test_ctp_network_renders_png_with_typed_nodes():
+    graph = {
+        "nodes": [
+            {"id": "CURCUMIN", "label": "CURCUMIN", "type": "compound"},
+            {"id": "PPARG", "label": "PPARG", "type": "target"},
+            {"id": "GO:1", "label": "blood circulation", "type": "pathway"},
+        ],
+        "edges": [
+            {"source": "CURCUMIN", "target": "PPARG"},
+            {"source": "PPARG", "target": "GO:1"},
+        ],
+    }
+    png = charts.render_ctp_network(graph)
+    assert png[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_ctp_network_no_edges_returns_none():
+    assert charts.render_ctp_network({"nodes": [], "edges": []}) is None

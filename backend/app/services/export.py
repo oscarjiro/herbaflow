@@ -157,7 +157,7 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
 
     ctp_graph = rh.build_ctp_graph(sr, compounds_by_id, targets_by_id)
     ppi_graph = rh.build_ppi_graph(sr)
-    network_png = charts.render_network(ctp_graph, title="Compound-target-pathway network")
+    network_png = charts.render_ctp_network(ctp_graph)
     stage_pngs: dict[str, bytes] = {}
     if (venn := charts.render_venn(sr.get("5", {}))) is not None:
         stage_pngs["stage5_venn.png"] = venn
