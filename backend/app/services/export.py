@@ -29,6 +29,7 @@ class ExportArtifacts:
     ppi_nodes: str
     ppi_edges: str
     docking: str
+    slug: str = "herbaflow_analysis"
     network_png: bytes | None = None
     stage_pngs: dict[str, bytes] = field(default_factory=dict)
 
@@ -211,6 +212,7 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         ppi_nodes=rh.build_ppi_nodes(sr),
         ppi_edges=rh.build_ppi_edges(sr),
         docking=rh.build_docking_table(sr, compounds_by_id, targets_by_id),
+        slug=rh.bundle_slug(labels, run.completed_at),
         network_png=network_png,
         stage_pngs=stage_pngs,
     )

@@ -555,3 +555,15 @@ def test_stages_readme_maps_pngs_and_is_accurate():
     r = rh.build_stages_readme()
     assert "stage5_venn.png" in r and "stage8_enrichment_" in r
     assert "one combined" in r.lower()  # corrects the "one CSV per stage" claim for enrichment
+
+
+def test_bundle_slug_brands_without_uuid():
+    slug = rh.bundle_slug(
+        {"plant": "Curcuma longa L.", "disease": "Type 2 Diabetes Mellitus"},
+        "2026-06-14T09:18:54+00:00",
+    )
+    assert slug == "herbaflow_curcuma-longa-l_type-2-diabetes-mellitus_2026-06-14"
+
+
+def test_bundle_slug_unlabelled_fallback():
+    assert rh.bundle_slug({}, "2026-06-14T00:00:00+00:00") == "herbaflow_analysis_2026-06-14"

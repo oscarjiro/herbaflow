@@ -13,10 +13,24 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 import zipfile
 from typing import Any
 
 from app.pipeline import report
+
+
+def _slug_part(text: str | None) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", (text or "").lower()).strip("-")
+
+
+def bundle_slug(labels: dict[str, Any], completed_at: Any) -> str:
+    """Branded, UUID-free download stem: ``herbaflow_{plant}_{disease}_{date}`` (date = YYYY-MM-DD).
+    Slug parts lowercase punctuation-stripped; falls back to ``analysis`` when unlabelled."""
+    parts = [p for p in (_slug_part(labels.get("plant")), _slug_part(labels.get("disease"))) if p]
+    subject = "_".join(parts) or "analysis"
+    date = str(completed_at or "")[:10]
+    return f"herbaflow_{subject}_{date}" if date else f"herbaflow_{subject}"
 
 
 # One canonical rule for a target's graph-node id (gene symbol preferred; falls back to the

@@ -38,7 +38,9 @@ async def export_report(
     analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> Response:
     a = await assemble_export(session, analysis_id)
-    return Response(a.report, media_type="text/markdown", headers=_disposition("report.md"))
+    return Response(
+        a.report, media_type="text/markdown", headers=_disposition(f"{a.slug}_report.md")
+    )
 
 
 @router.get("/analyses/{analysis_id}/export/network-and-docking.zip")
@@ -46,7 +48,7 @@ async def export_network(
     analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> StreamingResponse:
     a = await assemble_export(session, analysis_id)
-    return _zip_response(a.network_bundle(), "network-and-docking.zip")
+    return _zip_response(a.network_bundle(), f"{a.slug}_network-and-docking.zip")
 
 
 @router.get("/analyses/{analysis_id}/export/stages.zip")
@@ -54,7 +56,7 @@ async def export_stages(
     analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> StreamingResponse:
     a = await assemble_export(session, analysis_id)
-    return _zip_response(a.stages_bundle(), "stages.zip")
+    return _zip_response(a.stages_bundle(), f"{a.slug}_stages.zip")
 
 
 @router.get("/analyses/{analysis_id}/export/all-results.zip")
@@ -62,7 +64,7 @@ async def export_all(
     analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> StreamingResponse:
     a = await assemble_export(session, analysis_id)
-    return _zip_response(a.all_results_bundle(), f"herbaflow-{analysis_id}.zip")
+    return _zip_response(a.all_results_bundle(), f"{a.slug}_all-results.zip")
 
 
 # ---------------------------------------------------------------------------
