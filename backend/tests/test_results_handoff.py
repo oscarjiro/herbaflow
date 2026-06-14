@@ -503,3 +503,21 @@ def test_all_results_superset_layout():
     assert "README.txt" in names and "report.md" in names
     assert "network-and-docking/ctp-nodes.csv" in names
     assert "stages/stage5_overlap.csv" in names
+
+
+def test_report_lists_included_and_omitted_figures():
+    md = rh.build_report(
+        {"name": "R", "mode": "auto", "created_at": "t", "completed_at": "t"},
+        {},
+        _SR,
+        {"plant": "P", "disease": "D"},
+        input_modes={},
+        frontend_url="u",
+        figures=[
+            ("stage5_venn.png", True, "empty overlap"),
+            ("stage7_hub_bar.png", False, "no hub genes"),
+        ],
+    )
+    assert "## Figures" in md
+    assert "`stage5_venn.png`" in md
+    assert "omitted (no hub genes)" in md

@@ -296,6 +296,7 @@ def build_report(
     *,
     input_modes: dict[str, Any],
     frontend_url: str,
+    figures: list[tuple[str, bool, str]] | None = None,
 ) -> str:
     """Human-readable markdown run report (no analysis UUID, no input_mode in the body).
 
@@ -333,6 +334,14 @@ def build_report(
         if srcs:
             lines.append("")
             lines.append("- **Data sources:** " + "; ".join(srcs))
+        lines.append("")
+    if figures:
+        lines.append("## Figures")
+        for name, included, reason in figures:
+            if included:
+                lines.append(f"- `{name}`")
+            else:
+                lines.append(f"- `{name}` — omitted ({reason})")
         lines.append("")
     lines += [
         "## Provenance",

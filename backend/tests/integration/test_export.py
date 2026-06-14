@@ -37,6 +37,8 @@ def _stage_results(cid: str, tid: str) -> dict:
                 }
             ],
             "count": 1,
+            "compound_target_count": 180,
+            "disease_target_count": 911,
         },
         "7": {"hubs": [{"rank": 1, "target_id": tid, "gene_symbol": "PPARG"}], "count": 1},
         "8": {
@@ -209,3 +211,30 @@ async def test_stage_csv_endpoint(client, seed_complete_run):
     assert resp.status_code == 200
     assert resp.headers["content-type"].startswith("text/csv")
     assert "gene_symbol" in resp.text
+
+
+@pytest.mark.asyncio
+async def test_pngs_present_in_bundles(client, seed_complete_run):
+    c, _ = client
+    aid = seed_complete_run
+    r = await c.get(f"/analyses/{aid}/export/stages.zip")
+    names = zipfile.ZipFile(io.BytesIO(r.content)).namelist()
+    assert "stage5_venn.png" in names
+
+
+@pytest.mark.asyncio
+async def test_per_image_endpoint_serves_png(client, seed_complete_run):
+    c, _ = client
+    aid = seed_complete_run
+    r = await c.get(f"/analyses/{aid}/export/stage5_venn.png")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("image/png")
+
+
+@pytest.mark.asyncio
+async def test_omitted_chart_404s(client, seed_complete_run):
+    # the seed has no Stage-6 network -> PPI render omitted -> 404
+    c, _ = client
+    aid = seed_complete_run
+    r = await c.get(f"/analyses/{aid}/export/stage6_ppi_network.png")
+    assert r.status_code == 404

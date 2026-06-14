@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.errors import ConflictProblem, NotFoundProblem
+from app.pipeline import charts, state
 from app.pipeline import results_handoff as rh
-from app.pipeline import state
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
@@ -163,6 +163,35 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
     }
     params = run.parameters or {}
     input_modes = params.get("input_modes") or {}
+
+    ctp_graph = rh.build_ctp_graph(sr, compounds_by_id, targets_by_id)
+    ppi_graph = rh.build_ppi_graph(sr)
+    network_png = charts.render_network(ctp_graph, title="Compound-target-pathway network")
+    stage_pngs: dict[str, bytes] = {}
+    if (venn := charts.render_venn(sr.get("5", {}))) is not None:
+        stage_pngs["stage5_venn.png"] = venn
+    if (ppi := charts.render_network(ppi_graph, title="PPI network")) is not None:
+        stage_pngs["stage6_ppi_network.png"] = ppi
+    if (bar := charts.render_hub_bar(sr.get("7", {}))) is not None:
+        stage_pngs["stage7_hub_bar.png"] = bar
+    for cat in charts.ENRICHMENT_CATEGORIES:
+        if (png := charts.render_enrichment_bubble(sr.get("8", {}), cat)) is not None:
+            stage_pngs[f"stage8_enrichment_{charts.category_slug(cat)}.png"] = png
+
+    figures: list[tuple[str, bool, str]] = [
+        ("ctp-network.png", network_png is not None, "sparse C-T-P network (no edges)"),
+        ("stage5_venn.png", "stage5_venn.png" in stage_pngs, "empty overlap"),
+        (
+            "stage6_ppi_network.png",
+            "stage6_ppi_network.png" in stage_pngs,
+            "sparse or empty PPI network",
+        ),
+        ("stage7_hub_bar.png", "stage7_hub_bar.png" in stage_pngs, "no hub genes"),
+    ]
+    for cat in charts.ENRICHMENT_CATEGORIES:
+        fn = f"stage8_enrichment_{charts.category_slug(cat)}.png"
+        figures.append((fn, fn in stage_pngs, f"no enriched terms in {cat}"))
+
     return ExportArtifacts(
         report=rh.build_report(
             run_meta,
@@ -171,6 +200,7 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
             labels,
             input_modes=input_modes,
             frontend_url=settings.frontend_url,
+            figures=figures,
         ),
         stage_csvs={
             n: rh.build_stage_csv(n, sr, compounds_by_id, targets_by_id) for n in range(1, 9)
@@ -180,4 +210,6 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         ppi_nodes=rh.build_ppi_nodes(sr),
         ppi_edges=rh.build_ppi_edges(sr),
         docking=rh.build_docking_table(sr, compounds_by_id, targets_by_id),
+        network_png=network_png,
+        stage_pngs=stage_pngs,
     )

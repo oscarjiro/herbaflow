@@ -107,14 +107,19 @@ async def export_ppi_nodes(
 
 
 @router.get("/analyses/{analysis_id}/export/{filename}")
-async def export_stage_csv(
+async def export_artifact(
     analysis_id: uuid.UUID, filename: str, session: AsyncSession = Depends(get_session)
 ) -> Response:
-    """One per-stage CSV by its deterministic filename (e.g. ``stage5_overlap.csv``). The set of
-    valid filenames is the assembled stage-files allowlist — an unknown/None artifact 404s, so the
-    path segment can never address an arbitrary file (Software §8)."""
+    """One artifact by its deterministic filename — serves both the per-stage/graph CSVs (e.g.
+    ``stage5_overlap.csv``) and the rendered chart PNGs (e.g. ``ctp-network.png``,
+    ``stage5_venn.png``). The set of valid filenames is the assembled network+stage allowlist — an
+    unknown artifact, or a chart that could not be drawn (None, conditional-PNG rule), 404s, so the
+    path segment can never address an arbitrary file (Software §8). Declared last, so the explicit
+    ``.zip`` / ``.md`` / ``.csv`` routes above still win."""
     a = await assemble_export(session, analysis_id)
-    artifact = a._stage_files().get(filename)
-    if not isinstance(artifact, str):
-        raise NotFoundProblem(f"unknown export artifact {filename!r}")
-    return Response(artifact, media_type="text/csv", headers=_disposition(filename))
+    artifact = {**a._network_files(), **a._stage_files()}.get(filename)
+    if isinstance(artifact, bytes):
+        return Response(artifact, media_type="image/png", headers=_disposition(filename))
+    if isinstance(artifact, str):
+        return Response(artifact, media_type="text/csv", headers=_disposition(filename))
+    raise NotFoundProblem(f"unknown export artifact {filename!r}")
