@@ -668,26 +668,21 @@ so the FE table and CSV match a computed row.
      "uniprot_accession": "<str|null>", "opentargets_score": <float|null>},
     ...
   ],
-  "count": <int>,                  // overlap size; 0 = terminal hard-stop (BOTH modes)
-  "compound_target_count": <int>,  // |Stage-3 target set|
-  "disease_target_count": <int>,   // |Stage-4 target set|
-  "union_count": <int>,
-  "jaccard": <float>,              // |A∩B| / |A∪B|, rounded to 6dp
-  "hypergeometric": {
-    "background_n": 20000, "K": <int>, "n": <int>, "k": <int>,
-    "p_value": <float>, "alpha": 0.05, "significant": <bool>
-  },
+  "count": <int>,                  // overlap size |A∩B|; 0 = terminal hard-stop (BOTH modes)
+  "compound_target_count": <int>,  // |Stage-3 target set| (|A|)
+  "disease_target_count": <int>,   // |Stage-4 target set| (|B|)
   "unmapped_count": <int>,         // overlap targets with no gene_symbol (cannot go to STRING)
   "state": "computed",
-  "flags": [ /* "non_significant_overlap" | "unmapped_targets" | "set_exceeds_background" */ ]
+  "flags": [ /* "unmapped_targets" */ ]
 }
 ```
 
-Stage 5 intersects the Stage-3 compound-target set with the Stage-4 disease-target set on the
-canonical `target_id` (both columns are FKs to `targets.target_id`). It has **no parameters** — the
-background universe (N = 20,000 human protein-coding genes) and significance threshold (α = 0.05)
-are fixed method constants, not configuration. A **0-overlap result is a terminal scientific
-hard-stop in both guided and auto modes** (the run fails — there is nothing downstream to build).
+Stage 5 is a **pure set intersection** of the Stage-3 compound-target set and the Stage-4
+disease-target set on the canonical `target_id` (both columns are FKs to `targets.target_id`) — the
+field-standard raw overlap (à la Venny/jvenn); no statistics, no parameters, no external API. The two
+side-counts (`compound_target_count`, `disease_target_count`) are descriptive set sizes. A **0-overlap
+result is a terminal scientific hard-stop in both guided and auto modes** (the run fails — there is
+nothing downstream to build).
 
 **PPI stage** (Stage 6 — STRING network; `parameters.ppi`).
 

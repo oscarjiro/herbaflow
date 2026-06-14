@@ -50,7 +50,7 @@ The Herbaflow pipeline comprises 8 sequential stages, each producing a distinct 
 2. **Stage 2: ADME Screening** — Pharmacokinetic filter: absorption, distribution, metabolism, excretion properties
 3. **Stage 3: Target Identification** — Compound-target binding predictions (docking or ML-based)
 4. **Stage 4: Disease Target Mapping** — Maps predicted targets to disease associations (Open Targets database or ETL-cached DisGeNET)
-5. **Stage 5: Target Overlap Analysis** — Venn diagram of targets shared across input diseases; identifies candidate therapeutic targets
+5. **Stage 5: Target Overlap Analysis** — Set intersection of the compound-target and disease-target sets; identifies candidate therapeutic targets
 6. **Stage 6: PPI Network Construction** — Builds protein-protein interaction network around candidate targets (STRING database)
 7. **Stage 7: Hub Gene Analysis** — Computes network centrality metrics (degree, betweenness, closeness, eigenvector); hub+bottleneck criterion ranks targets by biological importance
 8. **Stage 8: Pathway Enrichment** — Statistical enrichment of KEGG/Reactome pathways (hypergeometric test with FDR correction)
@@ -64,9 +64,9 @@ Status polling (2-second intervals via TanStack Query) drives stage panel visibi
 
 ## Key Design Decisions
 
-### Stage 5: Hand-Rolled SVG Venn Diagram
+### Stage 5: Overlap View (no client-side Venn yet)
 
-Rather than depend on a third-party Venn diagram library, Stage 5 uses hand-authored SVG with configurable circle positions and radii. This decision trades implementation simplicity (three circles, three text labels) for fine-grained visual control. The SVG is parameterized by disease count and intersection sizes, allowing researchers to intuitively grasp which targets are shared across diseases.
+The Stage-5 view is a read-only summary — an overlap count, compound-side / disease-side set-size cards, and the overlap target table. A visual Venn diagram is **not** rendered client-side in this build; it is deferred to the server-rendered results-handoff export. The two side-counts are carried on the Stage-5 result so a future Venn can show |A|, |B|, and |A∩B| without recomputation.
 
 ### Stage 8: FDR Floor Clamping
 
@@ -358,18 +358,18 @@ ETL-time source) and lists the `min_score` used for the run.
 **Component:** `src/components/stages/Stage5View.tsx`.
 
 **Results view:** Read-only — Stage 5 has **no parameters** and is not an entity stage. Summary
-**cards** lead: overlap count, the Jaccard index, the hypergeometric p-value, and a clear
-**significant / not-significant badge** (driven by `hypergeometric.significant` and the
-`non_significant_overlap` flag). An **overlap table** lists each shared target by gene symbol +
-UniProt accession (linked to the UniProt entry) with its Open Targets score, paginated like
-the other stages. Stage 5 intersects the **run-scoped** Stage-3 (compound→target) and Stage-4
-(disease→target) sets from `stage_results` — including user-added targets — on the canonical
-`target_id`, **not** the global edge tables. A 0-overlap run is a terminal hard-stop.
+**cards** lead: the overlap count plus the compound-side and disease-side set sizes
+(`compound_target_count` / `disease_target_count`). An **overlap table** lists each shared target by
+gene symbol + UniProt accession (linked to the UniProt entry) with its Open Targets score, paginated
+like the other stages. Stage 5 is a **pure set intersection** of the **run-scoped** Stage-3
+(compound→target) and Stage-4 (disease→target) sets from `stage_results` — including user-added
+targets — on the canonical `target_id`, **not** the global edge tables; no statistics. A 0-overlap
+run is a terminal hard-stop.
 
 **CSV export:** gene symbol + UniProt accession + Open Targets score + UniProt source URL.
 
-**No param panel.** The data-sources footer states the fixed method (Jaccard + one-sided
-hypergeometric, N = 20,000, α = 0.05) — method constants, not configuration.
+**No param panel.** The data-sources footer states the method: a set intersection of the
+compound-target and disease-target sets (pure computation; no external source, no statistics).
 
 ---
 
