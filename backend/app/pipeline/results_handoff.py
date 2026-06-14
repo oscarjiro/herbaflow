@@ -187,7 +187,6 @@ def build_report(
     s = stage_results
     plant = labels.get("plant") or "N/A"
     disease = labels.get("disease") or "N/A"
-    hyp = s.get("5", {}).get("hypergeometric", {})
     lines: list[str] = [
         f"# Run report — {run_meta.get('name') or run_meta.get('analysis_id')}",
         "",
@@ -216,9 +215,7 @@ def build_report(
         f"- Stage 2 ADME-passed: {_count(s.get('2'))}",
         f"- Stage 3 compound-targets: {_count(s.get('3'))}",
         f"- Stage 4 disease-targets: {_count(s.get('4'))}",
-        f"- Stage 5 overlap: {_count(s.get('5'))} "
-        f"(Jaccard={s.get('5', {}).get('jaccard', 'N/A')}, "
-        f"p={hyp.get('p_value', 'N/A')}, significant={hyp.get('significant', 'N/A')})",
+        f"- Stage 5 overlap: {_count(s.get('5'))}",
         f"- Stage 6 PPI nodes: {_count(s.get('6'), 'node_count')}",
         f"- Stage 7 hubs: {_count(s.get('7'))}",
         f"- Stage 8 enriched terms: {_count(s.get('8'))}",

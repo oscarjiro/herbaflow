@@ -37,8 +37,6 @@ def _stage_results(cid: str, tid: str) -> dict:
                 }
             ],
             "count": 1,
-            "jaccard": 0.5,
-            "hypergeometric": {"p_value": 0.001, "significant": True},
         },
         "7": {"hubs": [{"rank": 1, "target_id": tid, "gene_symbol": "PPARG"}], "count": 1},
         "8": {

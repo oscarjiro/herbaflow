@@ -157,7 +157,7 @@ async def _drive_to_stage4(c, run_id):
 
 @pytest.mark.asyncio
 async def test_guided_run_reaches_stage5_then_stage6(client, engine, monkeypatch):
-    """Guided: real 2-target overlap parks at S5 (hypergeom/jaccard) then S6 (1 edge, 2 nodes)."""
+    """Guided: real 2-target overlap parks at S5 then S6 (1 edge, 2 nodes)."""
     c, ids = client
     _patch_stage_clients(monkeypatch, _FakeString([StringEdge("TP53", "EGFR", 0.9)]))
 
@@ -190,8 +190,7 @@ async def test_guided_run_reaches_stage5_then_stage6(client, engine, monkeypatch
     s5 = state["stage_results"]["5"]
     assert s5["count"] >= 1
     assert s5["count"] == 2  # both TP53 and EGFR are shared
-    assert "hypergeometric" in s5 and s5["hypergeometric"]["k"] == 2
-    assert "jaccard" in s5
+
     overlap_genes = sorted(o["gene_symbol"] for o in s5["overlap"])
     assert overlap_genes == ["EGFR", "TP53"]
 
