@@ -570,7 +570,7 @@ export type ExportPpiNodesResponses = {
     200: unknown;
 };
 
-export type ExportStageCsvData = {
+export type ExportArtifactData = {
     body?: never;
     path: {
         analysis_id: string;
@@ -580,16 +580,16 @@ export type ExportStageCsvData = {
     url: '/analyses/{analysis_id}/export/{filename}';
 };
 
-export type ExportStageCsvErrors = {
+export type ExportArtifactErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ExportStageCsvError = ExportStageCsvErrors[keyof ExportStageCsvErrors];
+export type ExportArtifactError = ExportArtifactErrors[keyof ExportArtifactErrors];
 
-export type ExportStageCsvResponses = {
+export type ExportArtifactResponses = {
     /**
      * Successful Response
      */

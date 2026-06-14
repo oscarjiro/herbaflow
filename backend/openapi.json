@@ -721,9 +721,9 @@
         "tags": [
           "export"
         ],
-        "summary": "Export Stage Csv",
-        "description": "One per-stage CSV by its deterministic filename (e.g. ``stage5_overlap.csv``). The set of\nvalid filenames is the assembled stage-files allowlist \u2014 an unknown/None artifact 404s, so the\npath segment can never address an arbitrary file (Software \u00a78).",
-        "operationId": "export_stage_csv",
+        "summary": "Export Artifact",
+        "description": "One artifact by its deterministic filename \u2014 serves both the per-stage/graph CSVs (e.g.\n``stage5_overlap.csv``) and the rendered chart PNGs (e.g. ``ctp-network.png``,\n``stage5_venn.png``). The set of valid filenames is the assembled network+stage allowlist \u2014 an\nunknown artifact, or a chart that could not be drawn (None, conditional-PNG rule), 404s, so the\npath segment can never address an arbitrary file (Software \u00a78). Declared last, so the explicit\n``.zip`` / ``.md`` / ``.csv`` routes above still win.",
+        "operationId": "export_artifact",
         "parameters": [
           {
             "name": "analysis_id",
