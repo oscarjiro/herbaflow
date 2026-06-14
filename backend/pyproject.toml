@@ -11,6 +11,8 @@ dependencies = [
     "asyncpg>=0.30",
     "rdkit>=2024.3",
     "networkx>=3.2",
+    "matplotlib>=3.9",
+    "matplotlib-venn>=1.1",
 ]
 
 [dependency-groups]
@@ -54,6 +56,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["networkx", "networkx.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["matplotlib", "matplotlib.*", "matplotlib_venn", "mpl_toolkits.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
