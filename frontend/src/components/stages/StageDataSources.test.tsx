@@ -40,3 +40,14 @@ it("shows the computed sources when not user-provided", () => {
   render(<StageDataSources stage={3} />);
   expect(screen.getByText(/ChEMBL/)).toBeInTheDocument();
 });
+
+it("renders a linked source name when url present", () => {
+  render(<StageDataSources stage={3} userProvided={false} />);
+  const link = screen.getByRole("link", { name: "ChEMBL" });
+  expect(link).toHaveAttribute("href", "https://www.ebi.ac.uk/chembl/");
+});
+
+it("renders a plain name when url is null", () => {
+  render(<StageDataSources stage={5} userProvided={false} />);
+  expect(screen.getByText(/Set intersection/)).toBeInTheDocument();
+});

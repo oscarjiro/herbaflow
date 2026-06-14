@@ -16,8 +16,16 @@ export function StageDataSources({
     <div className="stage-data-sources hf-muted" aria-label="Data sources">
       <span className="stage-data-sources__label">Data sources</span>
       <ul>
-        {sources.map((s) => (
-          <li key={s}>{s}</li>
+        {sources.map(({ name, url }) => (
+          <li key={name}>
+            {url ? (
+              <a href={url} target="_blank" rel="noreferrer">
+                {name}
+              </a>
+            ) : (
+              <span>{name}</span>
+            )}
+          </li>
         ))}
       </ul>
     </div>

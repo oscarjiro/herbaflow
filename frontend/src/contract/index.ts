@@ -308,23 +308,26 @@ export const ENRICHMENT_SELECT_PARAMS = ["correction"] as const;
 
 // ---------------------------------------------------------------------------
 // Per-stage data-source display names — one shared home in the contract.
+// Each entry is {name, url} where url is null for pseudo-sources.
 // ---------------------------------------------------------------------------
+
+export type StageSourceEntry = { name: string; url: string | null };
 
 const stageSourcesDefs = (
   contract.$defs as unknown as {
     stage_sources: {
       properties: {
-        computed: { properties: Record<string, { default: string[] }> };
-        user_provided: { properties: Record<string, { default: string[] }> };
+        computed: { properties: Record<string, { default: StageSourceEntry[] }> };
+        user_provided: { properties: Record<string, { default: StageSourceEntry[] }> };
       };
     };
   }
 ).stage_sources.properties;
 
 function readStageSourceMap(
-  group: { properties: Record<string, { default: string[] }> },
-): Record<number, string[]> {
-  const out: Record<number, string[]> = {};
+  group: { properties: Record<string, { default: StageSourceEntry[] }> },
+): Record<number, StageSourceEntry[]> {
+  const out: Record<number, StageSourceEntry[]> = {};
   for (const [k, v] of Object.entries(group.properties)) out[Number(k)] = v.default;
   return out;
 }
