@@ -591,6 +591,57 @@ def build_stage_csv(
     return _STAGE_CSV[stage](stage_results, compounds_by_id, targets_by_id)
 
 
+def build_network_readme() -> str:
+    return (
+        "# Network & docking handoff\n\n"
+        "Files for downstream tools:\n\n"
+        "- `ctp-nodes.csv` / `ctp-edges.csv` — the compound–target–pathway network.\n"
+        "- `ctp-network.png` — a static rendering of that network.\n"
+        "- `docking.csv` — hub target × binding compound pairs"
+        " (AlphaFold id = the UniProt accession).\n\n"
+        "## Import the network into Cytoscape (desktop)\n\n"
+        "1. Open **File, Import Network from File** and choose `ctp-edges.csv`. "
+        "Map `source` and `target` to the source/target node columns;"
+        " `interaction` is the edge type.\n"
+        "2. Open **File, Import Table from File** and choose `ctp-nodes.csv`,"
+        " matched on the `id` column. "
+        "This attaches `label`, `type`, `is_hub`, etc. as node attributes you can style by.\n\n"
+        "The edge endpoint strings equal the node `id` strings, so the join is exact.\n"
+    )
+
+
+def build_stages_readme() -> str:
+    rows = "\n".join(
+        f"- `stage{n}_{slug}` — {desc}"
+        for n, slug, desc in [
+            (1, "compounds.csv", "input/derived compounds"),
+            (2, "adme.csv", "ADME pass/fail + descriptors"),
+            (3, "compound_targets.csv", "predicted/measured compound targets"),
+            (4, "disease_targets.csv", "disease-associated targets"),
+            (5, "overlap.csv", "Stage 3 ∩ Stage 4 targets"),
+            (6, "ppi_edges.csv", "STRING PPI edges"),
+            (7, "hubs.csv", "ranked hub genes"),
+            (8, "enrichment.csv", "enriched GO/KEGG/Reactome/WP terms"),
+        ]
+    )
+    return (
+        "# Per-stage results\n\n"
+        "One CSV per pipeline stage (always present; an empty stage carries a `# note`). "
+        "PNG charts accompany the stages that have one.\n\n" + rows + "\n"
+    )
+
+
+def build_root_readme() -> str:
+    return (
+        "# Herbaflow analysis — full results\n\n"
+        "- `report.md` — the human-readable run report.\n"
+        "- `network-and-docking/` — the C-T-P network (Cytoscape) + docking pairing table"
+        " + network PNG.\n"
+        "- `stages/` — one CSV (and chart, where applicable) per pipeline stage.\n\n"
+        "See each folder's README for column details and import steps.\n"
+    )
+
+
 def build_bundle(*, ctp_nodes: str, ctp_edges: str, docking: str, report: str) -> bytes:
     """In-memory zip of the four artifacts (deterministic file names)."""
     buf = io.BytesIO()

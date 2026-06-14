@@ -467,3 +467,20 @@ def test_report_honest_sources_for_user_provided_stage():
     )
     # manual_targets => S3 user_provided => only UniProt named, not ChEMBL
     assert "UniProt (manual target resolution)" in md
+
+
+def test_network_readme_has_cytoscape_steps():
+    md = rh.build_network_readme()
+    assert "Import Network from File" in md
+    assert "Import Table from File" in md
+    assert "ctp-nodes.csv" in md and "ctp-edges.csv" in md and "docking.csv" in md
+
+
+def test_stages_readme_lists_files():
+    md = rh.build_stages_readme()
+    assert "stage5_overlap.csv" in md and "stage8_enrichment.csv" in md
+
+
+def test_root_readme_lists_bundles():
+    md = rh.build_root_readme()
+    assert "report.md" in md and "network-and-docking" in md.lower() and "stages/" in md
