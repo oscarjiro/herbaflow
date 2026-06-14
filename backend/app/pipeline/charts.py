@@ -8,7 +8,6 @@ No DB/async/API.
 from __future__ import annotations
 
 import io
-import math
 from typing import Any
 
 import matplotlib
@@ -73,21 +72,28 @@ def category_slug(source: str) -> str:
     return _CATEGORY_SLUG.get(source, source.replace(":", "_"))
 
 
-def render_enrichment_bubble(stage8: dict[str, Any], category: str) -> bytes | None:
+def render_enrichment_bubble(
+    stage8: dict[str, Any], category: str, *, overlap_size: int | None
+) -> bytes | None:
     terms = [t for t in stage8.get("terms", []) if t.get("source") == category and t.get("p_value")]
-    if not terms:
+    if not terms or not overlap_size:
         return None
-    terms = sorted(terms, key=lambda t: t["p_value"])[:20]
+    terms = sorted(terms, key=lambda t: len(t.get("intersection", [])) / overlap_size)[-20:]
     y = list(range(len(terms)))
-    x = [-math.log10(t["p_value"]) for t in terms]
-    sizes = [max(len(t.get("intersection", [])), 1) for t in terms]
+    counts = [len(t.get("intersection", [])) for t in terms]
+    ratio = [c / overlap_size for c in counts]
+    padj = [t["p_value"] for t in terms]
     fig, ax = plt.subplots(figsize=(7, max(2.5, 0.45 * len(terms))))
-    sc = ax.scatter(x, y, s=[s * 30 for s in sizes], c=sizes, cmap="viridis")
+    sc = ax.scatter(ratio, y, s=[max(c, 1) * 40 for c in counts], c=padj, cmap="autumn", norm=None)
     ax.set_yticks(y)
     ax.set_yticklabels([t.get("name") or t["term_id"] for t in terms])
-    ax.set_xlabel("-log10(adjusted p)")
+    ax.set_xlabel("gene ratio")
     ax.set_title(f"Stage 8 — enrichment ({category_slug(category)})")
-    fig.colorbar(sc, ax=ax, label="gene count")
+    cb = fig.colorbar(sc, ax=ax, label="adjusted p-value")
+    cb.ax.invert_yaxis()
+    for c in sorted(set(counts))[:3]:
+        ax.scatter([], [], s=max(c, 1) * 40, c="grey", label=str(c))
+    ax.legend(title="gene count", loc="lower right", labelspacing=1)
     return _png(fig)
 
 

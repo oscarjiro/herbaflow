@@ -165,8 +165,10 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         stage_pngs["stage6_ppi_network.png"] = ppi
     if (bar := charts.render_hub_bar(sr.get("7", {}))) is not None:
         stage_pngs["stage7_hub_bar.png"] = bar
+    overlap_size = sr.get("5", {}).get("count")
     for cat in charts.ENRICHMENT_CATEGORIES:
-        if (png := charts.render_enrichment_bubble(sr.get("8", {}), cat)) is not None:
+        png = charts.render_enrichment_bubble(sr.get("8", {}), cat, overlap_size=overlap_size)
+        if png is not None:
             stage_pngs[f"stage8_enrichment_{charts.category_slug(cat)}.png"] = png
 
     figures: list[tuple[str, bool, str]] = [

@@ -67,12 +67,39 @@ _TERMS = {
 
 
 def test_bubble_per_category():
-    assert charts.render_enrichment_bubble(_TERMS, "GO:BP") is not None
-    assert charts.render_enrichment_bubble(_TERMS, "GO:BP").startswith(_PNG_SIG)
+    assert charts.render_enrichment_bubble(_TERMS, "GO:BP", overlap_size=17) is not None
+    assert charts.render_enrichment_bubble(_TERMS, "GO:BP", overlap_size=17).startswith(_PNG_SIG)
 
 
 def test_bubble_none_when_category_empty():
-    assert charts.render_enrichment_bubble(_TERMS, "REAC") is None
+    assert charts.render_enrichment_bubble(_TERMS, "REAC", overlap_size=17) is None
+
+
+def test_enrichment_dotplot_uses_gene_ratio_and_returns_png():
+    s8 = {
+        "terms": [
+            {
+                "term_id": "GO:1",
+                "name": "x",
+                "source": "GO:BP",
+                "p_value": 1e-4,
+                "intersection": ["A", "B"],
+            },
+            {
+                "term_id": "GO:2",
+                "name": "y",
+                "source": "GO:BP",
+                "p_value": 1e-2,
+                "intersection": ["A"],
+            },
+        ]
+    }
+    png = charts.render_enrichment_bubble(s8, "GO:BP", overlap_size=17)
+    assert png[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_enrichment_empty_category_returns_none():
+    assert charts.render_enrichment_bubble({"terms": []}, "KEGG", overlap_size=17) is None
 
 
 def test_enrichment_categories_list():
