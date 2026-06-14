@@ -129,6 +129,7 @@ def test_docking_table_one_row_per_hub_x_binding_compound_alphafold_is_accession
         "compound_inchikey",
         "compound_smiles",
         "prediction_method",
+        "source_url",
     ]
     assert len(data) == 2
     assert all(r[0] == "PPARG" for r in data)
@@ -488,6 +489,13 @@ def test_all_results_superset_layout():
     assert "README.txt" in names and "report.md" in names
     assert "network-and-docking/ctp-nodes.csv" in names
     assert "stages/stage5_overlap.csv" in names
+
+
+def test_docking_table_has_source_url():
+    csv = rh.build_docking_table(SR_FULL, COMPOUNDS, TARGETS)
+    header = csv.splitlines()[0]
+    assert header.endswith("source_url")
+    assert "alphafold.ebi.ac.uk" in csv
 
 
 def test_report_threads_included_figures_into_stage_sections():

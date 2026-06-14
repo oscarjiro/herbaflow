@@ -203,12 +203,14 @@ def build_docking_table(
             "compound_inchikey",
             "compound_smiles",
             "prediction_method",
+            "source_url",
         )
     ]
     for h in hubs:
         tid = h["target_id"]
         gene = h.get("gene_symbol") or ""
         acc = targets_by_id.get(tid, {}).get("uniprot_accession") or ""
+        af_url = f"https://alphafold.ebi.ac.uk/entry/{acc}" if acc else ""
         for e in edges_by_tid.get(tid, []):
             c = compounds_by_id.get(e["compound_id"], {})
             rows.append(
@@ -220,6 +222,7 @@ def build_docking_table(
                     c.get("inchi_key") or "",
                     c.get("smiles") or "",
                     e.get("prediction_method") or "",
+                    af_url,
                 )
             )
     out = _csv(rows)
