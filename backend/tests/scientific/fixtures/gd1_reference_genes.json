@@ -1,0 +1,24 @@
+{
+  "genes": {
+    "AKT1": {"papers": ["Han 2021"], "ctd": false},
+    "EGFR": {"papers": ["Han 2021"], "ctd": false},
+    "STAT3": {"papers": ["Han 2021"], "ctd": false},
+    "CDK2": {"papers": ["He 2023"], "ctd": false},
+    "HSP90AA1": {"papers": ["He 2023"], "ctd": false},
+    "AURKB": {"papers": ["He 2023"], "ctd": false},
+    "CCNA2": {"papers": ["He 2023"], "ctd": false},
+    "TYMS": {"papers": ["He 2023"], "ctd": false},
+    "CHEK1": {"papers": ["He 2023"], "ctd": false},
+    "AURKA": {"papers": ["He 2023"], "ctd": false},
+    "DNMT1": {"papers": ["He 2023"], "ctd": false},
+    "TOP2A": {"papers": ["He 2023"], "ctd": false},
+    "TK1": {"papers": ["He 2023"], "ctd": false},
+    "SIRT1": {"papers": ["Yuan 2026"], "ctd": false},
+    "SERPINE1": {"papers": ["Yuan 2026"], "ctd": false},
+    "MMP3": {"papers": ["Yuan 2026"], "ctd": false},
+    "WNT5A": {"papers": ["Yuan 2026"], "ctd": false},
+    "MDM2": {"papers": ["Wu 2025"], "ctd": false},
+    "PTGS2": {"papers": ["Wu 2025"], "ctd": false}
+  },
+  "universe": 20000
+}
