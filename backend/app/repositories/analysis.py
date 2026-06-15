@@ -26,6 +26,7 @@ class AnalysisRepository:
         self,
         *,
         analysis_name: str | None,
+        idempotency_key: str | None = None,
         disease_id: uuid.UUID | None,
         plant_ids: list[uuid.UUID],
         mode: str,
@@ -37,6 +38,7 @@ class AnalysisRepository:
     ) -> AnalysisRun:
         run = AnalysisRun(
             analysis_name=analysis_name,
+            idempotency_key=idempotency_key,
             disease_id=disease_id,
             parameters={
                 "plant_ids": [str(p) for p in plant_ids],
@@ -60,6 +62,16 @@ class AnalysisRepository:
             select(AnalysisRun).where(AnalysisRun.analysis_id == analysis_id)
         )
         return result.scalar_one_or_none()
+
+    async def get_by_idempotency_key(self, key: str) -> AnalysisRun | None:
+        result = await self.session.execute(
+            select(AnalysisRun).where(AnalysisRun.idempotency_key == key)
+        )
+        return result.scalar_one_or_none()
+
+    async def rollback(self) -> None:
+        """Roll back the current transaction (used to recover after a unique-key clash)."""
+        await self.session.rollback()
 
     async def set_status(
         self, run: AnalysisRun, status: str, *, current_stage: int | None = None
