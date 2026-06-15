@@ -66,7 +66,9 @@ def render_hub_bar(stage7: dict[str, Any]) -> bytes | None:
         return None
     ordered = sorted(hubs, key=lambda h: h.get("mcc") or 0.0)  # ascending -> top at the top
     labels = [h.get("gene_symbol") or str(h.get("target_id")) for h in ordered]
-    vals = [h.get("mcc") or 0.0 for h in ordered]
+    # MCC scores are large Python ints on dense graphs; matplotlib's bar conversion overflows on
+    # ints beyond C-long range, so cast to float for the (display-only) bar lengths.
+    vals = [float(h.get("mcc") or 0.0) for h in ordered]
     colors = hub_bar_colors(vals)
     fig, ax = plt.subplots(figsize=(6, max(2.0, 0.4 * len(ordered))))
     ax.barh(labels, vals, color=colors)

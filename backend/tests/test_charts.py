@@ -51,6 +51,16 @@ def test_hub_bar_renders():
     assert out is not None and out.startswith(_PNG_SIG)
 
 
+def test_hub_bar_handles_large_mcc_ints():
+    # MCC on a dense graph is a very large Python int (sum of factorials of clique sizes).
+    # matplotlib's bar conversion overflows on ints beyond C-long range, so render must cast to
+    # float. Regression for the OverflowError caught in the live export proof.
+    out = charts.render_hub_bar(
+        {"hubs": [{"gene_symbol": "STAT3", "mcc": 10**40}, {"gene_symbol": "TP53", "mcc": 10**38}]}
+    )
+    assert out is not None and out.startswith(_PNG_SIG)
+
+
 def test_hub_bar_none_when_empty():
     assert charts.render_hub_bar({"hubs": []}) is None
 

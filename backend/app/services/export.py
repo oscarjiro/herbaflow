@@ -193,7 +193,11 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
     )
     if venn is not None:
         stage_pngs["stage5_venn.png"] = venn
-    hub_scores = {h["gene_symbol"]: (h.get("mcc") or 0.0) for h in sr.get("7", {}).get("hubs", [])}
+    # float() not int: MCC scores are large Python ints on dense graphs and matplotlib's node/bar
+    # colour conversion overflows beyond C-long range; the score here only drives display colour.
+    hub_scores = {
+        h["gene_symbol"]: float(h.get("mcc") or 0.0) for h in sr.get("7", {}).get("hubs", [])
+    }
     min_confidence = (params.get("ppi") or {}).get("min_confidence", 0.4)
     ppi = _ppi_figure(sr, ppi_graph, hub_scores=hub_scores, min_confidence=min_confidence)
     if ppi is not None:
