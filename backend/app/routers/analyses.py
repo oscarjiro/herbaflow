@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Header
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
 from app.pipeline.engine import run_analysis_task, run_stages_task
 from app.schemas.analysis import AnalysisCreate, AnalysisRead, ResetFromRequest, StageEditRequest
+from app.security import RATE_LIMIT_CREATE, limiter
 from app.services.analysis import AnalysisService
 
 router = APIRouter(tags=["analyses"])
@@ -20,7 +21,9 @@ async def _commit(session: AsyncSession) -> None:
 
 
 @router.post("/analyses", response_model=AnalysisRead, status_code=202)
+@limiter.limit(RATE_LIMIT_CREATE)
 async def create_analysis(
+    request: Request,
     payload: AnalysisCreate,
     background: BackgroundTasks,
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),

@@ -2,11 +2,35 @@
 
 from __future__ import annotations
 
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
-from starlette.responses import Response
+from starlette.responses import JSONResponse, Response
 
+from app.config import settings
 from app.errors import problem_json
+
+# One limiter instance for the app; routers import it to decorate specific routes.
+# Behind a reverse proxy, run uvicorn with --proxy-headers so get_remote_address sees
+# the real client (X-Forwarded-For), not the proxy (documented in docs/security.md).
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[settings.rate_limit_default],
+    enabled=settings.rate_limit_enabled,
+)
+RATE_LIMIT_CREATE = settings.rate_limit_create
+RATE_LIMIT_VALIDATE = settings.rate_limit_validate
+
+
+def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    """Map slowapi's RateLimitExceeded to the RFC 9457 problem+json shape (429)."""
+    response = problem_json(
+        429, "Too Many Requests", "Rate limit exceeded. Please slow down and retry."
+    )
+    response.headers["Retry-After"] = "60"
+    return response
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

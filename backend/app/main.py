@@ -9,6 +9,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app import db
 from app.config import settings
@@ -16,7 +18,12 @@ from app.db import check_db
 from app.errors import ServiceUnavailableError, register_error_handlers
 from app.logging_config import configure_logging
 from app.routers import analyses, compounds, diseases, export, plants, targets
-from app.security import PayloadSizeLimitMiddleware, SecurityHeadersMiddleware
+from app.security import (
+    PayloadSizeLimitMiddleware,
+    SecurityHeadersMiddleware,
+    limiter,
+    rate_limit_handler,
+)
 
 logger = logging.getLogger("herbaflow.app")
 
@@ -49,9 +56,12 @@ app = FastAPI(
     lifespan=lifespan,
     generate_unique_id_function=_operation_id,
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)  # type: ignore[arg-type]
 # Middleware is applied in reverse order of registration (last added = outermost).
 # Register CORS LAST so every response — including short-circuited 413/429 — carries
 # CORS headers (the browser hides bodies on responses missing them).
+app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(PayloadSizeLimitMiddleware, max_bytes=settings.max_request_bytes)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
