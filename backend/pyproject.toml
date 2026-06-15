@@ -64,6 +64,10 @@ ignore_missing_imports = true
 module = ["matplotlib", "matplotlib.*", "matplotlib_venn", "mpl_toolkits.*"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["scipy", "scipy.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "-q -m 'not scientific'"
