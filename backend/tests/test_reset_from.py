@@ -76,6 +76,9 @@ class FakeRepo:
         run.status = "failed"
         run.error_message = message
 
+    async def commit(self) -> None:
+        pass
+
 
 class FakeCompoundRepo:
     def __init__(self, names: dict[uuid.UUID, str]) -> None:

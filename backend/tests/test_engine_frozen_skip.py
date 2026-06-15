@@ -53,6 +53,9 @@ class _FakeRepo:
         run.status = "failed"
         run.error_message = message
 
+    async def commit(self) -> None:
+        pass
+
 
 class _Run:
     def __init__(

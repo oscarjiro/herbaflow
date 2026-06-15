@@ -125,6 +125,7 @@ class _Repo(Protocol):  # structural type for testability
     async def set_parameters(self, run: Any) -> None: ...
     async def complete(self, run: Any) -> None: ...
     async def fail(self, run: Any, message: str) -> None: ...
+    async def commit(self) -> None: ...
 
 
 async def execute_run(
@@ -155,6 +156,13 @@ async def execute_run(
         if s >= start_stage and (run_stages is None or s in run_stages) and s not in frozen
     ]
     for stage in stages:
+        # Per-stage commit: release the prior stage's row lock and surface progress; then
+        # re-read so an exit/delete during the run is detected and stops the pipeline cleanly.
+        await repo.commit()
+        run = await repo.get(analysis_id)
+        if run is None:
+            logger.info("run %s: deleted mid-run — stopping", rid)
+            return
         await repo.set_status(run, state.stage_status(stage, "running"), current_stage=stage)
         result = await runners[stage](run)
 
@@ -521,7 +529,10 @@ async def run_stages_task(
                 repo, analysis_id, runners, start_stage=start_stage, run_stages=run_stages
             )
         except Exception as exc:  # noqa: BLE001 — must not leave a stuck *_running status
-            await repo.fail(run, f"Stage execution failed: {exc}")
+            await session.rollback()
+            run = await repo.get(analysis_id)
+            if run is not None:  # run still exists -> record the failure; deleted -> nothing to do
+                await repo.fail(run, f"Stage execution failed: {exc}")
         await session.commit()
 
 

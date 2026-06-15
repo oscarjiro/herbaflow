@@ -42,6 +42,9 @@ class _FakeRepo:
         run.status = "failed"
         run.error_message = message
 
+    async def commit(self) -> None:
+        pass
+
 
 def _run() -> SimpleNamespace:
     return SimpleNamespace(
@@ -65,7 +68,10 @@ async def test_run_stages_task_marks_failed_when_runner_raises(
     async def _commit() -> None:
         committed.append(True)
 
-    fake_session = SimpleNamespace(commit=_commit)
+    async def _rollback() -> None:
+        return None
+
+    fake_session = SimpleNamespace(commit=_commit, rollback=_rollback)
 
     @asynccontextmanager
     async def fake_scope():

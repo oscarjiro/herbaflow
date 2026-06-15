@@ -54,6 +54,9 @@ class _FakeRepo:
         run.status = "failed"
         run.error_message = message
 
+    async def commit(self) -> None:
+        pass
+
 
 def _runners_that_must_not_run() -> dict[int, Any]:
     async def _boom(_run: SimpleNamespace) -> dict:
