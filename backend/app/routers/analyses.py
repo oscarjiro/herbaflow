@@ -75,6 +75,14 @@ async def reset_from(
     return await service.get(analysis_id)
 
 
+@router.delete("/analyses/{analysis_id}", status_code=204)
+async def delete_analysis(
+    analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
+) -> None:
+    await AnalysisService.from_session(session).delete(analysis_id)
+    await _commit(session)
+
+
 @router.post(
     "/analyses/{analysis_id}/stages/{stage}/edit", response_model=AnalysisRead, status_code=202
 )

@@ -315,6 +315,13 @@ class AnalysisService:
             raise GoneProblem(detail="Analysis run has expired.")
         return AnalysisRead.model_validate(run)
 
+    async def delete(self, analysis_id: uuid.UUID) -> None:
+        run = await self.analysis_repo.get(analysis_id)
+        if run is None:
+            raise NotFoundProblem(detail="Run not found.")
+        logger.info("deleting analysis %s", str(analysis_id)[:8])
+        await self.analysis_repo.delete(run)
+
     async def advance(self, analysis_id: uuid.UUID, *, defer: bool = False) -> int | None:
         runners = engine.build_runners(self.analysis_repo.session)
         return await engine.advance_run(self.analysis_repo, analysis_id, runners, defer=defer)

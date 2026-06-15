@@ -73,6 +73,13 @@ class AnalysisRepository:
         """Roll back the current transaction (used to recover after a unique-key clash)."""
         await self.session.rollback()
 
+    async def delete(self, run: AnalysisRun) -> None:
+        await self.session.delete(run)
+        await self.session.flush()
+
+    async def commit(self) -> None:
+        await self.session.commit()
+
     async def set_status(
         self, run: AnalysisRun, status: str, *, current_stage: int | None = None
     ) -> None:
