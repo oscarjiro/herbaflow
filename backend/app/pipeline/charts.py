@@ -140,6 +140,11 @@ def render_enrichment_bubble(
     return _png(fig)
 
 
+# Above this many nodes the full tripartite graph is an unreadable hairball, so the figure
+# shows the highest-degree core (the full graph stays in the Cytoscape CSV bundle). Readability
+# heuristic, not a publication standard; tune in the live proof.
+CTP_FULL_RENDER_MAX = 80
+
 _TYPE_COLOR = {"compound": "#4C9F70", "target": "#3066BE", "pathway": "#B5179E"}
 
 _TYPE_STYLE: dict[str, tuple[str, str]] = {
@@ -153,29 +158,92 @@ def _trunc(s: str, n: int = 22) -> str:
     return s if len(s) <= n else s[: n - 1] + "…"
 
 
+def select_ctp_core(graph: dict[str, Any], cap: int = CTP_FULL_RENDER_MAX) -> list[str]:
+    """Node ids to draw.
+
+    If total nodes <= cap, return all. Otherwise return the highest-degree core, keeping type
+    balance: allocate the cap across the present node types proportionally to each type's node
+    count (floor 1 per present type), and within each type keep the highest-degree nodes. So no
+    whole type (compound/target/pathway) vanishes from the figure.
+    """
+    nodes = graph.get("nodes", [])
+    total = len(nodes)
+    if total <= cap:
+        return [n["id"] for n in nodes]
+
+    # Build a temporary graph to compute degree for each node id.
+    g: nx.Graph = nx.Graph()
+    for node in nodes:
+        g.add_node(node["id"])
+    for e in graph.get("edges", []):
+        g.add_edge(e["source"], e["target"])
+    degree = dict(g.degree())
+
+    # Group ids by type.
+    by_type: dict[str, list[str]] = {}
+    for node in nodes:
+        t = node.get("type", "")
+        by_type.setdefault(t, []).append(node["id"])
+
+    present_types = [t for t in by_type if by_type[t]]
+    n_types = len(present_types)
+
+    kept: list[str] = []
+    for t in present_types:
+        type_ids = by_type[t]
+        # Proportional allocation, floor 1.
+        keep_t = max(1, round(cap * len(type_ids) / total))
+        # Sort descending by degree, take top keep_t.
+        sorted_ids = sorted(type_ids, key=lambda nid: degree.get(nid, 0), reverse=True)
+        kept.extend(sorted_ids[:keep_t])
+
+    # Rounding may push us slightly over or under; trim excess evenly if over.
+    # (Under is fine — we never drop below floor-1 per type.)
+    if len(kept) > cap + n_types:
+        kept = kept[: cap + n_types]
+
+    return kept
+
+
 def render_ctp_network(graph: dict[str, Any]) -> bytes | None:
-    """Concentric shell-layout C-T-P network (compounds centre → targets ring → pathways rim).
-    Node size ∝ degree; colour+shape by type with a legend; labels truncated to 22 chars.
-    Returns None when there are no edges (conditional-PNG rule)."""
+    """Concentric shell-layout C-T-P network (compounds centre -> targets ring -> pathways rim).
+
+    Node size proportional to degree; colour+shape by type with a legend; labels truncated to 22
+    chars. Returns None when there are no edges (conditional-PNG rule). When the graph exceeds
+    CTP_FULL_RENDER_MAX nodes, draws only the highest-degree core (induced subgraph) to keep the
+    figure legible; the title notes how many nodes are shown vs. the total.
+    """
     edges = graph.get("edges", [])
     if not edges:
         return None
+
+    all_nodes = graph.get("nodes", [])
+    total_nodes = len(all_nodes)
+
+    keep = set(select_ctp_core(graph))
+    k = len(keep)
+
+    # Induced subgraph: only nodes in keep + edges where BOTH endpoints are in keep.
     g: nx.Graph = nx.Graph()
-    for n in graph.get("nodes", []):
-        g.add_node(n["id"], **n)
+    for node in all_nodes:
+        if node["id"] in keep:
+            g.add_node(node["id"], **node)
     for e in edges:
-        g.add_edge(e["source"], e["target"])
+        if e["source"] in keep and e["target"] in keep:
+            g.add_edge(e["source"], e["target"])
+
     shells = [
-        [n["id"] for n in graph["nodes"] if n.get("type") == t]
+        [node["id"] for node in all_nodes if node.get("type") == t and node["id"] in keep]
         for t in ("compound", "target", "pathway")
     ]
     shells = [s for s in shells if s]
     pos = nx.shell_layout(g, nlist=shells)
     deg = dict(g.degree())
+
     fig, ax = plt.subplots(figsize=(11, 11))
     nx.draw_networkx_edges(g, pos, ax=ax, edge_color="#CCCCCC", width=0.8)
     for t, (color, marker) in _TYPE_STYLE.items():
-        ids = [n for n in g.nodes if g.nodes[n].get("type") == t]
+        ids = [nid for nid in g.nodes if g.nodes[nid].get("type") == t]
         if not ids:
             continue
         nx.draw_networkx_nodes(
@@ -193,10 +261,14 @@ def render_ctp_network(graph: dict[str, Any]) -> bytes | None:
         pos,
         ax=ax,
         font_size=7,
-        labels={n: _trunc(str(g.nodes[n].get("label") or n)) for n in g.nodes},
+        labels={nid: _trunc(str(g.nodes[nid].get("label") or nid)) for nid in g.nodes},
     )
-    ax.legend(scatterpoints=1)
-    ax.set_title("Compound–target–pathway network")
+    ax.legend(scatterpoints=1, bbox_to_anchor=(1.02, 1), loc="upper left", borderaxespad=0.0)
+    if total_nodes > k:
+        title = f"Compound-target-pathway network (top {k} of {total_nodes} nodes shown)"
+    else:
+        title = "Compound-target-pathway network"
+    ax.set_title(title)
     ax.axis("off")
     return _png(fig)
 

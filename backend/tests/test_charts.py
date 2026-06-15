@@ -270,3 +270,87 @@ def test_ppi_network_no_nodes_returns_none():
         charts.render_ppi_network({"nodes": [], "edges": []}, hub_scores={}, min_confidence=0.4)
         is None
     )
+
+
+# Task T6 — CTP core selection and capped render
+
+
+def _make_small_ctp_graph() -> dict:
+    """A minimal 3-node, 2-edge C-T-P graph (well below CTP_FULL_RENDER_MAX)."""
+    return {
+        "nodes": [
+            {"id": "CURCUMIN", "label": "CURCUMIN", "type": "compound"},
+            {"id": "PPARG", "label": "PPARG", "type": "target"},
+            {"id": "GO:1", "label": "blood circulation", "type": "pathway"},
+        ],
+        "edges": [
+            {"source": "CURCUMIN", "target": "PPARG"},
+            {"source": "PPARG", "target": "GO:1"},
+        ],
+    }
+
+
+def _make_large_ctp_graph(
+    n_compound: int = 80,
+    n_target: int = 80,
+    n_pathway: int = 60,
+) -> dict:
+    """Build a graph with 200+ nodes across all three types.
+
+    Connectivity: each compound connects to every target; each target connects to every pathway.
+    This ensures varying degree so the selector has something to rank on.
+    """
+    compounds = [{"id": f"C{i}", "label": f"C{i}", "type": "compound"} for i in range(n_compound)]
+    targets = [{"id": f"T{i}", "label": f"T{i}", "type": "target"} for i in range(n_target)]
+    pathways = [{"id": f"P{i}", "label": f"P{i}", "type": "pathway"} for i in range(n_pathway)]
+    nodes = compounds + targets + pathways
+
+    edges = []
+    # Compound→target edges (first compound connects to all targets, giving it highest degree)
+    for c in compounds[:1]:
+        for t in targets:
+            edges.append({"source": c["id"], "target": t["id"]})
+    # Target→pathway edges
+    for t in targets[:1]:
+        for p in pathways:
+            edges.append({"source": t["id"], "target": p["id"]})
+    return {"nodes": nodes, "edges": edges}
+
+
+def test_select_ctp_core_small_returns_all():
+    """Small graph (< cap): select_ctp_core returns every node id."""
+    graph = _make_small_ctp_graph()
+    all_ids = {n["id"] for n in graph["nodes"]}
+    result = set(charts.select_ctp_core(graph))
+    assert result == all_ids
+
+
+def test_select_ctp_core_large_respects_cap():
+    """Large graph (200+ nodes): result length is at most cap + small slack."""
+    cap = 80
+    graph = _make_large_ctp_graph()
+    result = charts.select_ctp_core(graph, cap=cap)
+    assert len(result) <= cap + 3
+
+
+def test_select_ctp_core_large_preserves_type_balance():
+    """Large graph: at least one node from each present type is included."""
+    cap = 80
+    graph = _make_large_ctp_graph()
+    result_ids = set(charts.select_ctp_core(graph, cap=cap))
+    node_types_in_result = {n["type"] for n in graph["nodes"] if n["id"] in result_ids}
+    assert "compound" in node_types_in_result
+    assert "target" in node_types_in_result
+    assert "pathway" in node_types_in_result
+
+
+def test_ctp_render_small_returns_png():
+    """render_ctp_network returns PNG bytes for a small valid graph."""
+    png = charts.render_ctp_network(_make_small_ctp_graph())
+    assert isinstance(png, bytes)
+    assert png[:8] == _PNG_SIG
+
+
+def test_ctp_render_no_edges_returns_none():
+    """render_ctp_network returns None when there are no edges."""
+    assert charts.render_ctp_network({"nodes": [], "edges": []}) is None
