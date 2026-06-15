@@ -120,4 +120,9 @@ def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(OperationalError, _db_unavailable_handler)
     app.add_exception_handler(InterfaceError, _db_unavailable_handler)
     app.add_exception_handler(SQLATimeoutError, _db_unavailable_handler)
+    # A connect-time failure (DB down) surfaces as a raw OSError, not a SQLAlchemy error:
+    # asyncpg raises ConnectionRefusedError/TimeoutError/socket.gaierror (all OSError) and
+    # SQLAlchemy does not wrap it. In a request path the only OS-level socket is the database,
+    # so map OSError to the same 503 as the wrapped query-time errors above.
+    app.add_exception_handler(OSError, _db_unavailable_handler)
     app.add_exception_handler(Exception, _unhandled_handler)
