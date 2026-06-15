@@ -17,13 +17,13 @@
       "enum": ["computed", "user_provided", "not_applicable"]
     },
     "plant_input_mode": {
-      "description": "How the plant/compound side of the run is supplied (Software Lock §5.5).",
+      "description": "How the plant/compound side of the run is supplied.",
       "type": "string",
       "enum": ["selection", "manual_compounds", "manual_targets"],
       "default": "selection"
     },
     "disease_input_mode": {
-      "description": "How the disease side of the run is supplied (Software Lock §5.5).",
+      "description": "How the disease side of the run is supplied.",
       "type": "string",
       "enum": ["selection", "manual_disease_targets"],
       "default": "selection"
@@ -48,14 +48,14 @@
       "required": ["name", "url"]
     },
     "stage_sources": {
-      "description": "Per-stage data-source objects. 'computed' = the sources used in a normal run; 'user_provided' = only the manual-resolution source that runs when an entity stage is supplied by the user (Software Lock B3/B4-i). Read by the backend report and the FE StageDataSources. Each entry is {name, url} where url is null for pseudo-sources.",
+      "description": "Per-stage data-source objects. 'computed' = the sources used in a normal run; 'user_provided' = only the manual-resolution source that runs when an entity stage is supplied by the user. Read by the backend report and the FE StageDataSources. Each entry is {name, url} where url is null for pseudo-sources.",
       "type": "object",
       "properties": {
         "computed": {
           "type": "object",
           "properties": {
             "1": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "KNApSAcK (plant–compound)", "url": "http://www.knapsackfamily.com/" },
+              { "name": "KNApSAcK (plant-compound)", "url": "http://www.knapsackfamily.com/" },
               { "name": "PubChem (manual enrichment)", "url": "https://pubchem.ncbi.nlm.nih.gov/" }
             ]},
             "2": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
@@ -67,14 +67,14 @@
               { "name": "UniProt", "url": "https://www.uniprot.org/" }
             ]},
             "4": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "Open Targets (ETL-seeded disease–target associations)", "url": "https://platform.opentargets.org/" },
+              { "name": "Open Targets (disease-target associations)", "url": "https://platform.opentargets.org/" },
               { "name": "UniProt", "url": "https://www.uniprot.org/" }
             ]},
             "5": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
               { "name": "Set intersection of Stage 3 ∩ Stage 4 (on target_id)", "url": null }
             ]},
             "6": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "STRING (protein–protein interactions)", "url": "https://string-db.org/" },
+              { "name": "STRING (protein-protein interactions)", "url": "https://string-db.org/" },
               { "name": "Human only (species 9606); functional or physical", "url": null }
             ]},
             "7": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
@@ -111,34 +111,34 @@
           "properties": {
             "max_mw": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000, "default": 500,
               "recommended_min": 350, "recommended_max": 600, "unit": "Da",
-              "description": "Molecular weight ceiling (Da). Molecular size — larger molecules permeate membranes more poorly." },
+              "description": "Molecular weight ceiling (Da). Molecular size: larger molecules permeate membranes more poorly." },
             "max_logp": { "type": "number", "minimum": -10, "maximum": 20, "default": 5,
               "recommended_min": 3, "recommended_max": 5.6,
-              "description": "Lipophilicity ceiling (logP, octanol–water partition). Balances solubility against membrane permeation." },
+              "description": "Lipophilicity ceiling (logP, octanol-water partition). Balances solubility against membrane permeation." },
             "max_hbd": { "type": "integer", "minimum": 0, "maximum": 50, "default": 5,
               "recommended_min": 3, "recommended_max": 5,
-              "description": "Hydrogen-bond donor ceiling (Σ N–H, O–H). Each donor adds a desolvation penalty crossing membranes." },
+              "description": "Hydrogen-bond donor ceiling (Σ N-H, O-H). Each donor adds a desolvation penalty crossing membranes." },
             "max_hba": { "type": "integer", "minimum": 0, "maximum": 50, "default": 10,
               "recommended_min": 8, "recommended_max": 10,
               "description": "Hydrogen-bond acceptor ceiling (Σ N, O atoms). Adds a desolvation penalty." },
             "max_tpsa": { "type": "number", "minimum": 0, "maximum": 500, "default": 140,
               "recommended_min": 90, "recommended_max": 140, "unit": "Å²",
-              "description": "Topological polar surface area ceiling (Å²). Polarity — high TPSA lowers absorption (Veber)." },
+              "description": "Topological polar surface area ceiling (Å²). Polarity: high TPSA lowers absorption (Veber)." },
             "max_rotatable_bonds": { "type": "integer", "minimum": 0, "maximum": 50, "default": 10,
               "recommended_min": 7, "recommended_max": 10,
-              "description": "Rotatable-bond ceiling. Molecular flexibility — too flexible lowers oral bioavailability (Veber)." },
+              "description": "Rotatable-bond ceiling. Molecular flexibility: too flexible lowers oral bioavailability (Veber)." },
             "apply_veber": { "type": "boolean", "default": true,
               "description": "Apply Veber's rules (rotatable bonds + TPSA) on top of Lipinski's four." },
             "np_exception_threshold": { "type": "number", "minimum": -5, "maximum": 5, "default": 0.5,
               "recommended_min": -1, "recommended_max": 2,
-              "description": "Natural-product-likeness score (Ertl, approx [-5,+5]) at or above which a compound bypasses the rules — protects genuine plant compounds." },
+              "description": "Natural-product-likeness score (Ertl, approx [-5,+5]) at or above which a compound bypasses the rules, protecting genuine plant compounds." },
             "apply_np_exception": { "type": "boolean", "default": true,
               "description": "Allow the natural-product-likeness exception to rescue rule-breaking compounds. Off = strict (no NP rescue)." },
             "max_violations": { "type": "integer", "minimum": 0, "maximum": 4, "default": 1,
               "recommended_min": 0, "recommended_max": 2,
               "description": "Number of the four Lipinski rules a compound may break and still pass (RO5 leniency). Veber is evaluated separately, not in this budget." },
             "skip_adme": { "type": "boolean", "default": false,
-              "description": "Bypass ADME screening entirely — every compound passes, flagged not screened." }
+              "description": "Bypass ADME screening entirely: every compound passes, flagged not screened." }
           }
         },
         "target": {
@@ -146,10 +146,10 @@
           "properties": {
             "min_pchembl": { "type": "number", "minimum": 0, "maximum": 14, "default": 5.0,
               "recommended_min": 5.0, "recommended_max": 7.0,
-              "description": "Minimum pChEMBL (−log10 molar potency) for a measured compound–target edge. 5 ≈ active at ≤10 µM (standard cutoff); 6 = 1 µM; 7 = 100 nM (stricter)." },
+              "description": "Minimum pChEMBL (−log10 molar potency) for a measured compound-target edge. 5 ≈ active at ≤10 µM (standard cutoff); 6 = 1 µM; 7 = 100 nM (stricter)." },
             "min_assay_confidence": { "type": "integer", "minimum": 0, "maximum": 9, "default": 7,
               "recommended_min": 5, "recommended_max": 9,
-              "description": "Minimum ChEMBL target-confidence score (0–9). 9 = direct single protein; ≥7 high-confidence molecular target; <4 cellular." }
+              "description": "Minimum ChEMBL target-confidence score (0-9). 9 = direct single protein; ≥7 high-confidence molecular target; <4 cellular." }
           }
         },
         "disease_targets": {
@@ -157,7 +157,7 @@
           "properties": {
             "min_score": {
               "type": "number",
-              "description": "Open Targets overall disease-target association score floor (Methodology Lock §4.4).",
+              "description": "Open Targets overall disease-target association score floor.",
               "default": 0.3,
               "minimum": 0,
               "maximum": 1,
@@ -170,7 +170,7 @@
           "type": "object",
           "properties": {
             "min_confidence": {
-              "description": "STRING edge-confidence floor (0–1; tiers 0.15/0.4/0.7/0.9). Default 0.4 = medium.",
+              "description": "STRING edge-confidence floor (0-1; tiers 0.15/0.4/0.7/0.9). Default 0.4 = medium.",
               "type": "number", "enum": [0.15, 0.4, 0.7, 0.9], "default": 0.4
             },
             "max_proteins": {
