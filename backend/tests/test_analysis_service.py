@@ -181,7 +181,7 @@ async def test_create_allows_manual_compounds_at_cap() -> None:
         mode=Mode.auto,
         manual_compound_ids=ids,
     )
-    result = await svc.create(payload)
+    result, _ = await svc.create(payload)
     assert result is not None
 
 

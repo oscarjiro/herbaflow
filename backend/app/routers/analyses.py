@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
@@ -23,11 +23,15 @@ async def _commit(session: AsyncSession) -> None:
 async def create_analysis(
     payload: AnalysisCreate,
     background: BackgroundTasks,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     session: AsyncSession = Depends(get_session),
 ) -> AnalysisRead:
-    run = await AnalysisService.from_session(session).create(payload)
+    run, replayed = await AnalysisService.from_session(session).create(
+        payload, idempotency_key=idempotency_key
+    )
     await _commit(session)
-    background.add_task(run_analysis_task, run.analysis_id)
+    if not replayed:
+        background.add_task(run_analysis_task, run.analysis_id)
     return run
 
 
