@@ -8,6 +8,7 @@ No DB/async/API.
 from __future__ import annotations
 
 import io
+import math
 from typing import Any
 
 import matplotlib
@@ -69,6 +70,25 @@ _CATEGORY_SLUG = {
     "WP": "WP",
 }
 
+# Shared sequential colormap for "higher value = more important" scores (gene count,
+# hub-bottleneck composite). enrichplot convention: the important (high) end is a dark,
+# saturated red; the low end is faint. Never put the important value at the invisible
+# yellow end. Reused by the enrichment dotplot, the hub bar, and the PPI node colouring.
+SEQUENTIAL_CMAP = "Reds"
+
+ENRICHMENT_FULL_NAME = {
+    "GO:BP": "Biological Process",
+    "GO:MF": "Molecular Function",
+    "GO:CC": "Cellular Component",
+    "KEGG": "KEGG pathways",
+    "REAC": "Reactome pathways",
+    "WP": "WikiPathways",
+}
+
+
+def enrichment_title(category: str) -> str:
+    return f"Functional enrichment: {ENRICHMENT_FULL_NAME.get(category, category)}"
+
 
 def category_slug(source: str) -> str:
     return _CATEGORY_SLUG.get(source, source.replace(":", "_"))
@@ -80,22 +100,34 @@ def render_enrichment_bubble(
     terms = [t for t in stage8.get("terms", []) if t.get("source") == category and t.get("p_value")]
     if not terms or not overlap_size:
         return None
-    terms = sorted(terms, key=lambda t: len(t.get("intersection", [])) / overlap_size)[-20:]
+    total = len(terms)
+    # Most significant first (smallest adjusted p), keep top 20.
+    terms = sorted(terms, key=lambda t: t["p_value"])[:20]
+    # Reverse for y-axis so the most significant term sits at the top.
+    terms = list(reversed(terms))
     y = list(range(len(terms)))
+    x = [-math.log10(max(t["p_value"], 1e-300)) for t in terms]
     counts = [len(t.get("intersection", [])) for t in terms]
-    ratio = [c / overlap_size for c in counts]
-    padj = [t["p_value"] for t in terms]
-    fig, ax = plt.subplots(figsize=(7, max(2.5, 0.45 * len(terms))))
-    sc = ax.scatter(ratio, y, s=[max(c, 1) * 40 for c in counts], c=padj, cmap="autumn", norm=None)
+    labels = [_trunc(t.get("name") or t["term_id"], 40) for t in terms]
+    title = enrichment_title(category)
+    if total > 20:
+        title = f"{title} (top 20 of {total})"
+    fig, ax = plt.subplots(figsize=(8, max(2.5, 0.45 * len(terms))))
+    sc = ax.scatter(
+        x,
+        y,
+        s=120,
+        c=counts,
+        cmap=SEQUENTIAL_CMAP,
+        alpha=0.6,
+        edgecolors="#333333",
+        linewidths=0.5,
+    )
     ax.set_yticks(y)
-    ax.set_yticklabels([t.get("name") or t["term_id"] for t in terms])
-    ax.set_xlabel("gene ratio")
-    ax.set_title(f"Stage 8 — enrichment ({category_slug(category)})")
-    cb = fig.colorbar(sc, ax=ax, label="adjusted p-value")
-    cb.ax.invert_yaxis()
-    for c in sorted(set(counts))[:3]:
-        ax.scatter([], [], s=max(c, 1) * 40, c="grey", label=str(c))
-    ax.legend(title="gene count", loc="lower right", labelspacing=1)
+    ax.set_yticklabels(labels)
+    ax.set_xlabel("−log₁₀(adjusted p)")
+    ax.set_title(title)
+    fig.colorbar(sc, ax=ax, label="gene count")
     return _png(fig)
 
 
