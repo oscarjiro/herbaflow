@@ -8,6 +8,8 @@ from typing import Any
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import InterfaceError, OperationalError
+from sqlalchemy.exc import TimeoutError as SQLATimeoutError
 
 logger = logging.getLogger("herbaflow.errors")
 
@@ -101,8 +103,21 @@ async def _unhandled_handler(request: Request, exc: Exception) -> JSONResponse:
     return _problem(500, "Internal Server Error", "An internal error occurred.", "about:blank")
 
 
+async def _db_unavailable_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.error("database unavailable on %s %s: %s", request.method, request.url.path, exc)
+    return _problem(
+        503,
+        "Service Unavailable",
+        "The service is temporarily unavailable. Please try again later.",
+        "about:blank",
+    )
+
+
 def register_error_handlers(app: FastAPI) -> None:
     """Wire the problem+json handlers onto the app."""
     app.add_exception_handler(ProblemException, _problem_handler)  # type: ignore[arg-type]
     app.add_exception_handler(RequestValidationError, _validation_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(OperationalError, _db_unavailable_handler)
+    app.add_exception_handler(InterfaceError, _db_unavailable_handler)
+    app.add_exception_handler(SQLATimeoutError, _db_unavailable_handler)
     app.add_exception_handler(Exception, _unhandled_handler)
