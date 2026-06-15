@@ -293,9 +293,10 @@ async def advance_run(
 def _validate_overrides(group: str, overrides: dict[str, Any]) -> None:
     """Validate param overrides against the group's HARD bounds only.
 
-    Enforces ``minimum``/``maximum``/``exclusiveMinimum`` and the JSON-Schema ``type``.
-    The advisory ``recommended_min``/``recommended_max`` are NEVER enforced. An unknown key
-    or an out-of-range value raises :class:`ValidationProblem` (422).
+    Enforces ``minimum``/``maximum``/``exclusiveMinimum``, the JSON-Schema ``type``, and any
+    closed ``enum`` (string OR numeric, e.g. STRING's confidence tiers). The advisory
+    ``recommended_min``/``recommended_max`` are NEVER enforced. An unknown key, an out-of-range
+    value, or an off-enum value raises :class:`ValidationProblem` (422).
     """
     bounds = contracts.pipeline_param_bounds(group)
     for name, value in overrides.items():
@@ -309,7 +310,7 @@ def _validate_overrides(group: str, overrides: dict[str, Any]) -> None:
             continue
         if kind == "string":
             # String params (e.g. network_type) carry a closed enum vocabulary; enforce it
-            # (unlike a numeric tier, an off-list string is meaningless to the downstream API).
+            # here. Numeric enums (e.g. min_confidence tiers) are enforced in the numeric branch.
             if not isinstance(value, str):
                 raise ValidationProblem(detail=f"{name} must be a string.")
             allowed = spec.get("enum")
@@ -351,6 +352,11 @@ def _validate_overrides(group: str, overrides: dict[str, Any]) -> None:
         maximum = spec.get("maximum")
         if maximum is not None and value > maximum:
             raise ValidationProblem(detail=f"{name} must be <= {maximum}.")
+        allowed = spec.get("enum")
+        if allowed is not None and value not in allowed:
+            raise ValidationProblem(
+                detail=f"{name} must be one of: {', '.join(map(str, allowed))}."
+            )
 
 
 async def reset_from(

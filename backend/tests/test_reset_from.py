@@ -688,6 +688,19 @@ def test_validate_overrides_rejects_non_string_for_string_param() -> None:
         engine._validate_overrides("ppi", {"network_type": 123})
 
 
+def test_validate_overrides_rejects_off_tier_numeric_enum() -> None:
+    # min_confidence carries a numeric enum (STRING's confidence tiers). An in-range but
+    # off-tier value (0.55 sits between the 0.15 and 0.9 bounds) must be rejected, symmetric
+    # with the string-enum branch.
+    with pytest.raises(ValidationProblem):
+        engine._validate_overrides("ppi", {"min_confidence": 0.55})
+
+
+def test_validate_overrides_accepts_on_tier_numeric_enum() -> None:
+    for tier in (0.15, 0.4, 0.7, 0.9):
+        engine._validate_overrides("ppi", {"min_confidence": tier})  # exact tier is valid
+
+
 # ---------------------------------------------------------------------------
 # Array param overrides (enrichment.sources): ADJUST-3
 # ---------------------------------------------------------------------------
