@@ -130,3 +130,7 @@ AGENTS.md
 # scratch schema-equivalence work (not part of the baseline)
 supabase/_baseline_work/
 
+# GD-2 golden-dataset fixtures + report derive from unpublished thesis data (do not commit)
+backend/tests/scientific/fixtures/gd2_*.json
+docs/validation/golden-hito-pancreatic/
+
