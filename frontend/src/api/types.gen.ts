@@ -187,6 +187,9 @@ export type ListPlantsResponse = ListPlantsResponses[keyof ListPlantsResponses];
 
 export type CreateAnalysisData = {
     body: AnalysisCreate;
+    headers?: {
+        'Idempotency-Key'?: string | null;
+    };
     path?: never;
     query?: never;
     url: '/analyses';
@@ -209,6 +212,33 @@ export type CreateAnalysisResponses = {
 };
 
 export type CreateAnalysisResponse = CreateAnalysisResponses[keyof CreateAnalysisResponses];
+
+export type DeleteAnalysisData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}';
+};
+
+export type DeleteAnalysisErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteAnalysisError = DeleteAnalysisErrors[keyof DeleteAnalysisErrors];
+
+export type DeleteAnalysisResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteAnalysisResponse = DeleteAnalysisResponses[keyof DeleteAnalysisResponses];
 
 export type GetAnalysisData = {
     body?: never;

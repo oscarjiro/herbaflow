@@ -244,6 +244,8 @@ export const zListPlantsResponse = z.array(zPlantRead);
 
 export const zCreateAnalysisResponse = zAnalysisRead;
 
+export const zDeleteAnalysisResponse = z.void();
+
 export const zGetAnalysisResponse = zAnalysisRead;
 
 export const zAdvanceAnalysisResponse = zAnalysisRead;

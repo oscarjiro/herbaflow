@@ -62,15 +62,33 @@
         ],
         "summary": "Create Analysis",
         "operationId": "create_analysis",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AnalysisCreate"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "202": {
@@ -125,6 +143,40 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "Delete Analysis",
+        "operationId": "delete_analysis",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -770,7 +822,7 @@
     "/health": {
       "get": {
         "summary": "Health",
-        "description": "Liveness probe reporting service status.",
+        "description": "Readiness probe: 200 when the database is reachable, 503 otherwise.",
         "operationId": "health",
         "responses": {
           "200": {
