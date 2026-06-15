@@ -193,9 +193,7 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
     )
     if venn is not None:
         stage_pngs["stage5_venn.png"] = venn
-    hub_scores = {
-        h["gene_symbol"]: (h.get("composite") or 0.0) for h in sr.get("7", {}).get("hubs", [])
-    }
+    hub_scores = {h["gene_symbol"]: (h.get("mcc") or 0.0) for h in sr.get("7", {}).get("hubs", [])}
     min_confidence = (params.get("ppi") or {}).get("min_confidence", 0.4)
     ppi = _ppi_figure(sr, ppi_graph, hub_scores=hub_scores, min_confidence=min_confidence)
     if ppi is not None:

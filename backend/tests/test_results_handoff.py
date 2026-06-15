@@ -272,14 +272,14 @@ def test_stage7_csv_columns():
                     "betweenness": 0.2,
                     "closeness": 0.4,
                     "eigenvector": 0.3,
-                    "composite": 0.41,
+                    "mcc": 3,
                 }
             ]
         }
     }
     head = rh.build_stage_csv(7, sr, {}, {}).splitlines()[0]
     assert head == (
-        "rank,gene_symbol,uniprot_accession,degree,betweenness,closeness,eigenvector,composite"
+        "rank,gene_symbol,uniprot_accession,degree,betweenness,closeness,eigenvector,mcc"
     )
 
 

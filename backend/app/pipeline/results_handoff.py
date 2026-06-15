@@ -457,7 +457,7 @@ def _stage7_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> s
         "betweenness",
         "closeness",
         "eigenvector",
-        "composite",
+        "mcc",
     )
     rows = [tuple(h.get(c, "") for c in cols) for h in sr.get("7", {}).get("hubs", [])]
     return _csv_with_note(cols, rows, "no hub genes")
@@ -735,21 +735,21 @@ STRING PPI network built over the overlap targets. The per-stage CSV is the edge
 
 **`stage7_hubs.csv`** · **`stage7_hub_bar.png`**
 
-Targets ranked by their centrality in the PPI network using a composite of degree and
-betweenness centrality (hub-bottleneck method, Yu 2007). Higher composite = more central.
+Targets ranked by their centrality in the PPI network using the Matthews Correlation Coefficient
+(MCC) of the node's local neighbourhood. Higher MCC = more topologically central.
 
-`stage7_hub_bar.png` shows a bar chart of the top hub genes by composite score.
+`stage7_hub_bar.png` shows a bar chart of the top hub genes by MCC score.
 
 | Column | Meaning |
 |---|---|
-| `rank` | Hub rank (1 = highest composite score). |
+| `rank` | Hub rank (1 = highest MCC score). |
 | `gene_symbol` | HGNC gene symbol. |
 | `uniprot_accession` | UniProt accession. |
 | `degree` | Normalised degree centrality (fraction of possible connections). |
 | `betweenness` | Normalised betweenness centrality (fraction of shortest paths via this node). |
 | `closeness` | Normalised closeness centrality. |
 | `eigenvector` | Normalised eigenvector centrality (influence weighted by neighbour importance). |
-| `composite` | Hub-bottleneck composite score used for ranking. |
+| `mcc` | MCC score used for ranking (integer; higher = more central). |
 
 ---
 
