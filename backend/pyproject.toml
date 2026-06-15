@@ -13,6 +13,7 @@ dependencies = [
     "networkx>=3.2",
     "matplotlib>=3.9",
     "matplotlib-venn>=1.1",
+    "slowapi>=0.1.10",
 ]
 
 [dependency-groups]

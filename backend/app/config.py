@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     db_pool_timeout: int = 10
     db_pool_recycle: int = 1800
     db_connect_timeout: int = 5
+    # Security controls. Budgets are env-configurable; rate limits use slowapi's
+    # "<count>/<period>" syntax. rate_limit_enabled is toggled off in tests (conftest).
+    max_request_bytes: int = 1_048_576  # 1 MB request-body cap
+    rate_limit_enabled: bool = True
+    rate_limit_default: str = "120/minute"
+    rate_limit_create: str = "5/minute"
+    rate_limit_validate: str = "20/minute"
 
     @property
     def cors_origins_list(self) -> list[str]:
