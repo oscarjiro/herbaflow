@@ -12,7 +12,8 @@ from fastapi.routing import APIRoute
 
 from app import db
 from app.config import settings
-from app.errors import register_error_handlers
+from app.db import check_db
+from app.errors import ServiceUnavailableError, register_error_handlers
 from app.logging_config import configure_logging
 from app.routers import analyses, compounds, diseases, export, plants, targets
 
@@ -63,6 +64,10 @@ app.include_router(export.router)
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    """Liveness probe reporting service status."""
+async def health() -> dict[str, str]:
+    """Readiness probe: 200 when the database is reachable, 503 otherwise."""
+    try:
+        await check_db()
+    except Exception as exc:  # noqa: BLE001 — any DB failure means not-ready
+        raise ServiceUnavailableError(detail="The database is unavailable.") from exc
     return {"status": "ok"}

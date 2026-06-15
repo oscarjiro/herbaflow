@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -80,3 +81,9 @@ async def session_scope() -> AsyncIterator[AsyncSession]:
         raise RuntimeError("engine not initialized; call init_engine() in the app lifespan")
     async with _sessionmaker() as session:
         yield session
+
+
+async def check_db() -> None:
+    """Run ``SELECT 1`` to confirm the database is reachable. Raises on failure."""
+    async with session_scope() as session:
+        await session.execute(text("SELECT 1"))
