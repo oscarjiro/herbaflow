@@ -723,19 +723,21 @@ Redoing Stage 6 with `allow_top_n_cap: true` (proceeds on the top-N overlap targ
   "hubs": [
     { "rank": 1, "target_id": "<uuid>", "gene_symbol": "TNF",
       "degree": 0.41, "betweenness": 0.33, "closeness": 0.58, "eigenvector": 0.29,
-      "composite": 0.37, "source_url": "https://www.uniprot.org/uniprotkb/<acc>/entry" }
+      "mcc": 12, "source_url": "https://www.uniprot.org/uniprotkb/<acc>/entry" }
   ],
-  "ranking_metric": "hub_bottleneck_composite",  // or "degree" when use_hub_bottleneck=false
-  "composite_weight": 0.5, "normalization": "min_max",
+  "ranking_metric": "mcc",
   "node_count": <int>, "top_n": <int>, "count": <int>,  // count = hubs reported
   "flags": [ /* "network_too_small" | "eigenvector_fallback" */ ]
 }
 ```
 
-Stage 7 ranks the Stage-6 PPI proteins by four networkx centralities (degree/betweenness/
-closeness/eigenvector, undirected graph) and a min-max hub-bottleneck composite
-(`w·degree + (1−w)·betweenness`, Yu 2007). `top_n` is a descriptive cut, not a significance
-test. Tiny/sparse networks are flagged (reported, never a hard-stop).
+Stage 7 ranks the Stage-6 PPI proteins by MCC (Maximal Clique Centrality, Chin 2014), computed on
+the undirected, unweighted graph as the sum over each protein's maximal cliques of (clique size minus
+one) factorial. The four classic centralities (degree, betweenness, closeness, eigenvector) are still
+computed and reported per protein for transparency, but they no longer feed the rank. `top_n` is a
+descriptive cut, not a significance test. Tiny or sparse networks are flagged (reported, never a
+hard-stop); where a protein has no edge among its neighbours, MCC equals its degree, and an isolated
+node scores 0.
 
 **Enrichment stage** (Stage 8 — `parameters.enrichment`; TERMINAL).
 
@@ -850,18 +852,18 @@ dropped; module detection is deferred future work.
 
 #### `parameters.hub_genes` block (Stage 7)
 
-Frozen from the contract defaults at run-creation (like `adme` and `ppi`). `normalization` is
-hardcoded `"min_max"` — not a user param; `use_hub_bottleneck` drives the ranking metric.
+Frozen from the contract defaults at run-creation (like `adme` and `ppi`). The ranking metric is MCC
+(Maximal Clique Centrality, Chin 2014); it is a fixed method constant, not a user parameter.
 
 | Parameter | Type | Default | Bounds / enum | Notes |
 |---|---|---|---|---|
-| `top_n` | integer | 10 | ≥1, ≤100 (rec. 5–20) | Descriptive hub cut; not a significance test |
-| `use_hub_bottleneck` | boolean | true | — | Use composite hub-bottleneck (`w·degree+(1−w)·betweenness`); false = degree only |
-| `composite_weight` | number | 0.5 | ≥0, ≤1 (rec. 0.3–0.7) | Weight `w` on degree in the composite; `(1−w)` on betweenness |
+| `top_n` | integer | 20 | ≥1, ≤200 (rec. 5–50) | Descriptive hub cut; not a significance test |
 
-Min-max normalization is a fixed method constant, not configuration. Tiny/sparse networks (fewer
-nodes than the minimum required for eigenvector convergence) emit the `"network_too_small"` flag
-and fall back to degree-only — reported, never a hard-stop.
+MCC is computed on the undirected, unweighted PPI graph. The four classic centralities (degree,
+betweenness, closeness, eigenvector) are reported per protein for transparency but do not feed the
+rank. Tiny or sparse networks (fewer nodes than the minimum required for eigenvector convergence) emit
+the `"network_too_small"` flag and the eigenvector value falls back gracefully (the
+`"eigenvector_fallback"` flag); both are reported, never a hard-stop.
 
 ---
 

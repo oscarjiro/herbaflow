@@ -52,7 +52,7 @@ The Herbaflow pipeline comprises 8 sequential stages, each producing a distinct 
 4. **Stage 4: Disease Target Mapping** — Maps predicted targets to disease associations (Open Targets database or ETL-cached DisGeNET)
 5. **Stage 5: Target Overlap Analysis** — Set intersection of the compound-target and disease-target sets; identifies candidate therapeutic targets
 6. **Stage 6: PPI Network Construction** — Builds protein-protein interaction network around candidate targets (STRING database)
-7. **Stage 7: Hub Gene Analysis** — Computes network centrality metrics (degree, betweenness, closeness, eigenvector); hub+bottleneck criterion ranks targets by biological importance
+7. **Stage 7: Hub Gene Analysis** — Ranks targets by MCC (Maximal Clique Centrality, Chin 2014) on the PPI network; the four classic centralities (degree, betweenness, closeness, eigenvector) are reported per protein for transparency
 8. **Stage 8: Pathway Enrichment** — Statistical enrichment of KEGG/Reactome pathways (hypergeometric test with FDR correction)
 
 The UI implements two execution modes:
@@ -401,22 +401,22 @@ deferred to the Phase-5 design pass — the edge list is the current surface.
 
 **Component:** `src/components/stages/Stage7View.tsx`.
 
-**Results view (computed):** Summary **cards** lead (node count, ranked count, ranking metric,
-`composite_weight`); a **hub table** lists each hub-ranked protein with columns for rank, gene
-symbol (linked to UniProt via `source_url`), and all four centrality values (degree, betweenness,
-closeness, eigenvector) plus the composite score, ordered by rank ascending. The `"network_too_small"`
-flag renders as a dismissible notice (tiny/sparse network — informational, not an error). The
-`"eigenvector_fallback"` flag is surfaced as a footnote on the eigenvector column header.
+**Results view (computed):** Summary **cards** lead (node count, ranked count, ranking metric =
+MCC); a **hub table** lists each hub-ranked protein with columns for rank, gene
+symbol (linked to UniProt via `source_url`), the MCC score, and all four centrality values (degree,
+betweenness, closeness, eigenvector) reported for transparency, ordered by rank ascending. The
+`"network_too_small"` flag renders as a dismissible notice (tiny or sparse network; informational, not
+an error). The `"eigenvector_fallback"` flag is surfaced as a footnote on the eigenvector column header.
 
-**CSV export:** columns are rank + gene symbol + UniProt accession + degree + betweenness +
-closeness + eigenvector + composite score.
+**CSV export:** columns are rank + gene symbol + UniProt accession + MCC + degree + betweenness +
+closeness + eigenvector.
 
-**Param panel + Redo:** the `hub_genes` group is exposed via `ParamPanel` — `top_n` (numeric),
-`use_hub_bottleneck` (checkbox), and `composite_weight` (numeric; disabled and greyed when
-`use_hub_bottleneck` is false). Redo submits `POST /analyses/{id}/reset-from/7`.
+**Param panel + Redo:** the `hub_genes` group is exposed via `ParamPanel` with a single `top_n`
+(numeric) control; the ranking metric (MCC) is a fixed method, not a parameter. Redo submits
+`POST /analyses/{id}/reset-from/7`.
 
-**Footer:** attributes the centrality computation to networkx (Python, undirected graph) and cites
-the Yu 2007 hub-bottleneck composite.
+**Footer:** attributes the hub ranking to MCC (Maximal Clique Centrality, Chin 2014) and the
+centrality computation to networkx (Python, undirected graph).
 
 ---
 
@@ -481,7 +481,7 @@ parameters carry units + plain-language descriptions, data sources are markdown 
 preview tables (top hubs, top enriched terms) point at the full per-stage CSVs. The bundle PNGs
 follow publication conventions (enrichplot-style enrichment dotplot, concentric compound–target–
 pathway network, PPI network with isolated nodes parked in a labelled tray and hubs coloured by
-composite score). Every bundle carries a `.md` README with a per-column glossary; the all-results zip
+MCC score). Every bundle carries a `.md` README with a per-column glossary; the all-results zip
 embeds the two sub-bundle READMEs.
 
 ### Inline server-rendered charts
