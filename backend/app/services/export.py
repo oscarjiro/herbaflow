@@ -3,6 +3,7 @@ the pure builders in ``app.pipeline.results_handoff``. The only place export tou
 
 from __future__ import annotations
 
+import base64
 import uuid
 from dataclasses import dataclass, field
 from typing import Any
@@ -32,6 +33,7 @@ class ExportArtifacts:
     slug: str = "herbaflow_analysis"
     network_png: bytes | None = None
     stage_pngs: dict[str, bytes] = field(default_factory=dict)
+    input_modes: dict[str, Any] = field(default_factory=dict)
 
     def _network_files(self) -> dict[str, str | bytes | None]:
         return {
@@ -61,7 +63,9 @@ class ExportArtifacts:
 
     def stages_bundle(self) -> bytes:
         return rh.build_stages_bundle(
-            stage_files=self._stage_files(), readme=rh.build_stages_readme()
+            stage_files=self._stage_files(),
+            readme=rh.build_stages_readme(),
+            input_modes=self.input_modes,
         )
 
     def all_results_bundle(self) -> bytes:
@@ -69,7 +73,29 @@ class ExportArtifacts:
             report=self.report,
             network_files=self._network_files(),
             stage_files=self._stage_files(),
+            input_modes=self.input_modes,
         )
+
+
+def _ppi_figure(
+    sr: dict[str, Any],
+    ppi_graph: dict[str, Any],
+    *,
+    hub_scores: dict[str, float],
+    min_confidence: float,
+) -> bytes | None:
+    """The PPI figure for the bundle. Prefer STRING's stored server-rendered image
+    (sr["6"].network_image, base64); on its absence or a decode error fall back to the
+    local matplotlib render. Export makes NO network call — it only reads stored bytes."""
+    stored = (sr.get("6") or {}).get("network_image")
+    if stored:
+        try:
+            return base64.b64decode(stored)
+        except (ValueError, TypeError):
+            pass
+    return charts.render_ppi_network(
+        ppi_graph, hub_scores=hub_scores, min_confidence=min_confidence
+    )
 
 
 def _uuids(ids: set[str]) -> list[uuid.UUID]:
@@ -160,17 +186,19 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
     ppi_graph = rh.build_ppi_graph(sr)
     network_png = charts.render_ctp_network(ctp_graph)
     stage_pngs: dict[str, bytes] = {}
-    if (venn := charts.render_venn(sr.get("5", {}))) is not None:
+    venn = charts.render_venn(
+        sr.get("5", {}),
+        plant_label=labels.get("plant"),
+        disease_label=labels.get("disease"),
+    )
+    if venn is not None:
         stage_pngs["stage5_venn.png"] = venn
     hub_scores = {
         h["gene_symbol"]: (h.get("composite") or 0.0) for h in sr.get("7", {}).get("hubs", [])
     }
     min_confidence = (params.get("ppi") or {}).get("min_confidence", 0.4)
-    if (
-        ppi := charts.render_ppi_network(
-            ppi_graph, hub_scores=hub_scores, min_confidence=min_confidence
-        )
-    ) is not None:
+    ppi = _ppi_figure(sr, ppi_graph, hub_scores=hub_scores, min_confidence=min_confidence)
+    if ppi is not None:
         stage_pngs["stage6_ppi_network.png"] = ppi
     if (bar := charts.render_hub_bar(sr.get("7", {}))) is not None:
         stage_pngs["stage7_hub_bar.png"] = bar
@@ -215,4 +243,5 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         slug=rh.bundle_slug(labels, run.completed_at),
         network_png=network_png,
         stage_pngs=stage_pngs,
+        input_modes=input_modes,
     )
