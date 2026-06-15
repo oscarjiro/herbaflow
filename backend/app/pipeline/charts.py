@@ -28,7 +28,16 @@ def _png(fig: Any) -> bytes:
     return buf.getvalue()
 
 
-def render_venn(stage5: dict[str, Any]) -> bytes | None:
+def venn_title(plant_label: str | None, disease_label: str | None) -> str:
+    """Generate a title for the venn diagram with optional plant and disease labels."""
+    if plant_label and disease_label:
+        return f"{plant_label} and {disease_label} target overlap"
+    return "Target overlap"
+
+
+def render_venn(
+    stage5: dict[str, Any], *, plant_label: str | None = None, disease_label: str | None = None
+) -> bytes | None:
     count = stage5.get("count")
     a = stage5.get("compound_target_count")
     b = stage5.get("disease_target_count")
@@ -41,7 +50,7 @@ def render_venn(stage5: dict[str, Any]) -> bytes | None:
     venn2(
         subsets=(only_a, only_b, count), set_labels=("Compound targets", "Disease targets"), ax=ax
     )
-    ax.set_title("Stage 5 — target overlap")
+    ax.set_title(venn_title(plant_label, disease_label))
     return _png(fig)
 
 

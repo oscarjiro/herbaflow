@@ -10,6 +10,18 @@ def test_png_helper_present():
 # Task 13 — Venn (Stage 5)
 
 
+def test_venn_title_with_both_labels():
+    title = charts.venn_title("Curcuma longa", "Type 2 diabetes")
+    assert title == "Curcuma longa and Type 2 diabetes target overlap"
+    assert "Stage 5" not in title
+    assert "—" not in title
+
+
+def test_venn_title_without_labels():
+    title = charts.venn_title(None, None)
+    assert title == "Target overlap"
+
+
 def test_venn_renders_png():
     out = charts.render_venn(
         {"count": 17, "compound_target_count": 180, "disease_target_count": 911}
