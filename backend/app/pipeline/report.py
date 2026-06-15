@@ -1,6 +1,6 @@
-"""Pure report model + markdown renderer (Software Lock §4.6a — no DB/async/API). The model is the
-single home for the run's human-readable science; render_markdown emits the .md now, a PDF renderer
-can consume the same model later."""
+"""Pure report model + markdown renderer (no DB/async/API). The model is the single home for the
+run's human-readable science; render_markdown emits the .md now, a PDF renderer can consume the
+same model later."""
 
 from __future__ import annotations
 
@@ -116,14 +116,14 @@ _COUNT_KEY = {6: "node_count"}
 
 _ABOUT = [
     "Scope: human proteins only (species 9606).",
-    "These are computational predictions to guide research — not clinical conclusions.",
+    "These are computational predictions to guide research, not clinical conclusions.",
     "Enrichment is tested against the compound-target universe as background.",
 ]
 _PROVENANCE = [
     "Every compound, target, and pathway links back to the public database it came from; "
     "the report records when each source was queried.",
     "Limitation: we capture *when* and *where* data was fetched, not the exact release version "
-    "of each external database — so re-running later may differ slightly as sources update.",
+    "of each external database, so re-running later may differ slightly as sources update.",
 ]
 
 _STAGE_FIG_RE = re.compile(r"^stage(\d+)")
@@ -184,13 +184,18 @@ def render_markdown(m: ReportModel) -> str:
     if m.about:
         out += ["## About this analysis", ""] + [f"- {a}" for a in m.about] + [""]
     for st in m.stages:
-        out.append(f"## Stage {st.n} — {st.name}")
+        out.append(f"## Stage {st.n}: {st.name}")
         out += ["", st.finding, ""]
         if st.params:
-            out += ["**Parameters**", ""]
+            out += [
+                "**Parameters**",
+                "",
+                "| Parameter | Value | Description |",
+                "| --- | --- | --- |",
+            ]
             for p in st.params:
                 val = f"{p.value} {p.unit}" if p.unit else p.value
-                out.append(f"- **{p.label}:** {val} — {p.description}")
+                out.append(f"| {p.label} | {val} | {p.description} |")
             out.append("")
         if st.sources:
             out.append("**Data sources:** " + "; ".join(_source_md(s) for s in st.sources))
@@ -248,7 +253,7 @@ def _default_name(labels: dict[str, Any], completed_at: Any) -> str:
     parts = [labels.get("plant"), labels.get("disease")]
     subject = " and ".join(p for p in parts if p) or "Network analysis"
     date = str(completed_at or "")[:10]
-    return f"Herbaflow Analysis — {subject}" + (f", {date}" if date else "")
+    return f"Herbaflow Analysis: {subject}" + (f", {date}" if date else "")
 
 
 def _plant_phrase(labels: dict[str, Any]) -> str:
@@ -274,7 +279,7 @@ def _figure_index(figures: list[tuple[str, bool, str]]) -> dict[int, str]:
     return idx
 
 
-_NA_TARGETS = "Not applicable — this run started from user-supplied targets."
+_NA_TARGETS = "Not applicable: this run started from user-supplied targets."
 
 
 def _s1_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
@@ -285,7 +290,7 @@ def _s1_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
         who = labels.get("plant") or "user input"
         return f"{fmt_num(n)} compounds supplied directly ({who})."
     return (
-        f"{fmt_num(n)} candidate compounds catalogued from {_plant_phrase(labels)} — "
+        f"{fmt_num(n)} candidate compounds catalogued from {_plant_phrase(labels)}: "
         "the phytochemical space screened in this analysis."
     )
 
@@ -296,7 +301,7 @@ def _s2_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
         return _NA_TARGETS
     if ((p or {}).get("adme") or {}).get("skip_adme"):
         return (
-            f"ADME screening skipped — all {fmt_num(s2.get('count'))} compounds "
+            f"ADME screening skipped: all {fmt_num(s2.get('count'))} compounds "
             "carried forward unscreened."
         )
     passed = s2.get("passed")
@@ -333,11 +338,11 @@ def _s4_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
         return _NA_TARGETS
     if _is_up(4, im):
         return f"{fmt_num(s4.get('count'))} disease targets supplied directly."
-    min_score = ((p or {}).get("disease_targets") or {}).get("min_score", "—")
+    min_score = ((p or {}).get("disease_targets") or {}).get("min_score", "N/A")
     disease = labels.get("disease") or "the disease"
     return (
         f"{fmt_num(s4.get('count'))} proteins associated with {disease} "
-        f"(Open Targets, association score ≥ {min_score}) — the disease target space."
+        f"(Open Targets, association score >= {min_score}): the disease target space."
     )
 
 
@@ -358,8 +363,9 @@ def _s5_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
     return (
         f"{fmt_num(s5.get('count'))} targets shared between the "
         f"{fmt_num(s5.get('compound_target_count'))} compound targets and "
-        f"{fmt_num(s5.get('disease_target_count'))} disease targets — the candidate mechanistic "
-        f"core where {_plant_phrase(labels)} may act on {labels.get('disease') or 'the disease'}."
+        f"{fmt_num(s5.get('disease_target_count'))} disease targets. This is the candidate "
+        f"mechanistic core where {_plant_phrase(labels)} may act on "
+        f"{labels.get('disease') or 'the disease'}."
     )
 
 
@@ -384,7 +390,7 @@ def _s7_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
     top = ", ".join(h.get("gene_symbol") or str(h.get("target_id")) for h in hubs[:3])
     return (
         f"Hub-bottleneck ranking (degree + betweenness composite, Yu 2007) prioritises {top} "
-        f"as the most topologically central targets — the likely primary mediators."
+        f"as the most topologically central targets, the likely primary mediators."
     )
 
 
@@ -404,8 +410,8 @@ def _s8_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
         by_cat[c] = by_cat.get(c, 0) + 1
     breakdown = ", ".join(f"{n} {_SOURCE_NAME.get(c, c)}" for c, n in by_cat.items())
     return (
-        f"The shared targets are enriched for {themes} ({fmt_num(len(terms))} terms, FDR < 0.05) — "
-        f"the biological processes through which {_plant_phrase(labels)} may act on "
+        f"The shared targets are enriched for {themes} ({fmt_num(len(terms))} terms, FDR < 0.05), "
+        f"indicating the biological processes through which {_plant_phrase(labels)} may act on "
         f"{labels.get('disease') or 'the disease'}. Strongest: {top.get('name') or top['term_id']} "
         f"(adjusted p = {top['p_value']:.2g}, {len(top.get('intersection', []))} genes). "
         f"By category: {breakdown}."
@@ -469,15 +475,32 @@ def build_report_model(
     im = input_modes or {}
     p = params or {}
     fig_for = _figure_index(figures)
+    na = _na_stages(im)
     stages: list[StageSection] = []
     for n in range(1, 9):
+        finding = _FINDERS[n](stage_results or {}, labels, im, p)
+        if n in na:
+            stages.append(
+                StageSection(
+                    n=n,
+                    name=_STAGE_NAMES[n],
+                    finding=finding,
+                    params=[],
+                    sources=[],
+                    figure=None,
+                    csv=None,
+                    preview=None,
+                    notes=[],
+                )
+            )
+            continue
         group = _STAGE_PARAM_GROUP.get(n)
         gvals = p.get(group) if group else None
         stages.append(
             StageSection(
                 n=n,
                 name=_STAGE_NAMES[n],
-                finding=_FINDERS[n](stage_results or {}, labels, im, p),
+                finding=finding,
                 params=(
                     param_rows(group, gvals)
                     if group is not None and isinstance(gvals, dict) and gvals
@@ -499,5 +522,5 @@ def build_report_model(
         )
     title = run_meta.get("name") or _default_name(labels, run_meta.get("completed_at"))
     subtitle = " · ".join(x for x in (labels.get("plant"), labels.get("disease")) if x) or None
-    footer = f"Generated by Herbaflow{(' — ' + frontend_url) if frontend_url else ''}"
+    footer = f"Generated by Herbaflow{(': ' + frontend_url) if frontend_url else ''}"
     return ReportModel(title, subtitle, list(_ABOUT), stages, list(_PROVENANCE), footer)

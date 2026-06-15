@@ -49,7 +49,7 @@ def test_render_markdown_links_sources_and_pointers():
     md = report.render_markdown(_model())
     assert "[g:Profiler](https://biit.cs.ut.ee/gprofiler/)" in md
     assert "stages/stage8_enrichment.csv" in md
-    assert "## Stage 8 — Functional enrichment" in md
+    assert "## Stage 8: Functional enrichment" in md
     assert md.rstrip().endswith("http://localhost:5173")
 
 
@@ -211,3 +211,71 @@ def test_report_na_stage_finding_for_manual_targets():
     )
     s1 = next(s for s in m.stages if s.n == 1)
     assert "Not applicable" in s1.finding
+
+
+def test_na_stage_section_has_empty_fields():
+    # NA stages must have only the one-liner finding; all other fields are cleared.
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {"adme": {"max_mw": 500}},
+        {"3": {"count": 5}, "5": {"count": 1}},
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "manual_targets"},
+        frontend_url="u",
+        figures=[("stage1_compounds.png", True, "ok")],
+    )
+    for n in (1, 2):
+        s = next(st for st in m.stages if st.n == n)
+        assert s.params == [], f"stage {n}: params should be empty for NA"
+        assert s.sources == [], f"stage {n}: sources should be empty for NA"
+        assert s.figure is None, f"stage {n}: figure should be None for NA"
+        assert s.csv is None, f"stage {n}: csv should be None for NA"
+        assert s.preview is None, f"stage {n}: preview should be None for NA"
+        assert "Not applicable" in s.finding, f"stage {n}: finding must be the one-liner"
+
+
+def test_params_rendered_as_markdown_table():
+    # Params block must be a markdown table, not a bullet list.
+    md = report.render_markdown(_model())
+    assert "| Parameter | Value | Description |" in md
+    assert "| --- | --- | --- |" in md
+    # Must NOT contain bullet-style param lines like "- **Correction:**"
+    assert "- **Correction:**" not in md
+
+
+def test_rendered_report_has_no_em_or_en_dashes_or_internal_jargon():
+    # Export copy policy: no em/en dashes, no internal jargon in rendered output.
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {"adme": {"max_mw": 500}, "disease_targets": {"min_score": 0.5}},
+        {
+            "1": {"count": 180},
+            "2": {"count": 175, "passed": [1] * 175, "filtered": [1] * 5},
+            "3": {"count": 100, "targets": [], "coverage_pct": 70},
+            "4": {"count": 900, "targets": []},
+            "5": {"count": 17, "compound_target_count": 100, "disease_target_count": 900},
+            "6": {"node_count": 17, "nodes": [], "edges": []},
+            "7": {"hubs": [{"gene_symbol": "PPARG", "composite": 0.9}]},
+            "8": {
+                "terms": [
+                    {
+                        "term_id": "GO:0008015",
+                        "name": "blood circulation",
+                        "source": "GO:BP",
+                        "p_value": 1e-5,
+                        "intersection": ["PPARG"],
+                    }
+                ]
+            },
+        },
+        {"plant": "Curcuma longa L.", "disease": "Type 2 Diabetes"},
+        input_modes={"plant": "selection", "disease": "selection"},
+        frontend_url="",
+        figures=[],
+    )
+    md = report.render_markdown(m)
+    assert "—" not in md, "em dash found in rendered report"
+    assert "–" not in md, "en dash found in rendered report"
+    assert "§" not in md, "section sign (internal jargon) found in rendered report"
+    assert "Lock" not in md, "'Lock' (internal jargon) found in rendered report"
+    assert "ETL" not in md, "'ETL' (internal jargon) found in rendered report"

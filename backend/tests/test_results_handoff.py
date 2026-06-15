@@ -175,7 +175,7 @@ def test_build_report_is_interpretive():
         figures=[],
     )
     assert "Result count:" not in md
-    assert "## Stage 5 — Target overlap" in md
+    assert "## Stage 5: Target overlap" in md
     assert "mechanistic core" in md
 
 
@@ -418,7 +418,7 @@ def test_report_no_uuid_in_body_and_has_branding():
         figures=[],
     )
     assert "abcd-uuid" not in md  # no analysis UUID in the body
-    assert md.startswith("# Herbaflow Analysis — Curcuma longa and T2DM")  # branded default title
+    assert md.startswith("# Herbaflow Analysis: Curcuma longa and T2DM")  # branded default title
     assert "https://herbaflow.app" in md  # configurable Herbaflow link
     assert "ChEMBL" in md  # per-stage data sources (computed)
 
