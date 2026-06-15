@@ -123,3 +123,79 @@ def test_label_rejected_on_selection_mode() -> None:
         disease_id=DID,
         plant_label="custom extract",
     )
+
+
+# ---------------------------------------------------------------------------
+# AnalysisRead._strip_network_image validator
+# ---------------------------------------------------------------------------
+
+
+def _read_with_stage_results(stage_results: dict) -> AnalysisRead:
+    return AnalysisRead(
+        analysis_id=uuid.uuid4(),
+        analysis_name=None,
+        disease_id=None,
+        mode="auto",
+        status="complete",
+        current_stage=8,
+        parameters={},
+        stage_results=stage_results,
+        created_at=None,
+        completed_at=None,
+        expires_at=None,
+        error_message=None,
+    )
+
+
+def test_network_image_stripped_from_stage6() -> None:
+    source: dict = {
+        "6": {"node_count": 5, "edge_count": 3, "network_image": "BASE64DATA"},
+        "5": {"overlap_count": 17, "p_value": 0.0036},
+    }
+    read = _read_with_stage_results(source)
+
+    # network_image removed from stage 6
+    assert "network_image" not in read.stage_results["6"]
+    # other stage-6 fields preserved
+    assert read.stage_results["6"]["node_count"] == 5
+    assert read.stage_results["6"]["edge_count"] == 3
+    # stage 5 untouched
+    assert read.stage_results["5"] == {"overlap_count": 17, "p_value": 0.0036}
+
+
+def test_network_image_absent_from_model_dump() -> None:
+    source: dict = {
+        "6": {"node_count": 5, "edge_count": 3, "network_image": "BASE64DATA"},
+    }
+    read = _read_with_stage_results(source)
+    dumped = read.model_dump()
+    assert "network_image" not in dumped["stage_results"]["6"]
+    assert dumped["stage_results"]["6"]["node_count"] == 5
+
+
+def test_strip_does_not_mutate_source_dict() -> None:
+    source: dict = {
+        "6": {"node_count": 5, "edge_count": 3, "network_image": "BASE64DATA"},
+    }
+    original_six = source["6"]
+    _read_with_stage_results(source)
+    # the original source dict must still contain the image (export reads ORM directly)
+    assert "network_image" in original_six
+    assert original_six["network_image"] == "BASE64DATA"
+
+
+def test_no_stage6_key_passes_through() -> None:
+    source: dict = {"5": {"overlap_count": 10}}
+    read = _read_with_stage_results(source)
+    assert read.stage_results == {"5": {"overlap_count": 10}}
+
+
+def test_stage6_without_network_image_passes_through() -> None:
+    source: dict = {"6": {"node_count": 3, "edge_count": 2}}
+    read = _read_with_stage_results(source)
+    assert read.stage_results["6"] == {"node_count": 3, "edge_count": 2}
+
+
+def test_empty_stage_results_passes_through() -> None:
+    read = _read_with_stage_results({})
+    assert read.stage_results == {}

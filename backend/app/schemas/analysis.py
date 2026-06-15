@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
 from app import contracts
 
@@ -112,6 +112,19 @@ class AnalysisRead(BaseModel):
     current_stage: int | None
     parameters: dict[str, Any] = Field(default_factory=dict)
     stage_results: dict[str, Any]
+
+    @field_validator("stage_results", mode="after")
+    @classmethod
+    def _strip_network_image(cls, v: dict[str, Any]) -> dict[str, Any]:
+        """The stored STRING PPI image (``stage_results["6"].network_image``) is a large base64
+        PNG that only the export needs (it reads the ORM row directly). Drop it from the
+        status-poll payload so repeated polls stay lean. Copies only the touched levels so the
+        source ORM dict is never mutated."""
+        six = v.get("6")
+        if isinstance(six, dict) and "network_image" in six:
+            v = {**v, "6": {k: val for k, val in six.items() if k != "network_image"}}
+        return v
+
     created_at: datetime | None
     completed_at: datetime | None
     expires_at: datetime | None
