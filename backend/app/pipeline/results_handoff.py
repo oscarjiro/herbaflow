@@ -533,17 +533,17 @@ def build_network_readme() -> str:
     return """\
 # Network & docking handoff
 
-This folder contains the compound–target–pathway (C-T-P) network in a format ready for
+This folder contains the compound-target-pathway (C-T-P) network in a format ready for
 Cytoscape, a static PNG rendering of that network, and a docking-preparation table that pairs
 each hub protein with the compounds that bind it.
 
 ## Files
 
-- `ctp-nodes.csv` / `ctp-edges.csv` — the C-T-P network (Cytoscape node and edge tables).
-- `ctp-network.png` — a static rendering of the network (may be absent for very large networks).
-- `ppi-nodes.csv` / `ppi-edges.csv` — the protein–protein interaction (PPI) sub-network
+- `ctp-nodes.csv` / `ctp-edges.csv`: the C-T-P network (Cytoscape node and edge tables).
+- `ctp-network.png`: a static rendering of the network (may be absent for very large networks).
+- `ppi-nodes.csv` / `ppi-edges.csv`: the protein-protein interaction (PPI) sub-network
   (Stage 6); useful if you want to visualise only the target layer.
-- `docking.csv` — one row per hub protein × binding compound pair, ready to feed into a
+- `docking.csv`: one row per hub protein x binding compound pair, ready to feed into a
   structure-based docking tool (e.g. AutoDock Vina).
 
 ## Import the network into Cytoscape (desktop)
@@ -577,8 +577,8 @@ The edge endpoint strings equal the node `id` strings, so the join is exact.
 | `source` | Node id of the edge's origin (compound InChIKey or target gene symbol). |
 | `target` | Node id of the edge's destination (target gene symbol or pathway term id). |
 | `interaction` | `compound-target` (Stage 3 bioactivity) or `target-pathway` (Stage 8). |
-| `prediction_method` | Compound–target evidence: `chembl_bioactivity` or `pubchem_bioassay`. |
-| `p_value` | Target–pathway edges: BH-corrected enrichment p-value (full precision); else blank. |
+| `prediction_method` | Compound-target evidence: `chembl_bioactivity` or `pubchem_bioassay`. |
+| `p_value` | Target-pathway edges: BH-corrected enrichment p-value (full precision); else blank. |
 
 ### docking.csv
 
@@ -589,8 +589,8 @@ The edge endpoint strings equal the node `id` strings, so the join is exact.
 | `alphafold_id` | **AlphaFold** model id (= `hub_uniprot_accession`); predicted 3-D structure. |
 | `compound_name` | Common name of the binding compound. |
 | `compound_inchikey` | InChIKey of the binding compound (stable structural identifier). |
-| `compound_smiles` | **SMILES** of the binding compound — the ligand input for docking. |
-| `prediction_method` | Evidence source for the compound–target interaction. |
+| `compound_smiles` | **SMILES** of the binding compound (the ligand input for docking). |
+| `prediction_method` | Evidence source for the compound-target interaction. |
 | `source_url` | AlphaFold model page for the hub protein (links to the predicted structure). |
 
 ## How to use docking.csv
@@ -607,7 +607,7 @@ Each row in `docking.csv` describes one candidate docking experiment:
   structure and the prepared ligand. The predicted binding affinity (kcal/mol) is your primary
   output.
 
-The table already filters to hub proteins only — these are the mechanistically central targets
+The table already filters to hub proteins only. These are the mechanistically central targets
 identified by the network analysis, so they are the highest-priority candidates for docking.
 """
 
@@ -621,7 +621,7 @@ it ran but produced no rows). PNG charts accompany the stages that generate one.
 
 ---
 
-## Stage 1 — Compound resolution
+## Stage 1: Compound resolution
 
 **`stage1_compounds.csv`**
 
@@ -636,7 +636,7 @@ list) through PubChem.
 
 ---
 
-## Stage 2 — ADME / drug-likeness filter
+## Stage 2: ADME / drug-likeness filter
 
 **`stage2_adme.csv`**
 
@@ -648,14 +648,14 @@ included; the `passed` column tells you which bucket each compound fell into.
 | `compound_id` | Internal compound identifier. |
 | `canonical_name` | Canonical compound name. |
 | `passed` | `true` if the compound passed the ADME gate; `false` if it was filtered out. |
-| `descriptor_source` | Where the molecular descriptors came from (e.g. `etl`, `rdkit`). |
+| `descriptor_source` | Where the molecular descriptors came from (e.g. `pubchem`, `rdkit`). |
 | `molecular_weight` | Molecular weight in Da. |
 | `logp` | Calculated partition coefficient (lipophilicity). |
 | `hbond_donors` | Number of hydrogen-bond donors. |
 | `hbond_acceptors` | Number of hydrogen-bond acceptors. |
 | `tpsa` | Topological polar surface area (Å²). |
 | `rotatable_bonds` | Number of rotatable bonds (flexibility indicator). |
-| `qed_score` | Quantitative Estimate of Drug-likeness (0–1; higher = more drug-like). |
+| `qed_score` | Quantitative Estimate of Drug-likeness (0 to 1; higher = more drug-like). |
 | `np_likeness_score` | Natural-product likeness score. |
 | `num_ro5_violations` | Number of Lipinski Rule-of-Five violations. |
 | `is_pains_positive` | `True` if the compound triggered a PAINS (pan-assay interference) alert. |
@@ -664,7 +664,7 @@ included; the `passed` column tells you which bucket each compound fell into.
 
 ---
 
-## Stage 3 — Compound → target identification
+## Stage 3: Compound to target identification
 
 **`stage3_compound_targets.csv`**
 
@@ -681,28 +681,28 @@ outcomes).
 
 ---
 
-## Stage 4 — Disease → target collection
+## Stage 4: Disease to target collection
 
 **`stage4_disease_targets.csv`**
 
 Targets associated with the disease of interest, sourced from the Open Targets database
-(ETL-loaded; not a live call).
+(pre-loaded associations; not a live call at analysis time).
 
 | Column | Meaning |
 |---|---|
 | `gene_symbol` | HGNC gene symbol. |
 | `uniprot_accession` | UniProt accession. |
-| `opentargets_score` | Open Targets association score (0–1; higher = stronger evidence). |
+| `opentargets_score` | Open Targets association score (0 to 1; higher = stronger evidence). |
 | `source_url` | UniProt entry page for the target. |
 
 ---
 
-## Stage 5 — Target overlap (mechanistic core)
+## Stage 5: Target overlap (mechanistic core)
 
 **`stage5_overlap.csv`** · **`stage5_venn.png`**
 
-The intersection of Stage 3 and Stage 4 targets — the proteins that are both active against
-the plant compounds AND implicated in the disease. This is the mechanistic core of the analysis.
+The intersection of Stage 3 and Stage 4 targets: the proteins that are both active against
+the plant compounds and implicated in the disease. This is the mechanistic core of the analysis.
 
 `stage5_venn.png` shows a Venn diagram of the two sets with the overlap highlighted.
 
@@ -714,7 +714,7 @@ the plant compounds AND implicated in the disease. This is the mechanistic core 
 
 ---
 
-## Stage 6 — Protein–protein interaction (PPI) network
+## Stage 6: Protein-protein interaction (PPI) network
 
 **`stage6_ppi_edges.csv`** · **`stage6_ppi_network.png`**
 
@@ -727,11 +727,11 @@ STRING PPI network built over the overlap targets. The per-stage CSV is the edge
 |---|---|
 | `source` | Gene symbol of one interaction partner. |
 | `target` | Gene symbol of the other interaction partner. |
-| `confidence` | STRING combined interaction score (0–1). |
+| `confidence` | STRING combined interaction score (0 to 1). |
 
 ---
 
-## Stage 7 — Hub gene ranking
+## Stage 7: Hub gene ranking
 
 **`stage7_hubs.csv`** · **`stage7_hub_bar.png`**
 
@@ -753,7 +753,7 @@ betweenness centrality (hub-bottleneck method, Yu 2007). Higher composite = more
 
 ---
 
-## Stage 8 — Functional enrichment
+## Stage 8: Functional enrichment
 
 **`stage8_enrichment.csv`** · **`stage8_enrichment_<CATEGORY>.png`**
 
@@ -781,11 +781,11 @@ no significant terms).
 
 def build_root_readme() -> str:
     return (
-        "# Herbaflow analysis — full results\n\n"
-        "- `report.md` — the human-readable run report.\n"
-        "- `network-and-docking/` — the C-T-P network (Cytoscape) + docking pairing table"
+        "# Herbaflow analysis: full results\n\n"
+        "- `report.md`: the human-readable run report.\n"
+        "- `network-and-docking/`: the C-T-P network (Cytoscape) + docking pairing table"
         " + network PNG.\n"
-        "- `stages/` — one CSV (and chart, where applicable) per pipeline stage.\n\n"
+        "- `stages/`: one CSV (and chart, where applicable) per pipeline stage.\n\n"
         "See each folder's README for column details and import steps.\n"
     )
 
@@ -816,9 +816,37 @@ def build_network_bundle(
     )
 
 
-def build_stages_bundle(*, stage_files: dict[str, str | bytes | None], readme: str) -> bytes:
-    """Per-stage zip: one entry per stage CSV (and chart, where applicable)."""
-    return _zip({**stage_files, "README.md": readme})
+def _drop_na_stage_files(
+    stage_files: dict[str, str | bytes | None],
+    input_modes: dict[str, Any] | None,
+) -> dict[str, str | bytes | None]:
+    """Return a copy of stage_files with entries for not-applicable stages removed.
+
+    Uses ``report.na_stages`` (the single home for the NA-stage logic) and
+    ``report.STAGE_CSV_SLUG`` (the single home for per-stage filename stems) so the
+    mapping is never duplicated here."""
+    if not input_modes:
+        return stage_files
+    na = report.na_stages(input_modes)
+    if not na:
+        return stage_files
+    drop = {f"stage{n}_{report.STAGE_CSV_SLUG[n]}.csv" for n in na}
+    return {k: v for k, v in stage_files.items() if k not in drop}
+
+
+def build_stages_bundle(
+    *,
+    stage_files: dict[str, str | bytes | None],
+    readme: str,
+    input_modes: dict[str, Any] | None = None,
+) -> bytes:
+    """Per-stage zip: one entry per stage CSV (and chart, where applicable).
+
+    Pass ``input_modes`` to drop not-applicable stage CSVs (e.g. Stage 1/2 in a
+    manual-targets run). Omit or pass ``None`` to keep all entries (safe default for
+    existing callers)."""
+    filtered = _drop_na_stage_files(stage_files, input_modes)
+    return _zip({**filtered, "README.md": readme})
 
 
 def build_all_results_bundle(
@@ -826,12 +854,17 @@ def build_all_results_bundle(
     report: str,
     network_files: dict[str, str | bytes | None],
     stage_files: dict[str, str | bytes | None],
+    input_modes: dict[str, Any] | None = None,
 ) -> bytes:
     """All-results superset zip: report + network-and-docking/ + stages/ subdirectories.
 
     Embeds a README.md at the root and sub-READMEs in each subdirectory so the bundle is
-    self-contained — a reader opening any folder finds column-level documentation without
-    needing to consult an external source."""
+    self-contained: a reader opening any folder finds column-level documentation without
+    needing to consult an external source.
+
+    Pass ``input_modes`` to drop not-applicable stage CSVs from the stages/ subtree (e.g.
+    Stage 1/2 in a manual-targets run). Omit or pass ``None`` to keep all entries."""
+    filtered_stages = _drop_na_stage_files(stage_files, input_modes)
     files: dict[str, str | bytes | None] = {
         "README.md": build_root_readme(),
         "report.md": report,
@@ -840,6 +873,6 @@ def build_all_results_bundle(
     }
     for name, content in network_files.items():
         files[f"network-and-docking/{name}"] = content
-    for name, content in stage_files.items():
+    for name, content in filtered_stages.items():
         files[f"stages/{name}"] = content
     return _zip(files)

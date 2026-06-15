@@ -239,7 +239,7 @@ def _up_stages(input_modes: dict[str, Any]) -> set[int]:
     return {s for s, st in _state_map(input_modes).items() if st == entry_modes.USER_PROVIDED}
 
 
-def _na_stages(input_modes: dict[str, Any]) -> set[int]:
+def na_stages(input_modes: dict[str, Any]) -> set[int]:
     """Stages that do not apply for the chosen modes (e.g. S1/S2 in a manual-targets run)."""
     return {s for s, st in _state_map(input_modes).items() if st == entry_modes.NOT_APPLICABLE}
 
@@ -283,7 +283,7 @@ _NA_TARGETS = "Not applicable: this run started from user-supplied targets."
 
 
 def _s1_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
-    if 1 in _na_stages(im):
+    if 1 in na_stages(im):
         return _NA_TARGETS
     n = (sr.get("1") or {}).get("count")
     if _is_up(1, im):
@@ -297,7 +297,7 @@ def _s1_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
 
 def _s2_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], p: Any) -> str:
     s2 = sr.get("2") or {}
-    if 2 in _na_stages(im):
+    if 2 in na_stages(im):
         return _NA_TARGETS
     if ((p or {}).get("adme") or {}).get("skip_adme"):
         return (
@@ -334,7 +334,7 @@ def _s3_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
 
 def _s4_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], p: Any) -> str:
     s4 = sr.get("4") or {}
-    if 4 in _na_stages(im):
+    if 4 in na_stages(im):
         return _NA_TARGETS
     if _is_up(4, im):
         return f"{fmt_num(s4.get('count'))} disease targets supplied directly."
@@ -475,7 +475,7 @@ def build_report_model(
     im = input_modes or {}
     p = params or {}
     fig_for = _figure_index(figures)
-    na = _na_stages(im)
+    na = na_stages(im)
     stages: list[StageSection] = []
     for n in range(1, 9):
         finding = _FINDERS[n](stage_results or {}, labels, im, p)

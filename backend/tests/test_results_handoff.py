@@ -567,3 +567,117 @@ def test_bundle_slug_brands_without_uuid():
 
 def test_bundle_slug_unlabelled_fallback():
     assert rh.bundle_slug({}, "2026-06-14T00:00:00+00:00") == "herbaflow_analysis_2026-06-14"
+
+
+# ---------------------------------------------------------------------------
+# T3: README / glossary jargon guard
+# ---------------------------------------------------------------------------
+
+_README_BUILDERS = [
+    rh.build_root_readme,
+    rh.build_network_readme,
+    rh.build_stages_readme,
+]
+_FORBIDDEN = ["§", "Lock", "ETL", "—", "–"]  # §, Lock, ETL, em dash, en dash
+
+
+def test_readme_builders_contain_no_internal_jargon():
+    """Every README/glossary builder must be free of internal jargon and em/en dashes."""
+    for builder in _README_BUILDERS:
+        text = builder()
+        for token in _FORBIDDEN:
+            assert token not in text, f"{builder.__name__} contains forbidden token {token!r}"
+
+
+# ---------------------------------------------------------------------------
+# T3: NA-stage CSV skip in build_stages_bundle and build_all_results_bundle
+# ---------------------------------------------------------------------------
+
+# Minimal stage_files covering S1–S5 (enough to exercise the skip logic).
+_FULL_STAGE_FILES: dict[str, str] = {
+    "stage1_compounds.csv": "a",
+    "stage2_adme.csv": "b",
+    "stage3_compound_targets.csv": "c",
+    "stage4_disease_targets.csv": "d",
+    "stage5_overlap.csv": "e",
+}
+
+_IM_MANUAL_TARGETS = {"plant": "manual_targets", "disease": "selection"}
+_IM_SELECTION = {"plant": "selection", "disease": "selection"}
+
+
+def test_stages_bundle_drops_na_stages_for_manual_targets():
+    """manual_targets run: S1 + S2 are not applicable; their CSVs must be absent from the zip."""
+    blob = rh.build_stages_bundle(
+        stage_files=_FULL_STAGE_FILES,
+        readme="r",
+        input_modes=_IM_MANUAL_TARGETS,
+    )
+    names = _names(blob)
+    assert "stage1_compounds.csv" not in names
+    assert "stage2_adme.csv" not in names
+    # S3–S5 still present
+    assert "stage3_compound_targets.csv" in names
+    assert "stage5_overlap.csv" in names
+
+
+def test_stages_bundle_keeps_all_stages_for_selection_run():
+    """Normal selection run: no stages are NA, so all CSVs are present."""
+    blob = rh.build_stages_bundle(
+        stage_files=_FULL_STAGE_FILES,
+        readme="r",
+        input_modes=_IM_SELECTION,
+    )
+    names = _names(blob)
+    assert "stage1_compounds.csv" in names
+    assert "stage2_adme.csv" in names
+
+
+def test_stages_bundle_keeps_all_stages_when_input_modes_none():
+    """input_modes=None (default / legacy callers) must not drop any stage."""
+    blob = rh.build_stages_bundle(
+        stage_files=_FULL_STAGE_FILES,
+        readme="r",
+    )
+    names = _names(blob)
+    assert "stage1_compounds.csv" in names
+    assert "stage2_adme.csv" in names
+
+
+def test_all_results_bundle_drops_na_stages_for_manual_targets():
+    """All-results bundle stages/ subtree must also omit S1/S2 in a manual-targets run."""
+    blob = rh.build_all_results_bundle(
+        report="rep",
+        network_files={"ctp-nodes.csv": "n"},
+        stage_files=_FULL_STAGE_FILES,
+        input_modes=_IM_MANUAL_TARGETS,
+    )
+    names = _names(blob)
+    assert "stages/stage1_compounds.csv" not in names
+    assert "stages/stage2_adme.csv" not in names
+    assert "stages/stage3_compound_targets.csv" in names
+    assert "stages/stage5_overlap.csv" in names
+
+
+def test_all_results_bundle_keeps_all_stages_for_selection_run():
+    blob = rh.build_all_results_bundle(
+        report="rep",
+        network_files={"ctp-nodes.csv": "n"},
+        stage_files=_FULL_STAGE_FILES,
+        input_modes=_IM_SELECTION,
+    )
+    names = _names(blob)
+    assert "stages/stage1_compounds.csv" in names
+    assert "stages/stage2_adme.csv" in names
+
+
+def test_all_results_bundle_keeps_all_stages_when_input_modes_none():
+    """input_modes omitted (legacy callers) must not drop any stage."""
+    blob = rh.build_all_results_bundle(
+        report="rep",
+        network_files={"ctp-nodes.csv": "n"},
+        stage_files=_FULL_STAGE_FILES,
+    )
+    names = _names(blob)
+    assert "stages/stage1_compounds.csv" in names
+    assert "stages/stage2_adme.csv" in names
