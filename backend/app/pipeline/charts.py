@@ -54,7 +54,7 @@ def render_venn(
 
 
 def hub_bar_colors(vals: list[float]) -> Any:
-    """Map composite scores to the shared sequential palette (dark = high)."""
+    """Map MCC scores to the shared sequential palette (dark = high)."""
     cmap = matplotlib.colormaps[SEQUENTIAL_CMAP]
     hi = max(vals) or 1
     return cmap([v / hi for v in vals])
@@ -64,13 +64,13 @@ def render_hub_bar(stage7: dict[str, Any]) -> bytes | None:
     hubs = stage7.get("hubs", [])
     if not hubs:
         return None
-    ordered = sorted(hubs, key=lambda h: h.get("composite") or 0.0)  # ascending -> top at the top
+    ordered = sorted(hubs, key=lambda h: h.get("mcc") or 0.0)  # ascending -> top at the top
     labels = [h.get("gene_symbol") or str(h.get("target_id")) for h in ordered]
-    vals = [h.get("composite") or 0.0 for h in ordered]
+    vals = [h.get("mcc") or 0.0 for h in ordered]
     colors = hub_bar_colors(vals)
     fig, ax = plt.subplots(figsize=(6, max(2.0, 0.4 * len(ordered))))
     ax.barh(labels, vals, color=colors)
-    ax.set_xlabel("hub-bottleneck composite score")
+    ax.set_xlabel("MCC score")
     ax.set_title(f"Top {len(ordered)} hub genes")
     return _png(fig)
 
@@ -86,7 +86,7 @@ _CATEGORY_SLUG = {
 }
 
 # Shared sequential colormap for "higher value = more important" scores (gene count,
-# hub-bottleneck composite). enrichplot convention: the important (high) end is a dark,
+# MCC score). enrichplot convention: the important (high) end is a dark,
 # saturated red; the low end is faint. Never put the important value at the invisible
 # yellow end. Reused by the enrichment dotplot, the hub bar, and the PPI node colouring.
 SEQUENTIAL_CMAP = "Reds"
@@ -292,7 +292,7 @@ def select_ppi_core(
     """Node ids to draw.
 
     If total nodes <= cap, return all. Otherwise return the cap highest-ranked nodes by hub
-    composite score (fallback to 0.0 for unscored), tie-broken deterministically by id.
+    MCC score (fallback to 0.0 for unscored), tie-broken deterministically by id.
     """
     nodes = graph.get("nodes", [])
     if len(nodes) <= cap:
@@ -309,7 +309,7 @@ def render_ppi_network(
 ) -> bytes | None:
     """PPI network: connected nodes via kamada_kawai, isolated nodes in a bottom tray.
 
-    Node size proportional to degree; node colour = hub composite score via the shared
+    Node size proportional to degree; node colour = hub MCC score via the shared
     sequential palette (dark = high); edge width proportional to confidence. Returns None
     when there are no nodes. When the graph exceeds PPI_FULL_RENDER_MAX nodes, draws only
     the top-scored core (induced subgraph); the title notes the truncation.
@@ -359,7 +359,7 @@ def render_ppi_network(
             fontsize=8,
             color="#666666",
         )
-    fig.colorbar(sc, ax=ax, label="hub composite score")
+    fig.colorbar(sc, ax=ax, label="hub MCC score")
     if k < total_m:
         ax.set_title(f"Protein-protein interaction network (top {k} of {total_m} nodes shown)")
     else:

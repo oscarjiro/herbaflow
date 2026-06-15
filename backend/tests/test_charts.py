@@ -43,8 +43,8 @@ def test_hub_bar_renders():
     out = charts.render_hub_bar(
         {
             "hubs": [
-                {"gene_symbol": "PPARG", "composite": 0.9},
-                {"gene_symbol": "TP53", "composite": 0.4},
+                {"gene_symbol": "PPARG", "mcc": 9},
+                {"gene_symbol": "TP53", "mcc": 4},
             ]
         }
     )
@@ -56,9 +56,31 @@ def test_hub_bar_none_when_empty():
 
 
 def test_hub_bar_title_states_top_n():
-    s7 = {"hubs": [{"gene_symbol": "A", "composite": 1.0}, {"gene_symbol": "B", "composite": 0.2}]}
+    s7 = {"hubs": [{"gene_symbol": "A", "mcc": 7}, {"gene_symbol": "B", "mcc": 2}]}
     png = charts.render_hub_bar(s7)
     assert png[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_hub_bar_xlabel_is_mcc():
+    """render_hub_bar uses 'MCC score' as the x-axis label."""
+    # Render with mcc key; inspect the figure's xlabel via a round-trip through PNG is not
+    # possible, so we monkeypatch plt.subplots to capture the axes object instead.
+    captured: list = []
+    _orig = charts.plt.subplots
+
+    def _capture(*args, **kwargs):
+        fig, ax = _orig(*args, **kwargs)
+        captured.append(ax)
+        return fig, ax
+
+    charts.plt.subplots = _capture  # type: ignore[attr-defined]
+    try:
+        charts.render_hub_bar({"hubs": [{"gene_symbol": "PPARG", "mcc": 7}]})
+    finally:
+        charts.plt.subplots = _orig  # type: ignore[attr-defined]
+
+    assert captured, "subplots was never called"
+    assert captured[0].get_xlabel() == "MCC score"
 
 
 def test_hub_bar_colors_maps_to_sequential_palette():
