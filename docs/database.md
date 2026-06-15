@@ -1050,7 +1050,13 @@ The capstone export is a **stateless, on-demand read** of the run's persisted
 rows. It is available only when `analysis_runs.status = 'complete'` (else **409**). It adds **no
 table, no column, and no migration** — it reshapes data that already exists. The de-UUID node ids
 (compound = InChIKey, target = gene symbol, pathway = term id) are a **presentation transform**
-applied at read time, never persisted; the chart PNGs are **generated on the fly**, never stored.
+applied at read time, never persisted; the chart PNGs are **generated on the fly** at export, with
+**one exception**: the Stage-6 protein-protein interaction figure is STRING's own server-rendered
+network image, fetched **during Stage 6** (where STRING is already called) and persisted base64 under
+`stage_results["6"].network_image`. It rides the existing Redo/staleness machinery (cleared when
+Stage 6 is reset), so it needs **no migration**. The export reads those stored bytes and falls back
+to an on-the-fly matplotlib render when the field is absent. That field is **stripped from the
+`GET /analyses/{id}` poll payload** (read-time only, the ORM row keeps it) so repeated polls stay lean.
 
 It is served as **four downloadable bundles** (each its own endpoint):
 
