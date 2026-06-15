@@ -23,11 +23,23 @@ from app.integrations.base import with_retry
 logger = logging.getLogger("herbaflow.integrations.string")
 
 _URL = "https://string-db.org/api/json/network"
+_IMAGE_URL = "https://string-db.org/api/highres_image/network"
 _SPECIES = 9606
 _CALLER = "herbaflow"
 _MIN_INTERVAL = 1.0  # ~1 req/s (STRING guidance)
 _SEM = asyncio.Semaphore(1)
 _last_call = 0.0
+
+
+def _network_body(symbols: list[str], min_confidence: float, network_type: str) -> dict[str, str]:
+    """Form body shared by the JSON network call and the server-rendered image call."""
+    return {
+        "identifiers": "\r".join(symbols),
+        "species": str(_SPECIES),
+        "required_score": str(round(min_confidence * 1000)),
+        "network_type": network_type,
+        "caller_identity": _CALLER,
+    }
 
 
 @dataclass(frozen=True)
@@ -41,6 +53,17 @@ class StringClient:
     def __init__(self, client: httpx.AsyncClient) -> None:
         self._client = client
 
+    async def _throttled_post(self, url: str, body: dict[str, str]) -> httpx.Response:
+        """POST honoring STRING's shared ~1 req/s budget (the JSON and image calls share it)."""
+        global _last_call
+        async with _SEM:
+            wait = _MIN_INTERVAL - (time.monotonic() - _last_call)
+            if wait > 0:
+                await asyncio.sleep(wait)
+            resp = await self._client.post(url, data=body, timeout=60.0)
+            _last_call = time.monotonic()
+        return resp
+
     async def network(
         self, gene_symbols: list[str], *, min_confidence: float, network_type: str
     ) -> list[StringEdge]:
@@ -49,22 +72,10 @@ class StringClient:
         if not symbols:
             return []
         required_score = round(min_confidence * 1000)
-        body = {
-            "identifiers": "\r".join(symbols),
-            "species": str(_SPECIES),
-            "required_score": str(required_score),
-            "network_type": network_type,
-            "caller_identity": _CALLER,
-        }
+        body = _network_body(symbols, min_confidence, network_type)
 
         async def _call() -> httpx.Response:
-            global _last_call
-            async with _SEM:
-                wait = _MIN_INTERVAL - (time.monotonic() - _last_call)
-                if wait > 0:
-                    await asyncio.sleep(wait)
-                resp = await self._client.post(_URL, data=body, timeout=60.0)
-                _last_call = time.monotonic()
+            resp = await self._throttled_post(_URL, body)
             if resp.status_code == 404:
                 return resp  # all-unresolved -> handled below, not retried
             resp.raise_for_status()
@@ -98,3 +109,26 @@ class StringClient:
             required_score,
         )
         return edges
+
+    async def fetch_network_image(
+        self, gene_symbols: list[str], *, min_confidence: float, network_type: str
+    ) -> bytes | None:
+        """STRING's own server-rendered PPI network image (high-res PNG) for the overlap genes.
+
+        SUPPLEMENTARY, degrade-never-fail: returns the PNG bytes on success, or None on an
+        empty input or ANY error (non-200, 404, timeout, transport, malformed) so the export's
+        PPI figure can fall back to the local matplotlib render and the run never fails on it.
+        Contrast network(), which is load-bearing (raises 503 on outage)."""
+        symbols = [g for g in gene_symbols if g]
+        if not symbols:
+            return None
+        body = _network_body(symbols, min_confidence, network_type)
+        try:
+            resp = await self._throttled_post(_IMAGE_URL, body)
+        except httpx.HTTPError as exc:  # timeout/transport/protocol — degrade, do not raise
+            logger.info("STRING image unavailable, falling back to local render: %s", exc)
+            return None
+        if resp.status_code != 200:
+            logger.info("STRING image returned %d, falling back to local render", resp.status_code)
+            return None
+        return resp.content

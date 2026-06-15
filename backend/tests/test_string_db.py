@@ -67,3 +67,73 @@ async def test_network_outage_raises_503():
             await StringClient(http).network(
                 ["AKT1"], min_confidence=0.4, network_type="functional"
             )
+
+
+_PNG = b"\x89PNG\r\n\x1a\n" + b"fake-image-bytes"
+
+
+@pytest.mark.asyncio
+async def test_fetch_network_image_returns_png_bytes():
+    captured = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["url"] = str(request.url)
+        captured["body"] = request.content.decode()
+        return httpx.Response(200, content=_PNG)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as http:
+        image = await StringClient(http).fetch_network_image(
+            ["AKT1", "TNF", "EGFR"], min_confidence=0.4, network_type="functional"
+        )
+    assert image == _PNG
+    # hit the high-res image endpoint with the same body shape as network()
+    assert "/api/highres_image/network" in captured["url"]
+    assert "required_score=400" in captured["body"]
+    assert "network_type=functional" in captured["body"]
+    assert "species=9606" in captured["body"]
+    # identifiers carriage-return joined (STRING's %0d)
+    assert "AKT1%0DTNF%0DEGFR" in captured["body"].upper()
+
+
+@pytest.mark.asyncio
+async def test_fetch_network_image_non_200_returns_none():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(500, text="boom")
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as http:
+        image = await StringClient(http).fetch_network_image(
+            ["AKT1"], min_confidence=0.4, network_type="functional"
+        )
+    assert image is None  # supplementary: degrade, never raise
+
+
+@pytest.mark.asyncio
+async def test_fetch_network_image_transport_error_returns_none():
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectTimeout("timed out")
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as http:
+        image = await StringClient(http).fetch_network_image(
+            ["AKT1"], min_confidence=0.4, network_type="functional"
+        )
+    assert image is None  # supplementary: degrade, never raise
+
+
+@pytest.mark.asyncio
+async def test_fetch_network_image_empty_input_returns_none_without_call():
+    called = {"n": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        called["n"] += 1
+        return httpx.Response(200, content=_PNG)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as http:
+        image = await StringClient(http).fetch_network_image(
+            ["", None], min_confidence=0.4, network_type="functional"  # type: ignore[list-item]
+        )
+    assert image is None
+    assert called["n"] == 0  # no HTTP call on empty input
