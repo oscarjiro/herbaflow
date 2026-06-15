@@ -1,0 +1,277 @@
+[
+  {
+    "source": "RARA",
+    "target": "EGFR",
+    "confidence": 0.441
+  },
+  {
+    "source": "RARA",
+    "target": "SMAD2",
+    "confidence": 0.451
+  },
+  {
+    "source": "RARA",
+    "target": "NFE2L2",
+    "confidence": 0.468
+  },
+  {
+    "source": "RARA",
+    "target": "SMAD3",
+    "confidence": 0.516
+  },
+  {
+    "source": "RARA",
+    "target": "TP53",
+    "confidence": 0.591
+  },
+  {
+    "source": "RARA",
+    "target": "JUN",
+    "confidence": 0.759
+  },
+  {
+    "source": "RARA",
+    "target": "EP300",
+    "confidence": 0.883
+  },
+  {
+    "source": "RARA",
+    "target": "RXRA",
+    "confidence": 0.999
+  },
+  {
+    "source": "SMAD2",
+    "target": "PTGS2",
+    "confidence": 0.488
+  },
+  {
+    "source": "SMAD2",
+    "target": "EGFR",
+    "confidence": 0.736
+  },
+  {
+    "source": "SMAD2",
+    "target": "JUN",
+    "confidence": 0.925
+  },
+  {
+    "source": "SMAD2",
+    "target": "EP300",
+    "confidence": 0.987
+  },
+  {
+    "source": "SMAD2",
+    "target": "TP53",
+    "confidence": 0.993
+  },
+  {
+    "source": "SMAD2",
+    "target": "SMAD3",
+    "confidence": 0.999
+  },
+  {
+    "source": "EP300",
+    "target": "EGFR",
+    "confidence": 0.588
+  },
+  {
+    "source": "EP300",
+    "target": "NSD2",
+    "confidence": 0.668
+  },
+  {
+    "source": "EP300",
+    "target": "PTGS2",
+    "confidence": 0.692
+  },
+  {
+    "source": "EP300",
+    "target": "NFE2L2",
+    "confidence": 0.933
+  },
+  {
+    "source": "EP300",
+    "target": "RXRA",
+    "confidence": 0.934
+  },
+  {
+    "source": "EP300",
+    "target": "TP53",
+    "confidence": 0.999
+  },
+  {
+    "source": "EP300",
+    "target": "JUN",
+    "confidence": 0.999
+  },
+  {
+    "source": "EP300",
+    "target": "SMAD3",
+    "confidence": 0.999
+  },
+  {
+    "source": "TP53",
+    "target": "TLR9",
+    "confidence": 0.407
+  },
+  {
+    "source": "TP53",
+    "target": "NFKB2",
+    "confidence": 0.537
+  },
+  {
+    "source": "TP53",
+    "target": "NSD2",
+    "confidence": 0.769
+  },
+  {
+    "source": "TP53",
+    "target": "NFE2L2",
+    "confidence": 0.78
+  },
+  {
+    "source": "TP53",
+    "target": "EGFR",
+    "confidence": 0.943
+  },
+  {
+    "source": "TP53",
+    "target": "TOP1",
+    "confidence": 0.947
+  },
+  {
+    "source": "TP53",
+    "target": "SMAD3",
+    "confidence": 0.963
+  },
+  {
+    "source": "TP53",
+    "target": "PTGS2",
+    "confidence": 0.974
+  },
+  {
+    "source": "TP53",
+    "target": "JUN",
+    "confidence": 0.997
+  },
+  {
+    "source": "EGFR",
+    "target": "PTGS1",
+    "confidence": 0.406
+  },
+  {
+    "source": "EGFR",
+    "target": "TLR9",
+    "confidence": 0.411
+  },
+  {
+    "source": "EGFR",
+    "target": "TOP1",
+    "confidence": 0.417
+  },
+  {
+    "source": "EGFR",
+    "target": "SMAD3",
+    "confidence": 0.589
+  },
+  {
+    "source": "EGFR",
+    "target": "NFE2L2",
+    "confidence": 0.691
+  },
+  {
+    "source": "EGFR",
+    "target": "PTGS2",
+    "confidence": 0.836
+  },
+  {
+    "source": "EGFR",
+    "target": "JUN",
+    "confidence": 0.871
+  },
+  {
+    "source": "SMAD3",
+    "target": "PTGS2",
+    "confidence": 0.494
+  },
+  {
+    "source": "SMAD3",
+    "target": "NFKB2",
+    "confidence": 0.536
+  },
+  {
+    "source": "SMAD3",
+    "target": "RXRA",
+    "confidence": 0.559
+  },
+  {
+    "source": "SMAD3",
+    "target": "NFE2L2",
+    "confidence": 0.593
+  },
+  {
+    "source": "SMAD3",
+    "target": "JUN",
+    "confidence": 0.997
+  },
+  {
+    "source": "TLR9",
+    "target": "JUN",
+    "confidence": 0.474
+  },
+  {
+    "source": "TLR9",
+    "target": "PTGS2",
+    "confidence": 0.618
+  },
+  {
+    "source": "TOP1",
+    "target": "JUN",
+    "confidence": 0.606
+  },
+  {
+    "source": "PTGS1",
+    "target": "RXRA",
+    "confidence": 0.452
+  },
+  {
+    "source": "PTGS1",
+    "target": "PTGS2",
+    "confidence": 0.946
+  },
+  {
+    "source": "PTGS2",
+    "target": "NFKB2",
+    "confidence": 0.457
+  },
+  {
+    "source": "PTGS2",
+    "target": "RXRA",
+    "confidence": 0.489
+  },
+  {
+    "source": "PTGS2",
+    "target": "NFE2L2",
+    "confidence": 0.698
+  },
+  {
+    "source": "PTGS2",
+    "target": "JUN",
+    "confidence": 0.866
+  },
+  {
+    "source": "NFKB2",
+    "target": "JUN",
+    "confidence": 0.525
+  },
+  {
+    "source": "JUN",
+    "target": "NFE2L2",
+    "confidence": 0.92
+  },
+  {
+    "source": "NFE2L2",
+    "target": "RXRA",
+    "confidence": 0.594
+  }
+]
