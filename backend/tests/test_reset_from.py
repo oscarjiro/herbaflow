@@ -103,7 +103,7 @@ def _stage1_fragment(ids: list[str]) -> dict[str, Any]:
 
 
 def _hub_genes() -> dict[str, Any]:
-    return {"top_n": 20, "use_hub_bottleneck": True, "composite_weight": 0.5}
+    return {"top_n": 20}
 
 
 def _enrichment() -> dict[str, Any]:
@@ -253,17 +253,15 @@ def _patch_runners(monkeypatch: pytest.MonkeyPatch, **counts: int) -> dict[str, 
                         "rank": 1,
                         "gene_symbol": "G0",
                         "target_id": "t0",
-                        "degree": 0.0,
-                        "betweenness": 0.0,
-                        "closeness": 0.0,
-                        "eigenvector": 0.0,
-                        "composite": 0.0,
+                        "degree": 0,
+                        "betweenness": 0,
+                        "closeness": 0,
+                        "eigenvector": 0,
+                        "mcc": 0,
                         "source_url": None,
                     }
                 ],
-                "ranking_metric": "hub_bottleneck_composite",
-                "composite_weight": 0.5,
-                "normalization": "min_max",
+                "ranking_metric": "mcc",
                 "node_count": 1,
                 "top_n": 20,
                 "count": 1,
