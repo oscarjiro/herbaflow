@@ -68,6 +68,11 @@ def _problem(status: int, title: str, detail: str | None, type_: str, **extra: A
     return JSONResponse(status_code=status, content=body, media_type=PROBLEM_MEDIA_TYPE)
 
 
+def problem_json(status: int, title: str, detail: str | None = None, **extra: Any) -> JSONResponse:
+    """Public RFC 9457 problem+json builder for middleware (one shape for all errors)."""
+    return _problem(status, title, detail, "about:blank", **extra)
+
+
 async def _problem_handler(request: Request, exc: ProblemException) -> JSONResponse:
     return _problem(exc.status, exc.title, exc.detail, exc.type_, **exc.extra)
 
