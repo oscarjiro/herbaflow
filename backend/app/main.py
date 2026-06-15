@@ -16,7 +16,7 @@ from app.db import check_db
 from app.errors import ServiceUnavailableError, register_error_handlers
 from app.logging_config import configure_logging
 from app.routers import analyses, compounds, diseases, export, plants, targets
-from app.security import SecurityHeadersMiddleware
+from app.security import PayloadSizeLimitMiddleware, SecurityHeadersMiddleware
 
 logger = logging.getLogger("herbaflow.app")
 
@@ -52,6 +52,7 @@ app = FastAPI(
 # Middleware is applied in reverse order of registration (last added = outermost).
 # Register CORS LAST so every response — including short-circuited 413/429 — carries
 # CORS headers (the browser hides bodies on responses missing them).
+app.add_middleware(PayloadSizeLimitMiddleware, max_bytes=settings.max_request_bytes)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
