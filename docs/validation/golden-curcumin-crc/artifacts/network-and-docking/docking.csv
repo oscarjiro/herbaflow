@@ -1,0 +1,16 @@
+hub_gene_symbol,hub_uniprot_accession,alphafold_id,compound_name,compound_inchikey,compound_smiles,prediction_method,source_url
+SMAD3,P84022,P84022,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/P84022
+TP53,P04637,P04637,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/P04637
+JUN,P05412,P05412,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/P05412
+EP300,Q09472,Q09472,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,chembl_bioactivity,https://alphafold.ebi.ac.uk/entry/Q09472
+EGFR,P00533,P00533,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,chembl_bioactivity,https://alphafold.ebi.ac.uk/entry/P00533
+PTGS2,P35354,P35354,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/P35354
+NFE2L2,Q16236,Q16236,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,chembl_bioactivity,https://alphafold.ebi.ac.uk/entry/Q16236
+RARA,P10276,P10276,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/P10276
+SMAD2,Q15796,Q15796,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/Q15796
+RXRA,P19793,P19793,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/P19793
+NFKB2,Q00653,Q00653,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/Q00653
+TLR9,Q9NR96,Q9NR96,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,chembl_bioactivity,https://alphafold.ebi.ac.uk/entry/Q9NR96
+TOP1,P11387,P11387,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/P11387
+PTGS1,P23219,P23219,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,chembl_bioactivity,https://alphafold.ebi.ac.uk/entry/P23219
+NSD2,O96028,O96028,CURCUMIN,VFLDPWHFBUODDF-FCXRPNKRSA-N,,pubchem_bioassay,https://alphafold.ebi.ac.uk/entry/O96028

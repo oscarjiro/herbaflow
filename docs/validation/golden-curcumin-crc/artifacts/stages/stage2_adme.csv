@@ -1,0 +1,2 @@
+compound_id,canonical_name,passed,descriptor_source,molecular_weight,logp,hbond_donors,hbond_acceptors,tpsa,rotatable_bonds,qed_score,np_likeness_score,num_ro5_violations,is_pains_positive,source_url,reason
+bbcfd2c2-1d5e-5a46-85c6-f1fa45b9bc9f,CURCUMIN,true,etl,368.39,3.37,2,6,93.06,8,,,0,False,,

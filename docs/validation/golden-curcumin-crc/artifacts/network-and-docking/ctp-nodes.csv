@@ -1,0 +1,118 @@
+id,label,type,inchikey,smiles,uniprot_accession,is_hub,source
+VFLDPWHFBUODDF-FCXRPNKRSA-N,CURCUMIN,compound,VFLDPWHFBUODDF-FCXRPNKRSA-N,,,,
+NFE2L2,NFE2L2,target,,,Q16236,true,
+SMAD3,SMAD3,target,,,P84022,true,
+EP300,EP300,target,,,Q09472,true,
+RARA,RARA,target,,,P10276,true,
+RXRA,RXRA,target,,,P19793,true,
+PTGS2,PTGS2,target,,,P35354,true,
+PTGS1,PTGS1,target,,,P23219,true,
+TP53,TP53,target,,,P04637,true,
+EGFR,EGFR,target,,,P00533,true,
+TLR9,TLR9,target,,,Q9NR96,true,
+NFKB2,NFKB2,target,,,Q00653,true,
+SMAD2,SMAD2,target,,,Q15796,true,
+NSD2,NSD2,target,,,O96028,true,
+TOP1,TOP1,target,,,P11387,true,
+JUN,JUN,target,,,P05412,true,
+GO:0003677,DNA binding,pathway,,,,,GO:MF
+KEGG:05200,Pathways in cancer,pathway,,,,,KEGG
+GO:0003676,nucleic acid binding,pathway,,,,,GO:MF
+GO:0043565,sequence-specific DNA binding,pathway,,,,,GO:MF
+KEGG:05225,Hepatocellular carcinoma,pathway,,,,,KEGG
+KEGG:05166,Human T-cell leukemia virus 1 infection,pathway,,,,,KEGG
+KEGG:05210,Colorectal cancer,pathway,,,,,KEGG
+GO:0000977,RNA polymerase II transcription regulatory region sequence-specific DNA binding,pathway,,,,,GO:MF
+GO:0000987,cis-regulatory region sequence-specific DNA binding,pathway,,,,,GO:MF
+GO:0003700,DNA-binding transcription factor activity,pathway,,,,,GO:MF
+GO:0000981,"DNA-binding transcription factor activity, RNA polymerase II-specific",pathway,,,,,GO:MF
+GO:0000978,RNA polymerase II cis-regulatory region sequence-specific DNA binding,pathway,,,,,GO:MF
+GO:0003690,double-stranded DNA binding,pathway,,,,,GO:MF
+GO:0005694,chromosome,pathway,,,,,GO:CC
+GO:0000785,chromatin,pathway,,,,,GO:CC
+GO:0001067,transcription regulatory region nucleic acid binding,pathway,,,,,GO:MF
+GO:0000976,transcription cis-regulatory region binding,pathway,,,,,GO:MF
+GO:0001228,"DNA-binding transcription activator activity, RNA polymerase II-specific",pathway,,,,,GO:MF
+GO:0001216,DNA-binding transcription activator activity,pathway,,,,,GO:MF
+GO:0010604,positive regulation of macromolecule metabolic process,pathway,,,,,GO:BP
+GO:0010468,regulation of gene expression,pathway,,,,,GO:BP
+GO:0010556,regulation of macromolecule biosynthetic process,pathway,,,,,GO:BP
+GO:0010557,positive regulation of macromolecule biosynthetic process,pathway,,,,,GO:BP
+GO:0007507,heart development,pathway,,,,,GO:BP
+GO:1902680,positive regulation of RNA biosynthetic process,pathway,,,,,GO:BP
+GO:0051254,positive regulation of RNA metabolic process,pathway,,,,,GO:BP
+GO:0045944,positive regulation of transcription by RNA polymerase II,pathway,,,,,GO:BP
+GO:0045893,positive regulation of DNA-templated transcription,pathway,,,,,GO:BP
+GO:0009891,positive regulation of biosynthetic process,pathway,,,,,GO:BP
+GO:1990837,sequence-specific double-stranded DNA binding,pathway,,,,,GO:MF
+GO:0006357,regulation of transcription by RNA polymerase II,pathway,,,,,GO:BP
+GO:0006366,transcription by RNA polymerase II,pathway,,,,,GO:BP
+GO:0009893,positive regulation of metabolic process,pathway,,,,,GO:BP
+GO:0009889,regulation of biosynthetic process,pathway,,,,,GO:BP
+GO:0072359,circulatory system development,pathway,,,,,GO:BP
+GO:0090304,nucleic acid metabolic process,pathway,,,,,GO:BP
+GO:0048584,positive regulation of response to stimulus,pathway,,,,,GO:BP
+GO:0051094,positive regulation of developmental process,pathway,,,,,GO:BP
+GO:0006355,regulation of DNA-templated transcription,pathway,,,,,GO:BP
+GO:2001141,regulation of RNA biosynthetic process,pathway,,,,,GO:BP
+GO:0009790,embryo development,pathway,,,,,GO:BP
+GO:0043009,chordate embryonic development,pathway,,,,,GO:BP
+GO:0006351,DNA-templated transcription,pathway,,,,,GO:BP
+GO:0003007,heart morphogenesis,pathway,,,,,GO:BP
+GO:0010467,gene expression,pathway,,,,,GO:BP
+GO:0019219,regulation of nucleobase-containing compound metabolic process,pathway,,,,,GO:BP
+GO:0006139,nucleobase-containing compound metabolic process,pathway,,,,,GO:BP
+GO:0009792,embryo development ending in birth or egg hatching,pathway,,,,,GO:BP
+GO:0051252,regulation of RNA metabolic process,pathway,,,,,GO:BP
+GO:0060255,regulation of macromolecule metabolic process,pathway,,,,,GO:BP
+GO:0010628,positive regulation of gene expression,pathway,,,,,GO:BP
+GO:0009059,macromolecule biosynthetic process,pathway,,,,,GO:BP
+GO:0019904,protein domain specific binding,pathway,,,,,GO:MF
+GO:0044389,ubiquitin-like protein ligase binding,pathway,,,,,GO:MF
+GO:0031625,ubiquitin protein ligase binding,pathway,,,,,GO:MF
+GO:0019902,phosphatase binding,pathway,,,,,GO:MF
+GO:0140110,transcription regulator activity,pathway,,,,,GO:MF
+GO:0003682,chromatin binding,pathway,,,,,GO:MF
+GO:0141187,nucleic acid biosynthetic process,pathway,,,,,GO:BP
+GO:0034654,nucleobase-containing compound biosynthetic process,pathway,,,,,GO:BP
+GO:0032774,RNA biosynthetic process,pathway,,,,,GO:BP
+GO:0019222,regulation of metabolic process,pathway,,,,,GO:BP
+GO:0044419,biological process involved in interspecies interaction between organisms,pathway,,,,,GO:BP
+GO:0046649,lymphocyte activation,pathway,,,,,GO:BP
+GO:0090575,RNA polymerase II transcription regulator complex,pathway,,,,,GO:CC
+GO:0016070,RNA metabolic process,pathway,,,,,GO:BP
+KEGG:04310,Wnt signaling pathway,pathway,,,,,KEGG
+KEGG:05224,Breast cancer,pathway,,,,,KEGG
+KEGG:05226,Gastric cancer,pathway,,,,,KEGG
+GO:0050793,regulation of developmental process,pathway,,,,,GO:BP
+GO:0080090,regulation of primary metabolic process,pathway,,,,,GO:BP
+GO:0042221,response to chemical,pathway,,,,,GO:BP
+GO:0003002,regionalization,pathway,,,,,GO:BP
+GO:0007178,cell surface receptor protein serine/threonine kinase signaling pathway,pathway,,,,,GO:BP
+GO:0009952,anterior/posterior pattern specification,pathway,,,,,GO:BP
+GO:0002285,lymphocyte activation involved in immune response,pathway,,,,,GO:BP
+GO:1902893,regulation of miRNA transcription,pathway,,,,,GO:BP
+GO:0141091,transforming growth factor beta receptor superfamily signaling pathway,pathway,,,,,GO:BP
+GO:0141124,intracellular signaling cassette,pathway,,,,,GO:BP
+GO:0035556,intracellular signal transduction,pathway,,,,,GO:BP
+GO:0009058,biosynthetic process,pathway,,,,,GO:BP
+GO:0007389,pattern specification process,pathway,,,,,GO:BP
+GO:0035295,tube development,pathway,,,,,GO:BP
+GO:0042110,T cell activation,pathway,,,,,GO:BP
+GO:0007179,transforming growth factor beta receptor signaling pathway,pathway,,,,,GO:BP
+GO:0002696,positive regulation of leukocyte activation,pathway,,,,,GO:BP
+GO:0055123,digestive system development,pathway,,,,,GO:BP
+GO:0050867,positive regulation of cell activation,pathway,,,,,GO:BP
+GO:0048568,embryonic organ development,pathway,,,,,GO:BP
+GO:0048565,digestive tract development,pathway,,,,,GO:BP
+GO:0051249,regulation of lymphocyte activation,pathway,,,,,GO:BP
+GO:0051251,positive regulation of lymphocyte activation,pathway,,,,,GO:BP
+GO:0071559,response to transforming growth factor beta,pathway,,,,,GO:BP
+GO:0071363,cellular response to growth factor stimulus,pathway,,,,,GO:BP
+GO:0070848,response to growth factor,pathway,,,,,GO:BP
+GO:0061614,miRNA transcription,pathway,,,,,GO:BP
+GO:0071560,cellular response to transforming growth factor beta stimulus,pathway,,,,,GO:BP
+GO:0001217,DNA-binding transcription repressor activity,pathway,,,,,GO:MF
+KEGG:05212,Pancreatic cancer,pathway,,,,,KEGG
+GO:0001775,cell activation,pathway,,,,,GO:BP
+GO:0009887,animal organ morphogenesis,pathway,,,,,GO:BP
