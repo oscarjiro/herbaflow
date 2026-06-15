@@ -7,7 +7,15 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-def test_cors_allows_dev_origin() -> None:
+def test_cors_allows_dev_origin(monkeypatch) -> None:
+    # /health is a DB-aware readiness probe; stub the DB check so it reports ready and the
+    # assertion can focus on the CORS header being present on the response.
+    import app.main as main_module
+
+    async def _db_ok() -> None:
+        return None
+
+    monkeypatch.setattr(main_module, "check_db", _db_ok)
     client = TestClient(app)
     resp = client.get("/health", headers={"Origin": "http://localhost:5173"})
     assert resp.status_code == 200
