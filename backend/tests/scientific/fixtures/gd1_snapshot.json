@@ -1,5 +1,4 @@
 {
-  "_note": "mcc_top5 to be reconciled to observed harness output in the GD-1 regression test",
   "overlap_count": 15,
   "mcc_top5": ["SMAD3", "TP53", "JUN", "EP300", "EGFR"],
   "ranking_metric": "mcc",
