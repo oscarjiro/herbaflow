@@ -27,6 +27,7 @@ _APPLY = [
     "20260609000001_compound_validation_status.sql",
     "20260613000001_rename_disease_target_score.sql",
     "20260613000002_compound_target_discovery_params.sql",
+    "20260615000001_analysis_run_idempotency_key.sql",
 ]
 
 

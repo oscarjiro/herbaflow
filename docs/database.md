@@ -475,6 +475,7 @@ One row per pipeline execution. PKs are UUID v4.
 |---|---|---|---|
 | `analysis_id` | uuid PK | NO | `DEFAULT gen_random_uuid()` |
 | `analysis_name` | text | YES | User-supplied label |
+| `idempotency_key` | text | YES | Optional client-supplied key (`POST /analyses`); partial unique index `analysis_runs_idempotency_key_key` WHERE NOT NULL makes a repeated create return the same run |
 | `disease_id` | uuid FK → `diseases` | YES | The target disease for this run |
 | `parameters` | jsonb | NO | Run-input snapshot (plants, compounds, targets, options); CHECK `jsonb_typeof = 'object'` |
 | `status` | text | YES | Dynamic backend-set string: `pending`, `failed`, `complete`, `stage_{N}_running`, `stage_{N}_awaiting_approval`, `stage_{N}_starting`; no fixed-vocab CHECK |
@@ -961,6 +962,7 @@ An edit that empties an entity stage triggers the same hard-stop as a computed-e
 **Constraints:**
 - PK: `analysis_runs_pkey` on `analysis_id`
 - FK: `analysis_runs_disease_id_fkey` → `diseases(disease_id)`
+- UNIQUE (partial) `analysis_runs_idempotency_key_key`: `idempotency_key` WHERE `idempotency_key IS NOT NULL`
 - CHECK `analysis_runs_mode_check`: `mode IN ('auto', 'guided')`
 - CHECK `analysis_runs_current_stage_check`: `current_stage IS NULL OR (current_stage >= 1 AND current_stage <= 8)`
 - CHECK `analysis_runs_parameters_object_check`: `jsonb_typeof(parameters) = 'object'`
@@ -968,6 +970,7 @@ An edit that empties an entity stage triggers the same hard-stop as a computed-e
 
 **Indexes:**
 - `analysis_runs_pkey` (unique, btree, `analysis_id`)
+- `analysis_runs_idempotency_key_key` (unique, btree, `idempotency_key`, partial: `WHERE idempotency_key IS NOT NULL`)
 - `idx_analysis_runs_status` (btree, `status`)
 - `idx_analysis_runs_expires_at` (btree, `expires_at`)
 
