@@ -279,6 +279,78 @@ def test_ppi_network_no_nodes_returns_none():
     )
 
 
+# Task T8 — PPI fallback chart hardening
+
+
+def test_select_ppi_core_small_returns_all():
+    """Graph with fewer nodes than cap: all node ids returned."""
+    graph = {
+        "nodes": [{"id": "PPARG"}, {"id": "TP53"}, {"id": "EGFR"}],
+        "edges": [{"source": "PPARG", "target": "TP53", "confidence": 0.9}],
+    }
+    hub_scores = {"PPARG": 0.9, "TP53": 0.5, "EGFR": 0.1}
+    result = charts.select_ppi_core(graph, hub_scores)
+    assert set(result) == {"PPARG", "TP53", "EGFR"}
+
+
+def test_select_ppi_core_large_returns_cap_highest_scored():
+    """Graph with 150 nodes: returns exactly cap highest-scored nodes."""
+    cap = charts.PPI_FULL_RENDER_MAX  # 80
+    # Build 150 nodes: first 10 have high scores, last 10 have low scores.
+    nodes = [{"id": f"G{i}"} for i in range(150)]
+    # Assign scores: G0..G9 -> 0.9+, G140..G149 -> 0.0
+    hub_scores: dict[str, float] = {}
+    for i in range(150):
+        if i < 10:
+            hub_scores[f"G{i}"] = 0.9 + i * 0.001  # top-10: 0.900..0.909
+        elif i >= 140:
+            hub_scores[f"G{i}"] = 0.001 * i / 1000  # bottom-10: near 0
+        else:
+            hub_scores[f"G{i}"] = 0.3 + i * 0.001  # middle
+    graph = {"nodes": nodes, "edges": []}
+
+    result = charts.select_ppi_core(graph, hub_scores, cap=cap)
+
+    assert len(result) == cap
+    # Top-scored nodes must be present.
+    assert "G9" in result  # highest score (0.909)
+    assert "G0" in result  # also high (0.900)
+    # Bottom-scored nodes must be absent.
+    assert "G149" not in result
+    assert "G140" not in result
+
+
+def test_select_ppi_core_tie_broken_by_id():
+    """Nodes with identical scores are tie-broken deterministically by id (sorted)."""
+    nodes = [{"id": f"G{i:03d}"} for i in range(10)]
+    hub_scores = {f"G{i:03d}": 0.5 for i in range(10)}  # all identical
+    graph = {"nodes": nodes, "edges": []}
+    result1 = charts.select_ppi_core(graph, hub_scores, cap=5)
+    result2 = charts.select_ppi_core(graph, hub_scores, cap=5)
+    assert result1 == result2  # deterministic
+    assert len(result1) == 5
+
+
+def test_ppi_network_renders_bytes_for_small_graph():
+    """render_ppi_network returns PNG bytes for a small valid graph."""
+    graph = {
+        "nodes": [{"id": "A"}, {"id": "B"}, {"id": "C"}],
+        "edges": [{"source": "A", "target": "B", "confidence": 0.7}],
+    }
+    hub_scores = {"A": 0.9, "B": 0.5, "C": 0.0}
+    result = charts.render_ppi_network(graph, hub_scores=hub_scores, min_confidence=0.4)
+    assert isinstance(result, bytes)
+    assert result[:8] == _PNG_SIG
+
+
+def test_ppi_network_none_for_empty_nodes():
+    """render_ppi_network returns None when graph has no nodes."""
+    result = charts.render_ppi_network(
+        {"nodes": [], "edges": []}, hub_scores={}, min_confidence=0.4
+    )
+    assert result is None
+
+
 # Task T6 — CTP core selection and capped render
 
 

@@ -279,19 +279,57 @@ def render_ctp_network(graph: dict[str, Any]) -> bytes | None:
     return _png(fig)
 
 
+# Above this many nodes the PPI fallback figure becomes a hairball; draw the top-scored core
+# instead. The full graph data is still exported in the Cytoscape CSV bundle.
+PPI_FULL_RENDER_MAX = 80
+
+
+def select_ppi_core(
+    graph: dict[str, Any],
+    hub_scores: dict[str, float],
+    cap: int = PPI_FULL_RENDER_MAX,
+) -> list[str]:
+    """Node ids to draw.
+
+    If total nodes <= cap, return all. Otherwise return the cap highest-ranked nodes by hub
+    composite score (fallback to 0.0 for unscored), tie-broken deterministically by id.
+    """
+    nodes = graph.get("nodes", [])
+    if len(nodes) <= cap:
+        return [n["id"] for n in nodes]
+    sorted_ids = sorted(
+        (n["id"] for n in nodes),
+        key=lambda nid: (-hub_scores.get(nid, 0.0), nid),
+    )
+    return sorted_ids[:cap]
+
+
 def render_ppi_network(
     graph: dict[str, Any], *, hub_scores: dict[str, float], min_confidence: float
 ) -> bytes | None:
     """PPI network: connected nodes via kamada_kawai, isolated nodes in a bottom tray.
-    Node size ∝ degree; node colour = hub composite score (red→yellow autumn_r colourbar);
-    edge width ∝ confidence. Returns None when there are no nodes."""
-    nodes = [n["id"] for n in graph.get("nodes", [])]
-    if not nodes:
+
+    Node size proportional to degree; node colour = hub composite score via the shared
+    sequential palette (dark = high); edge width proportional to confidence. Returns None
+    when there are no nodes. When the graph exceeds PPI_FULL_RENDER_MAX nodes, draws only
+    the top-scored core (induced subgraph); the title notes the truncation.
+    """
+    all_nodes = [n["id"] for n in graph.get("nodes", [])]
+    if not all_nodes:
         return None
+
+    total_m = len(all_nodes)
+    keep = set(select_ppi_core(graph, hub_scores))
+    k = len(keep)
+
+    # Restrict to the kept induced subgraph.
+    nodes = [n for n in all_nodes if n in keep]
     g: nx.Graph = nx.Graph()
     g.add_nodes_from(nodes)
     for e in graph.get("edges", []):
-        g.add_edge(e["source"], e["target"], confidence=e.get("confidence") or 0.4)
+        if e["source"] in keep and e["target"] in keep:
+            g.add_edge(e["source"], e["target"], confidence=e.get("confidence") or 0.4)
+
     connected = [n for n in nodes if g.degree(n) > 0]
     isolated = [n for n in nodes if g.degree(n) == 0]
     sub = g.subgraph(connected)
@@ -309,19 +347,22 @@ def render_ppi_network(
         nodelist=nodes,
         node_size=[150 + 80 * deg.get(n, 0) for n in nodes],
         node_color=[hub_scores.get(n, 0.0) for n in nodes],
-        cmap="autumn_r",
+        cmap=SEQUENTIAL_CMAP,
     )
     nx.draw_networkx_labels(g, pos, ax=ax, font_size=7)
     if isolated:
         ax.text(
             0,
             -1.75,
-            f"{len(isolated)} isolated — no STRING interactions at confidence ≥ {min_confidence}",
+            f"{len(isolated)} isolated: no interactions at confidence >= {min_confidence}",
             ha="center",
             fontsize=8,
             color="#666666",
         )
     fig.colorbar(sc, ax=ax, label="hub composite score")
-    ax.set_title("PPI network")
+    if k < total_m:
+        ax.set_title(f"Protein-protein interaction network (top {k} of {total_m} nodes shown)")
+    else:
+        ax.set_title("Protein-protein interaction network")
     ax.axis("off")
     return _png(fig)
