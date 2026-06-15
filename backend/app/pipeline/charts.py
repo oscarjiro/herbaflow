@@ -12,7 +12,6 @@ import math
 from typing import Any
 
 import matplotlib
-import matplotlib.cm as cm
 import networkx as nx
 
 matplotlib.use("Agg")
@@ -54,6 +53,13 @@ def render_venn(
     return _png(fig)
 
 
+def hub_bar_colors(vals: list[float]) -> Any:
+    """Map composite scores to the shared sequential palette (dark = high)."""
+    cmap = matplotlib.colormaps[SEQUENTIAL_CMAP]
+    hi = max(vals) or 1
+    return cmap([v / hi for v in vals])
+
+
 def render_hub_bar(stage7: dict[str, Any]) -> bytes | None:
     hubs = stage7.get("hubs", [])
     if not hubs:
@@ -61,7 +67,7 @@ def render_hub_bar(stage7: dict[str, Any]) -> bytes | None:
     ordered = sorted(hubs, key=lambda h: h.get("composite") or 0.0)  # ascending -> top at the top
     labels = [h.get("gene_symbol") or str(h.get("target_id")) for h in ordered]
     vals = [h.get("composite") or 0.0 for h in ordered]
-    colors = cm.autumn_r([v / (max(vals) or 1) for v in vals])
+    colors = hub_bar_colors(vals)
     fig, ax = plt.subplots(figsize=(6, max(2.0, 0.4 * len(ordered))))
     ax.barh(labels, vals, color=colors)
     ax.set_xlabel("hub-bottleneck composite score")

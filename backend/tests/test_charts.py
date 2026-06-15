@@ -61,6 +61,13 @@ def test_hub_bar_title_states_top_n():
     assert png[:8] == b"\x89PNG\r\n\x1a\n"
 
 
+def test_hub_bar_colors_maps_to_sequential_palette():
+    """hub_bar_colors returns colors where high values are darker than low values."""
+    colors = charts.hub_bar_colors([0.1, 0.9])
+    # colors[1] (high value 0.9) should be darker (lower RGB sum) than colors[0] (low value 0.1)
+    assert sum(colors[1][:3]) < sum(colors[0][:3])
+
+
 # Task 15 — Enrichment bubble per category (Stage 8)
 
 
