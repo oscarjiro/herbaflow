@@ -37,7 +37,15 @@ def init_engine(database_url: str | None = None) -> AsyncEngine:
     """Create the engine + session factory. Call once on app startup (lifespan)."""
     global _engine, _sessionmaker
     url, connect_args = _prepare(database_url or settings.async_database_url)
-    _engine = create_async_engine(url, pool_pre_ping=True, connect_args=connect_args)
+    _engine = create_async_engine(
+        url,
+        pool_pre_ping=True,
+        pool_size=settings.db_pool_size,
+        max_overflow=settings.db_max_overflow,
+        pool_timeout=settings.db_pool_timeout,
+        pool_recycle=settings.db_pool_recycle,
+        connect_args={**connect_args, "timeout": settings.db_connect_timeout},
+    )
     _sessionmaker = async_sessionmaker(_engine, expire_on_commit=False)
     return _engine
 

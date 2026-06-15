@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     database_url: str = ""
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     frontend_url: str = ""
+    db_pool_size: int = 5
+    db_max_overflow: int = 10
+    db_pool_timeout: int = 10
+    db_pool_recycle: int = 1800
+    db_connect_timeout: int = 5
 
     @property
     def cors_origins_list(self) -> list[str]:
