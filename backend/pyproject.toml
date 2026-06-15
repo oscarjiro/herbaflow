@@ -28,6 +28,7 @@ dev = [
     "jsonschema>=4.26.0",
     "testcontainers[postgresql]>=4.8",
     "psycopg2-binary>=2.9",
+    "scipy>=1.13",
 ]
 
 [tool.ruff]
@@ -65,7 +66,8 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-addopts = "-q"
+addopts = "-q -m 'not scientific'"
 markers = [
     "integration: test runs against the real Postgres testcontainer via the `client` fixture",
+    "scientific: opt-in end-to-end golden-dataset tests (deselect with -m 'not scientific')",
 ]

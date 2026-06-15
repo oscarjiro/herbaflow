@@ -524,6 +524,7 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "pytest-httpx" },
     { name = "ruff" },
+    { name = "scipy" },
     { name = "testcontainers" },
 ]
 
@@ -553,6 +554,7 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=0.25" },
     { name = "pytest-httpx", specifier = ">=0.35" },
     { name = "ruff", specifier = ">=0.9" },
+    { name = "scipy", specifier = ">=1.13" },
     { name = "testcontainers", extras = ["postgresql"], specifier = ">=4.8" },
 ]
 
