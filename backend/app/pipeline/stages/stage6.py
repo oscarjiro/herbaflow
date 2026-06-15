@@ -20,6 +20,7 @@ Result fragment (``stage_results["6"]``):
 
 from __future__ import annotations
 
+import base64
 import logging
 from typing import Any
 
@@ -149,22 +150,32 @@ async def run(
 
     rows = envelope["rows"]
     symbols = [r["gene_symbol"] for r in rows]
-    if client is not None:
-        edges = await client.network(
+
+    async def _build(string_client: StringClient) -> dict[str, Any]:
+        # ONE client for both calls so they share the throttle (and the httpx session in the
+        # non-injected path). The image is supplementary and never fails the stage.
+        edges = await string_client.network(
             symbols, min_confidence=min_confidence, network_type=network_type
         )
+        image_bytes = await string_client.fetch_network_image(
+            symbols, min_confidence=min_confidence, network_type=network_type
+        )
+        out = build_result(
+            rows,
+            edges,
+            min_confidence=min_confidence,
+            network_type=network_type,
+            capped=envelope["capped"],
+        )
+        if image_bytes is not None:
+            out["network_image"] = base64.b64encode(image_bytes).decode("ascii")
+        return out
+
+    if client is not None:
+        result = await _build(client)
     else:
         async with httpx.AsyncClient() as http:
-            edges = await StringClient(http).network(
-                symbols, min_confidence=min_confidence, network_type=network_type
-            )
-    result = build_result(
-        rows,
-        edges,
-        min_confidence=min_confidence,
-        network_type=network_type,
-        capped=envelope["capped"],
-    )
+            result = await _build(StringClient(http))
     logger.info(
         "stage 6: %d node(s), %d edge(s) at confidence %.2f (%s)",
         result["node_count"],

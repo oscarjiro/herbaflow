@@ -1,3 +1,7 @@
+import base64
+
+import pytest
+
 from app.integrations.string_db import StringEdge
 from app.pipeline.stages import stage6
 
@@ -91,3 +95,94 @@ def test_nodes_carry_target_id_and_accession():
     assert by_gene["TNF"]["target_id"] == "t2"
     assert by_gene["TNF"]["uniprot_accession"] == "P01375"
     assert result["node_count"] == 2 and result["edge_count"] == 1
+
+
+class _FakeRun:
+    def __init__(self, overlap, *, max_proteins=2000, allow_top_n_cap=False):
+        self.stage_results = {"5": overlap}
+        self.parameters = {
+            "ppi": {
+                "min_confidence": 0.4,
+                "network_type": "functional",
+                "max_proteins": max_proteins,
+                "allow_top_n_cap": allow_top_n_cap,
+            }
+        }
+
+
+class _StubStringClient:
+    """Records the args of both calls; returns canned edges + a canned image (or None)."""
+
+    def __init__(self, *, edges, image):
+        self._edges = edges
+        self._image = image
+        self.network_args = None
+        self.image_args = None
+
+    async def network(self, gene_symbols, *, min_confidence, network_type):
+        self.network_args = (list(gene_symbols), min_confidence, network_type)
+        return self._edges
+
+    async def fetch_network_image(self, gene_symbols, *, min_confidence, network_type):
+        self.image_args = (list(gene_symbols), min_confidence, network_type)
+        return self._image
+
+
+@pytest.mark.asyncio
+async def test_run_persists_server_image_base64_when_present():
+    png = b"\x89PNG\r\n\x1a\nfake-image-bytes"
+    client = _StubStringClient(edges=[StringEdge("G0", "G1", 0.6)], image=png)
+    run = _FakeRun(_overlap(3))
+
+    result = await stage6.run(None, run, client=client)
+
+    assert result["network_image"] == base64.b64encode(png).decode("ascii")
+    # core result unchanged by the image step
+    assert result["state"] == "computed"
+    assert result["node_count"] == 3
+    assert result["edge_count"] == 1
+    assert {n["gene_symbol"] for n in result["nodes"]} == {"G0", "G1", "G2"}
+
+
+@pytest.mark.asyncio
+async def test_run_omits_image_key_when_fetch_returns_none():
+    client = _StubStringClient(edges=[StringEdge("G0", "G1", 0.6)], image=None)
+    run = _FakeRun(_overlap(3))
+
+    result = await stage6.run(None, run, client=client)
+
+    assert "network_image" not in result
+    # the stage still succeeds with the normal result
+    assert result["state"] == "computed"
+    assert result["node_count"] == 3
+    assert result["edge_count"] == 1
+
+
+@pytest.mark.asyncio
+async def test_run_blocked_path_has_no_image():
+    client = _StubStringClient(edges=[StringEdge("G0", "G1", 0.6)], image=b"unused")
+    run = _FakeRun(_overlap(3), max_proteins=2, allow_top_n_cap=False)
+
+    result = await stage6.run(None, run, client=client)
+
+    assert result["blocked"] is True
+    assert result["reason"] == "overlap_too_large"
+    assert "network_image" not in result
+    # the image step never ran (no STRING call at all on the blocked path)
+    assert client.network_args is None
+    assert client.image_args is None
+
+
+@pytest.mark.asyncio
+async def test_run_image_fetch_uses_same_args_as_network():
+    png = b"img"
+    client = _StubStringClient(edges=[], image=png)
+    run = _FakeRun(_overlap(3))
+
+    await stage6.run(None, run, client=client)
+
+    assert client.network_args is not None
+    assert client.image_args is not None
+    # same symbols / min_confidence / network_type for both calls
+    assert client.image_args == client.network_args
+    assert client.network_args == (["G0", "G1", "G2"], 0.4, "functional")
