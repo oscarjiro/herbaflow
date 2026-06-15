@@ -87,8 +87,8 @@ async def test_fetch_network_image_returns_png_bytes():
             ["AKT1", "TNF", "EGFR"], min_confidence=0.4, network_type="functional"
         )
     assert image == _PNG
-    # hit the high-res image endpoint with the same body shape as network()
-    assert "/api/highres_image/network" in captured["url"]
+    # hit the image endpoint with the same body shape as network()
+    assert "/api/image/network" in captured["url"]
     assert "required_score=400" in captured["body"]
     assert "network_type=functional" in captured["body"]
     assert "species=9606" in captured["body"]

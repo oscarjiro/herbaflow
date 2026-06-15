@@ -23,7 +23,7 @@ from app.integrations.base import with_retry
 logger = logging.getLogger("herbaflow.integrations.string")
 
 _URL = "https://string-db.org/api/json/network"
-_IMAGE_URL = "https://string-db.org/api/highres_image/network"
+_IMAGE_URL = "https://string-db.org/api/image/network"
 _SPECIES = 9606
 _CALLER = "herbaflow"
 _MIN_INTERVAL = 1.0  # ~1 req/s (STRING guidance)
@@ -113,7 +113,11 @@ class StringClient:
     async def fetch_network_image(
         self, gene_symbols: list[str], *, min_confidence: float, network_type: str
     ) -> bytes | None:
-        """STRING's own server-rendered PPI network image (high-res PNG) for the overlap genes.
+        """STRING's own server-rendered PPI network image (standard-resolution PNG) for the genes.
+
+        Standard resolution is used (not high-res): a high-res render of a large overlap is tens of
+        MB, which bloats the persisted ``stage_results`` JSONB; the standard image is ~6x smaller
+        and reads the same on screen.
 
         SUPPLEMENTARY, degrade-never-fail: returns the PNG bytes on success, or None on an
         empty input or ANY error (non-200, 404, timeout, transport, malformed) so the export's
