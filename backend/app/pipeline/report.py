@@ -382,15 +382,16 @@ def _s6_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
 def _s7_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
     hubs = sorted(
         (sr.get("7") or {}).get("hubs", []),
-        key=lambda h: h.get("composite") or 0.0,
+        key=lambda h: h.get("mcc") or 0.0,
         reverse=True,
     )
     if not hubs:
         return "No hub genes were identified (the shared-target network is too sparse to rank)."
     top = ", ".join(h.get("gene_symbol") or str(h.get("target_id")) for h in hubs[:3])
     return (
-        f"Hub-bottleneck ranking (degree + betweenness composite, Yu 2007) prioritises {top} "
-        f"as the most topologically central targets, the likely primary mediators."
+        f"Maximal Clique Centrality (Chin 2014) ranks {top} as the most topologically central "
+        f"targets, the likely primary mediators. Degree, betweenness, closeness, and eigenvector "
+        f"centrality are reported per target for transparency."
     )
 
 
@@ -419,16 +420,15 @@ def _s8_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
 
 
 def _hub_preview(sr: dict[str, Any]) -> PreviewTable | None:
-    """Top-5 hub genes by composite score (None when no hubs were ranked)."""
+    """Top-5 hub genes by MCC score (None when no hubs were ranked)."""
     hubs = (sr.get("7") or {}).get("hubs", [])
     if not hubs:
         return None
-    ordered = sorted(hubs, key=lambda h: h.get("composite") or 0.0, reverse=True)[:5]
+    ordered = sorted(hubs, key=lambda h: h.get("mcc") or 0.0, reverse=True)[:5]
     rows: list[tuple[str, ...]] = [
-        (str(h.get("gene_symbol") or h.get("target_id")), f"{(h.get('composite') or 0.0):.3f}")
-        for h in ordered
+        (str(h.get("gene_symbol") or h.get("target_id")), str(h.get("mcc") or 0)) for h in ordered
     ]
-    return PreviewTable("Top hub genes", ["Gene", "Composite score"], rows)
+    return PreviewTable("Top hub genes", ["Gene", "MCC score"], rows)
 
 
 def _term_preview(sr: dict[str, Any]) -> PreviewTable | None:

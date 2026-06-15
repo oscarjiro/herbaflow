@@ -119,7 +119,7 @@ def test_s6_reports_connected_and_isolated():
             "nodes": [{"gene_symbol": g} for g in ["A", "B", "C", "X"]],
             "edges": [{"source": "A", "target": "B"}, {"source": "B", "target": "C"}],
         },
-        "7": {"hubs": [{"gene_symbol": "A", "composite": 1.0}]},
+        "7": {"hubs": [{"gene_symbol": "A", "mcc": 10}]},
         "8": {
             "terms": [
                 {
@@ -178,6 +178,38 @@ def test_s8_finding_and_preview():
     )
     s8 = next(s for s in m.stages if s.n == 8)
     assert "blood circulation" in s8.finding and s8.preview is not None
+
+
+def test_s7_finding_and_preview_mcc():
+    sr = {
+        "5": {"count": 3},
+        "7": {
+            "hubs": [
+                {"gene_symbol": "PPARG", "mcc": 50},
+                {"gene_symbol": "AKT1", "mcc": 30},
+                {"gene_symbol": "TP53", "mcc": 10},
+            ]
+        },
+    }
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        sr,
+        {"plant": "P", "disease": "D"},
+        input_modes={},
+        frontend_url="u",
+        figures=[],
+    )
+    s7 = next(s for s in m.stages if s.n == 7)
+    # Finding must mention MCC and the top gene; no em dash
+    assert "Maximal Clique Centrality" in s7.finding
+    assert "PPARG" in s7.finding
+    assert "—" not in s7.finding
+    # Preview table must use "MCC score" column header
+    assert s7.preview is not None
+    assert s7.preview.columns[1] == "MCC score"
+    # Rows are sorted by MCC descending; top row is PPARG with score 50
+    assert s7.preview.rows[0] == ("PPARG", "50")
 
 
 def test_report_preserves_no_version_checksum_honesty():
@@ -255,7 +287,7 @@ def test_rendered_report_has_no_em_or_en_dashes_or_internal_jargon():
             "4": {"count": 900, "targets": []},
             "5": {"count": 17, "compound_target_count": 100, "disease_target_count": 900},
             "6": {"node_count": 17, "nodes": [], "edges": []},
-            "7": {"hubs": [{"gene_symbol": "PPARG", "composite": 0.9}]},
+            "7": {"hubs": [{"gene_symbol": "PPARG", "mcc": 42}]},
             "8": {
                 "terms": [
                     {
