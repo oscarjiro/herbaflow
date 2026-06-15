@@ -75,6 +75,9 @@ class _FakeString:
     async def network(self, gene_symbols, *, min_confidence, network_type):
         return list(self._edges)
 
+    async def fetch_network_image(self, gene_symbols, *, min_confidence, network_type):
+        return None
+
 
 class _FakeGprofiler:
     def __init__(self, terms=None):

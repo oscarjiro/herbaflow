@@ -69,6 +69,9 @@ class _FakeString:
             raise ServiceUnavailableError(detail="STRING is unavailable.")
         return list(self._edges)
 
+    async def fetch_network_image(self, gene_symbols, *, min_confidence, network_type):
+        return None
+
 
 class _FakeGprofiler:
     """Minimal g:Profiler stub — returns empty terms (valid honest-null completion)."""
