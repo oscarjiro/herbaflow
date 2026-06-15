@@ -4,8 +4,6 @@ from app import contracts
 def test_hub_genes_defaults_match_lock():
     assert contracts.hub_genes_defaults() == {
         "top_n": 20,
-        "use_hub_bottleneck": True,
-        "composite_weight": 0.5,
     }
 
 
@@ -27,4 +25,5 @@ def test_enrichment_correction_enum_is_api_verbatim():
 def test_hub_genes_param_meta_bounds():
     meta = contracts.hub_genes_param_meta()
     assert meta["top_n"]["min"] == 1 and meta["top_n"]["max"] == 200
-    assert meta["composite_weight"]["min"] == 0.0 and meta["composite_weight"]["max"] == 1.0
+    assert set(meta.keys()) == {"top_n"}
+    assert meta["top_n"]["default"] == 20

@@ -90,13 +90,14 @@ def test_ppi_param_meta_matches_contract():
 
 def test_hub_genes_defaults_match_contract():
     d = contracts.hub_genes_defaults()
-    assert d == {"top_n": 20, "use_hub_bottleneck": True, "composite_weight": 0.5}
+    assert d == {"top_n": 20}
+    assert "use_hub_bottleneck" not in d
+    assert "composite_weight" not in d
     meta = contracts.hub_genes_param_meta()
+    assert set(meta.keys()) == {"top_n"}
     assert meta["top_n"]["min"] == 1
     assert meta["top_n"]["max"] == 200
-    assert meta["composite_weight"]["min"] == 0.0
-    assert meta["composite_weight"]["max"] == 1.0
-    assert meta["use_hub_bottleneck"]["default"] is True
+    assert meta["top_n"]["default"] == 20
 
 
 def test_plant_input_modes_match_contract() -> None:
