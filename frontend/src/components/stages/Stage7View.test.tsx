@@ -20,13 +20,11 @@ function makeComputedResult() {
         betweenness: 0.33,
         closeness: 0.58,
         eigenvector: 0.29,
-        composite: 0.37,
+        mcc: 7,
         source_url: "https://www.uniprot.org/uniprotkb/P01375/entry",
       },
     ],
-    ranking_metric: "hub_bottleneck_composite",
-    composite_weight: 0.5,
-    normalization: "min_max",
+    ranking_metric: "mcc",
     node_count: 1,
     top_n: 20,
     count: 1,
@@ -36,8 +34,6 @@ function makeComputedResult() {
 
 const HUB_PARAM_VALUES = {
   top_n: 20,
-  use_hub_bottleneck: true,
-  composite_weight: 0.5,
 };
 
 function makeData(result: object): AnalysisRead {
@@ -66,11 +62,11 @@ function wrap(ui: React.ReactNode) {
 // ---------------------------------------------------------------------------
 
 describe("Stage7View", () => {
-  it("renders the hub table with the gene and composite", () => {
+  it("renders the hub table with the gene and MCC", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
     expect(screen.getByText("Step 7 — Hub Genes")).toBeInTheDocument();
     expect(screen.getByText("TNF")).toBeInTheDocument();
-    expect(screen.getByText("0.37")).toBeInTheDocument();
+    expect(screen.getByText("7")).toBeInTheDocument();
   });
 
   it("renders summary cards for node count and hub count", () => {
@@ -87,8 +83,8 @@ describe("Stage7View", () => {
   it("renders the hub_genes param panel with a Redo button", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
     expect(screen.getByLabelText("top_n")).toBeInTheDocument();
-    expect(screen.getByLabelText("use_hub_bottleneck")).toBeInTheDocument();
-    expect(screen.getByLabelText("composite_weight")).toBeInTheDocument();
+    expect(screen.queryByLabelText("use_hub_bottleneck")).toBeNull();
+    expect(screen.queryByLabelText("composite_weight")).toBeNull();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
   });
 
@@ -100,7 +96,7 @@ describe("Stage7View", () => {
     expect(screen.getByText("Eigenvector")).toBeInTheDocument();
   });
 
-  it("rounds centralities to 4 sig figs", () => {
+  it("rounds centralities to 4 sig figs and shows MCC as integer", () => {
     const result = {
       state: "computed",
       hubs: [
@@ -112,13 +108,11 @@ describe("Stage7View", () => {
           betweenness: 0.5,
           closeness: 0.5,
           eigenvector: 0.5,
-          composite: 0.987654321,
+          mcc: 12,
           source_url: null,
         },
       ],
-      ranking_metric: "composite",
-      composite_weight: 0.5,
-      normalization: "min-max",
+      ranking_metric: "mcc",
       node_count: 5,
       top_n: 10,
       count: 1,
@@ -126,7 +120,7 @@ describe("Stage7View", () => {
     };
     wrap(<Stage7View data={makeData(result)} />);
     expect(screen.getByText("0.1235")).toBeInTheDocument();
-    expect(screen.getByText("0.9877")).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
   });
 
   it("shows the hub bar image when complete", () => {

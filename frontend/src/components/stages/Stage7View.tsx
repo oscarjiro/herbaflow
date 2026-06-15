@@ -1,10 +1,10 @@
 /**
- * Stage7View — Stage 7 hub-gene ranking (networkx centralities + hub-bottleneck composite).
+ * Stage7View — Stage 7 hub-gene ranking (networkx centralities + Maximal Clique Centrality (MCC)).
  *
- * Param-bearing (`hub_genes`: top_n, use_hub_bottleneck, composite_weight). Renders summary
- * cards, the ranked hub table (rank, gene, composite, and the four individual centralities for
- * transparency) with per-row UniProt links + CSV, the param panel (Redo via reset-from/7), the
- * StageDataSources footer, the ApprovalBar, a `network_too_small` notice, and the StaleNotice.
+ * Param-bearing (`hub_genes`: top_n). Renders summary cards, the ranked hub table (rank, gene,
+ * MCC, and the four individual centralities for transparency) with per-row UniProt links + CSV,
+ * the param panel (Redo via reset-from/7), the StageDataSources footer, the ApprovalBar, a
+ * `network_too_small` notice, and the StaleNotice.
  */
 
 import { useMemo, useState } from "react";
@@ -37,7 +37,7 @@ type Hub = {
   betweenness: number;
   closeness: number;
   eigenvector: number;
-  composite: number;
+  mcc: number;
   source_url: string | null;
 };
 
@@ -45,8 +45,6 @@ type Stage7Result = {
   state: "computed";
   hubs: Hub[];
   ranking_metric: string;
-  composite_weight: number;
-  normalization: string;
   node_count: number;
   top_n: number;
   count: number;
@@ -62,14 +60,13 @@ type HubParams = Record<string, number | boolean | string>;
 
 const PAGE_SIZES = [10, 20, 50] as const;
 
-const S7_CSV_HEADER =
-  "rank,gene_symbol,composite,degree,betweenness,closeness,eigenvector,source_url";
+const S7_CSV_HEADER = "rank,gene_symbol,mcc,degree,betweenness,closeness,eigenvector,source_url";
 
 function buildS7CsvRows(hubs: Hub[]): unknown[][] {
   return hubs.map((h) => [
     h.rank,
     h.gene_symbol,
-    h.composite,
+    h.mcc,
     h.degree,
     h.betweenness,
     h.closeness,
@@ -145,13 +142,6 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
           <span className="summary-card__value">{stage7.ranking_metric}</span>
           <span className="summary-card__label">ranking metric</span>
         </div>
-        <div
-          className="summary-card summary-card--muted"
-          aria-label={`weight ${stage7.composite_weight}`}
-        >
-          <span className="summary-card__value">{stage7.composite_weight}</span>
-          <span className="summary-card__label">composite weight</span>
-        </div>
       </div>
 
       {tooSmall && (
@@ -207,7 +197,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
             <tr>
               <th>Rank</th>
               <th>Gene</th>
-              <th>Composite</th>
+              <th>MCC</th>
               <th>Degree</th>
               <th>Betweenness</th>
               <th>Closeness</th>
@@ -227,7 +217,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
                     h.gene_symbol
                   )}
                 </td>
-                <td>{formatSig(h.composite)}</td>
+                <td>{h.mcc}</td>
                 <td>{formatSig(h.degree)}</td>
                 <td>{formatSig(h.betweenness)}</td>
                 <td>{formatSig(h.closeness)}</td>
@@ -289,9 +279,9 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
       <footer className="stage-footer hf-muted">
         <p>
-          Centralities: networkx (degree, betweenness, closeness, eigenvector) on the undirected
-          STRING PPI. Composite = w·degree + (1−w)·betweenness (Yu 2007), min-max normalised. Human
-          only (species 9606).
+          Ranking: Maximal Clique Centrality (MCC, Chin 2014) on the undirected STRING PPI. Degree,
+          betweenness, closeness, and eigenvector centrality (networkx) are reported per target for
+          transparency. Human only (species 9606).
         </p>
       </footer>
     </section>

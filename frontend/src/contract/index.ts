@@ -252,12 +252,10 @@ function hubGenesEntry(key: keyof typeof hubGenesProps): AdmeParamMeta {
 
 export const HUB_GENES_PARAMS = {
   top_n: hubGenesEntry("top_n"),
-  use_hub_bottleneck: hubGenesEntry("use_hub_bottleneck"),
-  composite_weight: hubGenesEntry("composite_weight"),
 } satisfies Record<string, AdmeParamMeta>;
 
-export const HUB_GENES_NUMERIC_PARAMS = ["top_n", "composite_weight"] as const;
-export const HUB_GENES_BOOLEAN_PARAMS = ["use_hub_bottleneck"] as const;
+export const HUB_GENES_NUMERIC_PARAMS = ["top_n"] as const;
+export const HUB_GENES_BOOLEAN_PARAMS = [] as const;
 
 // ---------------------------------------------------------------------------
 // Enrichment (Stage 8) parameter metadata — derived from the contract.
