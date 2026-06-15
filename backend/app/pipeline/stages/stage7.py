@@ -1,29 +1,35 @@
-"""Stage 7 — Hub genes (networkx centralities + hub-bottleneck composite).
+"""Stage 7 — Hub genes (networkx centralities + Maximal Clique Centrality).
 
-Rank the Stage-6 PPI proteins by network centrality so the key mechanistic players surface.
-Four classic centralities (degree, betweenness, closeness, eigenvector) are computed on the
-UNDIRECTED PPI graph and reported alongside a weighted hub-bottleneck composite
-(``w·norm(degree) + (1−w)·norm(betweenness)``, Yu 2007), min-max normalised. Pure
-computation (networkx); NO external API.
+Rank the Stage-6 PPI proteins by Maximal Clique Centrality (MCC; Chin et al. 2014, cytoHubba),
+the field-standard single-method hub ranker. Four classic centralities (degree, betweenness,
+closeness, eigenvector) are computed on the UNDIRECTED PPI graph and REPORTED alongside the MCC
+score for transparency; they are no longer aggregated into the ranking. Pure computation
+(networkx); NO external API.
 
-Reads ``stage_results["6"]`` (nodes carry gene_symbol + target_id + uniprot_accession; edges
-carry source/target gene symbols + confidence). The graph node identity is the gene symbol
-(STRING ``preferredName``); identity (target_id, UniProt link) is recovered from the node rows.
+MCC(v) = sum over maximal cliques C containing v of (|C| - 1)!  (Chin 2014). Computed on the
+undirected, unweighted graph via Bron-Kerbosch maximal-clique enumeration (nx.find_cliques). Only
+cliques of size >= 2 are counted, so an isolated node scores 0 (== its degree), matching the
+paper's "no edge between the neighbours of v -> MCC(v) == degree(v)" special case.
+
+Reads ``stage_results["6"]`` (nodes carry gene_symbol + target_id + uniprot_accession; edges carry
+source/target gene symbols + confidence). The graph node identity is the gene symbol (STRING
+``preferredName``); identity (target_id, UniProt link) is recovered from the node rows.
 
 Result fragment (``stage_results["7"]``); ``count`` = number of hubs reported:
-  - ``hubs``: [{rank, target_id, gene_symbol, degree, betweenness, closeness, eigenvector,
-               composite, source_url}]
-  - ``ranking_metric`` / ``composite_weight`` / ``normalization`` / ``node_count`` / ``top_n``
+  - ``hubs``: [{rank, target_id, gene_symbol, degree, betweenness, closeness, eigenvector, mcc,
+               source_url}]
+  - ``ranking_metric`` (always "mcc") / ``node_count`` / ``top_n``
   - ``flags`` (``network_too_small`` / ``eigenvector_fallback``)
 
-Edge cases (Methodology §7.6 / spec HB-2/3): tiny/edgeless network -> ``network_too_small`` flag
-(reported, not a hard-stop); eigenvector non-convergence -> numpy fallback + flag; ties broken
-deterministically by (gene_symbol, target_id); ``top_n`` > node_count -> all.
+Edge cases (Methodology §7.6): tiny/edgeless network -> ``network_too_small`` flag (reported, not a
+hard-stop); eigenvector non-convergence -> numpy fallback + flag; ties broken deterministically by
+(mcc desc, degree desc, gene_symbol, target_id); ``top_n`` > node_count -> all.
 """
 
 from __future__ import annotations
 
 import logging
+from math import factorial
 from typing import Any
 
 import networkx as nx
@@ -34,22 +40,23 @@ logger = logging.getLogger("herbaflow.pipeline")
 _MIN_INFORMATIVE_NODES = 3  # below this (or edgeless) centrality is near-meaningless (§7.6)
 
 
-def _min_max(values: dict[str, float]) -> dict[str, float]:
-    """Min-max normalise to [0,1]; a flat distribution maps to all-zeros (no spread)."""
-    if not values:
-        return {}
-    lo = min(values.values())
-    hi = max(values.values())
-    if hi == lo:
-        return {k: 0.0 for k in values}
-    span = hi - lo
-    return {k: (v - lo) / span for k, v in values.items()}
+def _mcc(graph: nx.Graph) -> dict[str, int]:
+    """Maximal Clique Centrality (Chin 2014): MCC(v) = sum over maximal cliques C containing v of
+    (|C|-1)!. Only cliques of size >= 2 are counted, so an isolated node (singleton clique) scores
+    0 == its degree, per the paper's "no edge between neighbours -> MCC == degree" special case.
+    Undirected, unweighted topology (nx.find_cliques ignores edge weights)."""
+    mcc: dict[str, int] = {v: 0 for v in graph}
+    for clique in nx.find_cliques(graph):
+        if len(clique) < 2:
+            continue
+        f = factorial(len(clique) - 1)
+        for v in clique:
+            mcc[v] += f
+    return mcc
 
 
-def compute(
-    stage6: dict[str, Any], *, top_n: int, use_hub_bottleneck: bool, composite_weight: float
-) -> dict[str, Any]:
-    """Pure centrality ranking from the stored Stage-6 network."""
+def compute(stage6: dict[str, Any], *, top_n: int) -> dict[str, Any]:
+    """Pure MCC hub ranking from the stored Stage-6 network."""
     meta = {n["gene_symbol"]: n for n in stage6.get("nodes", [])}
     edges = stage6.get("edges", [])
 
@@ -68,9 +75,7 @@ def compute(
         return {
             "state": "computed",
             "hubs": [],
-            "ranking_metric": "hub_bottleneck_composite" if use_hub_bottleneck else "degree",
-            "composite_weight": composite_weight,
-            "normalization": "min_max",
+            "ranking_metric": "mcc",
             "node_count": 0,
             "top_n": top_n,
             "count": 0,
@@ -89,22 +94,12 @@ def compute(
             eigenvector = nx.eigenvector_centrality_numpy(graph)
             flags.append("eigenvector_fallback")
 
-    deg_norm = _min_max(degree)
-    betw_norm = _min_max(betweenness)
-    if use_hub_bottleneck:
-        composite = {
-            g: composite_weight * deg_norm[g] + (1.0 - composite_weight) * betw_norm[g]
-            for g in graph
-        }
-        ranking_metric = "hub_bottleneck_composite"
-    else:
-        composite = dict(degree)
-        ranking_metric = "degree"
+    mcc = _mcc(graph)
 
-    # Deterministic ranking: composite desc, then gene_symbol asc, then target_id asc.
+    # Deterministic ranking: mcc desc, degree desc, gene_symbol asc, target_id asc.
     ordered = sorted(
         graph.nodes(),
-        key=lambda g: (-composite[g], g, str(meta[g].get("target_id") or "")),
+        key=lambda g: (-mcc[g], -degree[g], g, str(meta[g].get("target_id") or "")),
     )
 
     if n_nodes < _MIN_INFORMATIVE_NODES or n_edges == 0:
@@ -124,7 +119,7 @@ def compute(
                 "betweenness": round(betweenness[g], 6),
                 "closeness": round(closeness[g], 6),
                 "eigenvector": round(eigenvector[g], 6),
-                "composite": round(composite[g], 6),
+                "mcc": mcc[g],
                 "source_url": (f"https://www.uniprot.org/uniprotkb/{acc}/entry" if acc else None),
             }
         )
@@ -132,9 +127,7 @@ def compute(
     return {
         "state": "computed",
         "hubs": hubs,
-        "ranking_metric": ranking_metric,
-        "composite_weight": composite_weight,
-        "normalization": "min_max",
+        "ranking_metric": "mcc",
         "node_count": n_nodes,
         "top_n": top_n,
         "count": len(hubs),
@@ -146,18 +139,12 @@ async def run(session: AsyncSession | None, run: Any) -> dict[str, Any]:
     """Rank hubs from the run's stored Stage-6 network. Pure read; ``session`` is for symmetry."""
     stage6 = run.stage_results["6"]
     params = run.parameters["hub_genes"]
-    result = compute(
-        stage6,
-        top_n=int(params["top_n"]),
-        use_hub_bottleneck=bool(params["use_hub_bottleneck"]),
-        composite_weight=float(params["composite_weight"]),
-    )
+    result = compute(stage6, top_n=int(params["top_n"]))
     logger.info(
-        "stage 7: %d hub(s) of %d node(s) (metric=%s, w=%.2f)%s",
+        "stage 7: %d hub(s) of %d node(s) (metric=%s)%s",
         result["count"],
         result["node_count"],
         result["ranking_metric"],
-        result["composite_weight"],
         f" flags={result['flags']}" if result["flags"] else "",
     )
     return result
