@@ -1,0 +1,268 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap");
+
+/* Class-based dark variant (Tailwind v4 form — matches the .dark element AND its descendants). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Neutrals — warm, paper-tinted */
+  --hf-neutral-50: #f7f5f2;
+  --hf-neutral-100: #efebe4;
+  --hf-neutral-200: #e5e0d8;
+  --hf-neutral-300: #d4cec4;
+  --hf-neutral-500: #9a958c;
+  --hf-neutral-600: #6e6a62;
+  --hf-neutral-700: #4a463f;
+  --hf-neutral-900: #1a1a1a;
+
+  /* Data-viz accents */
+  --hf-sage: #8fa084;
+  --hf-sage-deep: #6b7e62;
+  --hf-sage-soft: #d6dcd1;
+  --hf-sage-faint: #ebeee6;
+  --hf-terracotta: #b8755c;
+  --hf-terracotta-soft: #e9d2c7;
+
+  /* Semantic surfaces */
+  --hf-bg: var(--hf-neutral-50);
+  --hf-surface: #ffffff;
+  --hf-surface-2: var(--hf-neutral-100);
+  --hf-border: rgba(26, 26, 26, 0.08);
+  --hf-border-strong: rgba(26, 26, 26, 0.18);
+  --hf-border-focus: var(--hf-fg-1);
+
+  /* Foreground */
+  --hf-fg-1: var(--hf-neutral-900);
+  --hf-fg-2: var(--hf-neutral-700);
+  --hf-fg-3: var(--hf-neutral-600);
+  --hf-fg-4: var(--hf-neutral-500);
+
+  /* Status — muted earth tones */
+  --hf-success: #6f8b6a;
+  --hf-success-soft: #dce5d6;
+  --hf-warning: #b58a3a;
+  --hf-warning-soft: #efe2c2;
+  --hf-danger: #a85a4e;
+  --hf-danger-soft: #eccdc6;
+  --hf-info: #5c7a8f;
+  --hf-info-soft: #d2dde5;
+
+  /* Glass (baseline) */
+  --hf-glass-bg: rgba(255, 255, 255, 0.62);
+  --hf-glass-bg-strong: rgba(255, 255, 255, 0.82);
+  --hf-glass-border: rgba(255, 255, 255, 0.7);
+  --hf-glass-shadow: 0 1px 1px rgba(26, 26, 26, 0.04), 0 12px 32px -8px rgba(26, 26, 26, 0.1);
+
+  /* Passthrough scales (used via var()/arbitrary utilities) */
+  --lh-tight: 1.05;
+  --lh-snug: 1.2;
+  --lh-normal: 1.45;
+  --lh-prose: 1.6;
+  --tracking-display: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-eyebrow: 0.14em;
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+  --space-11: 192px;
+  --space-12: 256px;
+  --radius-0: 0;
+  --radius-1: 2px;
+  --radius-2: 4px;
+  --radius-3: 8px;
+  --radius-pill: 999px;
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(26, 26, 26, 0.04);
+  --shadow-2: 0 4px 16px -4px rgba(26, 26, 26, 0.08);
+  --shadow-3: 0 18px 48px -16px rgba(26, 26, 26, 0.18);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-1: 120ms;
+  --duration-2: 220ms;
+  --duration-3: 380ms;
+
+  /* shadcn semantic variables aliased onto hf tokens (light) */
+  --background: var(--hf-bg);
+  --foreground: var(--hf-fg-1);
+  --primary: var(--hf-fg-1);
+  --primary-foreground: var(--hf-bg);
+  --secondary: var(--hf-surface-2);
+  --secondary-foreground: var(--hf-fg-1);
+  --card: var(--hf-surface);
+  --card-foreground: var(--hf-fg-1);
+  --popover: var(--hf-surface);
+  --popover-foreground: var(--hf-fg-1);
+  --muted: var(--hf-surface-2);
+  --muted-foreground: var(--hf-fg-2);
+  --accent: var(--hf-surface-2);
+  --accent-foreground: var(--hf-fg-1);
+  --border: var(--hf-border);
+  --input: var(--hf-border-strong);
+  --ring: var(--hf-fg-1);
+  --destructive: var(--hf-danger);
+  --destructive-foreground: var(--hf-bg);
+  --radius: var(--radius-1);
+}
+
+/* Clinical type pairing (verbatim from source) */
+[data-type-pair="clinical"] {
+  --font-display: "Fraunces", "Caudex", "Times New Roman", serif;
+  --font-sans: "IBM Plex Sans", "DM Sans", -apple-system, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, monospace;
+}
+
+/* Static scales → utilities */
+@theme {
+  --font-display:
+    "Instrument Serif", "Caudex", "Playfair Display", "Times New Roman", Georgia, serif;
+  --font-sans:
+    "Be Vietnam Pro", "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.625rem;
+  --text-2xl: 2.125rem;
+  --text-3xl: 3rem;
+  --text-display: clamp(3.5rem, 7vw, 5.5rem);
+}
+
+/* Color utilities (re-resolve under .dark) */
+@theme inline {
+  --color-hf-bg: var(--hf-bg);
+  --color-hf-surface: var(--hf-surface);
+  --color-hf-surface-2: var(--hf-surface-2);
+  --color-hf-border: var(--hf-border);
+  --color-hf-border-strong: var(--hf-border-strong);
+  --color-hf-fg-1: var(--hf-fg-1);
+  --color-hf-fg-2: var(--hf-fg-2);
+  --color-hf-fg-3: var(--hf-fg-3);
+  --color-hf-fg-4: var(--hf-fg-4);
+  --color-hf-sage: var(--hf-sage);
+  --color-hf-sage-deep: var(--hf-sage-deep);
+  --color-hf-sage-soft: var(--hf-sage-soft);
+  --color-hf-sage-faint: var(--hf-sage-faint);
+  --color-hf-terracotta: var(--hf-terracotta);
+  --color-hf-terracotta-soft: var(--hf-terracotta-soft);
+  --color-hf-success: var(--hf-success);
+  --color-hf-success-soft: var(--hf-success-soft);
+  --color-hf-warning: var(--hf-warning);
+  --color-hf-warning-soft: var(--hf-warning-soft);
+  --color-hf-danger: var(--hf-danger);
+  --color-hf-danger-soft: var(--hf-danger-soft);
+  --color-hf-info: var(--hf-info);
+  --color-hf-info-soft: var(--hf-info-soft);
+}
+
+/* Base element styles (verbatim from source; NO .hf-eyebrow/.hf-rule/.hf-bracket/.hf-binomial/.hf-num — later task). */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--hf-bg);
+  color: var(--hf-fg-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--hf-sage-soft);
+  color: var(--hf-fg-1);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--lh-tight);
+  color: var(--hf-fg-1);
+  margin: 0;
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--text-3xl);
+  letter-spacing: var(--tracking-display);
+}
+h2 {
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-tight);
+}
+h3 {
+  font-size: var(--text-xl);
+  letter-spacing: var(--tracking-tight);
+}
+h4 {
+  font-size: var(--text-lg);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--tracking-normal);
+}
+
+p {
+  margin: 0;
+  color: var(--hf-fg-2);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a.hf-link {
+  text-decoration: underline;
+  text-decoration-color: var(--hf-border-strong);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--duration-1) var(--ease-out);
+}
+a.hf-link:hover {
+  text-decoration-color: var(--hf-fg-1);
+}
+
+code,
+pre,
+.hf-mono {
+  font-family: var(--font-mono);
+}
+em,
+i,
+.hf-italic {
+  font-style: italic;
+}
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--hf-fg-1);
+  outline-offset: 2px;
+  border-radius: var(--radius-1);
+}
