@@ -266,3 +266,48 @@ i,
   outline-offset: 2px;
   border-radius: var(--radius-1);
 }
+
+/* =====================================================================
+   Warm editorial dark ramp. Inverts paper<->ink but stays warm and
+   low-contrast (never pure #000/#FFF). Overrides the raw --hf-* tokens;
+   the shadcn aliases and the @theme inline color utilities re-resolve
+   automatically because they reference these vars.
+   ===================================================================== */
+.dark {
+  /* Neutral / semantic ramp */
+  --hf-bg: #14130f;
+  --hf-surface: #1c1a15;
+  --hf-surface-2: #232019;
+  --hf-fg-1: #f2eee6;
+  --hf-fg-2: #cfc8bc;
+  --hf-fg-3: #a39c8e;
+  --hf-fg-4: #7c7568;
+  --hf-border: rgba(247, 245, 242, 0.1);
+  --hf-border-strong: rgba(247, 245, 242, 0.18);
+
+  /* Data-viz accents — same hue, luminance lifted for dark contrast (data-viz only) */
+  --hf-sage: #a6b89a;
+  --hf-sage-deep: #8aa07e;
+  --hf-sage-soft: #313a2c;
+  --hf-sage-faint: #21271d;
+  --hf-terracotta: #cb8b72;
+  --hf-terracotta-soft: #3a2a23;
+
+  /* Status — muted earth tones, luminance raised; soft = dark muted fill */
+  --hf-success: #86a180;
+  --hf-success-soft: #25301f;
+  --hf-warning: #cda45a;
+  --hf-warning-soft: #322813;
+  --hf-danger: #c67d6f;
+  --hf-danger-soft: #36211c;
+  --hf-info: #7e9db0;
+  --hf-info-soft: #1e2a31;
+
+  /* Glass — faint light wash on dark */
+  --hf-glass-bg: rgba(247, 245, 242, 0.06);
+  --hf-glass-bg-strong: rgba(247, 245, 242, 0.1);
+  --hf-glass-border: rgba(247, 245, 242, 0.12);
+  --hf-glass-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
+}
