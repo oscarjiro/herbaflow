@@ -9,8 +9,9 @@
  */
 
 import { useMemo, useState } from "react";
-import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
+import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
 import {
@@ -21,6 +22,11 @@ import {
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
 import { exportArtifactUrl } from "../../lib/exportUrl";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { DataTable } from "@/components/ui/DataTable";
+import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -108,7 +114,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   const [page, setPage] = useState(0);
 
   const terms = useMemo(() => stage8?.terms ?? [], [stage8]);
-  const csvHref = useCsvBlobUrl(S8_CSV_HEADER, buildS8CsvRows(terms));
+  const csvRows = useMemo(() => buildS8CsvRows(terms), [terms]);
 
   if (!stage8) return null;
 
@@ -123,132 +129,161 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   const stale = stage8.stale === true;
   const isComplete = data.status === "complete";
 
+  // Column definitions — SAME columns + order as the prior <table>
+  const columns: ColumnDef<Term>[] = [
+    {
+      id: "source",
+      header: "Source",
+      cell: ({ row }) => row.original.source,
+    },
+    {
+      id: "term",
+      header: "Term",
+      cell: ({ row }) => row.original.term_id,
+    },
+    {
+      id: "name",
+      header: "Name",
+      cell: ({ row }) => row.original.name,
+    },
+    {
+      id: "corrected_p",
+      header: "Corrected p",
+      cell: ({ row }) => formatSig(row.original.p_value),
+    },
+    {
+      id: "term_size",
+      header: "Term size",
+      cell: ({ row }) => row.original.term_size,
+    },
+    {
+      id: "overlap",
+      header: "Overlap",
+      cell: ({ row }) => row.original.intersection_size,
+    },
+  ];
+
   return (
-    <section className="stage-view stage-view--8">
-      <h2>Step 8 — Functional Enrichment</h2>
+    <section className="flex flex-col gap-6">
+      {/* Editorial header */}
+      <div className="flex flex-col gap-1">
+        <Eyebrow>Step 8</Eyebrow>
+        <h2 className="hf-heading-serif">Step 8 — Functional Enrichment</h2>
+      </div>
+
       <StageDataSources stage={8} />
 
       {/* Summary cards */}
-      <div className="stage-summary">
-        <div className="summary-card" aria-label={`${stage8.count} terms`}>
-          <span className="summary-card__value">{stage8.count}</span>
-          <span className="summary-card__label">enriched terms</span>
+      <div className="flex flex-wrap gap-3">
+        <div
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
+          aria-label={`${stage8.count} terms`}
+        >
+          <span className="hf-num text-2xl font-semibold tabular-nums">{stage8.count}</span>
+          <span className="text-muted-foreground text-xs">enriched terms</span>
         </div>
         <div
-          className="summary-card summary-card--muted"
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
           aria-label={`${stage8.input_gene_count} query genes`}
         >
-          <span className="summary-card__value">{stage8.input_gene_count}</span>
-          <span className="summary-card__label">query genes</span>
+          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+            {stage8.input_gene_count}
+          </span>
+          <span className="text-muted-foreground text-xs">query genes</span>
         </div>
         <div
-          className="summary-card summary-card--muted"
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
           aria-label={`${stage8.background_gene_count} background genes`}
         >
-          <span className="summary-card__value">{stage8.background_gene_count}</span>
-          <span className="summary-card__label">background genes</span>
+          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+            {stage8.background_gene_count}
+          </span>
+          <span className="text-muted-foreground text-xs">background genes</span>
         </div>
         <div
-          className="summary-card summary-card--muted"
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
           aria-label={`correction ${stage8.correction}`}
         >
-          <span className="summary-card__value">{stage8.correction}</span>
-          <span className="summary-card__label">correction</span>
+          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+            {stage8.correction}
+          </span>
+          <span className="text-muted-foreground text-xs">correction</span>
         </div>
       </div>
 
-      <p className="hf-muted">
+      <p className="text-muted-foreground text-sm">
         Background: {stage8.background_source.replace(/_/g, " ")} ({stage8.background_gene_count}{" "}
         genes) — the methodologically-correct custom universe (not the whole genome).
       </p>
 
       {stage8.degraded && (
-        <p className="hf-badge hf-badge--warn" role="status">
-          g:Profiler was unavailable — enrichment was skipped, but the run still completed.
-        </p>
+        <div role="status">
+          <Badge variant="destructive">
+            g:Profiler was unavailable — enrichment was skipped, but the run still completed.
+          </Badge>
+        </div>
       )}
 
       {!stage8.degraded && stage8.count === 0 && (
-        <p className="hf-muted" role="status">
+        <p className="text-muted-foreground text-sm" role="status">
           No terms survived correction at this threshold — an honest null for a small or
           well-dispersed gene set.
         </p>
       )}
 
       {terms.length > 0 && (
-        <>
-          {/* Table controls */}
-          <div className="table-controls">
-            <label htmlFor="t8-page-size">Rows per page</label>
-            <select
-              id="t8-page-size"
-              value={pageSize}
-              onChange={(e) => {
-                const v = e.target.value;
-                setPageSize(v === "all" ? "all" : Number(v));
-                setPage(0);
-              }}
-            >
-              {PAGE_SIZES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-              <option value="all">All</option>
-            </select>
-            <a
-              href={csvHref}
-              download="enrichment.csv"
-              className="hf-btn hf-btn-ghost"
-              aria-label="Download CSV"
-            >
-              Download CSV
-            </a>
-          </div>
-
-          {/* Enriched-terms table */}
-          <div className="table-wrapper">
-            <table className="hf-table">
-              <thead>
-                <tr>
-                  <th>Source</th>
-                  <th>Term</th>
-                  <th>Name</th>
-                  <th>Corrected p</th>
-                  <th>Term size</th>
-                  <th>Overlap</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visible.map((t) => (
-                  <tr key={t.term_id}>
-                    <td>{t.source}</td>
-                    <td>{t.term_id}</td>
-                    <td>{t.name}</td>
-                    <td>{t.p_value.toExponential(2)}</td>
-                    <td>{t.term_size}</td>
-                    <td>{t.intersection_size}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <Card>
+          <CardHeader>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2">
+                <label htmlFor="t8-page-size" className="text-muted-foreground text-sm">
+                  Rows per page
+                </label>
+                <select
+                  id="t8-page-size"
+                  className="bg-background rounded border px-2 py-1 text-sm"
+                  value={pageSize}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setPageSize(v === "all" ? "all" : Number(v));
+                    setPage(0);
+                  }}
+                >
+                  {PAGE_SIZES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                  <option value="all">All</option>
+                </select>
+              </div>
+              <CsvDownloadButton
+                header={S8_CSV_HEADER}
+                rows={csvRows}
+                filename="enrichment.csv"
+                label="Download CSV"
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="px-0">
+            <DataTable columns={columns} data={visible} />
+          </CardContent>
 
           {/* Pagination */}
           {pageSize !== "all" && totalPages > 1 && (
-            <div className="pagination">
+            <div className="flex items-center justify-center gap-3 px-6 pb-4">
               <button
-                className="hf-btn"
+                className="hf-btn text-sm"
                 disabled={currentPage === 0}
                 onClick={() => setPage((p) => p - 1)}
               >
                 Previous
               </button>
-              <span>
+              <span className="text-muted-foreground text-sm">
                 Page {currentPage + 1} / {totalPages}
               </span>
               <button
-                className="hf-btn"
+                className="hf-btn text-sm"
                 disabled={currentPage >= totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
               >
@@ -256,24 +291,25 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
               </button>
             </div>
           )}
-        </>
+        </Card>
       )}
 
+      {/* Per-category enrichment chart images (complete-only, onError-hidden) */}
       {isComplete &&
         (
           [
-            ["BP", "Biological process enrichment"],
-            ["MF", "Molecular function enrichment"],
-            ["CC", "Cellular component enrichment"],
-            ["KEGG", "KEGG pathway enrichment"],
-            ["REAC", "Reactome pathway enrichment"],
-            ["WP", "WikiPathways enrichment"],
+            ["BP", "Biological Process"],
+            ["MF", "Molecular Function"],
+            ["CC", "Cellular Component"],
+            ["KEGG", "KEGG Pathway"],
+            ["REAC", "Reactome Pathway"],
+            ["WP", "WikiPathways"],
           ] as [string, string][]
-        ).map(([cat, altText]) => (
+        ).map(([cat, label]) => (
           <img
             key={cat}
-            className="hf-stage-chart"
-            alt={altText}
+            className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
+            alt={`${label} enrichment`}
             src={exportArtifactUrl(data.analysis_id, `stage8_enrichment_${cat}.png`)}
             onError={(e) => {
               e.currentTarget.style.display = "none";
@@ -300,7 +336,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
       )}
 
       {isComplete ? (
-        <p className="hf-badge hf-badge--ok" role="status">
+        <p className="text-muted-foreground text-sm" role="status">
           Pipeline complete — all eight stages finished.
         </p>
       ) : (
@@ -314,7 +350,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         />
       )}
 
-      <footer className="stage-footer hf-muted">
+      <footer className="text-muted-foreground text-sm">
         <p>
           Enrichment: g:Profiler (GO BP/MF/CC + KEGG), cumulative hypergeometric, custom background
           = the compound-target universe. Human only (species 9606).
