@@ -18,7 +18,7 @@ import json
 import pytest
 
 from tests.scientific import gd2_support
-from tests.scientific.conftest import FIXTURES, load_json
+from tests.scientific.conftest import FIXTURES, load_json, poll_run
 
 pytestmark = [
     pytest.mark.scientific,
@@ -47,11 +47,7 @@ async def test_gd2_headline_overlap_233_mcc(golden_client, monkeypatch):
     )
     assert resp.status_code == 202, resp.text
     run_id = resp.json()["analysis_id"]
-    state = {}
-    for _ in range(180):
-        state = (await c.get(f"/analyses/{run_id}")).json()
-        if state.get("status") in {"complete", "failed"}:
-            break
+    state = await poll_run(c, run_id)
     assert state["status"] == "complete", state.get("error_message")
     sr = state["stage_results"]
     assert sr["5"]["count"] == 233
@@ -84,11 +80,7 @@ async def test_gd2_secondary_recovers_233_plus_14(golden_client, monkeypatch):
     )
     assert resp.status_code == 202, resp.text
     run_id = resp.json()["analysis_id"]
-    state = {}
-    for _ in range(180):
-        state = (await c.get(f"/analyses/{run_id}")).json()
-        if state.get("status") in {"complete", "failed"}:
-            break
+    state = await poll_run(c, run_id)
     assert state["status"] == "complete", state.get("error_message")
     sr = state["stage_results"]
     ref233 = set(seed["overlap_233_symbols"])

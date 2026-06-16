@@ -1,15 +1,16 @@
 """Shared support for the GD-1 curcumin x colorectal-cancer golden regression.
 
-One home for the deterministic, OFFLINE Level-A harness pieces so the regression test and a
-later GD-1 report driver replay the SAME recorded ground truth:
+One home for the deterministic, OFFLINE Level-A harness pieces so the regression test and the GD-1
+report driver replay the SAME recorded ground truth:
 
-- ``FakeString`` / ``FakeGprofiler`` replay the recorded STRING + g:Profiler fixtures (no network).
+- ``gd1_string_client`` / ``gd1_gprofiler_client`` build the shared ``ReplayString`` /
+  ``ReplayGprofiler`` doubles over the recorded STRING + g:Profiler fixtures (no network).
 - ``seed_gd1(engine)`` inserts the captured canonical data (curcumin, 835 targets, 104 measured
   edges, the CRC disease, 746 disease->target associations) and returns the seed dict.
-- ``patch_gd1(monkeypatch)`` swaps the live STRING/g:Profiler clients for the fakes, and installs
-  raise-if-called guards on the Stage-3 external clients to PROVE the D9 edge-reuse path keeps the
-  run fully offline (every seeded curcumin edge was discovered at the run's default discovery
-  params, so Stage 3 finds ``to_fetch == []`` and never constructs an external client).
+- ``patch_gd1(monkeypatch)`` swaps the live STRING/g:Profiler clients for the replay doubles, and
+  installs raise-if-called guards on the Stage-3 external clients to PROVE the D9 edge-reuse path
+  keeps the run fully offline (every seeded curcumin edge was discovered at the run's default
+  discovery params, so Stage 3 finds ``to_fetch == []`` and never constructs an external client).
 """
 
 from __future__ import annotations
@@ -21,63 +22,23 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from app.integrations.gprofiler import EnrichedTerm
-from app.integrations.string_db import StringEdge
-from app.pipeline.stages import stage3, stage6, stage8
+from app.pipeline.stages import stage6, stage8
 from tests.scientific.conftest import load_json
+from tests.scientific.replay import ReplayGprofiler, ReplayString, forbid_stage3_clients
 
 # Canonical CRC disease identity (the seed carries only disease_id; DOID 9256 = colorectal cancer).
 _CRC_CANONICAL_KEY = "doid:9256"
 _CRC_NAME = "Colorectal Cancer"
 
 
-class FakeString:
-    """Replay the 55 recorded STRING edges; the server-rendered image is absent (None)."""
-
-    def __init__(self) -> None:
-        self._edges = [
-            StringEdge(e["source"], e["target"], e["confidence"])
-            for e in load_json("gd1_string_network.json")
-        ]
-
-    async def network(
-        self, gene_symbols: list[str], *, min_confidence: float, network_type: str
-    ) -> list[StringEdge]:
-        return list(self._edges)
-
-    async def fetch_network_image(
-        self, gene_symbols: list[str], *, min_confidence: float, network_type: str
-    ) -> bytes | None:
-        return None
+def gd1_string_client() -> ReplayString:
+    """Replay the recorded STRING network (captured over the overlap, so the filter is a no-op)."""
+    return ReplayString(load_json("gd1_string_network.json"))
 
 
-class FakeGprofiler:
-    """Replay the 105 recorded g:Profiler enrichment terms."""
-
-    def __init__(self) -> None:
-        self._terms = [EnrichedTerm(**t) for t in load_json("gd1_gprofiler.json")]
-
-    async def profile(
-        self,
-        *,
-        query: list[str],
-        background: list[str],
-        sources: list[str],
-        correction: str,
-        user_threshold: float,
-        no_iea: bool = False,
-    ) -> list[EnrichedTerm]:
-        return list(self._terms)
-
-
-class _RaiseIfCalled:
-    """A stand-in external client whose construction is forbidden in the offline GD-1 run.
-
-    If Stage-3's D9 edge-reuse ever fails to fire, the engine would build a real client and this
-    guard trips loudly — surfacing the regression instead of silently making a live call.
-    """
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        raise AssertionError("external call in offline GD-1 test")
+def gd1_gprofiler_client() -> ReplayGprofiler:
+    """Replay the recorded g:Profiler enrichment terms."""
+    return ReplayGprofiler([EnrichedTerm(**t) for t in load_json("gd1_gprofiler.json")])
 
 
 async def seed_gd1(engine: AsyncEngine) -> dict[str, Any]:
@@ -221,14 +182,12 @@ async def seed_gd1(engine: AsyncEngine) -> dict[str, Any]:
 
 
 def patch_gd1(monkeypatch: Any) -> None:
-    """Swap STRING + g:Profiler for the recorded fakes; forbid every Stage-3 external client.
+    """Swap STRING + g:Profiler for the replay doubles; forbid every Stage-3 external client.
 
     Only Stage 6 (STRING) and Stage 8 (g:Profiler) need replay: Stage 3 runs fully offline via D9
     edge-reuse (all 104 seeded curcumin edges carry the run's default discovery params). The
     raise-if-called guards on the Stage-3 clients PROVE that — if any trips, D9 did not fire.
     """
-    monkeypatch.setattr(stage6, "StringClient", lambda http: FakeString())
-    monkeypatch.setattr(stage8, "GprofilerClient", lambda http: FakeGprofiler())
-    monkeypatch.setattr(stage3, "ChemblClient", _RaiseIfCalled)
-    monkeypatch.setattr(stage3, "PubChemBioAssayClient", _RaiseIfCalled)
-    monkeypatch.setattr(stage3, "UniProtClient", _RaiseIfCalled)
+    monkeypatch.setattr(stage6, "StringClient", lambda http: gd1_string_client())
+    monkeypatch.setattr(stage8, "GprofilerClient", lambda http: gd1_gprofiler_client())
+    forbid_stage3_clients(monkeypatch)

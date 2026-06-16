@@ -58,11 +58,11 @@ from tests.scientific.conftest import (  # noqa: E402
     _MIGRATIONS,
     _async_url,
     _run_script,
-    load_json,
+    poll_run,
 )
 from tests.scientific.gd2_support import (  # noqa: E402
-    FakeGprofiler,
-    FakeString,
+    gd2_gprofiler_client,
+    gd2_string_client,
     seed_gd2,
 )
 
@@ -188,12 +188,7 @@ async def _run_pipeline(client: httpx.AsyncClient, seed: dict[str, Any]) -> dict
     if resp.status_code != 202:
         raise RuntimeError(f"create failed {resp.status_code}: {resp.text}")
     run_id = resp.json()["analysis_id"]
-
-    state: dict[str, Any] = {}
-    for _ in range(300):
-        state = (await client.get(f"/analyses/{run_id}")).json()
-        if state.get("status") in {"complete", "failed"}:
-            break
+    state = await poll_run(client, run_id, max_iters=300)
     if state.get("status") != "complete":
         raise RuntimeError(
             f"run did not complete: {state.get('status')} {state.get('error_message')}"
@@ -386,11 +381,10 @@ async def main() -> None:
 
             seed = await seed_gd2(engine)
 
-            # Replay the recorded STRING network + an empty g:Profiler, reusing the regression fakes
-            # verbatim (standalone driver, so reassign the stage-module factories directly).
-            edges = load_json("gd2_string.json")
-            stage6.StringClient = lambda http: FakeString(edges)  # type: ignore[attr-defined,assignment,return-value]
-            stage8.GprofilerClient = lambda http: FakeGprofiler()  # type: ignore[attr-defined,assignment,return-value]
+            # Replay the recorded STRING network + an empty g:Profiler, reusing the regression
+            # replay doubles verbatim (standalone driver: reassign the stage-module factories).
+            stage6.StringClient = lambda http: gd2_string_client()  # type: ignore[attr-defined,assignment,return-value]
+            stage8.GprofilerClient = lambda http: gd2_gprofiler_client()  # type: ignore[attr-defined,assignment,return-value]
 
             maker = async_sessionmaker(engine, expire_on_commit=False)
             db.set_sessionmaker(maker)

@@ -9,7 +9,7 @@ via D9 edge-reuse; the Stage-3 client guards in ``patch_gd1`` prove no live call
 
 import pytest
 
-from tests.scientific.conftest import load_json
+from tests.scientific.conftest import load_json, poll_run
 from tests.scientific.gd1_support import patch_gd1, seed_gd1
 
 pytestmark = pytest.mark.scientific
@@ -35,11 +35,7 @@ async def test_gd1_curcumin_crc_snapshot(golden_client, monkeypatch):
     assert resp.status_code == 202
     run_id = resp.json()["analysis_id"]
 
-    state = {}
-    for _ in range(180):
-        state = (await c.get(f"/analyses/{run_id}")).json()
-        if state.get("status") in {"complete", "failed"}:
-            break
+    state = await poll_run(c, run_id)
     assert state["status"] == "complete", state.get("error_message")
 
     sr = state["stage_results"]

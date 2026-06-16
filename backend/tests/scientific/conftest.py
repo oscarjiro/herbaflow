@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import httpx
 import pytest
@@ -80,3 +81,19 @@ def fixtures_dir() -> Path:
 
 def load_json(name: str):
     return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
+
+
+async def poll_run(
+    client: httpx.AsyncClient, run_id: str, *, max_iters: int = 180
+) -> dict[str, Any]:
+    """Poll ``GET /analyses/{run_id}`` until the run settles (complete/failed) or iters run out.
+
+    The single home for the golden suite's poll-until-settled loop, reused by the scientific tests
+    (``max_iters=180``) and both report drivers (``max_iters=300``).
+    """
+    state: dict[str, Any] = {}
+    for _ in range(max_iters):
+        state = (await client.get(f"/analyses/{run_id}")).json()
+        if state.get("status") in {"complete", "failed"}:
+            break
+    return state

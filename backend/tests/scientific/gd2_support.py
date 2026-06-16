@@ -12,8 +12,8 @@ manual entry modes, so Stages 1-4 do no work beyond loading the user-provided id
   MCC, Stage 8 calls g:Profiler over the overlap. Hito supplied no enrichment, so g:Profiler is
   replayed EMPTY (the run still completes; Stage 8 is honest-null).
 
-ONE recorded STRING network (over the 247-gene secondary overlap) serves BOTH runs:
-``FakeString`` returns only the recorded edges whose source AND target are both in the called gene
+ONE recorded STRING network (over the 247-gene secondary overlap) serves BOTH runs: the shared
+``ReplayString`` returns only the recorded edges whose source AND target are both in the called gene
 set, so STRING-over-233 == STRING-over-247 filtered to the 233 set.
 
 The four GD-2 fixtures are gitignored (unpublished Hito data); the tests SKIP cleanly when absent.
@@ -26,9 +26,9 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
-from app.integrations.string_db import StringEdge
-from app.pipeline.stages import stage3, stage6, stage8
+from app.pipeline.stages import stage6, stage8
 from tests.scientific.conftest import FIXTURES, load_json
+from tests.scientific.replay import ReplayGprofiler, ReplayString, forbid_stage3_clients
 
 GD2_FIXTURES = [
     "gd2_seed.json",
@@ -43,58 +43,14 @@ def gd2_fixtures_present() -> bool:
     return all((FIXTURES / name).exists() for name in GD2_FIXTURES)
 
 
-class FakeString:
-    """Replay the recorded STRING edges, scoped to the called gene set.
-
-    Returns only edges whose source AND target are both in ``gene_symbols`` — so the single recorded
-    247-gene network reproduces the 233-gene network when the 233 set is passed. The server-rendered
-    image is absent (None); the image step can never fail the stage.
-    """
-
-    def __init__(self, edges: list[dict[str, Any]]) -> None:
-        self._edges = edges
-
-    async def network(
-        self, gene_symbols: list[str], *, min_confidence: float, network_type: str
-    ) -> list[StringEdge]:
-        called = set(gene_symbols)
-        return [
-            StringEdge(e["source"], e["target"], e["confidence"])
-            for e in self._edges
-            if e["source"] in called and e["target"] in called
-        ]
-
-    async def fetch_network_image(
-        self, gene_symbols: list[str], *, min_confidence: float, network_type: str
-    ) -> bytes | None:
-        return None
+def gd2_string_client() -> ReplayString:
+    """Replay the recorded 247-gene STRING network; the filter scopes it to the called set."""
+    return ReplayString(load_json("gd2_string.json"))
 
 
-class FakeGprofiler:
+def gd2_gprofiler_client() -> ReplayGprofiler:
     """Hito supplied no enrichment — g:Profiler is replayed empty (Stage 8 honest-null)."""
-
-    async def profile(
-        self,
-        *,
-        query: list[str],
-        background: list[str],
-        sources: list[str],
-        correction: str,
-        user_threshold: float,
-        no_iea: bool = False,
-    ) -> list[Any]:
-        return []
-
-
-class _RaiseIfCalled:
-    """A Stage-3 external client whose construction is forbidden in the offline GD-2 runs.
-
-    The manual entry modes never fetch (create only loads the user-provided ids), so building any
-    Stage-3 client would mean the offline contract broke — this guard trips loudly if it ever does.
-    """
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        raise AssertionError("external call in offline GD-2 test")
+    return ReplayGprofiler([])
 
 
 async def seed_gd2(engine: AsyncEngine) -> dict[str, Any]:
@@ -126,14 +82,11 @@ async def seed_gd2(engine: AsyncEngine) -> dict[str, Any]:
 
 
 def patch_gd2(monkeypatch: Any) -> None:
-    """Swap STRING + g:Profiler for the recorded fakes; forbid every Stage-3 external client.
+    """Swap STRING + g:Profiler for the replay doubles; forbid every Stage-3 external client.
 
     One recorded network backs both runs; g:Profiler is empty. The Stage-3 raise-if-called guards
     PROVE the manual modes run fully offline — no external client is ever constructed.
     """
-    edges = load_json("gd2_string.json")
-    monkeypatch.setattr(stage6, "StringClient", lambda http: FakeString(edges))
-    monkeypatch.setattr(stage8, "GprofilerClient", lambda http: FakeGprofiler())
-    monkeypatch.setattr(stage3, "ChemblClient", _RaiseIfCalled)
-    monkeypatch.setattr(stage3, "PubChemBioAssayClient", _RaiseIfCalled)
-    monkeypatch.setattr(stage3, "UniProtClient", _RaiseIfCalled)
+    monkeypatch.setattr(stage6, "StringClient", lambda http: gd2_string_client())
+    monkeypatch.setattr(stage8, "GprofilerClient", lambda http: gd2_gprofiler_client())
+    forbid_stage3_clients(monkeypatch)

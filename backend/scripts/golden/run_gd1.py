@@ -50,10 +50,16 @@ from scripts.golden.report import (  # noqa: E402
     StageRow,
     render,
 )
-from tests.scientific.conftest import _APPLY, _MIGRATIONS, _async_url, _run_script  # noqa: E402
+from tests.scientific.conftest import (  # noqa: E402
+    _APPLY,
+    _MIGRATIONS,
+    _async_url,
+    _run_script,
+    poll_run,
+)
 from tests.scientific.gd1_support import (  # noqa: E402
-    FakeGprofiler,
-    FakeString,
+    gd1_gprofiler_client,
+    gd1_string_client,
     seed_gd1,
 )
 
@@ -217,12 +223,7 @@ async def _run_pipeline(client: httpx.AsyncClient, seed: dict[str, Any]) -> dict
     if resp.status_code != 202:
         raise RuntimeError(f"create failed {resp.status_code}: {resp.text}")
     run_id = resp.json()["analysis_id"]
-
-    state: dict[str, Any] = {}
-    for _ in range(300):
-        state = (await client.get(f"/analyses/{run_id}")).json()
-        if state.get("status") in {"complete", "failed"}:
-            break
+    state = await poll_run(client, run_id, max_iters=300)
     if state.get("status") != "complete":
         raise RuntimeError(
             f"run did not complete: {state.get('status')} {state.get('error_message')}"
@@ -458,9 +459,9 @@ async def main() -> None:
 
             # Replay the recorded STRING + g:Profiler responses (no monkeypatch here, since this
             # is a standalone driver): reassign the stage-module client factories directly,
-            # reusing the regression fakes verbatim. Stage 3 stays offline via edge-reuse, no patch.
-            stage6.StringClient = lambda http: FakeString()  # type: ignore[attr-defined,assignment,return-value]
-            stage8.GprofilerClient = lambda http: FakeGprofiler()  # type: ignore[attr-defined,assignment,return-value]
+            # reusing the regression replay doubles verbatim. Stage 3 stays offline via edge-reuse.
+            stage6.StringClient = lambda http: gd1_string_client()  # type: ignore[attr-defined,assignment,return-value]
+            stage8.GprofilerClient = lambda http: gd1_gprofiler_client()  # type: ignore[attr-defined,assignment,return-value]
 
             maker = async_sessionmaker(engine, expire_on_commit=False)
             db.set_sessionmaker(maker)
