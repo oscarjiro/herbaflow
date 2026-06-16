@@ -2,11 +2,11 @@
  * Stage2View — ADME screening results.
  *
  * Renders:
- *  - Summary count cards (passed / filtered / unscreened)
- *  - A combined passed + filtered table with badges, QED score, descriptor
- *    source, source_url links, and reasons for filtered rows
+ *  - Editorial header (Eyebrow + serif h2) with summary count cards
+ *  - A combined passed + filtered DataTable with badges, QED score, descriptor
+ *    source (CSV only), source_url links, and reasons for filtered rows
  *  - Pagination controls (10 / 20 / 50 / all)
- *  - Client-side CSV download (no external library)
+ *  - CsvDownloadButton (same header + rows as before)
  *  - Collapsible ParamPanel wired to resetFrom
  *  - ApprovalBar (approve → advance)
  *  - "Tools & data sources" footer
@@ -16,13 +16,21 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
 import { ADME_PARAMS } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
+import { cn } from "@/lib/cn";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/DataTable";
+import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
+import { StageEntityContext } from "./StageEntityContext";
 import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
@@ -61,6 +69,8 @@ type Stage2Result = {
   };
 };
 
+type DisplayRow = CompoundRow & { _kind: "passed" | "filtered" };
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -72,71 +82,160 @@ function fmt(n: number | null, decimals = 2): string {
   return n.toFixed(decimals);
 }
 
-function BadgePill({ label, variant }: { label: string; variant: string }) {
-  return (
-    <span className={`badge badge--${variant}`} aria-label={label}>
-      {label}
-    </span>
-  );
-}
-
-function rowBadges(row: CompoundRow) {
-  const badges: React.ReactElement[] = [];
+function RowBadges({ row }: { row: CompoundRow }) {
+  const items: React.ReactElement[] = [];
   if (row.badges?.includes("pains") || row.is_pains_positive) {
-    badges.push(<BadgePill key="pains" label="PAINS" variant="warning" />);
+    items.push(
+      <Badge key="pains" variant="secondary" className="text-[10px]">
+        PAINS
+      </Badge>,
+    );
   }
   if (row.badges?.includes("np_bypass")) {
-    badges.push(<BadgePill key="np" label="NP-bypass" variant="info" />);
+    items.push(
+      <Badge key="np" variant="outline" className="text-[10px]">
+        NP-bypass
+      </Badge>,
+    );
   }
   if (row.badges?.includes("unscreened")) {
-    badges.push(<BadgePill key="unscreened" label="unscreened" variant="muted" />);
+    items.push(
+      <Badge key="unscreened" variant="outline" className="text-muted-foreground text-[10px]">
+        unscreened
+      </Badge>,
+    );
   }
   if (row.badges?.includes("could_not_screen")) {
-    badges.push(<BadgePill key="cns" label="could-not-screen" variant="muted" />);
+    items.push(
+      <Badge key="cns" variant="outline" className="text-muted-foreground text-[10px]">
+        could-not-screen
+      </Badge>,
+    );
   }
-  return badges;
+  return <span className="flex flex-wrap gap-1">{items}</span>;
 }
 
-// Build a CSV string from a flat array of objects
-function buildCsv(rows: CompoundRow[]): string {
-  const cols: (keyof CompoundRow)[] = [
-    "compound_id",
-    "canonical_name",
-    "descriptor_source",
-    "molecular_weight",
-    "logp",
-    "hbond_donors",
-    "hbond_acceptors",
-    "tpsa",
-    "rotatable_bonds",
-    "qed_score",
-    "np_likeness_score",
-    "num_ro5_violations",
-    "is_pains_positive",
-    "source_url",
-    "reason",
-  ];
-  const escape = (v: unknown) => {
-    if (v == null) return "";
-    const s = String(v);
-    if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-      return `"${s.replace(/"/g, '""')}"`;
-    }
-    return s;
-  };
-  const header = cols.join(",");
-  const body = rows.map((r) => cols.map((c) => escape(r[c])).join(",")).join("\n");
-  return `${header}\n${body}`;
+// CSV columns — IDENTICAL to original buildCsv cols array.
+// Header string must not change; descriptor_source and all fields preserved in CSV.
+const CSV_COLS: (keyof CompoundRow)[] = [
+  "compound_id",
+  "canonical_name",
+  "descriptor_source",
+  "molecular_weight",
+  "logp",
+  "hbond_donors",
+  "hbond_acceptors",
+  "tpsa",
+  "rotatable_bonds",
+  "qed_score",
+  "np_likeness_score",
+  "num_ro5_violations",
+  "is_pains_positive",
+  "source_url",
+  "reason",
+];
+
+const CSV_HEADER = CSV_COLS.join(",");
+
+function buildCsvRows(rows: DisplayRow[]): unknown[][] {
+  return rows.map((r) => CSV_COLS.map((c) => r[c] ?? null));
 }
 
-function useCsvDownload(rows: CompoundRow[]) {
-  const href = useMemo(() => {
-    const csv = buildCsv(rows);
-    const blob = new Blob([csv], { type: "text/csv" });
-    return URL.createObjectURL(blob);
-  }, [rows]);
-  return href;
-}
+// ---------------------------------------------------------------------------
+// Column definitions for DataTable
+// ---------------------------------------------------------------------------
+
+const COLUMNS: ColumnDef<DisplayRow>[] = [
+  {
+    id: "name",
+    header: "Name",
+    cell: ({ row }) => {
+      const r = row.original;
+      return (
+        <span className="flex flex-col gap-0.5">
+          {r.source_url && (
+            <a
+              href={r.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-[color:var(--hf-accent)] underline underline-offset-2"
+            >
+              PubChem
+            </a>
+          )}
+          <span>{r.canonical_name ?? r.compound_id}</span>
+        </span>
+      );
+    },
+  },
+  {
+    id: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const kind = row.original._kind;
+      return (
+        <Badge variant={kind === "passed" ? "default" : "destructive"} className="text-[10px]">
+          {kind}
+        </Badge>
+      );
+    },
+  },
+  {
+    id: "badges",
+    header: "Badges",
+    cell: ({ row }) => <RowBadges row={row.original} />,
+  },
+  {
+    id: "mw",
+    header: "MW",
+    cell: ({ row }) => fmt(row.original.molecular_weight, 1),
+  },
+  {
+    id: "logp",
+    header: "logP",
+    cell: ({ row }) => fmt(row.original.logp),
+  },
+  {
+    id: "hbd",
+    header: "HBD",
+    cell: ({ row }) => row.original.hbond_donors ?? "—",
+  },
+  {
+    id: "hba",
+    header: "HBA",
+    cell: ({ row }) => row.original.hbond_acceptors ?? "—",
+  },
+  {
+    id: "tpsa",
+    header: "TPSA",
+    cell: ({ row }) => fmt(row.original.tpsa, 1),
+  },
+  {
+    id: "rotb",
+    header: "RotB",
+    cell: ({ row }) => row.original.rotatable_bonds ?? "—",
+  },
+  {
+    id: "qed",
+    header: "QED",
+    cell: ({ row }) => fmt(row.original.qed_score),
+  },
+  {
+    id: "np",
+    header: "NP score",
+    cell: ({ row }) => fmt(row.original.np_likeness_score),
+  },
+  {
+    id: "ro5",
+    header: "RO5 viol.",
+    cell: ({ row }) => row.original.num_ro5_violations ?? "—",
+  },
+  {
+    id: "reason",
+    header: "Reason",
+    cell: ({ row }) => row.original.reason ?? "",
+  },
+];
 
 // ---------------------------------------------------------------------------
 // Stage2View
@@ -165,29 +264,38 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
     onSuccess: () => qc.invalidateQueries(),
   });
 
-  const [pageSize, setPageSize] = useState<number | "all">(10);
-  const [page, setPage] = useState(0);
-
-  if (!stage2) return null;
-
   // Read the single canonical entry-mode source (stage_state), like Stages 1/3/4.
   // S2 is always computed, so stage_state["2"] is normally "computed" — but never key UI off
   // the presentational stage2.state (it flips to user_provided on edits).
   const stageState = (data as { stage_state?: Record<string, string> }).stage_state?.["2"];
   const isNA = stageState === "not_applicable";
+  const isUserProvided = stageState === "user_provided";
+
+  // All hooks must precede any early return (Rules of Hooks).
+  const allRows: DisplayRow[] = useMemo(
+    () => [
+      ...(stage2?.passed ?? []).map((r) => ({ ...r, _kind: "passed" as const })),
+      ...(stage2?.filtered ?? []).map((r) => ({ ...r, _kind: "filtered" as const })),
+    ],
+    [stage2],
+  );
+
+  const csvRows = useMemo(() => buildCsvRows(allRows), [allRows]);
+
+  const [pageSize, setPageSize] = useState<number | "all">(10);
+  const [page, setPage] = useState(0);
+
+  // Early returns after all hooks.
+  if (!stage2) return null;
+
   if (isNA) {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
         <h2>Step 2 — ADME Screening</h2>
-        <p className="hf-muted">Not applicable for this run.</p>
+        <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
   }
-
-  const allRows: (CompoundRow & { _kind: "passed" | "filtered" })[] = [
-    ...stage2.passed.map((r) => ({ ...r, _kind: "passed" as const })),
-    ...stage2.filtered.map((r) => ({ ...r, _kind: "filtered" as const })),
-  ];
 
   const effectivePageSize = pageSize === "all" ? allRows.length : pageSize;
   const totalPages = Math.ceil(allRows.length / effectivePageSize);
@@ -197,158 +305,133 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
-  const csvHref = useCsvDownload(allRows);
-
   const passedCount = stage2.passed.length;
   const filteredCount = stage2.filtered.length;
   const unscreenedCount = stage2.annotations.unscreened.length;
 
-  const isUserProvided = stageState === "user_provided";
-
   return (
-    <section className="stage-view stage-view--2">
-      <h2>
-        Step 2 — ADME Screening
-        {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
-      </h2>
-      <StageDataSources stage={2} />
+    <section className="flex flex-col gap-6">
+      {/* Editorial header */}
+      <div className="flex flex-col gap-1">
+        <Eyebrow>Step 2</Eyebrow>
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h2 className="hf-heading-serif">
+            Step 2 — ADME Screening
+            {isUserProvided && (
+              <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
+                Provided by you
+              </Badge>
+            )}
+          </h2>
+        </div>
+        <StageEntityContext data={data} side="plant" />
+      </div>
+
+      <StageDataSources stage={2} userProvided={isUserProvided} />
 
       {/* Summary cards */}
-      <div className="stage-summary">
-        <div className="summary-card" aria-label={`${passedCount} passed`}>
-          <span className="summary-card__value">{passedCount}</span>
-          <span className="summary-card__label">passed</span>
+      <div className="flex flex-wrap gap-3">
+        <div
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
+          aria-label={`${passedCount} passed`}
+        >
+          <span className="hf-num text-2xl font-semibold tabular-nums">{passedCount}</span>
+          <span className="text-muted-foreground text-xs">passed</span>
         </div>
         <div
-          className="summary-card summary-card--filtered"
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
           aria-label={`${filteredCount} filtered`}
         >
-          <span className="summary-card__value">{filteredCount}</span>
-          <span className="summary-card__label">filtered</span>
+          <span className="hf-num text-2xl font-semibold tabular-nums">{filteredCount}</span>
+          <span className="text-muted-foreground text-xs">filtered</span>
         </div>
         {unscreenedCount > 0 && (
           <div
-            className="summary-card summary-card--muted"
+            className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
             aria-label={`${unscreenedCount} unscreened`}
           >
-            <span className="summary-card__value">{unscreenedCount}</span>
-            <span className="summary-card__label">unscreened</span>
+            <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+              {unscreenedCount}
+            </span>
+            <span className="text-muted-foreground text-xs">unscreened</span>
           </div>
         )}
       </div>
 
-      {/* Table controls */}
-      <div className="table-controls">
-        <label htmlFor="page-size">Rows per page</label>
-        <select
-          id="page-size"
-          value={pageSize}
-          onChange={(e) => {
-            const v = e.target.value;
-            setPageSize(v === "all" ? "all" : Number(v));
-            setPage(0);
-          }}
-        >
-          {PAGE_SIZES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-          <option value="all">All</option>
-        </select>
-        <a
-          href={csvHref}
-          download="adme-results.csv"
-          className="hf-btn hf-btn-ghost"
-          aria-label="Download CSV"
-        >
-          Download CSV
-        </a>
-      </div>
-
-      {/* Compound table */}
-      <div className="table-wrapper">
-        <table className="hf-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Badges</th>
-              <th>MW</th>
-              <th>logP</th>
-              <th>HBD</th>
-              <th>HBA</th>
-              <th>TPSA</th>
-              <th>RotB</th>
-              <th>QED</th>
-              <th>NP score</th>
-              <th>RO5 viol.</th>
-              <th>Reason</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleRows.map((row) => (
-              <tr
-                key={row.compound_id}
-                className={row._kind === "filtered" ? "row--filtered" : undefined}
+      {/* Table + controls */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="page-size" className="text-muted-foreground text-sm">
+                Rows per page
+              </label>
+              <select
+                id="page-size"
+                className="bg-background rounded border px-2 py-1 text-sm"
+                value={pageSize}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setPageSize(v === "all" ? "all" : Number(v));
+                  setPage(0);
+                }}
               >
-                <td>
-                  {row.source_url ? (
-                    <a href={row.source_url} target="_blank" rel="noopener noreferrer">
-                      PubChem
-                    </a>
-                  ) : null}
-                  {row.canonical_name ?? row.compound_id}
-                </td>
-                <td>{row._kind}</td>
-                <td>{rowBadges(row)}</td>
-                <td>{fmt(row.molecular_weight, 1)}</td>
-                <td>{fmt(row.logp)}</td>
-                <td>{row.hbond_donors ?? "—"}</td>
-                <td>{row.hbond_acceptors ?? "—"}</td>
-                <td>{fmt(row.tpsa, 1)}</td>
-                <td>{row.rotatable_bonds ?? "—"}</td>
-                <td>{fmt(row.qed_score)}</td>
-                <td>{fmt(row.np_likeness_score)}</td>
-                <td>{row.num_ro5_violations ?? "—"}</td>
-                <td>{row.reason ?? ""}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                {PAGE_SIZES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+                <option value="all">All</option>
+              </select>
+            </div>
+            <CsvDownloadButton
+              header={CSV_HEADER}
+              rows={csvRows}
+              filename="adme-results.csv"
+              label="Download CSV"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="px-0">
+          <DataTable columns={COLUMNS} data={visibleRows} />
+        </CardContent>
 
-      {/* Pagination */}
-      {pageSize !== "all" && totalPages > 1 && (
-        <div className="pagination">
-          <button
-            className="hf-btn"
-            disabled={currentPage === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage + 1} / {totalPages}
-          </span>
-          <button
-            className="hf-btn"
-            disabled={currentPage >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
+        {/* Pagination */}
+        {pageSize !== "all" && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 px-6 pb-4">
+            <button
+              className="hf-btn text-sm"
+              disabled={currentPage === 0}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </button>
+            <span className="text-muted-foreground text-sm">
+              Page {currentPage + 1} / {totalPages}
+            </span>
+            <button
+              className="hf-btn text-sm"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </Card>
 
       {/* Param panel */}
       {admeParams && (
-        <ParamPanel
-          params={admeParams}
-          meta={ADME_PARAMS}
-          disabled={redo.isPending}
-          onRedo={(changed) => redo.mutate(changed)}
-        />
+        <Card>
+          <CardContent className="pt-6">
+            <ParamPanel
+              params={admeParams}
+              meta={ADME_PARAMS}
+              disabled={redo.isPending}
+              onRedo={(changed) => redo.mutate(changed)}
+            />
+          </CardContent>
+        </Card>
       )}
 
       {/* Approval */}
@@ -369,12 +452,10 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       />
 
       {/* Footer */}
-      <footer className="stage-footer hf-muted">
-        <p>
-          Filters: Lipinski RO5, Veber (TPSA + rotatable bonds), Ertl NP-likeness, Baell &amp;
-          Holloway PAINS.
-        </p>
-      </footer>
+      <p className="text-muted-foreground text-sm">
+        Filters: Lipinski RO5, Veber (TPSA + rotatable bonds), Ertl NP-likeness, Baell &amp;
+        Holloway PAINS.
+      </p>
     </section>
   );
 }
