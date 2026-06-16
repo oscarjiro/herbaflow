@@ -60,4 +60,74 @@ describe("Stage4View — single editable table", () => {
     // The visible row gets an in-table delete control.
     expect(screen.getByRole("button", { name: "Remove PPARG" })).toBeInTheDocument();
   });
+
+  it("renders disease-targets with score, min_score card, CSV link and the Open Targets footer", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      parameters: {
+        input_modes: { plant: "selection", disease: "selection" },
+        disease_targets: { min_score: 0.3 },
+      },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "GENEZ",
+              gene_symbol: "GENEZ",
+              uniprot_accession: "P55555",
+              opentargets_score: 0.8,
+              association_type: "overall",
+              source_url: "https://www.uniprot.org/uniprotkb/P55555/entry",
+              tag: "computed",
+            },
+          ],
+          count: 1,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    expect(screen.getByText("GENEZ")).toBeInTheDocument();
+    expect(screen.getByText("0.8")).toBeInTheDocument();
+    // min-score card is shown for a computed run.
+    expect(screen.getByText("min score")).toBeInTheDocument();
+    // "Open Targets" appears in both the footer and the data-sources block — use getAllByText.
+    expect(screen.getAllByText(/Open Targets/i).length).toBeGreaterThan(0);
+    // CSV download is rendered as a link.
+    expect(screen.getByRole("link", { name: /Download CSV/i })).toBeInTheDocument();
+  });
+
+  it("hides the min-score card and param panel for a user_provided run", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "user_provided" },
+      parameters: {
+        input_modes: { plant: "selection", disease: "manual" },
+        disease_targets: { min_score: 0.3 },
+      },
+      stage_results: {
+        "4": {
+          targets: [{ target_id: "m1", canonical_name: "MANUALG", tag: "user-added" }],
+          count: 1,
+          min_score_applied: 0.3,
+          state: "user_provided",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    // The manually-added target is shown with the user-added badge.
+    expect(screen.getByText("MANUALG")).toBeInTheDocument();
+    expect(screen.getByText("user-added")).toBeInTheDocument();
+    // The min-score card is gated on !user_provided.
+    expect(screen.queryByText("min score")).not.toBeInTheDocument();
+    // The disease-target ParamPanel is gated on !user_provided.
+    expect(screen.queryByText("Disease-target parameters")).not.toBeInTheDocument();
+  });
 });
