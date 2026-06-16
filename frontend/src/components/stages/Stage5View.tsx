@@ -11,14 +11,18 @@
  * No param panel, no Redo, no entity add/remove, no TargetValidateBox.
  */
 
-import { useState } from "react";
-import { useCsvBlobUrl } from "../../lib/csv";
+import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis } from "../../api/sdk.gen";
 import { useStaleState } from "../../hooks/useStaleState";
 import { exportArtifactUrl } from "../../lib/exportUrl";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { DataTable } from "@/components/ui/DataTable";
+import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { StageDataSources } from "./StageDataSources";
 import { StaleNotice } from "./StaleNotice";
@@ -78,7 +82,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [page, setPage] = useState(0);
 
-  const csvHref = useCsvBlobUrl(S5_CSV_HEADER, buildS5CsvRows(stage5?.overlap ?? []));
+  const csvRows = useMemo(() => buildS5CsvRows(stage5?.overlap ?? []), [stage5]);
 
   if (!stage5) return null;
 
@@ -92,36 +96,82 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
+  // Column definitions — SAME columns + order as the prior <table>
+  const columns: ColumnDef<OverlapRow>[] = [
+    {
+      id: "gene_symbol",
+      header: "Gene symbol",
+      cell: ({ row }) => row.original.gene_symbol ?? "—",
+    },
+    {
+      id: "uniprot",
+      header: "UniProt",
+      cell: ({ row }) => {
+        const acc = row.original.uniprot_accession;
+        if (!acc) return "—";
+        const sourceUrl = `https://www.uniprot.org/uniprotkb/${acc}/entry`;
+        return (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[color:var(--hf-accent)] underline underline-offset-2"
+          >
+            {acc}
+          </a>
+        );
+      },
+    },
+    {
+      id: "opentargets_score",
+      header: "Open Targets score",
+      cell: ({ row }) => formatSig(row.original.opentargets_score),
+    },
+  ];
+
   return (
-    <section className="stage-view stage-view--5">
-      <h2>Step 5 — Target Overlap</h2>
+    <section className="flex flex-col gap-6">
+      {/* Editorial header */}
+      <div className="flex flex-col gap-1">
+        <Eyebrow>Step 5</Eyebrow>
+        <h2 className="hf-heading-serif">Step 5 — Target Overlap</h2>
+      </div>
+
       <StageDataSources stage={5} />
 
       {/* Summary cards */}
-      <div className="stage-summary">
-        <div className="summary-card" aria-label={`${stage5.count} overlap targets`}>
-          <span className="summary-card__value">{stage5.count}</span>
-          <span className="summary-card__label">overlap targets</span>
+      <div className="flex flex-wrap gap-3">
+        <div
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
+          aria-label={`${stage5.count} overlap targets`}
+        >
+          <span className="hf-num text-2xl font-semibold tabular-nums">{stage5.count}</span>
+          <span className="text-muted-foreground text-xs">overlap targets</span>
         </div>
         <div
-          className="summary-card summary-card--muted"
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
           aria-label={`${stage5.compound_target_count} compound-side targets`}
         >
-          <span className="summary-card__value">{stage5.compound_target_count}</span>
-          <span className="summary-card__label">compound-side targets</span>
+          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+            {stage5.compound_target_count}
+          </span>
+          <span className="text-muted-foreground text-xs">compound-side targets</span>
         </div>
         <div
-          className="summary-card summary-card--muted"
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
           aria-label={`${stage5.disease_target_count} disease-side targets`}
         >
-          <span className="summary-card__value">{stage5.disease_target_count}</span>
-          <span className="summary-card__label">disease-side targets</span>
+          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+            {stage5.disease_target_count}
+          </span>
+          <span className="text-muted-foreground text-xs">disease-side targets</span>
         </div>
       </div>
 
+      {/* Venn diagram image (complete-only, onError-hidden) */}
       {isComplete && (
         <img
-          className="hf-stage-chart"
+          className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
           alt="Stage 5 target overlap"
           src={exportArtifactUrl(data.analysis_id, "stage5_venn.png")}
           onError={(e) => {
@@ -131,101 +181,72 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
       )}
 
       {stage5.count === 0 && (
-        <p className="hf-muted" role="status">
+        <p className="text-sm text-[color:var(--hf-fg-3)]" role="status">
           No targets overlap between compound–target and disease–target sets.
         </p>
       )}
 
-      {/* Table controls */}
-      <div className="table-controls">
-        <label htmlFor="t5-page-size">Rows per page</label>
-        <select
-          id="t5-page-size"
-          value={pageSize}
-          onChange={(e) => {
-            const v = e.target.value;
-            setPageSize(v === "all" ? "all" : Number(v));
-            setPage(0);
-          }}
-        >
-          {PAGE_SIZES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-          <option value="all">All</option>
-        </select>
-        <a
-          href={csvHref}
-          download="overlap-targets.csv"
-          className="hf-btn hf-btn-ghost"
-          aria-label="Download CSV"
-        >
-          Download CSV
-        </a>
-      </div>
+      {/* Overlap table card */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="t5-page-size" className="text-muted-foreground text-sm">
+                Rows per page
+              </label>
+              <select
+                id="t5-page-size"
+                className="bg-background rounded border px-2 py-1 text-sm"
+                value={pageSize}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setPageSize(v === "all" ? "all" : Number(v));
+                  setPage(0);
+                }}
+              >
+                {PAGE_SIZES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+                <option value="all">All</option>
+              </select>
+            </div>
+            <CsvDownloadButton
+              header={S5_CSV_HEADER}
+              rows={csvRows}
+              filename="overlap-targets.csv"
+              label="Download CSV"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="px-0">
+          <DataTable columns={columns} data={visibleRows} />
+        </CardContent>
 
-      {/* Overlap table */}
-      <div className="table-wrapper">
-        <table className="hf-table">
-          <thead>
-            <tr>
-              <th>Gene symbol</th>
-              <th>UniProt</th>
-              <th>Open Targets score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleRows.map((row) => {
-              const sourceUrl = row.uniprot_accession
-                ? `https://www.uniprot.org/uniprotkb/${row.uniprot_accession}/entry`
-                : null;
-              return (
-                <tr key={row.target_id}>
-                  <td>{row.gene_symbol ?? "—"}</td>
-                  <td>
-                    {row.uniprot_accession ? (
-                      sourceUrl ? (
-                        <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
-                          {row.uniprot_accession}
-                        </a>
-                      ) : (
-                        row.uniprot_accession
-                      )
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td>{formatSig(row.opentargets_score)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {pageSize !== "all" && totalPages > 1 && (
-        <div className="pagination">
-          <button
-            className="hf-btn"
-            disabled={currentPage === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage + 1} / {totalPages}
-          </span>
-          <button
-            className="hf-btn"
-            disabled={currentPage >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
+        {/* Pagination */}
+        {pageSize !== "all" && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 px-6 pb-4">
+            <button
+              className="hf-btn text-sm"
+              disabled={currentPage === 0}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </button>
+            <span className="text-muted-foreground text-sm">
+              Page {currentPage + 1} / {totalPages}
+            </span>
+            <button
+              className="hf-btn text-sm"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </Card>
 
       {/* Stale notice + approval */}
       {(stage5 as { stale?: boolean }).stale && rerunFrom != null && (
