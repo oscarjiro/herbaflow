@@ -3,6 +3,11 @@ import { editStage } from "../../api/sdk.gen";
 import type { AnalysisRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
+import { cn } from "@/lib/cn";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Eyebrow } from "@/components/ui/editorial";
 import { CompoundValidateBox } from "../CompoundValidateBox";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EditableEntityList } from "./EditableEntityList";
@@ -46,7 +51,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
         <h2>Step 1 — Compounds</h2>
-        <p className="hf-muted">Not applicable for this run.</p>
+        <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
   }
@@ -67,27 +72,42 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
   }
 
   return (
-    <div className="stage1-view">
-      <h2>
-        Step 1 — Compounds ({current})
-        {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
-      </h2>
-      <StageDataSources stage={1} userProvided={isUserProvided} />
-      <StageEntityContext data={data} side="plant" />
-      <EditableEntityList
-        entities={entities}
-        onRemove={handleRemove}
-        cap={MAX_COMPOUNDS}
-        current={current}
-        addControl={
-          <CompoundValidateBox label="Add compounds" onResolved={handleAdd} showAddButton />
-        }
-      />
+    <section className="flex flex-col gap-4">
+      {/* Editorial header */}
+      <div className="flex flex-col gap-1">
+        <Eyebrow>Step 1</Eyebrow>
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h2>Compounds ({current})</h2>
+          {isUserProvided && <Badge variant="secondary">Provided by you</Badge>}
+        </div>
+      </div>
 
-      {/* Already-in-run note */}
-      <AlreadyInRunNote
-        labels={alreadyInRun.map((c) => c.canonical_name ?? c.canonical_key ?? c.compound_id)}
-      />
-    </div>
+      <Separator className="opacity-50" />
+
+      {/* Context + sources */}
+      <div className="flex flex-col gap-1">
+        <StageEntityContext data={data} side="plant" />
+        <StageDataSources stage={1} userProvided={isUserProvided} />
+      </div>
+
+      {/* Compound list card */}
+      <Card>
+        <CardHeader className="pb-0" />
+        <CardContent className="flex flex-col gap-3 pt-0">
+          <EditableEntityList
+            entities={entities}
+            onRemove={handleRemove}
+            cap={MAX_COMPOUNDS}
+            current={current}
+            addControl={
+              <CompoundValidateBox label="Add compounds" onResolved={handleAdd} showAddButton />
+            }
+          />
+          <AlreadyInRunNote
+            labels={alreadyInRun.map((c) => c.canonical_name ?? c.canonical_key ?? c.compound_id)}
+          />
+        </CardContent>
+      </Card>
+    </section>
   );
 }
