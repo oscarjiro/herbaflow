@@ -2,7 +2,7 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "src/api/**"] }, // generated client is not linted
+  { ignores: ["dist", "src/api/**", "src/routeTree.gen.ts"] }, // generated files are not linted
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

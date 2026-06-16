@@ -2,6 +2,7 @@ node_modules
 dist
 pnpm-lock.yaml
 src/api
+src/routeTree.gen.ts
 # Gitignored local agent docs — not part of the formatted source.
 CLAUDE.md
 AGENTS.md
