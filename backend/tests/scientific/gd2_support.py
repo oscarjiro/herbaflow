@@ -6,7 +6,7 @@ manual entry modes, so Stages 1-4 do no work beyond loading the user-provided id
 
 - plant side ``manual_targets`` (``manual_target_ids``) and disease side ``manual_disease_targets``
   (``manual_disease_target_ids``, NO ``disease_id``). Create only VERIFIES the ids exist and loads
-  them via ``get_many`` — no external call, no organism check — so seeding plain Target rows
+  them via ``get_many`` (no external call, no organism check), so seeding plain Target rows
   (``target_id``/``canonical_key``/``gene_symbol``; accession null) is sufficient.
 - Stage 5 overlaps the two id sets, Stage 6 calls STRING over the overlap gene set, Stage 7 ranks by
   MCC, Stage 8 calls g:Profiler over the overlap. Hito supplied no enrichment, so g:Profiler is
@@ -49,14 +49,14 @@ def gd2_string_client() -> ReplayString:
 
 
 def gd2_gprofiler_client() -> ReplayGprofiler:
-    """Hito supplied no enrichment — g:Profiler is replayed empty (Stage 8 honest-null)."""
+    """Hito supplied no enrichment, so g:Profiler is replayed empty (Stage 8 honest-null)."""
     return ReplayGprofiler([])
 
 
 async def seed_gd2(engine: AsyncEngine) -> dict[str, Any]:
     """Insert the 1695 canonical Target rows and return the seed dict.
 
-    NO source_systems, NO compound_targets, NO disease_targets — the manual modes feed pre-resolved
+    NO source_systems, NO compound_targets, NO disease_targets. The manual modes feed pre-resolved
     target ids and verify existence only. ``target_id`` is a deterministic ``uuid5`` of the gene
     symbol. All SQL is parameterized (multi-row insert), mirroring the integration seed style.
     """
@@ -85,7 +85,7 @@ def patch_gd2(monkeypatch: Any) -> None:
     """Swap STRING + g:Profiler for the replay doubles; forbid every Stage-3 external client.
 
     One recorded network backs both runs; g:Profiler is empty. The Stage-3 raise-if-called guards
-    PROVE the manual modes run fully offline — no external client is ever constructed.
+    PROVE the manual modes run fully offline: no external client is ever constructed.
     """
     monkeypatch.setattr(stage6, "StringClient", lambda http: gd2_string_client())
     monkeypatch.setattr(stage8, "GprofilerClient", lambda http: gd2_gprofiler_client())
