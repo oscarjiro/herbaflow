@@ -113,6 +113,11 @@ frontend/test-results/
 frontend/playwright-report/
 
 # =========================
+# TANSTACK ROUTER CACHE
+# =========================
+frontend/.tanstack/
+
+# =========================
 # TOOLING
 # =========================
 .superpowers/
