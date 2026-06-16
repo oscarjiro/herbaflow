@@ -30,4 +30,19 @@ describe("EditableEntityList", () => {
     );
     expect(screen.getByRole("button", { name: "Remove Alpha" })).toBeDisabled();
   });
+
+  it("enables remove when more than one entity remains", () => {
+    render(
+      <EditableEntityList
+        entities={[
+          { id: "a", label: "One", tag: "computed" },
+          { id: "b", label: "Two", tag: "computed" },
+        ]}
+        onRemove={vi.fn()}
+        cap={10}
+        current={2}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /remove one/i })).not.toBeDisabled();
+  });
 });

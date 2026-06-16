@@ -16,13 +16,11 @@ export function EntityAddControl({
 }) {
   const atCap = current >= cap;
   return (
-    <div className="entity-add">
-      <p className="hf-caption">
+    <div className="flex flex-col gap-2">
+      <p className="text-xs [color:var(--hf-fg-3)]">
         {current} / {cap}
       </p>
-      <div
-        className={atCap ? "entity-add-control entity-add-control--disabled" : "entity-add-control"}
-      >
+      <div className={atCap ? "pointer-events-none opacity-50" : undefined}>
         {atCap
           ? React.Children.map(children, (child) =>
               React.isValidElement(child)

@@ -1,4 +1,5 @@
 import { STAGE_SOURCES, USER_PROVIDED_SOURCES } from "../../contract";
+import { Eyebrow } from "@/components/ui/editorial";
 
 export function StageDataSources({
   stage,
@@ -13,17 +14,30 @@ export function StageDataSources({
       : STAGE_SOURCES[stage];
   if (!sources) return null;
   return (
-    <div className="stage-data-sources hf-muted" aria-label="Data sources">
-      <span className="stage-data-sources__label">Data sources</span>
-      <ul>
-        {sources.map(({ name, url }) => (
-          <li key={name}>
+    <div
+      className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm [color:var(--hf-fg-3)]"
+      aria-label="Data sources"
+    >
+      <Eyebrow>Data sources</Eyebrow>
+      <ul className="m-0 flex list-none flex-wrap gap-x-1.5 gap-y-0.5 p-0">
+        {sources.map(({ name, url }, idx) => (
+          <li key={name} className="flex items-center gap-1.5">
             {url ? (
-              <a href={url} target="_blank" rel="noreferrer">
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2 transition-colors hover:[color:var(--hf-fg-2)]"
+              >
                 {name}
               </a>
             ) : (
               <span>{name}</span>
+            )}
+            {idx < sources.length - 1 && (
+              <span aria-hidden className="[color:var(--hf-fg-4)]">
+                ·
+              </span>
             )}
           </li>
         ))}

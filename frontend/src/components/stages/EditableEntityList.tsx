@@ -8,6 +8,8 @@
  */
 import type React from "react";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { EntityAddControl } from "./EntityAddControl";
 
 export type EditableEntity = {
@@ -33,20 +35,23 @@ export function EditableEntityList({
   const visible = entities.filter((e) => !isUserRemoved(e.tag));
 
   return (
-    <div className="editable-entity-list">
-      <ul>
+    <div className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-1.5">
         {visible.map((e) => (
-          <li key={e.id} className="entity-row">
-            <span>{e.label}</span>
-            <button
-              className="hf-btn hf-btn-icon"
+          <li key={e.id} className="flex items-center justify-between gap-2">
+            <Badge variant="secondary" className="max-w-xs truncate">
+              {e.label}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="icon-xs"
               aria-label={`Remove ${e.label}`}
               onClick={() => onRemove(e.id)}
               disabled={atMin}
               title={atMin ? "A stage must keep at least one entry." : undefined}
             >
               ✕
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

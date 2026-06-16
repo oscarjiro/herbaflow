@@ -21,6 +21,8 @@ describe("StageEntityContext", () => {
       stage_results: {},
     } as unknown as AnalysisRead;
     wrap(<StageEntityContext data={data} side="disease" />);
-    expect(screen.getByText(/Disease: Type 2 Diabetes/)).toBeInTheDocument();
+    // Label and value are in separate child spans; check each part independently.
+    expect(screen.getByText(/Disease:/)).toBeInTheDocument();
+    expect(screen.getByText("Type 2 Diabetes")).toBeInTheDocument();
   });
 });
