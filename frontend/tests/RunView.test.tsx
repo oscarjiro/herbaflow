@@ -19,7 +19,8 @@ function wrap(analysisId: string) {
 test("renders the stage 1 compound list", async () => {
   wrap("r1");
   expect(await screen.findByText("Alpha")).toBeInTheDocument();
-  expect(await screen.findByText(/status: complete/i)).toBeInTheDocument();
+  // Status is shown as a Badge in the run header (no "Status:" label prefix in the new layout).
+  expect(await screen.findByText("complete")).toBeInTheDocument();
 });
 
 describe("RunView with Stage 2 data", () => {
