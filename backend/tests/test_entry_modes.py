@@ -115,3 +115,18 @@ def test_missing_modes_default_to_selection() -> None:
     assert em.frozen_stages_from_params(
         {"input_modes": {"plant": "manual_targets", "disease": "selection"}}
     ) == frozenset({1, 2, 3})
+
+
+def test_has_compounds_true_for_selection_and_manual_compounds():
+    assert em.has_compounds("selection") is True
+    assert em.has_compounds("manual_compounds") is True
+
+
+def test_has_compounds_false_for_manual_targets():
+    assert em.has_compounds("manual_targets") is False
+
+
+def test_has_compounds_from_params_defaults_to_true():
+    # pre-entry-modes runs (no input_modes) are selection -> have compounds
+    assert em.has_compounds_from_params({}) is True
+    assert em.has_compounds_from_params({"input_modes": {"plant": "manual_targets"}}) is False

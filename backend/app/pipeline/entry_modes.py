@@ -74,3 +74,20 @@ def frozen_stages_from_params(parameters: dict[str, Any]) -> frozenset[int]:
     """Frozen set for a stored run (empty for pre-entry-modes runs with no input_modes)."""
     plant, disease = modes_from_params(parameters)
     return frozen_stages(plant, disease)
+
+
+# Plant modes that introduce compounds (Stage 1/3 compound path). manual_targets supplies
+# resolved targets directly and has NO compounds, so compound-only outputs (CTP network,
+# docking) are not applicable to it.
+_COMPOUND_PLANT_MODES = ("selection", "manual_compounds")
+
+
+def has_compounds(plant_mode: str) -> bool:
+    """True when the plant side introduces compounds (selection or manual_compounds)."""
+    return plant_mode in _COMPOUND_PLANT_MODES
+
+
+def has_compounds_from_params(parameters: dict[str, Any]) -> bool:
+    """True when a stored run has compounds (defaults to True for pre-entry-modes runs)."""
+    plant, _ = modes_from_params(parameters)
+    return has_compounds(plant)
