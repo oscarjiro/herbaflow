@@ -21,8 +21,8 @@
  */
 
 import { useMemo, useState } from "react";
-import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
 import {
@@ -33,6 +33,12 @@ import {
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
 import { exportArtifactUrl } from "../../lib/exportUrl";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { DataTable } from "@/components/ui/DataTable";
+import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -121,7 +127,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
 
   const computed = stage6 && !isBlocked(stage6) ? stage6 : undefined;
   const edges = useMemo(() => computed?.edges ?? [], [computed]);
-  const csvHref = useCsvBlobUrl(S6_CSV_HEADER, buildS6CsvRows(edges));
+  const csvRows = useMemo(() => buildS6CsvRows(edges), [edges]);
 
   if (!stage6) return null;
 
@@ -139,6 +145,25 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   const stale = (stage6 as { stale?: boolean }).stale === true;
   const isComplete = data.status === "complete";
 
+  // Column definitions — SAME columns + order as the prior <table>
+  const columns: ColumnDef<Stage6Edge>[] = [
+    {
+      id: "source",
+      header: "Source",
+      cell: ({ row }) => row.original.source,
+    },
+    {
+      id: "target",
+      header: "Target",
+      cell: ({ row }) => row.original.target,
+    },
+    {
+      id: "confidence",
+      header: "Confidence",
+      cell: ({ row }) => row.original.confidence,
+    },
+  ];
+
   const paramPanel = ppiParams ? (
     <ParamPanel
       params={ppiParams}
@@ -153,163 +178,178 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   ) : null;
 
   return (
-    <section className="stage-view stage-view--6">
-      <h2>Step 6 — PPI Network</h2>
+    <section className="flex flex-col gap-6">
+      {/* Editorial header */}
+      <div className="flex flex-col gap-1">
+        <Eyebrow>Step 6</Eyebrow>
+        <h2 className="hf-heading-serif">Step 6 — PPI Network</h2>
+      </div>
+
       <StageDataSources stage={6} />
 
       {blocked ? (
         // ----- Overlap-too-large prompt -----
-        <div className="stage-blocked" role="status">
-          <p className="hf-badge hf-badge--warn">Overlap too large</p>
-          <p>
-            The overlap of {blocked.overlap_count} proteins exceeds the STRING ceiling of{" "}
-            {blocked.max_proteins}. Building a network this large is unreliable, so it was not
-            queried.
-          </p>
-          <p className="hf-muted">
-            Either enable the top-N cap to proceed on the {blocked.max_proteins} highest-ranked
-            proteins, or narrow the inputs upstream (raise the Stage 3 / Stage 4 thresholds, or
-            tighten the overlap) and re-run.
-          </p>
-          <button
-            type="button"
-            className="hf-btn hf-btn-primary"
-            disabled={redo.isPending}
-            onClick={() => redo.mutate({ allow_top_n_cap: true })}
-            aria-label="Enable top-N cap and Redo"
-          >
-            Enable top-N &amp; Redo
-          </button>
-        </div>
+        <Card role="status">
+          <CardContent className="flex flex-col gap-4 pt-6">
+            <div className="flex items-center gap-2">
+              <Badge variant="destructive">Overlap too large</Badge>
+            </div>
+            <p className="text-sm">
+              The overlap of {blocked.overlap_count} proteins exceeds the STRING ceiling of{" "}
+              {blocked.max_proteins}. Building a network this large is unreliable, so it was not
+              queried.
+            </p>
+            <p className="text-muted-foreground text-sm">
+              Either enable the top-N cap to proceed on the {blocked.max_proteins} highest-ranked
+              proteins, or narrow the inputs upstream (raise the Stage 3 / Stage 4 thresholds, or
+              tighten the overlap) and re-run.
+            </p>
+            <div>
+              <Button
+                type="button"
+                disabled={redo.isPending}
+                onClick={() => redo.mutate({ allow_top_n_cap: true })}
+                aria-label="Enable top-N cap and Redo"
+              >
+                Enable top-N &amp; Redo
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
         computed && (
           <>
             {/* Summary cards */}
-            <div className="stage-summary">
-              <div className="summary-card" aria-label={`${computed.node_count} nodes`}>
-                <span className="summary-card__value">{computed.node_count}</span>
-                <span className="summary-card__label">nodes</span>
-              </div>
-              <div className="summary-card" aria-label={`${computed.edge_count} edges`}>
-                <span className="summary-card__value">{computed.edge_count}</span>
-                <span className="summary-card__label">edges</span>
+            <div className="flex flex-wrap gap-3">
+              <div
+                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
+                aria-label={`${computed.node_count} nodes`}
+              >
+                <span className="hf-num text-2xl font-semibold tabular-nums">
+                  {computed.node_count}
+                </span>
+                <span className="text-muted-foreground text-xs">nodes</span>
               </div>
               <div
-                className="summary-card summary-card--muted"
+                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
+                aria-label={`${computed.edge_count} edges`}
+              >
+                <span className="hf-num text-2xl font-semibold tabular-nums">
+                  {computed.edge_count}
+                </span>
+                <span className="text-muted-foreground text-xs">edges</span>
+              </div>
+              <div
+                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
                 aria-label={`min confidence ${computed.min_confidence}`}
               >
-                <span className="summary-card__value">{computed.min_confidence}</span>
-                <span className="summary-card__label">min confidence</span>
+                <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+                  {computed.min_confidence}
+                </span>
+                <span className="text-muted-foreground text-xs">min confidence</span>
               </div>
               <div
-                className="summary-card summary-card--muted"
+                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
                 aria-label={`network type ${computed.network_type}`}
               >
-                <span className="summary-card__value">{computed.network_type}</span>
-                <span className="summary-card__label">network type</span>
+                <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+                  {computed.network_type}
+                </span>
+                <span className="text-muted-foreground text-xs">network type</span>
               </div>
               <div
-                className="summary-card summary-card--muted"
+                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
                 aria-label={`${computed.unmapped.length} unmapped`}
               >
-                <span className="summary-card__value">{computed.unmapped.length}</span>
-                <span className="summary-card__label">unmapped</span>
+                <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+                  {computed.unmapped.length}
+                </span>
+                <span className="text-muted-foreground text-xs">unmapped</span>
               </div>
             </div>
 
             {computed.capped.applied && (
-              <p className="hf-muted" role="status">
+              <p className="text-muted-foreground text-sm" role="status">
                 Capped to the top {computed.capped.max_proteins} proteins by{" "}
                 {computed.capped.ranked_by}.
               </p>
             )}
 
             {computed.edge_count === 0 && (
-              <p className="hf-muted" role="status">
+              <p className="text-muted-foreground text-sm" role="status">
                 No interactions among the overlap targets at this confidence floor.
               </p>
             )}
 
-            {/* Table controls */}
-            <div className="table-controls">
-              <label htmlFor="t6-page-size">Rows per page</label>
-              <select
-                id="t6-page-size"
-                value={pageSize}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setPageSize(v === "all" ? "all" : Number(v));
-                  setPage(0);
-                }}
-              >
-                {PAGE_SIZES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-                <option value="all">All</option>
-              </select>
-              <a
-                href={csvHref}
-                download="ppi-edges.csv"
-                className="hf-btn hf-btn-ghost"
-                aria-label="Download CSV"
-              >
-                Download CSV
-              </a>
-            </div>
+            {/* Edge-list table card */}
+            <Card>
+              <CardHeader>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="t6-page-size" className="text-muted-foreground text-sm">
+                      Rows per page
+                    </label>
+                    <select
+                      id="t6-page-size"
+                      className="bg-background rounded border px-2 py-1 text-sm"
+                      value={pageSize}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setPageSize(v === "all" ? "all" : Number(v));
+                        setPage(0);
+                      }}
+                    >
+                      {PAGE_SIZES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                      <option value="all">All</option>
+                    </select>
+                  </div>
+                  <CsvDownloadButton
+                    header={S6_CSV_HEADER}
+                    rows={csvRows}
+                    filename="ppi-edges.csv"
+                    label="Download CSV"
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="px-0">
+                <DataTable columns={columns} data={visibleEdges} />
+              </CardContent>
 
-            {/* Edge-list table */}
-            <div className="table-wrapper">
-              <table className="hf-table">
-                <thead>
-                  <tr>
-                    <th>Source</th>
-                    <th>Target</th>
-                    <th>Confidence</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleEdges.map((edge, i) => (
-                    <tr key={`${edge.source}-${edge.target}-${i}`}>
-                      <td>{edge.source}</td>
-                      <td>{edge.target}</td>
-                      <td>{edge.confidence}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {pageSize !== "all" && totalPages > 1 && (
-              <div className="pagination">
-                <button
-                  className="hf-btn"
-                  disabled={currentPage === 0}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  Previous
-                </button>
-                <span>
-                  Page {currentPage + 1} / {totalPages}
-                </span>
-                <button
-                  className="hf-btn"
-                  disabled={currentPage >= totalPages - 1}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next
-                </button>
-              </div>
-            )}
+              {/* Pagination */}
+              {pageSize !== "all" && totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 px-6 pb-4">
+                  <button
+                    className="hf-btn text-sm"
+                    disabled={currentPage === 0}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Previous
+                  </button>
+                  <span className="text-muted-foreground text-sm">
+                    Page {currentPage + 1} / {totalPages}
+                  </span>
+                  <button
+                    className="hf-btn text-sm"
+                    disabled={currentPage >= totalPages - 1}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </Card>
           </>
         )
       )}
 
+      {/* STRING network image (complete-only, onError-hidden) */}
       {isComplete && (
         <img
-          className="hf-stage-chart"
+          className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
           alt="PPI network"
           src={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
           onError={(e) => {
@@ -338,10 +378,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
         }
         onApprove={() => advance.mutate()}
       />
-
-      <footer className="stage-footer hf-muted">
-        <p>Protein interactions: STRING. Human only (species 9606).</p>
-      </footer>
     </section>
   );
 }
