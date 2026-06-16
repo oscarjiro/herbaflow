@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { validateTargets } from "../api/sdk.gen";
 import type { FailedInput, ResolvedTarget, ValidateTargetsResponse } from "../api/types.gen";
+import { humanizeProblem } from "../lib/problem";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 /**
  * Reusable target validate box: textarea + Validate button + resolved/failed lists.
@@ -29,6 +36,8 @@ export function TargetValidateBox({
   const [resolved, setResolved] = useState<ResolvedTarget[]>([]);
   const [failed, setFailed] = useState<FailedInput[]>([]);
 
+  const textareaId = `target-validate-box-${label.replace(/\s+/g, "-").toLowerCase()}`;
+
   const validate = useMutation({
     mutationFn: async () => {
       const inputs = text
@@ -47,6 +56,9 @@ export function TargetValidateBox({
         onResolved(resolvedList);
       }
     },
+    onError: (error) => {
+      toast.error(humanizeProblem(error as Parameters<typeof humanizeProblem>[0]));
+    },
   });
 
   function handleAdd() {
@@ -57,41 +69,59 @@ export function TargetValidateBox({
   }
 
   return (
-    <div className="target-validate-box">
-      <label htmlFor={`target-validate-box-${label.replace(/\s+/g, "-").toLowerCase()}`}>
-        {label}
-      </label>
-      <textarea
-        id={`target-validate-box-${label.replace(/\s+/g, "-").toLowerCase()}`}
-        aria-label={label}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="One gene symbol or UniProt accession per line"
-        disabled={disabled}
-      />
-      <button disabled={validate.isPending || disabled} onClick={() => validate.mutate()}>
-        Validate
-      </button>
+    <Card className="gap-3 py-4">
+      <CardContent className="flex flex-col gap-3">
+        <Label htmlFor={textareaId}>{label}</Label>
+        <Textarea
+          id={textareaId}
+          aria-label={label}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="One gene symbol or UniProt accession per line"
+          disabled={disabled}
+          rows={3}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={validate.isPending || disabled}
+          onClick={() => validate.mutate()}
+        >
+          Validate
+        </Button>
 
-      {resolved.length > 0 && (
-        <ul aria-label="Resolved targets">
-          {resolved.map((r) => (
-            <li key={r.target_id}>{r.gene_symbol ?? r.uniprot_accession ?? r.canonical_key}</li>
-          ))}
-        </ul>
-      )}
+        {resolved.length > 0 && (
+          <ul aria-label="Resolved targets" className="flex flex-wrap gap-1.5">
+            {resolved.map((r) => (
+              <li key={r.target_id} className="list-none">
+                <Badge variant="secondary">
+                  {r.gene_symbol ?? r.uniprot_accession ?? r.canonical_key}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {failed.length > 0 && (
-        <ul aria-label="Failed inputs">
-          {failed.map((f) => (
-            <li key={f.value}>
-              {f.value}: {f.reason}
-            </li>
-          ))}
-        </ul>
-      )}
+        {failed.length > 0 && (
+          <ul aria-label="Failed inputs" className="flex flex-col gap-1">
+            {failed.map((f) => (
+              <li key={f.value} className="list-none text-xs [color:var(--hf-fg-3)]">
+                <Badge variant="destructive" className="mr-1.5">
+                  {f.value}
+                </Badge>
+                {f.reason}
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {showAddButton && resolved.length > 0 && <button onClick={handleAdd}>Add</button>}
-    </div>
+        {showAddButton && resolved.length > 0 && (
+          <Button type="button" size="sm" onClick={handleAdd}>
+            Add
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }

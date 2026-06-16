@@ -21,9 +21,23 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { validateTargets } from "../../api/sdk.gen";
 import type { ResolvedTarget, ValidateTargetsResponse } from "../../api/types.gen";
+import { humanizeProblem } from "../../lib/problem";
 import { parseStpCsv, type StpRow } from "../../lib/stp";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 const STP_URL = "http://www.swisstargetprediction.ch/";
 
@@ -46,6 +60,7 @@ export function StpDialog({
   existingTargetIds: string[];
   onAddTargets: (resolved: ResolvedTarget[]) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [threshold, setThreshold] = useState(0.6);
   const [pasteText, setPasteText] = useState("");
@@ -90,6 +105,9 @@ export function StpDialog({
       setSelected(new Set());
       setPasteText("");
     },
+    onError: (error) => {
+      toast.error(humanizeProblem(error as Parameters<typeof humanizeProblem>[0]));
+    },
   });
 
   function toggle(id: string) {
@@ -120,126 +138,156 @@ export function StpDialog({
   const result = importMut.data;
 
   return (
-    <section className="stp-dialog" aria-label="SwissTargetPrediction import">
-      <h3>SwissTargetPrediction (manual paste-back)</h3>
-      <p className="hf-muted">
-        Pick the least-covered compounds, copy their SMILES into SwissTargetPrediction, then paste
-        the result CSV here. The resolved targets are added to this run only (not stored as measured
-        compound–target links).
-      </p>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm">
+          SwissTargetPrediction import
+        </Button>
+      </DialogTrigger>
+      <DialogContent
+        className="max-h-[85vh] max-w-2xl overflow-y-auto"
+        aria-label="SwissTargetPrediction import"
+      >
+        <DialogHeader>
+          <DialogTitle>SwissTargetPrediction (manual paste-back)</DialogTitle>
+        </DialogHeader>
 
-      {/* Compound picker — least-covered first (copy-SMILES convenience only) */}
-      <ul className="stp-compound-list" aria-label="Compounds to screen">
-        {sorted.map((c) => {
-          const coverage = perCompound[c.compound_id]?.coverage ?? 0;
-          return (
-            <li key={c.compound_id}>
-              <label>
-                <input
-                  type="checkbox"
-                  aria-label={`Select ${c.canonical_name ?? c.compound_id}`}
-                  checked={selected.has(c.compound_id)}
-                  onChange={() => toggle(c.compound_id)}
-                />{" "}
-                {c.canonical_name ?? c.compound_id}{" "}
-                <span className="hf-caption">coverage {coverage}</span>
-                {!c.smiles && <span className="hf-caption"> (no SMILES)</span>}
-              </label>
-            </li>
-          );
-        })}
-      </ul>
-
-      <div className="stp-actions">
-        <button
-          type="button"
-          className="hf-btn hf-btn-ghost"
-          disabled={selected.size === 0}
-          onClick={handleCopySmiles}
-        >
-          Copy SMILES
-        </button>
-        <a href={STP_URL} target="_blank" rel="noopener noreferrer" className="hf-btn hf-btn-ghost">
-          Open SwissTargetPrediction
-        </a>
-      </div>
-      {copyNote && <p className="hf-caption">{copyNote}</p>}
-
-      {/* Threshold + paste-back */}
-      <div className="stp-paste">
-        <label htmlFor="stp-threshold">Probability threshold</label>
-        <input
-          id="stp-threshold"
-          type="number"
-          step="0.05"
-          min="0"
-          max="1"
-          aria-label="Probability threshold"
-          value={threshold}
-          onChange={(e) => setThreshold(Number(e.target.value))}
-        />
-        <label htmlFor="stp-paste">Paste SwissTargetPrediction CSV</label>
-        <textarea
-          id="stp-paste"
-          aria-label="Paste SwissTargetPrediction CSV"
-          value={pasteText}
-          onChange={(e) => setPasteText(e.target.value)}
-          placeholder={"Target,Common name,Uniprot ID,…,Probability*,…\n…"}
-          rows={6}
-        />
-      </div>
-
-      {parse.error && pasteText.trim().length > 0 && (
-        <p className="hf-error" role="alert">
-          {parse.error} Expected SwissTargetPrediction columns include <code>Uniprot ID</code>,{" "}
-          <code>Common name</code>, and <code>Probability*</code>.
+        <p className="text-sm [color:var(--hf-fg-3)]">
+          Pick the least-covered compounds, copy their SMILES into SwissTargetPrediction, then paste
+          the result CSV here. The resolved targets are added to this run only (not stored as
+          measured compound–target links).
         </p>
-      )}
 
-      {parsedRows.length > 0 && (
-        <div className="stp-preview">
-          <p className="hf-caption">{parsedRows.length} rows at or above threshold</p>
-          <table className="hf-table">
-            <thead>
-              <tr>
-                <th>UniProt</th>
-                <th>Common name</th>
-                <th>Probability</th>
-              </tr>
-            </thead>
-            <tbody>
-              {parsedRows.map((r) => (
-                <tr key={r.uniprot}>
-                  <td>{r.uniprot}</td>
-                  <td>{r.common_name ?? "—"}</td>
-                  <td>{r.probability.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Compound picker — least-covered first (copy-SMILES convenience only) */}
+        <fieldset className="flex flex-col gap-1.5">
+          <legend className="mb-1 text-sm font-medium">Compounds to screen</legend>
+          <ul aria-label="Compounds to screen" className="flex flex-col gap-1">
+            {sorted.map((c) => {
+              const coverage = perCompound[c.compound_id]?.coverage ?? 0;
+              return (
+                <li key={c.compound_id} className="list-none">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${c.canonical_name ?? c.compound_id}`}
+                      checked={selected.has(c.compound_id)}
+                      onChange={() => toggle(c.compound_id)}
+                      className="h-4 w-4 rounded [accent-color:var(--hf-accent)]"
+                    />
+                    <span>{c.canonical_name ?? c.compound_id}</span>
+                    <span className="text-xs [color:var(--hf-fg-3)]">coverage {coverage}</span>
+                    {!c.smiles && (
+                      <span className="text-xs [color:var(--hf-fg-3)]">(no SMILES)</span>
+                    )}
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        </fieldset>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={selected.size === 0}
+            onClick={handleCopySmiles}
+          >
+            Copy SMILES
+          </Button>
+          <Button type="button" variant="ghost" size="sm" asChild>
+            <a href={STP_URL} target="_blank" rel="noopener noreferrer">
+              Open SwissTargetPrediction
+            </a>
+          </Button>
         </div>
-      )}
+        {copyNote && <p className="text-xs [color:var(--hf-fg-3)]">{copyNote}</p>}
 
-      <div className="stp-import-row">
-        <button
-          type="button"
-          className="hf-btn hf-btn-primary"
-          disabled={!canImport}
-          onClick={() => importMut.mutate()}
-        >
-          Import
-        </button>
-        {!canImport && !importMut.isPending && (
-          <span className="hf-muted stp-import-hint">Paste a valid CSV to import</span>
+        <Separator />
+
+        {/* Threshold + paste-back */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <Label htmlFor="stp-threshold" className="shrink-0">
+              Probability threshold
+            </Label>
+            <Input
+              id="stp-threshold"
+              type="number"
+              step="0.05"
+              min="0"
+              max="1"
+              aria-label="Probability threshold"
+              value={threshold}
+              onChange={(e) => setThreshold(Number(e.target.value))}
+              className="w-28"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="stp-paste">Paste SwissTargetPrediction CSV</Label>
+            <Textarea
+              id="stp-paste"
+              aria-label="Paste SwissTargetPrediction CSV"
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              placeholder={"Target,Common name,Uniprot ID,…,Probability*,…\n…"}
+              rows={6}
+            />
+          </div>
+        </div>
+
+        {parse.error && pasteText.trim().length > 0 && (
+          <p className="text-destructive text-sm" role="alert">
+            {parse.error} Expected SwissTargetPrediction columns include <code>Uniprot ID</code>,{" "}
+            <code>Common name</code>, and <code>Probability*</code>.
+          </p>
         )}
-      </div>
 
-      {result && (
-        <p className="stp-import-result" role="status">
-          Added {result.added} target(s) to the run; {result.alreadyInRun} already present;{" "}
-          {result.failed} failed to resolve.
-        </p>
-      )}
-    </section>
+        {parsedRows.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-xs [color:var(--hf-fg-3)]">
+              {parsedRows.length} rows at or above threshold
+            </p>
+            <div className="overflow-x-auto rounded-md border">
+              <table className="w-full text-sm">
+                <thead className="border-b [background:var(--hf-surface-1)]">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium">UniProt</th>
+                    <th className="px-3 py-2 text-left font-medium">Common name</th>
+                    <th className="px-3 py-2 text-left font-medium">Probability</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {parsedRows.map((r) => (
+                    <tr key={r.uniprot} className="border-b last:border-0">
+                      <td className="px-3 py-2">{r.uniprot}</td>
+                      <td className="px-3 py-2">{r.common_name ?? "—"}</td>
+                      <td className="px-3 py-2">{r.probability.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3">
+          <Button type="button" disabled={!canImport} onClick={() => importMut.mutate()}>
+            Import
+          </Button>
+          {!canImport && !importMut.isPending && (
+            <span className="text-sm [color:var(--hf-fg-3)]">Paste a valid CSV to import</span>
+          )}
+        </div>
+
+        {result && (
+          <p className="text-sm" role="status">
+            Added {result.added} target(s) to the run; {result.alreadyInRun} already present;{" "}
+            {result.failed} failed to resolve.
+          </p>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

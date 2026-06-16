@@ -237,7 +237,7 @@ describe("Stage3View", () => {
     wrap(<Stage3View data={data} />);
     expect(screen.getByText(/per-compound coverage/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("region", { name: /swisstargetprediction import/i }),
+      screen.getByRole("button", { name: /swisstargetprediction import/i }),
     ).toBeInTheDocument();
   });
 });
