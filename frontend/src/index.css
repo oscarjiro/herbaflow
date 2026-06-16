@@ -299,6 +299,62 @@ i,
 }
 
 /* =====================================================================
+   Editorial utility classes
+   ===================================================================== */
+
+/* Eyebrow — uppercase, tracked */
+.hf-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  font-weight: var(--fw-medium);
+  color: var(--hf-fg-3);
+}
+
+/* ASCII rule line — em-dash row */
+.hf-rule {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--hf-fg-4);
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+}
+.hf-rule::before {
+  content: "———————————————————————————————————————————————————————————————————————————————————————————";
+}
+
+/* Bracket framing for inline metadata */
+.hf-bracket {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--hf-fg-3);
+  letter-spacing: 0.04em;
+}
+.hf-bracket::before {
+  content: "[ ";
+}
+.hf-bracket::after {
+  content: " ]";
+}
+
+/* Binomial (italic serif for scientific names) */
+.hf-binomial {
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+/* Tabular numerals for numeric columns */
+.hf-num,
+.hf-table td.hf-num,
+.hf-table th.hf-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* =====================================================================
    Warm editorial dark ramp. Inverts paper<->ink but stays warm and
    low-contrast (never pure #000/#FFF). Overrides the raw --hf-* tokens;
    the shadcn aliases and the @theme inline color utilities re-resolve
