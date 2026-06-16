@@ -1,9 +1,11 @@
-import { render, screen, within, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { http, HttpResponse } from "msw";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { SetupView } from "./SetupView";
 import * as sdk from "../api/sdk.gen";
+import { server } from "../../tests/handlers";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -14,6 +16,14 @@ function wrap(ui: React.ReactNode) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+// Unmount + clear any Radix portal nodes left in document.body between tests so a
+// stale Select listbox/option from one test cannot leak into the next, and restore
+// any SDK spies so a mocked createAnalysis does not bleed into the MSW-driven tests.
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
+
 /** Get the plant-mode fieldset by its legend text. */
 function plantFieldset() {
   return screen.getByRole("group", { name: /plant input mode/i });
@@ -22,6 +32,13 @@ function plantFieldset() {
 /** Get the disease-mode fieldset by its legend text. */
 function diseaseFieldset() {
   return screen.getByRole("group", { name: /disease input mode/i });
+}
+
+/** Open the shadcn (Radix) disease Select and choose the option with the given text. */
+async function selectDisease(optionText: string | RegExp) {
+  await userEvent.click(screen.getByRole("combobox", { name: /disease/i }));
+  const listbox = await screen.findByRole("listbox");
+  await userEvent.click(await within(listbox).findByRole("option", { name: optionText }));
 }
 
 // ---------------------------------------------------------------------------
@@ -125,10 +142,6 @@ describe("SetupView — disease mode controls", () => {
 // ---------------------------------------------------------------------------
 
 describe("SetupView — create payload per mode", () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
   it("default selection mode posts plant_input_mode=selection, disease_input_mode=selection with selected plant + disease ids", async () => {
     const createSpy = vi.spyOn(sdk, "createAnalysis").mockResolvedValue({
       data: {
@@ -150,10 +163,9 @@ describe("SetupView — create payload per mode", () => {
 
     // Wait for plants + diseases to load from MSW
     await waitFor(() => screen.getByRole("checkbox", { name: /aaa bbb/i }));
-    await waitFor(() => screen.getByText("Test Disease"));
 
     // Select a disease
-    await userEvent.selectOptions(screen.getByRole("combobox", { name: /disease/i }), "d1");
+    await selectDisease("Test Disease");
 
     // Check a plant
     await userEvent.click(screen.getByRole("checkbox", { name: /aaa bbb/i }));
@@ -239,5 +251,81 @@ describe("SetupView — create payload per mode", () => {
     expect(body.manual_compound_ids).toEqual([]);
     expect(body.plant_label).toBe("My Plant");
     expect(body.disease_label).toBe("My Disease");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — end-to-end create flow (MSW handlers, no SDK spy)
+// ---------------------------------------------------------------------------
+
+describe("SetupView — end-to-end create flow", () => {
+  it("submits a created run id", async () => {
+    let createdId: string | null = null;
+    wrap(<SetupView onCreated={(id) => (createdId = id)} />);
+
+    await screen.findByRole("checkbox", { name: /aaa bbb/i });
+    await selectDisease("Test Disease");
+    await userEvent.click(screen.getByRole("checkbox", { name: /aaa bbb/i }));
+    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+
+    await waitFor(() => expect(createdId).toBe("r1"));
+  });
+
+  it("defaults mode to guided, validates compounds, and sends manual_compound_ids", async () => {
+    let createdId: string | null = null;
+    wrap(<SetupView onCreated={(id) => (createdId = id)} />);
+
+    // Mode defaults to guided
+    await waitFor(() =>
+      expect(screen.getByRole("combobox", { name: /mode/i })).toHaveTextContent("guided"),
+    );
+
+    // Switch plant input mode to manual_compounds to reveal CompoundValidateBox
+    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+
+    // Type two lines into the manual compounds textarea
+    await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO\nNOTAKEY");
+
+    // Click Validate
+    await userEvent.click(screen.getByRole("button", { name: /validate/i }));
+
+    // Resolved row: ethanol present
+    await screen.findByText(/ethanol/i);
+
+    // Failed row: the SMILES nudge is visible
+    await screen.findByText(/SMILES/);
+
+    // Now complete a create: override the handler to capture the body
+    let captured: unknown = null;
+    server.use(
+      http.post("http://localhost:8000/analyses", async ({ request }) => {
+        captured = await request.json();
+        return HttpResponse.json(
+          {
+            analysis_id: "r1",
+            analysis_name: null,
+            disease_id: "d1",
+            mode: "guided",
+            status: "pending",
+            current_stage: null,
+            stage_results: {},
+            created_at: null,
+            completed_at: null,
+            expires_at: null,
+            error_message: null,
+          },
+          { status: 202 },
+        );
+      }),
+    );
+
+    // Select a disease (disease section is still in selection mode)
+    await selectDisease("Test Disease");
+    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+
+    await waitFor(() => expect(createdId).toBe("r1"));
+    await waitFor(() =>
+      expect((captured as { manual_compound_ids?: string[] }).manual_compound_ids).toContain("c1"),
+    );
   });
 });

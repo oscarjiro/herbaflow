@@ -14,6 +14,14 @@ import {
 } from "../contract";
 import { CompoundValidateBox } from "./CompoundValidateBox";
 import { TargetValidateBox } from "./TargetValidateBox";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Checkbox } from "./ui/checkbox";
+import { Eyebrow } from "./ui/editorial";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   const diseases = useQuery(listDiseasesOptions());
@@ -81,147 +89,200 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
   const canSubmit = plantReady && diseaseReady;
 
+  const filteredPlants = plants.data
+    ?.filter((p) =>
+      (p.canonical_scientific_name ?? "").toLowerCase().includes(filter.toLowerCase()),
+    )
+    .slice(0, 100);
+
   return (
-    <section>
-      <h1>New analysis</h1>
+    <section className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
+      <header className="mb-8 space-y-2">
+        <Eyebrow>Setup</Eyebrow>
+        <h1>New analysis</h1>
+      </header>
 
-      {/* ---- Plant input mode ---- */}
-      <fieldset>
-        <legend>Plant input mode</legend>
-        {PLANT_INPUT_MODES.map((m) => (
-          <label key={m}>
-            <input
-              type="radio"
-              name="plant_input_mode"
-              value={m}
-              checked={plantMode === m}
-              onChange={() => setPlantMode(m)}
-              aria-label={m}
-            />
-            {m}
-          </label>
-        ))}
-      </fieldset>
+      <div className="space-y-6">
+        {/* ---- Plant input ---- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Plant input</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <fieldset className="space-y-3">
+              <legend className="hf-eyebrow mb-2">Plant input mode</legend>
+              <RadioGroup
+                value={plantMode}
+                onValueChange={(v) => setPlantMode(v as (typeof PLANT_INPUT_MODES)[number])}
+              >
+                {PLANT_INPUT_MODES.map((m) => (
+                  <div key={m} className="flex items-center gap-2">
+                    <RadioGroupItem id={`plant-mode-${m}`} value={m} aria-label={m} />
+                    <Label htmlFor={`plant-mode-${m}`} className="font-normal">
+                      {m}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </fieldset>
 
-      {plantMode === "selection" && (
-        <>
-          <input
-            aria-label="Filter plants"
-            placeholder="Filter plants"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-          <p>
-            {selected.length} / {MAX_PLANTS} plants
-          </p>
-          {selected.length > MAX_PLANTS && <p role="alert">Too many plants (max {MAX_PLANTS}).</p>}
-          <ul>
-            {plants.data
-              ?.filter((p) =>
-                (p.canonical_scientific_name ?? "").toLowerCase().includes(filter.toLowerCase()),
-              )
-              .slice(0, 100)
-              .map((p) => (
-                <li key={p.plant_id}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(p.plant_id)}
-                      onChange={(e) =>
-                        setSelected((s) =>
-                          e.target.checked ? [...s, p.plant_id] : s.filter((x) => x !== p.plant_id),
-                        )
-                      }
-                    />
-                    {p.canonical_scientific_name}
-                  </label>
-                </li>
-              ))}
-          </ul>
-        </>
-      )}
+            {plantMode === "selection" && (
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="plant-filter">Filter plants</Label>
+                  <Input
+                    id="plant-filter"
+                    aria-label="Filter plants"
+                    placeholder="Filter plants"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                  />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  {selected.length} / {MAX_PLANTS} plants
+                </p>
+                {selected.length > MAX_PLANTS && (
+                  <p role="alert" className="text-destructive text-sm">
+                    Too many plants (max {MAX_PLANTS}).
+                  </p>
+                )}
+                <ul className="max-h-72 space-y-1 overflow-y-auto rounded-md border p-2">
+                  {filteredPlants?.map((p) => (
+                    <li key={p.plant_id}>
+                      <label className="hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
+                        <Checkbox
+                          checked={selected.includes(p.plant_id)}
+                          onCheckedChange={(checked) =>
+                            setSelected((s) =>
+                              checked === true
+                                ? [...s, p.plant_id]
+                                : s.filter((x) => x !== p.plant_id),
+                            )
+                          }
+                        />
+                        {p.canonical_scientific_name}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-      {plantMode === "manual_compounds" && <CompoundValidateBox onResolved={setResolved} />}
+            {plantMode === "manual_compounds" && <CompoundValidateBox onResolved={setResolved} />}
 
-      {plantMode === "manual_targets" && (
-        <TargetValidateBox label="Plant targets" onResolved={setManualTargets} />
-      )}
+            {plantMode === "manual_targets" && (
+              <TargetValidateBox label="Plant targets" onResolved={setManualTargets} />
+            )}
 
-      {plantMode !== "selection" && (
-        <label>
-          Plant label (optional)
-          <input
-            aria-label="Plant label"
-            value={plantLabel}
-            maxLength={200}
-            onChange={(e) => setPlantLabel(e.target.value)}
-            placeholder="Optional label for this plant set"
-          />
-        </label>
-      )}
+            {plantMode !== "selection" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="plant-label">Plant label (optional)</Label>
+                <Input
+                  id="plant-label"
+                  aria-label="Plant label"
+                  value={plantLabel}
+                  maxLength={200}
+                  onChange={(e) => setPlantLabel(e.target.value)}
+                  placeholder="Optional label for this plant set"
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* ---- Disease input mode ---- */}
-      <fieldset>
-        <legend>Disease input mode</legend>
-        {DISEASE_INPUT_MODES.map((m) => (
-          <label key={m}>
-            <input
-              type="radio"
-              name="disease_input_mode"
-              value={m}
-              checked={diseaseMode === m}
-              onChange={() => setDiseaseMode(m)}
-              aria-label={m}
-            />
-            {m}
-          </label>
-        ))}
-      </fieldset>
+        {/* ---- Disease input ---- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Disease input</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <fieldset className="space-y-3">
+              <legend className="hf-eyebrow mb-2">Disease input mode</legend>
+              <RadioGroup
+                value={diseaseMode}
+                onValueChange={(v) => setDiseaseMode(v as (typeof DISEASE_INPUT_MODES)[number])}
+              >
+                {DISEASE_INPUT_MODES.map((m) => (
+                  <div key={m} className="flex items-center gap-2">
+                    <RadioGroupItem id={`disease-mode-${m}`} value={m} aria-label={m} />
+                    <Label htmlFor={`disease-mode-${m}`} className="font-normal">
+                      {m}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </fieldset>
 
-      {diseaseMode === "selection" && (
-        <>
-          <label htmlFor="disease">Disease</label>
-          <select id="disease" value={diseaseId} onChange={(e) => setDiseaseId(e.target.value)}>
-            <option value="">Select a disease</option>
-            {diseases.data?.map((d) => (
-              <option key={d.disease_id} value={d.disease_id}>
-                {d.disease_name}
-              </option>
-            ))}
-          </select>
-        </>
-      )}
+            {diseaseMode === "selection" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="disease">Disease</Label>
+                <Select value={diseaseId} onValueChange={setDiseaseId}>
+                  <SelectTrigger id="disease" aria-label="Disease" className="w-full">
+                    <SelectValue placeholder="Select a disease" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {diseases.data?.map((d) => (
+                      <SelectItem key={d.disease_id} value={d.disease_id}>
+                        {d.disease_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
-      {diseaseMode === "manual_disease_targets" && (
-        <TargetValidateBox label="Disease targets" onResolved={setManualDiseaseTargets} />
-      )}
+            {diseaseMode === "manual_disease_targets" && (
+              <TargetValidateBox label="Disease targets" onResolved={setManualDiseaseTargets} />
+            )}
 
-      {diseaseMode !== "selection" && (
-        <label>
-          Disease label (optional)
-          <input
-            aria-label="Disease label"
-            value={diseaseLabel}
-            maxLength={200}
-            onChange={(e) => setDiseaseLabel(e.target.value)}
-            placeholder="Optional label for this disease target set"
-          />
-        </label>
-      )}
+            {diseaseMode !== "selection" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="disease-label">Disease label (optional)</Label>
+                <Input
+                  id="disease-label"
+                  aria-label="Disease label"
+                  value={diseaseLabel}
+                  maxLength={200}
+                  onChange={(e) => setDiseaseLabel(e.target.value)}
+                  placeholder="Optional label for this disease target set"
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* ---- Mode (auto/guided) ---- */}
-      <label htmlFor="mode">Mode</label>
-      <select id="mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-        {MODES.map((m) => (
-          <option key={m} value={m}>
-            {m}
-          </option>
-        ))}
-      </select>
+        {/* ---- Mode (auto/guided) ---- */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Mode</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-1.5">
+              <Label htmlFor="mode">Mode</Label>
+              <Select value={mode} onValueChange={setMode}>
+                <SelectTrigger id="mode" aria-label="Mode" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {MODES.map((m) => (
+                    <SelectItem key={m} value={m}>
+                      {m}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
 
-      <button disabled={!canSubmit || create.isPending} onClick={() => create.mutate()}>
-        Create analysis
-      </button>
+        <Button
+          disabled={!canSubmit || create.isPending}
+          onClick={() => create.mutate()}
+          className="w-full sm:w-auto"
+        >
+          Create analysis
+        </Button>
+      </div>
     </section>
   );
 }

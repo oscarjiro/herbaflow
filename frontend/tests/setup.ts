@@ -45,6 +45,22 @@ if (typeof URL.revokeObjectURL === "undefined") {
   URL.revokeObjectURL = () => {};
 }
 
+// jsdom does not implement the pointer-capture / scrollIntoView APIs that Radix
+// primitives (e.g. the shadcn Select) call on open. Stub them so those components
+// can be driven in tests without throwing.
+if (typeof Element.prototype.hasPointerCapture === "undefined") {
+  Element.prototype.hasPointerCapture = () => false;
+}
+if (typeof Element.prototype.setPointerCapture === "undefined") {
+  Element.prototype.setPointerCapture = () => {};
+}
+if (typeof Element.prototype.releasePointerCapture === "undefined") {
+  Element.prototype.releasePointerCapture = () => {};
+}
+if (typeof Element.prototype.scrollIntoView === "undefined") {
+  Element.prototype.scrollIntoView = () => {};
+}
+
 // jsdom does not implement matchMedia — provide a stub (defaults to no dark preference).
 if (typeof window.matchMedia === "undefined") {
   const stub = (query: string): MediaQueryList =>
