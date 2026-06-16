@@ -40,17 +40,17 @@ async def test_gd1_curcumin_crc_snapshot(golden_client, monkeypatch):
 
     sr = state["stage_results"]
 
-    # Stage 5 — raw overlap (no statistics): the field-standard set intersection.
+    # Stage 5: raw overlap (no statistics): the field-standard set intersection.
     assert sr["5"]["count"] == snap["overlap_count"]
     for k in snap["stage5_forbidden_keys"]:
         assert k not in sr["5"]
 
-    # Stage 7 — MCC hub ranking (Chin 2014), sole ranker.
+    # Stage 7: MCC hub ranking (Chin 2014), sole ranker.
     assert sr["7"]["ranking_metric"] == snap["ranking_metric"]
     hubs = [h["gene_symbol"] for h in sorted(sr["7"]["hubs"], key=lambda h: -h["mcc"])]
     assert hubs[:5] == snap["mcc_top5"]
 
-    # Stage 8 — functional enrichment includes the disease pathway.
+    # Stage 8: functional enrichment includes the disease pathway.
     enr = {t["name"] for t in sr["8"]["terms"]}
     for term in snap["enrichment_includes"]:
         assert term in enr

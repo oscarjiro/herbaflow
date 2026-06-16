@@ -44,10 +44,10 @@ from app.pipeline.stages import stage6, stage8  # noqa: E402
 from scripts.golden import reference, stats  # noqa: E402
 from scripts.golden.report import (  # noqa: E402
     CodeExcerpt,
+    Gd1StageMatrixRow,
     HubRow,
     PanelPaper,
     ReportModel,
-    StageRow,
     render,
 )
 from tests.scientific.conftest import (  # noqa: E402
@@ -122,65 +122,91 @@ ARTIFACTS_DIR = DOCS_DIR / "artifacts"
 # ---------------------------------------------------------------------------
 
 
-def _stage_rows(m: dict[str, Any]) -> list[StageRow]:
+def _stage_matrix(m: dict[str, Any]) -> list[Gd1StageMatrixRow]:
     return [
-        StageRow(
-            "1. Plant to compound",
-            "Not run: the compound is supplied directly (manual single-compound entry).",
-            "Network-pharmacology plant studies start here; not applicable to a single compound.",
-            "N/A",
-            "not applicable",
+        Gd1StageMatrixRow(
+            "1 Compound",
+            "not run (manual single compound)",
+            "curcumin (PubChem)",
+            "curcumin (PubChem, CAS 458-37-7)",
+            "curcumin (PubChem)",
+            "curcumin (PubChem/RHAWN)",
         ),
-        StageRow(
-            "2. ADME / drug-likeness",
-            "Lipinski rule-of-five and physicochemical descriptors via RDKit.",
-            "Panel papers filter by SwissADME / Lipinski oral-bioavailability rules.",
-            "N/A for a single curated compound (curcumin is the established input).",
-            "different-but-valid",
+        Gd1StageMatrixRow(
+            "2 ADME",
+            "RDKit Lipinski/Veber; curcumin passes",
+            "SwissADME, Lipinski rule of five; passes",
+            "not reported",
+            "not reported",
+            "not reported",
         ),
-        StageRow(
-            "3. Compound to target",
-            "Measured bioactivity: ChEMBL and PubChem BioAssay (experimental affinity).",
-            "Predicted: SwissTargetPrediction / PharmMapper (structure-based prediction).",
-            f"{m['compound_target_count']} measured targets.",
-            "different-but-valid (measured vs predicted)",
+        Gd1StageMatrixRow(
+            "3 Compound to target",
+            f"{m['compound_target_count']} measured (ChEMBL + PubChem BioAssay)",
+            "104 (SwissTargetPrediction, p>0, Homo sapiens)",
+            "448 (PharmMapper + SwissTargetPrediction + TargetNet + SuperPred)",
+            "264 (ChEMBL + STRING + literature)",
+            "60 (STITCH, confidence 0.7, Homo sapiens)",
         ),
-        StageRow(
-            "4. Disease to target",
-            "Open Targets association scores (curated, scored), floor at the default cutoff.",
-            "Text-mined unions: GeneCards, DisGeNET, OMIM, TTD.",
-            f"{m['disease_target_count']} disease targets above the score floor.",
-            "different-but-valid",
+        Gd1StageMatrixRow(
+            "4 Disease to target",
+            f"{m['disease_target_count']} (Open Targets, at or above the score floor)",
+            "1911 (GeneCards/OMIM/TTD/DrugBank)",
+            "704 (GEO GSE74602 DEGs intersected with OMIM/DisGeNET/GeneCards)",
+            "47,261 (GeneCards/DrugBank/DisGeNET/CTD, score above median)",
+            "not reported (GeneCards; CRC plus apoptosis)",
         ),
-        StageRow(
-            "5. Overlap",
-            "Pure set intersection of the two target sets (field-standard Venn overlap).",
-            "Venn / intersection of the compound and disease target sets.",
-            f"overlap of {m['overlap_count']} genes.",
-            "equivalent",
+        Gd1StageMatrixRow(
+            "5 Overlap",
+            f"{m['overlap_count']} (set intersection)",
+            "30 (Jvenn)",
+            "73 (Venny)",
+            "46 (Venny; plus RNA-seq DEGs 3328)",
+            "25 (curcumin, CRC, apoptosis triple)",
         ),
-        StageRow(
-            "6. PPI network",
-            "STRING protein-protein interaction network over the overlap genes.",
-            "STRING PPI network (the field standard).",
-            f"{m['ppi_node_count']} nodes, {m['ppi_edge_count']} edges.",
-            "equivalent",
+        Gd1StageMatrixRow(
+            "6 PPI",
+            f"{m['ppi_node_count']} nodes, {m['ppi_edge_count']} edges (STRING)",
+            "26 nodes, 90 edges (STRING 0.4)",
+            "70 nodes, 230 edges (STRING)",
+            "42 nodes, 232 edges (STRING v11.5, 0.5, Homo sapiens)",
+            "25 input genes; nodes/edges not reported (STRING)",
         ),
-        StageRow(
-            "7. Hub ranking",
-            "Maximal Clique Centrality (cytoHubba, Chin 2014), the sole ranker.",
-            "cytoHubba MCC (or a related centrality) for hub selection.",
-            "top-10 hubs: " + ", ".join(m["top10_hubs"]) + ".",
-            "equivalent",
+        Gd1StageMatrixRow(
+            "7 Hubs",
+            "10 (MCC, Chin 2014)",
+            "3 core by degree (NetworkAnalyzer + CytoNCA): AKT1, EGFR, STAT3",
+            (
+                "10 (cytoHubba top-15 intersection of Degree/MNC/MCC/Closeness): CDK2, TOP2A, "
+                "CCNA2, AURKA, AURKB, CHEK1, TYMS, TK1, DNMT1, HSP90AA1"
+            ),
+            (
+                "11 (cytoHubba degree plus median; MCODE 8.364): ESR1, JUN, SIRT1, SERPINE1, "
+                "ICAM1, HMOX1, CHUK, EP300, MMP3, PTGS1, WNT5A"
+            ),
+            "none (validated MDM2, COX-2; no hub-ranking stage)",
         ),
-        StageRow(
-            "8. Functional enrichment",
-            "g:Profiler over KEGG and GO, with the compound-target universe as background.",
-            "KEGG / GO enrichment via g:Profiler or DAVID.",
-            f"{m['enrichment_term_count']} significant terms; "
-            + ("disease pathway recovered." if m["c1_present"] else "disease pathway absent."),
-            "equivalent",
+        Gd1StageMatrixRow(
+            "8 Enrichment",
+            f"{m['enrichment_term_count']} (g:Profiler GO+KEGG); CRC present",
+            "61 KEGG, 140 GO (DAVID, P<0.05); CRC present",
+            "34 KEGG, 256 GO (DAVID); CRC not in top-20",
+            "33 pathways, 106 GO (DAVID, P<0.05 and FDR<0.05); CRC not in top-20",
+            "about 30 KEGG, 24 GO (R clusterProfiler); CRC present",
         ),
+    ]
+
+
+def _level_b() -> list[tuple[str, str]]:
+    return [
+        ("1", "not applicable (Herbaflow starts from the supplied compound)"),
+        ("2", "different-but-valid (RDKit drug-likeness versus SwissADME)"),
+        ("3", "different-but-valid (measured bioactivity versus predicted targets)"),
+        ("4", "different-but-valid (Open Targets scored versus text-mined unions)"),
+        ("5", "equivalent (set intersection)"),
+        ("6", "equivalent (STRING PPI)"),
+        ("7", "equivalent (MCC / cytoHubba family)"),
+        ("8", "equivalent (GO/KEGG enrichment)"),
     ]
 
 
@@ -412,7 +438,9 @@ def _build_model(seed: dict[str, Any], m: dict[str, Any], artifact_files: list[s
         enrichment_term_count=m["enrichment_term_count"],
         top10_hubs=m["top10_hubs"],
         code_excerpts=_code_excerpts(),
-        stage_rows=_stage_rows(m),
+        stage_rows=[],
+        stage_matrix=_stage_matrix(m),
+        level_b_rows=_level_b(),
         hub_rows=m["hub_rows"],
         ctp_node_count=ctp_nodes,
         ctp_edge_count=ctp_edges,

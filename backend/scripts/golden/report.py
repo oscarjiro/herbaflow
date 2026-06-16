@@ -41,6 +41,18 @@ class StageRow:
 
 
 @dataclass(frozen=True)
+class Gd1StageMatrixRow:
+    """One row of the GD-1 wide per-paper comparison matrix."""
+
+    stage: str
+    herbaflow: str
+    han: str
+    he: str
+    yuan: str
+    wu: str
+
+
+@dataclass(frozen=True)
 class HubRow:
     """One row of the top-10 hub evidence table."""
 
@@ -135,6 +147,8 @@ class ReportModel:
     verdict_reason: str
 
     notes: list[str] = field(default_factory=list)
+    stage_matrix: list[Gd1StageMatrixRow] = field(default_factory=list)
+    level_b_rows: list[tuple[str, str]] = field(default_factory=list)  # (stage label, judgment)
 
 
 @dataclass(frozen=True)
@@ -345,31 +359,26 @@ def _section_implementation(m: ReportModel) -> str:
 
 
 def _section_stage_comparison(m: ReportModel) -> str:
-    rows = [[r.stage, r.herbaflow, r.reference, r.output, r.verdict] for r in m.stage_rows]
+    matrix = [[r.stage, r.herbaflow, r.han, r.he, r.yuan, r.wu] for r in m.stage_matrix]
+    level_b = [f"- Stage {s}: {j}" for s, j in m.level_b_rows]
     return "\n".join(
         [
             "## 4. Stage-by-stage comparison (Stage 1 to 8)",
             "",
             (
-                "Each row records how Herbaflow's method for that stage relates to the panel's, "
-                "with the Level-B judgment in the final column. The most important distinction is "
-                "at compound-target identification: Herbaflow derives compound targets from "
-                "measured bioactivity (ChEMBL and PubChem BioAssay), while the panel studies "
-                "derive them from target-prediction software (SwissTargetPrediction, PharmMapper). "
-                "This is a different but equally valid sourcing choice, and it is the main reason "
-                "Herbaflow's hub list differs from any single panel paper's hub list."
+                "Each cell gives the count and the tool or source that paper reported for that "
+                'stage, or "not reported" when the paper does not state it. Every number is '
+                "transcribed from the cited paper. The reference panel uses single curcumin and "
+                "predicted compound targets, while Herbaflow uses measured bioactivity, so the "
+                "downstream sets differ by construction. He et al. study colon cancer; the others "
+                "study colorectal cancer."
             ),
             "",
-            _table(
-                [
-                    "Stage",
-                    "Herbaflow: method, tool, source, algorithm",
-                    "Reference: same",
-                    "Output comparison",
-                    "Verdict",
-                ],
-                rows,
-            ),
+            _table(["Stage", "Herbaflow", "Han 2021", "He 2023", "Yuan 2026", "Wu 2025"], matrix),
+            "",
+            "Level-B methodological judgment (Herbaflow versus the panel as a whole):",
+            "",
+            *level_b,
         ]
     )
 

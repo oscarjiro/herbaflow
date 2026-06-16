@@ -88,17 +88,17 @@ async def test_gd1_curcumin_crc_snapshot(golden_client, monkeypatch):
 
     sr = state["stage_results"]
 
-    # Stage 5 — raw overlap (no statistics): the field-standard set intersection.
+    # Stage 5: raw overlap (no statistics): the field-standard set intersection.
     assert sr["5"]["count"] == snap["overlap_count"]
     for k in snap["stage5_forbidden_keys"]:
         assert k not in sr["5"]
 
-    # Stage 7 — MCC hub ranking (Chin 2014), sole ranker.
+    # Stage 7: MCC hub ranking (Chin 2014), sole ranker.
     assert sr["7"]["ranking_metric"] == snap["ranking_metric"]
     hubs = [h["gene_symbol"] for h in sorted(sr["7"]["hubs"], key=lambda h: -h["mcc"])]
     assert hubs[:5] == snap["mcc_top5"]
 
-    # Stage 8 — functional enrichment includes the disease pathway.
+    # Stage 8: functional enrichment includes the disease pathway.
     enr = {t["name"] for t in sr["8"]["terms"]}
     for term in snap["enrichment_includes"]:
         assert term in enr
@@ -198,18 +198,29 @@ def load_gd2() -> Gd2Reference:
 
 ## 4. Stage-by-stage comparison (Stage 1 to 8)
 
-Each row records how Herbaflow's method for that stage relates to the panel's, with the Level-B judgment in the final column. The most important distinction is at compound-target identification: Herbaflow derives compound targets from measured bioactivity (ChEMBL and PubChem BioAssay), while the panel studies derive them from target-prediction software (SwissTargetPrediction, PharmMapper). This is a different but equally valid sourcing choice, and it is the main reason Herbaflow's hub list differs from any single panel paper's hub list.
+Each cell gives the count and the tool or source that paper reported for that stage, or "not reported" when the paper does not state it. Every number is transcribed from the cited paper. The reference panel uses single curcumin and predicted compound targets, while Herbaflow uses measured bioactivity, so the downstream sets differ by construction. He et al. study colon cancer; the others study colorectal cancer.
 
-| Stage | Herbaflow: method, tool, source, algorithm | Reference: same | Output comparison | Verdict |
-| --- | --- | --- | --- | --- |
-| 1. Plant to compound | Not run: the compound is supplied directly (manual single-compound entry). | Network-pharmacology plant studies start here; not applicable to a single compound. | N/A | not applicable |
-| 2. ADME / drug-likeness | Lipinski rule-of-five and physicochemical descriptors via RDKit. | Panel papers filter by SwissADME / Lipinski oral-bioavailability rules. | N/A for a single curated compound (curcumin is the established input). | different-but-valid |
-| 3. Compound to target | Measured bioactivity: ChEMBL and PubChem BioAssay (experimental affinity). | Predicted: SwissTargetPrediction / PharmMapper (structure-based prediction). | 104 measured targets. | different-but-valid (measured vs predicted) |
-| 4. Disease to target | Open Targets association scores (curated, scored), floor at the default cutoff. | Text-mined unions: GeneCards, DisGeNET, OMIM, TTD. | 746 disease targets above the score floor. | different-but-valid |
-| 5. Overlap | Pure set intersection of the two target sets (field-standard Venn overlap). | Venn / intersection of the compound and disease target sets. | overlap of 15 genes. | equivalent |
-| 6. PPI network | STRING protein-protein interaction network over the overlap genes. | STRING PPI network (the field standard). | 15 nodes, 55 edges. | equivalent |
-| 7. Hub ranking | Maximal Clique Centrality (cytoHubba, Chin 2014), the sole ranker. | cytoHubba MCC (or a related centrality) for hub selection. | top-10 hubs: SMAD3, TP53, JUN, EP300, EGFR, PTGS2, NFE2L2, RARA, SMAD2, RXRA. | equivalent |
-| 8. Functional enrichment | g:Profiler over KEGG and GO, with the compound-target universe as background. | KEGG / GO enrichment via g:Profiler or DAVID. | 101 significant terms; disease pathway recovered. | equivalent |
+| Stage | Herbaflow | Han 2021 | He 2023 | Yuan 2026 | Wu 2025 |
+| --- | --- | --- | --- | --- | --- |
+| 1 Compound | not run (manual single compound) | curcumin (PubChem) | curcumin (PubChem, CAS 458-37-7) | curcumin (PubChem) | curcumin (PubChem/RHAWN) |
+| 2 ADME | RDKit Lipinski/Veber; curcumin passes | SwissADME, Lipinski rule of five; passes | not reported | not reported | not reported |
+| 3 Compound to target | 104 measured (ChEMBL + PubChem BioAssay) | 104 (SwissTargetPrediction, p>0, Homo sapiens) | 448 (PharmMapper + SwissTargetPrediction + TargetNet + SuperPred) | 264 (ChEMBL + STRING + literature) | 60 (STITCH, confidence 0.7, Homo sapiens) |
+| 4 Disease to target | 746 (Open Targets, at or above the score floor) | 1911 (GeneCards/OMIM/TTD/DrugBank) | 704 (GEO GSE74602 DEGs intersected with OMIM/DisGeNET/GeneCards) | 47,261 (GeneCards/DrugBank/DisGeNET/CTD, score above median) | not reported (GeneCards; CRC plus apoptosis) |
+| 5 Overlap | 15 (set intersection) | 30 (Jvenn) | 73 (Venny) | 46 (Venny; plus RNA-seq DEGs 3328) | 25 (curcumin, CRC, apoptosis triple) |
+| 6 PPI | 15 nodes, 55 edges (STRING) | 26 nodes, 90 edges (STRING 0.4) | 70 nodes, 230 edges (STRING) | 42 nodes, 232 edges (STRING v11.5, 0.5, Homo sapiens) | 25 input genes; nodes/edges not reported (STRING) |
+| 7 Hubs | 10 (MCC, Chin 2014) | 3 core by degree (NetworkAnalyzer + CytoNCA): AKT1, EGFR, STAT3 | 10 (cytoHubba top-15 intersection of Degree/MNC/MCC/Closeness): CDK2, TOP2A, CCNA2, AURKA, AURKB, CHEK1, TYMS, TK1, DNMT1, HSP90AA1 | 11 (cytoHubba degree plus median; MCODE 8.364): ESR1, JUN, SIRT1, SERPINE1, ICAM1, HMOX1, CHUK, EP300, MMP3, PTGS1, WNT5A | none (validated MDM2, COX-2; no hub-ranking stage) |
+| 8 Enrichment | 101 (g:Profiler GO+KEGG); CRC present | 61 KEGG, 140 GO (DAVID, P<0.05); CRC present | 34 KEGG, 256 GO (DAVID); CRC not in top-20 | 33 pathways, 106 GO (DAVID, P<0.05 and FDR<0.05); CRC not in top-20 | about 30 KEGG, 24 GO (R clusterProfiler); CRC present |
+
+Level-B methodological judgment (Herbaflow versus the panel as a whole):
+
+- Stage 1: not applicable (Herbaflow starts from the supplied compound)
+- Stage 2: different-but-valid (RDKit drug-likeness versus SwissADME)
+- Stage 3: different-but-valid (measured bioactivity versus predicted targets)
+- Stage 4: different-but-valid (Open Targets scored versus text-mined unions)
+- Stage 5: equivalent (set intersection)
+- Stage 6: equivalent (STRING PPI)
+- Stage 7: equivalent (MCC / cytoHubba family)
+- Stage 8: equivalent (GO/KEGG enrichment)
 
 ## 5. Output comparison
 
