@@ -20,7 +20,9 @@ export function EntityAddControl({
       <p className="hf-caption">
         {current} / {cap}
       </p>
-      <div className={`entity-add-control${atCap ? " entity-add-control--disabled" : ""}`}>
+      <div
+        className={atCap ? "entity-add-control entity-add-control--disabled" : "entity-add-control"}
+      >
         {atCap
           ? React.Children.map(children, (child) =>
               React.isValidElement(child)
