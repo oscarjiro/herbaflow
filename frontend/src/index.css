@@ -1,5 +1,8 @@
-@import "tailwindcss";
+/* Google Fonts must precede the Tailwind import: Tailwind v4 inlines its own
+   @import into the compiled CSS, and the spec requires every @import to come
+   before any other rule, so a font @import placed after it is dropped. */
 @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap");
+@import "tailwindcss";
 
 /* Class-based dark variant (Tailwind v4 form — matches the .dark element AND its descendants). */
 @custom-variant dark (&:where(.dark, .dark *));
