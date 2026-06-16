@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { resetFrom } from "../../api/sdk.gen";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 /**
  * StaleNotice — shown over a stage whose results are out-of-date because an
@@ -16,15 +18,18 @@ export function StaleNotice({ analysisId, fromStage }: { analysisId: string; fro
     onSuccess: () => qc.invalidateQueries(),
   });
   return (
-    <div className="hf-stale" role="status">
-      <p>These results are out of date — an earlier step changed.</p>
-      <button
-        className="hf-btn hf-btn-primary"
-        onClick={() => rerun.mutate()}
-        disabled={rerun.isPending}
-      >
-        Re-run from Step {fromStage}
-      </button>
-    </div>
+    <Card className="border-hf-warning/40 bg-hf-warning-soft/20 w-full" role="status">
+      <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm">These results are out of date — an earlier step changed.</p>
+        <Button
+          variant="outline"
+          className="border-hf-warning text-hf-warning hover:bg-hf-warning/10 shrink-0"
+          onClick={() => rerun.mutate()}
+          disabled={rerun.isPending}
+        >
+          Re-run from Step {fromStage}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

@@ -7,6 +7,8 @@
  * is shown (used for the empty-stage blocking-stop).
  */
 
+import { Button } from "@/components/ui/button";
+
 export function ApprovalBar({
   stage,
   status,
@@ -27,12 +29,12 @@ export function ApprovalBar({
   if (status !== `stage_${stage}_awaiting_approval`) return null;
 
   return (
-    <div className="approval-bar">
-      <button className="hf-btn hf-btn-primary" onClick={onApprove} disabled={disabled}>
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <Button onClick={onApprove} disabled={disabled}>
         Approve &amp; Continue
-      </button>
+      </Button>
       {disabled && disabledReason && (
-        <p className="hf-muted" role="status">
+        <p className="text-muted-foreground text-sm" role="status">
           {disabledReason}
         </p>
       )}

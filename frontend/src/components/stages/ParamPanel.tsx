@@ -12,6 +12,19 @@
 
 import { useState, useCallback } from "react";
 import { ADME_BOOLEAN_PARAMS, ADME_NUMERIC_PARAMS } from "../../contract";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/cn";
 
 export type ParamMeta = {
   default: number | boolean | string;
@@ -145,18 +158,21 @@ export function ParamPanel({
   }
 
   return (
-    <div className="param-panel">
-      <button
-        type="button"
-        className="hf-btn hf-btn-ghost param-panel__toggle"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      >
-        {open ? "▾" : "▸"} {title}
-      </button>
+    <Card className="w-full">
+      <CardHeader className="pb-2">
+        <button
+          type="button"
+          className="flex w-full items-center gap-2 text-left"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+        >
+          <span className="text-muted-foreground text-xs">{open ? "▾" : "▸"}</span>
+          <CardTitle className="text-sm">{title}</CardTitle>
+        </button>
+      </CardHeader>
 
       {open && (
-        <div className="param-panel__body">
+        <CardContent className="flex flex-col gap-4 pt-0">
           {numericKeys.map((key) => {
             const m = meta[key];
             if (!m) return null;
@@ -166,28 +182,31 @@ export function ParamPanel({
                 ? `, recommended ${m.recommended_min}–${m.recommended_max}`
                 : "";
             return (
-              <div key={key} className="param-row">
-                <label htmlFor={`param-${key}`} className="param-row__label">
-                  {key}
-                </label>
-                <p className="param-row__description">
+              <div key={key} className="flex flex-col gap-1">
+                <Label htmlFor={`param-${key}`}>{key}</Label>
+                <p className="text-muted-foreground text-xs">
                   {m.description}
-                  <span className="param-row__hint">
+                  <span className="text-muted-foreground/70">
                     {" "}
                     (default {String(m.default)}
                     {recHint})
                   </span>
                 </p>
-                <input
+                <Input
                   id={`param-${key}`}
                   type="number"
                   aria-label={key}
                   value={localStr[key] ?? ""}
                   disabled={disabled}
                   onChange={(e) => handleNumericChange(key, e.target.value)}
-                  className={err ? "param-input param-input--error" : "param-input"}
+                  aria-invalid={err ? true : undefined}
+                  className={cn(err && "border-destructive")}
                 />
-                {err && <p className="param-error">{err}</p>}
+                {err && (
+                  <p className="text-destructive text-xs" role="alert">
+                    {err}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -196,18 +215,18 @@ export function ParamPanel({
             const m = meta[key];
             if (!m) return null;
             return (
-              <div key={key} className="param-row">
-                <label className="param-row__label">
-                  <input
-                    type="checkbox"
+              <div key={key} className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id={`param-${key}`}
                     aria-label={key}
                     checked={localStr[key] === "true"}
                     disabled={disabled}
-                    onChange={(e) => handleBooleanChange(key, e.target.checked)}
-                  />{" "}
-                  {key}
-                </label>
-                <p className="param-row__description">{m.description}</p>
+                    onCheckedChange={(checked) => handleBooleanChange(key, checked === true)}
+                  />
+                  <Label htmlFor={`param-${key}`}>{key}</Label>
+                </div>
+                <p className="text-muted-foreground text-xs">{m.description}</p>
               </div>
             );
           })}
@@ -217,43 +236,43 @@ export function ParamPanel({
             if (!m) return null;
             const options = m.enum ?? [];
             return (
-              <div key={key} className="param-row">
-                <label htmlFor={`param-${key}`} className="param-row__label">
-                  {key}
-                </label>
-                <p className="param-row__description">
+              <div key={key} className="flex flex-col gap-1">
+                <Label htmlFor={`param-${key}`}>{key}</Label>
+                <p className="text-muted-foreground text-xs">
                   {m.description}
-                  <span className="param-row__hint"> (default {String(m.default)})</span>
+                  <span className="text-muted-foreground/70"> (default {String(m.default)})</span>
                 </p>
-                <select
-                  id={`param-${key}`}
-                  aria-label={key}
+                <Select
                   value={localStr[key] ?? String(m.default)}
                   disabled={disabled}
-                  onChange={(e) => handleSelectChange(key, e.target.value)}
-                  className="param-input"
+                  onValueChange={(value) => handleSelectChange(key, value)}
                 >
-                  {options.map((o) => (
-                    <option key={String(o)} value={String(o)}>
-                      {String(o)}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id={`param-${key}`} aria-label={key} className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {options.map((o) => (
+                      <SelectItem key={String(o)} value={String(o)}>
+                        {String(o)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             );
           })}
 
-          <button
+          <Button
             type="button"
-            className="hf-btn hf-btn-primary"
             disabled={!redoEnabled}
             onClick={handleRedo}
             aria-label="Redo from this stage with changed parameters"
+            className="self-start"
           >
             Redo
-          </button>
-        </div>
+          </Button>
+        </CardContent>
       )}
-    </div>
+    </Card>
   );
 }

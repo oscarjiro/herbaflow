@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { ApprovalBar } from "../src/components/stages/ApprovalBar";
+import { ApprovalBar } from "./ApprovalBar";
 
 describe("ApprovalBar", () => {
   it("renders only for the matching stage at an awaiting checkpoint", () => {
