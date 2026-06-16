@@ -8,8 +8,8 @@
  */
 
 import { useMemo, useState } from "react";
-import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
@@ -20,6 +20,10 @@ import {
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
 import { exportArtifactUrl } from "../../lib/exportUrl";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { DataTable } from "@/components/ui/DataTable";
+import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -104,7 +108,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   const [page, setPage] = useState(0);
 
   const hubs = useMemo(() => stage7?.hubs ?? [], [stage7]);
-  const csvHref = useCsvBlobUrl(S7_CSV_HEADER, buildS7CsvRows(hubs));
+  const csvRows = useMemo(() => buildS7CsvRows(hubs), [hubs]);
 
   if (!stage7) return null;
 
@@ -120,39 +124,101 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   const stale = stage7.stale === true;
   const isComplete = data.status === "complete";
 
+  // Column definitions — SAME columns + order as the prior <table>
+  const columns: ColumnDef<Hub>[] = [
+    {
+      id: "rank",
+      header: "Rank",
+      cell: ({ row }) => row.original.rank,
+    },
+    {
+      id: "gene",
+      header: "Gene",
+      cell: ({ row }) => {
+        const h = row.original;
+        return h.source_url ? (
+          <a href={h.source_url} target="_blank" rel="noreferrer">
+            {h.gene_symbol}
+          </a>
+        ) : (
+          h.gene_symbol
+        );
+      },
+    },
+    {
+      id: "mcc",
+      header: "MCC",
+      cell: ({ row }) => row.original.mcc,
+    },
+    {
+      id: "degree",
+      header: "Degree",
+      cell: ({ row }) => formatSig(row.original.degree),
+    },
+    {
+      id: "betweenness",
+      header: "Betweenness",
+      cell: ({ row }) => formatSig(row.original.betweenness),
+    },
+    {
+      id: "closeness",
+      header: "Closeness",
+      cell: ({ row }) => formatSig(row.original.closeness),
+    },
+    {
+      id: "eigenvector",
+      header: "Eigenvector",
+      cell: ({ row }) => formatSig(row.original.eigenvector),
+    },
+  ];
+
   return (
-    <section className="stage-view stage-view--7">
-      <h2>Step 7 — Hub Genes</h2>
+    <section className="flex flex-col gap-6">
+      {/* Editorial header */}
+      <div className="flex flex-col gap-1">
+        <Eyebrow>Step 7</Eyebrow>
+        <h2 className="hf-heading-serif">Step 7 — Hub Genes</h2>
+      </div>
+
       <StageDataSources stage={7} />
 
       {/* Summary cards */}
-      <div className="stage-summary">
-        <div className="summary-card" aria-label={`${stage7.node_count} nodes`}>
-          <span className="summary-card__value">{stage7.node_count}</span>
-          <span className="summary-card__label">network nodes</span>
-        </div>
-        <div className="summary-card" aria-label={`${hubs.length} hubs`}>
-          <span className="summary-card__value">{hubs.length}</span>
-          <span className="summary-card__label">hubs reported</span>
+      <div className="flex flex-wrap gap-3">
+        <div
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
+          aria-label={`${stage7.node_count} nodes`}
+        >
+          <span className="hf-num text-2xl font-semibold tabular-nums">{stage7.node_count}</span>
+          <span className="text-muted-foreground text-xs">network nodes</span>
         </div>
         <div
-          className="summary-card summary-card--muted"
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
+          aria-label={`${hubs.length} hubs`}
+        >
+          <span className="hf-num text-2xl font-semibold tabular-nums">{hubs.length}</span>
+          <span className="text-muted-foreground text-xs">hubs reported</span>
+        </div>
+        <div
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
           aria-label={`metric ${stage7.ranking_metric}`}
         >
-          <span className="summary-card__value">{stage7.ranking_metric}</span>
-          <span className="summary-card__label">ranking metric</span>
+          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+            {stage7.ranking_metric}
+          </span>
+          <span className="text-muted-foreground text-xs">ranking metric</span>
         </div>
       </div>
 
       {tooSmall && (
-        <p className="hf-muted" role="status">
+        <p className="text-muted-foreground text-sm" role="status">
           The network is small or sparse — centrality ranking is unreliable on trivial topology.
         </p>
       )}
 
+      {/* Hub bar chart image (complete-only, onError-hidden) */}
       {isComplete && (
         <img
-          className="hf-stage-chart"
+          className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
           alt="Top hub genes"
           src={exportArtifactUrl(data.analysis_id, "stage7_hub_bar.png")}
           onError={(e) => {
@@ -161,95 +227,67 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         />
       )}
 
-      {/* Table controls */}
-      <div className="table-controls">
-        <label htmlFor="t7-page-size">Rows per page</label>
-        <select
-          id="t7-page-size"
-          value={pageSize}
-          onChange={(e) => {
-            const v = e.target.value;
-            setPageSize(v === "all" ? "all" : Number(v));
-            setPage(0);
-          }}
-        >
-          {PAGE_SIZES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-          <option value="all">All</option>
-        </select>
-        <a
-          href={csvHref}
-          download="hub-genes.csv"
-          className="hf-btn hf-btn-ghost"
-          aria-label="Download CSV"
-        >
-          Download CSV
-        </a>
-      </div>
+      {/* Hub-ranking table card */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="t7-page-size" className="text-muted-foreground text-sm">
+                Rows per page
+              </label>
+              <select
+                id="t7-page-size"
+                className="bg-background rounded border px-2 py-1 text-sm"
+                value={pageSize}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setPageSize(v === "all" ? "all" : Number(v));
+                  setPage(0);
+                }}
+              >
+                {PAGE_SIZES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+                <option value="all">All</option>
+              </select>
+            </div>
+            <CsvDownloadButton
+              header={S7_CSV_HEADER}
+              rows={csvRows}
+              filename="hub-genes.csv"
+              label="Download CSV"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="px-0">
+          <DataTable columns={columns} data={visible} />
+        </CardContent>
 
-      {/* Hub-ranking table */}
-      <div className="table-wrapper">
-        <table className="hf-table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Gene</th>
-              <th>MCC</th>
-              <th>Degree</th>
-              <th>Betweenness</th>
-              <th>Closeness</th>
-              <th>Eigenvector</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((h) => (
-              <tr key={`${h.gene_symbol}-${h.rank}`}>
-                <td>{h.rank}</td>
-                <td>
-                  {h.source_url ? (
-                    <a href={h.source_url} target="_blank" rel="noreferrer">
-                      {h.gene_symbol}
-                    </a>
-                  ) : (
-                    h.gene_symbol
-                  )}
-                </td>
-                <td>{h.mcc}</td>
-                <td>{formatSig(h.degree)}</td>
-                <td>{formatSig(h.betweenness)}</td>
-                <td>{formatSig(h.closeness)}</td>
-                <td>{formatSig(h.eigenvector)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {pageSize !== "all" && totalPages > 1 && (
-        <div className="pagination">
-          <button
-            className="hf-btn"
-            disabled={currentPage === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage + 1} / {totalPages}
-          </span>
-          <button
-            className="hf-btn"
-            disabled={currentPage >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
+        {/* Pagination */}
+        {pageSize !== "all" && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 px-6 pb-4">
+            <button
+              className="hf-btn text-sm"
+              disabled={currentPage === 0}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </button>
+            <span className="text-muted-foreground text-sm">
+              Page {currentPage + 1} / {totalPages}
+            </span>
+            <button
+              className="hf-btn text-sm"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </Card>
 
       {/* Hub-ranking param panel */}
       {hubParams && (
@@ -277,7 +315,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         onApprove={() => advance.mutate()}
       />
 
-      <footer className="stage-footer hf-muted">
+      <footer className="text-muted-foreground text-sm">
         <p>
           Ranking: Maximal Clique Centrality (MCC, Chin 2014) on the undirected STRING PPI. Degree,
           betweenness, closeness, and eigenvector centrality (networkx) are reported per target for
