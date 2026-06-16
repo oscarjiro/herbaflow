@@ -48,7 +48,11 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
     <section>
       <h1>Run {analysisId}</h1>
       <p>Status: {data.status}</p>
-      <DownloadResults status={data.status} analysisId={analysisId} />
+      <DownloadResults
+        status={data.status}
+        analysisId={analysisId}
+        hasCompounds={runHasCompounds(data)}
+      />
       {data.status === "complete" && runHasCompounds(data) && (
         <img
           className="hf-stage-chart"

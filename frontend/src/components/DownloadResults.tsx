@@ -10,14 +10,21 @@ import {
 export function DownloadResults({
   status,
   analysisId,
+  hasCompounds = true,
 }: {
   status: string | null | undefined;
   analysisId: string;
+  hasCompounds?: boolean;
 }) {
   if (status !== "complete") return null;
+  // The network-and-docking bundle holds compound-target-pathway and docking artifacts only;
+  // a target-only run has none, and the backend 404s that bundle, so do not offer it. The PPI
+  // network stays available via the stages and all-results bundles.
   const links: [string, string][] = [
     ["Report (.md)", exportReportUrl(analysisId)],
-    ["Network & docking (.zip)", exportNetworkBundleUrl(analysisId)],
+    ...(hasCompounds
+      ? ([["Network & docking (.zip)", exportNetworkBundleUrl(analysisId)]] as [string, string][])
+      : []),
     ["All stages (.zip)", exportStagesBundleUrl(analysisId)],
     ["All results (.zip)", exportAllResultsUrl(analysisId)],
   ];

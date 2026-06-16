@@ -25,4 +25,12 @@ describe("DownloadResults", () => {
       expect.stringContaining("/export/all-results.zip"),
     );
   });
+
+  it("hides the network-and-docking bundle for target-only runs (it would 404)", () => {
+    render(<DownloadResults status="complete" analysisId="a1" hasCompounds={false} />);
+    expect(screen.queryByRole("link", { name: /network/i })).toBeNull();
+    // PPI stays reachable through the stages and all-results bundles.
+    expect(screen.getByRole("link", { name: /all stages/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /all results/i })).toBeInTheDocument();
+  });
 });
