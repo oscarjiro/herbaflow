@@ -14,3 +14,11 @@ export function isUserRemoved(tag?: string | null): boolean {
 export function atMinEntities(effectiveCount: number): boolean {
   return effectiveCount <= 1;
 }
+
+// A run has compounds unless its plant side is the target-only manual mode.
+export function runHasCompounds(
+  run: { parameters?: { input_modes?: { plant?: string } } } | null | undefined,
+): boolean {
+  const plant = run?.parameters?.input_modes?.plant ?? "selection";
+  return plant !== "manual_targets";
+}
