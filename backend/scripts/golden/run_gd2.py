@@ -8,14 +8,15 @@ renders the validation report. Run from ``backend/``::
 
 It spins up a throwaway Postgres (testcontainers), applies the migrations, seeds the captured GD-2
 canonical targets, replays the recorded protein-protein interaction network and an empty enrichment
-response (reusing the regression fakes verbatim), drives the headline manual-targets run
-end-to-end, then:
-  - computes the headline ranker agreement (Kendall tau / Spearman rho over the shared ranked genes,
-    plus overlap at 10) between Herbaflow's Maximal Clique Centrality ranking and the reference
-    ranking;
-  - reports the target-set recovery from the seed fixture set math (the companion run is already
-    proven by the GD-2 regression test, so no second pipeline runs here);
-  - downloads ``GET /analyses/{id}/export/all-results.zip`` and extracts it into the artifacts dir;
+response (reusing the regression fakes verbatim), drives two manual-targets runs end-to-end (the
+full-manual headline run over the supplied 1165 plant + 777 disease target sets, and the controlled
+identical-input run over the 233 shared genes on both sides), then:
+  - computes the ranker agreement (Kendall tau / Spearman rho over the shared ranked genes, plus
+    overlap at 10) between Herbaflow's Maximal Clique Centrality ranking and the reference ranking
+    from the controlled identical-input run;
+  - proves the target-set recovery live from the full-manual headline run's own overlap;
+  - downloads ``GET /analyses/{id}/export/all-results.zip`` for the headline run and extracts it
+    into the artifacts dir;
   - renders the report with ``report.render_gd2`` and writes ``report.md``.
 
 No statistic is reimplemented here: it reuses ``scripts/golden/stats.py`` and
@@ -91,56 +92,56 @@ def _stage_rows(m: dict[str, Any]) -> list[StageRow]:
         StageRow(
             "1. Plant to compound",
             "Not run: the targets are supplied directly (manual target entry).",
-            "Plant-to-compound mapping precedes target derivation in the reference study.",
+            "KNApSAcK; 910 candidate compounds (44 + 635 + 231 across the three plants).",
             "N/A",
             "not applicable",
         ),
         StageRow(
             "2. ADME / drug-likeness",
-            "Not run: no compounds are derived in this target-controlled comparison.",
-            "Drug-likeness filtering applied at the compound step.",
+            "Not run: no compounds are derived in a target-only run.",
+            "SwissADME, bioavailability > 0.5 and drug-likeness > 0; 113 compounds passing.",
             "N/A",
             "not applicable",
         ),
         StageRow(
             "3. Compound to target",
-            "Not run: the plant-side targets are supplied directly as resolved gene targets.",
-            "Targets derived from compounds via target-prediction software.",
-            "N/A",
-            "not applicable",
+            f"User-provided targets (manual entry): {m['plant_target_count']} plant-side targets.",
+            "SwissTargetPrediction, default parameters; 1906 undeduped (247 + 1056 + 603).",
+            f"{m['plant_target_count']} plant-side targets supplied.",
+            "user-provided versus predicted",
         ),
         StageRow(
             "4. Disease to target",
-            "Not run: the disease-side targets are supplied directly as resolved gene targets.",
-            "Disease targets gathered from curated and text-mined disease-gene resources.",
-            "N/A",
-            "not applicable",
+            f"User-provided targets (manual entry): {m['disease_target_count']} disease targets.",
+            "GeneCards; 777 disease targets.",
+            f"{m['disease_target_count']} disease targets supplied.",
+            "user-provided versus curated",
         ),
         StageRow(
             "5. Overlap",
-            "Pure set intersection of the two supplied target sets.",
-            "Intersection of the plant-target and disease-target sets.",
-            f"overlap of {m['overlap_count']} genes (identical inputs on both sides).",
-            "equivalent",
+            "Pure set intersection of the supplied plant and disease target sets.",
+            "Intersection of the plant-target and disease-target sets; 233 shared genes.",
+            f"overlap of {m['main_overlap_count']} genes.",
+            "equivalent method (set intersection)",
         ),
         StageRow(
             "6. PPI network",
             "STRING protein-protein interaction network over the overlap genes.",
-            "STRING protein-protein interaction network over the overlap genes.",
-            f"{m['ppi_node_count']} nodes, {m['ppi_edge_count']} edges (same recorded network).",
-            "equivalent",
+            "STRING, medium confidence 0.4, species 9606; node and edge counts not reported.",
+            f"{m['main_ppi_node_count']} nodes, {m['main_ppi_edge_count']} edges.",
+            "equivalent method (STRING network)",
         ),
         StageRow(
             "7. Hub ranking",
             "Maximal Clique Centrality (cytoHubba, Chin 2014), the sole ranker.",
-            "Mean of four min-max normalized centralities (degree, betweenness, closeness, "
-            "eigenvector).",
-            "Herbaflow top-10: " + ", ".join(m["herbaflow_top10"]) + ".",
-            "different-but-valid (both centrality-based hub rankers)",
+            "Iterated skyline (Pareto-dominance) query over degree, betweenness, closeness, and "
+            "eigenvector centrality.",
+            "Herbaflow top-10: " + ", ".join(m["main_herbaflow_top10"]) + ".",
+            "different-but-valid (both centrality-based)",
         ),
         StageRow(
             "8. Functional enrichment",
-            "g:Profiler over KEGG and GO, with the target set as background.",
+            "g:Profiler over GO and KEGG; replayed empty because the reference reported none.",
             "Not reported by the reference study.",
             "not assessed (no reference enrichment to compare against).",
             "not assessed",
@@ -172,8 +173,9 @@ def _code_excerpts() -> list[CodeExcerpt]:
 # ---------------------------------------------------------------------------
 
 
-async def _run_pipeline(client: httpx.AsyncClient, seed: dict[str, Any]) -> dict[str, Any]:
-    """POST the headline analysis, poll to completion, return stage_results + the run id."""
+async def _run_controlled(client: httpx.AsyncClient, seed: dict[str, Any]) -> dict[str, Any]:
+    """POST the controlled identical-input analysis (233 genes both sides), poll to completion,
+    return stage_results + run id."""
     ids = seed["headline_target_ids"]
     resp = await client.post(
         "/analyses",
@@ -182,6 +184,29 @@ async def _run_pipeline(client: httpx.AsyncClient, seed: dict[str, Any]) -> dict
             "manual_target_ids": ids,
             "disease_input_mode": "manual_disease_targets",
             "manual_disease_target_ids": ids,
+            "mode": "auto",
+        },
+    )
+    if resp.status_code != 202:
+        raise RuntimeError(f"create failed {resp.status_code}: {resp.text}")
+    run_id = resp.json()["analysis_id"]
+    state = await poll_run(client, run_id, max_iters=300)
+    if state.get("status") != "complete":
+        raise RuntimeError(
+            f"run did not complete: {state.get('status')} {state.get('error_message')}"
+        )
+    return {"run_id": run_id, "stage_results": state["stage_results"]}
+
+
+async def _run_full_manual(client: httpx.AsyncClient, seed: dict[str, Any]) -> dict[str, Any]:
+    """POST the headline full-manual analysis (1165 plant + 777 disease targets), poll, return."""
+    resp = await client.post(
+        "/analyses",
+        json={
+            "plant_input_mode": "manual_targets",
+            "manual_target_ids": seed["plant_target_ids"],
+            "disease_input_mode": "manual_disease_targets",
+            "manual_disease_target_ids": seed["disease_target_ids"],
             "mode": "auto",
         },
     )
@@ -222,31 +247,45 @@ def _download_and_extract(zip_bytes: bytes) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-def _score(sr: dict[str, Any], seed: dict[str, Any]) -> dict[str, Any]:
-    """Compute the headline numbers, the C4 ranker agreement, and the recovery from fixtures."""
+def _score(
+    main_sr: dict[str, Any], controlled_sr: dict[str, Any], seed: dict[str, Any]
+) -> dict[str, Any]:
+    """Headline numbers from the full-manual run; ranker agreement from the controlled run."""
     ref = reference.load_gd2()
 
-    s5 = sr["5"]
-    overlap_count = s5.get("count", 0)
+    # --- headline (full-manual) run: the supplied target sets carried end to end ---
+    main_s5 = main_sr["5"]
+    main_overlap_count = main_s5.get("count", 0)
+    main_overlap_symbols = {o["gene_symbol"] for o in main_s5.get("overlap", [])}
+    main_s6 = main_sr["6"]
+    main_ppi_node_count = len(main_s6.get("nodes", []))
+    main_ppi_edge_count = len(main_s6.get("edges", []))
+    main_s7 = main_sr["7"]
+    main_ranking = [h["gene_symbol"] for h in sorted(main_s7["hubs"], key=lambda h: -h["mcc"])]
+    main_herbaflow_top10 = main_ranking[:10]
+    plant_target_count = len(seed["plant_target_ids"])
+    disease_target_count = len(seed["disease_target_ids"])
 
-    s6 = sr["6"]
-    ppi_node_count = len(s6.get("nodes", []))
-    ppi_edge_count = len(s6.get("edges", []))
-
-    s7 = sr["7"]
-    herbaflow_ranking = [h["gene_symbol"] for h in sorted(s7["hubs"], key=lambda h: -h["mcc"])]
+    # --- controlled (identical-input) run: the apples-to-apples ranker comparison ---
+    c5 = controlled_sr["5"]
+    overlap_count = c5.get("count", 0)
+    c6 = controlled_sr["6"]
+    ppi_node_count = len(c6.get("nodes", []))
+    ppi_edge_count = len(c6.get("edges", []))
+    c7 = controlled_sr["7"]
+    herbaflow_ranking = [h["gene_symbol"] for h in sorted(c7["hubs"], key=lambda h: -h["mcc"])]
     herbaflow_top10 = herbaflow_ranking[:10]
 
-    s8 = sr["8"]
-    enrichment_terms = s8.get("terms", [])
-    enrichment_term_count = s8.get("count", len(enrichment_terms))
+    c8 = controlled_sr["8"]
+    enrichment_terms = c8.get("terms", [])
+    enrichment_term_count = c8.get("count", len(enrichment_terms))
 
-    # --- C4: ranker agreement over the shared ranked genes ---
+    # --- ranker agreement over the shared ranked genes (controlled run) ---
     hito_ranking = list(ref.hito_top10)
     rc = stats.rank_correlation(herbaflow_ranking, hito_ranking)
     o10 = stats.overlap_at_k(herbaflow_ranking, hito_ranking, 10)
 
-    # --- hub comparison table over the union of both top-10s ---
+    # --- hub comparison table over the union of both top-10s (controlled run) ---
     herbaflow_rank = {g: i + 1 for i, g in enumerate(herbaflow_top10)}
     union = list(herbaflow_top10)
     for g in hito_ranking:
@@ -264,16 +303,15 @@ def _score(sr: dict[str, Any], seed: dict[str, Any]) -> dict[str, Any]:
             )
         )
 
-    # --- target-set recovery from the seed fixture set math (companion run proven by the test) ---
+    # --- target-set recovery from the LIVE headline run ---
     ref233 = set(seed["overlap_233_symbols"])
-    overlap247 = set(seed["gd2_overlap_247_symbols"])
-    recovery_overlap_count = int(seed["n_overlap_247"])
-    recovered = ref233 <= overlap247
-    recall = (len(ref233 & overlap247) / len(ref233)) if ref233 else 0.0
-    extra_genes = sorted(overlap247 - ref233)
+    recovered = ref233 <= main_overlap_symbols
+    recall = (len(ref233 & main_overlap_symbols) / len(ref233)) if ref233 else 0.0
+    extra_genes = sorted(main_overlap_symbols - ref233)
+    recovery_overlap_count = main_overlap_count
 
-    # --- verdict (spec §5.5 / §7, adapted for GD-2) ---
-    level_a_pass = True  # the GD-2 regression tests are green
+    # --- verdict ---
+    level_a_pass = True
     rankers_agree = (
         rc.kendall_tau is not None
         and rc.spearman_rho is not None
@@ -303,6 +341,12 @@ def _score(sr: dict[str, Any], seed: dict[str, Any]) -> dict[str, Any]:
         )
 
     return {
+        "main_overlap_count": main_overlap_count,
+        "main_ppi_node_count": main_ppi_node_count,
+        "main_ppi_edge_count": main_ppi_edge_count,
+        "main_herbaflow_top10": main_herbaflow_top10,
+        "plant_target_count": plant_target_count,
+        "disease_target_count": disease_target_count,
         "overlap_count": overlap_count,
         "ppi_node_count": ppi_node_count,
         "ppi_edge_count": ppi_edge_count,
@@ -358,8 +402,7 @@ def _build_model(m: dict[str, Any], artifact_files: list[str]) -> Gd2ReportModel
         verdict_reason=m["verdict_reason"],
         notes=[
             "The full export bundle for this run is attached under `artifacts/` as proof: "
-            "the applicable per-stage CSVs, the chart PNGs, the Cytoscape network tables, and the "
-            "run's own report.",
+            "the applicable per-stage CSVs, the chart PNGs, and the run's own report.",
             "The target-set recovery is asserted by the regression test, which confirms the "
             "companion run recovers the reference overlap at full recall plus the extra genes.",
         ],
@@ -396,16 +439,18 @@ async def main() -> None:
             app.dependency_overrides[db.get_session] = override
             transport = httpx.ASGITransport(app=app)
             async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-                run = await _run_pipeline(client, seed)
-                sr = run["stage_results"]
+                controlled = await _run_controlled(client, seed)
+                main = await _run_full_manual(client, seed)
+                main_sr = main["stage_results"]
+                controlled_sr = controlled["stage_results"]
 
-                export = await client.get(f"/analyses/{run['run_id']}/export/all-results.zip")
+                export = await client.get(f"/analyses/{main['run_id']}/export/all-results.zip")
                 if export.status_code != 200:
                     raise RuntimeError(f"export failed {export.status_code}: {export.text[:200]}")
             app.dependency_overrides.clear()
 
             artifact_files = _download_and_extract(export.content)
-            m = _score(sr, seed)
+            m = _score(main_sr, controlled_sr, seed)
             model = _build_model(m, artifact_files)
 
             DOCS_DIR.mkdir(parents=True, exist_ok=True)
@@ -414,8 +459,9 @@ async def main() -> None:
 
             # --- console summary ---
             print("GD-2 evaluation complete")
-            print(f"  headline overlap : {m['overlap_count']}")
-            print(f"  PPI              : {m['ppi_node_count']} nodes, {m['ppi_edge_count']} edges")
+            print(f"  headline overlap : {m['main_overlap_count']} (full-manual 1165 x 777)")
+            print(f"  controlled overlap: {m['overlap_count']} (identical 233 both sides)")
+            print(f"  PPI (controlled) : {m['ppi_node_count']} nodes, {m['ppi_edge_count']} edges")
             print(f"  Herbaflow top-10 : {', '.join(m['herbaflow_top10'])}")
             print(f"  reference top-10 : {', '.join(m['reference_top10'])}")
             tau = m["c4_kendall_tau"]
