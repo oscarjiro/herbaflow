@@ -582,20 +582,26 @@ def _gd2_overview(m: Gd2ReportModel) -> str:
         ),
         "",
         (
-            "This is an input-controlled comparison. Both analyses are driven from the same "
-            f"{m.overlap_count} shared target genes and the same protein-protein interaction "
-            "network, so the only variable under test is the hub-ranking formula. Herbaflow ranks "
-            "hubs by Maximal Clique Centrality (the cytoHubba method, Chin et al. 2014). The "
-            "reference ranks hubs by the mean of four classic centrality measures (degree, "
-            "betweenness, closeness, and eigenvector), each min-max normalized. The question is "
-            "whether two independently chosen, centrality-based hub rankers agree on the most "
-            "central genes when they see identical inputs."
+            "Herbaflow's headline run takes the full supplied target sets end to end: the "
+            "plant-side and disease-side targets are entered directly, and Herbaflow intersects "
+            "them to its own shared-target set, builds the interaction network, and ranks the "
+            "hubs. To compare the two hub-ranking formulas on equal footing, a second controlled "
+            f"run gives both sides the reference's own {m.overlap_count} shared genes, reproducing "
+            "the reference's interaction network exactly, so the only variable left is the ranking "
+            "formula. Herbaflow ranks hubs by Maximal Clique Centrality (the cytoHubba method, "
+            "Chin et al. 2014). The reference "
+            "ranks hubs with an iterated skyline (Pareto-dominance) query over four classic "
+            "centrality measures (degree, betweenness, closeness, and eigenvector): it repeatedly "
+            "takes the genes that no other gene beats on every centrality at once, records them, "
+            "removes them, and repeats. The question is whether two independently chosen, "
+            "centrality-based hub rankers agree on the most central genes when they see identical "
+            "inputs."
         ),
         "",
         (
-            "The targets are supplied directly to the pipeline, so the early stages that derive "
-            "targets from plants and compounds do no work here. The comparison begins at the "
-            "target-overlap step and centers on the hub ranking."
+            "The targets are supplied directly to the pipeline (manual entry), so the early stages "
+            "that derive targets from plants and compounds are user-provided rather than computed. "
+            "The comparison begins at the target-overlap step and centers on the hub ranking."
         ),
         "",
         "### Fixtures used",
@@ -675,12 +681,13 @@ def _gd2_stage_comparison(m: Gd2ReportModel) -> str:
             "",
             (
                 "Each row records how Herbaflow's method for that stage relates to the "
-                "reference's, with the methodological judgment in the final column. The early "
-                "target-sourcing stages are not applicable here because the targets are supplied "
-                "directly. The "
-                "overlap and interaction-network stages are equivalent by construction (identical "
-                "inputs, identical recorded network). The hub-ranking stage is the one point of "
-                "methodological difference and the focus of this comparison."
+                "reference's, with the methodological judgment in the final column. The Herbaflow "
+                "column reflects the headline full-manual run: the early target-sourcing stages "
+                "are user-provided (the targets are entered directly), while the reference derived "
+                "them through its own plant-to-target and disease-to-target pipeline, shown for "
+                "comparison. The overlap and interaction-network stages use the same methods on "
+                "both sides. The hub-ranking stage is the one point of methodological difference "
+                "and the focus of this comparison."
             ),
             "",
             _table(
@@ -724,18 +731,21 @@ def _gd2_output_comparison(m: Gd2ReportModel) -> str:
         "### Shared candidate targets and the interaction network",
         "",
         (
-            f"The shared target set has {m.overlap_count} genes, identical on both sides by "
-            f"construction. The protein-protein interaction network built over those genes has "
-            f"{m.ppi_node_count} nodes and {m.ppi_edge_count} edges. Both rankers operate on this "
-            "same network."
+            "The hub-ranking comparison below uses the controlled run, where both sides receive "
+            f"the reference's own {m.overlap_count} shared genes so the two rankers see identical "
+            "inputs. The protein-protein interaction network built over those genes has "
+            f"{m.ppi_node_count} nodes and {m.ppi_edge_count} edges, reproducing the reference's "
+            "network. Both rankers operate on this same network. The headline full-manual run's "
+            "own larger overlap is reported under target-set recovery below."
         ),
         "",
         "### Hub ranking: Herbaflow Maximal Clique Centrality versus the reference ranker",
         "",
         (
             "The table below lists every gene that appears in either side's top-10, with its rank "
-            "on each side and the reference composite score. A gene present on one side but "
-            "outside the other side's top-10 is marked accordingly."
+            "on each side and the reference centrality profile (the mean of the four "
+            "centralities). A gene present on one side but outside the other side's top-10 is "
+            "marked accordingly."
         ),
         "",
         _table(
@@ -743,22 +753,26 @@ def _gd2_output_comparison(m: Gd2ReportModel) -> str:
                 "Gene",
                 "Herbaflow MCC rank",
                 "Reference rank",
-                "Reference composite score",
+                "Reference centrality profile (mean)",
             ],
             hub_rows,
         ),
         "",
         (
             f"Herbaflow's top-10 by Maximal Clique Centrality: {_join_or_dash(m.herbaflow_top10)}. "
-            f"The reference top-10 by composite score: {_join_or_dash(m.reference_top10)}."
+            f"The reference top-10 by skyline rank: {_join_or_dash(m.reference_top10)}. The "
+            "reference centrality profile shown in the table is the mean of the four centralities, "
+            "included as an auxiliary summary; the reference ranks by the skyline query described "
+            "above, not by this mean. The reference ranking order is provisional pending the "
+            "author's exact skyline output and is flagged for revision."
         ),
         "",
         "### Target-set recovery",
         "",
         (
-            f"A companion run feeds the full plant target set and the full disease target set into "
-            f"the pipeline and lets Herbaflow compute its own overlap. That overlap has "
-            f"{m.recovery_overlap_count} genes and contains all "
+            f"The headline full-manual run feeds the full plant target set and the full disease "
+            f"target set into the pipeline and lets Herbaflow compute its own overlap. That "
+            f"overlap has {m.recovery_overlap_count} genes and contains all "
             f"{m.recovery_reference_count} of the reference study's shared targets, a recall of "
             f"{m.recovery_recall * 100:.0f} percent, plus {m.recovery_extra_count} additional "
             f"genes: {_join_or_dash(m.recovery_extra_genes)}. The additional genes trace to "
@@ -801,9 +815,10 @@ def _gd2_final_evaluation(m: Gd2ReportModel) -> str:
                 "direction: genes one ranks highly the other also tends to rank highly. The "
                 "agreement is partial rather than exact, which is expected. Maximal Clique "
                 "Centrality scores a gene by its membership in densely connected cliques, while "
-                "the reference score averages four whole-network centrality measures. The two "
-                "formulas weight the same network differently, so they reorder the shared hubs "
-                "without disagreeing on which genes are central."
+                "the reference selects hubs with a skyline (Pareto-dominance) query over four "
+                "whole-network centrality measures. The two formulas weight the same network "
+                "differently, so they reorder the shared hubs without disagreeing on which genes "
+                "are central."
             ),
             "",
             "### Target-set recovery",
