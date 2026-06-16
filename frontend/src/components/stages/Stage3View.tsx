@@ -2,14 +2,14 @@
  * Stage3View — compound → target identification results.
  *
  * Renders:
- *  - Summary cards: target count, coverage %, and per-source edge counts
- *    (ChEMBL bioactivity / PubChem BioAssay)
- *  - Targets table (one row per target): gene symbol, UniProt accession (linked),
- *    evidence/method(s), # compounds, and an edit tag badge
- *  - Pagination (10 / 20 / 50 / all) and a CSV download keyed on gene symbol +
- *    UniProt accession + method + source_url (NEVER a UUID column)
- *  - Per-compound coverage table (0-coverage rows always visible)
- *  - Target remove via an in-table delete column; add via a standalone EntityAddControl +
+ *  - Editorial header (Eyebrow + serif h2) with summary count cards: target count,
+ *    coverage %, and per-source edge counts (ChEMBL bioactivity / PubChem BioAssay)
+ *  - Targets DataTable (one row per target): gene symbol, UniProt accession (linked),
+ *    evidence/method(s), # compounds, an edit tag badge, and an in-table delete action
+ *  - Pagination (10 / 20 / 50 / all) and a CsvDownloadButton keyed on gene symbol +
+ *    UniProt accession + method + source_compounds + source_url (NEVER a UUID column)
+ *  - Per-compound coverage DataTable (0-coverage rows always visible)
+ *  - Target remove via the in-table delete column; add via a standalone EntityAddControl +
  *    TargetValidateBox (editStage). User-removed rows are hidden from the table and the CSV.
  *  - ParamPanel + Redo (resetFrom) and ApprovalBar
  *  - StpDialog for manual SwissTargetPrediction paste-back
@@ -21,8 +21,8 @@
  */
 
 import { useMemo, useState } from "react";
-import { useCsvBlobUrl } from "../../lib/csv";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
 import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contract";
@@ -30,6 +30,13 @@ import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig } from "../../lib/format";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStaleState } from "../../hooks/useStaleState";
+import { cn } from "@/lib/cn";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/DataTable";
+import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { Eyebrow } from "@/components/ui/editorial";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { ApprovalBar } from "./ApprovalBar";
 import { EntityAddControl } from "./EntityAddControl";
@@ -91,6 +98,13 @@ type TargetRow = {
   compound_count: number;
   source_compounds: string[];
   tag: TargetTag;
+};
+
+// A derived, per-compound coverage view row.
+type CoverageRow = {
+  compound_id: string;
+  compound: string;
+  coverage: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -162,10 +176,18 @@ function buildS3CsvRows(rows: TargetRow[]): unknown[][] {
 
 function tagBadge(tag: TargetTag): React.ReactElement | null {
   if (tag === "user-added") {
-    return <span className="hf-badge hf-badge--added">user-added</span>;
+    return (
+      <Badge variant="secondary" className="text-[10px]">
+        user-added
+      </Badge>
+    );
   }
   if (tag === "user-removed") {
-    return <span className="hf-badge hf-badge--removed">user-removed</span>;
+    return (
+      <Badge variant="destructive" className="text-[10px]">
+        user-removed
+      </Badge>
+    );
   }
   return null;
 }
@@ -225,7 +247,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     () => (stage3 ? buildTargetRows(stage3, nameById) : []),
     [stage3, nameById],
   );
-  const csvHref = useCsvBlobUrl(S3_CSV_HEADER, buildS3CsvRows(targetRows));
+  const csvRows = useMemo(() => buildS3CsvRows(targetRows), [targetRows]);
 
   if (!stage3) return null;
 
@@ -234,7 +256,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
         <h2>Step 3 — Target Identification</h2>
-        <p className="hf-muted">Not applicable for this run.</p>
+        <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
   }
@@ -270,178 +292,232 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     smiles: c.smiles ?? null,
   }));
 
+  // Per-target column definitions — SAME columns + order as the prior table, plus the delete action.
+  const targetColumns: ColumnDef<TargetRow>[] = [
+    {
+      id: "gene_symbol",
+      header: "Gene symbol",
+      cell: ({ row }) => row.original.gene_symbol,
+    },
+    {
+      id: "uniprot",
+      header: "UniProt",
+      cell: ({ row }) => {
+        const r = row.original;
+        if (!r.uniprot_accession) return "—";
+        return r.source_url ? (
+          <a
+            href={r.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[color:var(--hf-accent)] underline underline-offset-2"
+          >
+            {r.uniprot_accession}
+          </a>
+        ) : (
+          r.uniprot_accession
+        );
+      },
+    },
+    {
+      id: "evidence",
+      header: "Evidence",
+      cell: ({ row }) =>
+        row.original.methods.length > 0 ? row.original.methods.map(methodLabel).join(", ") : "—",
+    },
+    {
+      id: "compounds",
+      header: "# compounds",
+      cell: ({ row }) => row.original.compound_count,
+    },
+    {
+      id: "tag",
+      header: "",
+      cell: ({ row }) => tagBadge(row.original.tag),
+    },
+    {
+      id: "actions",
+      header: "",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          aria-label={`Remove ${row.original.gene_symbol}`}
+          onClick={() => edit.mutate({ add: [], remove: [row.original.target_id] })}
+          disabled={atMinEntities(effectiveCount)}
+          title={
+            atMinEntities(effectiveCount) ? "A stage must keep at least one entry." : undefined
+          }
+        >
+          ✕
+        </Button>
+      ),
+    },
+  ];
+
+  // Per-compound coverage rows + columns (0-coverage rows always visible).
+  const coverageRows: CoverageRow[] = Object.entries(stage3.per_compound).map(
+    ([compoundId, info]) => ({
+      compound_id: compoundId,
+      compound: nameById.get(compoundId) ?? compoundId,
+      coverage: info.coverage,
+    }),
+  );
+
+  const coverageColumns: ColumnDef<CoverageRow>[] = [
+    {
+      id: "compound",
+      header: "Compound",
+      cell: ({ row }) => (
+        <span className={row.original.coverage === 0 ? "[color:var(--hf-fg-3)]" : undefined}>
+          {row.original.compound}
+        </span>
+      ),
+    },
+    {
+      id: "coverage",
+      header: "Targets",
+      cell: ({ row }) => row.original.coverage,
+    },
+  ];
+
   return (
-    <section className="stage-view stage-view--3">
-      <h2>
-        Step 3 — Target Identification
-        {isUserProvided && <span className="hf-badge hf-badge--provided"> Provided by you</span>}
-      </h2>
+    <section className="flex flex-col gap-6">
+      {/* Editorial header */}
+      <div className="flex flex-col gap-1">
+        <Eyebrow>Step 3</Eyebrow>
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h2 className="hf-heading-serif">
+            Step 3 — Target Identification
+            {isUserProvided && (
+              <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
+                Provided by you
+              </Badge>
+            )}
+          </h2>
+        </div>
+        <StageEntityContext data={data} side="plant" />
+      </div>
+
       <StageDataSources stage={3} userProvided={isUserProvided} />
-      <StageEntityContext data={data} side="plant" />
 
       {/* Summary cards */}
-      <div className="stage-summary">
-        <div className="summary-card" aria-label={`${stage3.count} targets`}>
-          <span className="summary-card__value">{stage3.count}</span>
-          <span className="summary-card__label">targets</span>
+      <div className="flex flex-wrap gap-3">
+        <div
+          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
+          aria-label={`${stage3.count} targets`}
+        >
+          <span className="hf-num text-2xl font-semibold tabular-nums">{stage3.count}</span>
+          <span className="text-muted-foreground text-xs">targets</span>
         </div>
         {!isUserProvided && (
           <>
             <div
-              className="summary-card"
+              className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
               aria-label={`${formatSig(stage3.coverage_pct)}% coverage`}
             >
-              <span className="summary-card__value">{formatSig(stage3.coverage_pct)}%</span>
-              <span className="summary-card__label">coverage</span>
+              <span className="hf-num text-2xl font-semibold tabular-nums">
+                {formatSig(stage3.coverage_pct)}%
+              </span>
+              <span className="text-muted-foreground text-xs">coverage</span>
             </div>
             <div
-              className="summary-card summary-card--muted"
+              className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
               aria-label={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL edges`}
             >
-              <span className="summary-card__value">{sourceCounts.chembl_bioactivity ?? 0}</span>
-              <span className="summary-card__label">ChEMBL</span>
+              <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+                {sourceCounts.chembl_bioactivity ?? 0}
+              </span>
+              <span className="text-muted-foreground text-xs">ChEMBL</span>
             </div>
             <div
-              className="summary-card summary-card--muted"
+              className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
               aria-label={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay edges`}
             >
-              <span className="summary-card__value">{sourceCounts.pubchem_bioassay ?? 0}</span>
-              <span className="summary-card__label">PubChem BioAssay</span>
+              <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
+                {sourceCounts.pubchem_bioassay ?? 0}
+              </span>
+              <span className="text-muted-foreground text-xs">PubChem BioAssay</span>
             </div>
           </>
         )}
       </div>
 
-      {/* Table controls */}
-      <div className="table-controls">
-        <label htmlFor="t3-page-size">Rows per page</label>
-        <select
-          id="t3-page-size"
-          value={pageSize}
-          onChange={(e) => {
-            const v = e.target.value;
-            setPageSize(v === "all" ? "all" : Number(v));
-            setPage(0);
-          }}
-        >
-          {PAGE_SIZES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-          <option value="all">All</option>
-        </select>
-        <a
-          href={csvHref}
-          download="targets.csv"
-          className="hf-btn hf-btn-ghost"
-          aria-label="Download CSV"
-        >
-          Download CSV
-        </a>
-      </div>
+      {/* Targets table card */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="t3-page-size" className="text-muted-foreground text-sm">
+                Rows per page
+              </label>
+              <select
+                id="t3-page-size"
+                className="bg-background rounded border px-2 py-1 text-sm"
+                value={pageSize}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setPageSize(v === "all" ? "all" : Number(v));
+                  setPage(0);
+                }}
+              >
+                {PAGE_SIZES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+                <option value="all">All</option>
+              </select>
+            </div>
+            <CsvDownloadButton
+              header={S3_CSV_HEADER}
+              rows={csvRows}
+              filename="targets.csv"
+              label="Download CSV"
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="px-0">
+          {/* Targets table */}
+          <div className="table-wrapper">
+            <DataTable columns={targetColumns} data={visibleRows} />
+          </div>
+        </CardContent>
 
-      {/* Targets table */}
-      <div className="table-wrapper">
-        <table className="hf-table">
-          <thead>
-            <tr>
-              <th>Gene symbol</th>
-              <th>UniProt</th>
-              <th>Evidence</th>
-              <th># compounds</th>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {visibleRows.map((row) => (
-              <tr key={row.target_id}>
-                <td>{row.gene_symbol}</td>
-                <td>
-                  {row.uniprot_accession ? (
-                    row.source_url ? (
-                      <a href={row.source_url} target="_blank" rel="noopener noreferrer">
-                        {row.uniprot_accession}
-                      </a>
-                    ) : (
-                      row.uniprot_accession
-                    )
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td>{row.methods.length > 0 ? row.methods.map(methodLabel).join(", ") : "—"}</td>
-                <td>{row.compound_count}</td>
-                <td>{tagBadge(row.tag)}</td>
-                <td>
-                  <button
-                    className="hf-btn hf-btn-icon"
-                    aria-label={`Remove ${row.gene_symbol}`}
-                    onClick={() => edit.mutate({ add: [], remove: [row.target_id] })}
-                    disabled={atMinEntities(effectiveCount)}
-                    title={
-                      atMinEntities(effectiveCount)
-                        ? "A stage must keep at least one entry."
-                        : undefined
-                    }
-                  >
-                    ✕
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      {pageSize !== "all" && totalPages > 1 && (
-        <div className="pagination">
-          <button
-            className="hf-btn"
-            disabled={currentPage === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            Previous
-          </button>
-          <span>
-            Page {currentPage + 1} / {totalPages}
-          </span>
-          <button
-            className="hf-btn"
-            disabled={currentPage >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
+        {/* Pagination */}
+        {pageSize !== "all" && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 px-6 pb-4">
+            <button
+              className="hf-btn text-sm"
+              disabled={currentPage === 0}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </button>
+            <span className="text-muted-foreground text-sm">
+              Page {currentPage + 1} / {totalPages}
+            </span>
+            <button
+              className="hf-btn text-sm"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </Card>
 
       {/* Per-compound coverage — skipped for user_provided (no compounds) */}
       {!isUserProvided && (
-        <div className="coverage-table">
-          <h3>Per-compound coverage</h3>
-          <table className="hf-table">
-            <thead>
-              <tr>
-                <th>Compound</th>
-                <th>Targets</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(stage3.per_compound).map(([compoundId, info]) => (
-                <tr
-                  key={compoundId}
-                  className={info.coverage === 0 ? "row--zero-coverage" : undefined}
-                >
-                  <td>{nameById.get(compoundId) ?? compoundId}</td>
-                  <td>{info.coverage}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Card>
+          <CardHeader>
+            <h3 className="text-sm font-semibold">Per-compound coverage</h3>
+          </CardHeader>
+          <CardContent className="coverage-table px-0">
+            <DataTable columns={coverageColumns} data={coverageRows} />
+          </CardContent>
+        </Card>
       )}
 
       {/* Target add (the table above owns remove) */}
@@ -497,9 +573,9 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       />
 
       {/* Footer */}
-      <footer className="stage-footer hf-muted">
-        <p>Targets: ChEMBL + PubChem BioAssay. Human targets only (9606).</p>
-      </footer>
+      <p className="text-muted-foreground text-sm">
+        Targets: ChEMBL + PubChem BioAssay. Human targets only (9606).
+      </p>
     </section>
   );
 }
