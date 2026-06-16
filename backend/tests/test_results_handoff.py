@@ -681,3 +681,19 @@ def test_all_results_bundle_keeps_all_stages_when_input_modes_none():
     names = _names(blob)
     assert "stages/stage1_compounds.csv" in names
     assert "stages/stage2_adme.csv" in names
+
+
+def test_all_results_bundle_omits_network_subtree_when_network_files_empty():
+    import io
+    import zipfile
+
+    data = rh.build_all_results_bundle(
+        report="# r",
+        network_files={},  # no compounds -> no CTP/docking
+        stage_files={"stage6_ppi_nodes.csv": "id\n", "stage5_overlap.csv": "g\n"},
+        input_modes={"plant": "manual_targets", "disease": "manual_disease_targets"},
+    )
+    names = set(zipfile.ZipFile(io.BytesIO(data)).namelist())
+    assert "stages/stage6_ppi_nodes.csv" in names  # PPI kept
+    assert not any(n.startswith("network-and-docking/") for n in names)  # CTP/docking gone
+    assert "report.md" in names

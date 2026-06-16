@@ -868,11 +868,12 @@ def build_all_results_bundle(
     files: dict[str, str | bytes | None] = {
         "README.md": build_root_readme(),
         "report.md": report,
-        "network-and-docking/README.md": build_network_readme(),
         "stages/README.md": build_stages_readme(),
     }
-    for name, content in network_files.items():
-        files[f"network-and-docking/{name}"] = content
+    if network_files:
+        files["network-and-docking/README.md"] = build_network_readme()
+        for name, content in network_files.items():
+            files[f"network-and-docking/{name}"] = content
     for name, content in filtered_stages.items():
         files[f"stages/{name}"] = content
     return _zip(files)

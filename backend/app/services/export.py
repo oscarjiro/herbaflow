@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.errors import ConflictProblem, NotFoundProblem
-from app.pipeline import charts, report, state
+from app.pipeline import charts, entry_modes, report, state
 from app.pipeline import results_handoff as rh
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
@@ -34,8 +34,11 @@ class ExportArtifacts:
     network_png: bytes | None = None
     stage_pngs: dict[str, bytes] = field(default_factory=dict)
     input_modes: dict[str, Any] = field(default_factory=dict)
+    has_compounds: bool = True
 
     def _network_files(self) -> dict[str, str | bytes | None]:
+        if not self.has_compounds:
+            return {}
         return {
             "ctp-nodes.csv": self.ctp_nodes,
             "ctp-edges.csv": self.ctp_edges,
@@ -181,10 +184,15 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
     }
     params = run.parameters or {}
     input_modes = params.get("input_modes") or {}
+    has_compounds = entry_modes.has_compounds_from_params(params)
 
-    ctp_graph = rh.build_ctp_graph(sr, compounds_by_id, targets_by_id)
+    ctp_graph = (
+        rh.build_ctp_graph(sr, compounds_by_id, targets_by_id)
+        if has_compounds
+        else {"nodes": [], "edges": []}
+    )
     ppi_graph = rh.build_ppi_graph(sr)
-    network_png = charts.render_ctp_network(ctp_graph)
+    network_png = charts.render_ctp_network(ctp_graph) if has_compounds else None
     stage_pngs: dict[str, bytes] = {}
     venn = charts.render_venn(
         sr.get("5", {}),
@@ -210,8 +218,12 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         if png is not None:
             stage_pngs[f"stage8_enrichment_{charts.category_slug(cat)}.png"] = png
 
-    figures: list[tuple[str, bool, str]] = [
-        ("ctp-network.png", network_png is not None, "sparse C-T-P network (no edges)"),
+    figures: list[tuple[str, bool, str]] = []
+    if has_compounds:
+        figures.append(
+            ("ctp-network.png", network_png is not None, "sparse C-T-P network (no edges)")
+        )
+    figures += [
         ("stage5_venn.png", "stage5_venn.png" in stage_pngs, "empty overlap"),
         (
             "stage6_ppi_network.png",
@@ -237,13 +249,16 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         stage_csvs={
             n: rh.build_stage_csv(n, sr, compounds_by_id, targets_by_id) for n in range(1, 9)
         },
-        ctp_nodes=rh.build_ctp_nodes(sr, compounds_by_id, targets_by_id),
-        ctp_edges=rh.build_ctp_edges(sr, compounds_by_id, targets_by_id),
+        ctp_nodes=(rh.build_ctp_nodes(sr, compounds_by_id, targets_by_id) if has_compounds else ""),
+        ctp_edges=(rh.build_ctp_edges(sr, compounds_by_id, targets_by_id) if has_compounds else ""),
         ppi_nodes=rh.build_ppi_nodes(sr),
         ppi_edges=rh.build_ppi_edges(sr),
-        docking=rh.build_docking_table(sr, compounds_by_id, targets_by_id),
+        docking=(
+            rh.build_docking_table(sr, compounds_by_id, targets_by_id) if has_compounds else ""
+        ),
         slug=rh.bundle_slug(labels, run.completed_at),
         network_png=network_png,
         stage_pngs=stage_pngs,
         input_modes=input_modes,
+        has_compounds=has_compounds,
     )
