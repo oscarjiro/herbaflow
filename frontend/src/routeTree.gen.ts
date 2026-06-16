@@ -9,27 +9,97 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AnalysisRouteImport } from './routes/analysis'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnalysisIdRouteImport } from './routes/analysis.$id'
 
-export interface FileRoutesByFullPath {}
-export interface FileRoutesByTo {}
+const AnalysisRoute = AnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalysisIdRoute = AnalysisIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AnalysisRoute,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRouteWithChildren
+  '/analysis/$id': typeof AnalysisIdRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRouteWithChildren
+  '/analysis/$id': typeof AnalysisIdRoute
+}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRouteWithChildren
+  '/analysis/$id': typeof AnalysisIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: never
+  fullPaths: '/' | '/analysis' | '/analysis/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: never
-  id: '__root__'
+  to: '/' | '/analysis' | '/analysis/$id'
+  id: '__root__' | '/' | '/analysis' | '/analysis/$id'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  AnalysisRoute: typeof AnalysisRouteWithChildren
 }
 
-const rootRouteChildren: RootRouteChildren = {}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/analysis': {
+      id: '/analysis'
+      path: '/analysis'
+      fullPath: '/analysis'
+      preLoaderRoute: typeof AnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analysis/$id': {
+      id: '/analysis/$id'
+      path: '/$id'
+      fullPath: '/analysis/$id'
+      preLoaderRoute: typeof AnalysisIdRouteImport
+      parentRoute: typeof AnalysisRoute
+    }
+  }
+}
+
+interface AnalysisRouteChildren {
+  AnalysisIdRoute: typeof AnalysisIdRoute
+}
+
+const AnalysisRouteChildren: AnalysisRouteChildren = {
+  AnalysisIdRoute: AnalysisIdRoute,
+}
+
+const AnalysisRouteWithChildren = AnalysisRoute._addFileChildren(
+  AnalysisRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AnalysisRoute: AnalysisRouteWithChildren,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
