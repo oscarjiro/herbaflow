@@ -1,9 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { SetupView } from "@/components/SetupView";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
+// Layout for the analysis section: renders its child route (`/analysis` index = Setup,
+// `/analysis/$id` = Run) via the Outlet. Without this Outlet the `$id` child would not mount.
 export const Route = createFileRoute("/analysis")({
-  component: function AnalysisSetup() {
-    const navigate = useNavigate();
-    return <SetupView onCreated={(id) => navigate({ to: "/analysis/$id", params: { id } })} />;
-  },
+  component: () => <Outlet />,
 });
