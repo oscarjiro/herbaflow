@@ -552,7 +552,14 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
 ```jsonc
 {
   "compounds": [
-    {"compound_id": "<uuid>", "canonical_name": "<str|null>", "tag": "<tag>"},
+    {
+      "compound_id": "<uuid>",
+      "canonical_name": "<str|null>",
+      "smiles": "<str|null>",
+      "inchikey": "<str|null>",
+      "source_url": "<str|null>",
+      "tag": "<tag>"
+    },
     // tag ∈ {"computed", "user-added", "user-removed"}
     // "user-removed" entries are PRESENT in this list but excluded from the effective forward set
     ...
@@ -578,6 +585,10 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
 - `stage_results["1"].compounds[*].canonical_name` is populated from the compound row on a
   `manual_compounds` prefill (was previously `null` — Stage 1 was showing the UUID). Display only;
   no schema change. Symmetric with the Stage-3 target prefill which already carried names.
+- `stage_results["1"].compounds[*]` also carries `smiles`, `inchikey`, and `source_url` from the
+  compound row so downstream exports and UI surfaces can render structure provenance without an
+  extra lookup. The emitted JSON key is `inchikey`, mirroring the rest of the contract, even though
+  the ORM field is `Compound.inchi_key`.
 - The `POST /compounds/validate` response `FailedInput` objects carry an optional 1-based **`line`**
   field on compound failures (parity with `resolve_targets` which already reported line indices;
   Software Lock §4.5 per-line reason). No schema change — the `line` field is in the response body
@@ -1140,4 +1151,3 @@ Later migrations (applied on top of the baseline):
 Tables are created first and all foreign keys added last, so the set replays in order on a
 fresh database. File `0007` requires the managed platform's `pg_cron`; the other six replay
 on any stock PostgreSQL (used for the equivalence check).
-

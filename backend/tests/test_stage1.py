@@ -35,3 +35,21 @@ def test_select_compounds_no_manual_bucket() -> None:
     )
     assert out["count"] == 1
     assert "manual" not in out["per_plant"]
+
+
+def test_select_compounds_carries_structure_fields() -> None:
+    p, c1 = uuid.uuid4(), uuid.uuid4()
+    out = stage1.select_compounds(
+        rows=[
+            stage1.CompoundRow(
+                plant_id=p,
+                compound_id=c1,
+                canonical_name="Curcumin",
+                smiles="C/C=C/...",
+                inchikey="VFLDPWHFBUODDF-...",
+                source_url="https://pubchem.ncbi.nlm.nih.gov/compound/969516",
+            )
+        ],
+    )
+    c = out["compounds"][0]
+    assert c["smiles"] and c["inchikey"] and c["source_url"]
