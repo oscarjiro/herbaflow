@@ -52,5 +52,5 @@ test("keeps the all-page selection stable when All is chosen", () => {
 test("exposes a responsive container for mobile card-collapse", () => {
   const { container } = render(<DataTable columns={cols} data={[{ gene: "EGFR", score: 0.9 }]} />);
 
-  expect(container.querySelector('[data-slot="datatable"]')).not.toBeNull();
+  expect(container.querySelector('[data-slot="datatable"]')).toBeInTheDocument();
 });
