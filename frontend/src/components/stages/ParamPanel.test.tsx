@@ -35,8 +35,12 @@ const selectMeta: ParamMeta = {
   description: "A select param",
 };
 
+async function openPanel(name: RegExp = /parameters/i) {
+  await userEvent.click(screen.getByRole("button", { name }));
+}
+
 describe("ParamPanel", () => {
-  it("renders the title and param fields when open", () => {
+  it("hides param fields by default and renders them when opened", async () => {
     render(
       <ParamPanel
         params={{ score: 5 }}
@@ -49,10 +53,12 @@ describe("ParamPanel", () => {
       />,
     );
     expect(screen.getByText("Test params")).toBeInTheDocument();
+    expect(screen.queryByLabelText("score")).not.toBeInTheDocument();
+    await openPanel(/test params/i);
     expect(screen.getByLabelText("score")).toBeInTheDocument();
   });
 
-  it("Redo button is disabled when no value has changed", () => {
+  it("Redo button is disabled when no value has changed", async () => {
     render(
       <ParamPanel
         params={{ score: 5 }}
@@ -63,6 +69,7 @@ describe("ParamPanel", () => {
         selectKeys={[]}
       />,
     );
+    await openPanel();
     expect(screen.getByRole("button", { name: /redo from this stage/i })).toBeDisabled();
   });
 
@@ -78,6 +85,7 @@ describe("ParamPanel", () => {
         selectKeys={[]}
       />,
     );
+    await openPanel();
     const input = screen.getByLabelText("score");
     await userEvent.clear(input);
     await userEvent.type(input, "7");
@@ -97,6 +105,7 @@ describe("ParamPanel", () => {
         selectKeys={[]}
       />,
     );
+    await openPanel();
     const input = screen.getByLabelText("score");
     await userEvent.clear(input);
     await userEvent.type(input, "99");
@@ -104,7 +113,7 @@ describe("ParamPanel", () => {
     expect(screen.getByRole("button", { name: /redo from this stage/i })).toBeDisabled();
   });
 
-  it("renders boolean params as a checkbox", () => {
+  it("renders boolean params as a checkbox", async () => {
     render(
       <ParamPanel
         params={{ flag: false }}
@@ -115,10 +124,11 @@ describe("ParamPanel", () => {
         selectKeys={[]}
       />,
     );
+    await openPanel();
     expect(screen.getByLabelText("flag")).toBeInTheDocument();
   });
 
-  it("renders select params with enum options", () => {
+  it("renders select params with enum options", async () => {
     render(
       <ParamPanel
         params={{ mode: "a" }}
@@ -129,10 +139,11 @@ describe("ParamPanel", () => {
         selectKeys={["mode"]}
       />,
     );
+    await openPanel();
     expect(screen.getByLabelText("mode")).toBeInTheDocument();
   });
 
-  it("collapses and hides fields when toggle is clicked", async () => {
+  it("toggles fields open and closed", async () => {
     render(
       <ParamPanel
         params={{ score: 5 }}
@@ -145,12 +156,14 @@ describe("ParamPanel", () => {
       />,
     );
     const toggle = screen.getByRole("button", { name: /collapsible/i });
+    expect(screen.queryByLabelText("score")).not.toBeInTheDocument();
+    await userEvent.click(toggle);
     expect(screen.getByLabelText("score")).toBeInTheDocument();
     await userEvent.click(toggle);
     expect(screen.queryByLabelText("score")).not.toBeInTheDocument();
   });
 
-  it("Redo is disabled when disabled prop is true", () => {
+  it("Redo is disabled when disabled prop is true", async () => {
     render(
       <ParamPanel
         params={{ score: 5 }}
@@ -162,6 +175,7 @@ describe("ParamPanel", () => {
         disabled
       />,
     );
+    await openPanel();
     expect(screen.getByRole("button", { name: /redo from this stage/i })).toBeDisabled();
   });
 });

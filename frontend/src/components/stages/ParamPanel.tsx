@@ -61,7 +61,7 @@ export function ParamPanel({
   /** Collapsible panel title. */
   title?: string;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   // Local editable state (string for number inputs, boolean for checkboxes)
   const [localStr, setLocalStr] = useState<Record<string, string>>(() => {

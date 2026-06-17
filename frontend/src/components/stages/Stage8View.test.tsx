@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stage8View } from "./Stage8View";
 import type { AnalysisRead } from "../../api/types.gen";
@@ -7,6 +8,10 @@ import type { AnalysisRead } from "../../api/types.gen";
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient();
   return <QueryClientProvider client={qc}>{ui}</QueryClientProvider>;
+}
+
+async function openEnrichmentPanel() {
+  await userEvent.click(screen.getByRole("button", { name: /enrichment parameters/i }));
 }
 
 const base = {
@@ -61,7 +66,7 @@ describe("Stage8View", () => {
     expect(screen.getByText("PI3K-Akt")).toBeInTheDocument();
   });
 
-  it("renders the enrichment param panel with no_iea control", () => {
+  it("renders the enrichment param panel with no_iea control", async () => {
     const data = {
       ...base,
       status: "complete",
@@ -83,6 +88,7 @@ describe("Stage8View", () => {
       },
     } as unknown as AnalysisRead;
     render(wrap(<Stage8View data={data} />));
+    await openEnrichmentPanel();
     expect(screen.getByLabelText("significance_threshold")).toBeInTheDocument();
     expect(screen.getByLabelText("no_iea")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();

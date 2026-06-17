@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { Stage6View } from "./Stage6View";
 import type { AnalysisRead } from "../../api/types.gen";
 
@@ -64,6 +65,10 @@ function wrap(ui: React.ReactNode) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+async function openPpiPanel() {
+  await userEvent.click(screen.getByRole("button", { name: /ppi network parameters/i }));
+}
+
 // ---------------------------------------------------------------------------
 // Tests — computed network
 // ---------------------------------------------------------------------------
@@ -87,8 +92,9 @@ describe("Stage6View — computed network", () => {
     expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
   });
 
-  it("renders the ppi param panel including the network_type select and a Redo button", () => {
+  it("renders the ppi param panel including the network_type select and a Redo button", async () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
+    await openPpiPanel();
     // numeric + boolean + both enum selects are present
     expect(screen.getByLabelText("max_proteins")).toBeInTheDocument();
     expect(screen.getByLabelText("allow_top_n_cap")).toBeInTheDocument();
@@ -129,8 +135,9 @@ describe("Stage6View — overlap too large (blocked)", () => {
     expect(screen.queryByRole("link", { name: /download csv/i })).toBeNull();
   });
 
-  it("still renders the ppi param panel when blocked", () => {
+  it("still renders the ppi param panel when blocked", async () => {
     wrap(<Stage6View data={makeData(makeBlockedResult())} />);
+    await openPpiPanel();
     expect(screen.getByLabelText("max_proteins")).toBeInTheDocument();
     expect(screen.getByLabelText("network_type")).toBeInTheDocument();
   });

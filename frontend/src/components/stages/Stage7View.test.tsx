@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { Stage7View } from "./Stage7View";
 import type { AnalysisRead } from "../../api/types.gen";
 
@@ -57,6 +58,10 @@ function wrap(ui: React.ReactNode) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+async function openHubPanel() {
+  await userEvent.click(screen.getByRole("button", { name: /hub-ranking parameters/i }));
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -80,8 +85,9 @@ describe("Stage7View", () => {
     expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
   });
 
-  it("renders the hub_genes param panel with a Redo button", () => {
+  it("renders the hub_genes param panel with a Redo button", async () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
+    await openHubPanel();
     expect(screen.getByLabelText("top_n")).toBeInTheDocument();
     expect(screen.queryByLabelText("use_hub_bottleneck")).toBeNull();
     expect(screen.queryByLabelText("composite_weight")).toBeNull();

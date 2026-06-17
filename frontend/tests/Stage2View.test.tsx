@@ -46,6 +46,10 @@ function wrap(ui: ReactElement) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+async function openAdmePanel() {
+  await userEvent.click(screen.getByRole("button", { name: /adme parameters/i }));
+}
+
 describe("Stage2View", () => {
   it("renders passed compound rows", () => {
     wrap(<Stage2View data={makeRun()} />);
@@ -94,13 +98,15 @@ describe("Stage2View", () => {
     expect(link).toBeInTheDocument();
   });
 
-  it("param panel shows description for max_mw", () => {
+  it("param panel shows description for max_mw", async () => {
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     expect(screen.getByText(/Molecular weight ceiling/i)).toBeInTheDocument();
   });
 
-  it("Redo button is disabled when no values differ from frozen params", () => {
+  it("Redo button is disabled when no values differ from frozen params", async () => {
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const redo = screen.getByRole("button", { name: /redo/i });
     expect(redo).toBeDisabled();
   });
@@ -108,6 +114,7 @@ describe("Stage2View", () => {
   it("Redo button enables when a value differs from the frozen param", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
     await user.type(input, "400");
@@ -118,6 +125,7 @@ describe("Stage2View", () => {
   it("Redo button disarms when value is reverted to the frozen param", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
     await user.type(input, "400");
@@ -130,6 +138,7 @@ describe("Stage2View", () => {
   it("Redo button is disabled when a value is outside hard bounds", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     // max_mw hard max is 2000; set to 99999 to exceed it
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
@@ -138,8 +147,9 @@ describe("Stage2View", () => {
     expect(redo).toBeDisabled();
   });
 
-  it("shows param hint with default and recommended range", () => {
+  it("shows param hint with default and recommended range", async () => {
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     // max_mw has recommended_min=350, recommended_max=600, default=500
     expect(screen.getByText(/default.*500/i)).toBeInTheDocument();
   });
@@ -194,8 +204,9 @@ describe("RunView with Stage 2", () => {
 });
 
 describe("ParamPanel E7 arming rule", () => {
-  it("Redo is disabled when all values equal frozen params (arms only on actual diff)", () => {
+  it("Redo is disabled when all values equal frozen params (arms only on actual diff)", async () => {
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const redo = screen.getByRole("button", { name: /redo/i });
     expect(redo).toBeDisabled();
   });
@@ -203,6 +214,7 @@ describe("ParamPanel E7 arming rule", () => {
   it("shows inline hard-bound error for out-of-range value", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
     await user.type(input, "9999");
@@ -212,6 +224,7 @@ describe("ParamPanel E7 arming rule", () => {
   it("does NOT show error for value outside recommended but within hard bounds", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     // recommended_max=600, hard max=2000. Enter 1500 — allowed but outside recommended.
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
