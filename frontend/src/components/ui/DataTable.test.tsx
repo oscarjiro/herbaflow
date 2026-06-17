@@ -38,3 +38,13 @@ test("paginates with a page-size control (default 10)", () => {
   expect(screen.getAllByRole("row").slice(1)).toHaveLength(10);
   expect(screen.getByLabelText(/rows per page/i)).toBeInTheDocument();
 });
+
+test("keeps the all-page selection stable when All is chosen", () => {
+  const many = Array.from({ length: 12 }, (_, i) => ({ gene: `G${i}`, score: i }));
+  render(<DataTable columns={cols} data={many} />);
+
+  fireEvent.change(screen.getByLabelText(/rows per page/i), { target: { value: "all" } });
+
+  expect(screen.getByLabelText(/rows per page/i)).toHaveValue("all");
+  expect(screen.getAllByRole("row").slice(1)).toHaveLength(12);
+});
