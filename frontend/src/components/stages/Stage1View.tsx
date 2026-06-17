@@ -1,16 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
 import { editStage } from "../../api/sdk.gen";
 import type { AnalysisRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
+import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/DataTable";
 import { Separator } from "@/components/ui/separator";
 import { Eyebrow } from "@/components/ui/editorial";
 import { CompoundValidateBox } from "../CompoundValidateBox";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
-import { EditableEntityList } from "./EditableEntityList";
+import { EntityAddControl } from "./EntityAddControl";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
 
@@ -24,6 +28,12 @@ type Stage1Data = {
   count?: number;
   compounds?: Stage1Compound[];
   state?: string;
+};
+
+type Stage1Row = {
+  id: string;
+  label: string;
+  tag?: string;
 };
 
 export function Stage1View({ data }: { data: AnalysisRead }) {
@@ -60,16 +70,50 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
 
   const compounds = stage1.compounds ?? [];
   const current = stage1.count ?? compounds.filter((c) => c.tag !== "user-removed").length;
+  const atMin = atMinEntities(current);
 
-  const entities = compounds.map((c) => ({
-    id: c.compound_id,
-    label: c.canonical_name ?? c.compound_id,
-    tag: c.tag,
-  }));
+  const rows: Stage1Row[] = compounds
+    .filter((c) => !isUserRemoved(c.tag))
+    .map((c) => ({
+      id: c.compound_id,
+      label: c.canonical_name ?? c.compound_id,
+      tag: c.tag,
+    }));
 
   function handleRemove(id: string) {
     edit.mutate({ add: [], remove: [id] });
   }
+
+  const columns: ColumnDef<Stage1Row>[] = [
+    {
+      accessorKey: "label",
+      header: "Compound",
+    },
+    {
+      id: "provenance",
+      header: "Source",
+      enableSorting: false,
+      cell: ({ row }) =>
+        row.original.tag === "user-added" ? <Badge variant="secondary">Added by you</Badge> : null,
+    },
+    {
+      id: "actions",
+      header: "",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          aria-label={`Remove ${row.original.label}`}
+          onClick={() => handleRemove(row.original.id)}
+          disabled={atMin}
+          title={atMin ? "A stage must keep at least one entry." : undefined}
+        >
+          ✕
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <section className="flex flex-col gap-4">
@@ -94,15 +138,12 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
       <Card>
         <CardHeader className="pb-0" />
         <CardContent className="flex flex-col gap-3 pt-0">
-          <EditableEntityList
-            entities={entities}
-            onRemove={handleRemove}
-            cap={MAX_COMPOUNDS}
-            current={current}
-            addControl={
-              <CompoundValidateBox label="Add compounds" onResolved={handleAdd} showAddButton />
-            }
-          />
+          <div className="table-wrapper">
+            <DataTable columns={columns} data={rows} />
+          </div>
+          <EntityAddControl current={current} cap={MAX_COMPOUNDS}>
+            <CompoundValidateBox label="Add compounds" onResolved={handleAdd} showAddButton />
+          </EntityAddControl>
           <AlreadyInRunNote
             labels={alreadyInRun.map((c) => c.canonical_name ?? c.canonical_key ?? c.compound_id)}
           />

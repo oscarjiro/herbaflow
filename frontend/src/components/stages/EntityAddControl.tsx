@@ -2,8 +2,8 @@ import React from "react";
 
 /**
  * Cap-aware add affordance: shows `current / cap` and disables its children when at cap. The single
- * home for the add control, shared by Stage 1's EditableEntityList and the standalone Stage 3/4 add
- * boxes — so the cap logic is never copy-pasted.
+ * home for the add control, shared by Stage 1 and the standalone Stage 3/4 add boxes — so the cap
+ * logic is never copy-pasted.
  */
 export function EntityAddControl({
   current,
