@@ -31,3 +31,10 @@ test("sorts rows when a header is clicked", () => {
   expect(rows[0]).toHaveTextContent("EGFR");
   expect(rows[1]).toHaveTextContent("TP53");
 });
+
+test("paginates with a page-size control (default 10)", () => {
+  const many = Array.from({ length: 12 }, (_, i) => ({ gene: `G${i}`, score: i }));
+  render(<DataTable columns={cols} data={many} />);
+  expect(screen.getAllByRole("row").slice(1)).toHaveLength(10);
+  expect(screen.getByLabelText(/rows per page/i)).toBeInTheDocument();
+});

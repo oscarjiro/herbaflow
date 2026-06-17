@@ -4,6 +4,7 @@ import {
   type SortingState,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -25,6 +26,8 @@ export function DataTable<T>({ columns, data }: { columns: ColumnDef<T>[]; data:
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: { pagination: { pageSize: 10 } },
   });
 
   return (
@@ -73,6 +76,31 @@ export function DataTable<T>({ columns, data }: { columns: ColumnDef<T>[]; data:
           ))}
         </TableBody>
       </Table>
+      <div className="mt-2 flex items-center justify-end gap-2 text-sm">
+        <label htmlFor="dt-page-size">Rows per page</label>
+        <select
+          id="dt-page-size"
+          className="border-border rounded border bg-transparent px-1 py-0.5"
+          value={table.getState().pagination.pageSize}
+          onChange={(e) => {
+            const v = e.target.value;
+            table.setPageSize(v === "all" ? data.length || 1 : Number(v));
+          }}
+        >
+          {[10, 20, 50].map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+          <option value="all">All</option>
+        </select>
+        <button type="button" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+          Prev
+        </button>
+        <button type="button" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+          Next
+        </button>
+      </div>
     </div>
   );
 }
