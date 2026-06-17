@@ -1,4 +1,12 @@
-import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useState } from "react";
+import {
+  type ColumnDef,
+  type SortingState,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -9,10 +17,14 @@ import {
 } from "@/components/ui/table";
 
 export function DataTable<T>({ columns, data }: { columns: ColumnDef<T>[]; data: T[] }) {
+  const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
     data,
     columns,
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -22,8 +34,28 @@ export function DataTable<T>({ columns, data }: { columns: ColumnDef<T>[]; data:
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id}>
               {hg.headers.map((h) => (
-                <TableHead key={h.id}>
-                  {flexRender(h.column.columnDef.header, h.getContext())}
+                <TableHead
+                  key={h.id}
+                  aria-sort={
+                    h.column.getIsSorted() === "asc"
+                      ? "ascending"
+                      : h.column.getIsSorted() === "desc"
+                        ? "descending"
+                        : "none"
+                  }
+                >
+                  {h.column.getCanSort() ? (
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1"
+                      onClick={h.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(h.column.columnDef.header, h.getContext())}
+                      <span aria-hidden>{h.column.getIsSorted() === "asc" ? "↑" : h.column.getIsSorted() === "desc" ? "↓" : ""}</span>
+                    </button>
+                  ) : (
+                    flexRender(h.column.columnDef.header, h.getContext())
+                  )}
                 </TableHead>
               ))}
             </TableRow>
