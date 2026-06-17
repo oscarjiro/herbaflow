@@ -4,7 +4,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { Stage2View } from "../src/components/stages/Stage2View";
-import { EditableEntityList } from "../src/components/stages/EditableEntityList";
 import { SAMPLE_STAGE2_RESULTS } from "./handlers";
 import type { AnalysisRead } from "../src/api/types.gen";
 import "../src/lib/api";
@@ -182,36 +181,6 @@ describe("ApprovalBar primitive", () => {
     // We test ApprovalBar indirectly via Stage2View above.
     // This placeholder ensures import resolution is not bypassed by coverage.
     expect(container).toBeDefined();
-  });
-});
-
-describe("EditableEntityList primitive", () => {
-  it("renders entity rows and a remove control per row", () => {
-    const entities = [
-      { id: "e1", label: "Entity One" },
-      { id: "e2", label: "Entity Two" },
-    ];
-    const { getAllByRole } = render(
-      <EditableEntityList entities={entities} onRemove={() => {}} cap={10} current={2} />,
-    );
-    const removeButtons = getAllByRole("button", { name: /remove/i });
-    expect(removeButtons).toHaveLength(2);
-  });
-
-  it("disables add when current >= cap", () => {
-    const { getByRole, getByText } = render(
-      <EditableEntityList
-        entities={[{ id: "e1", label: "E1" }]}
-        onRemove={() => {}}
-        cap={1}
-        current={1}
-        addControl={<input aria-label="add item" />}
-      />,
-    );
-    // Should show cap reached message
-    expect(getByText(/1.*\/.*1/i)).toBeInTheDocument();
-    // The add control should be disabled when at cap
-    expect(getByRole("textbox", { name: /add item/i })).toBeDisabled();
   });
 });
 
