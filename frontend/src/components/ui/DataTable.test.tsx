@@ -48,3 +48,9 @@ test("keeps the all-page selection stable when All is chosen", () => {
   expect(screen.getByLabelText(/rows per page/i)).toHaveValue("all");
   expect(screen.getAllByRole("row").slice(1)).toHaveLength(12);
 });
+
+test("exposes a responsive container for mobile card-collapse", () => {
+  const { container } = render(<DataTable columns={cols} data={[{ gene: "EGFR", score: 0.9 }]} />);
+
+  expect(container.querySelector('[data-slot="datatable"]')).not.toBeNull();
+});
