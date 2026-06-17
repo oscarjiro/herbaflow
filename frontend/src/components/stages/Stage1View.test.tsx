@@ -131,6 +131,50 @@ describe("Stage1View — already-in-run deduplication", () => {
     vi.restoreAllMocks();
   });
 
+  it("hides compounds tagged user-removed", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 2,
+              compounds: [
+                { compound_id: "c1", canonical_name: "Berberine", tag: "user-removed" },
+                { compound_id: "c2", canonical_name: "Curcumin", tag: "computed" },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getByText(/curcumin/i)).toBeInTheDocument();
+    expect(screen.queryByText(/berberine/i)).toBeNull();
+    expect(screen.queryByRole("button", { name: /remove berberine/i })).toBeNull();
+  });
+
+  it("disables the remove button at the one-entity floor and uses the floor title", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [{ compound_id: "c1", canonical_name: "Quercetin", tag: "computed" }],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    const removeButton = screen.getByRole("button", { name: /remove quercetin/i });
+    expect(removeButton).toBeDisabled();
+    expect(removeButton).toHaveAttribute("title", "A stage must keep at least one entry.");
+  });
+
   it("renders compounds in the shared table with a provenance chip and an in-table delete", () => {
     wrap(
       <Stage1View
