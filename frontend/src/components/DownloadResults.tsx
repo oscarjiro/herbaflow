@@ -1,5 +1,9 @@
 import type { ElementType } from "react";
 import { Download, FileText, FolderArchive, Network } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { fetchBlobDownload } from "../lib/download";
+import type { Problem } from "../lib/problem";
+import { notifyError, notifySuccess } from "../lib/toast";
 import {
   exportAllResultsUrl,
   exportNetworkBundleUrl,
@@ -18,8 +22,8 @@ type DownloadLink = {
   variant: "default" | "outline";
 };
 
-/** Download panel — shown only once the run is complete. Binary downloads via the
- * browser (Content-Disposition from the backend), not the typed SDK. */
+/** Download panel — shown only once the run is complete. Artifacts are fetched
+ * via fetch-blob so success/error feedback surfaces as toasts. */
 export function DownloadResults({
   status,
   analysisId,
@@ -65,6 +69,17 @@ export function DownloadResults({
     },
   ];
 
+  return <DownloadResultsPanel links={links} />;
+}
+
+/** Inner panel — separated so hooks run unconditionally (hooks cannot follow early returns). */
+function DownloadResultsPanel({ links }: { links: DownloadLink[] }) {
+  const download = useMutation({
+    mutationFn: ({ url }: { url: string; label: string }) => fetchBlobDownload(url),
+    onSuccess: (_data, { label }) => notifySuccess(`Downloaded ${label}`),
+    onError: (error) => notifyError(error as Problem),
+  });
+
   return (
     <Card className="hf-download-results">
       <CardHeader className="pb-0">
@@ -74,11 +89,16 @@ export function DownloadResults({
       <Separator className="mx-6" />
       <CardContent className="flex flex-col gap-2">
         {links.map(({ label, href, icon: Icon, variant }) => (
-          <Button key={href} variant={variant} size="sm" asChild className="justify-start">
-            <a href={href} download>
-              <Icon className="size-4 shrink-0" strokeWidth={1.5} />
-              {label}
-            </a>
+          <Button
+            key={href}
+            variant={variant}
+            size="sm"
+            className="justify-start"
+            disabled={download.isPending}
+            onClick={() => download.mutate({ url: href, label })}
+          >
+            <Icon className="size-4 shrink-0" strokeWidth={1.5} />
+            {label}
           </Button>
         ))}
       </CardContent>
