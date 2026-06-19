@@ -61,9 +61,18 @@ describe("Stage8View", () => {
         },
       },
     } as unknown as AnalysisRead;
-    render(wrap(<Stage8View data={data} />));
-    expect(screen.getByText("Step 8 — Functional Enrichment")).toBeInTheDocument();
+    const { container } = render(wrap(<Stage8View data={data} />));
+    const stage8 = container.firstElementChild as HTMLElement;
+    expect(screen.getByText("Step 8: Functional Enrichment")).toBeInTheDocument();
     expect(screen.getByText("PI3K-Akt")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Background: compound target universe \(800 genes\)\./i),
+    ).toHaveTextContent("Custom universe, not the whole genome.");
+    expect(stage8).not.toHaveTextContent("—");
+    expect(stage8).not.toHaveTextContent("methodologically-correct");
+    expect(stage8).not.toHaveTextContent("honest null");
+    expect(stage8).not.toHaveTextContent("Pipeline complete");
+    expect(screen.getByText("Analysis complete. All eight steps finished.")).toBeInTheDocument();
   });
 
   it("renders the enrichment param panel with no_iea control", async () => {
@@ -89,9 +98,36 @@ describe("Stage8View", () => {
     } as unknown as AnalysisRead;
     render(wrap(<Stage8View data={data} />));
     await openEnrichmentPanel();
-    expect(screen.getByLabelText("significance_threshold")).toBeInTheDocument();
-    expect(screen.getByLabelText("no_iea")).toBeInTheDocument();
+    expect(screen.getByLabelText("Significance threshold (corrected p ≤)")).toBeInTheDocument();
+    expect(screen.getByLabelText("Exclude electronic annotations (IEA)")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
+  });
+
+  it("surfaces Reactome and WikiPathways enrichment source options", async () => {
+    const data = {
+      ...base,
+      status: "complete",
+      stage_results: {
+        "8": {
+          state: "computed",
+          terms: [],
+          input_gene_count: 3,
+          background_gene_count: 800,
+          background_source: "compound_target_universe",
+          correction: "fdr",
+          significance_threshold: 0.05,
+          min_term_size: 5,
+          sources: ["GO:BP", "KEGG"],
+          degraded: false,
+          count: 0,
+          flags: [],
+        },
+      },
+    } as unknown as AnalysisRead;
+    render(wrap(<Stage8View data={data} />));
+    await openEnrichmentPanel();
+    expect(screen.getByLabelText("Reactome")).toBeInTheDocument();
+    expect(screen.getByLabelText("WikiPathways")).toBeInTheDocument();
   });
 
   it("shows the degraded notice", () => {
@@ -117,7 +153,45 @@ describe("Stage8View", () => {
     } as unknown as AnalysisRead;
     render(wrap(<Stage8View data={data} />));
     expect(
-      screen.getByText(/g:Profiler was unavailable — enrichment was skipped/i),
+      screen.getByText(
+        "g:Profiler was unavailable. Enrichment was skipped, but the run still completed.",
+      ),
     ).toBeInTheDocument();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    const data = {
+      ...base,
+      status: "stage_8_awaiting_approval",
+      parameters: {
+        ...base.parameters,
+        rerun_from: 7,
+      },
+      stage_results: {
+        "8": {
+          state: "computed",
+          terms: [],
+          input_gene_count: 3,
+          background_gene_count: 800,
+          background_source: "compound_target_universe",
+          correction: "fdr",
+          significance_threshold: 0.05,
+          min_term_size: 5,
+          sources: ["GO:BP"],
+          degraded: false,
+          count: 0,
+          flags: [],
+          stale: true,
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    render(wrap(<Stage8View data={data} />));
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
   });
 });

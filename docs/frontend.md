@@ -242,7 +242,7 @@ pipeline computation.
 
 ### Param panel (param-bearing stages)
 
-Each stage that carries tunable parameters (currently Step 2 — ADME) renders a collapsible
+Each stage that carries tunable parameters (currently Step 2: ADME) renders a collapsible
 **param panel** above its results. The panel lists every parameter with its description, its
 default, and (where applicable) the recommended range in the format `(default X, recommended
 lo–hi)`. Input fields validate against the contract's **hard bounds** only — the backend's
@@ -253,7 +253,7 @@ the **frozen** value stored in `parameters.adme` (i.e., the value the run was ac
 with, not the contract default). Submitting Redo calls `POST /analyses/{id}/reset-from/{stage}`
 with the changed values; the backend validates, merges, clears downstream stages, and re-runs.
 
-### In-stage add/remove (Step 1 — compound selection)
+### In-stage add/remove (Step 1: compound selection)
 
 Step 1 renders an `EditableEntityList` over its compound result. Each computed row has a remove
 control; a separate add box (reusing the `CompoundValidateBox` from setup) resolves a SMILES or
@@ -275,15 +275,17 @@ re-runs from Step 2.
 An **ApprovalBar** (`"Approve & Continue"` button) is visible **only on the current awaiting
 stage** — i.e., when the run status is `stage_{N}_awaiting_approval` and `N` matches the
 displayed stage. Approving calls `POST /analyses/{id}/advance`. The bar is hidden once the stage
-is past or the run is in auto mode.
+is past or the run is in auto mode. The run header maps raw backend status values to visible labels
+such as "Complete" and "Waiting for review". Stale-stage approval blocks use the visible reason
+"Run the updated step before continuing."
 
 ### Step 2 results view
 
-The ADME results panel renders two tables — **Passed** and **Filtered** — switchable by tab.
+The ADME results panel renders two tables, **Passed** and **Filtered**, switchable by tab.
 Each row carries:
 
 - The descriptor values (MW, logP, HBD, HBA, TPSA, rotatable bonds).
-- `qed_score` (QED — Quantitative Estimate of Drug-likeness, 0–1).
+- `qed_score` (QED: Quantitative Estimate of Drug-likeness, 0-1).
 - `descriptor_source` badge: `etl` (DB columns), `rdkit` (computed at screen time), or
   `unscreened`.
 - Status badges: `PAINS`, `NP-bypass`, `unscreened`, `could-not-screen` where applicable.
@@ -293,53 +295,54 @@ A **CSV download** button exports the full passed + filtered compound list with 
 columns. A tools-and-data-sources footer lists the screening rules applied (Lipinski / Veber /
 NP-bypass / PAINS) and the parameter values used for the run.
 
-### Step 3 — Target Identification
+### Step 3: Target Identification
 
 **Components:** `src/components/stages/Stage3View.tsx`, `src/components/stages/StpDialog.tsx`,
 `src/components/TargetValidateBox.tsx`.
 
-**Results view:** Renders a target table keyed by **UniProt accession + gene symbol** (never
-a DB UUID). Each computed row carries an explicit `prediction_method` column (`chembl_bioactivity`
-or `pubchem_bioassay` — the only methods written as edges) and a `pchembl_value` for ChEMBL rows.
-Manually added targets (including STP paste-back) are run-scoped and carry no edge/method. A **per-compound
-coverage** summary is always visible; compounds with zero targets are surfaced explicitly.
+**Results view:** Renders a target table keyed by **UniProt accession + gene symbol**. Each computed
+row carries a source method (`chembl_bioactivity` or `pubchem_bioassay`) and a `pchembl_value` for
+ChEMBL rows. Targets added by the researcher, including targets from SwissTargetPrediction, appear
+in the analysis target set without a source-method edge. A **per-compound coverage** summary is
+always visible; compounds with zero targets are surfaced explicitly. Source summary cards describe
+ChEMBL and PubChem BioAssay counts as target links.
 
-**CSV export:** Columns are UniProt accession + gene symbol — the stable external identifiers —
-not internal DB UUIDs.
+**CSV export:** Columns are UniProt accession + gene symbol, the stable external identifiers.
 
-**STP dialog (`StpDialog.tsx`):** A modal for pasting SwissTargetPrediction results.
-- Compound selector orders by ascending target-count (least-covered first).
+**SwissTargetPrediction dialog (`StpDialog.tsx`):** A modal for adding targets from
+SwissTargetPrediction results.
+- Compound selector orders by ascending target count so compounds with few target matches appear
+  first.
 - Selected compound's SMILES is shown with a copy button (populated from `stage_results["2"].passed`
   rows, which now expose `smiles` + `inchi_key`).
 - Paste area is parsed by `src/lib/stp.ts` (the canonical home for the STP CSV parser; keys on the
   SwissTargetPrediction `Probability*` header, also accepting plain `Probability`, with
   `Uniprot ID` / `Common name`).
-- Preview table shows parsed rows; the resolved accessions are added to the run's Stage-3 set via the
-  manual target-add path (`POST /targets/validate` → `POST /analyses/{id}/stages/3/edit`). There is no
-  STP import endpoint.
+- Preview table shows parsed rows; the resolved accessions are added through the same target-add path
+  used by manual entries (`POST /targets/validate` -> `POST /analyses/{id}/stages/3/edit`).
 
 **Edit controls:** The `EditableEntityList` / `ParamPanel` machinery is now param-group-generic;
 Step 3 uses the `target` param group (parameters `min_pchembl` + `min_assay_confidence`). Manual
-target addition via `TargetValidateBox` → `POST /targets/validate` writes a run-scoped inclusion
-in the stage set (no `compound_targets` edge); STP paste-back via `StpDialog` resolves the pasted
-accessions the same way and adds them to the run's Stage-3 set through the manual target-add path
-(`POST /analyses/{id}/stages/3/edit`) — also run-scoped, no `compound_targets` edge. See
-Limitations in `docs/testing.md`.
+target addition via `TargetValidateBox` -> `POST /targets/validate` adds targets to the Step-3
+result set; SwissTargetPrediction accessions use the same path. See Limitations in
+`docs/testing.md`. Remove controls are disabled once one target remains, with the reason "Keep at
+least one target before removing another."
 
-### Step 4 — Disease Target Collection
+### Step 4: Disease Target Collection
 
 **Component:** `src/components/stages/Stage4View.tsx`.
 
-**Results view:** Renders the disease→target set collected from the ETL-seeded `disease_targets`
-read. Summary **cards** lead (e.g. target count, the `min_score` in effect); a **score table**
-lists each target keyed by UniProt accession + gene symbol with its Open Targets association
-score, ordered by score descending. Manual disease-targets have no score (shown as `—`). The
-table offers **add / remove** controls via the shared manual target-add path (`TargetValidateBox`
-→ `POST /targets/validate` → `POST /analyses/{id}/stages/4/edit`). An empty disease-target side is
-surfaced as an honesty note (count 0), not an error.
+**Results view:** Renders the disease-target set collected from the ETL-seeded `disease_targets`
+read. Summary **cards** lead (for example, target count and the `min_score` in effect); a **score
+table** lists each target keyed by UniProt accession + gene symbol with its Open Targets association
+score, ordered by score descending. Manual disease-targets have no score (shown as `—`). The table
+offers **add / remove** controls via the shared target-add path (`TargetValidateBox` ->
+`POST /targets/validate` -> `POST /analyses/{id}/stages/4/edit`). An empty disease-target side is
+shown as a plain note, not an error: "No disease targets match this score. Lower the minimum score,
+run this step again, or add targets manually." Remove controls are disabled once one target remains,
+with the reason "Keep at least one target before removing another."
 
-**CSV export:** Columns are UniProt accession + gene symbol + Open Targets score — stable external
-identifiers, never internal DB UUIDs.
+**CSV export:** Columns are UniProt accession + gene symbol + Open Targets score.
 
 **Param panel + Redo:** A collapsible param panel exposes `min_score` (the
 `DISEASE_TARGETS_PARAMS` group; default 0.3, hard range 0–1, advisory band 0.1–0.5). Redo submits
@@ -353,7 +356,7 @@ ETL-time source) and lists the `min_score` used for the run.
 
 ---
 
-### Step 5 — Target Overlap
+### Step 5: Target Overlap
 
 **Component:** `src/components/stages/Stage5View.tsx`.
 
@@ -364,7 +367,7 @@ gene symbol + UniProt accession (linked to the UniProt entry) with its Open Targ
 like the other stages. Stage 5 is a **pure set intersection** of the **run-scoped** Stage-3
 (compound→target) and Stage-4 (disease→target) sets from `stage_results` — including user-added
 targets — on the canonical `target_id`, **not** the global edge tables; no statistics. A 0-overlap
-run is a terminal hard-stop.
+run is a terminal hard-stop with the approval reason "No overlap targets. Check Step 3 and Step 4 results."
 
 **CSV export:** gene symbol + UniProt accession + Open Targets score + UniProt source URL.
 
@@ -373,7 +376,7 @@ compound-target and disease-target sets (pure computation; no external source, n
 
 ---
 
-### Step 6 — PPI Network
+### Step 6: PPI Network
 
 **Component:** `src/components/stages/Stage6View.tsx`.
 
@@ -386,6 +389,8 @@ was applied.
 replaced by a prompt explaining the overlap (`overlap_count`) exceeds the STRING ceiling
 (`max_proteins`), with an **"Enable top-N & Redo"** action (Redo with `allow_top_n_cap: true`) and a
 hint to narrow the inputs upstream. A guided run parks here; an auto run hard-fails (AD-6).
+The blocked approval reason is "Overlap too large. Enable the top-N cap and Redo, or narrow the inputs."
+A computed network with no nodes blocks approval with "No PPI nodes. Adjust the parameters and Redo, or narrow the inputs."
 
 **Param panel + Redo:** the `ppi` group is exposed via the generic `ParamPanel` — `max_proteins`
 (numeric), `allow_top_n_cap` (checkbox), and `min_confidence` / `network_type` as **enum selects**
@@ -397,7 +402,7 @@ deferred to the Phase-5 design pass — the edge list is the current surface.
 
 ---
 
-### Step 7 — Hub Genes
+### Step 7: Hub Genes
 
 **Component:** `src/components/stages/Stage7View.tsx`.
 
@@ -405,8 +410,9 @@ deferred to the Phase-5 design pass — the edge list is the current surface.
 MCC); a **hub table** lists each hub-ranked protein with columns for rank, gene
 symbol (linked to UniProt via `source_url`), the MCC score, and all four centrality values (degree,
 betweenness, closeness, eigenvector) reported for transparency, ordered by rank ascending. The
-`"network_too_small"` flag renders as a dismissible notice (tiny or sparse network; informational, not
-an error). The `"eigenvector_fallback"` flag is surfaced as a footnote on the eigenvector column header.
+`"network_too_small"` flag renders the notice "The network is small or sparse. Centrality ranking is
+unreliable on trivial topology." It is informational, not an error. The `"eigenvector_fallback"` flag
+is surfaced as a footnote on the eigenvector column header.
 
 **CSV export:** columns are rank + gene symbol + UniProt accession + MCC + degree + betweenness +
 closeness + eigenvector.
@@ -420,32 +426,33 @@ centrality computation to networkx (Python, undirected graph).
 
 ---
 
-### Step 8 — Pathway Enrichment (terminal)
+### Step 8: Functional Enrichment (terminal)
 
 **Component:** `src/components/stages/Stage8View.tsx`.
 
 **Results view (computed):** Summary **cards** lead (enriched-term count, input gene count,
 background gene count, FDR threshold, correction method); an **enrichment table** lists each
 significant term with columns for source (GO:BP / GO:MF / GO:CC / KEGG), term ID, term name,
-FDR-corrected p-value (rendered as `−log₁₀(p)`; clamped to a minimum of 1.0 to prevent `Infinity`
-from underflowing), term size, intersection size, and the intersection gene list. Paginated and
-CSV-exportable. A **0-term result** renders as an honest-null notice (no enrichment found at the
-current threshold — not an error; the run is still `complete`). A **degraded result**
-(`stage_results["8"].degraded = true`) renders a distinct notice (g:Profiler outage; pipeline
-completed but enrichment unavailable — the run is still `complete`).
+corrected p-value rendered with the shared significant-figure formatter, term size, intersection
+size, and the intersection gene list. The 0-term
+state shows `No terms survived correction at this threshold. The gene set may be small or widely
+distributed.` The degraded state (`stage_results["8"].degraded = true`) shows `g:Profiler was
+unavailable. Enrichment was skipped, but the run still completed.`
 
 **CSV export:** columns are source + term ID + term name + p-value + term size + intersection
 size + intersection genes (pipe-delimited).
 
-**Param panel + Redo:** the `enrichment` group is exposed via `ParamPanel` — `significance_threshold`
-(numeric), `min_term_size` (numeric), `correction` as an **enum select** (`g_SCS` / `fdr` /
-`bonferroni`), and `no_iea` (boolean). The `sources` multi-select is deferred to Phase 5. Redo
-submits `POST /analyses/{id}/reset-from/8`.
+**Param panel + Redo:** the `enrichment` group is exposed via `ParamPanel` with
+`significance_threshold` (numeric), `min_term_size` (numeric), `correction` as an **enum select**
+(`g_SCS` / `fdr` / `bonferroni`), `sources` as a checkbox-backed multi-select, and `no_iea`
+(boolean). The `sources` control uses the closed enum values `GO:BP`, `GO:MF`, `GO:CC`, `KEGG`,
+`REAC`, and `WP`. Redo submits `POST /analyses/{id}/reset-from/8` and sends the raw wire values
+unchanged, including the selected `sources` array.
 
-**Pipeline-complete affordance:** when `analysis.status === "complete"` and Stage 8 is the
-active stage, the view surfaces a **"Pipeline complete"** banner (distinct from the per-stage
-approval bar) with the run's `completed_at` timestamp. The downloadable results bundle is offered
-by the run-level **Download results** action (see below).
+**Completion affordance:** when `analysis.status === "complete"` and Stage 8 is the active stage,
+the view surfaces an **"Analysis complete. All eight steps finished."** banner (distinct from the
+per-stage approval bar) with the run's `completed_at` timestamp. The downloadable results bundle
+is offered by the run-level **Download results** action (see below).
 
 **Footer:** attributes enrichment to g:Profiler (Raudvere 2019), lists the sources queried and
 the custom background (Stage-3 compound-target universe).

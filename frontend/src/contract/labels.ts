@@ -15,6 +15,8 @@ const VALUES: Record<string, string> = {
   g_SCS: "g:SCS",
   fdr: "FDR",
   bonferroni: "Bonferroni",
+  REAC: "Reactome",
+  WP: "WikiPathways",
 };
 
 export function humanizeLabel(key: string): string {

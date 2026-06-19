@@ -1,8 +1,8 @@
 /**
  * Stage8View — Stage 8 functional enrichment (g:Profiler, GO + KEGG). Terminal stage.
  *
- * Param-bearing (`enrichment`: significance_threshold, min_term_size, correction, no_iea;
- * `sources` stays frozen — the multi-select control is deferred to Phase 5). Renders summary
+ * Param-bearing (`enrichment`: significance_threshold, min_term_size, correction, no_iea,
+ * sources). Renders summary
  * cards (input/background gene counts + the shown custom background source), the enriched-terms
  * table + CSV, the param panel (Redo via reset-from/8), honest-null + degraded notices, the
  * data-sources footer, and the ApprovalBar (approving completes the run).
@@ -15,6 +15,7 @@ import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
 import {
+  ENRICHMENT_ARRAY_PARAMS,
   ENRICHMENT_BOOLEAN_PARAMS,
   ENRICHMENT_NUMERIC_PARAMS,
   ENRICHMENT_PARAMS,
@@ -63,7 +64,7 @@ type Stage8Result = {
   stale?: boolean;
 };
 
-type EnrichmentParams = Record<string, number | boolean | string>;
+type EnrichmentParams = Record<string, number | boolean | string | string[]>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -168,7 +169,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
       {/* Editorial header */}
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 8</Eyebrow>
-        <h2 className="hf-heading-serif">Step 8 — Functional Enrichment</h2>
+        <h2 className="hf-heading-serif">Step 8: Functional Enrichment</h2>
       </div>
 
       <StageDataSources stage={8} />
@@ -213,21 +214,21 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
 
       <p className="text-muted-foreground text-sm">
         Background: {stage8.background_source.replace(/_/g, " ")} ({stage8.background_gene_count}{" "}
-        genes) — the methodologically-correct custom universe (not the whole genome).
+        genes). Custom universe, not the whole genome.
       </p>
 
       {stage8.degraded && (
         <div role="status">
           <Badge variant="destructive">
-            g:Profiler was unavailable — enrichment was skipped, but the run still completed.
+            g:Profiler was unavailable. Enrichment was skipped, but the run still completed.
           </Badge>
         </div>
       )}
 
       {!stage8.degraded && stage8.count === 0 && (
         <p className="text-muted-foreground text-sm" role="status">
-          No terms survived correction at this threshold — an honest null for a small or
-          well-dispersed gene set.
+          No terms survived correction at this threshold. The gene set may be small or widely
+          distributed.
         </p>
       )}
 
@@ -325,6 +326,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           numericKeys={ENRICHMENT_NUMERIC_PARAMS}
           booleanKeys={ENRICHMENT_BOOLEAN_PARAMS}
           selectKeys={ENRICHMENT_SELECT_PARAMS}
+          arrayKeys={ENRICHMENT_ARRAY_PARAMS}
           title="Enrichment parameters"
           disabled={redo.isPending}
           onRedo={(changed) => redo.mutate(changed)}
@@ -337,7 +339,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
 
       {isComplete ? (
         <p className="text-muted-foreground text-sm" role="status">
-          Pipeline complete — all eight stages finished.
+          Analysis complete. All eight steps finished.
         </p>
       ) : (
         <ApprovalBar
@@ -345,7 +347,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           status={data.status}
           currentStage={data.current_stage}
           disabled={anyStale}
-          disabledReason="Re-run the out-of-date step before continuing."
+          disabledReason="Run the updated step before continuing."
           onApprove={() => advance.mutate()}
         />
       )}
