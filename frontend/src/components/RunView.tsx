@@ -6,7 +6,7 @@ import { useStaleState } from "../hooks/useStaleState";
 import { exportArtifactUrl } from "../lib/exportUrl";
 import { runHasCompounds } from "../lib/entities";
 import { notifyError } from "../lib/toast";
-import type { Problem } from "../lib/problem";
+import { humanizeProblem, type Problem } from "../lib/problem";
 import { formatRunStatus } from "../lib/runStatus";
 import { StageRunningSkeleton } from "./stages/StageRunningSkeleton";
 import { ApprovalBar } from "./stages/ApprovalBar";
@@ -39,7 +39,7 @@ type Stage1Data = {
 };
 
 export function RunView({ analysisId, onReset }: { analysisId: string; onReset?: () => void }) {
-  const { data } = useAnalysisStatus(analysisId);
+  const { data, isError, error } = useAnalysisStatus(analysisId);
   const qc = useQueryClient();
   const advance = useMutation({
     mutationFn: async () => advanceAnalysis({ path: { analysis_id: analysisId } }),
@@ -48,7 +48,18 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
   });
   const { plant: plantDisplay, disease: diseaseDisplay } = useEntitySubjects(data);
 
-  if (!data)
+  if (!data) {
+    if (isError) {
+      return (
+        <div
+          role="alert"
+          className="border-hf-danger/30 bg-hf-danger-soft/20 mx-auto max-w-lg rounded-[var(--radius-3)] border p-6 text-sm"
+        >
+          <p className="text-hf-fg-1 font-medium">Could not load analysis status</p>
+          <p className="text-hf-fg-2 mt-1">{humanizeProblem(error as Problem)} Retrying...</p>
+        </div>
+      );
+    }
     return (
       <div className="flex flex-col gap-3 p-6">
         <Skeleton className="h-4 w-24" />
@@ -56,6 +67,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
         <Skeleton className="h-4 w-48" />
       </div>
     );
+  }
 
   // stage1 is still used below for the inline (unsettled) fallback rendering and ApprovalBar.
   const stage1 = data.stage_results?.["1"] as Stage1Data | undefined;
@@ -151,6 +163,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
                   ? "Run the updated step before continuing."
                   : "No compounds found. Add one to continue."
               }
+              pending={advance.isPending}
               onApprove={() => advance.mutate()}
             />
           </>

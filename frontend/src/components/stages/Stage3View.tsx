@@ -579,6 +579,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
             ? "Run the updated step before continuing."
             : "No targets found. Adjust the settings or add one to continue."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
 

@@ -383,6 +383,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
               ? "Overlap too large. Enable the top-N cap and Redo, or narrow the inputs."
               : "No PPI nodes. Adjust the parameters and Redo, or narrow the inputs."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
     </section>

@@ -33,12 +33,15 @@ function makeRun(overrides: Partial<AnalysisRead>): AnalysisRead {
   } as unknown as AnalysisRead;
 }
 
-function mockStatus(data: AnalysisRead | undefined) {
+function mockStatus(
+  data: AnalysisRead | undefined,
+  overrides: { isError?: boolean; error?: unknown } = {},
+) {
   vi.spyOn(useAnalysisStatusModule, "useAnalysisStatus").mockReturnValue({
     data,
-    isLoading: data == null,
-    isError: false,
-    error: null,
+    isLoading: data == null && !overrides.isError,
+    isError: overrides.isError ?? false,
+    error: overrides.error ?? null,
   } as ReturnType<typeof useAnalysisStatusModule.useAnalysisStatus>);
 }
 
@@ -109,5 +112,30 @@ describe("RunView — running skeleton", () => {
     wrap(<RunView analysisId="run-1" />);
     // Should render initial loading skeletons, not stage content
     expect(screen.queryByText(/running…/)).toBeNull();
+  });
+});
+
+describe("RunView — poll-error banner", () => {
+  it("renders an error banner when the poll errors with no data yet", () => {
+    mockStatus(undefined, {
+      isError: true,
+      error: { detail: "Service temporarily unavailable." },
+    });
+    wrap(<RunView analysisId="run-1" />);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.getByText(/could not load analysis status/i)).toBeInTheDocument();
+    expect(screen.getByText(/service temporarily unavailable/i)).toBeInTheDocument();
+    expect(screen.getByText(/retrying/i)).toBeInTheDocument();
+  });
+
+  it("does not render the error banner when data is already available despite an error", () => {
+    mockStatus(makeRun({ status: "complete", current_stage: 8 }), {
+      isError: true,
+      error: { detail: "Transient blip." },
+    });
+    wrap(<RunView analysisId="run-1" />);
+    // Run header should still render, no alert banner
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByText(/run-1/)).toBeInTheDocument();
   });
 });

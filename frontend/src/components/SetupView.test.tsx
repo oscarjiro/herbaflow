@@ -512,3 +512,25 @@ describe("SetupView — manual setup added-pool", () => {
     ).toHaveLength(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tests — double-submit guard
+// ---------------------------------------------------------------------------
+
+describe("SetupView — create button double-submit guard", () => {
+  it("disables the Create button while the create mutation is in-flight", async () => {
+    // Never resolves so the mutation stays pending throughout the test.
+    vi.spyOn(sdk, "createAnalysis").mockReturnValue(new Promise(() => {}));
+
+    wrap(<SetupView onCreated={() => {}} />);
+
+    await pickComboOption("Search plants", /aaa bbb/i);
+    await pickComboOption("Search disease", /test disease/i);
+
+    const createBtn = screen.getByRole("button", { name: /create analysis/i });
+    expect(createBtn).not.toBeDisabled();
+
+    await userEvent.click(createBtn);
+    expect(createBtn).toBeDisabled();
+  });
+});

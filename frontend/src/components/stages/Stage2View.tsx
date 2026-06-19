@@ -422,6 +422,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
             ? "Run the updated step before continuing."
             : "No compounds passed ADME. Adjust the settings and run this step again."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
 

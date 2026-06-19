@@ -319,6 +319,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         currentStage={data.current_stage}
         disabled={anyStale}
         disabledReason="Run the updated step before continuing."
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
 

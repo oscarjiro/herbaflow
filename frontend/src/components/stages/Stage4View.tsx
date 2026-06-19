@@ -410,6 +410,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
             ? "Run the updated step before continuing."
             : "No disease targets found. Lower the minimum score, run this step again, or add one to continue."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
 

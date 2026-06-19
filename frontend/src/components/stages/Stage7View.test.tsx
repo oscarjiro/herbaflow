@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { Stage7View } from "./Stage7View";
 import type { AnalysisRead } from "../../api/types.gen";
+import * as sdk from "../../api/sdk.gen";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -173,5 +174,42 @@ describe("Stage7View", () => {
     expect(
       screen.queryByText("Re-run the out-of-date step before continuing."),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("Stage7View — double-submit guards", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("disables Approve & Continue while the advance mutation is in-flight", async () => {
+    // Never resolves so the mutation stays pending throughout the test.
+    vi.spyOn(sdk, "advanceAnalysis").mockReturnValue(new Promise(() => {}));
+    vi.spyOn(sdk, "resetFrom").mockResolvedValue({ data: {} } as never);
+
+    wrap(<Stage7View data={makeData(makeComputedResult())} />);
+    const approveBtn = screen.getByRole("button", { name: /approve & continue/i });
+    expect(approveBtn).not.toBeDisabled();
+
+    await userEvent.click(approveBtn);
+    expect(approveBtn).toBeDisabled();
+  });
+
+  it("disables the Redo button inside the param panel while the redo mutation is in-flight", async () => {
+    vi.spyOn(sdk, "advanceAnalysis").mockResolvedValue({ data: {} } as never);
+    // Never resolves so the redo mutation stays pending.
+    vi.spyOn(sdk, "resetFrom").mockReturnValue(new Promise(() => {}));
+
+    wrap(<Stage7View data={makeData(makeComputedResult())} />);
+    await openHubPanel();
+
+    // Change the top_n param so Redo becomes armed.
+    const input = screen.getByLabelText("Top N");
+    await userEvent.clear(input);
+    await userEvent.type(input, "5");
+
+    const redoBtn = screen.getByRole("button", { name: /redo/i });
+    expect(redoBtn).not.toBeDisabled();
+
+    await userEvent.click(redoBtn);
+    expect(redoBtn).toBeDisabled();
   });
 });

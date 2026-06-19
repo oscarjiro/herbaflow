@@ -265,6 +265,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
             ? "Run the updated step before continuing."
             : "No overlap targets. Check Step 3 and Step 4 results."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
     </section>
