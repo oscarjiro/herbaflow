@@ -6,7 +6,7 @@ export function StageRunningSkeleton({ stage }: { stage: number }) {
   return (
     <section aria-label={`Step ${stage} running`}>
       <h2 className="text-hf-fg-1 mb-3 text-lg font-semibold">
-        Step {stage} — {label}
+        Step {stage}: {label}
         <span className="text-hf-fg-3 ml-1 text-sm font-normal"> · running…</span>
       </h2>
       <div className="border-hf-border overflow-hidden rounded-[var(--radius-3)] border">
