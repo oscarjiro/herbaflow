@@ -166,6 +166,67 @@ async def test_seeded_clean_passes_etl_source() -> None:
     assert passed["compound_id"] == str(c.compound_id)
 
 
+@pytest.mark.asyncio
+async def test_screened_rows_carry_adme_outcome_fields() -> None:
+    c = _seeded()
+    c.inchi_key = "LFQSCWFLJHTTHZ-UHFFFAOYSA-N"
+
+    result = await stage2.screen([c], _params(), compute=_fake_compute_none)
+
+    row = result["passed"][0]
+    assert row["inchikey"] == "LFQSCWFLJHTTHZ-UHFFFAOYSA-N"
+    assert row["lipinski_violations"] == 0
+    assert row["lipinski_pass"] is True
+    assert row["veber_pass"] is True
+    assert row["rule_evaluated"] is True
+
+
+@pytest.mark.asyncio
+async def test_bypass_and_unscreened_rows_mark_rule_not_evaluated() -> None:
+    np_bypass = _seeded(
+        molecular_weight=800.0,
+        logp=8.0,
+        hbond_donors=8,
+        hbond_acceptors=15,
+        tpsa=200.0,
+        rotatable_bonds=20,
+        np_likeness_score=1.5,
+    )
+    bypass_result = await stage2.screen(
+        [np_bypass],
+        _params(apply_np_exception=True, np_exception_threshold=1.0),
+        compute=_fake_compute_none,
+    )
+    bypass_row = bypass_result["passed"][0]
+    assert bypass_row["rule_evaluated"] is False
+    assert bypass_row["lipinski_violations"] is None
+    assert bypass_row["lipinski_pass"] is None
+    assert bypass_row["veber_pass"] is None
+
+    unscreened_result = await stage2.screen(
+        [_seeded()],
+        _params(skip_adme=True),
+        compute=_fake_compute_none,
+    )
+    unscreened_row = unscreened_result["passed"][0]
+    assert unscreened_row["rule_evaluated"] is False
+    assert unscreened_row["lipinski_violations"] is None
+    assert unscreened_row["lipinski_pass"] is None
+    assert unscreened_row["veber_pass"] is None
+
+
+@pytest.mark.asyncio
+async def test_could_not_screen_rows_mark_outcomes_as_no_data() -> None:
+    result = await stage2.screen([_seeded(logp=None)], _params(), compute=_fake_compute_none)
+
+    row = result["filtered"][0]
+    assert row["reason"] == "could not screen"
+    assert row["rule_evaluated"] is False
+    assert row["lipinski_violations"] is None
+    assert row["lipinski_pass"] is None
+    assert row["veber_pass"] is None
+
+
 # ---------------------------------------------------------------------------
 # Branch 3: manual/null compound → compute returns descriptors →
 #           screened on computed values, descriptor_source "rdkit", persist called

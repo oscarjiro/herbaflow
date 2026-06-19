@@ -304,12 +304,36 @@ def test_stage1_csv_empty_note():
 def test_stage2_csv_columns_and_buckets():
     out = rh.build_stage_csv(2, _SR2, {}, {})
     assert out.splitlines()[0] == (
-        "compound_id,canonical_name,passed,descriptor_source,molecular_weight,logp,"
-        "hbond_donors,hbond_acceptors,tpsa,rotatable_bonds,qed_score,np_likeness_score,"
-        "num_ro5_violations,is_pains_positive,source_url,reason"
+        "inchikey,canonical_name,passed,descriptor_source,lipinski_violations,"
+        "lipinski_pass,veber_pass,rule_evaluated,molecular_weight,logp,hbond_donors,"
+        "hbond_acceptors,tpsa,rotatable_bonds,qed_score,np_likeness_score,"
+        "is_pains_positive,source_url,reason"
     )
-    assert "c1,Curcumin,true," in out
-    assert "c2,Aspirin,false," in out
+    assert "compound_id" not in out.splitlines()[0]
+    assert "VFLDPWHFBUODDF-FCXRPNKRSA-N,Curcumin,true," in out
+    assert "BSYNRYMUTXBXSQ-UHFFFAOYSA-N,Aspirin,false," in out
+
+
+def test_stage2_csv_falls_back_to_compound_lookup_for_legacy_rows():
+    legacy = {
+        "2": {
+            "passed": [{"compound_id": "c1", "canonical_name": "Curcumin"}],
+            "filtered": [],
+        }
+    }
+
+    out = rh.build_stage_csv(2, legacy, _COMP1, {})
+
+    assert "VFLDPWHFBUODDF-FCXRPNKRSA-N,Curcumin,true" in out
+
+
+def test_stages_readme_glosses_stage2_outcome_columns():
+    md = rh.build_stages_readme()
+    assert "`inchikey`" in md
+    assert "`lipinski_violations`" in md
+    assert "`lipinski_pass`" in md
+    assert "`veber_pass`" in md
+    assert "`rule_evaluated`" in md
 
 
 def test_stage3_csv_columns():
@@ -334,7 +358,12 @@ _SR2 = {
             {
                 "compound_id": "c1",
                 "canonical_name": "Curcumin",
+                "inchikey": "VFLDPWHFBUODDF-FCXRPNKRSA-N",
                 "descriptor_source": "etl",
+                "lipinski_violations": 0,
+                "lipinski_pass": True,
+                "veber_pass": True,
+                "rule_evaluated": True,
                 "molecular_weight": 368.38,
                 "logp": 3.2,
                 "hbond_donors": 2,
@@ -353,7 +382,12 @@ _SR2 = {
             {
                 "compound_id": "c2",
                 "canonical_name": "Aspirin",
+                "inchikey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
                 "descriptor_source": "etl",
+                "lipinski_violations": 2,
+                "lipinski_pass": False,
+                "veber_pass": True,
+                "rule_evaluated": True,
                 "molecular_weight": 180.16,
                 "logp": 1.2,
                 "hbond_donors": 1,

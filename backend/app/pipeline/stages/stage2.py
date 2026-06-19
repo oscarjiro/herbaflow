@@ -55,11 +55,13 @@ def _compound_dict(
     badges: list[str],
 ) -> dict[str, Any]:
     """Serialise a compound-like object to a result dict."""
+    inchi_key = _read(obj, "inchi_key")
     return {
         "compound_id": str(obj.compound_id),
         "canonical_name": _read(obj, "canonical_name"),
         "smiles": _read(obj, "smiles"),
-        "inchi_key": _read(obj, "inchi_key"),
+        "inchi_key": inchi_key,
+        "inchikey": inchi_key,
         "descriptor_source": descriptor_source,
         "molecular_weight": _read(obj, "molecular_weight"),
         "logp": _read(obj, "logp"),
@@ -74,6 +76,26 @@ def _compound_dict(
         "source_url": _read(obj, "source_url"),
         "badges": badges,
     }
+
+
+def _blank_rule_outcome(row: dict[str, Any]) -> None:
+    row["lipinski_violations"] = None
+    row["lipinski_pass"] = None
+    row["veber_pass"] = None
+    row["rule_evaluated"] = False
+
+
+def _set_rule_outcome(
+    row: dict[str, Any],
+    *,
+    lipinski_violations: int,
+    lipinski_pass: bool,
+    veber_pass: bool | None,
+) -> None:
+    row["lipinski_violations"] = lipinski_violations
+    row["lipinski_pass"] = lipinski_pass
+    row["veber_pass"] = veber_pass
+    row["rule_evaluated"] = True
 
 
 def _filtered_dict(obj: Any, *, descriptor_source: str, reason: str) -> dict[str, Any]:
@@ -142,9 +164,9 @@ async def screen(
         # ------------------------------------------------------------------
         if skip_adme:
             annotations["unscreened"].append(cid)
-            passed.append(
-                _compound_dict(compound, descriptor_source="unscreened", badges=["unscreened"])
-            )
+            row = _compound_dict(compound, descriptor_source="unscreened", badges=["unscreened"])
+            _blank_rule_outcome(row)
+            passed.append(row)
             continue
 
         # ------------------------------------------------------------------
@@ -177,9 +199,9 @@ async def screen(
             if lipinski_missing or veber_missing:
                 # Cannot screen: exclude with reason rather than coercing to 0
                 annotations["could_not_screen"].append(cid)
-                filtered.append(
-                    _filtered_dict(compound, descriptor_source="etl", reason="could not screen")
-                )
+                row = _filtered_dict(compound, descriptor_source="etl", reason="could not screen")
+                _blank_rule_outcome(row)
+                filtered.append(row)
                 continue
 
             d_mw = float(mw)
@@ -217,9 +239,9 @@ async def screen(
         # ------------------------------------------------------------------
         if computed_here and computed_d is None:
             annotations["could_not_screen"].append(cid)
-            filtered.append(
-                _filtered_dict(compound, descriptor_source="unknown", reason="could not screen")
-            )
+            row = _filtered_dict(compound, descriptor_source="unknown", reason="could not screen")
+            _blank_rule_outcome(row)
+            filtered.append(row)
             continue
 
         # ------------------------------------------------------------------
@@ -234,6 +256,7 @@ async def screen(
             row = _compound_dict(compound, descriptor_source=descriptor_source, badges=badges)
             if computed_here and computed_d is not None:
                 _overlay_descriptors(row, computed_d, descriptor_source)
+            _blank_rule_outcome(row)
             passed.append(row)
             continue
 
@@ -271,6 +294,12 @@ async def screen(
             )
             if computed_here and computed_d is not None:
                 _overlay_descriptors(pass_row, computed_d, descriptor_source)
+            _set_rule_outcome(
+                pass_row,
+                lipinski_violations=lipo_violations,
+                lipinski_pass=lipinski_ok,
+                veber_pass=veber_ok if apply_veber else None,
+            )
             passed.append(pass_row)
         else:
             if not lipinski_ok:
@@ -280,6 +309,12 @@ async def screen(
             fail_row = _filtered_dict(compound, descriptor_source=descriptor_source, reason=reason)
             if computed_here and computed_d is not None:
                 _overlay_descriptors(fail_row, computed_d, descriptor_source)
+            _set_rule_outcome(
+                fail_row,
+                lipinski_violations=lipo_violations,
+                lipinski_pass=lipinski_ok,
+                veber_pass=veber_ok if apply_veber else None,
+            )
             filtered.append(fail_row)
 
     return {

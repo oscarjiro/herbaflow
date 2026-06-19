@@ -150,7 +150,16 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
 
     sr: dict[str, Any] = run.stage_results or {}
     edges = sr.get("3", {}).get("compound_targets", [])
-    compound_ids = {e["compound_id"] for e in edges}
+    stage1_compound_ids = {
+        c["compound_id"] for c in sr.get("1", {}).get("compounds", []) if c.get("compound_id")
+    }
+    stage2_compound_ids = {
+        c["compound_id"]
+        for bucket in ("passed", "filtered")
+        for c in sr.get("2", {}).get(bucket, [])
+        if c.get("compound_id")
+    }
+    compound_ids = {e["compound_id"] for e in edges} | stage1_compound_ids | stage2_compound_ids
     target_ids = (
         {o["target_id"] for o in sr.get("5", {}).get("overlap", [])}
         | {h["target_id"] for h in sr.get("7", {}).get("hubs", [])}

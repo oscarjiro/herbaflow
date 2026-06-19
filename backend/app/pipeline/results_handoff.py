@@ -345,12 +345,17 @@ def _stage1_csv(sr: dict[str, Any], compounds_by_id: dict[str, Any], _t: dict[st
     return _csv_with_note(cols, rows, "no compounds")
 
 
-# Stage-2 row columns mirror the on-screen ADME CSV (Stage2View.buildCsv) verbatim — flat row
-# keys (no `descriptors` nesting), with a `passed` flag splitting the two stored buckets.
+# Stage-2 row columns mirror the on-screen ADME CSV (Stage2View.buildCsv) verbatim: de-UUID'd
+# compound identity plus flat descriptor and rule-outcome fields, with a `passed` flag splitting
+# the two stored buckets.
 _STAGE2_FIELDS = (
-    "compound_id",
+    "inchikey",
     "canonical_name",
     "descriptor_source",
+    "lipinski_violations",
+    "lipinski_pass",
+    "veber_pass",
+    "rule_evaluated",
     "molecular_weight",
     "logp",
     "hbond_donors",
@@ -359,19 +364,22 @@ _STAGE2_FIELDS = (
     "rotatable_bonds",
     "qed_score",
     "np_likeness_score",
-    "num_ro5_violations",
     "is_pains_positive",
     "source_url",
     "reason",
 )
 
 
-def _stage2_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> str:
+def _stage2_csv(sr: dict[str, Any], compounds_by_id: dict[str, Any], _t: dict[str, Any]) -> str:
     cols = (
-        "compound_id",
+        "inchikey",
         "canonical_name",
         "passed",
         "descriptor_source",
+        "lipinski_violations",
+        "lipinski_pass",
+        "veber_pass",
+        "rule_evaluated",
         "molecular_weight",
         "logp",
         "hbond_donors",
@@ -380,7 +388,6 @@ def _stage2_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> s
         "rotatable_bonds",
         "qed_score",
         "np_likeness_score",
-        "num_ro5_violations",
         "is_pains_positive",
         "source_url",
         "reason",
@@ -389,9 +396,11 @@ def _stage2_csv(sr: dict[str, Any], _c: dict[str, Any], _t: dict[str, Any]) -> s
     rows: list[tuple[Any, ...]] = []
     for bucket, passed in (("passed", "true"), ("filtered", "false")):
         for r in s2.get(bucket, []):
+            compound_id = str(r.get("compound_id") or "")
+            compound_meta = compounds_by_id.get(compound_id, {})
             rows.append(
                 (
-                    r.get("compound_id"),
+                    r.get("inchikey") or r.get("inchi_key") or compound_meta.get("inchi_key"),
                     r.get("canonical_name") or "",
                     passed,
                     *(r.get(f, "") for f in _STAGE2_FIELDS[2:]),
@@ -645,10 +654,14 @@ included; the `passed` column tells you which bucket each compound fell into.
 
 | Column | Meaning |
 |---|---|
-| `compound_id` | Internal compound identifier. |
+| `inchikey` | IUPAC InChIKey, used as the stable compound identifier when available. |
 | `canonical_name` | Canonical compound name. |
 | `passed` | `true` if the compound passed the ADME gate; `false` if it was filtered out. |
 | `descriptor_source` | Where the molecular descriptors came from (e.g. `pubchem`, `rdkit`). |
+| `lipinski_violations` | Number of Lipinski criteria violated, blank when not evaluated. |
+| `lipinski_pass` | `true` if Lipinski passed, `false` if it failed, blank when not evaluated. |
+| `veber_pass` | `true` if Veber passed, `false` if it failed, blank when disabled or skipped. |
+| `rule_evaluated` | `true` when Lipinski/Veber rules ran; `false` for bypass or no-data rows. |
 | `molecular_weight` | Molecular weight in Da. |
 | `logp` | Calculated partition coefficient (lipophilicity). |
 | `hbond_donors` | Number of hydrogen-bond donors. |
@@ -657,7 +670,6 @@ included; the `passed` column tells you which bucket each compound fell into.
 | `rotatable_bonds` | Number of rotatable bonds (flexibility indicator). |
 | `qed_score` | Quantitative Estimate of Drug-likeness (0 to 1; higher = more drug-like). |
 | `np_likeness_score` | Natural-product likeness score. |
-| `num_ro5_violations` | Number of Lipinski Rule-of-Five violations. |
 | `is_pains_positive` | `True` if the compound triggered a PAINS (pan-assay interference) alert. |
 | `source_url` | PubChem compound page URL. |
 | `reason` | Why a compound was filtered (blank if it passed). |

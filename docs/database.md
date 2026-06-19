@@ -638,7 +638,12 @@ so the FE table and CSV match a computed row.
   "passed": [
     {
       "compound_id": "<uuid>", "canonical_name": "<str|null>",
+      "inchikey": "<str|null>",
       "descriptor_source": "etl|rdkit|unscreened",
+      "lipinski_violations": <int|null>,
+      "lipinski_pass": <bool|null>,
+      "veber_pass": <bool|null>,
+      "rule_evaluated": <bool>,
       "molecular_weight": <float|null>, "logp": <float|null>,
       "hbond_donors": <int|null>, "hbond_acceptors": <int|null>,
       "tpsa": <float|null>, "rotatable_bonds": <int|null>,
@@ -670,6 +675,11 @@ so the FE table and CSV match a computed row.
 - `"rdkit"` — descriptors computed on-the-fly via RDKit from the compound's SMILES (manual/null path);
   persisted back to the `compounds` table after computation.
 - `"unscreened"` — `skip_adme` was on; no descriptor access took place.
+
+`lipinski_violations`, `lipinski_pass`, `veber_pass`, and `rule_evaluated` make the gate outcome
+explicit for UI and CSV consumers. Rows that bypassed the rule gate (`skip_adme` or NP-bypass) or could
+not be screened carry `rule_evaluated: false` and `null` Lipinski/Veber outcomes. When `apply_veber`
+is false, `rule_evaluated` can still be true while `veber_pass` is null.
 
 **Overlap stage** (Stage 5 — no parameters):
 
@@ -881,22 +891,24 @@ the `"network_too_small"` flag and the eigenvector value falls back gracefully (
 
 #### `parameters.enrichment` block (Stage 8)
 
-Frozen from the contract defaults at run-creation. `sources` is stored but its UI multi-select is
-deferred to Phase 5 — the Stage-8 param panel exposes only the three scalar params below.
-Background is hardcoded to the Stage-3 compound-target universe (custom statistical background —
-method constant, not configuration).
+Frozen from the contract defaults at run-creation. The shared Stage-8 `ParamPanel` exposes
+`significance_threshold`, `min_term_size`, `correction`, `sources`, and `no_iea`. `sources` is a
+checkbox-backed multi-select that uses the closed enum values `GO:BP`, `GO:MF`, `GO:CC`, `KEGG`,
+`REAC`, and `WP`. Background is hardcoded to the Stage-3 compound-target universe (custom
+statistical background, method constant, not configuration).
 
 | Parameter | Type | Default | Bounds / enum | Notes |
 |---|---|---|---|---|
 | `significance_threshold` | number | 0.05 | >0, ≤1 (rec. 0.01–0.1) | Corrected-p significance cutoff for enriched terms (applies to whichever correction method is selected) |
 | `min_term_size` | integer | 5 | ≥1, ≤500 (rec. 3–20) | Minimum gene-set size; filtered client-side from g:Profiler results |
 | `correction` | string | `fdr` | enum {`fdr`, `g_SCS`, `bonferroni`} | Multiple-testing correction method; default BH-FDR; `g_SCS` = g:Profiler's adaptive threshold |
-| `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | enum items {`GO:BP`,`GO:MF`,`GO:CC`,`KEGG`,`REAC`,`WP`} | Annotation vocabularies; Reactome (REAC) + WikiPathways (WP) additionally selectable; multi-select UI deferred to Phase 5 |
+| `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | enum items {`GO:BP`,`GO:MF`,`GO:CC`,`KEGG`,`REAC`,`WP`} | Annotation vocabularies exposed in the shared ParamPanel as a checkbox-backed multi-select; Reactome = `REAC`, WikiPathways = `WP` |
 | `no_iea` | boolean | false | — | Exclude GO terms supported only by electronic (IEA) annotation |
 
 `correction` defaults to `fdr` (BH-FDR); the `g_SCS` enum value uses g:Profiler's verbatim API
-spelling. `sources` IS enum/array-validated on Redo — elements outside the closed vocabulary are
-rejected **422**.
+spelling. Redo forwards the raw wire values unchanged, including the ordered `sources` array.
+`sources` IS enum/array-validated on Redo; elements outside the closed vocabulary are rejected
+**422**.
 
 ---
 
