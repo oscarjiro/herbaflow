@@ -290,13 +290,15 @@ async def advance_run(
     return None
 
 
-def _validate_overrides(group: str, overrides: dict[str, Any]) -> None:
+def validate_overrides(group: str, overrides: dict[str, Any]) -> None:
     """Validate param overrides against the group's HARD bounds only.
 
     Enforces ``minimum``/``maximum``/``exclusiveMinimum``, the JSON-Schema ``type``, and any
     closed ``enum`` (string OR numeric, e.g. STRING's confidence tiers). The advisory
     ``recommended_min``/``recommended_max`` are NEVER enforced. An unknown key, an out-of-range
     value, or an off-enum value raises :class:`ValidationProblem` (422).
+
+    Shared by ``create`` (create-time advanced param overrides) and ``reset_from`` (param Redo).
     """
     bounds = contracts.pipeline_param_bounds(group)
     for name, value in overrides.items():
@@ -421,7 +423,7 @@ async def reset_from(
         group = STAGE_PARAM_GROUP.get(stage)
         if group is None:
             raise ValidationProblem(detail=f"Stage {stage} takes no parameters.")
-        _validate_overrides(group, param_overrides)
+        validate_overrides(group, param_overrides)
         current = dict(run.parameters.get(group, {}))
         merged = {**current, **param_overrides}
         if merged == current:  # E7: nothing changed -> no clear, no re-run.

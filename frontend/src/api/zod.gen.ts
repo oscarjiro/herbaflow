@@ -35,6 +35,10 @@ export const zAnalysisCreate = z.object({
     disease_label: z.union([
         z.string().max(200),
         z.null()
+    ]).optional(),
+    parameters: z.union([
+        z.object({}),
+        z.null()
     ]).optional()
 });
 

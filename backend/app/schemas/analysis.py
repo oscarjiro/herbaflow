@@ -40,6 +40,15 @@ class AnalysisCreate(BaseModel):
     manual_disease_target_ids: list[uuid.UUID] = Field(default_factory=list)
     plant_label: str | None = Field(default=None, max_length=200)
     disease_label: str | None = Field(default=None, max_length=200)
+    parameters: dict[str, dict[str, Any]] | None = Field(
+        default=None,
+        description=(
+            "Per-group parameter overrides for any pipeline group "
+            "(adme / target / disease_targets / ppi / hub_genes / enrichment); "
+            "validated against the contract hard bounds at create, merged over the group "
+            "defaults, and frozen as the run baseline."
+        ),
+    )
 
     @model_validator(mode="after")
     def _validate_modes(self) -> AnalysisCreate:

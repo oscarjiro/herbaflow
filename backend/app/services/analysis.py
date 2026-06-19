@@ -13,6 +13,7 @@ from app import contracts
 from app.clock import now_utc
 from app.errors import ConflictProblem, GoneProblem, NotFoundProblem, ValidationProblem
 from app.pipeline import edits, engine, entry_modes, state
+from app.pipeline.engine import validate_overrides
 from app.pipeline.limits import EntityCapExceeded, check_entity_cap
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
@@ -148,6 +149,20 @@ class AnalysisService:
             "hub_genes": contracts.hub_genes_defaults(),
             "enrichment": contracts.enrichment_defaults(),
         }
+
+        # Apply per-group parameter overrides from the create request (if any).
+        # Validation happens before any persistence: a bad override rejects the whole create
+        # (422) and nothing is written. Unknown groups and unknown keys within a valid group are
+        # both rejected. The merged dict becomes the run's frozen parameter baseline.
+        if payload.parameters:
+            for group, overrides in payload.parameters.items():
+                if group not in pipeline_parameters:
+                    raise ValidationProblem(detail=f"Unknown parameter group: {group}.")
+                if not isinstance(overrides, dict):
+                    raise ValidationProblem(detail=f"Parameters for {group} must be an object.")
+                validate_overrides(group, overrides)  # 422 on bad bound/type/enum/unknown key
+                pipeline_parameters[group].update(overrides)  # merge over defaults
+
         extra_parameters: dict[str, Any] = {
             "input_modes": {"plant": plant_mode, "disease": disease_mode}
         }

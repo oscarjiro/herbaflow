@@ -1050,6 +1050,22 @@
               }
             ],
             "title": "Disease Label"
+          },
+          "parameters": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parameters",
+            "description": "Per-group parameter overrides for any pipeline group (adme / target / disease_targets / ppi / hub_genes / enrichment); validated against the contract hard bounds at create, merged over the group defaults, and frozen as the run baseline."
           }
         },
         "type": "object",

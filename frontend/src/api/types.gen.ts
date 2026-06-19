@@ -12,6 +12,14 @@ export type AnalysisCreate = {
     manual_disease_target_ids?: Array<string>;
     plant_label?: string | null;
     disease_label?: string | null;
+    /**
+     * Per-group parameter overrides for any pipeline group (adme / target / disease_targets / ppi / hub_genes / enrichment); validated against the contract hard bounds at create, merged over the group defaults, and frozen as the run baseline.
+     */
+    parameters?: {
+        [key: string]: {
+            [key: string]: unknown;
+        };
+    } | null;
 };
 
 export type AnalysisRead = {

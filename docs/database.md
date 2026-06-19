@@ -526,6 +526,15 @@ survives a re-run's clear of `stage_results` and is reapplied every time the sta
 Defaults for each param-bearing stage are frozen into `parameters` at run-creation time; a Redo
 overrides them within the contract's hard bounds.
 
+**Create-time parameter overrides:** `POST /analyses` accepts an optional `parameters` body field
+— a group-keyed map of `{param: value}` overrides (e.g. `{"ppi": {"min_confidence": 0.7},
+"enrichment": {"min_term_size": 5}}`). Each override group is validated against the contract
+hard bounds before the run row is written; an out-of-bounds value, an unknown key within a valid
+group, or an unknown group all return **422** with nothing persisted. Valid overrides are merged
+(shallow `update`) over the per-group defaults, and the merged result is stored as the run's
+frozen parameter baseline — identical to the result of a post-create Param Redo on the same
+group, but captured at creation so the pipeline runs with the intended parameters from step 1.
+
 `parameters.stage_edits` may be **seeded at run-creation** for manual input modes: Stage 1 (manual
 compound IDs seeded into the S1 entity layer), Stage 3 (manual plant targets), and Stage 4 (manual
 disease targets). Previously, `stage_edits` was only ever written by in-stage edit calls;
