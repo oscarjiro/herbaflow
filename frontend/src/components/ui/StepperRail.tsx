@@ -1,16 +1,6 @@
 import type { AnalysisRead } from "@/api/types.gen";
+import { STAGE_LABELS } from "@/contract/labels";
 import { cn } from "@/lib/cn";
-
-const STAGE_LABELS = [
-  "Compounds",
-  "Druglikeness",
-  "Compound targets",
-  "Disease targets",
-  "Shared targets",
-  "Interaction network",
-  "Hub genes",
-  "Pathway enrichment",
-] as const;
 
 type StepState = "done" | "current" | "pending" | "not_applicable";
 

@@ -6,6 +6,7 @@ import { useStaleState } from "../hooks/useStaleState";
 import { exportArtifactUrl } from "../lib/exportUrl";
 import { runHasCompounds } from "../lib/entities";
 import { formatRunStatus } from "../lib/runStatus";
+import { StageRunningSkeleton } from "./stages/StageRunningSkeleton";
 import { ApprovalBar } from "./stages/ApprovalBar";
 import { Stage1View } from "./stages/Stage1View";
 import { Stage2View } from "./stages/Stage2View";
@@ -56,6 +57,10 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
   // stage1 is still used below for the inline (unsettled) fallback rendering and ApprovalBar.
   const stage1 = data.stage_results?.["1"] as Stage1Data | undefined;
   const { anyStale, rerunFrom } = useStaleState(data);
+
+  // Derive the actively-running stage from status like "stage_3_running".
+  const runningStageMatch = /^stage_(\d+)_running$/.exec(data.status ?? "");
+  const runningStage = runningStageMatch ? Number(runningStageMatch[1]) : null;
 
   return (
     <div className="lg:grid lg:grid-cols-[16rem_1fr] lg:gap-8">
@@ -161,6 +166,10 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
         {Boolean(data.stage_results?.["7"]) && <Stage7View data={data} />}
 
         {Boolean(data.stage_results?.["8"]) && <Stage8View data={data} />}
+
+        {runningStage != null && !data.stage_results?.[String(runningStage)] && (
+          <StageRunningSkeleton stage={runningStage} />
+        )}
       </section>
     </div>
   );

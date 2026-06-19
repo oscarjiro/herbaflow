@@ -1,3 +1,18 @@
+export const STAGE_LABELS = [
+  "Compounds",
+  "Druglikeness",
+  "Compound targets",
+  "Disease targets",
+  "Shared targets",
+  "Interaction network",
+  "Hub genes",
+  "Pathway enrichment",
+] as const;
+
+export function stageLabel(n: number): string {
+  return STAGE_LABELS[n - 1] ?? `Step ${n}`;
+}
+
 const LABELS: Record<string, string> = {
   min_term_size: "Minimum term size",
   significance_threshold: "Significance threshold (corrected p ≤)",
