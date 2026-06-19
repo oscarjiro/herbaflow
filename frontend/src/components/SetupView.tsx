@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { listDiseases, listPlants, createAnalysis } from "../api/sdk.gen";
 import type { AnalysisRead, ResolvedCompound, ResolvedTarget } from "../api/types.gen";
@@ -30,7 +30,7 @@ import {
   TARGET_NUMERIC_PARAMS,
   TARGET_PARAMS,
 } from "../contract";
-import { ParamPanel } from "./stages/ParamPanel";
+import { ParamPanel, type ParamMeta } from "./stages/ParamPanel";
 import { CompoundValidateBox } from "./CompoundValidateBox";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
 import { TargetValidateBox } from "./TargetValidateBox";
@@ -50,27 +50,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 
 type ParamGroupKey = "adme" | "target" | "disease_targets" | "ppi" | "hub_genes" | "enrichment";
 
-function buildDefaults(meta: Record<string, { default: unknown }>): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
+type GroupChange = Record<string, number | boolean | string | string[]>;
+
+type ParamGroup = {
+  key: ParamGroupKey;
+  title: string;
+  meta: Record<string, ParamMeta>;
+  numericKeys: readonly string[];
+  booleanKeys: readonly string[];
+  selectKeys: readonly string[];
+  arrayKeys: readonly string[];
+};
+
+/** Build a panel's baseline params from each meta's `default`, keyed by param name. */
+function buildDefaults(
+  meta: Record<string, ParamMeta>,
+): Record<string, number | boolean | string | string[]> {
+  const result: Record<string, number | boolean | string | string[]> = {};
   for (const [k, v] of Object.entries(meta)) {
     result[k] = v.default;
   }
   return result;
 }
 
-const PARAM_GROUPS: {
-  key: ParamGroupKey;
-  title: string;
-  meta: Record<string, { default: unknown; [k: string]: unknown }>;
-  numericKeys: readonly string[];
-  booleanKeys: readonly string[];
-  selectKeys: readonly string[];
-  arrayKeys: readonly string[];
-}[] = [
+const PARAM_GROUPS: ParamGroup[] = [
   {
     key: "adme",
     title: "ADME screening",
-    meta: ADME_PARAMS as Record<string, { default: unknown }>,
+    meta: ADME_PARAMS,
     numericKeys: ADME_NUMERIC_PARAMS,
     booleanKeys: ADME_BOOLEAN_PARAMS,
     selectKeys: [],
@@ -79,7 +86,7 @@ const PARAM_GROUPS: {
   {
     key: "target",
     title: "Target identification",
-    meta: TARGET_PARAMS as Record<string, { default: unknown }>,
+    meta: TARGET_PARAMS,
     numericKeys: TARGET_NUMERIC_PARAMS,
     booleanKeys: [],
     selectKeys: [],
@@ -88,7 +95,7 @@ const PARAM_GROUPS: {
   {
     key: "disease_targets",
     title: "Disease targets",
-    meta: DISEASE_TARGETS_PARAMS as Record<string, { default: unknown }>,
+    meta: DISEASE_TARGETS_PARAMS,
     numericKeys: DISEASE_TARGETS_NUMERIC_PARAMS,
     booleanKeys: [],
     selectKeys: [],
@@ -97,7 +104,7 @@ const PARAM_GROUPS: {
   {
     key: "ppi",
     title: "PPI network",
-    meta: PPI_PARAMS as Record<string, { default: unknown }>,
+    meta: PPI_PARAMS,
     numericKeys: PPI_NUMERIC_PARAMS,
     booleanKeys: PPI_BOOLEAN_PARAMS,
     selectKeys: PPI_SELECT_PARAMS,
@@ -106,7 +113,7 @@ const PARAM_GROUPS: {
   {
     key: "hub_genes",
     title: "Hub genes",
-    meta: HUB_GENES_PARAMS as Record<string, { default: unknown }>,
+    meta: HUB_GENES_PARAMS,
     numericKeys: HUB_GENES_NUMERIC_PARAMS,
     booleanKeys: HUB_GENES_BOOLEAN_PARAMS,
     selectKeys: [],
@@ -115,13 +122,45 @@ const PARAM_GROUPS: {
   {
     key: "enrichment",
     title: "Functional enrichment",
-    meta: ENRICHMENT_PARAMS as Record<string, { default: unknown }>,
+    meta: ENRICHMENT_PARAMS,
     numericKeys: ENRICHMENT_NUMERIC_PARAMS,
     booleanKeys: ENRICHMENT_BOOLEAN_PARAMS,
     selectKeys: ENRICHMENT_SELECT_PARAMS,
     arrayKeys: ENRICHMENT_ARRAY_PARAMS,
   },
 ];
+
+/**
+ * One advanced-parameter group panel. Binds the group's stable `onGroupChange`
+ * + key into a single stable `onChange` so ParamPanel's collect-mode effect does
+ * not re-fire on every SetupView render.
+ */
+function AdvancedParamPanel({
+  group,
+  onGroupChange,
+}: {
+  group: ParamGroup;
+  onGroupChange: (groupKey: ParamGroupKey, changed: GroupChange) => void;
+}) {
+  const handleChange = useCallback(
+    (changed: GroupChange) => onGroupChange(group.key, changed),
+    [group.key, onGroupChange],
+  );
+  return (
+    <ParamPanel
+      params={buildDefaults(group.meta)}
+      meta={group.meta}
+      onRedo={() => {}}
+      onChange={handleChange}
+      hideRedo
+      title={group.title}
+      numericKeys={group.numericKeys}
+      booleanKeys={group.booleanKeys}
+      selectKeys={group.selectKeys}
+      arrayKeys={group.arrayKeys}
+    />
+  );
+}
 
 export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   // ------- core selection state -------
@@ -131,16 +170,11 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
   // ------- advanced parameter overrides -------
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [overrides, setOverrides] = useState<
-    Record<string, Record<string, number | boolean | string | string[]>>
-  >({});
+  const [overrides, setOverrides] = useState<Record<string, GroupChange>>({});
 
-  const handleGroupChange = useCallback(
-    (groupKey: ParamGroupKey, changed: Record<string, number | boolean | string | string[]>) => {
-      setOverrides((prev) => ({ ...prev, [groupKey]: changed }));
-    },
-    [],
-  );
+  const handleGroupChange = useCallback((groupKey: ParamGroupKey, changed: GroupChange) => {
+    setOverrides((prev) => ({ ...prev, [groupKey]: changed }));
+  }, []);
 
   // ------- input-mode state -------
   const [plantMode, setPlantMode] =
@@ -178,14 +212,11 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   }, []);
 
   // Build the parameters payload: only include groups with at least one changed value.
-  const parametersPayload = (() => {
+  const parametersPayload = useMemo(() => {
     const nonEmpty = Object.entries(overrides).filter(([, v]) => Object.keys(v).length > 0);
     if (nonEmpty.length === 0) return undefined;
-    return Object.fromEntries(nonEmpty) as Record<
-      string,
-      Record<string, number | boolean | string | string[]>
-    >;
-  })();
+    return Object.fromEntries(nonEmpty) as Record<string, GroupChange>;
+  }, [overrides]);
 
   const create = useMutation({
     mutationFn: async () => {
@@ -401,18 +432,10 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
           {advancedOpen && (
             <div id="advanced-params-content" className="mt-4 flex flex-col gap-4">
               {PARAM_GROUPS.map((group) => (
-                <ParamPanel
+                <AdvancedParamPanel
                   key={group.key}
-                  params={buildDefaults(group.meta) as Record<string, never>}
-                  meta={group.meta as Parameters<typeof ParamPanel>[0]["meta"]}
-                  onRedo={() => {}}
-                  onChange={(changed) => handleGroupChange(group.key, changed)}
-                  hideRedo
-                  title={group.title}
-                  numericKeys={group.numericKeys}
-                  booleanKeys={group.booleanKeys}
-                  selectKeys={group.selectKeys}
-                  arrayKeys={group.arrayKeys}
+                  group={group}
+                  onGroupChange={handleGroupChange}
                 />
               ))}
             </div>
