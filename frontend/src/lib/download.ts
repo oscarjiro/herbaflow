@@ -16,6 +16,23 @@ function filenameFromContentDisposition(header: string | null): string | null {
 }
 
 /**
+ * Save a Blob to the user's filesystem via a temporary anchor click.
+ * This is the single canonical home for the objectURL→anchor→click→revoke
+ * sequence; chart PNG export reuses it alongside fetchBlobDownload.
+ */
+export function saveBlob(blob: Blob, filename: string): void {
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  anchor.style.display = "none";
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(objectUrl);
+}
+
+/**
  * Fetch a server artifact and save it as a file.
  * Throws a Problem on a non-OK response.
  * No toast logic here — the caller wires toasts via a mutation.
@@ -42,13 +59,5 @@ export async function fetchBlobDownload(url: string, fallbackName?: string): Pro
     url.split("/").pop() ??
     "download";
 
-  const objectUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = objectUrl;
-  anchor.download = filename;
-  anchor.style.display = "none";
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(objectUrl);
+  saveBlob(blob, filename);
 }
