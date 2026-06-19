@@ -31,6 +31,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import {
   DISEASE_TARGETS_NUMERIC_PARAMS,
   DISEASE_TARGETS_PARAMS,
@@ -140,6 +142,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const redo = useMutation({
     mutationFn: (changed: Record<string, number | boolean | string>) =>
@@ -147,12 +150,17 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 4 },
         body: { parameters: { "4": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 4");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
   const edit = useMutation({
     mutationFn: (body: { add: string[]; remove: string[] }) =>
       editStage({ path: { analysis_id: data.analysis_id, stage: 4 }, body }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);

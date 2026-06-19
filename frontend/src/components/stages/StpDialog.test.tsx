@@ -5,6 +5,8 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { afterEach, describe, expect, it, test, vi } from "vitest";
 import { StpDialog } from "./StpDialog";
+import * as sdkModule from "../../api/sdk.gen";
+import * as toastLib from "../../lib/toast";
 import { server } from "../../../tests/handlers";
 
 // Real SwissTargetPrediction export shape: quoted header, "Probability*" column.
@@ -223,5 +225,78 @@ describe("StpDialog — D10: disabled Import reason hint", () => {
 
     // A reason hint must be present when import is disabled
     expect(screen.getByText(/paste a valid csv to import/i)).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D-4: Toast wiring for StpDialog import
+// ---------------------------------------------------------------------------
+
+describe("StpDialog — D-4 toast wiring", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("fires notifySuccess with the added count on import success", async () => {
+    server.use(
+      http.post("http://localhost:8000/targets/validate", () =>
+        HttpResponse.json({
+          resolved: [
+            {
+              target_id: "t1",
+              canonical_key: "uniprot:P04637",
+              gene_symbol: "TP53",
+              uniprot_accession: "P04637",
+              validation_status: "externally_validated",
+            },
+          ],
+          failed: [],
+        }),
+      ),
+    );
+
+    const notifySuccessSpy = vi.spyOn(toastLib, "notifySuccess").mockImplementation(() => {});
+
+    render(
+      wrap(
+        <StpDialog
+          compounds={COMPOUNDS}
+          perCompound={{ c1: { coverage: 0 } }}
+          existingTargetIds={[]}
+          onAddTargets={() => {}}
+        />,
+      ),
+    );
+
+    await openDialog();
+    fireEvent.change(screen.getByLabelText("Paste SwissTargetPrediction CSV"), {
+      target: { value: CSV },
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Import" }));
+
+    await waitFor(() => expect(notifySuccessSpy).toHaveBeenCalledWith("Imported 1 targets"));
+  });
+
+  it("fires notifyError (not ad-hoc toast) when import fails", async () => {
+    // Reject the SDK call directly so TanStack Query routes it to onError.
+    vi.spyOn(sdkModule, "validateTargets").mockRejectedValue({ detail: "Service error." });
+    const notifyErrorSpy = vi.spyOn(toastLib, "notifyError").mockImplementation(() => {});
+
+    render(
+      wrap(
+        <StpDialog
+          compounds={COMPOUNDS}
+          perCompound={{ c1: { coverage: 0 } }}
+          existingTargetIds={[]}
+          onAddTargets={() => {}}
+        />,
+      ),
+    );
+
+    await openDialog();
+    fireEvent.change(screen.getByLabelText("Paste SwissTargetPrediction CSV"), {
+      target: { value: CSV },
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Import" }));
+
+    await waitFor(() => expect(notifyErrorSpy).toHaveBeenCalledTimes(1));
   });
 });

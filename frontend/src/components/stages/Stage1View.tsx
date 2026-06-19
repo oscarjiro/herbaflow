@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { editStage } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError } from "../../lib/toast";
 import type { AnalysisRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
@@ -48,6 +50,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
     mutationFn: (body: { add: string[]; remove: string[] }) =>
       editStage({ path: { analysis_id: analysisId, stage: 1 }, body }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
 
   const currentCompoundIds = new Set((stage1.compounds ?? []).map((c) => c.compound_id));

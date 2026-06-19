@@ -17,6 +17,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError } from "../../lib/toast";
 import { useStaleState } from "../../hooks/useStaleState";
 import { exportArtifactUrl } from "../../lib/exportUrl";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -77,6 +79,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);

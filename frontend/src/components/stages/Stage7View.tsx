@@ -13,6 +13,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import {
   HUB_GENES_BOOLEAN_PARAMS,
   HUB_GENES_NUMERIC_PARAMS,
@@ -94,6 +96,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const redo = useMutation({
     mutationFn: (changed: HubParams) =>
@@ -101,7 +104,11 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 7 },
         body: { parameters: { "7": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 7");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);

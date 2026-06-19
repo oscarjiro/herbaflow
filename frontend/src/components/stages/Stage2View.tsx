@@ -18,6 +18,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import { ADME_PARAMS } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
 import { cn } from "@/lib/cn";
@@ -276,6 +278,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
 
   const redo = useMutation({
@@ -284,7 +287,11 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 2 },
         body: { parameters: { "2": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 2");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   // Read the single canonical entry-mode source (stage_state), like Stages 1/3/4.

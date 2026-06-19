@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Stage3View } from "./Stage3View";
 import * as sdk from "../../api/sdk.gen";
+import * as toastLib from "../../lib/toast";
 import type { AnalysisRead } from "../../api/types.gen";
 import "../../lib/api";
 
@@ -512,5 +513,47 @@ describe("Stage3View — already-in-run deduplication", () => {
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/already in run/i));
     // editStage should NOT have been called at all
     expect(editSpy).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D-4: Toast wiring — advance error fires notifyError; redo success fires notifyInfo
+// ---------------------------------------------------------------------------
+
+describe("Stage3View — D-4 toast wiring", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("fires notifyError when advance fails", async () => {
+    vi.spyOn(sdk, "advanceAnalysis").mockRejectedValue({ detail: "Server error." });
+    const notifyErrorSpy = vi.spyOn(toastLib, "notifyError").mockImplementation(() => {});
+
+    wrap(<Stage3View data={makeRun()} />);
+    const approveBtn = screen.getByRole("button", { name: /approve & continue/i });
+    await userEvent.click(approveBtn);
+
+    await waitFor(() => expect(notifyErrorSpy).toHaveBeenCalledTimes(1));
+  });
+
+  it("fires notifyInfo with 'Re-running from step 3' when redo succeeds", async () => {
+    vi.spyOn(sdk, "resetFrom").mockResolvedValue({ data: {} } as never);
+    const notifyInfoSpy = vi.spyOn(toastLib, "notifyInfo").mockImplementation(() => {});
+
+    wrap(
+      <Stage3View
+        data={makeRun({
+          stage_state: { "3": "computed" },
+          parameters: { target: { min_pchembl: 4, min_assay_confidence: 0.4 } },
+        })}
+      />,
+    );
+
+    // Open param panel ("Target parameters" is the ParamPanel title)
+    await userEvent.click(screen.getByRole("button", { name: /target parameters/i }));
+    const input = screen.getByLabelText(/min.*pchembl/i);
+    await userEvent.clear(input);
+    await userEvent.type(input, "6");
+    await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
+
+    await waitFor(() => expect(notifyInfoSpy).toHaveBeenCalledWith("Re-running from step 3"));
   });
 });

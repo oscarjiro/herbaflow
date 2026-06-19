@@ -5,6 +5,8 @@ import { useEntitySubjects } from "../hooks/useEntitySubjects";
 import { useStaleState } from "../hooks/useStaleState";
 import { exportArtifactUrl } from "../lib/exportUrl";
 import { runHasCompounds } from "../lib/entities";
+import { notifyError } from "../lib/toast";
+import type { Problem } from "../lib/problem";
 import { formatRunStatus } from "../lib/runStatus";
 import { StageRunningSkeleton } from "./stages/StageRunningSkeleton";
 import { ApprovalBar } from "./stages/ApprovalBar";
@@ -42,6 +44,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
   const advance = useMutation({
     mutationFn: async () => advanceAnalysis({ path: { analysis_id: analysisId } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const { plant: plantDisplay, disease: diseaseDisplay } = useEntitySubjects(data);
 

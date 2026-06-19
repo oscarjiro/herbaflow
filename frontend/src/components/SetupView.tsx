@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { listDiseases, listPlants, createAnalysis } from "../api/sdk.gen";
+import type { Problem } from "../lib/problem";
+import { notifyError } from "../lib/toast";
 import type { AnalysisRead, ResolvedCompound, ResolvedTarget } from "../api/types.gen";
 import { mergeById } from "../lib/entities";
 import {
@@ -320,6 +322,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
       return res.data as AnalysisRead;
     },
     onSuccess: (data) => onCreated(data.analysis_id),
+    onError: (error) => notifyError(error as Problem),
   });
 
   // ------- canSubmit -------

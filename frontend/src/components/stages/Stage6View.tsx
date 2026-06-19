@@ -25,6 +25,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import {
   PPI_BOOLEAN_PARAMS,
   PPI_NUMERIC_PARAMS,
@@ -112,6 +114,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const redo = useMutation({
     mutationFn: (changed: PpiParams) =>
@@ -119,7 +122,11 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 6 },
         body: { parameters: { "6": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 6");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);

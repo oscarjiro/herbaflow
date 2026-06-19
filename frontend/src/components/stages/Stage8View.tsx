@@ -14,6 +14,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import {
   ENRICHMENT_ARRAY_PARAMS,
   ENRICHMENT_BOOLEAN_PARAMS,
@@ -101,6 +103,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const redo = useMutation({
     mutationFn: (changed: EnrichmentParams) =>
@@ -108,7 +111,11 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 8 },
         body: { parameters: { "8": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 8");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);

@@ -21,10 +21,10 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { validateTargets } from "../../api/sdk.gen";
 import type { ResolvedTarget, ValidateTargetsResponse } from "../../api/types.gen";
-import { humanizeProblem } from "../../lib/problem";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifySuccess } from "../../lib/toast";
 import { parseStpCsv, type StpRow } from "../../lib/stp";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,13 +101,12 @@ export function StpDialog({
         failed: failed.length,
       };
     },
-    onSuccess: () => {
+    onSuccess: (summary) => {
       setSelected(new Set());
       setPasteText("");
+      notifySuccess(`Imported ${summary.added} targets`);
     },
-    onError: (error) => {
-      toast.error(humanizeProblem(error as Parameters<typeof humanizeProblem>[0]));
-    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   function toggle(id: string) {
