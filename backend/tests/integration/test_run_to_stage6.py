@@ -265,7 +265,7 @@ async def test_overlap_cap_blocks_then_recovers_on_redo(client, engine, monkeypa
     """Auto: a >cap overlap with opt-in off BLOCKS (auto fail); enabling top-N recovers.
 
     NOTE on the cap value: the ppi contract hard floor is ``max_proteins >= 50`` (the engine's
-    ``_validate_overrides`` 422s anything below it), so ``max_proteins=1`` from the task sketch is
+    ``validate_overrides`` 422s anything below it), so ``max_proteins=1`` from the task sketch is
     not a legal override. The block is forced with a REAL 60-target overlap and ``max_proteins=50``
     instead — still a genuine overflow (60 > 50), not a stubbed one.
     """
