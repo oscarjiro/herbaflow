@@ -30,7 +30,9 @@ import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
+import { getAnalysisOptions } from "../../api/@tanstack/react-query.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
+import { markEntitiesRemoved } from "../../lib/optimisticEdit";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import {
@@ -159,8 +161,20 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   const edit = useMutation({
     mutationFn: (body: { add: string[]; remove: string[] }) =>
       editStage({ path: { analysis_id: data.analysis_id, stage: 4 }, body }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
+    onMutate: async (body) => {
+      if (body.remove.length === 0) return { prev: undefined };
+      const key = getAnalysisOptions({ path: { analysis_id: data.analysis_id } }).queryKey;
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<AnalysisRead>(key);
+      if (prev) qc.setQueryData<AnalysisRead>(key, markEntitiesRemoved(prev, 4, body.remove));
+      return { prev };
+    },
+    onError: (error, _body, ctx) => {
+      const key = getAnalysisOptions({ path: { analysis_id: data.analysis_id } }).queryKey;
+      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
+      notifyError(error as Problem);
+    },
+    onSettled: () => qc.invalidateQueries(),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);

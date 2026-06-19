@@ -1,10 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
+import { getAnalysisOptions } from "../../api/@tanstack/react-query.gen";
 import { editStage } from "../../api/sdk.gen";
-import type { Problem } from "../../lib/problem";
-import { notifyError } from "../../lib/toast";
 import type { AnalysisRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
+import { markEntitiesRemoved } from "../../lib/optimisticEdit";
+import type { Problem } from "../../lib/problem";
+import { notifyError } from "../../lib/toast";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { cn } from "@/lib/cn";
@@ -49,8 +51,20 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
   const edit = useMutation({
     mutationFn: (body: { add: string[]; remove: string[] }) =>
       editStage({ path: { analysis_id: analysisId, stage: 1 }, body }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
+    onMutate: async (body) => {
+      if (body.remove.length === 0) return { prev: undefined };
+      const key = getAnalysisOptions({ path: { analysis_id: analysisId } }).queryKey;
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<AnalysisRead>(key);
+      if (prev) qc.setQueryData<AnalysisRead>(key, markEntitiesRemoved(prev, 1, body.remove));
+      return { prev };
+    },
+    onError: (error, _body, ctx) => {
+      const key = getAnalysisOptions({ path: { analysis_id: analysisId } }).queryKey;
+      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
+      notifyError(error as Problem);
+    },
+    onSettled: () => qc.invalidateQueries(),
   });
 
   const currentCompoundIds = new Set((stage1.compounds ?? []).map((c) => c.compound_id));
