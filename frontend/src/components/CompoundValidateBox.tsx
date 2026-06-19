@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { validateCompounds } from "../api/sdk.gen";
 import type { FailedInput, ResolvedCompound, ValidateResponse } from "../api/types.gen";
-import { humanizeProblem } from "../lib/problem";
-import { jumpToLine } from "../lib/jump-to-line";
+import type { Problem } from "../lib/problem";
+import { notifyError } from "../lib/toast";
+import { FailedInputList } from "./FailedInputList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,7 +37,6 @@ export function CompoundValidateBox({
   const [text, setText] = useState("");
   const [resolved, setResolved] = useState<ResolvedCompound[]>([]);
   const [failed, setFailed] = useState<FailedInput[]>([]);
-  const [failedExpanded, setFailedExpanded] = useState(false);
 
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
   const textareaId = `compound-validate-box-${label.replace(/\s+/g, "-").toLowerCase()}`;
@@ -63,13 +62,12 @@ export function CompoundValidateBox({
       const resolvedList = data?.resolved ?? [];
       setResolved(resolvedList);
       setFailed(data?.failed ?? []);
-      setFailedExpanded(false);
       if (!showAddButton && resolvedList.length > 0) {
         onResolved(resolvedList);
       }
     },
     onError: (error) => {
-      toast.error(humanizeProblem(error as Parameters<typeof humanizeProblem>[0]));
+      notifyError(error as Problem);
     },
   });
 
@@ -118,47 +116,12 @@ export function CompoundValidateBox({
           </ul>
         )}
 
-        {failed.length > 0 && (
-          <div className="flex flex-col gap-1">
-            <button
-              type="button"
-              className="text-destructive w-fit text-xs font-medium underline-offset-2 hover:underline"
-              onClick={() => setFailedExpanded((v) => !v)}
-              aria-expanded={failedExpanded}
-              aria-controls={`${textareaId}-failed`}
-            >
-              {failed.length} invalid input{failed.length !== 1 ? "s" : ""}
-            </button>
-            {failedExpanded && (
-              <ul
-                id={`${textareaId}-failed`}
-                aria-label="Failed inputs"
-                className="flex flex-col gap-1"
-              >
-                {failed.map((f) => (
-                  <li key={f.value} className="list-none text-xs [color:var(--hf-fg-3)]">
-                    <button
-                      type="button"
-                      className="contents"
-                      onClick={() => {
-                        if (typeof f.line === "number") jumpToLine(editorRef.current, text, f.line);
-                      }}
-                      aria-label={
-                        typeof f.line === "number" ? `Go to line ${f.line}: ${f.value}` : undefined
-                      }
-                    >
-                      <Badge variant="destructive" className="mr-1.5">
-                        {typeof f.line === "number" ? `Line ${f.line}: ` : ""}
-                        {f.value}
-                      </Badge>
-                    </button>
-                    <span>{f.reason}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
+        <FailedInputList
+          failed={failed}
+          text={text}
+          editorRef={editorRef}
+          controlsId={`${textareaId}-failed`}
+        />
 
         {showAddButton && resolved.length > 0 && (
           <Button type="button" size="sm" onClick={handleAdd}>
