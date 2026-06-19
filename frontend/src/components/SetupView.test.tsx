@@ -297,7 +297,9 @@ describe("SetupView — end-to-end create flow", () => {
     // Resolved row: ethanol present
     await screen.findByText(/ethanol/i);
 
-    // Failed row: the SMILES nudge is visible
+    // Failed row: expand the collapsed invalid-inputs control then check the SMILES nudge
+    const invalidBtn = await screen.findByRole("button", { name: /invalid input/i });
+    await userEvent.click(invalidBtn);
     await screen.findByText(/SMILES/);
 
     // Now complete a create: override the handler to capture the body
