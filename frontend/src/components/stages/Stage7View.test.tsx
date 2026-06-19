@@ -1,10 +1,28 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { ThemeProvider } from "@/lib/theme";
 import { Stage7View } from "./Stage7View";
 import type { AnalysisRead } from "../../api/types.gen";
 import * as sdk from "../../api/sdk.gen";
+
+// ---------------------------------------------------------------------------
+// Mock recharts ResponsiveContainer so charts mount in jsdom (0-size otherwise).
+// ---------------------------------------------------------------------------
+
+vi.mock("recharts", async (orig) => {
+  const actual = await orig<typeof import("recharts")>();
+  return {
+    ...actual,
+    ResponsiveContainer: ({ children }: { children: React.ReactElement }) =>
+      React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+        width: 800,
+        height: 400,
+      }),
+  };
+});
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -56,7 +74,11 @@ function makeData(result: object): AnalysisRead {
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <ThemeProvider>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </ThemeProvider>,
+  );
 }
 
 async function openHubPanel() {
@@ -146,21 +168,23 @@ describe("Stage7View", () => {
     expect(screen.getByText("12")).toBeInTheDocument();
   });
 
-  it("shows the hub bar image when complete", () => {
+  it("shows the hub gene chart frame when complete with hubs", () => {
     const completeData: AnalysisRead = {
       ...makeData(makeComputedResult()),
       status: "complete",
     } as unknown as AnalysisRead;
     wrap(<Stage7View data={completeData} />);
-    expect(screen.getByRole("img", { name: /hub/i })).toHaveAttribute(
-      "src",
-      expect.stringContaining("/export/stage7_hub_bar.png"),
-    );
+    // ChartFrame renders the title and a Download PNG button.
+    expect(screen.getByText("Hub genes by MCC")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
+    // The old server-rendered image must be gone.
+    expect(screen.queryByRole("img", { name: /hub/i })).toBeNull();
   });
 
-  it("does not show the hub bar image when not complete", () => {
+  it("does not show the hub gene chart frame when not complete", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.queryByRole("img", { name: /hub/i })).toBeNull();
+    expect(screen.queryByText("Hub genes by MCC")).toBeNull();
+    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 
   it("uses cleaned stale approval copy", () => {

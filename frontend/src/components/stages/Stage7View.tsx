@@ -21,11 +21,12 @@ import {
   HUB_GENES_PARAMS,
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
-import { exportArtifactUrl } from "../../lib/exportUrl";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
+import { ChartFrame } from "@/components/charts/ChartFrame";
+import { HubBarChart } from "@/components/charts/HubBarChart";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -220,16 +221,11 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         </p>
       )}
 
-      {/* Hub bar chart image (complete-only, onError-hidden) */}
-      {isComplete && (
-        <img
-          className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-          alt="Top hub genes"
-          src={exportArtifactUrl(data.analysis_id, "stage7_hub_bar.png")}
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
+      {/* Hub bar chart — interactive recharts (complete-only, gracefully absent when hubs is empty) */}
+      {isComplete && hubs.length > 0 && (
+        <ChartFrame title="Hub genes by MCC" filename="hub_genes_mcc.png">
+          <HubBarChart hubs={hubs.map((h) => ({ gene_symbol: h.gene_symbol, mcc: h.mcc }))} />
+        </ChartFrame>
       )}
 
       {/* Hub-ranking table card */}
