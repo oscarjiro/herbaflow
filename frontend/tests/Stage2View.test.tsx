@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Stage2View } from "../src/components/stages/Stage2View";
 import { SAMPLE_STAGE2_RESULTS } from "./handlers";
 import type { AnalysisRead } from "../src/api/types.gen";
@@ -46,11 +46,42 @@ function wrap(ui: ReactElement) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+function blobToText(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(blob);
+  });
+}
+
 async function openAdmePanel() {
   await userEvent.click(screen.getByRole("button", { name: /adme parameters/i }));
 }
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("Stage2View", () => {
+  it("uses cleaned Step 2 heading and empty-result approval copy", () => {
+    wrap(
+      <Stage2View
+        data={makeRun({
+          stage_results: {
+            "2": { ...SAMPLE_STAGE2_RESULTS, count: 0, passed: [], filtered: [] },
+          } as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Step 2: ADME Screening" })).toBeInTheDocument();
+    expect(
+      screen.getByText("No compounds passed ADME. Adjust the settings and run this step again."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/No compounds passed ADME —/)).not.toBeInTheDocument();
+  });
+
   it("renders passed compound rows", () => {
     wrap(<Stage2View data={makeRun()} />);
     expect(screen.getByText("Curcumin")).toBeInTheDocument();
@@ -69,16 +100,33 @@ describe("Stage2View", () => {
     expect(screen.getByText("0.55")).toBeInTheDocument();
   });
 
-  it("does not render descriptor_source values as table cells", () => {
+  it("renders descriptor_source values in the Descriptor source column", () => {
     wrap(<Stage2View data={makeRun()} />);
-    // The Source column was removed; descriptor_source is kept in the type and CSV export only.
-    expect(screen.queryByText("rdkit")).toBeNull();
-    expect(screen.queryByText("etl")).toBeNull();
+    expect(screen.getByRole("columnheader", { name: "Descriptor source" })).toBeInTheDocument();
+    expect(screen.getAllByText("rdkit").length).toBeGreaterThan(0);
   });
 
-  it("renders PAINS badge for a positive compound", () => {
-    wrap(<Stage2View data={makeRun()} />);
-    expect(screen.getAllByText(/PAINS/i).length).toBeGreaterThan(0);
+  it("renders Positive in the PAINS column for a positive screened compound", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              inchikey: "PAINS-HIT",
+              lipinski_violations: 0,
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+              is_pains_positive: true,
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    expect(screen.getByText("Positive")).toBeInTheDocument();
   });
 
   it("renders NP-bypass badge", () => {
@@ -159,6 +207,7 @@ describe("Stage2View", () => {
       stage_state: { "2": "not_applicable" },
     });
     wrap(<Stage2View data={data} />);
+    expect(screen.getByRole("heading", { name: "Step 2: ADME Screening" })).toBeInTheDocument();
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
   });
 
@@ -166,6 +215,143 @@ describe("Stage2View", () => {
     wrap(<Stage2View data={makeRun()} />);
     const link = screen.getByRole("link", { name: /PubChem/i });
     expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
+  });
+
+  it("shows Lipinski and Veber outcomes with pass, fail, and no-data states", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              inchikey: "PASS-INCHIKEY",
+              lipinski_violations: 0,
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+            },
+          ],
+          filtered: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              inchikey: "FAIL-INCHIKEY",
+              canonical_name: "RuleBreak",
+              lipinski_violations: 2,
+              lipinski_pass: false,
+              veber_pass: false,
+              rule_evaluated: true,
+            },
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              inchikey: "NODATA-INCHIKEY",
+              compound_id: "c-unscreened",
+              canonical_name: "NoDescriptor",
+              reason: "Missing descriptor values",
+              lipinski_violations: null,
+              lipinski_pass: null,
+              veber_pass: null,
+              rule_evaluated: false,
+              is_pains_positive: false,
+              badges: ["unscreened"],
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+
+    wrap(<Stage2View data={data} />);
+
+    expect(screen.getByRole("columnheader", { name: "Lipinski" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Veber" })).toBeInTheDocument();
+
+    expect(screen.getAllByText("Pass")).toHaveLength(2);
+    expect(screen.getAllByText("Fail")).toHaveLength(2);
+    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+    expect(screen.queryByText("✓")).not.toBeInTheDocument();
+  });
+
+  it("labels the descriptor column as Descriptor source", () => {
+    wrap(<Stage2View data={makeRun()} />);
+    expect(screen.getByRole("columnheader", { name: "Descriptor source" })).toBeInTheDocument();
+  });
+
+  it("always shows the PAINS column for screened rows", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              inchikey: "PAINS-NEG",
+              lipinski_violations: 0,
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+              is_pains_positive: false,
+            },
+          ],
+          filtered: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              inchikey: "PAINS-POS",
+              lipinski_violations: 2,
+              lipinski_pass: false,
+              veber_pass: false,
+              rule_evaluated: true,
+              is_pains_positive: true,
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+
+    wrap(<Stage2View data={data} />);
+
+    expect(screen.getByRole("columnheader", { name: "PAINS" })).toBeInTheDocument();
+    expect(screen.getByText("Negative")).toBeInTheDocument();
+    expect(screen.getByText("Positive")).toBeInTheDocument();
+  });
+
+  it("exports CSV keyed by inchikey and excludes compound_id", async () => {
+    let capturedBlob: Blob | null = null;
+    vi.spyOn(URL, "createObjectURL").mockImplementation((blob: Blob | MediaSource) => {
+      capturedBlob = blob as Blob;
+      return "blob:mock";
+    });
+
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              inchikey: "CSV-INCHIKEY",
+              lipinski_violations: 0,
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+
+    wrap(<Stage2View data={data} />);
+    expect(await screen.findByRole("link", { name: /download.*csv/i })).toBeInTheDocument();
+
+    await waitFor(() => expect(capturedBlob).not.toBeNull());
+    if (capturedBlob == null) {
+      throw new Error("expected CSV blob to be created");
+    }
+    const csv = await blobToText(capturedBlob);
+
+    expect(csv).toContain("inchikey");
+    expect(csv).toContain("CSV-INCHIKEY");
+    expect(csv).not.toContain("compound_id");
+    expect(csv).not.toContain("c1");
   });
 });
 

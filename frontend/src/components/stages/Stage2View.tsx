@@ -3,9 +3,8 @@
  *
  * Renders:
  *  - Editorial header (Eyebrow + serif h2) with summary count cards
- *  - A combined passed + filtered DataTable with badges, QED score, descriptor
- *    source (CSV only), source_url links, and reasons for filtered rows
- *  - Pagination controls (10 / 20 / 50 / all)
+ *  - A combined passed + filtered DataTable with Stage 2 outcomes, source links,
+ *    and reasons for filtered rows
  *  - CsvDownloadButton (same header + rows as before)
  *  - Collapsible ParamPanel wired to resetFrom
  *  - ApprovalBar (approve → advance)
@@ -14,7 +13,7 @@
  * Defensive rendering: greyed out when state === "not_applicable".
  */
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
@@ -39,6 +38,7 @@ import { StaleNotice } from "./StaleNotice";
 
 type CompoundRow = {
   compound_id: string;
+  inchikey: string | null;
   canonical_name: string | null;
   descriptor_source: "rdkit" | "etl" | string;
   molecular_weight: number | null;
@@ -49,7 +49,11 @@ type CompoundRow = {
   rotatable_bonds: number | null;
   qed_score: number | null;
   np_likeness_score: number | null;
-  num_ro5_violations: number | null;
+  num_ro5_violations?: number | null;
+  lipinski_violations: number | null;
+  lipinski_pass: boolean | null;
+  veber_pass: boolean | null;
+  rule_evaluated: boolean | null;
   is_pains_positive: boolean;
   source_url: string | null;
   badges?: string[];
@@ -75,22 +79,21 @@ type DisplayRow = CompoundRow & { _kind: "passed" | "filtered" };
 // Helpers
 // ---------------------------------------------------------------------------
 
-const PAGE_SIZES = [10, 20, 50] as const;
-
 function fmt(n: number | null, decimals = 2): string {
   if (n == null) return "—";
   return n.toFixed(decimals);
 }
 
+function fmtOutcome(
+  passed: boolean | null | undefined,
+  evaluated: boolean | null | undefined,
+): string {
+  if (!evaluated || passed == null) return "—";
+  return passed ? "Pass" : "Fail";
+}
+
 function RowBadges({ row }: { row: CompoundRow }) {
   const items: React.ReactElement[] = [];
-  if (row.badges?.includes("pains") || row.is_pains_positive) {
-    items.push(
-      <Badge key="pains" variant="secondary" className="text-[10px]">
-        PAINS
-      </Badge>,
-    );
-  }
   if (row.badges?.includes("np_bypass")) {
     items.push(
       <Badge key="np" variant="outline" className="text-[10px]">
@@ -115,10 +118,8 @@ function RowBadges({ row }: { row: CompoundRow }) {
   return <span className="flex flex-wrap gap-1">{items}</span>;
 }
 
-// CSV columns — IDENTICAL to original buildCsv cols array.
-// Header string must not change; descriptor_source and all fields preserved in CSV.
 const CSV_COLS: (keyof CompoundRow)[] = [
-  "compound_id",
+  "inchikey",
   "canonical_name",
   "descriptor_source",
   "molecular_weight",
@@ -129,7 +130,10 @@ const CSV_COLS: (keyof CompoundRow)[] = [
   "rotatable_bonds",
   "qed_score",
   "np_likeness_score",
-  "num_ro5_violations",
+  "lipinski_violations",
+  "lipinski_pass",
+  "veber_pass",
+  "rule_evaluated",
   "is_pains_positive",
   "source_url",
   "reason",
@@ -163,7 +167,7 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
               PubChem
             </a>
           )}
-          <span>{r.canonical_name ?? r.compound_id}</span>
+          <span>{r.canonical_name ?? r.inchikey ?? r.compound_id}</span>
         </span>
       );
     },
@@ -184,6 +188,10 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     id: "badges",
     header: "Badges",
     cell: ({ row }) => <RowBadges row={row.original} />,
+  },
+  {
+    accessorKey: "descriptor_source",
+    header: "Descriptor source",
   },
   {
     id: "mw",
@@ -226,9 +234,24 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     cell: ({ row }) => fmt(row.original.np_likeness_score),
   },
   {
-    id: "ro5",
-    header: "RO5 viol.",
-    cell: ({ row }) => row.original.num_ro5_violations ?? "—",
+    id: "lipinski",
+    header: "Lipinski",
+    cell: ({ row }) => fmtOutcome(row.original.lipinski_pass, row.original.rule_evaluated),
+  },
+  {
+    id: "veber",
+    header: "Veber",
+    cell: ({ row }) => fmtOutcome(row.original.veber_pass, row.original.rule_evaluated),
+  },
+  {
+    id: "pains",
+    header: "PAINS",
+    cell: ({ row }) =>
+      row.original.rule_evaluated
+        ? row.original.is_pains_positive
+          ? "Positive"
+          : "Negative"
+        : "—",
   },
   {
     id: "reason",
@@ -282,28 +305,17 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
 
   const csvRows = useMemo(() => buildCsvRows(allRows), [allRows]);
 
-  const [pageSize, setPageSize] = useState<number | "all">(10);
-  const [page, setPage] = useState(0);
-
   // Early returns after all hooks.
   if (!stage2) return null;
 
   if (isNA) {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 2 — ADME Screening</h2>
+        <h2>Step 2: ADME Screening</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
   }
-
-  const effectivePageSize = pageSize === "all" ? allRows.length : pageSize;
-  const totalPages = Math.ceil(allRows.length / effectivePageSize);
-  const currentPage = Math.min(page, Math.max(0, totalPages - 1));
-  const visibleRows = allRows.slice(
-    currentPage * effectivePageSize,
-    (currentPage + 1) * effectivePageSize,
-  );
 
   const passedCount = stage2.passed.length;
   const filteredCount = stage2.filtered.length;
@@ -316,7 +328,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
         <Eyebrow>Step 2</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
           <h2 className="hf-heading-serif">
-            Step 2 — ADME Screening
+            Step 2: ADME Screening
             {isUserProvided && (
               <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
                 Provided by you
@@ -362,28 +374,6 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label htmlFor="page-size" className="text-muted-foreground text-sm">
-                Rows per page
-              </label>
-              <select
-                id="page-size"
-                className="bg-background rounded border px-2 py-1 text-sm"
-                value={pageSize}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setPageSize(v === "all" ? "all" : Number(v));
-                  setPage(0);
-                }}
-              >
-                {PAGE_SIZES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-                <option value="all">All</option>
-              </select>
-            </div>
             <CsvDownloadButton
               header={CSV_HEADER}
               rows={csvRows}
@@ -393,31 +383,8 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
           </div>
         </CardHeader>
         <CardContent className="px-0">
-          <DataTable columns={COLUMNS} data={visibleRows} />
+          <DataTable columns={COLUMNS} data={allRows} />
         </CardContent>
-
-        {/* Pagination */}
-        {pageSize !== "all" && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 px-6 pb-4">
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage === 0}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Previous
-            </button>
-            <span className="text-muted-foreground text-sm">
-              Page {currentPage + 1} / {totalPages}
-            </span>
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
-          </div>
-        )}
       </Card>
 
       {/* Param panel */}
@@ -445,8 +412,8 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
         disabled={stage2.count === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
-            : "No compounds passed ADME — adjust parameters and Redo to continue."
+            ? "Run the updated step before continuing."
+            : "No compounds passed ADME. Adjust the settings and run this step again."
         }
         onApprove={() => advance.mutate()}
       />
