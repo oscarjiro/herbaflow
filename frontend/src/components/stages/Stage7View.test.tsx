@@ -69,9 +69,25 @@ async function openHubPanel() {
 describe("Stage7View", () => {
   it("renders the hub table with the gene and MCC", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.getByText("Step 7 — Hub Genes")).toBeInTheDocument();
+    expect(screen.getByText("Step 7: Hub Genes")).toBeInTheDocument();
     expect(screen.getByText("TNF")).toBeInTheDocument();
     expect(screen.getByText("7")).toBeInTheDocument();
+  });
+
+  it("renders the cleaned small-network notice", () => {
+    wrap(
+      <Stage7View
+        data={makeData({
+          ...makeComputedResult(),
+          flags: ["network_too_small"],
+        })}
+      />,
+    );
+    expect(
+      screen.getByText(
+        "The network is small or sparse. Centrality ranking is unreliable on trivial topology.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("renders summary cards for node count and hub count", () => {
@@ -88,7 +104,7 @@ describe("Stage7View", () => {
   it("renders the hub_genes param panel with a Redo button", async () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
     await openHubPanel();
-    expect(screen.getByLabelText("top_n")).toBeInTheDocument();
+    expect(screen.getByLabelText("Top N")).toBeInTheDocument();
     expect(screen.queryByLabelText("use_hub_bottleneck")).toBeNull();
     expect(screen.queryByLabelText("composite_weight")).toBeNull();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
@@ -144,5 +160,18 @@ describe("Stage7View", () => {
   it("does not show the hub bar image when not complete", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
     expect(screen.queryByRole("img", { name: /hub/i })).toBeNull();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    const data = makeData({ ...makeComputedResult(), stale: true });
+    data.parameters = { hub_genes: HUB_PARAM_VALUES, rerun_from: 6 } as AnalysisRead["parameters"];
+
+    wrap(<Stage7View data={data} />);
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
   });
 });

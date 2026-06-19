@@ -173,7 +173,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 4 — Disease Targets</h2>
+        <h2>Step 4: Disease Targets</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -239,7 +239,9 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
           onClick={() => edit.mutate({ add: [], remove: [row.original.target_id] })}
           disabled={atMinEntities(effectiveCount)}
           title={
-            atMinEntities(effectiveCount) ? "A stage must keep at least one entry." : undefined
+            atMinEntities(effectiveCount)
+              ? "Keep at least one target before removing another."
+              : undefined
           }
         >
           ✕
@@ -255,7 +257,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         <Eyebrow>Step 4</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
           <h2 className="hf-heading-serif">
-            Step 4 — Disease Targets
+            Step 4: Disease Targets
             {isUserProvided && (
               <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
                 Provided by you
@@ -292,8 +294,8 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
 
       {stage4.count === 0 && (
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")} role="status">
-          No disease targets at this score floor. Lower the min score and Redo, or add targets by
-          hand.
+          No disease targets match this score. Lower the minimum score, run this step again, or add
+          targets manually.
         </p>
       )}
 
@@ -397,8 +399,8 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         disabled={stage4.count === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
-            : "No disease targets — lower min score and Redo, or add one to continue."
+            ? "Run the updated step before continuing."
+            : "No disease targets found. Lower the minimum score, run this step again, or add one to continue."
         }
         onApprove={() => advance.mutate()}
       />

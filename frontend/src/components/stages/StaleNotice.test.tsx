@@ -11,6 +11,13 @@ function wrap(ui: React.ReactNode) {
 }
 
 describe("StaleNotice", () => {
+  it("renders the cleaned stale-results notice copy", () => {
+    wrap(<StaleNotice analysisId="a1" fromStage={1} />);
+    expect(
+      screen.getByText("These results are out of date. An earlier step changed."),
+    ).toBeInTheDocument();
+  });
+
   it("re-runs from the given stage when clicked", async () => {
     const spy = vi.spyOn(sdk, "resetFrom").mockResolvedValue({ data: {} } as never);
     wrap(<StaleNotice analysisId="a1" fromStage={1} />);

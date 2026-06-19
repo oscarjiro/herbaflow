@@ -182,7 +182,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
       {/* Editorial header */}
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 6</Eyebrow>
-        <h2 className="hf-heading-serif">Step 6 — PPI Network</h2>
+        <h2 className="hf-heading-serif">Step 6: PPI Network</h2>
       </div>
 
       <StageDataSources stage={6} />
@@ -371,10 +371,10 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
         disabled={Boolean(blocked) || (computed?.node_count ?? 0) === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
+            ? "Run the updated step before continuing."
             : blocked
-              ? "Overlap too large — enable the top-N cap and Redo, or narrow the inputs."
-              : "No PPI nodes — adjust the parameters and Redo, or narrow the inputs."
+              ? "Overlap too large. Enable the top-N cap and Redo, or narrow the inputs."
+              : "No PPI nodes. Adjust the parameters and Redo, or narrow the inputs."
         }
         onApprove={() => advance.mutate()}
       />

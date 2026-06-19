@@ -28,6 +28,22 @@ function isSettled(status: string | null | undefined): boolean {
   return status.endsWith("awaiting_approval") || status === "complete" || status === "failed";
 }
 
+function formatRunStatus(status: string | null | undefined): string {
+  if (!status) return "Unknown";
+  if (status === "complete") return "Complete";
+  if (status === "failed") return "Failed";
+
+  const stageMatch = /^stage_(\d+)_(.+)$/.exec(status);
+  if (stageMatch) {
+    const [, stage, state] = stageMatch;
+    if (state === "awaiting_approval") return "Waiting for review";
+    return `Running step ${stage}`;
+  }
+
+  const readable = status.replaceAll("_", " ");
+  return readable.charAt(0).toUpperCase() + readable.slice(1);
+}
+
 type Stage1Data = {
   count?: number;
   compounds?: { compound_id: string; canonical_name?: string | null; tag?: string }[];
@@ -73,7 +89,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
               Run <span className="text-hf-fg-3 font-mono text-base">{analysisId}</span>
             </h1>
             <Badge variant="outline" className="capitalize">
-              {data.status}
+              {formatRunStatus(data.status)}
             </Badge>
           </div>
           <p className="text-hf-fg-3 text-sm">
@@ -139,8 +155,8 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
               disabled={(stage1.count ?? 0) === 0 || anyStale}
               disabledReason={
                 anyStale
-                  ? "Re-run the out-of-date step before continuing."
-                  : "No compounds — add one to continue."
+                  ? "Run the updated step before continuing."
+                  : "No compounds found. Add one to continue."
               }
               onApprove={() => advance.mutate()}
             />

@@ -49,6 +49,11 @@ function wrap(ui: React.ReactNode) {
 }
 
 describe("Stage5View — overlap view", () => {
+  it("renders the cleaned Step 5 heading", () => {
+    wrap(<Stage5View data={makeData()} />);
+    expect(screen.getByText("Step 5: Target Overlap")).toBeInTheDocument();
+  });
+
   it("renders the overlap count card", () => {
     wrap(<Stage5View data={makeData()} />);
     expect(screen.getByLabelText(/2 overlap targets/i)).toBeInTheDocument();
@@ -93,5 +98,39 @@ describe("Stage5View — overlap view", () => {
   it("does not show the venn image when not complete", () => {
     wrap(<Stage5View data={makeData()} />);
     expect(screen.queryByRole("img", { name: /overlap/i })).toBeNull();
+  });
+
+  it("renders the cleaned zero-overlap approval reason", () => {
+    const data = makeData({ overlap: [] });
+    data.stage_results = {
+      "5": {
+        ...makeStage5Result({ overlap: [] }),
+        count: 0,
+      },
+    };
+
+    wrap(<Stage5View data={data} />);
+    expect(
+      screen.getByText("No overlap targets. Check Step 3 and Step 4 results."),
+    ).toBeInTheDocument();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    const data = makeData();
+    data.parameters = { rerun_from: 4 } as AnalysisRead["parameters"];
+    data.stage_results = {
+      "5": {
+        ...makeStage5Result(),
+        stale: true,
+      },
+    } as unknown as AnalysisRead["stage_results"];
+
+    wrap(<Stage5View data={data} />);
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
   });
 });

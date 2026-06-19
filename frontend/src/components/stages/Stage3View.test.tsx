@@ -128,6 +128,32 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("Stage3View", () => {
+  it("uses cleaned Step 3 heading and empty-result approval copy", () => {
+    wrap(
+      <Stage3View
+        data={makeRun({
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": {
+              ...SAMPLE_STAGE3_RESULTS,
+              targets: [],
+              compound_targets: [],
+              count: 0,
+            },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Step 3: Target Identification" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("No targets found. Adjust the settings or add one to continue."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/No targets —/)).not.toBeInTheDocument();
+  });
+
   it("renders the gene symbol in the targets table", () => {
     const { container } = wrap(<Stage3View data={makeRun()} />);
     expect(targetsTable(container).getByText("TP53")).toBeInTheDocument();
@@ -153,7 +179,30 @@ describe("Stage3View", () => {
   it("shows per-source ChEMBL edge count", () => {
     wrap(<Stage3View data={makeRun()} />);
     // ChEMBL source card carries an aria-label with value 1.
-    expect(screen.getByLabelText(/1 ChEMBL edges/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/1 ChEMBL target links/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/1 ChEMBL edges/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/0 PubChem BioAssay target links/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/0 PubChem BioAssay edges/i)).not.toBeInTheDocument();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    wrap(
+      <Stage3View
+        data={makeRun({
+          parameters: { target: TARGET_FROZEN, rerun_from: 2 },
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": { ...SAMPLE_STAGE3_RESULTS, stale: true },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the 0-coverage compound row visible", () => {
@@ -201,6 +250,9 @@ describe("Stage3View", () => {
     const data = makeRun();
     (data as { stage_state?: Record<string, string> }).stage_state = { "3": "not_applicable" };
     wrap(<Stage3View data={data} />);
+    expect(
+      screen.getByRole("heading", { name: "Step 3: Target Identification" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
     // No targets table content.
     expect(screen.queryByText("TP53")).not.toBeInTheDocument();
@@ -215,7 +267,7 @@ describe("Stage3View", () => {
     // No per-compound coverage section and no STP dialog.
     expect(screen.queryByText(/per-compound coverage/i)).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("region", { name: /swisstargetprediction import/i }),
+      screen.queryByRole("region", { name: /add targets from swisstargetprediction/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -237,7 +289,7 @@ describe("Stage3View", () => {
     wrap(<Stage3View data={data} />);
     expect(screen.getByText(/per-compound coverage/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /swisstargetprediction import/i }),
+      screen.getByRole("button", { name: /add swisstargetprediction targets/i }),
     ).toBeInTheDocument();
   });
 });
@@ -279,7 +331,10 @@ describe("Stage3View — removed-row hiding + delete column", () => {
     wrap(<Stage3View data={makeDataWithRemoved()} />);
     expect(screen.getByText("PPARG")).toBeInTheDocument();
     expect(screen.queryByText("TP53")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Remove PPARG" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove PPARG" })).toHaveAttribute(
+      "title",
+      "Keep at least one target before removing another.",
+    );
   });
 });
 

@@ -74,6 +74,11 @@ async function openPpiPanel() {
 // ---------------------------------------------------------------------------
 
 describe("Stage6View — computed network", () => {
+  it("renders the cleaned Step 6 heading", () => {
+    wrap(<Stage6View data={makeData(makeComputedResult())} />);
+    expect(screen.getByText("Step 6: PPI Network")).toBeInTheDocument();
+  });
+
   it("renders the node and edge summary cards", () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
     expect(screen.getByLabelText(/2 nodes/i)).toBeInTheDocument();
@@ -98,14 +103,45 @@ describe("Stage6View — computed network", () => {
     // numeric + boolean + both enum selects are present
     expect(screen.getByLabelText("max_proteins")).toBeInTheDocument();
     expect(screen.getByLabelText("allow_top_n_cap")).toBeInTheDocument();
-    expect(screen.getByLabelText("min_confidence")).toBeInTheDocument();
-    expect(screen.getByLabelText("network_type")).toBeInTheDocument();
+    expect(screen.getByLabelText("Minimum confidence")).toBeInTheDocument();
+    expect(screen.getByLabelText("Network type")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
   });
 
   it("does not render the overlap-too-large prompt when computed", () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
     expect(screen.queryByText(/overlap too large/i)).toBeNull();
+  });
+
+  it("renders the cleaned no-node approval reason", () => {
+    wrap(
+      <Stage6View
+        data={makeData({
+          ...makeComputedResult(),
+          nodes: [],
+          edges: [],
+          node_count: 0,
+          edge_count: 0,
+          count: 0,
+        })}
+      />,
+    );
+    expect(
+      screen.getByText("No PPI nodes. Adjust the parameters and Redo, or narrow the inputs."),
+    ).toBeInTheDocument();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    const data = makeData({ ...makeComputedResult(), stale: true });
+    data.parameters = { ppi: PPI_PARAM_VALUES, rerun_from: 5 } as AnalysisRead["parameters"];
+
+    wrap(<Stage6View data={data} />);
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -127,6 +163,13 @@ describe("Stage6View — overlap too large (blocked)", () => {
     expect(screen.getByRole("button", { name: /enable top-n cap and redo/i })).toBeInTheDocument();
   });
 
+  it("renders the cleaned blocked approval reason", () => {
+    wrap(<Stage6View data={makeData(makeBlockedResult())} />);
+    expect(
+      screen.getByText("Overlap too large. Enable the top-N cap and Redo, or narrow the inputs."),
+    ).toBeInTheDocument();
+  });
+
   it("does NOT render the edge table when blocked", () => {
     wrap(<Stage6View data={makeData(makeBlockedResult())} />);
     // no edge-table headers
@@ -139,6 +182,6 @@ describe("Stage6View — overlap too large (blocked)", () => {
     wrap(<Stage6View data={makeData(makeBlockedResult())} />);
     await openPpiPanel();
     expect(screen.getByLabelText("max_proteins")).toBeInTheDocument();
-    expect(screen.getByLabelText("network_type")).toBeInTheDocument();
+    expect(screen.getByLabelText("Network type")).toBeInTheDocument();
   });
 });

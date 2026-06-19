@@ -177,7 +177,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       {/* Editorial header */}
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 7</Eyebrow>
-        <h2 className="hf-heading-serif">Step 7 — Hub Genes</h2>
+        <h2 className="hf-heading-serif">Step 7: Hub Genes</h2>
       </div>
 
       <StageDataSources stage={7} />
@@ -211,7 +211,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
       {tooSmall && (
         <p className="text-muted-foreground text-sm" role="status">
-          The network is small or sparse — centrality ranking is unreliable on trivial topology.
+          The network is small or sparse. Centrality ranking is unreliable on trivial topology.
         </p>
       )}
 
@@ -311,7 +311,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         status={data.status}
         currentStage={data.current_stage}
         disabled={anyStale}
-        disabledReason="Re-run the out-of-date step before continuing."
+        disabledReason="Run the updated step before continuing."
         onApprove={() => advance.mutate()}
       />
 

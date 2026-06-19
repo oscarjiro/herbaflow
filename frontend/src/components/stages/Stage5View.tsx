@@ -134,7 +134,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
       {/* Editorial header */}
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 5</Eyebrow>
-        <h2 className="hf-heading-serif">Step 5 — Target Overlap</h2>
+        <h2 className="hf-heading-serif">Step 5: Target Overlap</h2>
       </div>
 
       <StageDataSources stage={5} />
@@ -172,7 +172,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
       {isComplete && (
         <img
           className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-          alt="Stage 5 target overlap"
+          alt="Target overlap"
           src={exportArtifactUrl(data.analysis_id, "stage5_venn.png")}
           onError={(e) => {
             e.currentTarget.style.display = "none";
@@ -259,8 +259,8 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
         disabled={stage5.count === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
-            : "No overlap targets — check Stage 3 and Stage 4 results."
+            ? "Run the updated step before continuing."
+            : "No overlap targets. Check Step 3 and Step 4 results."
         }
         onApprove={() => advance.mutate()}
       />

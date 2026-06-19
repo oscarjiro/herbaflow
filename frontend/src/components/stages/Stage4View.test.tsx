@@ -21,6 +21,60 @@ const base = {
 } as unknown as AnalysisRead;
 
 describe("Stage4View — single editable table", () => {
+  it("uses cleaned heading in the not-applicable state", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "not_applicable" },
+      stage_results: {
+        "4": {
+          targets: [],
+          count: 0,
+          min_score_applied: 0.3,
+          state: "not_applicable",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    expect(screen.getByRole("heading", { name: "Step 4: Disease Targets" })).toBeInTheDocument();
+    expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
+  });
+
+  it("uses cleaned Step 4 heading and empty-result copy", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      parameters: {
+        input_modes: { plant: "selection", disease: "selection" },
+        disease_targets: { min_score: 0.3 },
+      },
+      stage_results: {
+        "4": {
+          targets: [],
+          count: 0,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    expect(screen.getByRole("heading", { name: "Step 4: Disease Targets" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "No disease targets match this score. Lower the minimum score, run this step again, or add targets manually.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "No disease targets found. Lower the minimum score, run this step again, or add one to continue.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/No disease targets —/)).not.toBeInTheDocument();
+  });
+
   it("rounds the score, drops Association, hides removed, shows delete", () => {
     const data = {
       ...base,
@@ -58,7 +112,39 @@ describe("Stage4View — single editable table", () => {
     // User-removed rows are hidden from the table.
     expect(screen.queryByText("TP53")).not.toBeInTheDocument();
     // The visible row gets an in-table delete control.
-    expect(screen.getByRole("button", { name: "Remove PPARG" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove PPARG" })).toHaveAttribute(
+      "title",
+      "Keep at least one target before removing another.",
+    );
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    const data = {
+      ...base,
+      parameters: {
+        input_modes: { plant: "selection", disease: "selection" },
+        disease_targets: {},
+        rerun_from: 3,
+      },
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [{ target_id: "t1", canonical_name: "PPARG", tag: "computed" }],
+          count: 1,
+          min_score_applied: 0.3,
+          state: "computed",
+          stale: true,
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
   });
 
   it("renders disease-targets with score, min_score card, CSV link and the Open Targets footer", () => {

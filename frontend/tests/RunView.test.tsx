@@ -20,7 +20,8 @@ test("renders the stage 1 compound list", async () => {
   wrap("r1");
   expect(await screen.findByText("Alpha")).toBeInTheDocument();
   // Status is shown as a Badge in the run header (no "Status:" label prefix in the new layout).
-  expect(await screen.findByText("complete")).toBeInTheDocument();
+  expect(await screen.findByText("Complete")).toBeInTheDocument();
+  expect(screen.queryByText("complete")).not.toBeInTheDocument();
 });
 
 describe("RunView with Stage 2 data", () => {
@@ -31,6 +32,14 @@ describe("RunView with Stage 2 data", () => {
     // Compound names appear in the table (may appear multiple times across stage1 list + table)
     const curcuminEls = await screen.findAllByText("Curcumin");
     expect(curcuminEls.length).toBeGreaterThan(0);
+  });
+
+  it("shows a readable waiting status instead of the raw backend value", async () => {
+    wrap("r2");
+    await screen.findByRole("heading", { name: /step 2/i });
+
+    expect(screen.getByText("Waiting for review")).toBeInTheDocument();
+    expect(screen.queryByText("stage_2_awaiting_approval")).not.toBeInTheDocument();
   });
 
   it("shows exactly one ApprovalBar at stage_2_awaiting_approval", async () => {
@@ -204,6 +213,42 @@ describe("stale stage (r-stale)", () => {
     wrap("r-stale");
     expect(await screen.findByRole("button", { name: /re-run from step 1/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+  });
+});
+
+describe("empty Stage 1 checkpoint (r-empty1)", () => {
+  it("shows the cleaned empty-compound approval reason", async () => {
+    server.use(
+      http.get("http://localhost:8000/analyses/r-empty1", () =>
+        HttpResponse.json({
+          analysis_id: "r-empty1",
+          analysis_name: null,
+          disease_id: "d1",
+          mode: "guided",
+          status: "stage_1_awaiting_approval",
+          current_stage: 1,
+          parameters: {},
+          stage_results: {
+            "1": {
+              count: 0,
+              compounds: [],
+              per_plant: {},
+              state: "computed",
+            },
+          },
+          created_at: null,
+          completed_at: null,
+          expires_at: null,
+          error_message: null,
+        }),
+      ),
+    );
+
+    wrap("r-empty1");
+
+    expect(await screen.findByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("No compounds found. Add one to continue.")).toBeInTheDocument();
   });
 });
 

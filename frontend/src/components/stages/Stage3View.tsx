@@ -255,7 +255,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 3 — Target Identification</h2>
+        <h2>Step 3: Target Identification</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -346,7 +346,9 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
           onClick={() => edit.mutate({ add: [], remove: [row.original.target_id] })}
           disabled={atMinEntities(effectiveCount)}
           title={
-            atMinEntities(effectiveCount) ? "A stage must keep at least one entry." : undefined
+            atMinEntities(effectiveCount)
+              ? "Keep at least one target before removing another."
+              : undefined
           }
         >
           ✕
@@ -388,7 +390,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         <Eyebrow>Step 3</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
           <h2 className="hf-heading-serif">
-            Step 3 — Target Identification
+            Step 3: Target Identification
             {isUserProvided && (
               <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
                 Provided by you
@@ -423,7 +425,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
             </div>
             <div
               className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-              aria-label={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL edges`}
+              aria-label={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL target links`}
             >
               <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
                 {sourceCounts.chembl_bioactivity ?? 0}
@@ -432,7 +434,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
             </div>
             <div
               className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-              aria-label={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay edges`}
+              aria-label={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay target links`}
             >
               <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
                 {sourceCounts.pubchem_bioassay ?? 0}
@@ -566,8 +568,8 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         disabled={stage3.count === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
-            : "No targets — adjust parameters or add one to continue."
+            ? "Run the updated step before continuing."
+            : "No targets found. Adjust the settings or add one to continue."
         }
         onApprove={() => advance.mutate()}
       />

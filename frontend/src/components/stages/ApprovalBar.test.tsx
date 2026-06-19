@@ -34,11 +34,11 @@ describe("ApprovalBar", () => {
         status="stage_4_awaiting_approval"
         currentStage={4}
         disabled
-        disabledReason="No disease targets — lower min score or add one to continue."
+        disabledReason="No disease targets found. Lower the minimum score, run this step again, or add one to continue."
         onApprove={onApprove}
       />,
     );
     expect(screen.getByRole("button", { name: /approve/i })).toBeDisabled();
-    expect(screen.getByText(/lower min score/i)).toBeInTheDocument();
+    expect(screen.getByText(/run this step again/i)).toBeInTheDocument();
   });
 });

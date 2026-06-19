@@ -60,7 +60,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
   if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 1 — Compounds</h2>
+        <h2>Step 1: Compounds</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -121,8 +121,14 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 1</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
-          <h2>Compounds ({current})</h2>
-          {isUserProvided && <Badge variant="secondary">Provided by you</Badge>}
+          <h2 className="hf-heading-serif">
+            Step 1: Compounds ({current})
+            {isUserProvided && (
+              <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
+                Provided by you
+              </Badge>
+            )}
+          </h2>
         </div>
       </div>
 
