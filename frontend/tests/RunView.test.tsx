@@ -1,17 +1,32 @@
+import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, test, vi } from "vitest";
 import { RunView } from "../src/components/RunView";
+import { ThemeProvider } from "../src/lib/theme";
 import "../src/lib/api";
 import { server } from "./handlers";
+
+// Mock react-cytoscapejs so the graph never really renders in jsdom.
+vi.mock("react-cytoscapejs", () => ({
+  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
+    cy?.({ png: () => "data:image/png;base64,AAAA" });
+    return React.createElement("div", {
+      "data-testid": "cytoscape",
+      "data-count": String(elements?.length ?? 0),
+    });
+  },
+}));
 
 function wrap(analysisId: string) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <RunView analysisId={analysisId} />
+      <ThemeProvider>
+        <RunView analysisId={analysisId} />
+      </ThemeProvider>
     </QueryClientProvider>,
   );
 }
@@ -332,7 +347,9 @@ describe("failed run recovery (r-failed)", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
-        <RunView analysisId="r-failed" onReset={onReset} />
+        <ThemeProvider>
+          <RunView analysisId="r-failed" onReset={onReset} />
+        </ThemeProvider>
       </QueryClientProvider>,
     );
     const btn = await screen.findByRole("button", { name: /back to setup/i });

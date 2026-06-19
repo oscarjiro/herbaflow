@@ -535,4 +535,57 @@ export const server = setupServer(
   http.post(`${BASE}/analyses/:id/stages/:stage/edit`, () =>
     HttpResponse.json({ ...ANALYSIS_WITH_STAGE2 }),
   ),
+  // ctp-graph: return a minimal compound-target-pathway graph
+  http.get(`${BASE}/analyses/:id/ctp-graph`, () =>
+    HttpResponse.json({
+      nodes: [
+        {
+          id: "cmp-1",
+          label: "Curcumin",
+          type: "compound",
+          inchikey: "VFGB",
+          smiles: "O=C",
+          uniprot_accession: "",
+          is_hub: "",
+          source: "knapsack",
+        },
+        {
+          id: "tgt-1",
+          label: "EGFR",
+          type: "target",
+          inchikey: "",
+          smiles: "",
+          uniprot_accession: "P00533",
+          is_hub: "true",
+          source: "chembl",
+        },
+        {
+          id: "pw-1",
+          label: "MAPK signaling pathway",
+          type: "pathway",
+          inchikey: "",
+          smiles: "",
+          uniprot_accession: "",
+          is_hub: "",
+          source: "enrichment",
+        },
+      ],
+      edges: [
+        {
+          source: "cmp-1",
+          target: "tgt-1",
+          interaction: "compound-target",
+          prediction_method: "chembl",
+          p_value: "",
+        },
+        {
+          source: "tgt-1",
+          target: "pw-1",
+          interaction: "target-pathway",
+          prediction_method: "",
+          p_value: "0.01",
+        },
+      ],
+    }),
+  ),
 );

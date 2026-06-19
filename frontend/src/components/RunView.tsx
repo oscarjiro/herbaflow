@@ -1,10 +1,15 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type cytoscape from "cytoscape";
 import { advanceAnalysis } from "../api/sdk.gen";
+import { getCtpGraphOptions } from "../api/@tanstack/react-query.gen";
+import type { CtpGraph, CtpGraphNode, CtpGraphEdge, GetCtpGraphResponse } from "../api/types.gen";
 import { useAnalysisStatus } from "../hooks/useAnalysisStatus";
 import { useEntitySubjects } from "../hooks/useEntitySubjects";
 import { useStaleState } from "../hooks/useStaleState";
-import { exportArtifactUrl } from "../lib/exportUrl";
 import { runHasCompounds } from "../lib/entities";
+import { useChartColors } from "../lib/chartTheme";
+import { NetworkGraph } from "./charts/NetworkGraph";
 import { notifyError } from "../lib/toast";
 import { humanizeProblem, type Problem } from "../lib/problem";
 import { formatRunStatus } from "../lib/runStatus";
@@ -32,6 +37,93 @@ function isSettled(status: string | null | undefined): boolean {
   return status.endsWith("awaiting_approval") || status === "complete" || status === "failed";
 }
 
+// ---------------------------------------------------------------------------
+// CTP graph helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a flat Cytoscape elements array from the typed CTP graph.
+ * Nodes carry id/label/type/hub; edges carry id/source/target/interaction.
+ */
+function buildCtpElements(graph: CtpGraph): cytoscape.ElementDefinition[] {
+  const nodes: cytoscape.ElementDefinition[] = (graph.nodes as CtpGraphNode[]).map((n) => ({
+    data: { id: n.id, label: n.label, type: n.type, hub: n.is_hub },
+  }));
+  const edges: cytoscape.ElementDefinition[] = (graph.edges as CtpGraphEdge[]).map((e, i) => ({
+    data: { id: `e-${i}`, source: e.source, target: e.target, interaction: e.interaction },
+  }));
+  return [...nodes, ...edges];
+}
+
+/** Build the Cytoscape stylesheet for the CTP graph from resolved hf-* color strings. */
+function buildCtpStylesheet(colors: ReturnType<typeof useChartColors>): cytoscape.StylesheetJson {
+  return [
+    {
+      selector: "node",
+      style: {
+        label: "data(label)",
+        color: colors.fg1,
+        "font-size": 9,
+        "text-valign": "bottom",
+        "text-halign": "center",
+        "text-margin-y": 2,
+        width: 20,
+        height: 20,
+      },
+    },
+    {
+      selector: 'node[type = "compound"]',
+      style: {
+        "background-color": colors.terracotta,
+        shape: "ellipse",
+      },
+    },
+    {
+      selector: 'node[type = "target"]',
+      style: {
+        "background-color": colors.sage,
+        shape: "ellipse",
+      },
+    },
+    {
+      selector: 'node[type = "target"][hub = "true"]',
+      style: {
+        "background-color": colors.sageDeep,
+        width: 30,
+        height: 30,
+      },
+    },
+    {
+      selector: 'node[type = "pathway"]',
+      style: {
+        "background-color": colors.info,
+        shape: "round-rectangle",
+      },
+    },
+    {
+      selector: "edge",
+      style: {
+        "curve-style": "bezier",
+        opacity: 0.6,
+      },
+    },
+    {
+      selector: 'edge[interaction = "compound-target"]',
+      style: {
+        "line-color": colors.border,
+        "line-style": "solid",
+      },
+    },
+    {
+      selector: 'edge[interaction = "target-pathway"]',
+      style: {
+        "line-color": colors.fg3,
+        "line-style": "dashed",
+      },
+    },
+  ] as cytoscape.StylesheetJson;
+}
+
 type Stage1Data = {
   count?: number;
   compounds?: { compound_id: string; canonical_name?: string | null; tag?: string }[];
@@ -47,6 +139,17 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
     onError: (error) => notifyError(error as Problem),
   });
   const { plant: plantDisplay, disease: diseaseDisplay } = useEntitySubjects(data);
+  const colors = useChartColors();
+
+  const ctpEnabled = data?.status === "complete" && runHasCompounds(data);
+  const ctpQuery = useQuery({
+    ...getCtpGraphOptions({ path: { analysis_id: analysisId } }),
+    enabled: ctpEnabled,
+  });
+
+  const ctpGraph = (ctpQuery.data as GetCtpGraphResponse | undefined) ?? null;
+  const ctpElements = useMemo(() => (ctpGraph ? buildCtpElements(ctpGraph) : []), [ctpGraph]);
+  const ctpStylesheet = useMemo(() => buildCtpStylesheet(colors), [colors]);
 
   if (!data) {
     if (isError) {
@@ -108,16 +211,21 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
           hasCompounds={runHasCompounds(data)}
         />
 
-        {data.status === "complete" && runHasCompounds(data) && (
-          <img
-            className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-            alt="Compound-target-pathway network"
-            src={exportArtifactUrl(analysisId, "ctp-network.png")}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
-        )}
+        {data.status === "complete" &&
+          runHasCompounds(data) &&
+          (ctpQuery.isPending ? (
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-[420px] w-full" />
+            </div>
+          ) : ctpGraph && ctpGraph.nodes.length > 0 ? (
+            <NetworkGraph
+              title="Compound, target and pathway network"
+              filename="ctp_network.png"
+              elements={ctpElements}
+              stylesheet={ctpStylesheet}
+            />
+          ) : null)}
 
         {data.status === "failed" && (
           <div

@@ -1,15 +1,34 @@
-import { render, screen } from "@testing-library/react";
+import React from "react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 import { RunView } from "./RunView";
+import { ThemeProvider } from "../lib/theme";
 import * as useAnalysisStatusModule from "../hooks/useAnalysisStatus";
 import type { AnalysisRead } from "../api/types.gen";
 
-// Mock advanceAnalysis so mutations don't fire real requests
-vi.mock("../api/sdk.gen", () => ({
-  advanceAnalysis: vi.fn().mockResolvedValue({ data: {} }),
-  resetFrom: vi.fn().mockResolvedValue({ data: {} }),
+// Mock react-cytoscapejs so the graph never really renders in jsdom.
+vi.mock("react-cytoscapejs", () => ({
+  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
+    cy?.({ png: () => "data:image/png;base64,AAAA" });
+    return React.createElement("div", {
+      "data-testid": "cytoscape",
+      "data-count": String(elements?.length ?? 0),
+    });
+  },
 }));
+
+// Mock sdk.gen so mutations don't fire real requests.
+// getCtpGraph must also be present so that getCtpGraphOptions (which imports it)
+// can function; it is NOT mocked to a stub — the real HTTP call goes through MSW.
+vi.mock("../api/sdk.gen", async (importOriginal) => {
+  const original = await importOriginal<typeof import("../api/sdk.gen")>();
+  return {
+    ...original,
+    advanceAnalysis: vi.fn().mockResolvedValue({ data: {} }),
+    resetFrom: vi.fn().mockResolvedValue({ data: {} }),
+  };
+});
 
 function makeRun(overrides: Partial<AnalysisRead>): AnalysisRead {
   return {
@@ -47,7 +66,11 @@ function mockStatus(
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={qc}>
+      <ThemeProvider>{ui}</ThemeProvider>
+    </QueryClientProvider>,
+  );
 }
 
 describe("RunView — running skeleton", () => {
@@ -137,5 +160,51 @@ describe("RunView — poll-error banner", () => {
     // Run header should still render, no alert banner
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.getByText(/run-1/)).toBeInTheDocument();
+  });
+});
+
+describe("RunView — CTP network graph", () => {
+  it("renders the NetworkGraph frame title and Download PNG button for a complete run with compounds", async () => {
+    // A complete run that has compounds (default input_modes = selection → has compounds).
+    mockStatus(
+      makeRun({
+        status: "complete",
+        current_stage: 8,
+        // No input_modes override → runHasCompounds returns true.
+      }),
+    );
+    wrap(<RunView analysisId="run-1" />);
+    // The MSW handler returns 3 nodes so the graph should appear.
+    await waitFor(() => {
+      expect(screen.getByText("Compound, target and pathway network")).toBeInTheDocument();
+    });
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
+  });
+
+  it("does not render the old server-rendered ctp-network.png img", async () => {
+    mockStatus(makeRun({ status: "complete", current_stage: 8 }));
+    wrap(<RunView analysisId="run-1" />);
+    // Wait for the graph to settle, then assert the old img is absent.
+    await waitFor(() => {
+      expect(screen.getByText("Compound, target and pathway network")).toBeInTheDocument();
+    });
+    const imgs = screen.queryAllByRole("img");
+    expect(imgs.some((el) => el.getAttribute("src")?.includes("ctp-network.png"))).toBe(false);
+  });
+
+  it("does NOT render the CTP graph for a compound-free (manual_targets) run", () => {
+    // manual_targets plant mode → runHasCompounds = false → query never fires.
+    mockStatus(
+      makeRun({
+        status: "complete",
+        current_stage: 8,
+        parameters: {
+          input_modes: { plant: "manual_targets", disease: "selection" },
+        },
+      }),
+    );
+    wrap(<RunView analysisId="run-1" />);
+    // The graph title must never appear.
+    expect(screen.queryByText("Compound, target and pathway network")).toBeNull();
   });
 });
