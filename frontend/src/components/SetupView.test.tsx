@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { http, HttpResponse } from "msw";
@@ -17,7 +17,7 @@ function wrap(ui: React.ReactNode) {
 }
 
 // Unmount + clear any Radix portal nodes left in document.body between tests so a
-// stale Select listbox/option from one test cannot leak into the next, and restore
+// stale combobox/popover from one test cannot leak into the next, and restore
 // any SDK spies so a mocked createAnalysis does not bleed into the MSW-driven tests.
 afterEach(() => {
   cleanup();
@@ -34,11 +34,13 @@ function diseaseFieldset() {
   return screen.getByRole("group", { name: /disease input mode/i });
 }
 
-/** Open the shadcn (Radix) disease Select and choose the option with the given text. */
-async function selectDisease(optionText: string | RegExp) {
-  await userEvent.click(screen.getByRole("combobox", { name: /disease/i }));
-  const listbox = await screen.findByRole("listbox");
-  await userEvent.click(await within(listbox).findByRole("option", { name: optionText }));
+/**
+ * Open the EntitySearchCombobox for the given ariaLabel and pick an option by text.
+ * Waits for the option to appear in the command list before clicking it.
+ */
+async function pickComboOption(ariaLabel: string, optionText: string | RegExp) {
+  await userEvent.click(screen.getByRole("combobox", { name: ariaLabel }));
+  await userEvent.click(await screen.findByText(optionText));
 }
 
 // ---------------------------------------------------------------------------
@@ -67,22 +69,22 @@ describe("SetupView — plant input-mode radios", () => {
 // ---------------------------------------------------------------------------
 
 describe("SetupView — plant mode controls", () => {
-  it("shows plant multiselect in default selection mode", async () => {
+  it("shows plant combobox trigger in default selection mode", async () => {
     wrap(<SetupView onCreated={() => {}} />);
-    // plant filter should be visible in default mode
-    expect(screen.getByPlaceholderText(/filter plants/i)).toBeInTheDocument();
+    // The plant combobox trigger button is present
+    expect(screen.getByRole("combobox", { name: /search plants/i })).toBeInTheDocument();
     // plant_label field should NOT be visible in selection mode
     expect(screen.queryByLabelText(/plant label/i)).not.toBeInTheDocument();
   });
 
-  it("switching plant mode to manual_targets hides plant multiselect and shows target editor + plant_label", async () => {
+  it("switching plant mode to manual_targets hides plant combobox and shows target editor + plant_label", async () => {
     wrap(<SetupView onCreated={() => {}} />);
 
     // Switch to manual_targets
     await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /manual_targets/i }));
 
-    // Plant filter / multiselect should be gone
-    expect(screen.queryByPlaceholderText(/filter plants/i)).not.toBeInTheDocument();
+    // Plant combobox should be gone
+    expect(screen.queryByRole("combobox", { name: /search plants/i })).not.toBeInTheDocument();
 
     // Target editor (TargetValidateBox textarea) should appear with label "Plant targets"
     expect(screen.getByRole("textbox", { name: /plant targets/i })).toBeInTheDocument();
@@ -91,14 +93,14 @@ describe("SetupView — plant mode controls", () => {
     expect(screen.getByLabelText(/plant label/i)).toBeInTheDocument();
   });
 
-  it("switching plant mode to manual_compounds shows CompoundValidateBox and plant_label, hides multiselect", async () => {
+  it("switching plant mode to manual_compounds shows CompoundValidateBox and plant_label, hides combobox", async () => {
     wrap(<SetupView onCreated={() => {}} />);
 
     await userEvent.click(
       within(plantFieldset()).getByRole("radio", { name: /manual_compounds/i }),
     );
 
-    expect(screen.queryByPlaceholderText(/filter plants/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: /search plants/i })).not.toBeInTheDocument();
     // CompoundValidateBox textarea has default label "Manual compounds"
     expect(screen.getByRole("textbox", { name: /manual compounds/i })).toBeInTheDocument();
     // plant_label
@@ -111,23 +113,22 @@ describe("SetupView — plant mode controls", () => {
 // ---------------------------------------------------------------------------
 
 describe("SetupView — disease mode controls", () => {
-  it("shows disease single-select in default selection mode", async () => {
+  it("shows disease combobox trigger in default selection mode", async () => {
     wrap(<SetupView onCreated={() => {}} />);
-    const select = screen.getByRole("combobox", { name: /disease/i });
-    expect(select).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /search disease/i })).toBeInTheDocument();
     // disease_label should NOT be visible
     expect(screen.queryByLabelText(/disease label/i)).not.toBeInTheDocument();
   });
 
-  it("switching disease mode to manual_disease_targets hides select and shows target editor + disease_label", async () => {
+  it("switching disease mode to manual_disease_targets hides combobox and shows target editor + disease_label", async () => {
     wrap(<SetupView onCreated={() => {}} />);
 
     await userEvent.click(
       within(diseaseFieldset()).getByRole("radio", { name: /manual_disease_targets/i }),
     );
 
-    // Disease select should be gone
-    expect(screen.queryByRole("combobox", { name: /disease/i })).not.toBeInTheDocument();
+    // Disease combobox should be gone
+    expect(screen.queryByRole("combobox", { name: /search disease/i })).not.toBeInTheDocument();
 
     // Target editor textarea for disease targets should appear
     expect(screen.getByRole("textbox", { name: /disease targets/i })).toBeInTheDocument();
@@ -161,14 +162,11 @@ describe("SetupView — create payload per mode", () => {
 
     wrap(<SetupView onCreated={() => {}} />);
 
-    // Wait for plants + diseases to load from MSW
-    await waitFor(() => screen.getByRole("checkbox", { name: /aaa bbb/i }));
+    // Select a plant via the combobox — wait for "Aaa bbb" to appear in dropdown
+    await pickComboOption("Search plants", /aaa bbb/i);
 
-    // Select a disease
-    await selectDisease("Test Disease");
-
-    // Check a plant
-    await userEvent.click(screen.getByRole("checkbox", { name: /aaa bbb/i }));
+    // Select a disease via the combobox
+    await pickComboOption("Search disease", /test disease/i);
 
     // Submit
     await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
@@ -263,9 +261,9 @@ describe("SetupView — end-to-end create flow", () => {
     let createdId: string | null = null;
     wrap(<SetupView onCreated={(id) => (createdId = id)} />);
 
-    await screen.findByRole("checkbox", { name: /aaa bbb/i });
-    await selectDisease("Test Disease");
-    await userEvent.click(screen.getByRole("checkbox", { name: /aaa bbb/i }));
+    // Select plant and disease via comboboxes
+    await pickComboOption("Search plants", /aaa bbb/i);
+    await pickComboOption("Search disease", /test disease/i);
     await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
 
     await waitFor(() => expect(createdId).toBe("r1"));
@@ -319,8 +317,8 @@ describe("SetupView — end-to-end create flow", () => {
       }),
     );
 
-    // Select a disease (disease section is still in selection mode)
-    await selectDisease("Test Disease");
+    // Select a disease via the new combobox
+    await pickComboOption("Search disease", /test disease/i);
     await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
 
     await waitFor(() => expect(createdId).toBe("r1"));

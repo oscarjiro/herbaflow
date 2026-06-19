@@ -77,6 +77,16 @@ if (typeof window.matchMedia === "undefined") {
   window.matchMedia = stub;
 }
 
+// jsdom does not implement ResizeObserver — Radix Popover uses it internally.
+// Provide a no-op stub so popovers/comboboxes can open in tests.
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}
+
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());

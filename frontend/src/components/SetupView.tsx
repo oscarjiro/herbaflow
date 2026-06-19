@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { listDiseasesOptions, listPlantsOptions } from "../api/@tanstack/react-query.gen";
-import { createAnalysis } from "../api/sdk.gen";
+import { useCallback, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { listDiseases, listPlants, createAnalysis } from "../api/sdk.gen";
 import type { AnalysisRead, ResolvedCompound, ResolvedTarget } from "../api/types.gen";
 import {
   DEFAULT_DISEASE_INPUT_MODE,
@@ -13,10 +12,10 @@ import {
   PLANT_INPUT_MODES,
 } from "../contract";
 import { CompoundValidateBox } from "./CompoundValidateBox";
+import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
 import { TargetValidateBox } from "./TargetValidateBox";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Checkbox } from "./ui/checkbox";
 import { Eyebrow } from "./ui/editorial";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -24,14 +23,10 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
-  const diseases = useQuery(listDiseasesOptions());
-  const plants = useQuery(listPlantsOptions());
-
   // ------- core selection state -------
-  const [selected, setSelected] = useState<string[]>([]);
-  const [diseaseId, setDiseaseId] = useState<string>("");
+  const [selectedPlants, setSelectedPlants] = useState<ComboOption[]>([]);
+  const [selectedDisease, setSelectedDisease] = useState<ComboOption[]>([]);
   const [mode, setMode] = useState<string>(DEFAULT_MODE);
-  const [filter, setFilter] = useState("");
 
   // ------- input-mode state -------
   const [plantMode, setPlantMode] =
@@ -49,6 +44,25 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   const [plantLabel, setPlantLabel] = useState("");
   const [diseaseLabel, setDiseaseLabel] = useState("");
 
+  // ------- search functions for comboboxes -------
+  const searchPlants = useCallback(async (q: string): Promise<ComboOption[]> => {
+    const { data } = await listPlants({ query: { q: q || undefined, limit: 50 } });
+    return (data ?? []).map((p) => ({
+      value: p.plant_id,
+      label: p.canonical_scientific_name ?? p.plant_id,
+      hint: p.matched_alias ?? null,
+    }));
+  }, []);
+
+  const searchDiseases = useCallback(async (q: string): Promise<ComboOption[]> => {
+    const { data } = await listDiseases({ query: { q: q || undefined, limit: 50 } });
+    return (data ?? []).map((d) => ({
+      value: d.disease_id,
+      label: d.disease_name ?? d.disease_id,
+      hint: d.matched_alias ?? null,
+    }));
+  }, []);
+
   const create = useMutation({
     mutationFn: async () => {
       const res = await createAnalysis({
@@ -57,8 +71,8 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
           plant_input_mode: plantMode,
           disease_input_mode: diseaseMode,
           mode: mode as "auto" | "guided",
-          plant_ids: plantMode === "selection" ? selected : [],
-          disease_id: diseaseMode === "selection" ? diseaseId : null,
+          plant_ids: plantMode === "selection" ? selectedPlants.map((o) => o.value) : [],
+          disease_id: diseaseMode === "selection" ? (selectedDisease[0]?.value ?? null) : null,
           manual_compound_ids:
             plantMode === "manual_compounds" ? resolved.map((r) => r.compound_id) : [],
           manual_target_ids:
@@ -79,21 +93,15 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   // ------- canSubmit -------
   const plantReady =
     plantMode === "selection"
-      ? selected.length >= 1 && selected.length <= MAX_PLANTS
+      ? selectedPlants.length >= 1 && selectedPlants.length <= MAX_PLANTS
       : plantMode === "manual_compounds"
         ? resolved.length >= 1
         : manualTargets.length >= 1;
 
   const diseaseReady =
-    diseaseMode === "selection" ? diseaseId !== "" : manualDiseaseTargets.length >= 1;
+    diseaseMode === "selection" ? selectedDisease.length > 0 : manualDiseaseTargets.length >= 1;
 
   const canSubmit = plantReady && diseaseReady;
-
-  const filteredPlants = plants.data
-    ?.filter((p) =>
-      (p.canonical_scientific_name ?? "").toLowerCase().includes(filter.toLowerCase()),
-    )
-    .slice(0, 100);
 
   return (
     <section className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
@@ -128,43 +136,24 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
             {plantMode === "selection" && (
               <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="plant-filter">Filter plants</Label>
-                  <Input
-                    id="plant-filter"
-                    aria-label="Filter plants"
-                    placeholder="Filter plants"
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                  />
-                </div>
+                <Label>Search plants</Label>
+                <EntitySearchCombobox
+                  mode="multiple"
+                  selected={selectedPlants}
+                  onChange={setSelectedPlants}
+                  search={searchPlants}
+                  max={MAX_PLANTS}
+                  placeholder="Search plants…"
+                  ariaLabel="Search plants"
+                />
                 <p className="text-muted-foreground text-sm">
-                  {selected.length} / {MAX_PLANTS} plants
+                  {selectedPlants.length} / {MAX_PLANTS} plants
                 </p>
-                {selected.length > MAX_PLANTS && (
+                {selectedPlants.length > MAX_PLANTS && (
                   <p role="alert" className="text-destructive text-sm">
                     Too many plants (max {MAX_PLANTS}).
                   </p>
                 )}
-                <ul className="max-h-72 space-y-1 overflow-y-auto rounded-md border p-2">
-                  {filteredPlants?.map((p) => (
-                    <li key={p.plant_id}>
-                      <label className="hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
-                        <Checkbox
-                          checked={selected.includes(p.plant_id)}
-                          onCheckedChange={(checked) =>
-                            setSelected((s) =>
-                              checked === true
-                                ? [...s, p.plant_id]
-                                : s.filter((x) => x !== p.plant_id),
-                            )
-                          }
-                        />
-                        {p.canonical_scientific_name}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
               </div>
             )}
 
@@ -215,19 +204,15 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
             {diseaseMode === "selection" && (
               <div className="space-y-1.5">
-                <Label htmlFor="disease">Disease</Label>
-                <Select value={diseaseId} onValueChange={setDiseaseId}>
-                  <SelectTrigger id="disease" aria-label="Disease" className="w-full">
-                    <SelectValue placeholder="Select a disease" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {diseases.data?.map((d) => (
-                      <SelectItem key={d.disease_id} value={d.disease_id}>
-                        {d.disease_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Search disease</Label>
+                <EntitySearchCombobox
+                  mode="single"
+                  selected={selectedDisease}
+                  onChange={setSelectedDisease}
+                  search={searchDiseases}
+                  placeholder="Search disease…"
+                  ariaLabel="Search disease"
+                />
               </div>
             )}
 
