@@ -10,7 +10,7 @@
  * - On Redo, calls `onRedo` with only the changed values.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ADME_BOOLEAN_PARAMS, ADME_NUMERIC_PARAMS } from "../../contract";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +46,8 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
   params,
   meta,
   onRedo,
+  onChange,
+  hideRedo = false,
   disabled = false,
   numericKeys = ADME_NUMERIC_PARAMS,
   booleanKeys = ADME_BOOLEAN_PARAMS,
@@ -56,6 +58,10 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
   params: Record<string, TValue>;
   meta: Record<string, ParamMeta>;
   onRedo: (changed: Record<string, TValue>) => void;
+  /** Collect-mode: called whenever the set of changed values changes. */
+  onChange?: (changed: Record<string, number | boolean | string | string[]>) => void;
+  /** When true, hides the Redo button (use in collect-mode panels). */
+  hideRedo?: boolean;
   disabled?: boolean;
   /** Ordered numeric param keys to render (defaults to the ADME set). */
   numericKeys?: readonly string[];
@@ -169,6 +175,17 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
   const changed = getChanged();
   const hasChanges = Object.keys(changed).length > 0;
   const redoEnabled = hasChanges && !hasViolations && !disabled;
+
+  // Collect-mode: fire onChange whenever the changed set itself changes.
+  // Keyed on a stable serialization to avoid infinite render loops.
+  const changedJson = JSON.stringify(changed);
+  const onChangePrev = useRef<string | null>(null);
+  useEffect(() => {
+    if (!onChange) return;
+    if (changedJson === onChangePrev.current) return;
+    onChangePrev.current = changedJson;
+    onChange(changed as Record<string, number | boolean | string | string[]>);
+  }, [changedJson, onChange]);
 
   function handleNumericChange(key: string, value: string) {
     setLocalStr((s) => ({ ...s, [key]: value }));
@@ -353,15 +370,17 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
             );
           })}
 
-          <Button
-            type="button"
-            disabled={!redoEnabled}
-            onClick={handleRedo}
-            aria-label="Redo from this stage with changed parameters"
-            className="self-start"
-          >
-            Redo
-          </Button>
+          {!hideRedo && (
+            <Button
+              type="button"
+              disabled={!redoEnabled}
+              onClick={handleRedo}
+              aria-label="Redo from this stage with changed parameters"
+              className="self-start"
+            >
+              Redo
+            </Button>
+          )}
         </CardContent>
       )}
     </Card>

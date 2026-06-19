@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ParamPanel } from "./ParamPanel";
@@ -242,5 +242,116 @@ describe("ParamPanel", () => {
     );
     await openPanel();
     expect(screen.getByRole("button", { name: /redo from this stage/i })).toBeDisabled();
+  });
+
+  describe("collect-mode (onChange + hideRedo)", () => {
+    it("hideRedo hides the Redo button", async () => {
+      render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          hideRedo
+          title="Collect panel"
+        />,
+      );
+      await openPanel(/collect panel/i);
+      expect(
+        screen.queryByRole("button", { name: /redo from this stage/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("Redo button still appears when hideRedo is absent", async () => {
+      render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          title="Normal panel"
+        />,
+      );
+      await openPanel(/normal panel/i);
+      expect(screen.getByRole("button", { name: /redo from this stage/i })).toBeInTheDocument();
+    });
+
+    it("onChange fires with the changed map when a value changes", async () => {
+      const onChange = vi.fn();
+      render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          onChange={onChange}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          title="Collect panel"
+        />,
+      );
+      await openPanel(/collect panel/i);
+      const input = screen.getByLabelText("score");
+      await userEvent.clear(input);
+      await userEvent.type(input, "8");
+      // After the change, onChange must have been called with { score: 8 }
+      expect(onChange).toHaveBeenCalledWith({ score: 8 });
+    });
+
+    it("onChange fires with an empty map when value is reverted to the default", async () => {
+      const onChange = vi.fn();
+      render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          onChange={onChange}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          title="Collect panel"
+        />,
+      );
+      await openPanel(/collect panel/i);
+      const input = screen.getByLabelText("score");
+      await userEvent.clear(input);
+      await userEvent.type(input, "8");
+      await userEvent.clear(input);
+      await userEvent.type(input, "5");
+      // Final call must be with an empty changed map
+      const calls = onChange.mock.calls;
+      const lastCall = calls[calls.length - 1]?.[0];
+      expect(lastCall).toEqual({});
+    });
+
+    it("onChange does NOT infinite-loop: fires a bounded number of times per change", async () => {
+      const onChange = vi.fn();
+      render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          onChange={onChange}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          title="Loop guard panel"
+        />,
+      );
+      await openPanel(/loop guard panel/i);
+      const input = screen.getByLabelText("score");
+      // Type a single digit — each keystroke may fire onChange at most once.
+      await act(async () => {
+        await userEvent.clear(input);
+        await userEvent.type(input, "7");
+      });
+      // "7" produces 1 change event; allow up to 3 calls total (clear + type + any
+      // re-sync); the critical guarantee is that we don't get dozens of calls.
+      expect(onChange.mock.calls.length).toBeLessThanOrEqual(5);
+    });
   });
 });

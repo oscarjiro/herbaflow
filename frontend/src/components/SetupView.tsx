@@ -3,14 +3,34 @@ import { useMutation } from "@tanstack/react-query";
 import { listDiseases, listPlants, createAnalysis } from "../api/sdk.gen";
 import type { AnalysisRead, ResolvedCompound, ResolvedTarget } from "../api/types.gen";
 import {
+  ADME_BOOLEAN_PARAMS,
+  ADME_NUMERIC_PARAMS,
+  ADME_PARAMS,
   DEFAULT_DISEASE_INPUT_MODE,
   DEFAULT_MODE,
   DEFAULT_PLANT_INPUT_MODE,
   DISEASE_INPUT_MODES,
+  DISEASE_TARGETS_NUMERIC_PARAMS,
+  DISEASE_TARGETS_PARAMS,
+  ENRICHMENT_ARRAY_PARAMS,
+  ENRICHMENT_BOOLEAN_PARAMS,
+  ENRICHMENT_NUMERIC_PARAMS,
+  ENRICHMENT_PARAMS,
+  ENRICHMENT_SELECT_PARAMS,
+  HUB_GENES_BOOLEAN_PARAMS,
+  HUB_GENES_NUMERIC_PARAMS,
+  HUB_GENES_PARAMS,
   MAX_PLANTS,
   MODES,
   PLANT_INPUT_MODES,
+  PPI_BOOLEAN_PARAMS,
+  PPI_NUMERIC_PARAMS,
+  PPI_PARAMS,
+  PPI_SELECT_PARAMS,
+  TARGET_NUMERIC_PARAMS,
+  TARGET_PARAMS,
 } from "../contract";
+import { ParamPanel } from "./stages/ParamPanel";
 import { CompoundValidateBox } from "./CompoundValidateBox";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
 import { TargetValidateBox } from "./TargetValidateBox";
@@ -22,11 +42,105 @@ import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
+// ---------------------------------------------------------------------------
+// Param group definitions for the Advanced parameters section.
+// Each entry carries the baseline params (built from meta defaults), the
+// meta object, and the key arrays needed by ParamPanel.
+// ---------------------------------------------------------------------------
+
+type ParamGroupKey = "adme" | "target" | "disease_targets" | "ppi" | "hub_genes" | "enrichment";
+
+function buildDefaults(meta: Record<string, { default: unknown }>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(meta)) {
+    result[k] = v.default;
+  }
+  return result;
+}
+
+const PARAM_GROUPS: {
+  key: ParamGroupKey;
+  title: string;
+  meta: Record<string, { default: unknown; [k: string]: unknown }>;
+  numericKeys: readonly string[];
+  booleanKeys: readonly string[];
+  selectKeys: readonly string[];
+  arrayKeys: readonly string[];
+}[] = [
+  {
+    key: "adme",
+    title: "ADME screening",
+    meta: ADME_PARAMS as Record<string, { default: unknown }>,
+    numericKeys: ADME_NUMERIC_PARAMS,
+    booleanKeys: ADME_BOOLEAN_PARAMS,
+    selectKeys: [],
+    arrayKeys: [],
+  },
+  {
+    key: "target",
+    title: "Target identification",
+    meta: TARGET_PARAMS as Record<string, { default: unknown }>,
+    numericKeys: TARGET_NUMERIC_PARAMS,
+    booleanKeys: [],
+    selectKeys: [],
+    arrayKeys: [],
+  },
+  {
+    key: "disease_targets",
+    title: "Disease targets",
+    meta: DISEASE_TARGETS_PARAMS as Record<string, { default: unknown }>,
+    numericKeys: DISEASE_TARGETS_NUMERIC_PARAMS,
+    booleanKeys: [],
+    selectKeys: [],
+    arrayKeys: [],
+  },
+  {
+    key: "ppi",
+    title: "PPI network",
+    meta: PPI_PARAMS as Record<string, { default: unknown }>,
+    numericKeys: PPI_NUMERIC_PARAMS,
+    booleanKeys: PPI_BOOLEAN_PARAMS,
+    selectKeys: PPI_SELECT_PARAMS,
+    arrayKeys: [],
+  },
+  {
+    key: "hub_genes",
+    title: "Hub genes",
+    meta: HUB_GENES_PARAMS as Record<string, { default: unknown }>,
+    numericKeys: HUB_GENES_NUMERIC_PARAMS,
+    booleanKeys: HUB_GENES_BOOLEAN_PARAMS,
+    selectKeys: [],
+    arrayKeys: [],
+  },
+  {
+    key: "enrichment",
+    title: "Functional enrichment",
+    meta: ENRICHMENT_PARAMS as Record<string, { default: unknown }>,
+    numericKeys: ENRICHMENT_NUMERIC_PARAMS,
+    booleanKeys: ENRICHMENT_BOOLEAN_PARAMS,
+    selectKeys: ENRICHMENT_SELECT_PARAMS,
+    arrayKeys: ENRICHMENT_ARRAY_PARAMS,
+  },
+];
+
 export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   // ------- core selection state -------
   const [selectedPlants, setSelectedPlants] = useState<ComboOption[]>([]);
   const [selectedDisease, setSelectedDisease] = useState<ComboOption[]>([]);
   const [mode, setMode] = useState<string>(DEFAULT_MODE);
+
+  // ------- advanced parameter overrides -------
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [overrides, setOverrides] = useState<
+    Record<string, Record<string, number | boolean | string | string[]>>
+  >({});
+
+  const handleGroupChange = useCallback(
+    (groupKey: ParamGroupKey, changed: Record<string, number | boolean | string | string[]>) => {
+      setOverrides((prev) => ({ ...prev, [groupKey]: changed }));
+    },
+    [],
+  );
 
   // ------- input-mode state -------
   const [plantMode, setPlantMode] =
@@ -63,6 +177,16 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
     }));
   }, []);
 
+  // Build the parameters payload: only include groups with at least one changed value.
+  const parametersPayload = (() => {
+    const nonEmpty = Object.entries(overrides).filter(([, v]) => Object.keys(v).length > 0);
+    if (nonEmpty.length === 0) return undefined;
+    return Object.fromEntries(nonEmpty) as Record<
+      string,
+      Record<string, number | boolean | string | string[]>
+    >;
+  })();
+
   const create = useMutation({
     mutationFn: async () => {
       const res = await createAnalysis({
@@ -83,6 +207,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
               : [],
           plant_label: plantMode === "selection" ? null : plantLabel || null,
           disease_label: diseaseMode === "selection" ? null : diseaseLabel || null,
+          parameters: parametersPayload,
         },
       });
       return res.data as AnalysisRead;
@@ -259,6 +384,40 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* ---- Advanced parameters ---- */}
+        <div>
+          <button
+            type="button"
+            aria-expanded={advancedOpen}
+            aria-controls="advanced-params-content"
+            className="flex w-full items-center gap-2 text-left"
+            onClick={() => setAdvancedOpen((o) => !o)}
+          >
+            <span className="text-muted-foreground text-xs">{advancedOpen ? "▾" : "▸"}</span>
+            <span className="text-sm font-medium">Advanced parameters</span>
+          </button>
+
+          {advancedOpen && (
+            <div id="advanced-params-content" className="mt-4 flex flex-col gap-4">
+              {PARAM_GROUPS.map((group) => (
+                <ParamPanel
+                  key={group.key}
+                  params={buildDefaults(group.meta) as Record<string, never>}
+                  meta={group.meta as Parameters<typeof ParamPanel>[0]["meta"]}
+                  onRedo={() => {}}
+                  onChange={(changed) => handleGroupChange(group.key, changed)}
+                  hideRedo
+                  title={group.title}
+                  numericKeys={group.numericKeys}
+                  booleanKeys={group.booleanKeys}
+                  selectKeys={group.selectKeys}
+                  arrayKeys={group.arrayKeys}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         <Button
           disabled={!canSubmit || create.isPending}
