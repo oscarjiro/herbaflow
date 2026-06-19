@@ -9,7 +9,10 @@ export function Nav() {
           Herbaflow
         </Link>
         <div className="flex items-center gap-6">
-          <Link to="/analysis" className="text-hf-fg-2 hover:text-hf-fg-1 text-sm transition-colors">
+          <Link
+            to="/analysis"
+            className="text-hf-fg-2 hover:text-hf-fg-1 text-sm transition-colors"
+          >
             Analysis
           </Link>
           <Link to="/about" className="text-hf-fg-2 hover:text-hf-fg-1 text-sm transition-colors">
