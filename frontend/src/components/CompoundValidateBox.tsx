@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { validateCompounds } from "../api/sdk.gen";
 import type { FailedInput, ResolvedCompound, ValidateResponse } from "../api/types.gen";
 import { humanizeProblem } from "../lib/problem";
+import { jumpToLine } from "../lib/jump-to-line";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -79,27 +80,6 @@ export function CompoundValidateBox({
     setText("");
   }
 
-  /**
-   * Best-effort focus + caret jump to the start of the given 1-based line.
-   * Computed by summing char lengths of all preceding lines + their newlines.
-   * No-ops silently in jsdom (where setSelectionRange may not move the caret).
-   */
-  function jumpToLine(lineNum: number) {
-    const el = editorRef.current;
-    if (!el) return;
-    const lines = text.split("\n");
-    let offset = 0;
-    for (let i = 0; i < lineNum - 1 && i < lines.length; i++) {
-      offset += (lines[i]?.length ?? 0) + 1; // +1 for the newline
-    }
-    try {
-      el.focus();
-      el.setSelectionRange(offset, offset);
-    } catch {
-      // jsdom or older browsers may not support this — no-op
-    }
-  }
-
   return (
     <Card className="gap-3 py-4">
       <CardContent className="flex flex-col gap-3">
@@ -145,18 +125,23 @@ export function CompoundValidateBox({
               className="text-destructive w-fit text-xs font-medium underline-offset-2 hover:underline"
               onClick={() => setFailedExpanded((v) => !v)}
               aria-expanded={failedExpanded}
+              aria-controls={`${textareaId}-failed`}
             >
               {failed.length} invalid input{failed.length !== 1 ? "s" : ""}
             </button>
             {failedExpanded && (
-              <ul aria-label="Failed inputs" className="flex flex-col gap-1">
+              <ul
+                id={`${textareaId}-failed`}
+                aria-label="Failed inputs"
+                className="flex flex-col gap-1"
+              >
                 {failed.map((f) => (
                   <li key={f.value} className="list-none text-xs [color:var(--hf-fg-3)]">
                     <button
                       type="button"
                       className="contents"
                       onClick={() => {
-                        if (typeof f.line === "number") jumpToLine(f.line);
+                        if (typeof f.line === "number") jumpToLine(editorRef.current, text, f.line);
                       }}
                       aria-label={
                         typeof f.line === "number" ? `Go to line ${f.line}: ${f.value}` : undefined

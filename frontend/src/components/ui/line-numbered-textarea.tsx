@@ -57,8 +57,7 @@ export const LineNumberedTextarea = React.forwardRef<
       <div
         ref={gutterRef}
         aria-hidden="true"
-        className="bg-muted/40 text-muted-foreground flex shrink-0 flex-col overflow-hidden border-r px-2 py-2 font-mono text-sm leading-5 tabular-nums select-none"
-        style={{ minWidth: "2.5rem" }}
+        className="bg-muted/40 text-muted-foreground flex min-w-10 shrink-0 flex-col overflow-hidden border-r px-2 py-2 font-mono text-sm leading-5 tabular-nums select-none"
       >
         {Array.from({ length: lineCount }, (_, i) => {
           const lineNum = i + 1;
@@ -90,9 +89,7 @@ export const LineNumberedTextarea = React.forwardRef<
         placeholder={placeholder}
         rows={rows}
         disabled={disabled}
-        className={cn(
-          "placeholder:text-muted-foreground flex min-h-[5rem] w-full resize-y bg-transparent px-3 py-2 font-mono text-sm leading-5 outline-none disabled:cursor-not-allowed",
-        )}
+        className="placeholder:text-muted-foreground flex min-h-[5rem] w-full resize-y bg-transparent px-3 py-2 font-mono text-sm leading-5 outline-none disabled:cursor-not-allowed"
         spellCheck={false}
       />
     </div>
