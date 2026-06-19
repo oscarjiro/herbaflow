@@ -1,7 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
+import { XIcon } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { listDiseases, listPlants, createAnalysis } from "../api/sdk.gen";
 import type { AnalysisRead, ResolvedCompound, ResolvedTarget } from "../api/types.gen";
+import { mergeById } from "../lib/entities";
 import {
   ADME_BOOLEAN_PARAMS,
   ADME_NUMERIC_PARAMS,
@@ -313,10 +315,79 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
               </div>
             )}
 
-            {plantMode === "manual_compounds" && <CompoundValidateBox onResolved={setResolved} />}
+            {plantMode === "manual_compounds" && (
+              <>
+                <CompoundValidateBox
+                  showAddButton
+                  onResolved={(incoming) =>
+                    setResolved((prev) => mergeById(prev, incoming, "compound_id"))
+                  }
+                />
+                {resolved.length > 0 && (
+                  <ul aria-label="Added compounds" className="flex flex-wrap gap-1.5">
+                    {resolved.map((r) => {
+                      const label = r.canonical_name ?? r.canonical_key ?? r.compound_id;
+                      return (
+                        <li key={r.compound_id}>
+                          <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
+                            {label}
+                            <button
+                              type="button"
+                              aria-label={`Remove ${label}`}
+                              onClick={() =>
+                                setResolved((prev) =>
+                                  prev.filter((x) => x.compound_id !== r.compound_id),
+                                )
+                              }
+                              className="hover:text-foreground ml-0.5 rounded-full opacity-60 transition-opacity hover:opacity-100"
+                            >
+                              <XIcon className="size-3" />
+                            </button>
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </>
+            )}
 
             {plantMode === "manual_targets" && (
-              <TargetValidateBox label="Plant targets" onResolved={setManualTargets} />
+              <>
+                <TargetValidateBox
+                  label="Plant targets"
+                  showAddButton
+                  onResolved={(incoming) =>
+                    setManualTargets((prev) => mergeById(prev, incoming, "target_id"))
+                  }
+                />
+                {manualTargets.length > 0 && (
+                  <ul aria-label="Added plant targets" className="flex flex-wrap gap-1.5">
+                    {manualTargets.map((t) => {
+                      const label = t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key;
+                      return (
+                        <li key={t.target_id}>
+                          <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
+                            {label}
+                            <button
+                              type="button"
+                              aria-label={`Remove ${label}`}
+                              onClick={() =>
+                                setManualTargets((prev) =>
+                                  prev.filter((x) => x.target_id !== t.target_id),
+                                )
+                              }
+                              className="hover:text-foreground ml-0.5 rounded-full opacity-60 transition-opacity hover:opacity-100"
+                            >
+                              <XIcon className="size-3" />
+                            </button>
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </>
             )}
 
             {plantMode !== "selection" && (
@@ -373,7 +444,41 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
             )}
 
             {diseaseMode === "manual_disease_targets" && (
-              <TargetValidateBox label="Disease targets" onResolved={setManualDiseaseTargets} />
+              <>
+                <TargetValidateBox
+                  label="Disease targets"
+                  showAddButton
+                  onResolved={(incoming) =>
+                    setManualDiseaseTargets((prev) => mergeById(prev, incoming, "target_id"))
+                  }
+                />
+                {manualDiseaseTargets.length > 0 && (
+                  <ul aria-label="Added disease targets" className="flex flex-wrap gap-1.5">
+                    {manualDiseaseTargets.map((t) => {
+                      const label = t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key;
+                      return (
+                        <li key={t.target_id}>
+                          <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
+                            {label}
+                            <button
+                              type="button"
+                              aria-label={`Remove ${label}`}
+                              onClick={() =>
+                                setManualDiseaseTargets((prev) =>
+                                  prev.filter((x) => x.target_id !== t.target_id),
+                                )
+                              }
+                              className="hover:text-foreground ml-0.5 rounded-full opacity-60 transition-opacity hover:opacity-100"
+                            >
+                              <XIcon className="size-3" />
+                            </button>
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </>
             )}
 
             {diseaseMode !== "selection" && (

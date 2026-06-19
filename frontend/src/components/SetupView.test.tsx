@@ -222,10 +222,13 @@ describe("SetupView — create payload per mode", () => {
     // There are now two Validate buttons (one per TargetValidateBox); click the first
     const validateBtns = screen.getAllByRole("button", { name: /^validate$/i });
     await userEvent.click(validateBtns[0]!);
-    // Wait for the resolved list from MSW
+    // Wait for the resolved list from MSW then click Add to commit to the pool
     await waitFor(() => {
       expect(screen.getAllByRole("list", { name: /resolved targets/i }).length).toBeGreaterThan(0);
     });
+    await userEvent.click(screen.getAllByRole("button", { name: /^add$/i })[0]!);
+    // Pool chip should be visible
+    await screen.findByRole("list", { name: /added plant targets/i });
 
     // Validate disease targets
     const diseaseTextarea = screen.getByRole("textbox", { name: /disease targets/i });
@@ -235,8 +238,15 @@ describe("SetupView — create payload per mode", () => {
     await waitFor(() => {
       expect(
         screen.getAllByRole("list", { name: /resolved targets/i }).length,
-      ).toBeGreaterThanOrEqual(2);
+      ).toBeGreaterThanOrEqual(1);
     });
+    await userEvent.click(
+      screen.getAllByRole("button", { name: /^add$/i })[
+        screen.getAllByRole("button", { name: /^add$/i }).length - 1
+      ]!,
+    );
+    // Pool chip should be visible
+    await screen.findByRole("list", { name: /added disease targets/i });
 
     // Fill labels
     await userEvent.type(screen.getByLabelText(/plant label/i), "My Plant");
@@ -294,13 +304,18 @@ describe("SetupView — end-to-end create flow", () => {
     // Click Validate
     await userEvent.click(screen.getByRole("button", { name: /validate/i }));
 
-    // Resolved row: ethanol present
+    // Resolved row: ethanol present in the validate-box resolved list
     await screen.findByText(/ethanol/i);
 
     // Failed row: expand the collapsed invalid-inputs control then check the SMILES nudge
     const invalidBtn = await screen.findByRole("button", { name: /invalid input/i });
     await userEvent.click(invalidBtn);
     await screen.findByText(/SMILES/);
+
+    // Click Add to commit the resolved batch to the pool
+    await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+    // The pool chip for ethanol should appear
+    await screen.findByRole("list", { name: /added compounds/i });
 
     // Now complete a create: override the handler to capture the body
     let captured: unknown = null;
@@ -334,5 +349,166 @@ describe("SetupView — end-to-end create flow", () => {
     await waitFor(() =>
       expect((captured as { manual_compound_ids?: string[] }).manual_compound_ids).toContain("c1"),
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — added-pool accumulation, dedup, remove, mode-switch persistence
+// ---------------------------------------------------------------------------
+
+describe("SetupView — manual setup added-pool", () => {
+  /** Validate in the compound box and click Add to commit to the pool. */
+  async function validateAndAddCompounds() {
+    await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO");
+    await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
+    // Wait for the validate-box resolved list
+    await screen.findByText(/ethanol/i);
+    await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+    // Pool should now show
+    await screen.findByRole("list", { name: /added compounds/i });
+  }
+
+  it("compound pool: validate + Add accumulates; second Add of same item does not duplicate", async () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+
+    // First Add — MSW always resolves to c1/ethanol
+    await validateAndAddCompounds();
+    expect(
+      within(screen.getByRole("list", { name: /added compounds/i })).getAllByRole("listitem"),
+    ).toHaveLength(1);
+
+    // Second validate + Add of the same item — should not duplicate
+    await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO");
+    await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
+    // Scope to the validate-box resolved list to avoid ambiguity with the pool chip
+    await waitFor(() => {
+      expect(
+        within(screen.getByRole("list", { name: /resolved compounds/i })).getByText(/ethanol/i),
+      ).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+
+    // Still one item in the pool
+    await waitFor(() => {
+      expect(
+        within(screen.getByRole("list", { name: /added compounds/i })).getAllByRole("listitem"),
+      ).toHaveLength(1);
+    });
+  });
+
+  it("compound pool: Remove button removes just that item", async () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await validateAndAddCompounds();
+
+    // Chip is present
+    const pool = screen.getByRole("list", { name: /added compounds/i });
+    expect(within(pool).getAllByRole("listitem")).toHaveLength(1);
+
+    // Click Remove
+    await userEvent.click(within(pool).getByRole("button", { name: /remove/i }));
+
+    // Pool list should be gone (no items → not rendered)
+    await waitFor(() => {
+      expect(screen.queryByRole("list", { name: /added compounds/i })).not.toBeInTheDocument();
+    });
+  });
+
+  it("compound pool: submit sends the accumulated compound ids", async () => {
+    const createSpy = vi.spyOn(sdk, "createAnalysis").mockResolvedValue({
+      data: {
+        analysis_id: "r1",
+        analysis_name: null,
+        disease_id: "d1",
+        mode: "guided",
+        status: "pending",
+        current_stage: null,
+        stage_results: {},
+        created_at: null,
+        completed_at: null,
+        expires_at: null,
+        error_message: null,
+      },
+    } as never);
+
+    wrap(<SetupView onCreated={() => {}} />);
+    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await validateAndAddCompounds();
+
+    // Select a disease to make form submittable
+    await pickComboOption("Search disease", /test disease/i);
+    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+
+    await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
+    const body = createSpy.mock.calls[0]![0].body;
+    expect(body.manual_compound_ids).toContain("c1");
+  });
+
+  it("compound pool: switching away and back to manual_compounds keeps the pool visible", async () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await validateAndAddCompounds();
+
+    // Switch away — scope to plantFieldset to avoid ambiguity with the disease selection radio
+    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /^selection$/i }));
+    expect(screen.queryByRole("list", { name: /added compounds/i })).not.toBeInTheDocument();
+
+    // Switch back
+    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await screen.findByRole("list", { name: /added compounds/i });
+    expect(
+      within(screen.getByRole("list", { name: /added compounds/i })).getAllByRole("listitem"),
+    ).toHaveLength(1);
+  });
+
+  it("plant target pool: validate + Add accumulates and Remove removes", async () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    await userEvent.click(screen.getByRole("radio", { name: /manual_targets/i }));
+
+    await userEvent.type(screen.getByRole("textbox", { name: /plant targets/i }), "EGFR");
+    await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
+    await waitFor(() =>
+      expect(screen.getAllByRole("list", { name: /resolved targets/i }).length).toBeGreaterThan(0),
+    );
+    await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+    await screen.findByRole("list", { name: /added plant targets/i });
+
+    const pool = screen.getByRole("list", { name: /added plant targets/i });
+    expect(within(pool).getAllByRole("listitem")).toHaveLength(1);
+
+    // Remove
+    await userEvent.click(within(pool).getByRole("button", { name: /remove/i }));
+    await waitFor(() => {
+      expect(screen.queryByRole("list", { name: /added plant targets/i })).not.toBeInTheDocument();
+    });
+  });
+
+  it("disease target pool: validate + Add accumulates; switching away and back keeps pool", async () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    await userEvent.click(
+      within(diseaseFieldset()).getByRole("radio", { name: /manual_disease_targets/i }),
+    );
+
+    await userEvent.type(screen.getByRole("textbox", { name: /disease targets/i }), "EGFR");
+    await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
+    await waitFor(() =>
+      expect(screen.getAllByRole("list", { name: /resolved targets/i }).length).toBeGreaterThan(0),
+    );
+    await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+    await screen.findByRole("list", { name: /added disease targets/i });
+
+    // Switch away to selection
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /^selection$/i }));
+    expect(screen.queryByRole("list", { name: /added disease targets/i })).not.toBeInTheDocument();
+
+    // Switch back
+    await userEvent.click(
+      within(diseaseFieldset()).getByRole("radio", { name: /manual_disease_targets/i }),
+    );
+    await screen.findByRole("list", { name: /added disease targets/i });
+    expect(
+      within(screen.getByRole("list", { name: /added disease targets/i })).getAllByRole("listitem"),
+    ).toHaveLength(1);
   });
 });
