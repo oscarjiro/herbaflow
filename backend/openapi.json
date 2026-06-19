@@ -935,6 +935,49 @@
         }
       }
     },
+    "/analyses/{analysis_id}/ctp-graph": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Get Ctp Graph",
+        "operationId": "get_ctp_graph",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CtpGraph"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analyses/{analysis_id}/export/{filename}": {
       "get": {
         "tags": [
@@ -1387,6 +1430,111 @@
           "value"
         ],
         "title": "CompoundInput"
+      },
+      "CtpGraph": {
+        "properties": {
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/CtpGraphNode"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/CtpGraphEdge"
+            },
+            "type": "array",
+            "title": "Edges"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nodes",
+          "edges"
+        ],
+        "title": "CtpGraph"
+      },
+      "CtpGraphEdge": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "interaction": {
+            "type": "string",
+            "title": "Interaction"
+          },
+          "prediction_method": {
+            "type": "string",
+            "title": "Prediction Method"
+          },
+          "p_value": {
+            "type": "string",
+            "title": "P Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "target",
+          "interaction",
+          "prediction_method",
+          "p_value"
+        ],
+        "title": "CtpGraphEdge"
+      },
+      "CtpGraphNode": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "inchikey": {
+            "type": "string",
+            "title": "Inchikey"
+          },
+          "smiles": {
+            "type": "string",
+            "title": "Smiles"
+          },
+          "uniprot_accession": {
+            "type": "string",
+            "title": "Uniprot Accession"
+          },
+          "is_hub": {
+            "type": "string",
+            "title": "Is Hub"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "type",
+          "inchikey",
+          "smiles",
+          "uniprot_accession",
+          "is_hub",
+          "source"
+        ],
+        "title": "CtpGraphNode"
       },
       "DiseaseInputMode": {
         "type": "string",

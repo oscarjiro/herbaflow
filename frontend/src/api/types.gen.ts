@@ -77,6 +77,30 @@ export type CompoundInput = {
     value: string;
 };
 
+export type CtpGraph = {
+    nodes: Array<CtpGraphNode>;
+    edges: Array<CtpGraphEdge>;
+};
+
+export type CtpGraphEdge = {
+    source: string;
+    target: string;
+    interaction: string;
+    prediction_method: string;
+    p_value: string;
+};
+
+export type CtpGraphNode = {
+    id: string;
+    label: string;
+    type: string;
+    inchikey: string;
+    smiles: string;
+    uniprot_accession: string;
+    is_hub: string;
+    source: string;
+};
+
 export type DiseaseInputMode = 'selection' | 'manual_disease_targets';
 
 export type DiseaseRead = {
@@ -701,6 +725,33 @@ export type ExportPpiNodesResponses = {
      */
     200: unknown;
 };
+
+export type GetCtpGraphData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/ctp-graph';
+};
+
+export type GetCtpGraphErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCtpGraphError = GetCtpGraphErrors[keyof GetCtpGraphErrors];
+
+export type GetCtpGraphResponses = {
+    /**
+     * Successful Response
+     */
+    200: CtpGraph;
+};
+
+export type GetCtpGraphResponse = GetCtpGraphResponses[keyof GetCtpGraphResponses];
 
 export type ExportArtifactData = {
     body?: never;

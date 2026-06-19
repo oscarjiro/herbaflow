@@ -125,6 +125,45 @@ export const zCompoundInput = z.object({
     value: z.string()
 });
 
+export const zCtpGraph = z.object({
+    nodes: z.array(z.object({
+        id: z.string(),
+        label: z.string(),
+        type: z.string(),
+        inchikey: z.string(),
+        smiles: z.string(),
+        uniprot_accession: z.string(),
+        is_hub: z.string(),
+        source: z.string()
+    })),
+    edges: z.array(z.object({
+        source: z.string(),
+        target: z.string(),
+        interaction: z.string(),
+        prediction_method: z.string(),
+        p_value: z.string()
+    }))
+});
+
+export const zCtpGraphEdge = z.object({
+    source: z.string(),
+    target: z.string(),
+    interaction: z.string(),
+    prediction_method: z.string(),
+    p_value: z.string()
+});
+
+export const zCtpGraphNode = z.object({
+    id: z.string(),
+    label: z.string(),
+    type: z.string(),
+    inchikey: z.string(),
+    smiles: z.string(),
+    uniprot_accession: z.string(),
+    is_hub: z.string(),
+    source: z.string()
+});
+
 export const zDiseaseInputMode = z.enum([
     'selection',
     'manual_disease_targets'
@@ -300,5 +339,7 @@ export const zEditStageResponse = zAnalysisRead;
 export const zValidateCompoundsResponse = zValidateResponse;
 
 export const zValidateTargetsResponse2 = zValidateTargetsResponse;
+
+export const zGetCtpGraphResponse = zCtpGraph;
 
 export const zHealthResponse = z.object({});

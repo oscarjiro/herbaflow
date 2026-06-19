@@ -1149,6 +1149,13 @@ Per-artifact endpoints also exist: the graph/stage CSVs (`…/export/ctp-nodes.c
 generalized `…/export/{filename}` that serves any single per-stage CSV (`text/csv`) or rendered
 chart PNG (`image/png`) by its deterministic filename, 404-ing an unknown or undrawable artifact.
 
+`GET /analyses/{id}/ctp-graph` returns the same compound-target-pathway graph as **JSON**
+(`{nodes, edges}`) for interactive frontend rendering — it reuses the one graph-data home
+(`build_ctp_graph`) and the same complete-only guard (409 when the run is not complete, 404 when
+the id is missing). It is **not** under `/export/` (it is data, not a download, so no
+`Content-Disposition`). A compound-free run (`manual_targets`) returns an empty graph
+(`{"nodes": [], "edges": []}`).
+
 Node-id and edge shapes (de-UUID'd; edge endpoints reference node ids, so Cytoscape imports them
 directly):
 
