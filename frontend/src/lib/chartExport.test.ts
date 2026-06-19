@@ -157,3 +157,64 @@ describe("exportSvgAsPng — error path", () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock-svg-url");
   });
 });
+
+// ---------------------------------------------------------------------------
+// exportCytoscapeAsPng — shares the same compose-to-PNG helper.
+// The fake cy exposes png() returning a data: URL (no objectURL to revoke).
+// ---------------------------------------------------------------------------
+
+function makeCy() {
+  return { png: vi.fn(() => "data:image/png;base64,AAAA") };
+}
+
+describe("exportCytoscapeAsPng — success path", () => {
+  it("calls cy.png with full:true, scale:2 and a background string", async () => {
+    const { exportCytoscapeAsPng } = await import("./chartExport");
+    const cy = makeCy();
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
+    expect(cy.png).toHaveBeenCalledWith(
+      expect.objectContaining({ full: true, scale: 2, bg: expect.any(String) }),
+    );
+  });
+
+  it("passes the explicit background through to cy.png", async () => {
+    const { exportCytoscapeAsPng } = await import("./chartExport");
+    const cy = makeCy();
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png", background: "#abcdef" });
+    expect(cy.png).toHaveBeenCalledWith(expect.objectContaining({ bg: "#abcdef" }));
+  });
+
+  it("draws the title via fillText when a title is provided", async () => {
+    const { exportCytoscapeAsPng } = await import("./chartExport");
+    const cy = makeCy();
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png", title: "Interaction network" });
+    expect(fakeCtx.fillText).toHaveBeenCalledWith("Interaction network", 12, 16);
+  });
+
+  it("calls toBlob and saveBlob with the filename", async () => {
+    const saveBlobSpy = vi.spyOn(downloadModule, "saveBlob");
+    const { exportCytoscapeAsPng } = await import("./chartExport");
+    const cy = makeCy();
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
+    expect(HTMLCanvasElement.prototype.toBlob).toHaveBeenCalled();
+    expect(saveBlobSpy).toHaveBeenCalledWith(expect.any(Blob), "ppi.png");
+  });
+
+  it("does not revoke the data: URL source (only blob: URLs are revoked)", async () => {
+    const { exportCytoscapeAsPng } = await import("./chartExport");
+    const cy = makeCy();
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
+    // saveBlob revokes its own anchor objectURL, but the data: URL fed to the
+    // composer must never be passed to revokeObjectURL.
+    expect(URL.revokeObjectURL).not.toHaveBeenCalledWith("data:image/png;base64,AAAA");
+  });
+});
+
+describe("exportCytoscapeAsPng — error path", () => {
+  it("rejects when the produced image fails to load", async () => {
+    vi.stubGlobal("Image", FakeImageError);
+    const { exportCytoscapeAsPng } = await import("./chartExport");
+    const cy = makeCy();
+    await expect(exportCytoscapeAsPng(cy as never, { filename: "ppi.png" })).rejects.toThrow();
+  });
+});

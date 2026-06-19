@@ -1,7 +1,21 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { ThemeProvider } from "@/lib/theme";
+
+// Mock react-cytoscapejs so the graph never really renders in jsdom.
+vi.mock("react-cytoscapejs", () => ({
+  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
+    cy?.({ png: () => "data:image/png;base64,AAAA" });
+    return React.createElement("div", {
+      "data-testid": "cytoscape",
+      "data-count": String(elements?.length ?? 0),
+    });
+  },
+}));
+
 import { Stage6View } from "./Stage6View";
 import type { AnalysisRead } from "../../api/types.gen";
 
@@ -44,7 +58,7 @@ const PPI_PARAM_VALUES = {
   network_type: "functional",
 };
 
-function makeData(result: object): AnalysisRead {
+function makeData(result: object, overrides: Partial<AnalysisRead> = {}): AnalysisRead {
   return {
     analysis_id: "a1",
     status: "stage_6_awaiting_approval",
@@ -57,12 +71,48 @@ function makeData(result: object): AnalysisRead {
     plants: [],
     diseases: [],
     compounds: [],
+    ...overrides,
   } as unknown as AnalysisRead;
+}
+
+// A complete run whose Stage-6 network has a connected pair (EGFR-TP53) plus an
+// isolated node (ABCA1) that participates in no kept edge, and a Stage-7 hub map.
+function makeCompleteNetworkData(): AnalysisRead {
+  return makeData(
+    {
+      ...makeComputedResult(),
+      nodes: [
+        { gene_symbol: "EGFR", string_id: "9606.ENSP00000275493" },
+        { gene_symbol: "TP53", string_id: "9606.ENSP00000269305" },
+        { gene_symbol: "ABCA1", string_id: "9606.ENSP00000374736" },
+      ],
+      node_count: 3,
+    },
+    {
+      status: "complete",
+      stage_results: {
+        "6": {
+          ...makeComputedResult(),
+          nodes: [
+            { gene_symbol: "EGFR", string_id: "9606.ENSP00000275493" },
+            { gene_symbol: "TP53", string_id: "9606.ENSP00000269305" },
+            { gene_symbol: "ABCA1", string_id: "9606.ENSP00000374736" },
+          ],
+          node_count: 3,
+        },
+        "7": { hubs: [{ rank: 1, target_id: "t1", gene_symbol: "EGFR", mcc: 12 }] },
+      },
+    } as unknown as Partial<AnalysisRead>,
+  );
 }
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={qc}>
+      <ThemeProvider>{ui}</ThemeProvider>
+    </QueryClientProvider>,
+  );
 }
 
 async function openPpiPanel() {
@@ -142,6 +192,42 @@ describe("Stage6View — computed network", () => {
     expect(
       screen.queryByText("Re-run the out-of-date step before continuing."),
     ).not.toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — interactive network graph (complete run)
+// ---------------------------------------------------------------------------
+
+describe("Stage6View — interactive network graph", () => {
+  it("renders the interaction network frame with a Download PNG control", () => {
+    wrap(<Stage6View data={makeCompleteNetworkData()} />);
+    expect(screen.getByText("Interaction network")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
+  });
+
+  it("does not render the old server-rendered PPI image", () => {
+    wrap(<Stage6View data={makeCompleteNetworkData()} />);
+    const imgs = screen.queryAllByRole("img");
+    expect(imgs.some((el) => el.getAttribute("src")?.includes("stage6_ppi_network.png"))).toBe(
+      false,
+    );
+  });
+
+  it("lists an edge-less node in the not-connected tray", () => {
+    wrap(<Stage6View data={makeCompleteNetworkData()} />);
+    expect(screen.getByText(/not connected at this confidence/i)).toHaveTextContent("ABCA1");
+  });
+
+  it("does not render the graph when the run is not complete", () => {
+    wrap(<Stage6View data={makeData(makeComputedResult())} />);
+    expect(screen.queryByText("Interaction network")).toBeNull();
+  });
+
+  it("still renders the edge-list table alongside the graph", () => {
+    wrap(<Stage6View data={makeCompleteNetworkData()} />);
+    expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
+    expect(screen.getByText("0.92")).toBeInTheDocument();
   });
 });
 
