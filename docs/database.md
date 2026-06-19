@@ -1071,6 +1071,43 @@ The pipeline traversal order is: `plants → compounds → targets → diseases 
 
 ---
 
+## Alias search (`GET /plants?q=`, `GET /diseases?q=`)
+
+Both catalog endpoints support server-side search via optional query parameters:
+
+| Parameter | Type | Default | Notes |
+|---|---|---|---|
+| `q` | string | — (omit for full list) | Search term matched against canonical name and all aliases |
+| `limit` | integer | 50 | Maximum rows to return |
+| `offset` | integer | 0 | Rows to skip (for paging) |
+
+**Ranking order** (lower is better; first match per entity wins):
+
+| Rank | Match type |
+|---|---|
+| 0 | Canonical name — exact |
+| 1 | Canonical name — prefix (`startswith`) |
+| 2 | Alias name — exact |
+| 3 | Alias name — prefix |
+| 4 | Canonical name — substring (not prefix) |
+| 5 | Alias name — substring (not prefix) |
+
+Matching is case-insensitive. An entity that matches via both canonical and alias keeps only the
+better-ranked hit. The result is paged **after** ranking, so `offset`/`limit` slice the ranked list.
+
+**`matched_alias` response field:** when the winning hit came from an alias row, the response
+includes `matched_alias: string` (the alias text) as a display hint. When the hit came from the
+canonical name, `matched_alias` is `null`. The display label always stays the canonical name
+(`canonical_scientific_name` for plants, `disease_name` for diseases).
+
+Omitting `q` (or passing an empty string) returns the full list ordered by canonical name, with
+`matched_alias: null` on every row. An unrecognized term returns `200 []`.
+
+The search reads the existing `plant_aliases` / `disease_aliases` tables. No new tables or
+migrations are required.
+
+---
+
 ## Results-handoff export (read-only)
 
 The capstone export is a **stateless, on-demand read** of the run's persisted

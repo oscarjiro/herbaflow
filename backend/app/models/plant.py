@@ -1,4 +1,4 @@
-"""Plant ORM model (read)."""
+"""Plant ORM models (read)."""
 
 from __future__ import annotations
 
@@ -21,4 +21,15 @@ class Plant(Base):
     family_name: Mapped[str | None] = mapped_column(String)
     source_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     source_url: Mapped[str | None] = mapped_column(String)
+    retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class PlantAlias(Base):
+    __tablename__ = "plant_aliases"
+
+    alias_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    plant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    alias_name: Mapped[str | None] = mapped_column(String)
+    alias_key: Mapped[str | None] = mapped_column(String)
+    alias_type: Mapped[str | None] = mapped_column(String)
     retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

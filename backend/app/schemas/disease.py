@@ -18,3 +18,4 @@ class DiseaseRead(BaseModel):
     ontology_source: str | None
     source_url: str | None
     retrieved_at: datetime | None
+    matched_alias: str | None = None

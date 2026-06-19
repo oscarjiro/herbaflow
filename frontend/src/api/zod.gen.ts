@@ -119,7 +119,11 @@ export const zDiseaseRead = z.object({
     retrieved_at: z.union([
         z.string().datetime(),
         z.null()
-    ])
+    ]),
+    matched_alias: z.union([
+        z.string(),
+        z.null()
+    ]).optional()
 });
 
 export const zFailedInput = z.object({
@@ -162,7 +166,11 @@ export const zPlantRead = z.object({
     family_name: z.union([
         z.string(),
         z.null()
-    ])
+    ]),
+    matched_alias: z.union([
+        z.string(),
+        z.null()
+    ]).optional()
 });
 
 export const zResetFromRequest = z.object({

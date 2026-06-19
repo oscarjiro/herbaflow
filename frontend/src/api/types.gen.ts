@@ -59,6 +59,7 @@ export type DiseaseRead = {
     ontology_source: string | null;
     source_url: string | null;
     retrieved_at: string | null;
+    matched_alias?: string | null;
 };
 
 export type FailedInput = {
@@ -80,6 +81,7 @@ export type PlantRead = {
     canonical_key: string;
     canonical_scientific_name: string | null;
     family_name: string | null;
+    matched_alias?: string | null;
 };
 
 /**
@@ -156,9 +158,31 @@ export type ValidationError = {
 export type ListDiseasesData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Search term (canonical name or alias)
+         */
+        q?: string | null;
+        /**
+         * Maximum number of results to return
+         */
+        limit?: number;
+        /**
+         * Number of results to skip
+         */
+        offset?: number;
+    };
     url: '/diseases';
 };
+
+export type ListDiseasesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListDiseasesError = ListDiseasesErrors[keyof ListDiseasesErrors];
 
 export type ListDiseasesResponses = {
     /**
@@ -172,9 +196,31 @@ export type ListDiseasesResponse = ListDiseasesResponses[keyof ListDiseasesRespo
 export type ListPlantsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Search term (canonical name or alias)
+         */
+        q?: string | null;
+        /**
+         * Maximum number of results to return
+         */
+        limit?: number;
+        /**
+         * Number of results to skip
+         */
+        offset?: number;
+    };
     url: '/plants';
 };
+
+export type ListPlantsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListPlantsError = ListPlantsErrors[keyof ListPlantsErrors];
 
 export type ListPlantsResponses = {
     /**
