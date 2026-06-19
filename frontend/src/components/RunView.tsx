@@ -5,6 +5,7 @@ import { useEntitySubjects } from "../hooks/useEntitySubjects";
 import { useStaleState } from "../hooks/useStaleState";
 import { exportArtifactUrl } from "../lib/exportUrl";
 import { runHasCompounds } from "../lib/entities";
+import { formatRunStatus } from "../lib/runStatus";
 import { ApprovalBar } from "./stages/ApprovalBar";
 import { Stage1View } from "./stages/Stage1View";
 import { Stage2View } from "./stages/Stage2View";
@@ -26,22 +27,6 @@ import { StepperRail } from "@/components/ui/StepperRail";
 function isSettled(status: string | null | undefined): boolean {
   if (!status) return false;
   return status.endsWith("awaiting_approval") || status === "complete" || status === "failed";
-}
-
-function formatRunStatus(status: string | null | undefined): string {
-  if (!status) return "Unknown";
-  if (status === "complete") return "Complete";
-  if (status === "failed") return "Failed";
-
-  const stageMatch = /^stage_(\d+)_(.+)$/.exec(status);
-  if (stageMatch) {
-    const [, stage, state] = stageMatch;
-    if (state === "awaiting_approval") return "Waiting for review";
-    return `Running step ${stage}`;
-  }
-
-  const readable = status.replaceAll("_", " ");
-  return readable.charAt(0).toUpperCase() + readable.slice(1);
 }
 
 type Stage1Data = {
