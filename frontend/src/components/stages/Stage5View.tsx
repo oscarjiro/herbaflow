@@ -20,8 +20,9 @@ import { advanceAnalysis } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
 import { notifyError } from "../../lib/toast";
 import { useStaleState } from "../../hooks/useStaleState";
-import { exportArtifactUrl } from "../../lib/exportUrl";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ChartFrame } from "@/components/charts/ChartFrame";
+import { OverlapVenn } from "@/components/charts/OverlapVenn";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
@@ -170,16 +171,15 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
         </div>
       </div>
 
-      {/* Venn diagram image (complete-only, onError-hidden) */}
-      {isComplete && (
-        <img
-          className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-          alt="Target overlap"
-          src={exportArtifactUrl(data.analysis_id, "stage5_venn.png")}
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
+      {/* Interactive Venn diagram (complete-only; hidden when both counts are zero) */}
+      {isComplete && (stage5.compound_target_count > 0 || stage5.disease_target_count > 0) && (
+        <ChartFrame title="Target overlap" filename="target_overlap.png">
+          <OverlapVenn
+            compoundCount={stage5.compound_target_count}
+            diseaseCount={stage5.disease_target_count}
+            overlapCount={stage5.count}
+          />
+        </ChartFrame>
       )}
 
       {stage5.count === 0 && (
