@@ -40,7 +40,14 @@ function diseaseFieldset() {
  */
 async function pickComboOption(ariaLabel: string, optionText: string | RegExp) {
   await userEvent.click(screen.getByRole("combobox", { name: ariaLabel }));
-  await userEvent.click(await screen.findByText(optionText));
+  // Scope to the command-list options so a matching selected-chip never wins the lookup.
+  const options = await screen.findAllByRole("option");
+  const match = options.find((el) => {
+    const text = el.textContent ?? "";
+    return typeof optionText === "string" ? text.includes(optionText) : optionText.test(text);
+  });
+  if (!match) throw new Error(`No combobox option matching ${optionText}`);
+  await userEvent.click(match);
 }
 
 // ---------------------------------------------------------------------------

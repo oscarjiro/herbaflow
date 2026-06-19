@@ -53,8 +53,10 @@ export function EntitySearchCombobox({
 
   const debouncedQuery = useDebouncedValue(query, 300);
 
-  // Fire search when the debounced query settles
+  // Fire search only while the popover is open and the debounced query settles, so a
+  // pre-rendered combobox does not hit the server on mount before the user opens it.
   useEffect(() => {
+    if (!open) return;
     let cancelled = false;
     setLoading(true);
     search(debouncedQuery)
@@ -67,7 +69,7 @@ export function EntitySearchCombobox({
     return () => {
       cancelled = true;
     };
-  }, [debouncedQuery, search]);
+  }, [open, debouncedQuery, search]);
 
   const atCap = mode === "multiple" && max !== undefined && selected.length >= max;
 
