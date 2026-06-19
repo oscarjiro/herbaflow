@@ -1209,3 +1209,39 @@ Later migrations (applied on top of the baseline):
 Tables are created first and all foreign keys added last, so the set replays in order on a
 fresh database. File `0007` requires the managed platform's `pg_cron`; the other six replay
 on any stock PostgreSQL (used for the equivalence check).
+
+---
+
+## API — recent-runs list
+
+### `GET /analyses`
+
+Returns a paged, newest-first list of analysis runs. Intended for run recovery (the frontend
+uses it to let a user re-open a run whose `analysis_id` was lost from local state).
+
+**Query parameters:**
+
+| Parameter | Default | Clamped range | Description |
+|---|---|---|---|
+| `limit` | `50` | 1–100 | Maximum number of items to return |
+| `offset` | `0` | ≥ 0 | Number of items to skip (for paging) |
+
+`limit` values outside 1–100 are silently clamped (no error). Empty DB returns `200 []`.
+
+**Response shape — `AnalysisListItem`** (array):
+
+| Field | Type | Nullable | Notes |
+|---|---|---|---|
+| `analysis_id` | uuid | no | Run identifier |
+| `analysis_name` | string | yes | User-supplied name |
+| `status` | string | yes | `pending` / `running` / `complete` / `failed` / `stage_N_awaiting_approval` |
+| `current_stage` | integer | yes | Last stage reached |
+| `created_at` | timestamptz | yes | Creation time; list is ordered by this descending |
+| `completed_at` | timestamptz | yes | Set when the run reaches `complete` |
+| `disease_id` | uuid | yes | Null for `manual_disease_targets` runs |
+| `parameters` | object | no | Frozen run parameters — carries `input_modes`, `plant_ids`, `labels`, and all pipeline-group defaults; bounded by entity caps |
+
+`stage_results` is **deliberately omitted** — it holds the heavy per-stage tables and is not
+needed for run-list display. To inspect a specific run's stage data, use `GET /analyses/{id}`.
+
+**No DB migration** — reads existing `analysis_runs` columns only.

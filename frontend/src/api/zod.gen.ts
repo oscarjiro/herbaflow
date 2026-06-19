@@ -42,6 +42,35 @@ export const zAnalysisCreate = z.object({
     ]).optional()
 });
 
+export const zAnalysisListItem = z.object({
+    analysis_id: z.string().uuid(),
+    analysis_name: z.union([
+        z.string(),
+        z.null()
+    ]),
+    status: z.union([
+        z.string(),
+        z.null()
+    ]),
+    current_stage: z.union([
+        z.number().int(),
+        z.null()
+    ]),
+    created_at: z.union([
+        z.string().datetime(),
+        z.null()
+    ]),
+    completed_at: z.union([
+        z.string().datetime(),
+        z.null()
+    ]),
+    disease_id: z.union([
+        z.string().uuid(),
+        z.null()
+    ]),
+    parameters: z.object({}).optional()
+});
+
 export const zAnalysisRead = z.object({
     analysis_id: z.string().uuid(),
     analysis_name: z.union([
@@ -253,6 +282,8 @@ export const zValidationError = z.object({
 export const zListDiseasesResponse = z.array(zDiseaseRead);
 
 export const zListPlantsResponse = z.array(zPlantRead);
+
+export const zListAnalysesResponse = z.array(zAnalysisListItem);
 
 export const zCreateAnalysisResponse = zAnalysisRead;
 

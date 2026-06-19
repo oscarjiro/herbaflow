@@ -21,7 +21,7 @@ from app.repositories.compound_target import CompoundTargetRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
 from app.repositories.target import TargetRepository
-from app.schemas.analysis import AnalysisCreate, AnalysisRead
+from app.schemas.analysis import AnalysisCreate, AnalysisListItem, AnalysisRead
 
 logger = logging.getLogger("herbaflow.analysis")
 
@@ -329,6 +329,10 @@ class AnalysisService:
         if run.expires_at is not None and run.expires_at < now_utc():
             raise GoneProblem(detail="Analysis run has expired.")
         return AnalysisRead.model_validate(run)
+
+    async def list_recent(self, *, limit: int, offset: int) -> list[AnalysisListItem]:
+        runs = await self.analysis_repo.list_recent(limit=limit, offset=offset)
+        return [AnalysisListItem.model_validate(r) for r in runs]
 
     async def delete(self, analysis_id: uuid.UUID) -> None:
         run = await self.analysis_repo.get(analysis_id)

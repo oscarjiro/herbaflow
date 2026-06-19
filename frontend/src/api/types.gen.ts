@@ -22,6 +22,26 @@ export type AnalysisCreate = {
     } | null;
 };
 
+/**
+ * Lean per-run shape for the recent-runs list.
+ *
+ * Deliberately omits ``stage_results`` (the heavy per-stage tables).
+ * ``parameters`` is kept — it carries ``input_modes`` / ``labels`` / ``plant_ids``;
+ * its size is bounded by the entity caps.
+ */
+export type AnalysisListItem = {
+    analysis_id: string;
+    analysis_name: string | null;
+    status: string | null;
+    current_stage: number | null;
+    created_at: string | null;
+    completed_at: string | null;
+    disease_id: string | null;
+    parameters?: {
+        [key: string]: unknown;
+    };
+};
+
 export type AnalysisRead = {
     analysis_id: string;
     analysis_name: string | null;
@@ -238,6 +258,34 @@ export type ListPlantsResponses = {
 };
 
 export type ListPlantsResponse = ListPlantsResponses[keyof ListPlantsResponses];
+
+export type ListAnalysesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        limit?: number;
+        offset?: number;
+    };
+    url: '/analyses';
+};
+
+export type ListAnalysesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListAnalysesError = ListAnalysesErrors[keyof ListAnalysesErrors];
+
+export type ListAnalysesResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<AnalysisListItem>;
+};
+
+export type ListAnalysesResponse = ListAnalysesResponses[keyof ListAnalysesResponses];
 
 export type CreateAnalysisData = {
     body: AnalysisCreate;

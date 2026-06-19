@@ -12,6 +12,26 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validat
 from app import contracts
 
 
+class AnalysisListItem(BaseModel):
+    """Lean per-run shape for the recent-runs list.
+
+    Deliberately omits ``stage_results`` (the heavy per-stage tables).
+    ``parameters`` is kept — it carries ``input_modes`` / ``labels`` / ``plant_ids``;
+    its size is bounded by the entity caps.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    analysis_id: uuid.UUID
+    analysis_name: str | None
+    status: str | None
+    current_stage: int | None
+    created_at: datetime | None
+    completed_at: datetime | None
+    disease_id: uuid.UUID | None
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
 class Mode(enum.StrEnum):
     auto = "auto"
     guided = "guided"
