@@ -1,13 +1,35 @@
-import { describe, expect, it } from "vitest";
+import React from "react";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "@/lib/theme";
 import { Stage8View } from "./Stage8View";
 import type { AnalysisRead } from "../../api/types.gen";
 
+// ---------------------------------------------------------------------------
+// Mock recharts ResponsiveContainer — jsdom renders it at 0-size otherwise.
+// ---------------------------------------------------------------------------
+
+vi.mock("recharts", async (orig) => {
+  const actual = await orig<typeof import("recharts")>();
+  return {
+    ...actual,
+    ResponsiveContainer: ({ children }: { children: React.ReactElement }) =>
+      React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+        width: 800,
+        height: 400,
+      }),
+  };
+});
+
 function wrap(ui: React.ReactNode) {
-  const qc = new QueryClient();
-  return <QueryClientProvider client={qc}>{ui}</QueryClientProvider>;
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return (
+    <QueryClientProvider client={qc}>
+      <ThemeProvider>{ui}</ThemeProvider>
+    </QueryClientProvider>
+  );
 }
 
 async function openEnrichmentPanel() {
@@ -64,7 +86,7 @@ describe("Stage8View", () => {
     const { container } = render(wrap(<Stage8View data={data} />));
     const stage8 = container.firstElementChild as HTMLElement;
     expect(screen.getByText("Step 8: Functional Enrichment")).toBeInTheDocument();
-    expect(screen.getByText("PI3K-Akt")).toBeInTheDocument();
+    expect(screen.getAllByText("PI3K-Akt").length).toBeGreaterThanOrEqual(1);
     expect(
       screen.getByText(/Background: compound target universe \(800 genes\)\./i),
     ).toHaveTextContent("Custom universe, not the whole genome.");
@@ -73,6 +95,10 @@ describe("Stage8View", () => {
     expect(stage8).not.toHaveTextContent("honest null");
     expect(stage8).not.toHaveTextContent("Pipeline complete");
     expect(screen.getByText("Analysis complete. All eight steps finished.")).toBeInTheDocument();
+    // Interactive chart replaces the six server-rendered PNGs.
+    expect(screen.getByText("Pathway enrichment")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
+    expect(document.querySelector('img[src*="stage8_enrichment_"]')).not.toBeInTheDocument();
   });
 
   it("renders the enrichment param panel with no_iea control", async () => {

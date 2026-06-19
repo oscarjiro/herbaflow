@@ -1,3 +1,12 @@
+export const ENRICHMENT_SOURCE_LABELS: Record<string, string> = {
+  BP: "Biological Process",
+  MF: "Molecular Function",
+  CC: "Cellular Component",
+  KEGG: "KEGG Pathway",
+  REAC: "Reactome Pathway",
+  WP: "WikiPathways",
+};
+
 export const STAGE_LABELS = [
   "Compounds",
   "Druglikeness",

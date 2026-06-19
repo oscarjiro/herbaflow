@@ -24,12 +24,13 @@ import {
   ENRICHMENT_SELECT_PARAMS,
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
-import { exportArtifactUrl } from "../../lib/exportUrl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
+import { ChartFrame } from "@/components/charts/ChartFrame";
+import { EnrichmentDotChart } from "@/components/charts/EnrichmentDotChart";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -300,28 +301,19 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         </Card>
       )}
 
-      {/* Per-category enrichment chart images (complete-only, onError-hidden) */}
-      {isComplete &&
-        (
-          [
-            ["BP", "Biological Process"],
-            ["MF", "Molecular Function"],
-            ["CC", "Cellular Component"],
-            ["KEGG", "KEGG Pathway"],
-            ["REAC", "Reactome Pathway"],
-            ["WP", "WikiPathways"],
-          ] as [string, string][]
-        ).map(([cat, label]) => (
-          <img
-            key={cat}
-            className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-            alt={`${label} enrichment`}
-            src={exportArtifactUrl(data.analysis_id, `stage8_enrichment_${cat}.png`)}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
+      {/* Interactive enrichment dot chart (complete-only, only when terms exist) */}
+      {isComplete && terms.length > 0 && (
+        <ChartFrame title="Pathway enrichment" filename="pathway_enrichment.png">
+          <EnrichmentDotChart
+            terms={terms.map((t) => ({
+              source: t.source,
+              name: t.name,
+              p_value: t.p_value,
+              intersection_size: t.intersection_size,
+            }))}
           />
-        ))}
+        </ChartFrame>
+      )}
 
       {/* Enrichment param panel */}
       {enrichParams && (
