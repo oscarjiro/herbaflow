@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
+import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { RemovableChipList } from "./RemovableChipList";
 import { Button } from "./ui/button";
 import {
   Command,
@@ -168,25 +169,13 @@ export function EntitySearchCombobox({
       </Popover>
 
       {/* Selected chips */}
-      {selected.length > 0 && (
-        <ul aria-label={`Selected ${ariaLabel}`} className="flex flex-wrap gap-1.5">
-          {selected.map((opt) => (
-            <li key={opt.value}>
-              <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
-                {opt.label}
-                <button
-                  type="button"
-                  aria-label={`Remove ${opt.label}`}
-                  onClick={() => remove(opt.value)}
-                  className="hover:text-foreground ml-0.5 rounded-full opacity-60 transition-opacity hover:opacity-100"
-                >
-                  <XIcon className="size-3" />
-                </button>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <RemovableChipList
+        items={selected}
+        getKey={(o) => o.value}
+        getLabel={(o) => o.label}
+        onRemove={(o) => remove(o.value)}
+        ariaLabel={`Selected ${ariaLabel}`}
+      />
     </div>
   );
 }
