@@ -148,7 +148,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
         <CardHeader className="pb-0" />
         <CardContent className="flex flex-col gap-3 pt-0">
           <div className="table-wrapper">
-            <DataTable columns={columns} data={rows} />
+            <DataTable columns={columns} data={rows} emptyMessage="No compounds yet." />
           </div>
           <EntityAddControl current={current} cap={MAX_COMPOUNDS}>
             <CompoundValidateBox label="Add compounds" onResolved={handleAdd} showAddButton />

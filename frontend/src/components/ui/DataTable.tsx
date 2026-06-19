@@ -17,7 +17,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export function DataTable<T>({ columns, data }: { columns: ColumnDef<T>[]; data: T[] }) {
+export function DataTable<T>({
+  columns,
+  data,
+  emptyMessage = "No results.",
+}: {
+  columns: ColumnDef<T>[];
+  data: T[];
+  emptyMessage?: string;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pageSize, setPageSize] = useState<"10" | "20" | "50" | "all">("10");
   const table = useReactTable({
@@ -30,6 +38,19 @@ export function DataTable<T>({ columns, data }: { columns: ColumnDef<T>[]; data:
     getPaginationRowModel: getPaginationRowModel(),
     initialState: { pagination: { pageSize: 10 } },
   });
+
+  if (data.length === 0) {
+    return (
+      <div data-slot="datatable" className="w-full">
+        <div
+          data-slot="datatable-empty"
+          className="text-hf-fg-3 flex items-center justify-center rounded-md border border-dashed py-10 text-sm"
+        >
+          {emptyMessage}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div data-slot="datatable" className="w-full">

@@ -54,3 +54,31 @@ test("exposes a responsive container for mobile card-collapse", () => {
 
   expect(container.querySelector('[data-slot="datatable"]')).toBeInTheDocument();
 });
+
+test("shows the default empty-state message when data is empty", () => {
+  const { container } = render(<DataTable columns={cols} data={[]} />);
+
+  expect(screen.getByText("No results.")).toBeInTheDocument();
+  expect(container.querySelector('[data-slot="datatable-empty"]')).toBeInTheDocument();
+});
+
+test("shows a custom emptyMessage when data is empty", () => {
+  render(<DataTable columns={cols} data={[]} emptyMessage="No compounds yet." />);
+
+  expect(screen.getByText("No compounds yet.")).toBeInTheDocument();
+});
+
+test("does not render pagination controls when data is empty", () => {
+  render(<DataTable columns={cols} data={[]} />);
+
+  expect(screen.queryByLabelText(/rows per page/i)).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /prev/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /next/i })).not.toBeInTheDocument();
+});
+
+test("does not render column headers when data is empty", () => {
+  render(<DataTable columns={cols} data={[]} />);
+
+  expect(screen.queryByText("Gene")).not.toBeInTheDocument();
+  expect(screen.queryByText("Score")).not.toBeInTheDocument();
+});

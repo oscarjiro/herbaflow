@@ -224,7 +224,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
           </div>
         </CardHeader>
         <CardContent className="px-0">
-          <DataTable columns={columns} data={visibleRows} />
+          <DataTable columns={columns} data={visibleRows} emptyMessage="No shared targets found." />
         </CardContent>
 
         {/* Pagination */}
