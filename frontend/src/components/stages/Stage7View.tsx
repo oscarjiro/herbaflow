@@ -29,7 +29,6 @@ import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
-import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 7 result shape (narrowed from unknown)
@@ -90,7 +89,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   const hubParams = (data.parameters as Record<string, unknown> | undefined)?.hub_genes as
     | HubParams
     | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
+  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
   const advance = useMutation({
@@ -128,7 +127,6 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   );
 
   const tooSmall = (stage7.flags ?? []).includes("network_too_small");
-  const stale = stage7.stale === true;
   const isComplete = data.status === "complete";
 
   // Column definitions — SAME columns + order as the prior <table>
@@ -310,9 +308,6 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         />
       )}
 
-      {stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
       <ApprovalBar
         stage={7}
         status={data.status}

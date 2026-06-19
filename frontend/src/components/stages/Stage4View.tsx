@@ -278,14 +278,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 4</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">
-            Step 4: Disease Targets
-            {isUserProvided && (
-              <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
-                Provided by you
-              </Badge>
-            )}
-          </h2>
+          <h2 className="hf-heading-serif">Step 4: Disease Targets</h2>
         </div>
         <StageEntityContext data={data} side="disease" />
       </div>
@@ -322,6 +315,11 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       )}
 
       {/* Disease-targets table card */}
+      {isUserProvided && (
+        <div>
+          <Badge variant="secondary">Provided by you</Badge>
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
@@ -411,9 +409,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         />
       )}
 
-      {(stage4 as { stale?: boolean }).stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
+      {rerunFrom === 4 && <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />}
       <ApprovalBar
         stage={4}
         status={data.status}

@@ -138,14 +138,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 1</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">
-            Step 1: Compounds ({current})
-            {isUserProvided && (
-              <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
-                Provided by you
-              </Badge>
-            )}
-          </h2>
+          <h2 className="hf-heading-serif">Step 1: Compounds ({current})</h2>
         </div>
       </div>
 
@@ -161,6 +154,11 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
       <Card>
         <CardHeader className="pb-0" />
         <CardContent className="flex flex-col gap-3 pt-0">
+          {isUserProvided && (
+            <div>
+              <Badge variant="secondary">Provided by you</Badge>
+            </div>
+          )}
           <div className="table-wrapper">
             <DataTable columns={columns} data={rows} emptyMessage="No compounds yet." />
           </div>

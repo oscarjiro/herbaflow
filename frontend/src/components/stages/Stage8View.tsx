@@ -33,7 +33,6 @@ import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
-import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 8 result shape (narrowed from unknown)
@@ -97,7 +96,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   const enrichParams = (data.parameters as Record<string, unknown> | undefined)?.enrichment as
     | EnrichmentParams
     | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
+  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
   const advance = useMutation({
@@ -134,7 +133,6 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
-  const stale = stage8.stale === true;
   const isComplete = data.status === "complete";
 
   // Column definitions — SAME columns + order as the prior <table>
@@ -338,10 +336,6 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           disabled={redo.isPending}
           onRedo={(changed) => redo.mutate(changed)}
         />
-      )}
-
-      {stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
       )}
 
       {isComplete ? (

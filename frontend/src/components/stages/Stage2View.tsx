@@ -32,7 +32,6 @@ import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
-import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 2 result shape (narrowed from unknown)
@@ -271,7 +270,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   const admeParams = (data.parameters as Record<string, unknown> | undefined)?.adme as
     | Record<string, number | boolean>
     | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
+  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
 
@@ -334,14 +333,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 2</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">
-            Step 2: ADME Screening
-            {isUserProvided && (
-              <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
-                Provided by you
-              </Badge>
-            )}
-          </h2>
+          <h2 className="hf-heading-serif">Step 2: ADME Screening</h2>
         </div>
         <StageEntityContext data={data} side="plant" />
       </div>
@@ -390,6 +382,11 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
           </div>
         </CardHeader>
         <CardContent className="px-0">
+          {isUserProvided && (
+            <div className="px-6 pb-3">
+              <Badge variant="secondary">Provided by you</Badge>
+            </div>
+          )}
           <DataTable columns={COLUMNS} data={allRows} />
         </CardContent>
       </Card>
@@ -409,9 +406,6 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       )}
 
       {/* Approval */}
-      {(stage2 as { stale?: boolean }).stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
       <ApprovalBar
         stage={2}
         status={data.status}

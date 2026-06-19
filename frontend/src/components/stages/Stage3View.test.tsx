@@ -206,6 +206,45 @@ describe("Stage3View", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders the StaleNotice when rerun_from === 3 (Stage 3 is the edited stage)", () => {
+    wrap(
+      <Stage3View
+        data={makeRun({
+          parameters: { target: TARGET_FROZEN, rerun_from: 3 },
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": { ...SAMPLE_STAGE3_RESULTS, stale: true },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+    // StaleNotice renders its card with role="status" and the re-run button
+    expect(
+      screen.getByText("These results are out of date. An earlier step changed."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /re-run from step 3/i })).toBeInTheDocument();
+  });
+
+  it("does NOT render the StaleNotice when rerun_from is not 3", () => {
+    // rerun_from === 1 means Stage 1 was edited; Stage 3 is downstream-stale but
+    // the notice belongs under Stage 1, not here.
+    wrap(
+      <Stage3View
+        data={makeRun({
+          parameters: { target: TARGET_FROZEN, rerun_from: 1 },
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": { ...SAMPLE_STAGE3_RESULTS, stale: true },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+    expect(
+      screen.queryByText("These results are out of date. An earlier step changed."),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /re-run from step/i })).not.toBeInTheDocument();
+  });
+
   it("keeps the 0-coverage compound row visible", () => {
     const { container } = wrap(<Stage3View data={makeRun()} />);
     const coverage = container.querySelector(".coverage-table") as HTMLElement;

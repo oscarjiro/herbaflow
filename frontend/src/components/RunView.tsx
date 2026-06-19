@@ -150,9 +150,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
               </>
             )}
             {/* ApprovalBar self-gates to the current stage, so stacked views show a single button. */}
-            {(stage1 as { stale?: boolean }).stale && rerunFrom != null && (
-              <StaleNotice analysisId={analysisId} fromStage={rerunFrom} />
-            )}
+            {rerunFrom === 1 && <StaleNotice analysisId={analysisId} fromStage={rerunFrom} />}
             <ApprovalBar
               stage={1}
               status={data.status}

@@ -27,7 +27,6 @@ import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { StageDataSources } from "./StageDataSources";
-import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 5 result shape (narrowed from unknown)
@@ -72,7 +71,7 @@ function buildS5CsvRows(rows: OverlapRow[]): unknown[][] {
 
 export function Stage5View({ data }: { data: AnalysisRead }) {
   const stage5 = data.stage_results?.["5"] as Stage5Result | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
+  const { anyStale } = useStaleState(data);
   const isComplete = data.status === "complete";
 
   const qc = useQueryClient();
@@ -251,10 +250,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
         )}
       </Card>
 
-      {/* Stale notice + approval */}
-      {(stage5 as { stale?: boolean }).stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
+      {/* Approval */}
       <ApprovalBar
         stage={5}
         status={data.status}

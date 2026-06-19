@@ -133,4 +133,24 @@ describe("Stage5View — overlap view", () => {
       screen.queryByText("Re-run the out-of-date step before continuing."),
     ).not.toBeInTheDocument();
   });
+
+  it("does NOT render a StaleNotice even when the stage is stale (notice belongs under the edited stage, never here)", () => {
+    // Stage 3 was edited (rerun_from === 3); Stage 5 is downstream-stale.
+    // The StaleNotice must appear under Stage 3, not Stage 5.
+    const data = makeData();
+    data.parameters = { rerun_from: 3 } as AnalysisRead["parameters"];
+    data.stage_results = {
+      "5": {
+        ...makeStage5Result(),
+        stale: true,
+      },
+    } as unknown as AnalysisRead["stage_results"];
+
+    wrap(<Stage5View data={data} />);
+
+    expect(
+      screen.queryByText("These results are out of date. An earlier step changed."),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /re-run from step/i })).not.toBeInTheDocument();
+  });
 });
