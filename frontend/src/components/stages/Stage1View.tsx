@@ -151,14 +151,14 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
       </div>
 
       {/* Compound list card */}
+      {isUserProvided && (
+        <div>
+          <Badge variant="secondary">Provided by you</Badge>
+        </div>
+      )}
       <Card>
         <CardHeader className="pb-0" />
         <CardContent className="flex flex-col gap-3 pt-0">
-          {isUserProvided && (
-            <div>
-              <Badge variant="secondary">Provided by you</Badge>
-            </div>
-          )}
           <div className="table-wrapper">
             <DataTable columns={columns} data={rows} emptyMessage="No compounds yet." />
           </div>

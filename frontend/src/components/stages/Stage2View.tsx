@@ -370,6 +370,11 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       </div>
 
       {/* Table + controls */}
+      {isUserProvided && (
+        <div>
+          <Badge variant="secondary">Provided by you</Badge>
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
@@ -382,11 +387,6 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
           </div>
         </CardHeader>
         <CardContent className="px-0">
-          {isUserProvided && (
-            <div className="px-6 pb-3">
-              <Badge variant="secondary">Provided by you</Badge>
-            </div>
-          )}
           <DataTable columns={COLUMNS} data={allRows} />
         </CardContent>
       </Card>
