@@ -54,6 +54,7 @@ class FakeAnalysisRepoList:
     def __init__(self, runs: list[SimpleNamespace]) -> None:
         # Store newest-first (mirrors ORDER BY created_at DESC)
         self._runs = sorted(runs, key=lambda r: r.created_at, reverse=True)
+        self.session = None  # required by AnalysisService.__init__ (progress_repo wiring)
 
     async def list_recent(self, *, limit: int, offset: int) -> list[SimpleNamespace]:
         return self._runs[offset : offset + limit]

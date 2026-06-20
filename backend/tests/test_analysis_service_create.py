@@ -23,6 +23,7 @@ from app.services.analysis import AnalysisService
 class _FakeAnalysisRepo:
     def __init__(self) -> None:
         self.created: dict[str, Any] | None = None
+        self.session = None  # required by AnalysisService.__init__ (progress_repo wiring)
 
     async def create(self, **kwargs: Any) -> Any:
         self.created = kwargs
