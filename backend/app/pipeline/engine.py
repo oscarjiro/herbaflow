@@ -470,7 +470,7 @@ async def reset_from(
     return None
 
 
-def build_runners(session: Any) -> dict[int, StageRunner]:
+def build_runners(session: Any, reporter: Any = None) -> dict[int, StageRunner]:
     """The single canonical runners map, shared by every engine entry point."""
 
     async def stage1_runner(run: Any) -> dict[str, Any]:
@@ -484,11 +484,11 @@ def build_runners(session: Any) -> dict[int, StageRunner]:
             for c in run.stage_results["1"]["compounds"]
             if c.get("tag") != "user-removed"
         ]
-        return await stage2.run(session, effective, run.parameters["adme"])
+        return await stage2.run(session, effective, run.parameters["adme"], reporter=reporter)
 
     async def stage3_runner(run: Any) -> dict[str, Any]:
         passed = run.stage_results["2"]["passed"]
-        return await stage3.run(session, passed, run.parameters["target"])
+        return await stage3.run(session, passed, run.parameters["target"], reporter=reporter)
 
     async def stage4_runner(run: Any) -> dict[str, Any]:
         return await stage4.run(session, run.disease_id, run.parameters["disease_targets"])
@@ -526,9 +526,12 @@ async def run_stages_task(
     ``start_stage``, commit. Wraps the run so an uncaught stage error marks the run failed
     instead of leaving it stuck in ``*_running``. Used by every scheduling path: create
     (full linear set) and the mutating endpoints (advance full-linear; reset-from run-set)."""
+    from app.pipeline.progress import ProgressReporter
+
     async with db.session_scope() as session:
         repo = AnalysisRepository(session)
-        runners = build_runners(session)
+        reporter = ProgressReporter(analysis_id)
+        runners = build_runners(session, reporter=reporter)
         run = await repo.get(analysis_id)
         if run is None:
             return
