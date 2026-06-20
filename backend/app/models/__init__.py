@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.models.analysis_run import AnalysisRun
+from app.models.analysis_run_progress import AnalysisRunProgress
 from app.models.base import Base
 from app.models.compound import Compound
 from app.models.compound_target import CompoundTarget
@@ -20,6 +21,7 @@ ALL_TABLES = [
         Compound,
         PlantCompound,
         AnalysisRun,
+        AnalysisRunProgress,
         Target,
         CompoundTarget,
         DiseaseTarget,
@@ -33,6 +35,7 @@ __all__ = [
     "Compound",
     "PlantCompound",
     "AnalysisRun",
+    "AnalysisRunProgress",
     "Target",
     "CompoundTarget",
     "DiseaseTarget",
