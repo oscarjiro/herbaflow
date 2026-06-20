@@ -62,3 +62,23 @@ export function useChartColors(): ChartColors {
   const { theme } = useTheme();
   return useMemo(() => readChartColors(), [theme]);
 }
+
+import type { Layout } from "plotly.js";
+
+/**
+ * Plotly layout template themed from resolved hf-* tokens. Transparent
+ * backgrounds let the glass ChartFrame show through; fonts/axes/colorway track
+ * the editorial palette. Charts merge this under their own data-specific layout.
+ */
+export function plotlyTemplate(colors: ChartColors): Partial<Layout> {
+  return {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: colors.fg2, family: "ui-sans-serif, system-ui, sans-serif", size: 12 },
+    colorway: [colors.sage, colors.terracotta, colors.info, colors.warning, colors.sageDeep, colors.success],
+    margin: { l: 8, r: 16, t: 8, b: 40 },
+    xaxis: { gridcolor: colors.border, zerolinecolor: colors.border, tickfont: { color: colors.fg3 } },
+    yaxis: { gridcolor: colors.border, zerolinecolor: colors.border, tickfont: { color: colors.fg2 } },
+    hoverlabel: { bgcolor: colors.surface, bordercolor: colors.border, font: { color: colors.fg1 } },
+  };
+}
