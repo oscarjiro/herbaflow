@@ -126,6 +126,7 @@ async def screen(
     *,
     compute: Callable[[str], Awaitable[MolDescriptors | None]] = descriptors.compute_async,
     persist: Callable[[uuid.UUID, MolDescriptors], Awaitable[None]] | None = None,
+    reporter: Any = None,
 ) -> dict[str, Any]:
     """Screen a list of compound-like objects through the ADME gate.
 
@@ -155,7 +156,10 @@ async def screen(
     max_rb: int = int(params["max_rotatable_bonds"])
     max_violations: int = int(params["max_violations"])
 
-    for compound in compounds:
+    total = len(compounds)
+    for index, compound in enumerate(compounds):
+        if reporter is not None:
+            await reporter.update(2, index + 1, total)
         cid = str(compound.compound_id)
         compound_id_uuid: uuid.UUID = compound.compound_id
 
@@ -330,6 +334,8 @@ async def run(
     session: AsyncSession,
     step1_compounds: list[dict[str, Any]],
     params: dict[str, Any],
+    *,
+    reporter: Any = None,
 ) -> dict[str, Any]:
     """Fetch full compound rows and apply the ADME gate.
 
@@ -343,7 +349,7 @@ async def run(
     async def _persist(compound_id: uuid.UUID, d: MolDescriptors) -> None:
         await repo.update_descriptors(compound_id, d)
 
-    result = await screen(rows, params, persist=_persist)
+    result = await screen(rows, params, persist=_persist, reporter=reporter)
 
     logger.info(
         "stage 2: %d passed, %d filtered, %d unscreened",
