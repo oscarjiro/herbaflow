@@ -31,7 +31,6 @@ def _run(status: str):
 class _FakeAnalysisRepo:
     def __init__(self, run):
         self._run = run
-        self.session = object()
 
     async def get(self, analysis_id):
         return self._run

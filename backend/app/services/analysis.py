@@ -48,6 +48,7 @@ class AnalysisService:
         compound_repo: Any,
         target_repo: Any = None,
         compound_target_repo: Any = None,
+        progress_repo: Any = None,
     ) -> None:
         self.plant_repo = plant_repo
         self.disease_repo = disease_repo
@@ -55,10 +56,7 @@ class AnalysisService:
         self.compound_repo = compound_repo
         self.target_repo = target_repo
         self.compound_target_repo = compound_target_repo
-        session = getattr(self.analysis_repo, "session", None)
-        self.progress_repo: Any = (
-            AnalysisProgressRepository(session) if session is not None else None
-        )
+        self.progress_repo: Any = progress_repo
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> AnalysisService:
@@ -69,6 +67,7 @@ class AnalysisService:
             compound_repo=CompoundRepository(session),
             target_repo=TargetRepository(session),
             compound_target_repo=CompoundTargetRepository(session),
+            progress_repo=AnalysisProgressRepository(session),
         )
 
     async def create(

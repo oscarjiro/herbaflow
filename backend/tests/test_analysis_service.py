@@ -29,7 +29,6 @@ class FakeAnalysisRepo:
         self.created = None
         self.created_parameters: dict = {}
         self._run = run
-        self.session = None  # required by AnalysisService.__init__ (progress_repo wiring)
 
     async def create(self, **kwargs):
         from types import SimpleNamespace
