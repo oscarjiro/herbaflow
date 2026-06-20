@@ -1251,6 +1251,8 @@ uses it to let a user re-open a run whose `analysis_id` was lost from local stat
 `stage_results` is **deliberately omitted** — it holds the heavy per-stage tables and is not
 needed for run-list display. To inspect a specific run's stage data, use `GET /analyses/{id}`.
 
+**No DB migration** — reads existing `analysis_runs` columns only.
+
 ---
 
 ### `analysis_run_progress`
@@ -1274,5 +1276,3 @@ per run; a side table so progress writes never contend with the main `analysis_r
 - `analysis_run_progress_pkey` (unique, btree, `analysis_id`)
 
 **RLS:** enabled; no policy (no grants, no policy body) — access is backend-only via the service role.
-
-**No DB migration** — reads existing `analysis_runs` columns only.
