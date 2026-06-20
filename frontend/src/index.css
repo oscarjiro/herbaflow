@@ -204,101 +204,106 @@
   }
 }
 
-/* Base element styles (verbatim from source; NO .hf-eyebrow/.hf-rule/.hf-bracket/.hf-binomial/.hf-num — later task). */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+/* Base element styles (verbatim from source; NO .hf-eyebrow/.hf-rule/.hf-bracket/.hf-binomial/.hf-num — later task).
+   Wrapped in @layer base so Tailwind's @layer utilities override these element defaults. Left unlayered, an
+   element rule like `a { color: inherit }` outranks `text-hf-*` utilities and collapses a link-button's text
+   color onto its own background (the invisible-control theming defect). */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-html {
-  color-scheme: light;
-}
+  html {
+    color-scheme: light;
+  }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--hf-bg);
-  color: var(--hf-fg-1);
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
-  line-height: var(--lh-normal);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--hf-bg);
+    color: var(--hf-fg-1);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--lh-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-::selection {
-  background: var(--hf-sage-soft);
-  color: var(--hf-fg-1);
-}
+  ::selection {
+    background: var(--hf-sage-soft);
+    color: var(--hf-fg-1);
+  }
 
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-display);
-  font-weight: var(--fw-regular);
-  letter-spacing: var(--tracking-display);
-  line-height: var(--lh-tight);
-  color: var(--hf-fg-1);
-  margin: 0;
-  text-wrap: balance;
-}
-h1 {
-  font-size: var(--text-3xl);
-  letter-spacing: var(--tracking-display);
-}
-h2 {
-  font-size: var(--text-2xl);
-  letter-spacing: var(--tracking-tight);
-}
-h3 {
-  font-size: var(--text-xl);
-  letter-spacing: var(--tracking-tight);
-}
-h4 {
-  font-size: var(--text-lg);
-  font-family: var(--font-sans);
-  font-weight: var(--fw-medium);
-  letter-spacing: var(--tracking-normal);
-}
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: var(--fw-regular);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--lh-tight);
+    color: var(--hf-fg-1);
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: var(--text-3xl);
+    letter-spacing: var(--tracking-display);
+  }
+  h2 {
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-tight);
+  }
+  h3 {
+    font-size: var(--text-xl);
+    letter-spacing: var(--tracking-tight);
+  }
+  h4 {
+    font-size: var(--text-lg);
+    font-family: var(--font-sans);
+    font-weight: var(--fw-medium);
+    letter-spacing: var(--tracking-normal);
+  }
 
-p {
-  margin: 0;
-  color: var(--hf-fg-2);
-}
+  p {
+    margin: 0;
+    color: var(--hf-fg-2);
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-a.hf-link {
-  text-decoration: underline;
-  text-decoration-color: var(--hf-border-strong);
-  text-underline-offset: 3px;
-  transition: text-decoration-color var(--duration-1) var(--ease-out);
-}
-a.hf-link:hover {
-  text-decoration-color: var(--hf-fg-1);
-}
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a.hf-link {
+    text-decoration: underline;
+    text-decoration-color: var(--hf-border-strong);
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--duration-1) var(--ease-out);
+  }
+  a.hf-link:hover {
+    text-decoration-color: var(--hf-fg-1);
+  }
 
-code,
-pre,
-.hf-mono {
-  font-family: var(--font-mono);
-}
-em,
-i,
-.hf-italic {
-  font-style: italic;
-}
+  code,
+  pre,
+  .hf-mono {
+    font-family: var(--font-mono);
+  }
+  em,
+  i,
+  .hf-italic {
+    font-style: italic;
+  }
 
-:where(button, a, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--hf-fg-1);
-  outline-offset: 2px;
-  border-radius: var(--radius-1);
+  :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--hf-fg-1);
+    outline-offset: 2px;
+    border-radius: var(--radius-1);
+  }
 }
 
 /* =====================================================================
