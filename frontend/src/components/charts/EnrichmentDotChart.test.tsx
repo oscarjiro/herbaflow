@@ -37,7 +37,7 @@ function wrap(ui: React.ReactNode) {
 
 const SAMPLE_TERMS = [
   {
-    source: "BP",
+    source: "GO:BP",
     name: "response to oxidative stress",
     p_value: 0.001,
     intersection_size: 5,
@@ -76,7 +76,7 @@ describe("EnrichmentDotChart", () => {
     expect(() =>
       wrap(
         <EnrichmentDotChart
-          terms={[{ source: "BP", name: "test term", p_value: 0, intersection_size: 2 }]}
+          terms={[{ source: "GO:BP", name: "test term", p_value: 0, intersection_size: 2 }]}
         />,
       ),
     ).not.toThrow();

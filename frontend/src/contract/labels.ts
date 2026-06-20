@@ -1,7 +1,7 @@
 export const ENRICHMENT_SOURCE_LABELS: Record<string, string> = {
-  BP: "Biological Process",
-  MF: "Molecular Function",
-  CC: "Cellular Component",
+  "GO:BP": "Biological Process",
+  "GO:MF": "Molecular Function",
+  "GO:CC": "Cellular Component",
   KEGG: "KEGG Pathway",
   REAC: "Reactome Pathway",
   WP: "WikiPathways",

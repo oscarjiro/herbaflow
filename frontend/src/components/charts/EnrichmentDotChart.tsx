@@ -52,18 +52,20 @@ type Props = {
 
 const MAX_TERMS = 20;
 
-// Source → color key in ChartColors
+// Source → color key in ChartColors. Keys are the canonical g:Profiler source
+// strings (the shared contract enrichment `sources` enum), e.g. "GO:BP" — the
+// same values the backend persists in each term's `source`.
 const SOURCE_COLOR_KEY: Record<string, keyof ReturnType<typeof useChartColors>> = {
-  BP: "sage",
-  MF: "terracotta",
-  CC: "info",
+  "GO:BP": "sage",
+  "GO:MF": "terracotta",
+  "GO:CC": "info",
   KEGG: "warning",
   REAC: "sageDeep",
   WP: "success",
 };
 
 // Ordered list so legend order is deterministic
-const SOURCE_ORDER = ["BP", "MF", "CC", "KEGG", "REAC", "WP"];
+const SOURCE_ORDER = ["GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC", "WP"];
 
 // ---------------------------------------------------------------------------
 // Component
