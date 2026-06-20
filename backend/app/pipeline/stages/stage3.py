@@ -52,6 +52,9 @@ async def compute(
     resolve_target: TargetResolver,
     min_pchembl: float,
     min_confidence: int,
+    reporter: Any = None,
+    progress_base: int = 0,
+    progress_total: int | None = None,
 ) -> dict[str, Any]:
     """Pure-ish core: union + dedupe + precedence + human-only resolve + coverage.
 
@@ -61,61 +64,72 @@ async def compute(
     targets: dict[str, dict[str, Any]] = {}
     edges: list[dict[str, Any]] = []
     per_compound: dict[str, dict[str, int]] = {}
+    done = 0
+    total = progress_total if progress_total is not None else (progress_base + len(compounds))
 
     async def _one(c: dict[str, Any]) -> None:
+        nonlocal done
         ik = c.get("inchi_key")
         cid = str(c["compound_id"])
         if not ik:
             per_compound[cid] = {"coverage": 0}
-            return
-        chembl_hits = await chembl.targets_for_inchikey(
-            ik, min_pchembl=min_pchembl, min_confidence=min_confidence
-        )
-        pubchem_accs = await pubchem.active_targets_for_inchikey(ik)
-
-        # PubChem first, then ChEMBL overwrites the shared pair -> ChEMBL wins.
-        winner: dict[str, tuple[str, float | None]] = {}
-        for acc in pubchem_accs:
-            winner[acc] = ("pubchem_bioassay", None)
-        for h in chembl_hits:
-            winner[h.uniprot_accession] = ("chembl_bioactivity", h.pchembl_value)
-
-        # Collapse resolved accessions to ONE edge per distinct target_id, ChEMBL > PubChem.
-        # Two different accessions (e.g. a primary + a secondary of one protein) can resolve to
-        # the same target_id; counting raw accessions overcounts coverage and emits duplicate
-        # in-memory edges (the DB upsert is pair-keyed, so durable data was already correct).
-        by_target: dict[str, dict[str, Any]] = {}
-        for acc, (method, pchembl) in winner.items():
-            resolved = await resolve_target(acc)
-            if resolved is None:
-                continue  # not a human UniProt target -> skip (human-only)
-            tid, gene, _key = resolved
-            tid_s = str(tid)
-            targets.setdefault(
-                tid_s,
-                {
-                    "target_id": tid_s,
-                    "canonical_name": gene or acc,
-                    "gene_symbol": gene,
-                    "uniprot_accession": acc,
-                },
+        else:
+            chembl_hits = await chembl.targets_for_inchikey(
+                ik, min_pchembl=min_pchembl, min_confidence=min_confidence
             )
-            cand = {
-                "compound_id": cid,
-                "target_id": tid_s,
-                "prediction_method": method,
-                "pchembl_value": pchembl,
-                "score": pchembl,
-                "source_url": f"https://www.uniprot.org/uniprotkb/{acc}/entry",
-                "uniprot_accession": acc,
-            }
-            prev = by_target.get(tid_s)
-            if prev is None or (
-                method == "chembl_bioactivity" and prev["prediction_method"] != "chembl_bioactivity"
-            ):
-                by_target[tid_s] = cand
-        edges.extend(by_target.values())
-        per_compound[cid] = {"coverage": len(by_target)}
+            pubchem_accs = await pubchem.active_targets_for_inchikey(ik)
+
+            # PubChem first, then ChEMBL overwrites the shared pair -> ChEMBL wins.
+            winner: dict[str, tuple[str, float | None]] = {}
+            for acc in pubchem_accs:
+                winner[acc] = ("pubchem_bioassay", None)
+            for h in chembl_hits:
+                winner[h.uniprot_accession] = ("chembl_bioactivity", h.pchembl_value)
+
+            # Collapse resolved accessions to ONE edge per distinct target_id, ChEMBL > PubChem.
+            # Two different accessions (e.g. a primary + a secondary of one protein) can resolve to
+            # the same target_id; counting raw accessions overcounts coverage and emits duplicate
+            # in-memory edges (the DB upsert is pair-keyed, so durable data was already correct).
+            by_target: dict[str, dict[str, Any]] = {}
+            for acc, (method, pchembl) in winner.items():
+                resolved = await resolve_target(acc)
+                if resolved is None:
+                    continue  # not a human UniProt target -> skip (human-only)
+                tid, gene, _key = resolved
+                tid_s = str(tid)
+                targets.setdefault(
+                    tid_s,
+                    {
+                        "target_id": tid_s,
+                        "canonical_name": gene or acc,
+                        "gene_symbol": gene,
+                        "uniprot_accession": acc,
+                    },
+                )
+                cand = {
+                    "compound_id": cid,
+                    "target_id": tid_s,
+                    "prediction_method": method,
+                    "pchembl_value": pchembl,
+                    "score": pchembl,
+                    "source_url": f"https://www.uniprot.org/uniprotkb/{acc}/entry",
+                    "uniprot_accession": acc,
+                }
+                prev = by_target.get(tid_s)
+                if prev is None or (
+                    method == "chembl_bioactivity"
+                    and prev["prediction_method"] != "chembl_bioactivity"
+                ):
+                    by_target[tid_s] = cand
+            edges.extend(by_target.values())
+            per_compound[cid] = {"coverage": len(by_target)}
+
+        # Count this compound's completion on EVERY path (incl. the no-InChIKey early case).
+        # `done += 1` is synchronous (no await between read and write), so concurrent _one
+        # coroutines increment it safely; only the report awaits.
+        done += 1
+        if reporter is not None:
+            await reporter.update(3, progress_base + done, total)
 
     await asyncio.gather(*(_one(c) for c in compounds))
 
@@ -168,6 +182,7 @@ async def run(
     chembl: Any = None,
     pubchem: Any = None,
     uniprot: Any = None,
+    reporter: Any = None,
 ) -> dict[str, Any]:
     """Fetch structures, build a DB-first + human-only resolver, compute, persist.
 
@@ -244,6 +259,14 @@ async def run(
         reused_edges.extend(by_target.values())
         reused_per_compound[cid] = {"coverage": len(by_target)}
 
+    # Per-item progress spans ALL compounds: the reused ones are already done at this point, so
+    # report them as the baseline; compute() then climbs from this base to total as each fetched
+    # compound completes (base + len(to_fetch) == total).
+    progress_total = len(compounds)
+    progress_base = len(reused_per_compound)
+    if reporter is not None:
+        await reporter.update(3, progress_base, progress_total)
+
     logger.info("stage 3: reuse %d compound(s), fetch %d", len(reused_per_compound), len(to_fetch))
 
     async def _go(chembl_c: Any, pubchem_c: Any, uniprot_c: Any) -> dict[str, Any]:
@@ -266,6 +289,9 @@ async def run(
             resolve_target=_resolve,
             min_pchembl=min_pchembl,
             min_confidence=min_confidence,
+            reporter=reporter,
+            progress_base=progress_base,
+            progress_total=progress_total,
         )
 
     if not to_fetch:
