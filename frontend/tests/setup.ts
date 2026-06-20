@@ -66,20 +66,31 @@ if (typeof Element.prototype.scrollIntoView === "undefined") {
   Element.prototype.scrollIntoView = () => {};
 }
 
-// jsdom does not implement matchMedia — provide a stub (defaults to no dark preference).
+// jsdom does not implement matchMedia. Provide a controllable stub: defaults to no dark
+// preference, supports addEventListener("change") so the theme provider's live OS tracking
+// is testable. Tests can flip the preference via __setMatchMediaDark(boolean).
 if (typeof window.matchMedia === "undefined") {
-  const stub = (query: string): MediaQueryList =>
-    ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      addListener: () => {},
-      removeListener: () => {},
-      dispatchEvent: () => false,
-    }) as unknown as MediaQueryList;
-  window.matchMedia = stub;
+  const listeners = new Set<(e: MediaQueryListEvent) => void>();
+  let prefersDark = false;
+  const mql = {
+    get matches() {
+      return prefersDark;
+    },
+    media: "(prefers-color-scheme: dark)",
+    onchange: null,
+    addEventListener: (_: string, cb: (e: MediaQueryListEvent) => void) => listeners.add(cb),
+    removeEventListener: (_: string, cb: (e: MediaQueryListEvent) => void) => listeners.delete(cb),
+    addListener: (cb: (e: MediaQueryListEvent) => void) => listeners.add(cb),
+    removeListener: (cb: (e: MediaQueryListEvent) => void) => listeners.delete(cb),
+    dispatchEvent: () => false,
+  };
+  window.matchMedia = (() => mql as unknown as MediaQueryList) as typeof window.matchMedia;
+  (globalThis as unknown as { __setMatchMediaDark: (v: boolean) => void }).__setMatchMediaDark = (
+    v: boolean,
+  ) => {
+    prefersDark = v;
+    listeners.forEach((cb) => cb({ matches: v } as MediaQueryListEvent));
+  };
 }
 
 // jsdom does not implement ResizeObserver — Radix Popover uses it internally.
