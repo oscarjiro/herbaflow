@@ -19,6 +19,7 @@ from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
 from app.repositories.target import TargetRepository
+from app.schemas.graph import CtpGraph
 
 
 @dataclass(frozen=True)
@@ -141,16 +142,28 @@ async def _resolve_labels(session: AsyncSession, run: Any) -> dict[str, Any]:
     return {"plant": plant, "disease": disease}
 
 
-async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> ExportArtifacts:
-    run = await AnalysisRepository(session).get(analysis_id)
-    if run is None:
-        raise NotFoundProblem(f"analysis {analysis_id} not found")
-    if run.status != state.COMPLETE:
-        raise ConflictProblem("export is available only when the run is complete")
+async def _load_ctp_lookups(
+    session: AsyncSession, run: Any
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]], dict[str, dict[str, Any]], bool]:
+    """Batch-fetch the entity-attribute lookups the C-T-P graph builder needs from a complete run.
 
+    The SINGLE home for the export lookup build: gathers compound/target ids from the run's
+    ``stage_results``, batch-fetches via ``CompoundRepository.get_many`` / ``TargetRepository``,
+    and returns ``(stage_results, compounds_by_id, targets_by_id, has_compounds)``. Shared by
+    ``assemble_export`` (the download artifacts) and ``assemble_ctp_graph`` (the JSON endpoint) so
+    there is no second copy of the lookup-build logic (one canonical home rule)."""
     sr: dict[str, Any] = run.stage_results or {}
     edges = sr.get("3", {}).get("compound_targets", [])
-    compound_ids = {e["compound_id"] for e in edges}
+    stage1_compound_ids = {
+        c["compound_id"] for c in sr.get("1", {}).get("compounds", []) if c.get("compound_id")
+    }
+    stage2_compound_ids = {
+        c["compound_id"]
+        for bucket in ("passed", "filtered")
+        for c in sr.get("2", {}).get(bucket, [])
+        if c.get("compound_id")
+    }
+    compound_ids = {e["compound_id"] for e in edges} | stage1_compound_ids | stage2_compound_ids
     target_ids = (
         {o["target_id"] for o in sr.get("5", {}).get("overlap", [])}
         | {h["target_id"] for h in sr.get("7", {}).get("hubs", [])}
@@ -174,6 +187,40 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         }
         for t in targets
     }
+    has_compounds = entry_modes.has_compounds_from_params(run.parameters or {})
+    return sr, compounds_by_id, targets_by_id, has_compounds
+
+
+async def assemble_ctp_graph(session: AsyncSession, analysis_id: uuid.UUID) -> CtpGraph:
+    """Assemble the compound-target-pathway graph for a complete run as a typed DTO.
+
+    Reuses the single graph-data home (``results_handoff.build_ctp_graph``) and the shared
+    ``_load_ctp_lookups`` batch-fetch — no second copy of either the graph logic or the lookup
+    build. Compound-free runs (``manual_targets``) get an empty graph. The only DB touch for the
+    JSON endpoint."""
+    run = await AnalysisRepository(session).get(analysis_id)
+    if run is None:
+        raise NotFoundProblem(f"analysis {analysis_id} not found")
+    if run.status != state.COMPLETE:
+        raise ConflictProblem("the C-T-P graph is available only when the run is complete")
+
+    sr, compounds_by_id, targets_by_id, has_compounds = await _load_ctp_lookups(session, run)
+    graph = (
+        rh.build_ctp_graph(sr, compounds_by_id, targets_by_id)
+        if has_compounds
+        else {"nodes": [], "edges": []}
+    )
+    return CtpGraph.model_validate(graph)
+
+
+async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> ExportArtifacts:
+    run = await AnalysisRepository(session).get(analysis_id)
+    if run is None:
+        raise NotFoundProblem(f"analysis {analysis_id} not found")
+    if run.status != state.COMPLETE:
+        raise ConflictProblem("export is available only when the run is complete")
+
+    sr, compounds_by_id, targets_by_id, has_compounds = await _load_ctp_lookups(session, run)
     labels = await _resolve_labels(session, run)
     run_meta = {
         "analysis_id": str(run.analysis_id),
@@ -184,7 +231,6 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
     }
     params = run.parameters or {}
     input_modes = params.get("input_modes") or {}
-    has_compounds = entry_modes.has_compounds_from_params(params)
 
     ctp_graph = (
         rh.build_ctp_graph(sr, compounds_by_id, targets_by_id)

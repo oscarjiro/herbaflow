@@ -526,6 +526,15 @@ survives a re-run's clear of `stage_results` and is reapplied every time the sta
 Defaults for each param-bearing stage are frozen into `parameters` at run-creation time; a Redo
 overrides them within the contract's hard bounds.
 
+**Create-time parameter overrides:** `POST /analyses` accepts an optional `parameters` body field
+— a group-keyed map of `{param: value}` overrides (e.g. `{"ppi": {"min_confidence": 0.7},
+"enrichment": {"min_term_size": 5}}`). Each override group is validated against the contract
+hard bounds before the run row is written; an out-of-bounds value, an unknown key within a valid
+group, or an unknown group all return **422** with nothing persisted. Valid overrides are merged
+(shallow `update`) over the per-group defaults, and the merged result is stored as the run's
+frozen parameter baseline — identical to the result of a post-create Param Redo on the same
+group, but captured at creation so the pipeline runs with the intended parameters from step 1.
+
 `parameters.stage_edits` may be **seeded at run-creation** for manual input modes: Stage 1 (manual
 compound IDs seeded into the S1 entity layer), Stage 3 (manual plant targets), and Stage 4 (manual
 disease targets). Previously, `stage_edits` was only ever written by in-stage edit calls;
@@ -552,7 +561,14 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
 ```jsonc
 {
   "compounds": [
-    {"compound_id": "<uuid>", "canonical_name": "<str|null>", "tag": "<tag>"},
+    {
+      "compound_id": "<uuid>",
+      "canonical_name": "<str|null>",
+      "smiles": "<str|null>",
+      "inchikey": "<str|null>",
+      "source_url": "<str|null>",
+      "tag": "<tag>"
+    },
     // tag ∈ {"computed", "user-added", "user-removed"}
     // "user-removed" entries are PRESENT in this list but excluded from the effective forward set
     ...
@@ -578,6 +594,10 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
 - `stage_results["1"].compounds[*].canonical_name` is populated from the compound row on a
   `manual_compounds` prefill (was previously `null` — Stage 1 was showing the UUID). Display only;
   no schema change. Symmetric with the Stage-3 target prefill which already carried names.
+- `stage_results["1"].compounds[*]` also carries `smiles`, `inchikey`, and `source_url` from the
+  compound row so downstream exports and UI surfaces can render structure provenance without an
+  extra lookup. The emitted JSON key is `inchikey`, mirroring the rest of the contract, even though
+  the ORM field is `Compound.inchi_key`.
 - The `POST /compounds/validate` response `FailedInput` objects carry an optional 1-based **`line`**
   field on compound failures (parity with `resolve_targets` which already reported line indices;
   Software Lock §4.5 per-line reason). No schema change — the `line` field is in the response body
@@ -627,7 +647,12 @@ so the FE table and CSV match a computed row.
   "passed": [
     {
       "compound_id": "<uuid>", "canonical_name": "<str|null>",
+      "inchikey": "<str|null>",
       "descriptor_source": "etl|rdkit|unscreened",
+      "lipinski_violations": <int|null>,
+      "lipinski_pass": <bool|null>,
+      "veber_pass": <bool|null>,
+      "rule_evaluated": <bool>,
       "molecular_weight": <float|null>, "logp": <float|null>,
       "hbond_donors": <int|null>, "hbond_acceptors": <int|null>,
       "tpsa": <float|null>, "rotatable_bonds": <int|null>,
@@ -659,6 +684,11 @@ so the FE table and CSV match a computed row.
 - `"rdkit"` — descriptors computed on-the-fly via RDKit from the compound's SMILES (manual/null path);
   persisted back to the `compounds` table after computation.
 - `"unscreened"` — `skip_adme` was on; no descriptor access took place.
+
+`lipinski_violations`, `lipinski_pass`, `veber_pass`, and `rule_evaluated` make the gate outcome
+explicit for UI and CSV consumers. Rows that bypassed the rule gate (`skip_adme` or NP-bypass) or could
+not be screened carry `rule_evaluated: false` and `null` Lipinski/Veber outcomes. When `apply_veber`
+is false, `rule_evaluated` can still be true while `veber_pass` is null.
 
 **Overlap stage** (Stage 5 — no parameters):
 
@@ -870,22 +900,24 @@ the `"network_too_small"` flag and the eigenvector value falls back gracefully (
 
 #### `parameters.enrichment` block (Stage 8)
 
-Frozen from the contract defaults at run-creation. `sources` is stored but its UI multi-select is
-deferred to Phase 5 — the Stage-8 param panel exposes only the three scalar params below.
-Background is hardcoded to the Stage-3 compound-target universe (custom statistical background —
-method constant, not configuration).
+Frozen from the contract defaults at run-creation. The shared Stage-8 `ParamPanel` exposes
+`significance_threshold`, `min_term_size`, `correction`, `sources`, and `no_iea`. `sources` is a
+checkbox-backed multi-select that uses the closed enum values `GO:BP`, `GO:MF`, `GO:CC`, `KEGG`,
+`REAC`, and `WP`. Background is hardcoded to the Stage-3 compound-target universe (custom
+statistical background, method constant, not configuration).
 
 | Parameter | Type | Default | Bounds / enum | Notes |
 |---|---|---|---|---|
 | `significance_threshold` | number | 0.05 | >0, ≤1 (rec. 0.01–0.1) | Corrected-p significance cutoff for enriched terms (applies to whichever correction method is selected) |
 | `min_term_size` | integer | 5 | ≥1, ≤500 (rec. 3–20) | Minimum gene-set size; filtered client-side from g:Profiler results |
 | `correction` | string | `fdr` | enum {`fdr`, `g_SCS`, `bonferroni`} | Multiple-testing correction method; default BH-FDR; `g_SCS` = g:Profiler's adaptive threshold |
-| `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | enum items {`GO:BP`,`GO:MF`,`GO:CC`,`KEGG`,`REAC`,`WP`} | Annotation vocabularies; Reactome (REAC) + WikiPathways (WP) additionally selectable; multi-select UI deferred to Phase 5 |
+| `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | enum items {`GO:BP`,`GO:MF`,`GO:CC`,`KEGG`,`REAC`,`WP`} | Annotation vocabularies exposed in the shared ParamPanel as a checkbox-backed multi-select; Reactome = `REAC`, WikiPathways = `WP` |
 | `no_iea` | boolean | false | — | Exclude GO terms supported only by electronic (IEA) annotation |
 
 `correction` defaults to `fdr` (BH-FDR); the `g_SCS` enum value uses g:Profiler's verbatim API
-spelling. `sources` IS enum/array-validated on Redo — elements outside the closed vocabulary are
-rejected **422**.
+spelling. Redo forwards the raw wire values unchanged, including the ordered `sources` array.
+`sources` IS enum/array-validated on Redo; elements outside the closed vocabulary are rejected
+**422**.
 
 ---
 
@@ -1048,6 +1080,43 @@ The pipeline traversal order is: `plants → compounds → targets → diseases 
 
 ---
 
+## Alias search (`GET /plants?q=`, `GET /diseases?q=`)
+
+Both catalog endpoints support server-side search via optional query parameters:
+
+| Parameter | Type | Default | Notes |
+|---|---|---|---|
+| `q` | string | — (omit for full list) | Search term matched against canonical name and all aliases |
+| `limit` | integer | 50 | Maximum rows to return |
+| `offset` | integer | 0 | Rows to skip (for paging) |
+
+**Ranking order** (lower is better; first match per entity wins):
+
+| Rank | Match type |
+|---|---|
+| 0 | Canonical name — exact |
+| 1 | Canonical name — prefix (`startswith`) |
+| 2 | Alias name — exact |
+| 3 | Alias name — prefix |
+| 4 | Canonical name — substring (not prefix) |
+| 5 | Alias name — substring (not prefix) |
+
+Matching is case-insensitive. An entity that matches via both canonical and alias keeps only the
+better-ranked hit. The result is paged **after** ranking, so `offset`/`limit` slice the ranked list.
+
+**`matched_alias` response field:** when the winning hit came from an alias row, the response
+includes `matched_alias: string` (the alias text) as a display hint. When the hit came from the
+canonical name, `matched_alias` is `null`. The display label always stays the canonical name
+(`canonical_scientific_name` for plants, `disease_name` for diseases).
+
+Omitting `q` (or passing an empty string) returns the full list ordered by canonical name, with
+`matched_alias: null` on every row. An unrecognized term returns `200 []`.
+
+The search reads the existing `plant_aliases` / `disease_aliases` tables. No new tables or
+migrations are required.
+
+---
+
 ## Results-handoff export (read-only)
 
 The capstone export is a **stateless, on-demand read** of the run's persisted
@@ -1079,6 +1148,13 @@ Per-artifact endpoints also exist: the graph/stage CSVs (`…/export/ctp-nodes.c
 `…/export/ctp-edges.csv`, `…/export/docking.csv`, `…/export/stage6_ppi_nodes.csv`) and one
 generalized `…/export/{filename}` that serves any single per-stage CSV (`text/csv`) or rendered
 chart PNG (`image/png`) by its deterministic filename, 404-ing an unknown or undrawable artifact.
+
+`GET /analyses/{id}/ctp-graph` returns the same compound-target-pathway graph as **JSON**
+(`{nodes, edges}`) for interactive frontend rendering — it reuses the one graph-data home
+(`build_ctp_graph`) and the same complete-only guard (409 when the run is not complete, 404 when
+the id is missing). It is **not** under `/export/` (it is data, not a download, so no
+`Content-Disposition`). A compound-free run (`manual_targets`) returns an empty graph
+(`{"nodes": [], "edges": []}`).
 
 Node-id and edge shapes (de-UUID'd; edge endpoints reference node ids, so Cytoscape imports them
 directly):
@@ -1141,3 +1217,38 @@ Tables are created first and all foreign keys added last, so the set replays in 
 fresh database. File `0007` requires the managed platform's `pg_cron`; the other six replay
 on any stock PostgreSQL (used for the equivalence check).
 
+---
+
+## API — recent-runs list
+
+### `GET /analyses`
+
+Returns a paged, newest-first list of analysis runs. Intended for run recovery (the frontend
+uses it to let a user re-open a run whose `analysis_id` was lost from local state).
+
+**Query parameters:**
+
+| Parameter | Default | Clamped range | Description |
+|---|---|---|---|
+| `limit` | `50` | 1–100 | Maximum number of items to return |
+| `offset` | `0` | ≥ 0 | Number of items to skip (for paging) |
+
+`limit` values outside 1–100 are silently clamped (no error). Empty DB returns `200 []`.
+
+**Response shape — `AnalysisListItem`** (array):
+
+| Field | Type | Nullable | Notes |
+|---|---|---|---|
+| `analysis_id` | uuid | no | Run identifier |
+| `analysis_name` | string | yes | User-supplied name |
+| `status` | string | yes | `pending` / `running` / `complete` / `failed` / `stage_N_awaiting_approval` |
+| `current_stage` | integer | yes | Last stage reached |
+| `created_at` | timestamptz | yes | Creation time; list is ordered by this descending |
+| `completed_at` | timestamptz | yes | Set when the run reaches `complete` |
+| `disease_id` | uuid | yes | Null for `manual_disease_targets` runs |
+| `parameters` | object | no | Frozen run parameters — carries `input_modes`, `plant_ids`, `labels`, and all pipeline-group defaults; bounded by entity caps |
+
+`stage_results` is **deliberately omitted** — it holds the heavy per-stage tables and is not
+needed for run-list display. To inspect a specific run's stage data, use `GET /analyses/{id}`.
+
+**No DB migration** — reads existing `analysis_runs` columns only.

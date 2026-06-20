@@ -1,8 +1,28 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { ThemeProvider } from "@/lib/theme";
 import { Stage7View } from "./Stage7View";
 import type { AnalysisRead } from "../../api/types.gen";
+import * as sdk from "../../api/sdk.gen";
+
+// ---------------------------------------------------------------------------
+// Mock recharts ResponsiveContainer so charts mount in jsdom (0-size otherwise).
+// ---------------------------------------------------------------------------
+
+vi.mock("recharts", async (orig) => {
+  const actual = await orig<typeof import("recharts")>();
+  return {
+    ...actual,
+    ResponsiveContainer: ({ children }: { children: React.ReactElement }) =>
+      React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+        width: 800,
+        height: 400,
+      }),
+  };
+});
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -54,7 +74,15 @@ function makeData(result: object): AnalysisRead {
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <ThemeProvider>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </ThemeProvider>,
+  );
+}
+
+async function openHubPanel() {
+  await userEvent.click(screen.getByRole("button", { name: /hub-ranking parameters/i }));
 }
 
 // ---------------------------------------------------------------------------
@@ -64,9 +92,25 @@ function wrap(ui: React.ReactNode) {
 describe("Stage7View", () => {
   it("renders the hub table with the gene and MCC", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.getByText("Step 7 — Hub Genes")).toBeInTheDocument();
+    expect(screen.getByText("Step 7: Hub Genes")).toBeInTheDocument();
     expect(screen.getByText("TNF")).toBeInTheDocument();
     expect(screen.getByText("7")).toBeInTheDocument();
+  });
+
+  it("renders the cleaned small-network notice", () => {
+    wrap(
+      <Stage7View
+        data={makeData({
+          ...makeComputedResult(),
+          flags: ["network_too_small"],
+        })}
+      />,
+    );
+    expect(
+      screen.getByText(
+        "The network is small or sparse. Centrality ranking is unreliable on trivial topology.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("renders summary cards for node count and hub count", () => {
@@ -80,9 +124,10 @@ describe("Stage7View", () => {
     expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
   });
 
-  it("renders the hub_genes param panel with a Redo button", () => {
+  it("renders the hub_genes param panel with a Redo button", async () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.getByLabelText("top_n")).toBeInTheDocument();
+    await openHubPanel();
+    expect(screen.getByLabelText("Top N")).toBeInTheDocument();
     expect(screen.queryByLabelText("use_hub_bottleneck")).toBeNull();
     expect(screen.queryByLabelText("composite_weight")).toBeNull();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
@@ -123,20 +168,72 @@ describe("Stage7View", () => {
     expect(screen.getByText("12")).toBeInTheDocument();
   });
 
-  it("shows the hub bar image when complete", () => {
+  it("shows the hub gene chart frame when complete with hubs", () => {
     const completeData: AnalysisRead = {
       ...makeData(makeComputedResult()),
       status: "complete",
     } as unknown as AnalysisRead;
     wrap(<Stage7View data={completeData} />);
-    expect(screen.getByRole("img", { name: /hub/i })).toHaveAttribute(
-      "src",
-      expect.stringContaining("/export/stage7_hub_bar.png"),
-    );
+    // ChartFrame renders the title and a Download PNG button.
+    expect(screen.getByText("Hub genes by MCC")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
+    // The old server-rendered image must be gone.
+    expect(screen.queryByRole("img", { name: /hub/i })).toBeNull();
   });
 
-  it("does not show the hub bar image when not complete", () => {
+  it("does not show the hub gene chart frame when not complete", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.queryByRole("img", { name: /hub/i })).toBeNull();
+    expect(screen.queryByText("Hub genes by MCC")).toBeNull();
+    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    const data = makeData({ ...makeComputedResult(), stale: true });
+    data.parameters = { hub_genes: HUB_PARAM_VALUES, rerun_from: 6 } as AnalysisRead["parameters"];
+
+    wrap(<Stage7View data={data} />);
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe("Stage7View — double-submit guards", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("disables Approve & Continue while the advance mutation is in-flight", async () => {
+    // Never resolves so the mutation stays pending throughout the test.
+    vi.spyOn(sdk, "advanceAnalysis").mockReturnValue(new Promise(() => {}));
+    vi.spyOn(sdk, "resetFrom").mockResolvedValue({ data: {} } as never);
+
+    wrap(<Stage7View data={makeData(makeComputedResult())} />);
+    const approveBtn = screen.getByRole("button", { name: /approve & continue/i });
+    expect(approveBtn).not.toBeDisabled();
+
+    await userEvent.click(approveBtn);
+    expect(approveBtn).toBeDisabled();
+  });
+
+  it("disables the Redo button inside the param panel while the redo mutation is in-flight", async () => {
+    vi.spyOn(sdk, "advanceAnalysis").mockResolvedValue({ data: {} } as never);
+    // Never resolves so the redo mutation stays pending.
+    vi.spyOn(sdk, "resetFrom").mockReturnValue(new Promise(() => {}));
+
+    wrap(<Stage7View data={makeData(makeComputedResult())} />);
+    await openHubPanel();
+
+    // Change the top_n param so Redo becomes armed.
+    const input = screen.getByLabelText("Top N");
+    await userEvent.clear(input);
+    await userEvent.type(input, "5");
+
+    const redoBtn = screen.getByRole("button", { name: /redo/i });
+    expect(redoBtn).not.toBeDisabled();
+
+    await userEvent.click(redoBtn);
+    expect(redoBtn).toBeDisabled();
   });
 });

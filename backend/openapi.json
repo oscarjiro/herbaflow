@@ -12,17 +12,73 @@
         ],
         "summary": "List Diseases",
         "operationId": "list_diseases",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search term (canonical name or alias)",
+              "title": "Q"
+            },
+            "description": "Search term (canonical name or alias)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of results to return",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximum number of results to return"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of results to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of results to skip"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/DiseaseRead"
                   },
-                  "type": "array",
                   "title": "Response List Diseases"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -37,17 +93,73 @@
         ],
         "summary": "List Plants",
         "operationId": "list_plants",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search term (canonical name or alias)",
+              "title": "Q"
+            },
+            "description": "Search term (canonical name or alias)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of results to return",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximum number of results to return"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of results to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of results to skip"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/PlantRead"
                   },
-                  "type": "array",
                   "title": "Response List Plants"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -97,6 +209,61 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AnalysisRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "analyses"
+        ],
+        "summary": "List Analyses",
+        "operationId": "list_analyses",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AnalysisListItem"
+                  },
+                  "title": "Response List Analyses"
                 }
               }
             }
@@ -768,6 +935,49 @@
         }
       }
     },
+    "/analyses/{analysis_id}/ctp-graph": {
+      "get": {
+        "tags": [
+          "export"
+        ],
+        "summary": "Get Ctp Graph",
+        "operationId": "get_ctp_graph",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CtpGraph"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analyses/{analysis_id}/export/{filename}": {
       "get": {
         "tags": [
@@ -938,10 +1148,121 @@
               }
             ],
             "title": "Disease Label"
+          },
+          "parameters": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parameters",
+            "description": "Per-group parameter overrides for any pipeline group (adme / target / disease_targets / ppi / hub_genes / enrichment); validated against the contract hard bounds at create, merged over the group defaults, and frozen as the run baseline."
           }
         },
         "type": "object",
         "title": "AnalysisCreate"
+      },
+      "AnalysisListItem": {
+        "properties": {
+          "analysis_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Analysis Id"
+          },
+          "analysis_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Name"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "current_stage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Stage"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "disease_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disease Id"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Parameters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "analysis_id",
+          "analysis_name",
+          "status",
+          "current_stage",
+          "created_at",
+          "completed_at",
+          "disease_id"
+        ],
+        "title": "AnalysisListItem",
+        "description": "Lean per-run shape for the recent-runs list.\n\nDeliberately omits ``stage_results`` (the heavy per-stage tables).\n``parameters`` is kept \u2014 it carries ``input_modes`` / ``labels`` / ``plant_ids``;\nits size is bounded by the entity caps."
       },
       "AnalysisRead": {
         "properties": {
@@ -1110,6 +1431,111 @@
         ],
         "title": "CompoundInput"
       },
+      "CtpGraph": {
+        "properties": {
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/CtpGraphNode"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/CtpGraphEdge"
+            },
+            "type": "array",
+            "title": "Edges"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nodes",
+          "edges"
+        ],
+        "title": "CtpGraph"
+      },
+      "CtpGraphEdge": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "interaction": {
+            "type": "string",
+            "title": "Interaction"
+          },
+          "prediction_method": {
+            "type": "string",
+            "title": "Prediction Method"
+          },
+          "p_value": {
+            "type": "string",
+            "title": "P Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "target",
+          "interaction",
+          "prediction_method",
+          "p_value"
+        ],
+        "title": "CtpGraphEdge"
+      },
+      "CtpGraphNode": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "inchikey": {
+            "type": "string",
+            "title": "Inchikey"
+          },
+          "smiles": {
+            "type": "string",
+            "title": "Smiles"
+          },
+          "uniprot_accession": {
+            "type": "string",
+            "title": "Uniprot Accession"
+          },
+          "is_hub": {
+            "type": "string",
+            "title": "Is Hub"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "type",
+          "inchikey",
+          "smiles",
+          "uniprot_accession",
+          "is_hub",
+          "source"
+        ],
+        "title": "CtpGraphNode"
+      },
       "DiseaseInputMode": {
         "type": "string",
         "enum": [
@@ -1184,6 +1610,17 @@
               }
             ],
             "title": "Retrieved At"
+          },
+          "matched_alias": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Alias"
           }
         },
         "type": "object",
@@ -1289,6 +1726,17 @@
               }
             ],
             "title": "Family Name"
+          },
+          "matched_alias": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Alias"
           }
         },
         "type": "object",

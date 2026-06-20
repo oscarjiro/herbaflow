@@ -376,7 +376,38 @@ const ANALYSIS_WITH_STAGE2 = {
   error_message: null,
 };
 
+export const SAMPLE_ANALYSES_LIST = [
+  {
+    analysis_id: "r1",
+    analysis_name: "My first run",
+    status: "complete",
+    current_stage: 8,
+    created_at: "2026-06-19T10:00:00Z",
+    completed_at: "2026-06-19T11:00:00Z",
+    disease_id: "d1",
+    parameters: {
+      input_modes: { plant: "selection", disease: "selection" },
+      plant_ids: ["p1"],
+    },
+  },
+  {
+    analysis_id: "r2",
+    analysis_name: null,
+    status: "stage_2_awaiting_approval",
+    current_stage: 2,
+    created_at: "2026-06-18T09:00:00Z",
+    completed_at: null,
+    disease_id: "d1",
+    parameters: {
+      input_modes: { plant: "manual_compounds", disease: "selection" },
+      labels: { plant: "My herb" },
+      plant_ids: [],
+    },
+  },
+];
+
 export const server = setupServer(
+  http.get(`${BASE}/analyses`, () => HttpResponse.json(SAMPLE_ANALYSES_LIST)),
   http.get(`${BASE}/diseases`, () =>
     HttpResponse.json([
       {
@@ -503,5 +534,58 @@ export const server = setupServer(
   // stages edit: echo back the same run
   http.post(`${BASE}/analyses/:id/stages/:stage/edit`, () =>
     HttpResponse.json({ ...ANALYSIS_WITH_STAGE2 }),
+  ),
+  // ctp-graph: return a minimal compound-target-pathway graph
+  http.get(`${BASE}/analyses/:id/ctp-graph`, () =>
+    HttpResponse.json({
+      nodes: [
+        {
+          id: "cmp-1",
+          label: "Curcumin",
+          type: "compound",
+          inchikey: "VFGB",
+          smiles: "O=C",
+          uniprot_accession: "",
+          is_hub: "",
+          source: "knapsack",
+        },
+        {
+          id: "tgt-1",
+          label: "EGFR",
+          type: "target",
+          inchikey: "",
+          smiles: "",
+          uniprot_accession: "P00533",
+          is_hub: "true",
+          source: "chembl",
+        },
+        {
+          id: "pw-1",
+          label: "MAPK signaling pathway",
+          type: "pathway",
+          inchikey: "",
+          smiles: "",
+          uniprot_accession: "",
+          is_hub: "",
+          source: "enrichment",
+        },
+      ],
+      edges: [
+        {
+          source: "cmp-1",
+          target: "tgt-1",
+          interaction: "compound-target",
+          prediction_method: "chembl",
+          p_value: "",
+        },
+        {
+          source: "tgt-1",
+          target: "pw-1",
+          interaction: "target-pathway",
+          prediction_method: "",
+          p_value: "0.01",
+        },
+      ],
+    }),
   ),
 );

@@ -17,15 +17,17 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError } from "../../lib/toast";
 import { useStaleState } from "../../hooks/useStaleState";
-import { exportArtifactUrl } from "../../lib/exportUrl";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ChartFrame } from "@/components/charts/ChartFrame";
+import { OverlapVenn } from "@/components/charts/OverlapVenn";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { StageDataSources } from "./StageDataSources";
-import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 5 result shape (narrowed from unknown)
@@ -70,13 +72,14 @@ function buildS5CsvRows(rows: OverlapRow[]): unknown[][] {
 
 export function Stage5View({ data }: { data: AnalysisRead }) {
   const stage5 = data.stage_results?.["5"] as Stage5Result | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
+  const { anyStale } = useStaleState(data);
   const isComplete = data.status === "complete";
 
   const qc = useQueryClient();
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
@@ -134,7 +137,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
       {/* Editorial header */}
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 5</Eyebrow>
-        <h2 className="hf-heading-serif">Step 5 — Target Overlap</h2>
+        <h2 className="hf-heading-serif">Step 5: Target Overlap</h2>
       </div>
 
       <StageDataSources stage={5} />
@@ -168,16 +171,15 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
         </div>
       </div>
 
-      {/* Venn diagram image (complete-only, onError-hidden) */}
-      {isComplete && (
-        <img
-          className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-          alt="Stage 5 target overlap"
-          src={exportArtifactUrl(data.analysis_id, "stage5_venn.png")}
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
+      {/* Interactive Venn diagram (complete-only; hidden when both counts are zero) */}
+      {isComplete && (stage5.compound_target_count > 0 || stage5.disease_target_count > 0) && (
+        <ChartFrame title="Target overlap" filename="target_overlap.png">
+          <OverlapVenn
+            compoundCount={stage5.compound_target_count}
+            diseaseCount={stage5.disease_target_count}
+            overlapCount={stage5.count}
+          />
+        </ChartFrame>
       )}
 
       {stage5.count === 0 && (
@@ -221,7 +223,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
           </div>
         </CardHeader>
         <CardContent className="px-0">
-          <DataTable columns={columns} data={visibleRows} />
+          <DataTable columns={columns} data={visibleRows} emptyMessage="No shared targets found." />
         </CardContent>
 
         {/* Pagination */}
@@ -248,10 +250,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
         )}
       </Card>
 
-      {/* Stale notice + approval */}
-      {(stage5 as { stale?: boolean }).stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
+      {/* Approval */}
       <ApprovalBar
         stage={5}
         status={data.status}
@@ -259,9 +258,10 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
         disabled={stage5.count === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
-            : "No overlap targets — check Stage 3 and Stage 4 results."
+            ? "Run the updated step before continuing."
+            : "No overlap targets. Check Step 3 and Step 4 results."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
     </section>

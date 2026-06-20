@@ -33,7 +33,7 @@ export const DEFAULT_DISEASE_INPUT_MODE = contract.$defs.disease_input_mode
 // ---------------------------------------------------------------------------
 
 type AdmeParamMeta = {
-  default: number | boolean | string;
+  default: number | boolean | string | string[];
   /** Hard lower bound (inclusive unless minExclusive is true). */
   min: number | undefined;
   /** True when the lower bound from the contract is exclusiveMinimum. */
@@ -260,14 +260,14 @@ export const HUB_GENES_BOOLEAN_PARAMS = [] as const;
 // ---------------------------------------------------------------------------
 // Enrichment (Stage 8) parameter metadata — derived from the contract.
 //
-// `no_iea` (boolean) is exposed to the panel. `sources` (array) stays at its
-// frozen default; a multi-select control is deferred to Phase 5 FE polish.
+// All Stage 8 parameters now surface through the shared ParamPanel, including
+// `sources` as a checkbox-backed enum array.
 // ---------------------------------------------------------------------------
 
 const enrichmentProps = contract.$defs.pipeline_parameters.properties.enrichment.properties;
 
 function enrichmentEntry(
-  key: "significance_threshold" | "min_term_size" | "correction" | "no_iea",
+  key: "significance_threshold" | "min_term_size" | "correction" | "sources" | "no_iea",
 ): AdmeParamMeta {
   const p = enrichmentProps[key] as Record<string, unknown>;
   const minExclusive = "exclusiveMinimum" in p && !("minimum" in p);
@@ -280,9 +280,14 @@ function enrichmentEntry(
   const max = "maximum" in p ? (p.maximum as number) : undefined;
   const recommended_min = "recommended_min" in p ? (p.recommended_min as number) : undefined;
   const recommended_max = "recommended_max" in p ? (p.recommended_max as number) : undefined;
-  const enumVals = "enum" in p ? (p.enum as (number | string)[]) : undefined;
+  const enumVals =
+    "enum" in p
+      ? (p.enum as (number | string)[])
+      : "items" in p
+        ? ((p.items as { enum?: (number | string)[] }).enum ?? undefined)
+        : undefined;
   return {
-    default: p.default as number | boolean | string,
+    default: p.default as number | boolean | string | string[],
     min,
     minExclusive,
     max,
@@ -297,12 +302,14 @@ export const ENRICHMENT_PARAMS = {
   significance_threshold: enrichmentEntry("significance_threshold"),
   min_term_size: enrichmentEntry("min_term_size"),
   correction: enrichmentEntry("correction"),
+  sources: enrichmentEntry("sources"),
   no_iea: enrichmentEntry("no_iea"),
 } satisfies Record<string, AdmeParamMeta>;
 
 export const ENRICHMENT_NUMERIC_PARAMS = ["significance_threshold", "min_term_size"] as const;
 export const ENRICHMENT_BOOLEAN_PARAMS = ["no_iea"] as const;
 export const ENRICHMENT_SELECT_PARAMS = ["correction"] as const;
+export const ENRICHMENT_ARRAY_PARAMS = ["sources"] as const;
 
 // ---------------------------------------------------------------------------
 // Per-stage data-source display names — one shared home in the contract.

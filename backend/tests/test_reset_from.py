@@ -674,18 +674,18 @@ async def test_reset_from_defer_returns_run_set(monkeypatch):
 # enum, not rejected by the numeric fallthrough ("must be a number").
 # ---------------------------------------------------------------------------
 def test_validate_overrides_accepts_enum_string_param() -> None:
-    engine._validate_overrides("ppi", {"network_type": "physical"})  # valid enum member
-    engine._validate_overrides("ppi", {"min_confidence": 0.7})  # numeric tier still fine
+    engine.validate_overrides("ppi", {"network_type": "physical"})  # valid enum member
+    engine.validate_overrides("ppi", {"min_confidence": 0.7})  # numeric tier still fine
 
 
 def test_validate_overrides_rejects_off_enum_string() -> None:
     with pytest.raises(ValidationProblem):
-        engine._validate_overrides("ppi", {"network_type": "bogus"})
+        engine.validate_overrides("ppi", {"network_type": "bogus"})
 
 
 def test_validate_overrides_rejects_non_string_for_string_param() -> None:
     with pytest.raises(ValidationProblem):
-        engine._validate_overrides("ppi", {"network_type": 123})
+        engine.validate_overrides("ppi", {"network_type": 123})
 
 
 def test_validate_overrides_rejects_off_tier_numeric_enum() -> None:
@@ -693,12 +693,12 @@ def test_validate_overrides_rejects_off_tier_numeric_enum() -> None:
     # off-tier value (0.55 sits between the 0.15 and 0.9 bounds) must be rejected, symmetric
     # with the string-enum branch.
     with pytest.raises(ValidationProblem):
-        engine._validate_overrides("ppi", {"min_confidence": 0.55})
+        engine.validate_overrides("ppi", {"min_confidence": 0.55})
 
 
 def test_validate_overrides_accepts_on_tier_numeric_enum() -> None:
     for tier in (0.15, 0.4, 0.7, 0.9):
-        engine._validate_overrides("ppi", {"min_confidence": tier})  # exact tier is valid
+        engine.validate_overrides("ppi", {"min_confidence": tier})  # exact tier is valid
 
 
 # ---------------------------------------------------------------------------
@@ -706,27 +706,27 @@ def test_validate_overrides_accepts_on_tier_numeric_enum() -> None:
 # ---------------------------------------------------------------------------
 def test_validate_overrides_accepts_array_param() -> None:
     # enrichment.sources is an array of strings -> must validate, not 422.
-    engine._validate_overrides("enrichment", {"sources": ["GO:BP", "KEGG"]})
+    engine.validate_overrides("enrichment", {"sources": ["GO:BP", "KEGG"]})
 
 
 def test_validate_overrides_rejects_non_array_for_array_param() -> None:
     with pytest.raises(ValidationProblem):
-        engine._validate_overrides("enrichment", {"sources": "GO:BP"})
+        engine.validate_overrides("enrichment", {"sources": "GO:BP"})
 
 
 def test_validate_overrides_rejects_non_string_array_items() -> None:
     with pytest.raises(ValidationProblem):
-        engine._validate_overrides("enrichment", {"sources": [1, 2]})
+        engine.validate_overrides("enrichment", {"sources": [1, 2]})
 
 
 def test_sources_override_accepts_reac_wp() -> None:
     # REAC + WP are in the contract item enum -> valid override
-    engine._validate_overrides("enrichment", {"sources": ["GO:BP", "REAC", "WP"]})
+    engine.validate_overrides("enrichment", {"sources": ["GO:BP", "REAC", "WP"]})
 
 
 def test_sources_override_rejects_unknown_value() -> None:
     with pytest.raises(ValidationProblem):
-        engine._validate_overrides("enrichment", {"sources": ["NOT_A_SOURCE"]})
+        engine.validate_overrides("enrichment", {"sources": ["NOT_A_SOURCE"]})
 
 
 # ---------------------------------------------------------------------------

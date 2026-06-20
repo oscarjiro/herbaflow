@@ -9,7 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
 from app.pipeline.engine import run_analysis_task, run_stages_task
-from app.schemas.analysis import AnalysisCreate, AnalysisRead, ResetFromRequest, StageEditRequest
+from app.schemas.analysis import (
+    AnalysisCreate,
+    AnalysisListItem,
+    AnalysisRead,
+    ResetFromRequest,
+    StageEditRequest,
+)
 from app.security import RATE_LIMIT_CREATE, limiter
 from app.services.analysis import AnalysisService
 
@@ -36,6 +42,17 @@ async def create_analysis(
     if not replayed:
         background.add_task(run_analysis_task, run.analysis_id)
     return run
+
+
+@router.get("/analyses", response_model=list[AnalysisListItem])
+async def list_analyses(
+    limit: int = 50,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
+) -> list[AnalysisListItem]:
+    limit = max(1, min(limit, 100))
+    offset = max(0, offset)
+    return await AnalysisService.from_session(session).list_recent(limit=limit, offset=offset)
 
 
 @router.get("/analyses/{analysis_id}", response_model=AnalysisRead)

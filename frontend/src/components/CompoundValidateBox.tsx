@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { validateCompounds } from "../api/sdk.gen";
 import type { FailedInput, ResolvedCompound, ValidateResponse } from "../api/types.gen";
-import { humanizeProblem } from "../lib/problem";
+import type { Problem } from "../lib/problem";
+import { notifyError } from "../lib/toast";
+import { FailedInputList } from "./FailedInputList";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { LineNumberedTextarea } from "@/components/ui/line-numbered-textarea";
 
 /**
- * Reusable compound validate box: textarea + Validate button + resolved/failed lists.
+ * Reusable compound validate box: line-numbered editor + Validate button +
+ * resolved/failed lists.
  *
  * Props:
  *  - onResolved: called with resolved compounds when the user confirms (see showAddButton)
@@ -36,7 +38,15 @@ export function CompoundValidateBox({
   const [resolved, setResolved] = useState<ResolvedCompound[]>([]);
   const [failed, setFailed] = useState<FailedInput[]>([]);
 
+  const editorRef = useRef<HTMLTextAreaElement | null>(null);
   const textareaId = `compound-validate-box-${label.replace(/\s+/g, "-").toLowerCase()}`;
+
+  // Build 1-based line -> reason map from the failed list.
+  const errorLines: ReadonlyMap<number, string> = new Map(
+    failed
+      .filter((f): f is FailedInput & { line: number } => typeof f.line === "number")
+      .map((f) => [f.line, f.reason]),
+  );
 
   const validate = useMutation({
     mutationFn: async () => {
@@ -57,7 +67,7 @@ export function CompoundValidateBox({
       }
     },
     onError: (error) => {
-      toast.error(humanizeProblem(error as Parameters<typeof humanizeProblem>[0]));
+      notifyError(error as Problem);
     },
   });
 
@@ -72,14 +82,16 @@ export function CompoundValidateBox({
     <Card className="gap-3 py-4">
       <CardContent className="flex flex-col gap-3">
         <Label htmlFor={textareaId}>{label}</Label>
-        <Textarea
+        <LineNumberedTextarea
+          ref={editorRef}
           id={textareaId}
           aria-label={label}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={setText}
           placeholder="One SMILES or InChIKey per line"
           disabled={disabled}
           rows={3}
+          errorLines={errorLines}
         />
         <Button
           type="button"
@@ -104,18 +116,12 @@ export function CompoundValidateBox({
           </ul>
         )}
 
-        {failed.length > 0 && (
-          <ul aria-label="Failed inputs" className="flex flex-col gap-1">
-            {failed.map((f) => (
-              <li key={f.value} className="list-none text-xs [color:var(--hf-fg-3)]">
-                <Badge variant="destructive" className="mr-1.5">
-                  {f.value}
-                </Badge>
-                {f.reason}
-              </li>
-            ))}
-          </ul>
-        )}
+        <FailedInputList
+          failed={failed}
+          text={text}
+          editorRef={editorRef}
+          controlsId={`${textareaId}-failed`}
+        />
 
         {showAddButton && resolved.length > 0 && (
           <Button type="button" size="sm" onClick={handleAdd}>

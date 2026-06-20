@@ -34,11 +34,58 @@ describe("ApprovalBar", () => {
         status="stage_4_awaiting_approval"
         currentStage={4}
         disabled
-        disabledReason="No disease targets — lower min score or add one to continue."
+        disabledReason="No disease targets found. Lower the minimum score, run this step again, or add one to continue."
         onApprove={onApprove}
       />,
     );
     expect(screen.getByRole("button", { name: /approve/i })).toBeDisabled();
-    expect(screen.getByText(/lower min score/i)).toBeInTheDocument();
+    expect(screen.getByText(/run this step again/i)).toBeInTheDocument();
+  });
+
+  it("disables the button while pending without showing a disabledReason", () => {
+    render(
+      <ApprovalBar
+        stage={4}
+        status="stage_4_awaiting_approval"
+        currentStage={4}
+        pending
+        disabledReason="Should not appear"
+        onApprove={() => {}}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /approve/i })).toBeDisabled();
+    expect(screen.queryByText("Should not appear")).not.toBeInTheDocument();
+  });
+
+  it("shows disabledReason only when disabled is true, not when only pending", () => {
+    const { rerender } = render(
+      <ApprovalBar
+        stage={4}
+        status="stage_4_awaiting_approval"
+        currentStage={4}
+        disabled={false}
+        pending
+        disabledReason="Blocking reason"
+        onApprove={() => {}}
+      />,
+    );
+    // pending alone: button disabled but no reason text
+    expect(screen.getByRole("button", { name: /approve/i })).toBeDisabled();
+    expect(screen.queryByText("Blocking reason")).not.toBeInTheDocument();
+
+    // disabled alone: button disabled AND reason shown
+    rerender(
+      <ApprovalBar
+        stage={4}
+        status="stage_4_awaiting_approval"
+        currentStage={4}
+        disabled
+        pending={false}
+        disabledReason="Blocking reason"
+        onApprove={() => {}}
+      />,
+    );
+    expect(screen.getByRole("button", { name: /approve/i })).toBeDisabled();
+    expect(screen.getByText("Blocking reason")).toBeInTheDocument();
   });
 });

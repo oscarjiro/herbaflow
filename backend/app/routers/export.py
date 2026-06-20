@@ -13,7 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
 from app.errors import NotFoundProblem
-from app.services.export import ExportArtifacts, assemble_export
+from app.schemas.graph import CtpGraph
+from app.services.export import ExportArtifacts, assemble_ctp_graph, assemble_export
 
 router = APIRouter(tags=["export"])
 
@@ -117,6 +118,20 @@ async def export_ppi_nodes(
     return Response(
         a.ppi_nodes, media_type="text/csv", headers=_disposition("stage6_ppi_nodes.csv")
     )
+
+
+# ---------------------------------------------------------------------------
+# C-T-P graph as JSON (interactive frontend rendering). NOT under /export/ — it returns
+# graph data, not a download (no Content-Disposition) — but shares this results-handoff
+# router and the same complete-only (409) / missing (404) guards.
+# ---------------------------------------------------------------------------
+
+
+@router.get("/analyses/{analysis_id}/ctp-graph")
+async def get_ctp_graph(
+    analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
+) -> CtpGraph:
+    return await assemble_ctp_graph(session, analysis_id)
 
 
 @router.get("/analyses/{analysis_id}/export/{filename}")

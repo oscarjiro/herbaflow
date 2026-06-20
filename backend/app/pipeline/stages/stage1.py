@@ -21,6 +21,9 @@ class CompoundRow:
     plant_id: uuid.UUID
     compound_id: uuid.UUID
     canonical_name: str | None
+    smiles: str | None = None
+    inchikey: str | None = None
+    source_url: str | None = None
 
 
 def select_compounds(rows: list[CompoundRow]) -> dict[str, Any]:
@@ -29,7 +32,16 @@ def select_compounds(rows: list[CompoundRow]) -> dict[str, Any]:
     per_plant: dict[str, list[str]] = {}
     for row in rows:
         cid = str(row.compound_id)
-        compounds.setdefault(cid, {"compound_id": cid, "canonical_name": row.canonical_name})
+        compounds.setdefault(
+            cid,
+            {
+                "compound_id": cid,
+                "canonical_name": row.canonical_name,
+                "smiles": row.smiles,
+                "inchikey": row.inchikey,
+                "source_url": row.source_url,
+            },
+        )
         per_plant.setdefault(str(row.plant_id), [])
         if cid not in per_plant[str(row.plant_id)]:
             per_plant[str(row.plant_id)].append(cid)
@@ -48,13 +60,23 @@ async def run(session: AsyncSession, plant_ids: list[uuid.UUID]) -> dict[str, An
             PlantCompound.plant_id,
             PlantCompound.compound_id,
             Compound.canonical_name,
+            Compound.smiles,
+            Compound.inchi_key,
+            Compound.source_url,
         )
         .join(Compound, Compound.compound_id == PlantCompound.compound_id)
         .where(PlantCompound.plant_id.in_(plant_ids))
     )
     result = await session.execute(stmt)
     rows = [
-        CompoundRow(plant_id=r.plant_id, compound_id=r.compound_id, canonical_name=r.canonical_name)
+        CompoundRow(
+            plant_id=r.plant_id,
+            compound_id=r.compound_id,
+            canonical_name=r.canonical_name,
+            smiles=r.smiles,
+            inchikey=r.inchi_key,
+            source_url=r.source_url,
+        )
         for r in result.all()
     ]
     out = select_compounds(rows)

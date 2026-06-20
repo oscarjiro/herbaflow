@@ -6,12 +6,12 @@
  * pasting the result CSV back in.
  *
  * Flow:
- *  1. Pick one or more compounds (sorted least-covered-first; 0-coverage on top).
+ *  1. Pick one or more compounds (sorted by target coverage; 0-coverage on top).
  *  2. Copy their SMILES to the clipboard and open SwissTargetPrediction.
  *  3. Paste the STP result CSV; it is parsed (parseStpCsv) at the chosen
  *     probability threshold and previewed.
- *  4. Import → the pasted accessions are resolved via POST /targets/validate and the
- *     resolved targets are added to the run's Stage-3 target set — exactly like a
+ *  4. Import -> the pasted accessions are resolved via POST /targets/validate and the
+ *     resolved targets are added to the run's Step-3 target set, exactly like a
  *     manual target add. STP is user-asserted, so NO canonical compound→target edge
  *     is written; the targets are run-scoped only.
  *
@@ -21,10 +21,10 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { validateTargets } from "../../api/sdk.gen";
 import type { ResolvedTarget, ValidateTargetsResponse } from "../../api/types.gen";
-import { humanizeProblem } from "../../lib/problem";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifySuccess } from "../../lib/toast";
 import { parseStpCsv, type StpRow } from "../../lib/stp";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,13 +101,12 @@ export function StpDialog({
         failed: failed.length,
       };
     },
-    onSuccess: () => {
+    onSuccess: (summary) => {
       setSelected(new Set());
       setPasteText("");
+      notifySuccess(`Imported ${summary.added} targets`);
     },
-    onError: (error) => {
-      toast.error(humanizeProblem(error as Parameters<typeof humanizeProblem>[0]));
-    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   function toggle(id: string) {
@@ -127,10 +126,12 @@ export function StpDialog({
     try {
       await navigator.clipboard.writeText(smiles);
       setCopyNote(
-        `Copied ${withSmiles.length} SMILES${skipped > 0 ? ` (${skipped} skipped — no SMILES)` : ""}.`,
+        skipped > 0
+          ? `Copied ${withSmiles.length} SMILES. ${skipped} skipped because no SMILES were available.`
+          : `Copied ${withSmiles.length} SMILES.`,
       );
     } catch {
-      setCopyNote("Copy failed — your browser blocked clipboard access.");
+      setCopyNote("Copy failed. Your browser blocked clipboard access.");
     }
   }
 
@@ -141,24 +142,23 @@ export function StpDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline" size="sm">
-          SwissTargetPrediction import
+          Add SwissTargetPrediction targets
         </Button>
       </DialogTrigger>
       <DialogContent
         className="max-h-[85vh] max-w-2xl overflow-y-auto"
-        aria-label="SwissTargetPrediction import"
+        aria-label="Add targets from SwissTargetPrediction"
       >
         <DialogHeader>
-          <DialogTitle>SwissTargetPrediction (manual paste-back)</DialogTitle>
+          <DialogTitle>Add targets from SwissTargetPrediction</DialogTitle>
         </DialogHeader>
 
         <p className="text-sm [color:var(--hf-fg-3)]">
-          Pick the least-covered compounds, copy their SMILES into SwissTargetPrediction, then paste
-          the result CSV here. The resolved targets are added to this run only (not stored as
-          measured compound–target links).
+          Select compounds with few target matches, copy their SMILES into SwissTargetPrediction,
+          then paste the CSV here. New targets are added only to this analysis.
         </p>
 
-        {/* Compound picker — least-covered first (copy-SMILES convenience only) */}
+        {/* Compound picker: lowest coverage first (copy-SMILES convenience only). */}
         <fieldset className="flex flex-col gap-1.5">
           <legend className="mb-1 text-sm font-medium">Compounds to screen</legend>
           <ul aria-label="Compounds to screen" className="flex flex-col gap-1">
@@ -231,7 +231,7 @@ export function StpDialog({
               aria-label="Paste SwissTargetPrediction CSV"
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
-              placeholder={"Target,Common name,Uniprot ID,…,Probability*,…\n…"}
+              placeholder={"Target,Common name,Uniprot ID,...,Probability*,...\n..."}
               rows={6}
             />
           </div>
@@ -283,8 +283,9 @@ export function StpDialog({
 
         {result && (
           <p className="text-sm" role="status">
-            Added {result.added} target(s) to the run; {result.alreadyInRun} already present;{" "}
-            {result.failed} failed to resolve.
+            Added {result.added} {result.added === 1 ? "target" : "targets"}. {result.alreadyInRun}{" "}
+            {result.alreadyInRun === 1 ? "was" : "were"} already present. {result.failed} could not
+            be matched.
           </p>
         )}
       </DialogContent>

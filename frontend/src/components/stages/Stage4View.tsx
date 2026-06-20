@@ -30,7 +30,11 @@ import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
+import { getAnalysisOptions } from "../../api/@tanstack/react-query.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
+import { markEntitiesRemoved } from "../../lib/optimisticEdit";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import {
   DISEASE_TARGETS_NUMERIC_PARAMS,
   DISEASE_TARGETS_PARAMS,
@@ -140,6 +144,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const redo = useMutation({
     mutationFn: (changed: Record<string, number | boolean | string>) =>
@@ -147,12 +152,29 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 4 },
         body: { parameters: { "4": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 4");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
   const edit = useMutation({
     mutationFn: (body: { add: string[]; remove: string[] }) =>
       editStage({ path: { analysis_id: data.analysis_id, stage: 4 }, body }),
-    onSuccess: () => qc.invalidateQueries(),
+    onMutate: async (body) => {
+      if (body.remove.length === 0) return { prev: undefined };
+      const key = getAnalysisOptions({ path: { analysis_id: data.analysis_id } }).queryKey;
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<AnalysisRead>(key);
+      if (prev) qc.setQueryData<AnalysisRead>(key, markEntitiesRemoved(prev, 4, body.remove));
+      return { prev };
+    },
+    onError: (error, _body, ctx) => {
+      const key = getAnalysisOptions({ path: { analysis_id: data.analysis_id } }).queryKey;
+      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
+      notifyError(error as Problem);
+    },
+    onSettled: () => qc.invalidateQueries(),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
@@ -173,7 +195,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 4 — Disease Targets</h2>
+        <h2>Step 4: Disease Targets</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -239,7 +261,9 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
           onClick={() => edit.mutate({ add: [], remove: [row.original.target_id] })}
           disabled={atMinEntities(effectiveCount)}
           title={
-            atMinEntities(effectiveCount) ? "A stage must keep at least one entry." : undefined
+            atMinEntities(effectiveCount)
+              ? "Keep at least one target before removing another."
+              : undefined
           }
         >
           ✕
@@ -254,14 +278,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 4</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">
-            Step 4 — Disease Targets
-            {isUserProvided && (
-              <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
-                Provided by you
-              </Badge>
-            )}
-          </h2>
+          <h2 className="hf-heading-serif">Step 4: Disease Targets</h2>
         </div>
         <StageEntityContext data={data} side="disease" />
       </div>
@@ -292,12 +309,17 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
 
       {stage4.count === 0 && (
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")} role="status">
-          No disease targets at this score floor. Lower the min score and Redo, or add targets by
-          hand.
+          No disease targets match this score. Lower the minimum score, run this step again, or add
+          targets manually.
         </p>
       )}
 
       {/* Disease-targets table card */}
+      {isUserProvided && (
+        <div>
+          <Badge variant="secondary">Provided by you</Badge>
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
@@ -387,9 +409,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         />
       )}
 
-      {(stage4 as { stale?: boolean }).stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
+      {rerunFrom === 4 && <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />}
       <ApprovalBar
         stage={4}
         status={data.status}
@@ -397,9 +417,10 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         disabled={stage4.count === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
-            : "No disease targets — lower min score and Redo, or add one to continue."
+            ? "Run the updated step before continuing."
+            : "No disease targets found. Lower the minimum score, run this step again, or add one to continue."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
 

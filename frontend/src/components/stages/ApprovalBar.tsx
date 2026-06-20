@@ -4,7 +4,8 @@
  * Renders only when the run is awaiting approval AND this view is the current
  * stage (`currentStage === stage`), so stacked stage views never show more than
  * one Approve button. When `disabled`, the button is inert and `disabledReason`
- * is shown (used for the empty-stage blocking-stop).
+ * is shown (used for the empty-stage blocking-stop). When `pending`, the button
+ * is disabled transiently while the mutation is in-flight; no reason is shown.
  */
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export function ApprovalBar({
   onApprove,
   disabled = false,
   disabledReason,
+  pending = false,
 }: {
   stage: number;
   status: string | null | undefined;
@@ -23,6 +25,8 @@ export function ApprovalBar({
   onApprove: () => void;
   disabled?: boolean;
   disabledReason?: string;
+  /** True while the advance mutation is in-flight — disables the button without showing a reason. */
+  pending?: boolean;
 }) {
   if (!status || currentStage == null) return null;
   if (currentStage !== stage) return null;
@@ -30,7 +34,7 @@ export function ApprovalBar({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <Button onClick={onApprove} disabled={disabled}>
+      <Button onClick={onApprove} disabled={disabled || pending}>
         Approve &amp; Continue
       </Button>
       {disabled && disabledReason && (

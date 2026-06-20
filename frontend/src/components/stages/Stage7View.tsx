@@ -13,21 +13,23 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import {
   HUB_GENES_BOOLEAN_PARAMS,
   HUB_GENES_NUMERIC_PARAMS,
   HUB_GENES_PARAMS,
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
-import { exportArtifactUrl } from "../../lib/exportUrl";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
+import { ChartFrame } from "@/components/charts/ChartFrame";
+import { HubBarChart } from "@/components/charts/HubBarChart";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
-import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 7 result shape (narrowed from unknown)
@@ -88,12 +90,13 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   const hubParams = (data.parameters as Record<string, unknown> | undefined)?.hub_genes as
     | HubParams
     | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
+  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const redo = useMutation({
     mutationFn: (changed: HubParams) =>
@@ -101,7 +104,11 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 7 },
         body: { parameters: { "7": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 7");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
@@ -121,7 +128,6 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   );
 
   const tooSmall = (stage7.flags ?? []).includes("network_too_small");
-  const stale = stage7.stale === true;
   const isComplete = data.status === "complete";
 
   // Column definitions — SAME columns + order as the prior <table>
@@ -177,7 +183,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       {/* Editorial header */}
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 7</Eyebrow>
-        <h2 className="hf-heading-serif">Step 7 — Hub Genes</h2>
+        <h2 className="hf-heading-serif">Step 7: Hub Genes</h2>
       </div>
 
       <StageDataSources stage={7} />
@@ -211,20 +217,15 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
       {tooSmall && (
         <p className="text-muted-foreground text-sm" role="status">
-          The network is small or sparse — centrality ranking is unreliable on trivial topology.
+          The network is small or sparse. Centrality ranking is unreliable on trivial topology.
         </p>
       )}
 
-      {/* Hub bar chart image (complete-only, onError-hidden) */}
-      {isComplete && (
-        <img
-          className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-          alt="Top hub genes"
-          src={exportArtifactUrl(data.analysis_id, "stage7_hub_bar.png")}
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
+      {/* Hub bar chart — interactive recharts (complete-only, gracefully absent when hubs is empty) */}
+      {isComplete && hubs.length > 0 && (
+        <ChartFrame title="Hub genes by MCC" filename="hub_genes_mcc.png">
+          <HubBarChart hubs={hubs.map((h) => ({ gene_symbol: h.gene_symbol, mcc: h.mcc }))} />
+        </ChartFrame>
       )}
 
       {/* Hub-ranking table card */}
@@ -303,15 +304,13 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         />
       )}
 
-      {stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
       <ApprovalBar
         stage={7}
         status={data.status}
         currentStage={data.current_stage}
         disabled={anyStale}
-        disabledReason="Re-run the out-of-date step before continuing."
+        disabledReason="Run the updated step before continuing."
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
 

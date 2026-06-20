@@ -1,8 +1,8 @@
 /**
  * Stage8View — Stage 8 functional enrichment (g:Profiler, GO + KEGG). Terminal stage.
  *
- * Param-bearing (`enrichment`: significance_threshold, min_term_size, correction, no_iea;
- * `sources` stays frozen — the multi-select control is deferred to Phase 5). Renders summary
+ * Param-bearing (`enrichment`: significance_threshold, min_term_size, correction, no_iea,
+ * sources). Renders summary
  * cards (input/background gene counts + the shown custom background source), the enriched-terms
  * table + CSV, the param panel (Redo via reset-from/8), honest-null + degraded notices, the
  * data-sources footer, and the ApprovalBar (approving completes the run).
@@ -14,23 +14,26 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import {
+  ENRICHMENT_ARRAY_PARAMS,
   ENRICHMENT_BOOLEAN_PARAMS,
   ENRICHMENT_NUMERIC_PARAMS,
   ENRICHMENT_PARAMS,
   ENRICHMENT_SELECT_PARAMS,
 } from "../../contract";
 import { useStaleState } from "../../hooks/useStaleState";
-import { exportArtifactUrl } from "../../lib/exportUrl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
+import { ChartFrame } from "@/components/charts/ChartFrame";
+import { EnrichmentDotChart } from "@/components/charts/EnrichmentDotChart";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
-import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 8 result shape (narrowed from unknown)
@@ -63,7 +66,7 @@ type Stage8Result = {
   stale?: boolean;
 };
 
-type EnrichmentParams = Record<string, number | boolean | string>;
+type EnrichmentParams = Record<string, number | boolean | string | string[]>;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -94,12 +97,13 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   const enrichParams = (data.parameters as Record<string, unknown> | undefined)?.enrichment as
     | EnrichmentParams
     | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
+  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const redo = useMutation({
     mutationFn: (changed: EnrichmentParams) =>
@@ -107,7 +111,11 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 8 },
         body: { parameters: { "8": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 8");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
@@ -126,7 +134,6 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
-  const stale = stage8.stale === true;
   const isComplete = data.status === "complete";
 
   // Column definitions — SAME columns + order as the prior <table>
@@ -168,7 +175,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
       {/* Editorial header */}
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 8</Eyebrow>
-        <h2 className="hf-heading-serif">Step 8 — Functional Enrichment</h2>
+        <h2 className="hf-heading-serif">Step 8: Functional Enrichment</h2>
       </div>
 
       <StageDataSources stage={8} />
@@ -213,21 +220,21 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
 
       <p className="text-muted-foreground text-sm">
         Background: {stage8.background_source.replace(/_/g, " ")} ({stage8.background_gene_count}{" "}
-        genes) — the methodologically-correct custom universe (not the whole genome).
+        genes). Custom universe, not the whole genome.
       </p>
 
       {stage8.degraded && (
         <div role="status">
           <Badge variant="destructive">
-            g:Profiler was unavailable — enrichment was skipped, but the run still completed.
+            g:Profiler was unavailable. Enrichment was skipped, but the run still completed.
           </Badge>
         </div>
       )}
 
       {!stage8.degraded && stage8.count === 0 && (
         <p className="text-muted-foreground text-sm" role="status">
-          No terms survived correction at this threshold — an honest null for a small or
-          well-dispersed gene set.
+          No terms survived correction at this threshold. The gene set may be small or widely
+          distributed.
         </p>
       )}
 
@@ -294,28 +301,19 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         </Card>
       )}
 
-      {/* Per-category enrichment chart images (complete-only, onError-hidden) */}
-      {isComplete &&
-        (
-          [
-            ["BP", "Biological Process"],
-            ["MF", "Molecular Function"],
-            ["CC", "Cellular Component"],
-            ["KEGG", "KEGG Pathway"],
-            ["REAC", "Reactome Pathway"],
-            ["WP", "WikiPathways"],
-          ] as [string, string][]
-        ).map(([cat, label]) => (
-          <img
-            key={cat}
-            className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-            alt={`${label} enrichment`}
-            src={exportArtifactUrl(data.analysis_id, `stage8_enrichment_${cat}.png`)}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
+      {/* Interactive enrichment dot chart (complete-only, only when terms exist) */}
+      {isComplete && terms.length > 0 && (
+        <ChartFrame title="Pathway enrichment" filename="pathway_enrichment.png">
+          <EnrichmentDotChart
+            terms={terms.map((t) => ({
+              source: t.source,
+              name: t.name,
+              p_value: t.p_value,
+              intersection_size: t.intersection_size,
+            }))}
           />
-        ))}
+        </ChartFrame>
+      )}
 
       {/* Enrichment param panel */}
       {enrichParams && (
@@ -325,19 +323,16 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           numericKeys={ENRICHMENT_NUMERIC_PARAMS}
           booleanKeys={ENRICHMENT_BOOLEAN_PARAMS}
           selectKeys={ENRICHMENT_SELECT_PARAMS}
+          arrayKeys={ENRICHMENT_ARRAY_PARAMS}
           title="Enrichment parameters"
           disabled={redo.isPending}
           onRedo={(changed) => redo.mutate(changed)}
         />
       )}
 
-      {stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
-
       {isComplete ? (
         <p className="text-muted-foreground text-sm" role="status">
-          Pipeline complete — all eight stages finished.
+          Analysis complete. All eight steps finished.
         </p>
       ) : (
         <ApprovalBar
@@ -345,7 +340,8 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           status={data.status}
           currentStage={data.current_stage}
           disabled={anyStale}
-          disabledReason="Re-run the out-of-date step before continuing."
+          disabledReason="Run the updated step before continuing."
+          pending={advance.isPending}
           onApprove={() => advance.mutate()}
         />
       )}

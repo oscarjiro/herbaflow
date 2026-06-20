@@ -13,6 +13,7 @@ from app import contracts
 from app.clock import now_utc
 from app.errors import ConflictProblem, GoneProblem, NotFoundProblem, ValidationProblem
 from app.pipeline import edits, engine, entry_modes, state
+from app.pipeline.engine import validate_overrides
 from app.pipeline.limits import EntityCapExceeded, check_entity_cap
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
@@ -20,7 +21,7 @@ from app.repositories.compound_target import CompoundTargetRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
 from app.repositories.target import TargetRepository
-from app.schemas.analysis import AnalysisCreate, AnalysisRead
+from app.schemas.analysis import AnalysisCreate, AnalysisListItem, AnalysisRead
 
 logger = logging.getLogger("herbaflow.analysis")
 
@@ -148,6 +149,20 @@ class AnalysisService:
             "hub_genes": contracts.hub_genes_defaults(),
             "enrichment": contracts.enrichment_defaults(),
         }
+
+        # Apply per-group parameter overrides from the create request (if any).
+        # Validation happens before any persistence: a bad override rejects the whole create
+        # (422) and nothing is written. Unknown groups and unknown keys within a valid group are
+        # both rejected. The merged dict becomes the run's frozen parameter baseline.
+        if payload.parameters:
+            for group, overrides in payload.parameters.items():
+                if group not in pipeline_parameters:
+                    raise ValidationProblem(detail=f"Unknown parameter group: {group}.")
+                if not isinstance(overrides, dict):
+                    raise ValidationProblem(detail=f"Parameters for {group} must be an object.")
+                validate_overrides(group, overrides)  # 422 on bad bound/type/enum/unknown key
+                pipeline_parameters[group].update(overrides)  # merge over defaults
+
         extra_parameters: dict[str, Any] = {
             "input_modes": {"plant": plant_mode, "disease": disease_mode}
         }
@@ -314,6 +329,10 @@ class AnalysisService:
         if run.expires_at is not None and run.expires_at < now_utc():
             raise GoneProblem(detail="Analysis run has expired.")
         return AnalysisRead.model_validate(run)
+
+    async def list_recent(self, *, limit: int, offset: int) -> list[AnalysisListItem]:
+        runs = await self.analysis_repo.list_recent(limit=limit, offset=offset)
+        return [AnalysisListItem.model_validate(r) for r in runs]
 
     async def delete(self, analysis_id: uuid.UUID) -> None:
         run = await self.analysis_repo.get(analysis_id)

@@ -12,6 +12,26 @@ from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validat
 from app import contracts
 
 
+class AnalysisListItem(BaseModel):
+    """Lean per-run shape for the recent-runs list.
+
+    Deliberately omits ``stage_results`` (the heavy per-stage tables).
+    ``parameters`` is kept — it carries ``input_modes`` / ``labels`` / ``plant_ids``;
+    its size is bounded by the entity caps.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    analysis_id: uuid.UUID
+    analysis_name: str | None
+    status: str | None
+    current_stage: int | None
+    created_at: datetime | None
+    completed_at: datetime | None
+    disease_id: uuid.UUID | None
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
 class Mode(enum.StrEnum):
     auto = "auto"
     guided = "guided"
@@ -40,6 +60,15 @@ class AnalysisCreate(BaseModel):
     manual_disease_target_ids: list[uuid.UUID] = Field(default_factory=list)
     plant_label: str | None = Field(default=None, max_length=200)
     disease_label: str | None = Field(default=None, max_length=200)
+    parameters: dict[str, dict[str, Any]] | None = Field(
+        default=None,
+        description=(
+            "Per-group parameter overrides for any pipeline group "
+            "(adme / target / disease_targets / ppi / hub_genes / enrichment); "
+            "validated against the contract hard bounds at create, merged over the group "
+            "defaults, and frozen as the run baseline."
+        ),
+    )
 
     @model_validator(mode="after")
     def _validate_modes(self) -> AnalysisCreate:

@@ -22,3 +22,18 @@ export function runHasCompounds(
   const plant = run?.parameters?.input_modes?.plant ?? "selection";
   return plant !== "manual_targets";
 }
+
+/**
+ * Merge `incoming` items into `existing`, deduplicating by the given id key.
+ * Existing items come first; genuinely new items are appended in their original order.
+ * Pure — returns a new array; never mutates either input.
+ */
+export function mergeById<T extends Record<string, unknown>>(
+  existing: T[],
+  incoming: T[],
+  idKey: keyof T,
+): T[] {
+  const seen = new Set(existing.map((item) => item[idKey]));
+  const genuinelyNew = incoming.filter((item) => !seen.has(item[idKey]));
+  return [...existing, ...genuinelyNew];
+}

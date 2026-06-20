@@ -25,14 +25,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
 import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import {
   PPI_BOOLEAN_PARAMS,
   PPI_NUMERIC_PARAMS,
   PPI_PARAMS,
   PPI_SELECT_PARAMS,
 } from "../../contract";
+import type cytoscape from "cytoscape";
 import { useStaleState } from "../../hooks/useStaleState";
-import { exportArtifactUrl } from "../../lib/exportUrl";
+import { useChartColors } from "@/lib/chartTheme";
+import { NetworkGraph } from "@/components/charts/NetworkGraph";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -42,7 +46,6 @@ import { Eyebrow } from "@/components/ui/editorial";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
-import { StaleNotice } from "./StaleNotice";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 6 result shapes (narrowed from unknown)
@@ -79,6 +82,13 @@ type Stage6Blocked = {
 
 type Stage6Result = Stage6Computed | Stage6Blocked;
 
+type Stage7Hub = {
+  rank?: number;
+  target_id?: string | null;
+  gene_symbol: string;
+  mcc: number;
+};
+
 type PpiParams = Record<string, number | boolean | string>;
 
 // ---------------------------------------------------------------------------
@@ -97,6 +107,117 @@ function buildS6CsvRows(edges: Stage6Edge[]): unknown[][] {
   return edges.map((e) => [e.source, e.target, e.confidence]);
 }
 
+type NetworkElements = {
+  elements: cytoscape.ElementDefinition[];
+  isolated: string[];
+  maxMcc: number;
+};
+
+/**
+ * Build the flat Cytoscape elements array for the PPI network.
+ *
+ * Edges connect by a resolver that maps BOTH gene_symbol and string_id to the
+ * canonical node id (the gene symbol), so an edge endpoint expressed either way
+ * still links. Only edges whose both endpoints resolve to a known node are kept;
+ * only nodes that appear in at least one kept edge are added (isolated nodes are
+ * collected for the not-connected tray, not drawn). MCC (from Stage 7) sizes the
+ * hub nodes; hub nodes are those present in the MCC map.
+ */
+function buildNetworkElements(
+  nodes: Stage6Node[],
+  edges: Stage6Edge[],
+  hubs: Stage7Hub[],
+): NetworkElements {
+  // Map every node key (gene_symbol and string_id) to the canonical id.
+  const idByKey = new Map<string, string>();
+  for (const n of nodes) {
+    const id = n.gene_symbol;
+    idByKey.set(n.gene_symbol, id);
+    if (n.string_id) idByKey.set(n.string_id, id);
+  }
+  const resolve = (endpoint: string) => idByKey.get(endpoint);
+
+  // MCC by gene_symbol and by target_id; hubs are the keys of this map.
+  const mccByKey = new Map<string, number>();
+  for (const h of hubs) {
+    mccByKey.set(h.gene_symbol, h.mcc);
+    if (h.target_id) mccByKey.set(h.target_id, h.mcc);
+  }
+
+  const elements: cytoscape.ElementDefinition[] = [];
+  const connected = new Set<string>();
+
+  edges.forEach((e, i) => {
+    const source = resolve(e.source);
+    const target = resolve(e.target);
+    if (!source || !target) return;
+    elements.push({ data: { id: `e-${i}`, source, target, weight: e.confidence } });
+    connected.add(source);
+    connected.add(target);
+  });
+
+  let maxMcc = 0;
+  const isolated: string[] = [];
+  for (const n of nodes) {
+    const id = n.gene_symbol;
+    if (!connected.has(id)) {
+      isolated.push(id);
+      continue;
+    }
+    const mcc =
+      mccByKey.get(n.gene_symbol) ?? (n.target_id ? mccByKey.get(n.target_id) : undefined) ?? 0;
+    if (mcc > maxMcc) maxMcc = mcc;
+    elements.push({
+      data: { id, label: n.gene_symbol, mcc, hub: mccByKey.has(n.gene_symbol) ? "true" : "false" },
+    });
+  }
+
+  return { elements, isolated, maxMcc };
+}
+
+/** Build the Cytoscape stylesheet from resolved hf-* color strings. */
+function buildNetworkStylesheet(
+  colors: ReturnType<typeof useChartColors>,
+  minConfidence: number,
+  maxMcc: number,
+): cytoscape.StylesheetJson {
+  const sizeStyle =
+    maxMcc > 0
+      ? {
+          width: `mapData(mcc, 0, ${maxMcc}, 16, 52)`,
+          height: `mapData(mcc, 0, ${maxMcc}, 16, 52)`,
+        }
+      : { width: 24, height: 24 };
+  return [
+    {
+      selector: "node",
+      style: {
+        ...sizeStyle,
+        "background-color": colors.sage,
+        label: "data(label)",
+        color: colors.fg1,
+        "font-size": 9,
+        "text-valign": "bottom",
+        "text-halign": "center",
+        "text-margin-y": 2,
+      },
+    },
+    {
+      selector: 'node[hub = "true"]',
+      style: { "background-color": colors.sageDeep },
+    },
+    {
+      selector: "edge",
+      style: {
+        width: `mapData(weight, ${minConfidence}, 1, 1, 4)`,
+        "line-color": colors.border,
+        "curve-style": "bezier",
+        opacity: 0.6,
+      },
+    },
+  ] as cytoscape.StylesheetJson;
+}
+
 // ---------------------------------------------------------------------------
 // Stage6View
 // ---------------------------------------------------------------------------
@@ -106,12 +227,13 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   const ppiParams = (data.parameters as Record<string, unknown> | undefined)?.ppi as
     | PpiParams
     | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
+  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
   const redo = useMutation({
     mutationFn: (changed: PpiParams) =>
@@ -119,7 +241,11 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 6 },
         body: { parameters: { "6": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 6");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
@@ -128,6 +254,20 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   const computed = stage6 && !isBlocked(stage6) ? stage6 : undefined;
   const edges = useMemo(() => computed?.edges ?? [], [computed]);
   const csvRows = useMemo(() => buildS6CsvRows(edges), [edges]);
+
+  const colors = useChartColors();
+  const hubs = useMemo(
+    () => (data.stage_results?.["7"] as { hubs?: Stage7Hub[] } | undefined)?.hubs ?? [],
+    [data.stage_results],
+  );
+  const network = useMemo(
+    () => buildNetworkElements(computed?.nodes ?? [], computed?.edges ?? [], hubs),
+    [computed, hubs],
+  );
+  const stylesheet = useMemo(
+    () => buildNetworkStylesheet(colors, computed?.min_confidence ?? 0, network.maxMcc),
+    [colors, computed, network.maxMcc],
+  );
 
   if (!stage6) return null;
 
@@ -142,7 +282,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
-  const stale = (stage6 as { stale?: boolean }).stale === true;
   const isComplete = data.status === "complete";
 
   // Column definitions — SAME columns + order as the prior <table>
@@ -182,7 +321,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
       {/* Editorial header */}
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 6</Eyebrow>
-        <h2 className="hf-heading-serif">Step 6 — PPI Network</h2>
+        <h2 className="hf-heading-serif">Step 6: PPI Network</h2>
       </div>
 
       <StageDataSources stage={6} />
@@ -346,24 +485,28 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
         )
       )}
 
-      {/* STRING network image (complete-only, onError-hidden) */}
-      {isComplete && (
-        <img
-          className="border-hf-border max-w-full rounded-[var(--radius-3)] border"
-          alt="PPI network"
-          src={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
+      {/* Interactive PPI network (complete-only; the deterministic server PNG
+          stays in the export bundle). Blocked / empty states have their own UI
+          above, so the graph simply does not render then. */}
+      {isComplete && computed && computed.nodes.length > 0 && (
+        <NetworkGraph
+          title="Interaction network"
+          filename="ppi_network.png"
+          elements={network.elements}
+          stylesheet={stylesheet}
+          tray={
+            network.isolated.length > 0 ? (
+              <p className="text-muted-foreground mt-3 text-sm">
+                Not connected at this confidence: {network.isolated.join(", ")}
+              </p>
+            ) : undefined
+          }
         />
       )}
 
       {/* PPI param panel — always shown (raise the cap / change settings + Redo) */}
       {paramPanel}
 
-      {stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
       <ApprovalBar
         stage={6}
         status={data.status}
@@ -371,11 +514,12 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
         disabled={Boolean(blocked) || (computed?.node_count ?? 0) === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
+            ? "Run the updated step before continuing."
             : blocked
-              ? "Overlap too large — enable the top-N cap and Redo, or narrow the inputs."
-              : "No PPI nodes — adjust the parameters and Redo, or narrow the inputs."
+              ? "Overlap too large. Enable the top-N cap and Redo, or narrow the inputs."
+              : "No PPI nodes. Adjust the parameters and Redo, or narrow the inputs."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
     </section>

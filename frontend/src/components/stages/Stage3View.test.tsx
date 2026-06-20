@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Stage3View } from "./Stage3View";
 import * as sdk from "../../api/sdk.gen";
+import * as toastLib from "../../lib/toast";
 import type { AnalysisRead } from "../../api/types.gen";
 import "../../lib/api";
 
@@ -128,6 +129,32 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("Stage3View", () => {
+  it("uses cleaned Step 3 heading and empty-result approval copy", () => {
+    wrap(
+      <Stage3View
+        data={makeRun({
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": {
+              ...SAMPLE_STAGE3_RESULTS,
+              targets: [],
+              compound_targets: [],
+              count: 0,
+            },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Step 3: Target Identification" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("No targets found. Adjust the settings or add one to continue."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/No targets —/)).not.toBeInTheDocument();
+  });
+
   it("renders the gene symbol in the targets table", () => {
     const { container } = wrap(<Stage3View data={makeRun()} />);
     expect(targetsTable(container).getByText("TP53")).toBeInTheDocument();
@@ -153,7 +180,69 @@ describe("Stage3View", () => {
   it("shows per-source ChEMBL edge count", () => {
     wrap(<Stage3View data={makeRun()} />);
     // ChEMBL source card carries an aria-label with value 1.
-    expect(screen.getByLabelText(/1 ChEMBL edges/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/1 ChEMBL target links/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/1 ChEMBL edges/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/0 PubChem BioAssay target links/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/0 PubChem BioAssay edges/i)).not.toBeInTheDocument();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    wrap(
+      <Stage3View
+        data={makeRun({
+          parameters: { target: TARGET_FROZEN, rerun_from: 2 },
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": { ...SAMPLE_STAGE3_RESULTS, stale: true },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the StaleNotice when rerun_from === 3 (Stage 3 is the edited stage)", () => {
+    wrap(
+      <Stage3View
+        data={makeRun({
+          parameters: { target: TARGET_FROZEN, rerun_from: 3 },
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": { ...SAMPLE_STAGE3_RESULTS, stale: true },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+    // StaleNotice renders its card with role="status" and the re-run button
+    expect(
+      screen.getByText("These results are out of date. An earlier step changed."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /re-run from step 3/i })).toBeInTheDocument();
+  });
+
+  it("does NOT render the StaleNotice when rerun_from is not 3", () => {
+    // rerun_from === 1 means Stage 1 was edited; Stage 3 is downstream-stale but
+    // the notice belongs under Stage 1, not here.
+    wrap(
+      <Stage3View
+        data={makeRun({
+          parameters: { target: TARGET_FROZEN, rerun_from: 1 },
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": { ...SAMPLE_STAGE3_RESULTS, stale: true },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+    expect(
+      screen.queryByText("These results are out of date. An earlier step changed."),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /re-run from step/i })).not.toBeInTheDocument();
   });
 
   it("keeps the 0-coverage compound row visible", () => {
@@ -201,6 +290,9 @@ describe("Stage3View", () => {
     const data = makeRun();
     (data as { stage_state?: Record<string, string> }).stage_state = { "3": "not_applicable" };
     wrap(<Stage3View data={data} />);
+    expect(
+      screen.getByRole("heading", { name: "Step 3: Target Identification" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
     // No targets table content.
     expect(screen.queryByText("TP53")).not.toBeInTheDocument();
@@ -215,7 +307,7 @@ describe("Stage3View", () => {
     // No per-compound coverage section and no STP dialog.
     expect(screen.queryByText(/per-compound coverage/i)).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("region", { name: /swisstargetprediction import/i }),
+      screen.queryByRole("region", { name: /add targets from swisstargetprediction/i }),
     ).not.toBeInTheDocument();
   });
 
@@ -237,7 +329,7 @@ describe("Stage3View", () => {
     wrap(<Stage3View data={data} />);
     expect(screen.getByText(/per-compound coverage/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /swisstargetprediction import/i }),
+      screen.getByRole("button", { name: /add swisstargetprediction targets/i }),
     ).toBeInTheDocument();
   });
 });
@@ -279,7 +371,10 @@ describe("Stage3View — removed-row hiding + delete column", () => {
     wrap(<Stage3View data={makeDataWithRemoved()} />);
     expect(screen.getByText("PPARG")).toBeInTheDocument();
     expect(screen.queryByText("TP53")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Remove PPARG" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove PPARG" })).toHaveAttribute(
+      "title",
+      "Keep at least one target before removing another.",
+    );
   });
 });
 
@@ -457,5 +552,47 @@ describe("Stage3View — already-in-run deduplication", () => {
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/already in run/i));
     // editStage should NOT have been called at all
     expect(editSpy).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D-4: Toast wiring — advance error fires notifyError; redo success fires notifyInfo
+// ---------------------------------------------------------------------------
+
+describe("Stage3View — D-4 toast wiring", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("fires notifyError when advance fails", async () => {
+    vi.spyOn(sdk, "advanceAnalysis").mockRejectedValue({ detail: "Server error." });
+    const notifyErrorSpy = vi.spyOn(toastLib, "notifyError").mockImplementation(() => {});
+
+    wrap(<Stage3View data={makeRun()} />);
+    const approveBtn = screen.getByRole("button", { name: /approve & continue/i });
+    await userEvent.click(approveBtn);
+
+    await waitFor(() => expect(notifyErrorSpy).toHaveBeenCalledTimes(1));
+  });
+
+  it("fires notifyInfo with 'Re-running from step 3' when redo succeeds", async () => {
+    vi.spyOn(sdk, "resetFrom").mockResolvedValue({ data: {} } as never);
+    const notifyInfoSpy = vi.spyOn(toastLib, "notifyInfo").mockImplementation(() => {});
+
+    wrap(
+      <Stage3View
+        data={makeRun({
+          stage_state: { "3": "computed" },
+          parameters: { target: { min_pchembl: 4, min_assay_confidence: 0.4 } },
+        })}
+      />,
+    );
+
+    // Open param panel ("Target parameters" is the ParamPanel title)
+    await userEvent.click(screen.getByRole("button", { name: /target parameters/i }));
+    const input = screen.getByLabelText(/min.*pchembl/i);
+    await userEvent.clear(input);
+    await userEvent.type(input, "6");
+    await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
+
+    await waitFor(() => expect(notifyInfoSpy).toHaveBeenCalledWith("Re-running from step 3"));
   });
 });

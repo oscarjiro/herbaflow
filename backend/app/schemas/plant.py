@@ -14,3 +14,4 @@ class PlantRead(BaseModel):
     canonical_key: str
     canonical_scientific_name: str | None
     family_name: str | None
+    matched_alias: str | None = None

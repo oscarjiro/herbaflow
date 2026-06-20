@@ -1,8 +1,13 @@
 import "@testing-library/jest-dom/vitest";
+import { configure } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { server } from "./handlers";
 // Configure the generated API client to point at localhost:8000 (where MSW intercepts).
 import "../src/lib/api";
+
+// Raise the async utility timeout so that findBy* queries survive the slower
+// module-transform pass that heavier dependencies (e.g. recharts) introduce.
+configure({ asyncUtilTimeout: 4000 });
 
 // In vitest's jsdom environment, globalThis.AbortController is jsdom's own
 // implementation. Node's built-in Request (undici, used by hey-api) validates
@@ -75,6 +80,16 @@ if (typeof window.matchMedia === "undefined") {
       dispatchEvent: () => false,
     }) as unknown as MediaQueryList;
   window.matchMedia = stub;
+}
+
+// jsdom does not implement ResizeObserver — Radix Popover uses it internally.
+// Provide a no-op stub so popovers/comboboxes can open in tests.
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
 }
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));

@@ -1,12 +1,39 @@
-import { describe, expect, it } from "vitest";
+import React from "react";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "@/lib/theme";
 import { Stage8View } from "./Stage8View";
 import type { AnalysisRead } from "../../api/types.gen";
 
+// ---------------------------------------------------------------------------
+// Mock recharts ResponsiveContainer — jsdom renders it at 0-size otherwise.
+// ---------------------------------------------------------------------------
+
+vi.mock("recharts", async (orig) => {
+  const actual = await orig<typeof import("recharts")>();
+  return {
+    ...actual,
+    ResponsiveContainer: ({ children }: { children: React.ReactElement }) =>
+      React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+        width: 800,
+        height: 400,
+      }),
+  };
+});
+
 function wrap(ui: React.ReactNode) {
-  const qc = new QueryClient();
-  return <QueryClientProvider client={qc}>{ui}</QueryClientProvider>;
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return (
+    <QueryClientProvider client={qc}>
+      <ThemeProvider>{ui}</ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
+async function openEnrichmentPanel() {
+  await userEvent.click(screen.getByRole("button", { name: /enrichment parameters/i }));
 }
 
 const base = {
@@ -56,12 +83,25 @@ describe("Stage8View", () => {
         },
       },
     } as unknown as AnalysisRead;
-    render(wrap(<Stage8View data={data} />));
-    expect(screen.getByText("Step 8 — Functional Enrichment")).toBeInTheDocument();
-    expect(screen.getByText("PI3K-Akt")).toBeInTheDocument();
+    const { container } = render(wrap(<Stage8View data={data} />));
+    const stage8 = container.firstElementChild as HTMLElement;
+    expect(screen.getByText("Step 8: Functional Enrichment")).toBeInTheDocument();
+    expect(screen.getAllByText("PI3K-Akt").length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByText(/Background: compound target universe \(800 genes\)\./i),
+    ).toHaveTextContent("Custom universe, not the whole genome.");
+    expect(stage8).not.toHaveTextContent("—");
+    expect(stage8).not.toHaveTextContent("methodologically-correct");
+    expect(stage8).not.toHaveTextContent("honest null");
+    expect(stage8).not.toHaveTextContent("Pipeline complete");
+    expect(screen.getByText("Analysis complete. All eight steps finished.")).toBeInTheDocument();
+    // Interactive chart replaces the six server-rendered PNGs.
+    expect(screen.getByText("Pathway enrichment")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
+    expect(document.querySelector('img[src*="stage8_enrichment_"]')).not.toBeInTheDocument();
   });
 
-  it("renders the enrichment param panel with no_iea control", () => {
+  it("renders the enrichment param panel with no_iea control", async () => {
     const data = {
       ...base,
       status: "complete",
@@ -83,9 +123,37 @@ describe("Stage8View", () => {
       },
     } as unknown as AnalysisRead;
     render(wrap(<Stage8View data={data} />));
-    expect(screen.getByLabelText("significance_threshold")).toBeInTheDocument();
-    expect(screen.getByLabelText("no_iea")).toBeInTheDocument();
+    await openEnrichmentPanel();
+    expect(screen.getByLabelText("Significance threshold (corrected p ≤)")).toBeInTheDocument();
+    expect(screen.getByLabelText("Exclude electronic annotations (IEA)")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
+  });
+
+  it("surfaces Reactome and WikiPathways enrichment source options", async () => {
+    const data = {
+      ...base,
+      status: "complete",
+      stage_results: {
+        "8": {
+          state: "computed",
+          terms: [],
+          input_gene_count: 3,
+          background_gene_count: 800,
+          background_source: "compound_target_universe",
+          correction: "fdr",
+          significance_threshold: 0.05,
+          min_term_size: 5,
+          sources: ["GO:BP", "KEGG"],
+          degraded: false,
+          count: 0,
+          flags: [],
+        },
+      },
+    } as unknown as AnalysisRead;
+    render(wrap(<Stage8View data={data} />));
+    await openEnrichmentPanel();
+    expect(screen.getByLabelText("Reactome")).toBeInTheDocument();
+    expect(screen.getByLabelText("WikiPathways")).toBeInTheDocument();
   });
 
   it("shows the degraded notice", () => {
@@ -111,7 +179,45 @@ describe("Stage8View", () => {
     } as unknown as AnalysisRead;
     render(wrap(<Stage8View data={data} />));
     expect(
-      screen.getByText(/g:Profiler was unavailable — enrichment was skipped/i),
+      screen.getByText(
+        "g:Profiler was unavailable. Enrichment was skipped, but the run still completed.",
+      ),
     ).toBeInTheDocument();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    const data = {
+      ...base,
+      status: "stage_8_awaiting_approval",
+      parameters: {
+        ...base.parameters,
+        rerun_from: 7,
+      },
+      stage_results: {
+        "8": {
+          state: "computed",
+          terms: [],
+          input_gene_count: 3,
+          background_gene_count: 800,
+          background_source: "compound_target_universe",
+          correction: "fdr",
+          significance_threshold: 0.05,
+          min_term_size: 5,
+          sources: ["GO:BP"],
+          degraded: false,
+          count: 0,
+          flags: [],
+          stale: true,
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    render(wrap(<Stage8View data={data} />));
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
   });
 });

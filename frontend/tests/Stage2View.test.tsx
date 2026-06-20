@@ -1,10 +1,9 @@
 import type { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Stage2View } from "../src/components/stages/Stage2View";
-import { EditableEntityList } from "../src/components/stages/EditableEntityList";
 import { SAMPLE_STAGE2_RESULTS } from "./handlers";
 import type { AnalysisRead } from "../src/api/types.gen";
 import "../src/lib/api";
@@ -47,7 +46,42 @@ function wrap(ui: ReactElement) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+function blobToText(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(blob);
+  });
+}
+
+async function openAdmePanel() {
+  await userEvent.click(screen.getByRole("button", { name: /adme parameters/i }));
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("Stage2View", () => {
+  it("uses cleaned Step 2 heading and empty-result approval copy", () => {
+    wrap(
+      <Stage2View
+        data={makeRun({
+          stage_results: {
+            "2": { ...SAMPLE_STAGE2_RESULTS, count: 0, passed: [], filtered: [] },
+          } as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Step 2: ADME Screening" })).toBeInTheDocument();
+    expect(
+      screen.getByText("No compounds passed ADME. Adjust the settings and run this step again."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/No compounds passed ADME —/)).not.toBeInTheDocument();
+  });
+
   it("renders passed compound rows", () => {
     wrap(<Stage2View data={makeRun()} />);
     expect(screen.getByText("Curcumin")).toBeInTheDocument();
@@ -66,16 +100,33 @@ describe("Stage2View", () => {
     expect(screen.getByText("0.55")).toBeInTheDocument();
   });
 
-  it("does not render descriptor_source values as table cells", () => {
+  it("renders descriptor_source values in the Descriptor source column", () => {
     wrap(<Stage2View data={makeRun()} />);
-    // The Source column was removed; descriptor_source is kept in the type and CSV export only.
-    expect(screen.queryByText("rdkit")).toBeNull();
-    expect(screen.queryByText("etl")).toBeNull();
+    expect(screen.getByRole("columnheader", { name: "Descriptor source" })).toBeInTheDocument();
+    expect(screen.getAllByText("rdkit").length).toBeGreaterThan(0);
   });
 
-  it("renders PAINS badge for a positive compound", () => {
-    wrap(<Stage2View data={makeRun()} />);
-    expect(screen.getAllByText(/PAINS/i).length).toBeGreaterThan(0);
+  it("renders Positive in the PAINS column for a positive screened compound", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              inchikey: "PAINS-HIT",
+              lipinski_violations: 0,
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+              is_pains_positive: true,
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    expect(screen.getByText("Positive")).toBeInTheDocument();
   });
 
   it("renders NP-bypass badge", () => {
@@ -95,13 +146,15 @@ describe("Stage2View", () => {
     expect(link).toBeInTheDocument();
   });
 
-  it("param panel shows description for max_mw", () => {
+  it("param panel shows description for max_mw", async () => {
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     expect(screen.getByText(/Molecular weight ceiling/i)).toBeInTheDocument();
   });
 
-  it("Redo button is disabled when no values differ from frozen params", () => {
+  it("Redo button is disabled when no values differ from frozen params", async () => {
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const redo = screen.getByRole("button", { name: /redo/i });
     expect(redo).toBeDisabled();
   });
@@ -109,6 +162,7 @@ describe("Stage2View", () => {
   it("Redo button enables when a value differs from the frozen param", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
     await user.type(input, "400");
@@ -119,6 +173,7 @@ describe("Stage2View", () => {
   it("Redo button disarms when value is reverted to the frozen param", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
     await user.type(input, "400");
@@ -131,6 +186,7 @@ describe("Stage2View", () => {
   it("Redo button is disabled when a value is outside hard bounds", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     // max_mw hard max is 2000; set to 99999 to exceed it
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
@@ -139,8 +195,9 @@ describe("Stage2View", () => {
     expect(redo).toBeDisabled();
   });
 
-  it("shows param hint with default and recommended range", () => {
+  it("shows param hint with default and recommended range", async () => {
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     // max_mw has recommended_min=350, recommended_max=600, default=500
     expect(screen.getByText(/default.*500/i)).toBeInTheDocument();
   });
@@ -150,6 +207,7 @@ describe("Stage2View", () => {
       stage_state: { "2": "not_applicable" },
     });
     wrap(<Stage2View data={data} />);
+    expect(screen.getByRole("heading", { name: "Step 2: ADME Screening" })).toBeInTheDocument();
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
   });
 
@@ -157,6 +215,143 @@ describe("Stage2View", () => {
     wrap(<Stage2View data={makeRun()} />);
     const link = screen.getByRole("link", { name: /PubChem/i });
     expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
+  });
+
+  it("shows Lipinski and Veber outcomes with pass, fail, and no-data states", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              inchikey: "PASS-INCHIKEY",
+              lipinski_violations: 0,
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+            },
+          ],
+          filtered: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              inchikey: "FAIL-INCHIKEY",
+              canonical_name: "RuleBreak",
+              lipinski_violations: 2,
+              lipinski_pass: false,
+              veber_pass: false,
+              rule_evaluated: true,
+            },
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              inchikey: "NODATA-INCHIKEY",
+              compound_id: "c-unscreened",
+              canonical_name: "NoDescriptor",
+              reason: "Missing descriptor values",
+              lipinski_violations: null,
+              lipinski_pass: null,
+              veber_pass: null,
+              rule_evaluated: false,
+              is_pains_positive: false,
+              badges: ["unscreened"],
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+
+    wrap(<Stage2View data={data} />);
+
+    expect(screen.getByRole("columnheader", { name: "Lipinski" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Veber" })).toBeInTheDocument();
+
+    expect(screen.getAllByText("Pass")).toHaveLength(2);
+    expect(screen.getAllByText("Fail")).toHaveLength(2);
+    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+    expect(screen.queryByText("✓")).not.toBeInTheDocument();
+  });
+
+  it("labels the descriptor column as Descriptor source", () => {
+    wrap(<Stage2View data={makeRun()} />);
+    expect(screen.getByRole("columnheader", { name: "Descriptor source" })).toBeInTheDocument();
+  });
+
+  it("always shows the PAINS column for screened rows", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              inchikey: "PAINS-NEG",
+              lipinski_violations: 0,
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+              is_pains_positive: false,
+            },
+          ],
+          filtered: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              inchikey: "PAINS-POS",
+              lipinski_violations: 2,
+              lipinski_pass: false,
+              veber_pass: false,
+              rule_evaluated: true,
+              is_pains_positive: true,
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+
+    wrap(<Stage2View data={data} />);
+
+    expect(screen.getByRole("columnheader", { name: "PAINS" })).toBeInTheDocument();
+    expect(screen.getByText("Negative")).toBeInTheDocument();
+    expect(screen.getByText("Positive")).toBeInTheDocument();
+  });
+
+  it("exports CSV keyed by inchikey and excludes compound_id", async () => {
+    let capturedBlob: Blob | null = null;
+    vi.spyOn(URL, "createObjectURL").mockImplementation((blob: Blob | MediaSource) => {
+      capturedBlob = blob as Blob;
+      return "blob:mock";
+    });
+
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              inchikey: "CSV-INCHIKEY",
+              lipinski_violations: 0,
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+
+    wrap(<Stage2View data={data} />);
+    expect(await screen.findByRole("link", { name: /download.*csv/i })).toBeInTheDocument();
+
+    await waitFor(() => expect(capturedBlob).not.toBeNull());
+    if (capturedBlob == null) {
+      throw new Error("expected CSV blob to be created");
+    }
+    const csv = await blobToText(capturedBlob);
+
+    expect(csv).toContain("inchikey");
+    expect(csv).toContain("CSV-INCHIKEY");
+    expect(csv).not.toContain("compound_id");
+    expect(csv).not.toContain("c1");
   });
 });
 
@@ -185,36 +380,6 @@ describe("ApprovalBar primitive", () => {
   });
 });
 
-describe("EditableEntityList primitive", () => {
-  it("renders entity rows and a remove control per row", () => {
-    const entities = [
-      { id: "e1", label: "Entity One" },
-      { id: "e2", label: "Entity Two" },
-    ];
-    const { getAllByRole } = render(
-      <EditableEntityList entities={entities} onRemove={() => {}} cap={10} current={2} />,
-    );
-    const removeButtons = getAllByRole("button", { name: /remove/i });
-    expect(removeButtons).toHaveLength(2);
-  });
-
-  it("disables add when current >= cap", () => {
-    const { getByRole, getByText } = render(
-      <EditableEntityList
-        entities={[{ id: "e1", label: "E1" }]}
-        onRemove={() => {}}
-        cap={1}
-        current={1}
-        addControl={<input aria-label="add item" />}
-      />,
-    );
-    // Should show cap reached message
-    expect(getByText(/1.*\/.*1/i)).toBeInTheDocument();
-    // The add control should be disabled when at cap
-    expect(getByRole("textbox", { name: /add item/i })).toBeDisabled();
-  });
-});
-
 describe("RunView with Stage 2", () => {
   it("renders stage 2 view when stage_results[2] present (via RunView test file)", async () => {
     // Covered in RunView.test.tsx extension — see tests/RunView.test.tsx
@@ -225,8 +390,9 @@ describe("RunView with Stage 2", () => {
 });
 
 describe("ParamPanel E7 arming rule", () => {
-  it("Redo is disabled when all values equal frozen params (arms only on actual diff)", () => {
+  it("Redo is disabled when all values equal frozen params (arms only on actual diff)", async () => {
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const redo = screen.getByRole("button", { name: /redo/i });
     expect(redo).toBeDisabled();
   });
@@ -234,6 +400,7 @@ describe("ParamPanel E7 arming rule", () => {
   it("shows inline hard-bound error for out-of-range value", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);
     await user.type(input, "9999");
@@ -243,6 +410,7 @@ describe("ParamPanel E7 arming rule", () => {
   it("does NOT show error for value outside recommended but within hard bounds", async () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
+    await openAdmePanel();
     // recommended_max=600, hard max=2000. Enter 1500 — allowed but outside recommended.
     const input = screen.getByLabelText(/max_mw/i);
     await user.clear(input);

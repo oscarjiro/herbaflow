@@ -1,17 +1,32 @@
+import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, test, vi } from "vitest";
 import { RunView } from "../src/components/RunView";
+import { ThemeProvider } from "../src/lib/theme";
 import "../src/lib/api";
 import { server } from "./handlers";
+
+// Mock react-cytoscapejs so the graph never really renders in jsdom.
+vi.mock("react-cytoscapejs", () => ({
+  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
+    cy?.({ png: () => "data:image/png;base64,AAAA" });
+    return React.createElement("div", {
+      "data-testid": "cytoscape",
+      "data-count": String(elements?.length ?? 0),
+    });
+  },
+}));
 
 function wrap(analysisId: string) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <RunView analysisId={analysisId} />
+      <ThemeProvider>
+        <RunView analysisId={analysisId} />
+      </ThemeProvider>
     </QueryClientProvider>,
   );
 }
@@ -20,7 +35,8 @@ test("renders the stage 1 compound list", async () => {
   wrap("r1");
   expect(await screen.findByText("Alpha")).toBeInTheDocument();
   // Status is shown as a Badge in the run header (no "Status:" label prefix in the new layout).
-  expect(await screen.findByText("complete")).toBeInTheDocument();
+  expect(await screen.findByText("Complete")).toBeInTheDocument();
+  expect(screen.queryByText("complete")).not.toBeInTheDocument();
 });
 
 describe("RunView with Stage 2 data", () => {
@@ -31,6 +47,14 @@ describe("RunView with Stage 2 data", () => {
     // Compound names appear in the table (may appear multiple times across stage1 list + table)
     const curcuminEls = await screen.findAllByText("Curcumin");
     expect(curcuminEls.length).toBeGreaterThan(0);
+  });
+
+  it("shows a readable waiting status instead of the raw backend value", async () => {
+    wrap("r2");
+    await screen.findByRole("heading", { name: /step 2/i });
+
+    expect(screen.getByText("Waiting for review")).toBeInTheDocument();
+    expect(screen.queryByText("stage_2_awaiting_approval")).not.toBeInTheDocument();
   });
 
   it("shows exactly one ApprovalBar at stage_2_awaiting_approval", async () => {
@@ -204,6 +228,42 @@ describe("stale stage (r-stale)", () => {
     wrap("r-stale");
     expect(await screen.findByRole("button", { name: /re-run from step 1/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+  });
+});
+
+describe("empty Stage 1 checkpoint (r-empty1)", () => {
+  it("shows the cleaned empty-compound approval reason", async () => {
+    server.use(
+      http.get("http://localhost:8000/analyses/r-empty1", () =>
+        HttpResponse.json({
+          analysis_id: "r-empty1",
+          analysis_name: null,
+          disease_id: "d1",
+          mode: "guided",
+          status: "stage_1_awaiting_approval",
+          current_stage: 1,
+          parameters: {},
+          stage_results: {
+            "1": {
+              count: 0,
+              compounds: [],
+              per_plant: {},
+              state: "computed",
+            },
+          },
+          created_at: null,
+          completed_at: null,
+          expires_at: null,
+          error_message: null,
+        }),
+      ),
+    );
+
+    wrap("r-empty1");
+
+    expect(await screen.findByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("No compounds found. Add one to continue.")).toBeInTheDocument();
   });
 });
 
@@ -287,7 +347,9 @@ describe("failed run recovery (r-failed)", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
-        <RunView analysisId="r-failed" onReset={onReset} />
+        <ThemeProvider>
+          <RunView analysisId="r-failed" onReset={onReset} />
+        </ThemeProvider>
       </QueryClientProvider>,
     );
     const btn = await screen.findByRole("button", { name: /back to setup/i });

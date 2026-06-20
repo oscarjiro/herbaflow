@@ -39,7 +39,7 @@ test("renders resolved and failed lists, Add button fires onResolved", async () 
   const onResolved = vi.fn();
   render(wrap(<TargetValidateBox onResolved={onResolved} showAddButton />));
 
-  // Type two lines into the textarea
+  // Type two lines into the editor
   await userEvent.type(screen.getByLabelText("Add targets"), "TP53\nNOTAHUMAN");
 
   // Click Validate
@@ -49,8 +49,16 @@ test("renders resolved and failed lists, Add button fires onResolved", async () 
   await screen.findByRole("list", { name: "Resolved targets" });
   expect(screen.getByText("TP53")).toBeInTheDocument();
 
-  // Failed list renders with reason
+  // Failed list is collapsed behind "1 invalid input" control
+  const collapseBtn = await screen.findByRole("button", { name: /invalid input/i });
+  expect(collapseBtn).toHaveTextContent("1 invalid input");
+
+  // Expand the failed list
+  await userEvent.click(collapseBtn);
   const failedList = await screen.findByRole("list", { name: "Failed inputs" });
+
+  // Failed item shows "Line 2:" prefix
+  expect(failedList).toHaveTextContent(/Line 2:/);
   expect(failedList).toHaveTextContent(/human/i);
 
   // onResolved not yet called (showAddButton=true)
@@ -60,4 +68,40 @@ test("renders resolved and failed lists, Add button fires onResolved", async () 
   await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
 
   await waitFor(() => expect(onResolved).toHaveBeenCalledWith([RESOLVED_TARGET]));
+});
+
+test("failed item without a line number renders without Line N: prefix", async () => {
+  server.use(
+    http.post("http://localhost:8000/targets/validate", () =>
+      HttpResponse.json({
+        resolved: [],
+        failed: [{ value: "BADVAL", reason: "not recognised", line: null }],
+      }),
+    ),
+  );
+
+  render(wrap(<TargetValidateBox onResolved={vi.fn()} />));
+  await userEvent.type(screen.getByLabelText("Add targets"), "BADVAL");
+  await userEvent.click(screen.getByRole("button", { name: /validate/i }));
+
+  const collapseBtn = await screen.findByRole("button", { name: /invalid input/i });
+  await userEvent.click(collapseBtn);
+
+  const failedList = await screen.findByRole("list", { name: "Failed inputs" });
+  expect(failedList).not.toHaveTextContent(/Line \d+:/);
+  expect(failedList).toHaveTextContent(/not recognised/i);
+});
+
+test("the line-numbered editor still drives text state", async () => {
+  server.use(
+    http.post("http://localhost:8000/targets/validate", () =>
+      HttpResponse.json({ resolved: [], failed: [] }),
+    ),
+  );
+
+  render(wrap(<TargetValidateBox onResolved={vi.fn()} />));
+  const editor = screen.getByRole("textbox", { name: "Add targets" });
+  await userEvent.type(editor, "ABC");
+  // The editor is a real textarea so its value should update
+  expect((editor as HTMLTextAreaElement).value).toBe("ABC");
 });

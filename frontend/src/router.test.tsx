@@ -1,8 +1,37 @@
+import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter, createMemoryHistory } from "@tanstack/react-router";
 import { render, screen, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
 import { routeTree } from "./routeTree.gen";
 import "./lib/api";
+
+// Mock react-cytoscapejs so the CTP network graph never tries to use canvas APIs in jsdom.
+vi.mock("react-cytoscapejs", () => ({
+  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
+    cy?.({ png: () => "data:image/png;base64,AAAA" });
+    return React.createElement("div", {
+      "data-testid": "cytoscape",
+      "data-count": String(elements?.length ?? 0),
+    });
+  },
+}));
+
+test("/ renders the landing page with a CTA link to /analysis", async () => {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const router = createRouter({
+    routeTree,
+    history: createMemoryHistory({ initialEntries: ["/"] }),
+  });
+  render(
+    <QueryClientProvider client={qc}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  );
+  // The landing page renders the app name and the Start an analysis CTA
+  expect(await screen.findByRole("heading", { name: /herbaflow/i })).toBeInTheDocument();
+  expect(await screen.findByRole("link", { name: /start an analysis/i })).toBeInTheDocument();
+});
 
 test("/analysis renders the setup view (New analysis heading)", async () => {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

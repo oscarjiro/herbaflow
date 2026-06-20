@@ -24,7 +24,11 @@ import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
+import { getAnalysisOptions } from "../../api/@tanstack/react-query.gen";
 import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
+import { markEntitiesRemoved } from "../../lib/optimisticEdit";
+import type { Problem } from "../../lib/problem";
+import { notifyError, notifyInfo } from "../../lib/toast";
 import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contract";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig } from "../../lib/format";
@@ -210,6 +214,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   const advance = useMutation({
     mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
     onSuccess: () => qc.invalidateQueries(),
+    onError: (error) => notifyError(error as Problem),
   });
 
   const redo = useMutation({
@@ -218,13 +223,30 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         path: { analysis_id: data.analysis_id, stage: 3 },
         body: { parameters: { "3": changed } },
       }),
-    onSuccess: () => qc.invalidateQueries(),
+    onSuccess: () => {
+      void qc.invalidateQueries();
+      notifyInfo("Re-running from step 3");
+    },
+    onError: (error) => notifyError(error as Problem),
   });
 
   const edit = useMutation({
     mutationFn: (body: { add: string[]; remove: string[] }) =>
       editStage({ path: { analysis_id: data.analysis_id, stage: 3 }, body }),
-    onSuccess: () => qc.invalidateQueries(),
+    onMutate: async (body) => {
+      if (body.remove.length === 0) return { prev: undefined };
+      const key = getAnalysisOptions({ path: { analysis_id: data.analysis_id } }).queryKey;
+      await qc.cancelQueries({ queryKey: key });
+      const prev = qc.getQueryData<AnalysisRead>(key);
+      if (prev) qc.setQueryData<AnalysisRead>(key, markEntitiesRemoved(prev, 3, body.remove));
+      return { prev };
+    },
+    onError: (error, _body, ctx) => {
+      const key = getAnalysisOptions({ path: { analysis_id: data.analysis_id } }).queryKey;
+      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
+      notifyError(error as Problem);
+    },
+    onSettled: () => qc.invalidateQueries(),
   });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
@@ -255,7 +277,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 3 — Target Identification</h2>
+        <h2>Step 3: Target Identification</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -346,7 +368,9 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
           onClick={() => edit.mutate({ add: [], remove: [row.original.target_id] })}
           disabled={atMinEntities(effectiveCount)}
           title={
-            atMinEntities(effectiveCount) ? "A stage must keep at least one entry." : undefined
+            atMinEntities(effectiveCount)
+              ? "Keep at least one target before removing another."
+              : undefined
           }
         >
           ✕
@@ -387,14 +411,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       <div className="flex flex-col gap-1">
         <Eyebrow>Step 3</Eyebrow>
         <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">
-            Step 3 — Target Identification
-            {isUserProvided && (
-              <Badge variant="outline" className="ml-2 align-middle text-xs font-normal">
-                Provided by you
-              </Badge>
-            )}
-          </h2>
+          <h2 className="hf-heading-serif">Step 3: Target Identification</h2>
         </div>
         <StageEntityContext data={data} side="plant" />
       </div>
@@ -423,7 +440,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
             </div>
             <div
               className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-              aria-label={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL edges`}
+              aria-label={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL target links`}
             >
               <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
                 {sourceCounts.chembl_bioactivity ?? 0}
@@ -432,7 +449,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
             </div>
             <div
               className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-              aria-label={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay edges`}
+              aria-label={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay target links`}
             >
               <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
                 {sourceCounts.pubchem_bioassay ?? 0}
@@ -444,6 +461,11 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       </div>
 
       {/* Targets table card */}
+      {isUserProvided && (
+        <div>
+          <Badge variant="secondary">Provided by you</Badge>
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
@@ -556,9 +578,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       )}
 
       {/* Approval */}
-      {(stage3 as { stale?: boolean }).stale && rerunFrom != null && (
-        <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
-      )}
+      {rerunFrom === 3 && <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />}
       <ApprovalBar
         stage={3}
         status={data.status}
@@ -566,9 +586,10 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         disabled={stage3.count === 0 || anyStale}
         disabledReason={
           anyStale
-            ? "Re-run the out-of-date step before continuing."
-            : "No targets — adjust parameters or add one to continue."
+            ? "Run the updated step before continuing."
+            : "No targets found. Adjust the settings or add one to continue."
         }
+        pending={advance.isPending}
         onApprove={() => advance.mutate()}
       />
 

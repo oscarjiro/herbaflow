@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
+import { ThemeProvider } from "@/lib/theme";
 import { Stage5View } from "./Stage5View";
 import type { AnalysisRead } from "../../api/types.gen";
 
@@ -45,10 +46,19 @@ function makeData(overrides?: { overlap?: object[] }): AnalysisRead {
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <ThemeProvider>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </ThemeProvider>,
+  );
 }
 
 describe("Stage5View — overlap view", () => {
+  it("renders the cleaned Step 5 heading", () => {
+    wrap(<Stage5View data={makeData()} />);
+    expect(screen.getByText("Step 5: Target Overlap")).toBeInTheDocument();
+  });
+
   it("renders the overlap count card", () => {
     wrap(<Stage5View data={makeData()} />);
     expect(screen.getByLabelText(/2 overlap targets/i)).toBeInTheDocument();
@@ -78,20 +88,78 @@ describe("Stage5View — overlap view", () => {
     expect(screen.queryByText(/parameters/i)).toBeNull();
   });
 
-  it("shows the venn image when complete", () => {
+  it("renders the interactive venn chart inside a ChartFrame when complete and counts > 0", () => {
     const completeData: AnalysisRead = {
       ...makeData(),
       status: "complete",
     } as unknown as AnalysisRead;
     wrap(<Stage5View data={completeData} />);
-    expect(screen.getByRole("img", { name: /overlap/i })).toHaveAttribute(
-      "src",
-      expect.stringContaining("/export/stage5_venn.png"),
-    );
+    // ChartFrame renders the title in its card header and shows a Download PNG button
+    // (getAllByText because the SVG <title> also contains the same string)
+    const titleNodes = screen.getAllByText("Target overlap");
+    expect(titleNodes.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
+    // The old server-rendered PNG img is gone
+    expect(screen.queryByRole("img", { name: /target overlap/i })).toBeNull();
   });
 
-  it("does not show the venn image when not complete", () => {
+  it("does not render the venn chart when not complete", () => {
     wrap(<Stage5View data={makeData()} />);
-    expect(screen.queryByRole("img", { name: /overlap/i })).toBeNull();
+    expect(screen.queryByText("Target overlap")).toBeNull();
+    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
+  });
+
+  it("renders the cleaned zero-overlap approval reason", () => {
+    const data = makeData({ overlap: [] });
+    data.stage_results = {
+      "5": {
+        ...makeStage5Result({ overlap: [] }),
+        count: 0,
+      },
+    };
+
+    wrap(<Stage5View data={data} />);
+    expect(
+      screen.getByText("No overlap targets. Check Step 3 and Step 4 results."),
+    ).toBeInTheDocument();
+  });
+
+  it("uses cleaned stale approval copy", () => {
+    const data = makeData();
+    data.parameters = { rerun_from: 4 } as AnalysisRead["parameters"];
+    data.stage_results = {
+      "5": {
+        ...makeStage5Result(),
+        stale: true,
+      },
+    } as unknown as AnalysisRead["stage_results"];
+
+    wrap(<Stage5View data={data} />);
+
+    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
+    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Re-run the out-of-date step before continuing."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("does NOT render a StaleNotice even when the stage is stale (notice belongs under the edited stage, never here)", () => {
+    // Stage 3 was edited (rerun_from === 3); Stage 5 is downstream-stale.
+    // The StaleNotice must appear under Stage 3, not Stage 5.
+    const data = makeData();
+    data.parameters = { rerun_from: 3 } as AnalysisRead["parameters"];
+    data.stage_results = {
+      "5": {
+        ...makeStage5Result(),
+        stale: true,
+      },
+    } as unknown as AnalysisRead["stage_results"];
+
+    wrap(<Stage5View data={data} />);
+
+    expect(
+      screen.queryByText("These results are out of date. An earlier step changed."),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /re-run from step/i })).not.toBeInTheDocument();
   });
 });

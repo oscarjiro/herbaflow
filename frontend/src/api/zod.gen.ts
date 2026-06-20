@@ -35,7 +35,40 @@ export const zAnalysisCreate = z.object({
     disease_label: z.union([
         z.string().max(200),
         z.null()
+    ]).optional(),
+    parameters: z.union([
+        z.object({}),
+        z.null()
     ]).optional()
+});
+
+export const zAnalysisListItem = z.object({
+    analysis_id: z.string().uuid(),
+    analysis_name: z.union([
+        z.string(),
+        z.null()
+    ]),
+    status: z.union([
+        z.string(),
+        z.null()
+    ]),
+    current_stage: z.union([
+        z.number().int(),
+        z.null()
+    ]),
+    created_at: z.union([
+        z.string().datetime(),
+        z.null()
+    ]),
+    completed_at: z.union([
+        z.string().datetime(),
+        z.null()
+    ]),
+    disease_id: z.union([
+        z.string().uuid(),
+        z.null()
+    ]),
+    parameters: z.object({}).optional()
 });
 
 export const zAnalysisRead = z.object({
@@ -92,6 +125,45 @@ export const zCompoundInput = z.object({
     value: z.string()
 });
 
+export const zCtpGraph = z.object({
+    nodes: z.array(z.object({
+        id: z.string(),
+        label: z.string(),
+        type: z.string(),
+        inchikey: z.string(),
+        smiles: z.string(),
+        uniprot_accession: z.string(),
+        is_hub: z.string(),
+        source: z.string()
+    })),
+    edges: z.array(z.object({
+        source: z.string(),
+        target: z.string(),
+        interaction: z.string(),
+        prediction_method: z.string(),
+        p_value: z.string()
+    }))
+});
+
+export const zCtpGraphEdge = z.object({
+    source: z.string(),
+    target: z.string(),
+    interaction: z.string(),
+    prediction_method: z.string(),
+    p_value: z.string()
+});
+
+export const zCtpGraphNode = z.object({
+    id: z.string(),
+    label: z.string(),
+    type: z.string(),
+    inchikey: z.string(),
+    smiles: z.string(),
+    uniprot_accession: z.string(),
+    is_hub: z.string(),
+    source: z.string()
+});
+
 export const zDiseaseInputMode = z.enum([
     'selection',
     'manual_disease_targets'
@@ -119,7 +191,11 @@ export const zDiseaseRead = z.object({
     retrieved_at: z.union([
         z.string().datetime(),
         z.null()
-    ])
+    ]),
+    matched_alias: z.union([
+        z.string(),
+        z.null()
+    ]).optional()
 });
 
 export const zFailedInput = z.object({
@@ -162,7 +238,11 @@ export const zPlantRead = z.object({
     family_name: z.union([
         z.string(),
         z.null()
-    ])
+    ]),
+    matched_alias: z.union([
+        z.string(),
+        z.null()
+    ]).optional()
 });
 
 export const zResetFromRequest = z.object({
@@ -242,6 +322,8 @@ export const zListDiseasesResponse = z.array(zDiseaseRead);
 
 export const zListPlantsResponse = z.array(zPlantRead);
 
+export const zListAnalysesResponse = z.array(zAnalysisListItem);
+
 export const zCreateAnalysisResponse = zAnalysisRead;
 
 export const zDeleteAnalysisResponse = z.void();
@@ -257,5 +339,7 @@ export const zEditStageResponse = zAnalysisRead;
 export const zValidateCompoundsResponse = zValidateResponse;
 
 export const zValidateTargetsResponse2 = zValidateTargetsResponse;
+
+export const zGetCtpGraphResponse = zCtpGraph;
 
 export const zHealthResponse = z.object({});

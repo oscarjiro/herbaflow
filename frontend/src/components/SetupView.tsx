@@ -1,99 +1,342 @@
-import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { listDiseasesOptions, listPlantsOptions } from "../api/@tanstack/react-query.gen";
-import { createAnalysis } from "../api/sdk.gen";
+import { useCallback, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { listDiseases, listPlants, createAnalysis } from "../api/sdk.gen";
+import type { Problem } from "../lib/problem";
+import { notifyError } from "../lib/toast";
 import type { AnalysisRead, ResolvedCompound, ResolvedTarget } from "../api/types.gen";
+import { mergeById } from "../lib/entities";
 import {
+  ADME_BOOLEAN_PARAMS,
+  ADME_NUMERIC_PARAMS,
+  ADME_PARAMS,
   DEFAULT_DISEASE_INPUT_MODE,
   DEFAULT_MODE,
   DEFAULT_PLANT_INPUT_MODE,
   DISEASE_INPUT_MODES,
+  DISEASE_TARGETS_NUMERIC_PARAMS,
+  DISEASE_TARGETS_PARAMS,
+  ENRICHMENT_ARRAY_PARAMS,
+  ENRICHMENT_BOOLEAN_PARAMS,
+  ENRICHMENT_NUMERIC_PARAMS,
+  ENRICHMENT_PARAMS,
+  ENRICHMENT_SELECT_PARAMS,
+  HUB_GENES_BOOLEAN_PARAMS,
+  HUB_GENES_NUMERIC_PARAMS,
+  HUB_GENES_PARAMS,
   MAX_PLANTS,
   MODES,
   PLANT_INPUT_MODES,
+  PPI_BOOLEAN_PARAMS,
+  PPI_NUMERIC_PARAMS,
+  PPI_PARAMS,
+  PPI_SELECT_PARAMS,
+  TARGET_NUMERIC_PARAMS,
+  TARGET_PARAMS,
 } from "../contract";
+import { RemovableChipList } from "./RemovableChipList";
+import { ParamPanel, type ParamMeta } from "./stages/ParamPanel";
 import { CompoundValidateBox } from "./CompoundValidateBox";
+import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
 import { TargetValidateBox } from "./TargetValidateBox";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Checkbox } from "./ui/checkbox";
 import { Eyebrow } from "./ui/editorial";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
+// ---------------------------------------------------------------------------
+// Param group definitions for the Advanced parameters section.
+// Each entry carries the baseline params (built from meta defaults), the
+// meta object, and the key arrays needed by ParamPanel.
+// ---------------------------------------------------------------------------
+
+type ParamGroupKey = "adme" | "target" | "disease_targets" | "ppi" | "hub_genes" | "enrichment";
+
+type GroupChange = Record<string, number | boolean | string | string[]>;
+
+type ParamGroup = {
+  key: ParamGroupKey;
+  title: string;
+  meta: Record<string, ParamMeta>;
+  numericKeys: readonly string[];
+  booleanKeys: readonly string[];
+  selectKeys: readonly string[];
+  arrayKeys: readonly string[];
+};
+
+/** Build a panel's baseline params from each meta's `default`, keyed by param name. */
+function buildDefaults(
+  meta: Record<string, ParamMeta>,
+): Record<string, number | boolean | string | string[]> {
+  const result: Record<string, number | boolean | string | string[]> = {};
+  for (const [k, v] of Object.entries(meta)) {
+    result[k] = v.default;
+  }
+  return result;
+}
+
+const PARAM_GROUPS: ParamGroup[] = [
+  {
+    key: "adme",
+    title: "ADME screening",
+    meta: ADME_PARAMS,
+    numericKeys: ADME_NUMERIC_PARAMS,
+    booleanKeys: ADME_BOOLEAN_PARAMS,
+    selectKeys: [],
+    arrayKeys: [],
+  },
+  {
+    key: "target",
+    title: "Target identification",
+    meta: TARGET_PARAMS,
+    numericKeys: TARGET_NUMERIC_PARAMS,
+    booleanKeys: [],
+    selectKeys: [],
+    arrayKeys: [],
+  },
+  {
+    key: "disease_targets",
+    title: "Disease targets",
+    meta: DISEASE_TARGETS_PARAMS,
+    numericKeys: DISEASE_TARGETS_NUMERIC_PARAMS,
+    booleanKeys: [],
+    selectKeys: [],
+    arrayKeys: [],
+  },
+  {
+    key: "ppi",
+    title: "PPI network",
+    meta: PPI_PARAMS,
+    numericKeys: PPI_NUMERIC_PARAMS,
+    booleanKeys: PPI_BOOLEAN_PARAMS,
+    selectKeys: PPI_SELECT_PARAMS,
+    arrayKeys: [],
+  },
+  {
+    key: "hub_genes",
+    title: "Hub genes",
+    meta: HUB_GENES_PARAMS,
+    numericKeys: HUB_GENES_NUMERIC_PARAMS,
+    booleanKeys: HUB_GENES_BOOLEAN_PARAMS,
+    selectKeys: [],
+    arrayKeys: [],
+  },
+  {
+    key: "enrichment",
+    title: "Functional enrichment",
+    meta: ENRICHMENT_PARAMS,
+    numericKeys: ENRICHMENT_NUMERIC_PARAMS,
+    booleanKeys: ENRICHMENT_BOOLEAN_PARAMS,
+    selectKeys: ENRICHMENT_SELECT_PARAMS,
+    arrayKeys: ENRICHMENT_ARRAY_PARAMS,
+  },
+];
+
+/**
+ * One advanced-parameter group panel. Binds the group's stable `onGroupChange`
+ * + key into a single stable `onChange` so ParamPanel's collect-mode effect does
+ * not re-fire on every SetupView render.
+ */
+function AdvancedParamPanel({
+  group,
+  onGroupChange,
+}: {
+  group: ParamGroup;
+  onGroupChange: (groupKey: ParamGroupKey, changed: GroupChange) => void;
+}) {
+  const handleChange = useCallback(
+    (changed: GroupChange) => onGroupChange(group.key, changed),
+    [group.key, onGroupChange],
+  );
+  return (
+    <ParamPanel
+      params={buildDefaults(group.meta)}
+      meta={group.meta}
+      onRedo={() => {}}
+      onChange={handleChange}
+      hideRedo
+      title={group.title}
+      numericKeys={group.numericKeys}
+      booleanKeys={group.booleanKeys}
+      selectKeys={group.selectKeys}
+      arrayKeys={group.arrayKeys}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Form values shape + advisory Zod resolver.
+//
+// The whole setup form lives in react-hook-form. These are the FORM values
+// (selections, pools, labels, overrides) — NOT the wire body. The wire body is
+// still assembled in `mutationFn` from `getValues()`.
+//
+// The resolver is advisory only: the server is authoritative. It does not gate
+// the Create button (see `canSubmit`) and does not block `create.mutate()`. It
+// just sanity-checks the form-values shape (label lengths, plant count) so RHF's
+// `formState.errors` reflects the same soft limits the inputs already enforce.
+// We deliberately do NOT bind `zAnalysisCreate` (the all-optional WIRE schema).
+// ---------------------------------------------------------------------------
+
+type FormValues = {
+  mode: string;
+  plantMode: (typeof PLANT_INPUT_MODES)[number];
+  diseaseMode: (typeof DISEASE_INPUT_MODES)[number];
+  selectedPlants: ComboOption[];
+  selectedDisease: ComboOption[];
+  resolved: ResolvedCompound[];
+  manualTargets: ResolvedTarget[];
+  manualDiseaseTargets: ResolvedTarget[];
+  plantLabel: string;
+  diseaseLabel: string;
+  overrides: Record<string, GroupChange>;
+};
+
+// The schema covers the whole FormValues shape so the resolver type lines up with
+// `useForm<FormValues>`, but only the label lengths and plant count carry real
+// (advisory) checks; the structured pools/selections pass through unvalidated.
+const formSchema = z.object({
+  mode: z.string(),
+  plantMode: z.custom<FormValues["plantMode"]>(),
+  diseaseMode: z.custom<FormValues["diseaseMode"]>(),
+  selectedPlants: z.custom<ComboOption[]>().refine((v) => (v?.length ?? 0) <= MAX_PLANTS, {
+    message: `Too many plants (max ${MAX_PLANTS}).`,
+  }),
+  selectedDisease: z.custom<ComboOption[]>(),
+  resolved: z.custom<ResolvedCompound[]>(),
+  manualTargets: z.custom<ResolvedTarget[]>(),
+  manualDiseaseTargets: z.custom<ResolvedTarget[]>(),
+  plantLabel: z.string().max(200),
+  diseaseLabel: z.string().max(200),
+  overrides: z.custom<Record<string, GroupChange>>(),
+});
+
+const DEFAULT_FORM_VALUES: FormValues = {
+  mode: DEFAULT_MODE,
+  plantMode: DEFAULT_PLANT_INPUT_MODE,
+  diseaseMode: DEFAULT_DISEASE_INPUT_MODE,
+  selectedPlants: [],
+  selectedDisease: [],
+  resolved: [],
+  manualTargets: [],
+  manualDiseaseTargets: [],
+  plantLabel: "",
+  diseaseLabel: "",
+  overrides: {},
+};
+
 export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
-  const diseases = useQuery(listDiseasesOptions());
-  const plants = useQuery(listPlantsOptions());
+  // The setup form is managed by react-hook-form. Children are custom controlled
+  // components, so we read live values via `watch()` and write via `setValue()`
+  // (RHF's `register` only covers native inputs, which this form barely has).
+  const { watch, setValue, getValues } = useForm<FormValues>({
+    defaultValues: DEFAULT_FORM_VALUES,
+    resolver: zodResolver(formSchema),
+    mode: "onChange",
+  });
 
-  // ------- core selection state -------
-  const [selected, setSelected] = useState<string[]>([]);
-  const [diseaseId, setDiseaseId] = useState<string>("");
-  const [mode, setMode] = useState<string>(DEFAULT_MODE);
-  const [filter, setFilter] = useState("");
+  // Live form values used for rendering + the submit gate.
+  const mode = watch("mode");
+  const plantMode = watch("plantMode");
+  const diseaseMode = watch("diseaseMode");
+  const selectedPlants = watch("selectedPlants");
+  const selectedDisease = watch("selectedDisease");
+  const resolved = watch("resolved");
+  const manualTargets = watch("manualTargets");
+  const manualDiseaseTargets = watch("manualDiseaseTargets");
+  const plantLabel = watch("plantLabel");
+  const diseaseLabel = watch("diseaseLabel");
 
-  // ------- input-mode state -------
-  const [plantMode, setPlantMode] =
-    useState<(typeof PLANT_INPUT_MODES)[number]>(DEFAULT_PLANT_INPUT_MODE);
-  const [diseaseMode, setDiseaseMode] = useState<(typeof DISEASE_INPUT_MODES)[number]>(
-    DEFAULT_DISEASE_INPUT_MODE,
+  // ------- advanced parameter overrides -------
+  // `advancedOpen` is UI toggle state, not form data — it stays in useState.
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  // Stable collect-mode handler: `setValue`/`getValues` are stable across renders,
+  // so the `onChange` identity each ParamPanel receives never changes and the
+  // collect-mode effect does not re-fire/loop. `overrides` is not watched (read
+  // only at submit), so writing it does not churn renders.
+  const handleGroupChange = useCallback(
+    (groupKey: ParamGroupKey, changed: GroupChange) => {
+      setValue("overrides", { ...getValues("overrides"), [groupKey]: changed });
+    },
+    [setValue, getValues],
   );
 
-  // ------- manual-entity state -------
-  const [resolved, setResolved] = useState<ResolvedCompound[]>([]); // manual_compounds
-  const [manualTargets, setManualTargets] = useState<ResolvedTarget[]>([]); // manual_targets (plant)
-  const [manualDiseaseTargets, setManualDiseaseTargets] = useState<ResolvedTarget[]>([]); // manual_disease_targets
+  // ------- search functions for comboboxes -------
+  const searchPlants = useCallback(async (q: string): Promise<ComboOption[]> => {
+    const { data } = await listPlants({ query: { q: q || undefined, limit: 50 } });
+    return (data ?? []).map((p) => ({
+      value: p.plant_id,
+      label: p.canonical_scientific_name ?? p.plant_id,
+      hint: p.matched_alias ?? null,
+    }));
+  }, []);
 
-  // ------- free-text label state -------
-  const [plantLabel, setPlantLabel] = useState("");
-  const [diseaseLabel, setDiseaseLabel] = useState("");
+  const searchDiseases = useCallback(async (q: string): Promise<ComboOption[]> => {
+    const { data } = await listDiseases({ query: { q: q || undefined, limit: 50 } });
+    return (data ?? []).map((d) => ({
+      value: d.disease_id,
+      label: d.disease_name ?? d.disease_id,
+      hint: d.matched_alias ?? null,
+    }));
+  }, []);
+
+  // Build the parameters payload: only include groups with at least one changed value.
+  const buildParametersPayload = useCallback((): Record<string, GroupChange> | undefined => {
+    const nonEmpty = Object.entries(getValues("overrides")).filter(
+      ([, v]) => Object.keys(v).length > 0,
+    );
+    if (nonEmpty.length === 0) return undefined;
+    return Object.fromEntries(nonEmpty) as Record<string, GroupChange>;
+  }, [getValues]);
 
   const create = useMutation({
     mutationFn: async () => {
+      const v = getValues();
       const res = await createAnalysis({
         body: {
           analysis_name: null,
-          plant_input_mode: plantMode,
-          disease_input_mode: diseaseMode,
-          mode: mode as "auto" | "guided",
-          plant_ids: plantMode === "selection" ? selected : [],
-          disease_id: diseaseMode === "selection" ? diseaseId : null,
+          plant_input_mode: v.plantMode,
+          disease_input_mode: v.diseaseMode,
+          mode: v.mode as "auto" | "guided",
+          plant_ids: v.plantMode === "selection" ? v.selectedPlants.map((o) => o.value) : [],
+          disease_id: v.diseaseMode === "selection" ? (v.selectedDisease[0]?.value ?? null) : null,
           manual_compound_ids:
-            plantMode === "manual_compounds" ? resolved.map((r) => r.compound_id) : [],
+            v.plantMode === "manual_compounds" ? v.resolved.map((r) => r.compound_id) : [],
           manual_target_ids:
-            plantMode === "manual_targets" ? manualTargets.map((t) => t.target_id) : [],
+            v.plantMode === "manual_targets" ? v.manualTargets.map((t) => t.target_id) : [],
           manual_disease_target_ids:
-            diseaseMode === "manual_disease_targets"
-              ? manualDiseaseTargets.map((t) => t.target_id)
+            v.diseaseMode === "manual_disease_targets"
+              ? v.manualDiseaseTargets.map((t) => t.target_id)
               : [],
-          plant_label: plantMode === "selection" ? null : plantLabel || null,
-          disease_label: diseaseMode === "selection" ? null : diseaseLabel || null,
+          plant_label: v.plantMode === "selection" ? null : v.plantLabel || null,
+          disease_label: v.diseaseMode === "selection" ? null : v.diseaseLabel || null,
+          parameters: buildParametersPayload(),
         },
       });
       return res.data as AnalysisRead;
     },
     onSuccess: (data) => onCreated(data.analysis_id),
+    onError: (error) => notifyError(error as Problem),
   });
 
   // ------- canSubmit -------
   const plantReady =
     plantMode === "selection"
-      ? selected.length >= 1 && selected.length <= MAX_PLANTS
+      ? selectedPlants.length >= 1 && selectedPlants.length <= MAX_PLANTS
       : plantMode === "manual_compounds"
         ? resolved.length >= 1
         : manualTargets.length >= 1;
 
   const diseaseReady =
-    diseaseMode === "selection" ? diseaseId !== "" : manualDiseaseTargets.length >= 1;
+    diseaseMode === "selection" ? selectedDisease.length > 0 : manualDiseaseTargets.length >= 1;
 
   const canSubmit = plantReady && diseaseReady;
-
-  const filteredPlants = plants.data
-    ?.filter((p) =>
-      (p.canonical_scientific_name ?? "").toLowerCase().includes(filter.toLowerCase()),
-    )
-    .slice(0, 100);
 
   return (
     <section className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
@@ -113,7 +356,9 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
               <legend className="hf-eyebrow mb-2">Plant input mode</legend>
               <RadioGroup
                 value={plantMode}
-                onValueChange={(v) => setPlantMode(v as (typeof PLANT_INPUT_MODES)[number])}
+                onValueChange={(v) =>
+                  setValue("plantMode", v as (typeof PLANT_INPUT_MODES)[number])
+                }
               >
                 {PLANT_INPUT_MODES.map((m) => (
                   <div key={m} className="flex items-center gap-2">
@@ -128,50 +373,75 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
             {plantMode === "selection" && (
               <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="plant-filter">Filter plants</Label>
-                  <Input
-                    id="plant-filter"
-                    aria-label="Filter plants"
-                    placeholder="Filter plants"
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                  />
-                </div>
+                <Label>Search plants</Label>
+                <EntitySearchCombobox
+                  mode="multiple"
+                  selected={selectedPlants}
+                  onChange={(next) => setValue("selectedPlants", next)}
+                  search={searchPlants}
+                  max={MAX_PLANTS}
+                  placeholder="Search plants…"
+                  ariaLabel="Search plants"
+                />
                 <p className="text-muted-foreground text-sm">
-                  {selected.length} / {MAX_PLANTS} plants
+                  {selectedPlants.length} / {MAX_PLANTS} plants
                 </p>
-                {selected.length > MAX_PLANTS && (
+                {selectedPlants.length > MAX_PLANTS && (
                   <p role="alert" className="text-destructive text-sm">
                     Too many plants (max {MAX_PLANTS}).
                   </p>
                 )}
-                <ul className="max-h-72 space-y-1 overflow-y-auto rounded-md border p-2">
-                  {filteredPlants?.map((p) => (
-                    <li key={p.plant_id}>
-                      <label className="hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm">
-                        <Checkbox
-                          checked={selected.includes(p.plant_id)}
-                          onCheckedChange={(checked) =>
-                            setSelected((s) =>
-                              checked === true
-                                ? [...s, p.plant_id]
-                                : s.filter((x) => x !== p.plant_id),
-                            )
-                          }
-                        />
-                        {p.canonical_scientific_name}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
               </div>
             )}
 
-            {plantMode === "manual_compounds" && <CompoundValidateBox onResolved={setResolved} />}
+            {plantMode === "manual_compounds" && (
+              <>
+                <CompoundValidateBox
+                  showAddButton
+                  onResolved={(incoming) =>
+                    setValue("resolved", mergeById(getValues("resolved"), incoming, "compound_id"))
+                  }
+                />
+                <RemovableChipList
+                  items={resolved}
+                  getKey={(r) => r.compound_id}
+                  getLabel={(r) => r.canonical_name ?? r.canonical_key ?? r.compound_id}
+                  onRemove={(r) =>
+                    setValue(
+                      "resolved",
+                      getValues("resolved").filter((x) => x.compound_id !== r.compound_id),
+                    )
+                  }
+                  ariaLabel="Added compounds"
+                />
+              </>
+            )}
 
             {plantMode === "manual_targets" && (
-              <TargetValidateBox label="Plant targets" onResolved={setManualTargets} />
+              <>
+                <TargetValidateBox
+                  label="Plant targets"
+                  showAddButton
+                  onResolved={(incoming) =>
+                    setValue(
+                      "manualTargets",
+                      mergeById(getValues("manualTargets"), incoming, "target_id"),
+                    )
+                  }
+                />
+                <RemovableChipList
+                  items={manualTargets}
+                  getKey={(t) => t.target_id}
+                  getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
+                  onRemove={(t) =>
+                    setValue(
+                      "manualTargets",
+                      getValues("manualTargets").filter((x) => x.target_id !== t.target_id),
+                    )
+                  }
+                  ariaLabel="Added plant targets"
+                />
+              </>
             )}
 
             {plantMode !== "selection" && (
@@ -182,7 +452,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                   aria-label="Plant label"
                   value={plantLabel}
                   maxLength={200}
-                  onChange={(e) => setPlantLabel(e.target.value)}
+                  onChange={(e) => setValue("plantLabel", e.target.value)}
                   placeholder="Optional label for this plant set"
                 />
               </div>
@@ -200,7 +470,9 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
               <legend className="hf-eyebrow mb-2">Disease input mode</legend>
               <RadioGroup
                 value={diseaseMode}
-                onValueChange={(v) => setDiseaseMode(v as (typeof DISEASE_INPUT_MODES)[number])}
+                onValueChange={(v) =>
+                  setValue("diseaseMode", v as (typeof DISEASE_INPUT_MODES)[number])
+                }
               >
                 {DISEASE_INPUT_MODES.map((m) => (
                   <div key={m} className="flex items-center gap-2">
@@ -215,24 +487,43 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
             {diseaseMode === "selection" && (
               <div className="space-y-1.5">
-                <Label htmlFor="disease">Disease</Label>
-                <Select value={diseaseId} onValueChange={setDiseaseId}>
-                  <SelectTrigger id="disease" aria-label="Disease" className="w-full">
-                    <SelectValue placeholder="Select a disease" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {diseases.data?.map((d) => (
-                      <SelectItem key={d.disease_id} value={d.disease_id}>
-                        {d.disease_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Search disease</Label>
+                <EntitySearchCombobox
+                  mode="single"
+                  selected={selectedDisease}
+                  onChange={(next) => setValue("selectedDisease", next)}
+                  search={searchDiseases}
+                  placeholder="Search disease…"
+                  ariaLabel="Search disease"
+                />
               </div>
             )}
 
             {diseaseMode === "manual_disease_targets" && (
-              <TargetValidateBox label="Disease targets" onResolved={setManualDiseaseTargets} />
+              <>
+                <TargetValidateBox
+                  label="Disease targets"
+                  showAddButton
+                  onResolved={(incoming) =>
+                    setValue(
+                      "manualDiseaseTargets",
+                      mergeById(getValues("manualDiseaseTargets"), incoming, "target_id"),
+                    )
+                  }
+                />
+                <RemovableChipList
+                  items={manualDiseaseTargets}
+                  getKey={(t) => t.target_id}
+                  getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
+                  onRemove={(t) =>
+                    setValue(
+                      "manualDiseaseTargets",
+                      getValues("manualDiseaseTargets").filter((x) => x.target_id !== t.target_id),
+                    )
+                  }
+                  ariaLabel="Added disease targets"
+                />
+              </>
             )}
 
             {diseaseMode !== "selection" && (
@@ -243,7 +534,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                   aria-label="Disease label"
                   value={diseaseLabel}
                   maxLength={200}
-                  onChange={(e) => setDiseaseLabel(e.target.value)}
+                  onChange={(e) => setValue("diseaseLabel", e.target.value)}
                   placeholder="Optional label for this disease target set"
                 />
               </div>
@@ -259,7 +550,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
           <CardContent>
             <div className="space-y-1.5">
               <Label htmlFor="mode">Mode</Label>
-              <Select value={mode} onValueChange={setMode}>
+              <Select value={mode} onValueChange={(v) => setValue("mode", v)}>
                 <SelectTrigger id="mode" aria-label="Mode" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -274,6 +565,32 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* ---- Advanced parameters ---- */}
+        <div>
+          <button
+            type="button"
+            aria-expanded={advancedOpen}
+            aria-controls="advanced-params-content"
+            className="flex w-full items-center gap-2 text-left"
+            onClick={() => setAdvancedOpen((o) => !o)}
+          >
+            <span className="text-muted-foreground text-xs">{advancedOpen ? "▾" : "▸"}</span>
+            <span className="text-sm font-medium">Advanced parameters</span>
+          </button>
+
+          {advancedOpen && (
+            <div id="advanced-params-content" className="mt-4 flex flex-col gap-4">
+              {PARAM_GROUPS.map((group) => (
+                <AdvancedParamPanel
+                  key={group.key}
+                  group={group}
+                  onGroupChange={handleGroupChange}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         <Button
           disabled={!canSubmit || create.isPending}

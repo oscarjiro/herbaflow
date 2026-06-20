@@ -63,6 +63,12 @@ class AnalysisRepository:
         )
         return result.scalar_one_or_none()
 
+    async def list_recent(self, *, limit: int, offset: int) -> list[AnalysisRun]:
+        result = await self.session.execute(
+            select(AnalysisRun).order_by(AnalysisRun.created_at.desc()).limit(limit).offset(offset)
+        )
+        return list(result.scalars().all())
+
     async def get_by_idempotency_key(self, key: str) -> AnalysisRun | None:
         result = await self.session.execute(
             select(AnalysisRun).where(AnalysisRun.idempotency_key == key)

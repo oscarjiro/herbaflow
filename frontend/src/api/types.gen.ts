@@ -12,6 +12,34 @@ export type AnalysisCreate = {
     manual_disease_target_ids?: Array<string>;
     plant_label?: string | null;
     disease_label?: string | null;
+    /**
+     * Per-group parameter overrides for any pipeline group (adme / target / disease_targets / ppi / hub_genes / enrichment); validated against the contract hard bounds at create, merged over the group defaults, and frozen as the run baseline.
+     */
+    parameters?: {
+        [key: string]: {
+            [key: string]: unknown;
+        };
+    } | null;
+};
+
+/**
+ * Lean per-run shape for the recent-runs list.
+ *
+ * Deliberately omits ``stage_results`` (the heavy per-stage tables).
+ * ``parameters`` is kept — it carries ``input_modes`` / ``labels`` / ``plant_ids``;
+ * its size is bounded by the entity caps.
+ */
+export type AnalysisListItem = {
+    analysis_id: string;
+    analysis_name: string | null;
+    status: string | null;
+    current_stage: number | null;
+    created_at: string | null;
+    completed_at: string | null;
+    disease_id: string | null;
+    parameters?: {
+        [key: string]: unknown;
+    };
 };
 
 export type AnalysisRead = {
@@ -49,6 +77,30 @@ export type CompoundInput = {
     value: string;
 };
 
+export type CtpGraph = {
+    nodes: Array<CtpGraphNode>;
+    edges: Array<CtpGraphEdge>;
+};
+
+export type CtpGraphEdge = {
+    source: string;
+    target: string;
+    interaction: string;
+    prediction_method: string;
+    p_value: string;
+};
+
+export type CtpGraphNode = {
+    id: string;
+    label: string;
+    type: string;
+    inchikey: string;
+    smiles: string;
+    uniprot_accession: string;
+    is_hub: string;
+    source: string;
+};
+
 export type DiseaseInputMode = 'selection' | 'manual_disease_targets';
 
 export type DiseaseRead = {
@@ -59,6 +111,7 @@ export type DiseaseRead = {
     ontology_source: string | null;
     source_url: string | null;
     retrieved_at: string | null;
+    matched_alias?: string | null;
 };
 
 export type FailedInput = {
@@ -80,6 +133,7 @@ export type PlantRead = {
     canonical_key: string;
     canonical_scientific_name: string | null;
     family_name: string | null;
+    matched_alias?: string | null;
 };
 
 /**
@@ -156,9 +210,31 @@ export type ValidationError = {
 export type ListDiseasesData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Search term (canonical name or alias)
+         */
+        q?: string | null;
+        /**
+         * Maximum number of results to return
+         */
+        limit?: number;
+        /**
+         * Number of results to skip
+         */
+        offset?: number;
+    };
     url: '/diseases';
 };
+
+export type ListDiseasesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListDiseasesError = ListDiseasesErrors[keyof ListDiseasesErrors];
 
 export type ListDiseasesResponses = {
     /**
@@ -172,9 +248,31 @@ export type ListDiseasesResponse = ListDiseasesResponses[keyof ListDiseasesRespo
 export type ListPlantsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Search term (canonical name or alias)
+         */
+        q?: string | null;
+        /**
+         * Maximum number of results to return
+         */
+        limit?: number;
+        /**
+         * Number of results to skip
+         */
+        offset?: number;
+    };
     url: '/plants';
 };
+
+export type ListPlantsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListPlantsError = ListPlantsErrors[keyof ListPlantsErrors];
 
 export type ListPlantsResponses = {
     /**
@@ -184,6 +282,34 @@ export type ListPlantsResponses = {
 };
 
 export type ListPlantsResponse = ListPlantsResponses[keyof ListPlantsResponses];
+
+export type ListAnalysesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        limit?: number;
+        offset?: number;
+    };
+    url: '/analyses';
+};
+
+export type ListAnalysesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListAnalysesError = ListAnalysesErrors[keyof ListAnalysesErrors];
+
+export type ListAnalysesResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<AnalysisListItem>;
+};
+
+export type ListAnalysesResponse = ListAnalysesResponses[keyof ListAnalysesResponses];
 
 export type CreateAnalysisData = {
     body: AnalysisCreate;
@@ -599,6 +725,33 @@ export type ExportPpiNodesResponses = {
      */
     200: unknown;
 };
+
+export type GetCtpGraphData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/ctp-graph';
+};
+
+export type GetCtpGraphErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCtpGraphError = GetCtpGraphErrors[keyof GetCtpGraphErrors];
+
+export type GetCtpGraphResponses = {
+    /**
+     * Successful Response
+     */
+    200: CtpGraph;
+};
+
+export type GetCtpGraphResponse = GetCtpGraphResponses[keyof GetCtpGraphResponses];
 
 export type ExportArtifactData = {
     body?: never;

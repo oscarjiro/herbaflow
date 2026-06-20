@@ -14,8 +14,26 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 
-def _stage_results(cid: str, tid: str) -> dict:
+def _stage_results(cid: str, stage2_only_cid: str, tid: str) -> dict:
     return {
+        "2": {
+            "passed": [
+                {
+                    "compound_id": cid,
+                    "canonical_name": "CURCUMIN",
+                    "descriptor_source": "etl",
+                }
+            ],
+            "filtered": [
+                {
+                    "compound_id": stage2_only_cid,
+                    "canonical_name": "ASPIRIN",
+                    "descriptor_source": "etl",
+                    "reason": "2 Lipinski violation(s)",
+                }
+            ],
+            "count": 1,
+        },
         "3": {
             "compound_targets": [
                 {
@@ -56,8 +74,9 @@ def _stage_results(cid: str, tid: str) -> dict:
     }
 
 
-async def _seed_entities(maker) -> tuple[str, str]:
+async def _seed_entities(maker) -> tuple[str, str, str]:
     cid = uuid.uuid4()
+    stage2_only_cid = uuid.uuid4()
     tid = uuid.uuid4()
     async with maker() as s:
         await s.execute(
@@ -72,19 +91,29 @@ async def _seed_entities(maker) -> tuple[str, str]:
         )
         await s.execute(
             text(
+                "insert into compounds"
+                "(compound_id, canonical_key, canonical_name, inchi_key, smiles, "
+                " validation_status) "
+                "values (:c, 'inchikey:S2ONLY', 'ASPIRIN', 'BSYNRYMUTXBXSQ-UHFFFAOYSA-N', "
+                "'CC(=O)OC1=CC=CC=C1C(=O)O', 'externally_validated')"
+            ),
+            {"c": stage2_only_cid},
+        )
+        await s.execute(
+            text(
                 "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession) "
                 "values (:t, 'uniprot:P37231', 'PPARG', 'P37231')"
             ),
             {"t": tid},
         )
         await s.commit()
-    return str(cid), str(tid)
+    return str(cid), str(stage2_only_cid), str(tid)
 
 
 async def _seed_run(maker, *, status: str, with_results: bool) -> uuid.UUID:
-    cid, tid = await _seed_entities(maker)
+    cid, stage2_only_cid, tid = await _seed_entities(maker)
     aid = uuid.uuid4()
-    sr = _stage_results(cid, tid) if with_results else {}
+    sr = _stage_results(cid, stage2_only_cid, tid) if with_results else {}
     completed = datetime.now(UTC) if status == "complete" else None
     async with maker() as s:
         await s.execute(
@@ -199,6 +228,8 @@ async def test_assemble_export_shape(engine, seed_complete_run):
     async with maker() as session:
         art = await assemble_export(session, seed_complete_run)
     assert art.report.startswith("#")
+    assert "VFLDPWHFBUODDF-FCXRPNKRSA-N,CURCUMIN,true" in art.stage_csvs[2]
+    assert "BSYNRYMUTXBXSQ-UHFFFAOYSA-N,ASPIRIN,false" in art.stage_csvs[2]
     assert art.stage_csvs[5].splitlines()[0] == "gene_symbol,uniprot_accession,opentargets_score"
     assert art.ppi_edges.splitlines()[0] == "source,target,confidence"
     with zipfile.ZipFile(io.BytesIO(art.network_bundle())) as zf:
