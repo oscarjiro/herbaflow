@@ -95,6 +95,14 @@ export const zAnalysisRead = z.object({
     ]),
     parameters: z.object({}).optional(),
     stage_results: z.object({}),
+    progress: z.union([
+        z.object({
+            stage: z.number().int(),
+            processed: z.number().int(),
+            total: z.number().int()
+        }),
+        z.null()
+    ]).optional(),
     created_at: z.union([
         z.string().datetime(),
         z.null()
@@ -243,6 +251,12 @@ export const zPlantRead = z.object({
         z.string(),
         z.null()
     ]).optional()
+});
+
+export const zProgressRead = z.object({
+    stage: z.number().int(),
+    processed: z.number().int(),
+    total: z.number().int()
 });
 
 export const zResetFromRequest = z.object({

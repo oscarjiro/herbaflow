@@ -55,6 +55,7 @@ export type AnalysisRead = {
     stage_results: {
         [key: string]: unknown;
     };
+    progress?: ProgressRead | null;
     created_at: string | null;
     completed_at: string | null;
     expires_at: string | null;
@@ -134,6 +135,15 @@ export type PlantRead = {
     canonical_scientific_name: string | null;
     family_name: string | null;
     matched_alias?: string | null;
+};
+
+/**
+ * Live per-item progress for a running stage (Stage 2 or Stage 3 only).
+ */
+export type ProgressRead = {
+    stage: number;
+    processed: number;
+    total: number;
 };
 
 /**
