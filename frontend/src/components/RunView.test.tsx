@@ -1,9 +1,10 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, expect, it, vi } from "vitest";
+import { screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 import { RunView } from "./RunView";
-import { ThemeProvider } from "../lib/theme";
+import { renderWithRouter } from "../../tests/renderWithRouter";
+import { clearActiveRunId, getActiveRunId, setActiveRunId } from "../lib/activeRun";
 import * as useAnalysisStatusModule from "../hooks/useAnalysisStatus";
 import type { AnalysisRead } from "../api/types.gen";
 
@@ -16,6 +17,16 @@ vi.mock("react-cytoscapejs", () => ({
       "data-count": String(elements?.length ?? 0),
     });
   },
+}));
+
+// Mock sonner so the self-heal toast can be asserted without a mounted Toaster.
+vi.mock("sonner", () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+    info: vi.fn(),
+  },
+  Toaster: () => null,
 }));
 
 // Mock sdk.gen so mutations don't fire real requests.
@@ -65,12 +76,7 @@ function mockStatus(
 }
 
 function wrap(ui: React.ReactNode) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={qc}>
-      <ThemeProvider>{ui}</ThemeProvider>
-    </QueryClientProvider>,
-  );
+  return renderWithRouter(ui, { withTheme: true });
 }
 
 describe("RunView — running skeleton", () => {
@@ -206,5 +212,57 @@ describe("RunView — CTP network graph", () => {
     wrap(<RunView analysisId="run-1" />);
     // The graph title must never appear.
     expect(screen.queryByText("Compound, target and pathway network")).toBeNull();
+  });
+});
+
+describe("RunView — self-heal on a deleted or expired run (404)", () => {
+  beforeEach(() => {
+    vi.mocked(toast.error).mockClear();
+    clearActiveRunId();
+  });
+  afterEach(() => {
+    clearActiveRunId();
+  });
+
+  it("clears the cached run, toasts, and calls onReset when the run 404s", async () => {
+    // The poll surfaces a thrown RFC 9457 problem body that carries status: 404.
+    mockStatus(undefined, {
+      isError: true,
+      error: { type: "about:blank", title: "Not Found", status: 404, detail: "not found" },
+    });
+    setActiveRunId("gone-1");
+    const onReset = vi.fn();
+
+    wrap(<RunView analysisId="gone-1" onReset={onReset} />);
+
+    await waitFor(() => expect(onReset).toHaveBeenCalled());
+    expect(getActiveRunId()).toBeNull();
+    expect(toast.error).toHaveBeenCalledTimes(1);
+  });
+
+  it("does NOT self-heal on a non-404 poll error", async () => {
+    mockStatus(undefined, {
+      isError: true,
+      error: { status: 503, detail: "Service temporarily unavailable." },
+    });
+    setActiveRunId("run-1");
+    const onReset = vi.fn();
+
+    wrap(<RunView analysisId="run-1" onReset={onReset} />);
+
+    // Give effects a tick to run; nothing should fire for a transient error.
+    await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+    expect(onReset).not.toHaveBeenCalled();
+    expect(getActiveRunId()).toBe("run-1");
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it("caches the active run id when a valid run loads via deep link", () => {
+    clearActiveRunId();
+    mockStatus(makeRun({ analysis_id: "deep-1", status: "complete", current_stage: 8 }));
+
+    wrap(<RunView analysisId="deep-1" />);
+
+    expect(getActiveRunId()).toBe("deep-1");
   });
 });

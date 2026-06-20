@@ -1,11 +1,10 @@
 import React from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, test, vi } from "vitest";
 import { RunView } from "../src/components/RunView";
-import { ThemeProvider } from "../src/lib/theme";
+import { renderWithRouter } from "./renderWithRouter";
 import "../src/lib/api";
 import { server } from "./handlers";
 
@@ -21,14 +20,10 @@ vi.mock("react-cytoscapejs", () => ({
 }));
 
 function wrap(analysisId: string) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={qc}>
-      <ThemeProvider>
-        <RunView analysisId={analysisId} />
-      </ThemeProvider>
-    </QueryClientProvider>,
-  );
+  return renderWithRouter(<RunView analysisId={analysisId} />, {
+    initialEntries: [`/analysis/${analysisId}`],
+    withTheme: true,
+  });
 }
 
 test("renders the stage 1 compound list", async () => {
@@ -344,14 +339,10 @@ describe("run header display names", () => {
 describe("failed run recovery (r-failed)", () => {
   it("shows a Back to setup button that calls onReset", async () => {
     const onReset = vi.fn();
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={qc}>
-        <ThemeProvider>
-          <RunView analysisId="r-failed" onReset={onReset} />
-        </ThemeProvider>
-      </QueryClientProvider>,
-    );
+    renderWithRouter(<RunView analysisId="r-failed" onReset={onReset} />, {
+      initialEntries: ["/analysis/r-failed"],
+      withTheme: true,
+    });
     const btn = await screen.findByRole("button", { name: /back to setup/i });
     await userEvent.click(btn);
     expect(onReset).toHaveBeenCalledTimes(1);

@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type cytoscape from "cytoscape";
 import { advanceAnalysis } from "../api/sdk.gen";
 import { getCtpGraphOptions } from "../api/@tanstack/react-query.gen";
@@ -8,6 +9,7 @@ import { useAnalysisStatus } from "../hooks/useAnalysisStatus";
 import { useEntitySubjects } from "../hooks/useEntitySubjects";
 import { useStaleState } from "../hooks/useStaleState";
 import { runHasCompounds } from "../lib/entities";
+import { clearActiveRunId, getActiveRunId, setActiveRunId } from "../lib/activeRun";
 import { useChartColors } from "../lib/chartTheme";
 import { NetworkGraph } from "./charts/NetworkGraph";
 import { notifyError } from "../lib/toast";
@@ -25,11 +27,11 @@ import { Stage7View } from "./stages/Stage7View";
 import { Stage8View } from "./stages/Stage8View";
 import { StaleNotice } from "./stages/StaleNotice";
 import { DownloadResults } from "./DownloadResults";
+import { RunSidebar } from "./RunSidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Eyebrow } from "@/components/ui/editorial";
-import { StepperRail } from "@/components/ui/StepperRail";
 
 /** Returns true when the run is settled (not actively executing a stage). */
 function isSettled(status: string | null | undefined): boolean {
@@ -132,6 +134,24 @@ type Stage1Data = {
 
 export function RunView({ analysisId, onReset }: { analysisId: string; onReset?: () => void }) {
   const { data, isError, error } = useAnalysisStatus(analysisId);
+
+  // Self-heal a stale cached run: a 404 means the run was deleted or expired.
+  // The poll throws the RFC 9457 problem body, which carries the HTTP status.
+  useEffect(() => {
+    if (isError && (error as Problem)?.status === 404) {
+      clearActiveRunId();
+      toast.error("That analysis is no longer available.");
+      onReset?.();
+    }
+  }, [isError, error, onReset]);
+
+  // Deep-linking straight to a valid run caches it so /analysis later resumes here.
+  useEffect(() => {
+    if (data && getActiveRunId() !== analysisId) {
+      setActiveRunId(analysisId);
+    }
+  }, [data, analysisId]);
+
   const qc = useQueryClient();
   const advance = useMutation({
     mutationFn: async () => advanceAnalysis({ path: { analysis_id: analysisId } }),
@@ -181,14 +201,9 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
   const runningStage = runningStageMatch ? Number(runningStageMatch[1]) : null;
 
   return (
-    <div className="lg:grid lg:grid-cols-[16rem_1fr] lg:gap-8">
-      {/* Left rail — sticky on large screens, horizontal on small */}
-      <aside className="mb-6 self-start lg:sticky lg:top-6 lg:mb-0">
-        <StepperRail data={data} />
-      </aside>
-
-      {/* Right column — main content */}
-      <section className="flex min-w-0 flex-col gap-6">
+    <div className="lg:pl-64">
+      <RunSidebar data={data} analysisId={analysisId} onExit={() => onReset?.()} />
+      <section className="mx-auto flex min-w-0 max-w-5xl flex-col gap-6 p-6">
         {/* Editorial header */}
         <header className="flex flex-col gap-2">
           <Eyebrow>ANALYSIS</Eyebrow>
