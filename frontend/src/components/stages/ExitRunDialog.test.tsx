@@ -7,7 +7,9 @@ import { setActiveRunId, getActiveRunId } from "@/lib/activeRun";
 import { ExitRunDialog } from "./ExitRunDialog";
 
 function wrap(ui: React.ReactNode) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 afterEach(() => {
@@ -17,7 +19,12 @@ afterEach(() => {
 
 describe("ExitRunDialog", () => {
   it("deletes the run, clears storage, and calls onExited", async () => {
-    server.use(http.delete("http://localhost:8000/analyses/run-1", () => new HttpResponse(null, { status: 204 })));
+    server.use(
+      http.delete(
+        "http://localhost:8000/analyses/run-1",
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+    );
     setActiveRunId("run-1");
     const onExited = vi.fn();
     wrap(<ExitRunDialog analysisId="run-1" onExited={onExited} />);

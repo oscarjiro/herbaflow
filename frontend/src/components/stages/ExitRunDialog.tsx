@@ -26,7 +26,8 @@ export function ExitRunDialog({
 }) {
   const [open, setOpen] = useState(false);
   const del = useMutation({
-    mutationFn: async () => deleteAnalysis({ path: { analysis_id: analysisId }, throwOnError: true }),
+    mutationFn: async () =>
+      deleteAnalysis({ path: { analysis_id: analysisId }, throwOnError: true }),
     onSuccess: () => {
       clearActiveRunId();
       toast.success("Analysis deleted");

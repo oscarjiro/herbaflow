@@ -203,7 +203,7 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
   return (
     <div className="lg:pl-64">
       <RunSidebar data={data} analysisId={analysisId} onExit={() => onReset?.()} />
-      <section className="mx-auto flex min-w-0 max-w-5xl flex-col gap-6 p-6">
+      <section className="mx-auto flex max-w-5xl min-w-0 flex-col gap-6 p-6">
         {/* Editorial header */}
         <header className="flex flex-col gap-2">
           <Eyebrow>ANALYSIS</Eyebrow>
