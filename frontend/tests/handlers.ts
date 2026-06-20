@@ -407,6 +407,7 @@ export const SAMPLE_ANALYSES_LIST = [
 ];
 
 export const server = setupServer(
+  http.get(`${BASE}/health`, () => HttpResponse.json({ status: "ok" })),
   http.get(`${BASE}/analyses`, () => HttpResponse.json(SAMPLE_ANALYSES_LIST)),
   http.get(`${BASE}/diseases`, () =>
     HttpResponse.json([

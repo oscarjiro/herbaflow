@@ -1,6 +1,6 @@
 /**
  * Single home for converting a raw analysis status string into a human-readable label.
- * Consumed by RunView (run header badge) and RecentRuns (list row badge).
+ * Consumed by RunView (run header badge).
  */
 export function formatRunStatus(status: string | null | undefined): string {
   if (!status) return "Unknown";
