@@ -172,11 +172,11 @@ async def test_plant_alias_hit_returns_canonical_with_matched_alias(alias_client
 
 
 @pytest.mark.asyncio
-async def test_plant_canonical_prefix_beats_alias_substring(alias_client) -> None:
-    """Canonical prefix (rank 1) beats alias substring (rank 5)."""
-    # "gin": p2 "Zingiber officinale" has canonical substring (4);
-    # p2 alias "Ginger" has alias prefix (3) → merged best for p2 = 3.
+async def test_plant_alias_prefix_beats_alias_substring(alias_client) -> None:
+    """Alias prefix (rank 3) beats alias substring (rank 5)."""
+    # "gin": p2 alias "Ginger" has alias prefix (3) → merged best for p2 = 3.
     # p1 alias "Yellow ginger" has "gin" as alias substring (5).
+    # (No canonical name here contains "gin".)
     # p2 (rank 3) must appear before p1 (rank 5).
     c, ids = alias_client
     resp = await c.get("/plants", params={"q": "gin"})
