@@ -76,4 +76,7 @@ async def test_execute_run_stops_when_run_deleted_midway() -> None:
     assert ran == [1]
     # Prove the cooperative path was actually taken (NOT a stage-1 empty hard-stop):
     assert repo.get_calls == 3  # pre-loop + stage-1 top + stage-2 top (None -> stop)
-    assert repo.committed == 2  # per-stage commit fired at the top of stages 1 and 2
+    # Stage 1 commits twice (loop-head commit + the running-status commit that makes the
+    # executing stage visible to pollers); stage 2 does only its loop-head commit before the
+    # delete is detected and the run stops.
+    assert repo.committed == 3

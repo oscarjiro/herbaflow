@@ -164,6 +164,12 @@ async def execute_run(
             logger.info("run %s: deleted mid-run — stopping", rid)
             return
         await repo.set_status(run, state.stage_status(stage, "running"), current_stage=stage)
+        # Commit the running status before the stage body so a poller sees the truly-executing
+        # stage immediately (mirrors advance_run's synchronous *_running commit at the guided
+        # checkpoint). Without it, the per-stage commit at the loop head lags status one stage
+        # behind during straight-through (auto) runs, so the live per-item progress would surface
+        # under the previous stage's status.
+        await repo.commit()
         result = await runners[stage](run)
 
         # Entity stages: fold the durable edit layer over the freshly-computed entities so
