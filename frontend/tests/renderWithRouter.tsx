@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { render } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  RouterProvider,
+  RouterContextProvider,
   createMemoryHistory,
   createRootRoute,
   createRoute,
@@ -13,8 +13,11 @@ import { ThemeProvider } from "../src/lib/theme";
 /**
  * Renders `ui` inside a minimal TanStack Router + Query context so router hooks
  * (useNavigate, <Link>, <Navigate>, useMatchRoute) and query hooks resolve.
- * The route tree stubs /, /analysis, /analysis/$id, /about (all render null);
- * the component under test is mounted in the always-on root component.
+ * The route tree stubs /, /analysis, /analysis/$id, /about (all render null).
+ *
+ * Uses `RouterContextProvider` (not `RouterProvider`) so the router context is
+ * available synchronously without triggering TanStack Router's async Transitioner.
+ * This allows tests to use synchronous `getByRole` assertions immediately after render.
  */
 export function renderWithRouter(
   ui: ReactNode,
@@ -24,7 +27,7 @@ export function renderWithRouter(
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const content = withTheme ? <ThemeProvider>{ui}</ThemeProvider> : ui;
 
-  const rootRoute = createRootRoute({ component: () => <>{content}</> });
+  const rootRoute = createRootRoute({ component: () => null });
   const stub = (path: string) =>
     createRoute({ getParentRoute: () => rootRoute, path, component: () => null });
   const router = createRouter({
@@ -35,6 +38,7 @@ export function renderWithRouter(
       stub("/about"),
     ]),
     history: createMemoryHistory({ initialEntries }),
+    defaultPendingMs: 0,
   });
 
   return {
@@ -42,7 +46,7 @@ export function renderWithRouter(
     router,
     ...render(
       <QueryClientProvider client={qc}>
-        <RouterProvider router={router} />
+        <RouterContextProvider router={router}>{content}</RouterContextProvider>
       </QueryClientProvider>,
     ),
   };
