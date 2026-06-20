@@ -172,10 +172,22 @@ import { plotlyTemplate } from "./chartTheme";
 import type { ChartColors } from "./chartTheme";
 
 const COLORS: ChartColors = {
-  sage: "#6b7f5e", sageDeep: "#445138", sageSoft: "#cdd6c2", sageFaint: "#eef1e9",
-  terracotta: "#b3613f", terracottaSoft: "#e6c7b8", fg1: "#1b1b17", fg2: "#3a3a32",
-  fg3: "#6b6b5e", border: "#d8d8cf", surface: "#fbfaf6", bg: "#ffffff",
-  success: "#3f7d4f", warning: "#b08400", danger: "#a23b2d", info: "#3a6ea5",
+  sage: "#6b7f5e",
+  sageDeep: "#445138",
+  sageSoft: "#cdd6c2",
+  sageFaint: "#eef1e9",
+  terracotta: "#b3613f",
+  terracottaSoft: "#e6c7b8",
+  fg1: "#1b1b17",
+  fg2: "#3a3a32",
+  fg3: "#6b6b5e",
+  border: "#d8d8cf",
+  surface: "#fbfaf6",
+  bg: "#ffffff",
+  success: "#3f7d4f",
+  warning: "#b08400",
+  danger: "#a23b2d",
+  info: "#3a6ea5",
 };
 
 describe("plotlyTemplate", () => {
