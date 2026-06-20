@@ -7,7 +7,11 @@ beforeEach(() => localStorage.clear());
 
 describe("ThemeToggle", () => {
   it("cycles system → light → dark → system and persists", () => {
-    render(<ThemeProvider><ThemeToggle /></ThemeProvider>);
+    render(
+      <ThemeProvider>
+        <ThemeToggle />
+      </ThemeProvider>,
+    );
     const btn = screen.getByRole("button", { name: /theme:/i });
     expect(btn).toHaveAttribute("aria-label", expect.stringContaining("system"));
     fireEvent.click(btn);

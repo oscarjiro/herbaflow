@@ -28,14 +28,22 @@ afterEach(() => localStorage.clear());
 describe("ThemeProvider tri-state", () => {
   it("defaults to system and resolves via prefers-color-scheme", () => {
     setSystemDark(true);
-    render(<ThemeProvider><Probe /></ThemeProvider>);
+    render(
+      <ThemeProvider>
+        <Probe />
+      </ThemeProvider>,
+    );
     expect(screen.getByTestId("pref").textContent).toBe("system");
     expect(screen.getByTestId("resolved").textContent).toBe("dark");
     expect(document.documentElement.classList.contains("dark")).toBe(true);
   });
 
   it("tracks live OS changes while pref is system", () => {
-    render(<ThemeProvider><Probe /></ThemeProvider>);
+    render(
+      <ThemeProvider>
+        <Probe />
+      </ThemeProvider>,
+    );
     expect(screen.getByTestId("resolved").textContent).toBe("light");
     act(() => setSystemDark(true));
     expect(screen.getByTestId("resolved").textContent).toBe("dark");
@@ -43,7 +51,11 @@ describe("ThemeProvider tri-state", () => {
 
   it("explicit light/dark overrides the OS and persists", () => {
     setSystemDark(true);
-    render(<ThemeProvider><Probe /></ThemeProvider>);
+    render(
+      <ThemeProvider>
+        <Probe />
+      </ThemeProvider>,
+    );
     act(() => screen.getByText("light").click());
     expect(screen.getByTestId("resolved").textContent).toBe("light");
     expect(localStorage.getItem("hf-theme")).toBe("light");
