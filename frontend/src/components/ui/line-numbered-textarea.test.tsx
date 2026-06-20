@@ -3,10 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { expect, test, vi } from "vitest";
 import { LineNumberedTextarea } from "./line-numbered-textarea";
 
-function getGutter(): Element {
-  const el = document.querySelector('[aria-hidden="true"]');
-  if (!el) throw new Error("gutter not found");
-  return el;
+function getGutter(): HTMLElement {
+  return screen.getByTestId("line-gutter");
 }
 
 function getGutterSpans(): Element[] {

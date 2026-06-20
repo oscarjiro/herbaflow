@@ -4,7 +4,7 @@
  * Generic on purpose: it knows nothing about protein networks specifically. The
  * caller builds a flat elements array (nodes + edges) and a stylesheet (from
  * resolved hf-* colors, since Cytoscape cannot read CSS variables) and passes
- * them in. The Stage-6 PPI view uses it today; the RunView compound-target-plant
+ * them in. The Stage-6 PPI view uses it today; the RunView compound-target-pathway
  * graph reuses it with different elements and styling.
  *
  * Wraps the shared ChartFrame so the titled card and the Download-PNG control

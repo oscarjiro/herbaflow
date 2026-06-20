@@ -57,6 +57,7 @@ export const LineNumberedTextarea = React.forwardRef<
       <div
         ref={gutterRef}
         aria-hidden="true"
+        data-testid="line-gutter"
         className="bg-muted/40 text-muted-foreground flex min-w-10 shrink-0 flex-col overflow-hidden border-r px-2 py-2 font-mono text-sm leading-5 tabular-nums select-none"
       >
         {Array.from({ length: lineCount }, (_, i) => {
