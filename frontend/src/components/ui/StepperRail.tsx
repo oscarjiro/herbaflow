@@ -4,13 +4,6 @@ import { cn } from "@/lib/cn";
 
 type StepState = "done" | "current" | "pending" | "not_applicable";
 
-/** Parse the awaiting stage number from a status like "3_awaiting_approval". */
-function awaitingStage(status: string | null): number | null {
-  if (!status) return null;
-  const m = status.match(/^(\d+)_awaiting_approval$/);
-  return m?.[1] != null ? parseInt(m[1], 10) : null;
-}
-
 function deriveStepState(n: number, data: AnalysisRead, currentStage: number | null): StepState {
   // stage_state carries the entry-mode-intended state ("not_applicable" for N/A stages).
   if (data.stage_state?.[String(n)] === "not_applicable") {
@@ -27,9 +20,9 @@ function deriveStepState(n: number, data: AnalysisRead, currentStage: number | n
 }
 
 export function StepperRail({ data, className }: { data: AnalysisRead; className?: string }) {
-  const awaiting = awaitingStage(data.status);
-  // Use the awaiting stage, then fall back to current_stage from the run.
-  const currentStage = awaiting ?? data.current_stage;
+  // The run's current_stage drives the highlighted step (the awaiting-approval
+  // status is already reflected in current_stage).
+  const currentStage = data.current_stage;
 
   return (
     <nav aria-label="Pipeline steps" className={cn("w-full", className)}>
