@@ -130,6 +130,16 @@ class StageEditRequest(BaseModel):
     remove: list[uuid.UUID] = Field(default_factory=list)
 
 
+class ProgressRead(BaseModel):
+    """Live per-item progress for a running stage (Stage 2 or Stage 3 only)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    stage: int
+    processed: int
+    total: int
+
+
 class AnalysisRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -154,6 +164,7 @@ class AnalysisRead(BaseModel):
             v = {**v, "6": {k: val for k, val in six.items() if k != "network_image"}}
         return v
 
+    progress: ProgressRead | None = None
     created_at: datetime | None
     completed_at: datetime | None
     expires_at: datetime | None

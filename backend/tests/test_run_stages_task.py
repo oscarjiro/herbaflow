@@ -82,7 +82,7 @@ async def test_run_stages_task_marks_failed_when_runner_raises(
 
     monkeypatch.setattr(engine.db, "session_scope", fake_scope)
     monkeypatch.setattr(engine, "AnalysisRepository", lambda session: _FakeRepo(run))
-    monkeypatch.setattr(engine, "build_runners", lambda session: {1: boom, 2: boom, 3: boom})
+    monkeypatch.setattr(engine, "build_runners", lambda session, **_kw: {1: boom, 2: boom, 3: boom})
 
     await engine.run_stages_task(run.analysis_id, 1)
 
@@ -196,7 +196,7 @@ async def test_run_stages_task_completes_on_success(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(
         engine,
         "build_runners",
-        lambda session: {
+        lambda session, **_kw: {
             1: stage1,
             2: stage2,
             3: stage3,

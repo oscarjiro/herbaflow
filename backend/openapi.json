@@ -1329,6 +1329,16 @@
             "type": "object",
             "title": "Stage Results"
           },
+          "progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProgressRead"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "created_at": {
             "anyOf": [
               {
@@ -1747,6 +1757,30 @@
           "family_name"
         ],
         "title": "PlantRead"
+      },
+      "ProgressRead": {
+        "properties": {
+          "stage": {
+            "type": "integer",
+            "title": "Stage"
+          },
+          "processed": {
+            "type": "integer",
+            "title": "Processed"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stage",
+          "processed",
+          "total"
+        ],
+        "title": "ProgressRead",
+        "description": "Live per-item progress for a running stage (Stage 2 or Stage 3 only)."
       },
       "ResetFromRequest": {
         "properties": {

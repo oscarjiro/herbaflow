@@ -263,3 +263,30 @@ async def test_stage1_zero_fails() -> None:
     await engine.execute_run(repo, run.analysis_id, runners)
     assert run.status == "failed"
     assert "compound" in run.error_message.lower()
+
+
+@pytest.mark.asyncio
+async def test_running_status_is_committed_before_stage_body() -> None:
+    """The *_running status must be durable before the stage runs, so a poller (and the
+    per-item progress channel) sees the truly-executing stage — not one stage behind. Without
+    this the auto-mode per-stage commit lags status a stage behind during the stage body."""
+    run = _run("auto")
+
+    class _OrderRepo(FakeRepo):
+        def __init__(self, r: SimpleNamespace) -> None:
+            super().__init__(r)
+            self.committed_status: str | None = None
+
+        async def commit(self) -> None:
+            # Snapshot what is now durable/visible to a separate poller session.
+            self.committed_status = self.run.status
+
+    repo = _OrderRepo(run)
+    seen: dict[str, str | None] = {}
+
+    async def stage1_runner(r: SimpleNamespace) -> dict:
+        seen["committed_at_run"] = repo.committed_status
+        return {"count": 3, "compounds": _compounds(3), "state": "computed"}
+
+    await engine.execute_run(repo, run.analysis_id, {1: stage1_runner}, run_stages=frozenset({1}))
+    assert seen["committed_at_run"] == "stage_1_running"

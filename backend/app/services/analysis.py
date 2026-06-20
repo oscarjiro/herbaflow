@@ -16,14 +16,18 @@ from app.pipeline import edits, engine, entry_modes, state
 from app.pipeline.engine import validate_overrides
 from app.pipeline.limits import EntityCapExceeded, check_entity_cap
 from app.repositories.analysis import AnalysisRepository
+from app.repositories.analysis_progress import AnalysisProgressRepository
 from app.repositories.compound import CompoundRepository
 from app.repositories.compound_target import CompoundTargetRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
 from app.repositories.target import TargetRepository
-from app.schemas.analysis import AnalysisCreate, AnalysisListItem, AnalysisRead
+from app.schemas.analysis import AnalysisCreate, AnalysisListItem, AnalysisRead, ProgressRead
 
 logger = logging.getLogger("herbaflow.analysis")
+
+# Statuses that indicate a live per-item stage is running and may have progress rows.
+_PROGRESS_RUNNING = {state.stage_status(2, "running"), state.stage_status(3, "running")}
 
 # Per editable entity stage: (cap entity, id_key, stored list key). Stage 1 edits compounds;
 # Stage 3/4 edit targets. The durable edit layer is threaded with these keys.
@@ -44,6 +48,7 @@ class AnalysisService:
         compound_repo: Any,
         target_repo: Any = None,
         compound_target_repo: Any = None,
+        progress_repo: Any = None,
     ) -> None:
         self.plant_repo = plant_repo
         self.disease_repo = disease_repo
@@ -51,6 +56,7 @@ class AnalysisService:
         self.compound_repo = compound_repo
         self.target_repo = target_repo
         self.compound_target_repo = compound_target_repo
+        self.progress_repo: Any = progress_repo
 
     @classmethod
     def from_session(cls, session: AsyncSession) -> AnalysisService:
@@ -61,6 +67,7 @@ class AnalysisService:
             compound_repo=CompoundRepository(session),
             target_repo=TargetRepository(session),
             compound_target_repo=CompoundTargetRepository(session),
+            progress_repo=AnalysisProgressRepository(session),
         )
 
     async def create(
@@ -328,7 +335,12 @@ class AnalysisService:
             raise NotFoundProblem(detail="Analysis run not found.")
         if run.expires_at is not None and run.expires_at < now_utc():
             raise GoneProblem(detail="Analysis run has expired.")
-        return AnalysisRead.model_validate(run)
+        read = AnalysisRead.model_validate(run)
+        if run.status in _PROGRESS_RUNNING and self.progress_repo is not None:
+            row = await self.progress_repo.get(analysis_id)
+            if row is not None:
+                read.progress = ProgressRead.model_validate(row)
+        return read
 
     async def list_recent(self, *, limit: int, offset: int) -> list[AnalysisListItem]:
         runs = await self.analysis_repo.list_recent(limit=limit, offset=offset)
