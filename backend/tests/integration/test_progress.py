@@ -43,3 +43,35 @@ async def test_progress_row_cascades_on_run_delete(engine) -> None:
             )
         ).scalar_one()
     assert remaining == 0
+
+
+@pytest.mark.asyncio
+async def test_progress_repo_upserts_and_reads(engine) -> None:
+    from app.repositories.analysis_progress import AnalysisProgressRepository
+
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    run_id = uuid.uuid4()
+    async with maker() as s:
+        await s.execute(
+            text(
+                "insert into analysis_runs(analysis_id, parameters, status, updated_at) "
+                "values (:r, '{}'::jsonb, 'stage_3_running', now())"
+            ),
+            {"r": run_id},
+        )
+        await s.commit()
+
+    async with maker() as s:
+        repo = AnalysisProgressRepository(s)
+        await repo.upsert(run_id, stage=3, processed=2, total=10)
+        await s.commit()
+    async with maker() as s:
+        repo = AnalysisProgressRepository(s)
+        await repo.upsert(run_id, stage=3, processed=7, total=10)
+        await s.commit()
+
+    async with maker() as s:
+        repo = AnalysisProgressRepository(s)
+        row = await repo.get(run_id)
+    assert row is not None
+    assert (row.stage, row.processed, row.total) == (3, 7, 10)
