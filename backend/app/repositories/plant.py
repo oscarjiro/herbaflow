@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.plant import Plant, PlantAlias
+from app.services.alias_search import like_escape
 
 
 class PlantRepository:
@@ -36,6 +37,8 @@ class PlantRepository:
         - alias_name ILIKE %q% (alias=alias_name)
         and merges them in Python (data set is small: ~478 plants / ~556 aliases).
         Uses SQLAlchemy ``.ilike()`` with a bound pattern — never string-formats ``q``.
+        The term's ``%``/``_`` are escaped (``like_escape``) so they match literally
+        instead of acting as LIKE wildcards.
         """
         if not q:
             rows = await self.session.execute(
@@ -43,11 +46,11 @@ class PlantRepository:
             )
             return [(p, None) for p in rows.scalars().all()]
 
-        pattern = f"%{q}%"
+        pattern = f"%{like_escape(q)}%"
 
         # Canonical-name hits
         canon_result = await self.session.execute(
-            select(Plant).where(Plant.canonical_scientific_name.ilike(pattern))
+            select(Plant).where(Plant.canonical_scientific_name.ilike(pattern, escape="\\"))
         )
         canon_rows: list[tuple[Plant, str | None]] = [
             (p, None) for p in canon_result.scalars().all()
@@ -57,7 +60,7 @@ class PlantRepository:
         alias_result = await self.session.execute(
             select(Plant, PlantAlias.alias_name)
             .join(PlantAlias, PlantAlias.plant_id == Plant.plant_id)
-            .where(PlantAlias.alias_name.ilike(pattern))
+            .where(PlantAlias.alias_name.ilike(pattern, escape="\\"))
         )
         alias_rows: list[tuple[Plant, str | None]] = [
             (plant, alias_name) for plant, alias_name in alias_result.all()

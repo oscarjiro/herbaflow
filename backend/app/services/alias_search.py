@@ -21,6 +21,17 @@ from collections.abc import Hashable
 # --------------------------------------------------------------------------- #
 
 
+def like_escape(term: str) -> str:
+    r"""Escape SQL ``LIKE`` / ``ILIKE`` wildcards in a user-typed search term.
+
+    A raw ``%`` or ``_`` in the term must match *literally* rather than act as a
+    wildcard, so a search for ``"a_b"`` does not silently also match ``"aXb"``.
+    Escape the escape character first, then ``%`` and ``_``. Callers wrap the
+    result in ``f"%{like_escape(q)}%"`` and pass ``escape="\\"`` to ``.ilike(...)``.
+    """
+    return term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 def rank_match(
     term: str,
     *,
@@ -77,7 +88,9 @@ def merge_candidates(
 
     Returns one row per entity, sorted by rank ascending.  Ties in rank retain
     a stable order (Python's sort is stable; the insertion order of first
-    appearance is the secondary key when ranks are equal).
+    appearance is the secondary key when ranks are equal). This function
+    guarantees only the rank ordering; the service caller applies a secondary
+    canonical-name sort for the final display order.
     """
     # {key: (rank, matched_alias)}
     best: dict[Hashable, tuple[int, str | None]] = {}

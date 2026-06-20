@@ -5,7 +5,32 @@ No DB, no Docker — pure Python only.
 
 from __future__ import annotations
 
-from app.services.alias_search import merge_candidates, rank_match
+from app.services.alias_search import like_escape, merge_candidates, rank_match
+
+# ---------------------------------------------------------------------------
+# like_escape
+# ---------------------------------------------------------------------------
+
+
+class TestLikeEscape:
+    """like_escape(term) -> term with LIKE wildcards neutralised."""
+
+    def test_plain_term_unchanged(self) -> None:
+        assert like_escape("Curcuma longa") == "Curcuma longa"
+
+    def test_percent_escaped(self) -> None:
+        assert like_escape("a%b") == "a\\%b"
+
+    def test_underscore_escaped(self) -> None:
+        assert like_escape("a_b") == "a\\_b"
+
+    def test_backslash_escaped_first(self) -> None:
+        # The escape char itself is doubled before % / _ so it is not consumed.
+        assert like_escape("a\\b") == "a\\\\b"
+
+    def test_combined(self) -> None:
+        assert like_escape("100%_done\\") == "100\\%\\_done\\\\"
+
 
 # ---------------------------------------------------------------------------
 # rank_match
