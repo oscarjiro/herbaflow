@@ -6,7 +6,7 @@
  * y = term, size = gene count, color = -log10 p on a Viridis colorbar. The
  * active tab is what ChartFrame's Download PNG exports.
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlotlyChart } from "./PlotlyChart";
 import {
@@ -23,7 +23,7 @@ type Props = {
 };
 
 export function EnrichmentDotChart({ terms, onGraphDiv }: Props) {
-  const groups = groupTermsBySource(terms);
+  const groups = useMemo(() => groupTermsBySource(terms), [terms]);
   const [active, setActive] = useState(groups[0]?.source ?? "");
   if (groups.length === 0) return null;
   // groups is non-empty at this point; fallback to first group when active key
