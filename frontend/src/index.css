@@ -309,11 +309,61 @@
     font-style: italic;
   }
 
-  :where(button, a, input, select, textarea, [tabindex]):focus-visible {
-    outline: 2px solid var(--hf-fg-1);
-    outline-offset: 2px;
-    border-radius: var(--radius-1);
+  /* Refined focus ring — soft radius, thinner stroke; keeps AA keyboard visibility.
+     Inputs/textarea/select opt OUT: Task 6 provides the animated-border focus for those. */
+  :where(button, a, [role="button"], [tabindex]):focus-visible {
+    outline: 1.5px solid var(--hf-fg-1);
+    outline-offset: 3px;
+    border-radius: var(--radius-md);
   }
+  /* Inputs keep a visible ring (AA) but use a subtler colour; Task 6 will replace
+     this with the animated border. Isolated selector so Task 6 can override cleanly. */
+  :where(input, select, textarea):focus-visible {
+    outline: 1.5px solid var(--hf-border-strong);
+    outline-offset: 0;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Hidden document (page) scrollbar — page still scrolls, bar is invisible.
+     Does NOT affect .scroll containers (those keep the thin styled bar). */
+  html {
+    scrollbar-width: none;
+  }
+  html::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+/* =====================================================================
+   Thin internal scrollbar utility (.scroll)
+   Apply to any overflow container that needs a visible but unobtrusive bar.
+   This is separate from the hidden page scrollbar above: the document hides
+   its bar entirely; .scroll containers keep a thin styled bar.
+   ===================================================================== */
+
+.scroll {
+  overflow-y: auto;
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--hf-border) transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+.scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.scroll::-webkit-scrollbar-track {
+  background: var(--hf-surface);
+  border-radius: var(--radius-pill);
+}
+.scroll::-webkit-scrollbar-thumb {
+  background: var(--hf-border-strong);
+  border-radius: var(--radius-pill);
+}
+.scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--hf-fg-3);
 }
 
 /* =====================================================================
