@@ -100,7 +100,7 @@ export function NetworkGraph({
       description={description}
       onExport={async () => {
         if (cyRef.current) {
-          await exportCytoscapeAsPng(cyRef.current, { title, filename });
+          await exportCytoscapeAsPng(cyRef.current, { filename });
         }
       }}
     >

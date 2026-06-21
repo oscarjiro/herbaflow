@@ -7,10 +7,11 @@ const EXPORT_TEXT = "#000000";
 /**
  * Compose an image source onto a canvas and save it as a PNG.
  *
- * This is the single shared compose-to-PNG path used by both the SVG export and
- * the Cytoscape export. It loads `src` into an Image, draws it onto a canvas
- * (with an optional 32 px title strip), fills the background, then toBlob's to
- * PNG and hands the blob to saveBlob — the one canonical save-to-disk path.
+ * This is the single shared compose-to-PNG path used by the SVG, Plotly, and
+ * Cytoscape exports. It loads `src` into an Image, draws it onto a canvas, fills
+ * the background (unless transparent), then toBlob's to PNG and hands the blob
+ * to saveBlob — the one canonical save-to-disk path. Figures export title-free:
+ * the chart carries its own labels and the filename carries its identity.
  *
  * Dimensions resolve from opts.width/height when given, else the image's natural
  * size, else an 800x400 fallback. A blob: object URL passed as `src` is revoked
@@ -20,7 +21,6 @@ async function composeImageToPng(
   src: string,
   opts: {
     filename: string;
-    title?: string;
     background?: string;
     width?: number;
     height?: number;
@@ -29,9 +29,6 @@ async function composeImageToPng(
 ): Promise<void> {
   const colors = readChartColors();
   const bg = opts.background ?? colors.surface ?? colors.bg ?? "#ffffff";
-
-  // Title padding: 32 px strip above the image when a title is requested.
-  const titlePad = opts.title ? 32 : 0;
 
   const isBlobUrl = src.startsWith("blob:");
   const revoke = () => {
@@ -51,7 +48,7 @@ async function composeImageToPng(
         const dpr = window.devicePixelRatio || 1;
         const canvas = document.createElement("canvas");
         canvas.width = width * dpr;
-        canvas.height = (height + titlePad) * dpr;
+        canvas.height = height * dpr;
 
         const ctx = canvas.getContext("2d");
         if (!ctx) {
@@ -66,20 +63,10 @@ async function composeImageToPng(
         // onto any page (e.g. a white thesis page) without a coloured backplate.
         if (!opts.transparent) {
           ctx.fillStyle = bg;
-          ctx.fillRect(0, 0, width, height + titlePad);
+          ctx.fillRect(0, 0, width, height);
         }
 
-        // Optional title strip. Black on a transparent export (theme-independent,
-        // prints legibly on white), else the themed foreground.
-        if (opts.title) {
-          ctx.fillStyle = opts.transparent ? "#000000" : colors.fg1 || "#000000";
-          ctx.font = "600 16px ui-sans-serif, system-ui, sans-serif";
-          ctx.textBaseline = "middle";
-          ctx.fillText(opts.title, 12, titlePad / 2);
-        }
-
-        // Draw the image below the title strip.
-        ctx.drawImage(img, 0, titlePad, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
 
         revoke();
 
@@ -110,15 +97,27 @@ async function composeImageToPng(
  * Export an SVGSVGElement as a PNG file saved to the user's filesystem.
  *
  * The SVG is serialized to a Blob, then drawn and saved via the shared
- * composeImageToPng helper (with an optional title bar above the chart).
+ * composeImageToPng helper. The figure is exported title-free and transparent.
  */
 export async function exportSvgAsPng(
   svg: SVGSVGElement,
-  opts: { filename: string; title?: string; background?: string },
+  opts: { filename: string },
 ): Promise<void> {
   // Clone so we don't mutate the live DOM node.
   const clone = svg.cloneNode(true) as SVGSVGElement;
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+  // Print-friendly labels: force black text on the clone so the figure's own
+  // labels (set names + counts) stay legible on a white page and on the
+  // transparent export, independent of the live theme — the same EXPORT_TEXT
+  // convention the Plotly/Cytoscape exports use. The root `color` covers any
+  // currentColor text; explicit fills are overridden per text node.
+  clone.style.color = EXPORT_TEXT;
+  clone.querySelectorAll("text, tspan").forEach((node) => {
+    const el = node as SVGElement;
+    el.setAttribute("fill", EXPORT_TEXT);
+    el.style.fill = EXPORT_TEXT;
+  });
 
   // Resolve dimensions: prefer viewBox, then clientWidth/Height, then fallback.
   let w: number;
@@ -141,7 +140,9 @@ export async function exportSvgAsPng(
   const svgUrl = URL.createObjectURL(svgBlob);
 
   try {
-    await composeImageToPng(svgUrl, { ...opts, width: w, height: h });
+    // Transparent so the figure drops onto any page (e.g. a white thesis page)
+    // without a coloured backplate, matching the Plotly/Cytoscape exports.
+    await composeImageToPng(svgUrl, { ...opts, width: w, height: h, transparent: true });
   } catch (err) {
     // Preserve the historical SVG-specific failure message.
     if (err instanceof Error && err.message === "Image load failed") {
@@ -156,12 +157,11 @@ export async function exportSvgAsPng(
  *
  * Renders the full graph to a PNG data URL via cy.png (2x scale, background
  * matching the surface), then draws and saves it through the same
- * composeImageToPng helper so the title strip and save path are shared with the
- * SVG export.
+ * composeImageToPng helper so the save path is shared with the SVG export.
  */
 export async function exportCytoscapeAsPng(
   cy: import("cytoscape").Core,
-  opts: { filename: string; title?: string },
+  opts: { filename: string },
 ): Promise<void> {
   // Print-friendly export: black labels with a white halo (legible on a white
   // page, independent of the live theme) on a transparent canvas. The temporary
@@ -176,7 +176,6 @@ export async function exportCytoscapeAsPng(
   }
   return composeImageToPng(dataUrl, {
     filename: opts.filename,
-    title: opts.title,
     transparent: true,
   });
 }
@@ -185,12 +184,12 @@ export async function exportCytoscapeAsPng(
  * Export a Plotly graph div as a PNG file. Renders the graph to a PNG data URL
  * via Plotly.toImage (2x scale), then draws + saves it through the same
  * composeImageToPng helper that backs the SVG and Cytoscape exports — one save
- * path, one title strip. Plotly is dynamically imported (cached) so this does
- * not pull Plotly into the main bundle.
+ * path. Plotly is dynamically imported (cached) so this does not pull Plotly
+ * into the main bundle.
  */
 export async function exportPlotlyAsPng(
   graphDiv: HTMLElement,
-  opts: { filename: string; title?: string },
+  opts: { filename: string },
 ): Promise<void> {
   const Plotly = (await import("plotly.js-dist-min")).default;
   const rect = graphDiv.getBoundingClientRect();
@@ -230,7 +229,6 @@ export async function exportPlotlyAsPng(
   );
   return composeImageToPng(dataUrl, {
     filename: opts.filename,
-    title: opts.title,
     transparent: true,
   });
 }

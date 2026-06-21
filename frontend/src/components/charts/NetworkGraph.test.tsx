@@ -77,7 +77,7 @@ describe("NetworkGraph", () => {
     await userEvent.click(screen.getByRole("button", { name: /download png/i }));
     expect(exportCytoscapeAsPng).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ title: "Interaction network", filename: "ppi_network.png" }),
+      expect.objectContaining({ filename: "ppi_network.png" }),
     );
   });
 

@@ -58,7 +58,7 @@ describe("exportPlotlyAsPng", () => {
     const Plotly = (await import("plotly.js-dist-min")).default;
     const gd = document.createElement("div");
     // jsdom has no canvas image decode; assert toImage gets a print-friendly figure.
-    await exportPlotlyAsPng(gd, { filename: "x.png", title: "X" });
+    await exportPlotlyAsPng(gd, { filename: "x.png" });
     expect(Plotly.toImage).toHaveBeenCalledWith(
       expect.objectContaining({
         layout: expect.objectContaining({

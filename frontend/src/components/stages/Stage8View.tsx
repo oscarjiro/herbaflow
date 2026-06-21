@@ -310,10 +310,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           filename="pathway_enrichment.png"
           onExport={async () => {
             if (gdRef.current)
-              await exportPlotlyAsPng(gdRef.current, {
-                title: "Pathway enrichment",
-                filename: "pathway_enrichment.png",
-              });
+              await exportPlotlyAsPng(gdRef.current, { filename: "pathway_enrichment.png" });
           }}
         >
           <EnrichmentDotChart

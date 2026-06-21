@@ -230,10 +230,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
           filename="hub_genes.png"
           onExport={async () => {
             if (gdRef.current)
-              await exportPlotlyAsPng(gdRef.current, {
-                title: "Hub genes",
-                filename: "hub_genes.png",
-              });
+              await exportPlotlyAsPng(gdRef.current, { filename: "hub_genes.png" });
           }}
         >
           <HubBarChart
