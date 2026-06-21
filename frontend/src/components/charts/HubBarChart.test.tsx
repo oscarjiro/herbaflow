@@ -3,12 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "@/lib/theme";
 import { HubBarChart } from "./HubBarChart";
 
-const lastData: { value?: unknown } = {};
 vi.mock("./PlotlyChart", () => ({
-  PlotlyChart: (p: { data: { x: number[] }[] }) => {
-    lastData.value = p.data;
-    return <div data-testid="plot">{p.data[0]?.x?.join(",")}</div>;
-  },
+  PlotlyChart: (p: { data: { x: number[] }[] }) => (
+    <div data-testid="plot">{p.data[0]?.x?.join(",")}</div>
+  ),
 }));
 
 function wrap(ui: React.ReactNode) {
@@ -33,4 +31,11 @@ it("defaults to MCC and switches metric on tab click", async () => {
 it("renders no Overall/composite tab", () => {
   wrap(<HubBarChart hubs={hubs} />);
   expect(screen.queryByRole("tab", { name: /overall|composite/i })).toBeNull();
+});
+
+it("renders without throwing when hubs is empty", () => {
+  wrap(<HubBarChart hubs={[]} />);
+  // Empty data yields an empty trace, not a crash; the MCC tab is still present.
+  expect(screen.getByTestId("plot").textContent).toBe("");
+  expect(screen.getByRole("tab", { name: "MCC" })).toBeInTheDocument();
 });
