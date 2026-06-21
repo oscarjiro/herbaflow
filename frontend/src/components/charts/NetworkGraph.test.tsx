@@ -11,7 +11,15 @@ import { ThemeProvider } from "@/lib/theme";
 // ---------------------------------------------------------------------------
 vi.mock("react-cytoscapejs", () => ({
   default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    cy?.({ png: () => "data:image/png;base64,AAAA", on: () => {}, nodes: () => [] });
+    // Chainable on/off so the tooltip wiring's `cy.off(...).on(...)` runs as it
+    // does against the real cytoscape Core.
+    const core: Record<string, unknown> = {
+      png: () => "data:image/png;base64,AAAA",
+      nodes: () => [],
+    };
+    core.on = () => core;
+    core.off = () => core;
+    cy?.(core);
     return React.createElement("div", {
       "data-testid": "cytoscape",
       "data-count": String(elements?.length ?? 0),

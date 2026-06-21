@@ -94,7 +94,10 @@ export function NetworkGraph({
           cy={(cy) => {
             cyRef.current = cy;
             if (nodeTooltip) {
-              cy.on("mouseover", "node", (evt: cytoscape.EventObject) => {
+              // react-cytoscapejs may invoke this callback again with the same
+              // Core on re-renders, so clear any prior node listeners before
+              // re-binding — keeps registration idempotent (no handler buildup).
+              cy.off("mouseover", "node").on("mouseover", "node", (evt: cytoscape.EventObject) => {
                 const pos = evt.renderedPosition ?? { x: 0, y: 0 };
                 setTip({
                   text: nodeTooltip(evt.target.data() as Record<string, unknown>),
@@ -102,7 +105,7 @@ export function NetworkGraph({
                   y: pos.y,
                 });
               });
-              cy.on("mouseout", "node", () => setTip(null));
+              cy.off("mouseout", "node").on("mouseout", "node", () => setTip(null));
             }
           }}
           style={{ width: "100%", height: "100%" }}
