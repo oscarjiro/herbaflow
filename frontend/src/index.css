@@ -61,6 +61,9 @@
   --hf-glass-shine-2: rgba(255, 255, 255, 0.55);
   --hf-glass-shadow: 0 16px 40px -18px rgba(26, 26, 26, 0.3), 0 2px 6px rgba(26, 26, 26, 0.08);
 
+  /* Switch toggle — track off-state (no existing neutral covers this value) */
+  --hf-switch-track-off: var(--hf-neutral-300);
+
   /* Dotted-glow background */
   --hf-dot: rgba(26, 26, 26, 0.05);
 
@@ -160,6 +163,7 @@
   --color-hf-bg: var(--hf-bg);
   --color-hf-surface: var(--hf-surface);
   --color-hf-surface-2: var(--hf-surface-2);
+  --color-hf-switch-track-off: var(--hf-switch-track-off);
   --color-hf-border: var(--hf-border);
   --color-hf-border-strong: var(--hf-border-strong);
   --color-hf-fg-1: var(--hf-fg-1);
@@ -787,6 +791,9 @@
   --hf-danger-soft: #36211c;
   --hf-info: #7e9db0;
   --hf-info-soft: #1e2a31;
+
+  /* Switch toggle — dark off-track (mid-tone warm dark, higher contrast than surface-2) */
+  --hf-switch-track-off: #38332b;
 
   /* Accent — paper in dark */
   --hf-accent: var(--hf-fg-1);
