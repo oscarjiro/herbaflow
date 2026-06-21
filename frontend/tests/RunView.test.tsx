@@ -9,9 +9,16 @@ import "../src/lib/api";
 import { server } from "./handlers";
 
 // Mock react-cytoscapejs so the graph never really renders in jsdom.
+// The stub cy object must have chainable off/on so NetworkGraph's nodeTooltip
+// wiring (cy.off(...).on(...)) does not throw.
 vi.mock("react-cytoscapejs", () => ({
   default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    cy?.({ png: () => "data:image/png;base64,AAAA" });
+    const stubCy: Record<string, unknown> = {
+      png: () => "data:image/png;base64,AAAA",
+    };
+    stubCy.off = () => stubCy;
+    stubCy.on = () => stubCy;
+    cy?.(stubCy);
     return React.createElement("div", {
       "data-testid": "cytoscape",
       "data-count": String(elements?.length ?? 0),

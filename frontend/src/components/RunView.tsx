@@ -1,16 +1,16 @@
 import { useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type cytoscape from "cytoscape";
 import { advanceAnalysis } from "../api/sdk.gen";
 import { getCtpGraphOptions } from "../api/@tanstack/react-query.gen";
-import type { CtpGraph, CtpGraphNode, CtpGraphEdge, GetCtpGraphResponse } from "../api/types.gen";
+import type { GetCtpGraphResponse } from "../api/types.gen";
 import { useAnalysisStatus } from "../hooks/useAnalysisStatus";
 import { useEntitySubjects } from "../hooks/useEntitySubjects";
 import { useStaleState } from "../hooks/useStaleState";
 import { runHasCompounds } from "../lib/entities";
 import { clearActiveRunId, getActiveRunId, setActiveRunId } from "../lib/activeRun";
 import { useChartColors } from "../lib/chartTheme";
+import { buildCtpElements, buildCtpStylesheet, ctpConcentricLayout } from "../lib/ctpGraph";
 import { NetworkGraph } from "./charts/NetworkGraph";
 import { notifyError } from "../lib/toast";
 import { humanizeProblem, type Problem } from "../lib/problem";
@@ -37,93 +37,6 @@ import { Eyebrow } from "@/components/ui/editorial";
 function isSettled(status: string | null | undefined): boolean {
   if (!status) return false;
   return status.endsWith("awaiting_approval") || status === "complete" || status === "failed";
-}
-
-// ---------------------------------------------------------------------------
-// CTP graph helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Build a flat Cytoscape elements array from the typed CTP graph.
- * Nodes carry id/label/type/hub; edges carry id/source/target/interaction.
- */
-function buildCtpElements(graph: CtpGraph): cytoscape.ElementDefinition[] {
-  const nodes: cytoscape.ElementDefinition[] = (graph.nodes as CtpGraphNode[]).map((n) => ({
-    data: { id: n.id, label: n.label, type: n.type, hub: n.is_hub },
-  }));
-  const edges: cytoscape.ElementDefinition[] = (graph.edges as CtpGraphEdge[]).map((e, i) => ({
-    data: { id: `e-${i}`, source: e.source, target: e.target, interaction: e.interaction },
-  }));
-  return [...nodes, ...edges];
-}
-
-/** Build the Cytoscape stylesheet for the CTP graph from resolved hf-* color strings. */
-function buildCtpStylesheet(colors: ReturnType<typeof useChartColors>): cytoscape.StylesheetJson {
-  return [
-    {
-      selector: "node",
-      style: {
-        label: "data(label)",
-        color: colors.fg1,
-        "font-size": 9,
-        "text-valign": "bottom",
-        "text-halign": "center",
-        "text-margin-y": 2,
-        width: 20,
-        height: 20,
-      },
-    },
-    {
-      selector: 'node[type = "compound"]',
-      style: {
-        "background-color": colors.terracotta,
-        shape: "ellipse",
-      },
-    },
-    {
-      selector: 'node[type = "target"]',
-      style: {
-        "background-color": colors.sage,
-        shape: "ellipse",
-      },
-    },
-    {
-      selector: 'node[type = "target"][hub = "true"]',
-      style: {
-        "background-color": colors.sageDeep,
-        width: 30,
-        height: 30,
-      },
-    },
-    {
-      selector: 'node[type = "pathway"]',
-      style: {
-        "background-color": colors.info,
-        shape: "round-rectangle",
-      },
-    },
-    {
-      selector: "edge",
-      style: {
-        "curve-style": "bezier",
-        opacity: 0.6,
-      },
-    },
-    {
-      selector: 'edge[interaction = "compound-target"]',
-      style: {
-        "line-color": colors.border,
-        "line-style": "solid",
-      },
-    },
-    {
-      selector: 'edge[interaction = "target-pathway"]',
-      style: {
-        "line-color": colors.fg3,
-        "line-style": "dashed",
-      },
-    },
-  ] as cytoscape.StylesheetJson;
 }
 
 type Stage1Data = {
@@ -239,6 +152,33 @@ export function RunView({ analysisId, onReset }: { analysisId: string; onReset?:
               filename="ctp_network.png"
               elements={ctpElements}
               stylesheet={ctpStylesheet}
+              layout={ctpConcentricLayout()}
+              nodeTooltip={(d) =>
+                d["type"] === "target"
+                  ? `Target: ${String(d["label"] ?? "")}`
+                  : `${String(d["type"] ?? "")}: ${String(d["label"] ?? "")}`
+              }
+              legend={
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs">
+                  <span className="text-hf-fg-2 font-medium">Legend:</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="bg-hf-warning inline-block h-3 w-3 rounded-sm" />
+                    <span className="text-hf-fg-2">Compound</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="bg-hf-info inline-block h-3 w-3 rounded-full" />
+                    <span className="text-hf-fg-2">Target</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="bg-hf-sage-deep inline-block h-3 w-3 rounded-full" />
+                    <span className="text-hf-fg-2">Hub target</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="bg-hf-danger inline-block h-3 w-3 rounded-sm" />
+                    <span className="text-hf-fg-2">Pathway / Disease</span>
+                  </span>
+                </div>
+              }
             />
           ) : null)}
 
