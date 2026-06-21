@@ -14,7 +14,7 @@
  * Pan and zoom are Cytoscape's built-in user interactions; no extra config.
  */
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import cytoscape from "cytoscape";
 import fcose from "cytoscape-fcose";
 import CytoscapeComponent from "react-cytoscapejs";
@@ -45,6 +45,13 @@ type NetworkGraphProps = {
   description?: string;
   /** Graph canvas height in pixels (default 420). */
   height?: number;
+  /**
+   * Optional hover tooltip producer. Receives the hovered node's data object
+   * and returns the string to display in the positioned label.
+   */
+  nodeTooltip?: (nodeData: Record<string, unknown>) => string;
+  /** Optional content rendered below the graph canvas (e.g. a colour legend). */
+  legend?: React.ReactNode;
 };
 
 const DEFAULT_LAYOUT: cytoscape.LayoutOptions = {
@@ -62,8 +69,11 @@ export function NetworkGraph({
   tray,
   description,
   height,
+  nodeTooltip,
+  legend,
 }: NetworkGraphProps) {
   const cyRef = useRef<cytoscape.Core | null>(null);
+  const [tip, setTip] = useState<{ text: string; x: number; y: number } | null>(null);
 
   return (
     <ChartFrame
@@ -76,17 +86,47 @@ export function NetworkGraph({
         }
       }}
     >
-      <div style={{ height: height ?? 420, width: "100%" }}>
+      <div style={{ height: height ?? 420, width: "100%", position: "relative" }}>
         <CytoscapeComponent
           elements={elements}
           stylesheet={stylesheet}
           layout={layout ?? DEFAULT_LAYOUT}
           cy={(cy) => {
             cyRef.current = cy;
+            if (nodeTooltip) {
+              cy.on("mouseover", "node", (evt: cytoscape.EventObject) => {
+                const pos = evt.renderedPosition ?? { x: 0, y: 0 };
+                setTip({
+                  text: nodeTooltip(evt.target.data() as Record<string, unknown>),
+                  x: pos.x,
+                  y: pos.y,
+                });
+              });
+              cy.on("mouseout", "node", () => setTip(null));
+            }
           }}
           style={{ width: "100%", height: "100%" }}
         />
+        {tip !== null && (
+          <div
+            style={{
+              position: "absolute",
+              left: tip.x + 8,
+              top: tip.y + 8,
+              padding: "4px 8px",
+              borderRadius: 4,
+              fontSize: "0.75rem",
+              pointerEvents: "none",
+              zIndex: 10,
+              whiteSpace: "nowrap",
+            }}
+            className="bg-hf-surface text-hf-fg1 border-hf-border border shadow-sm"
+          >
+            {tip.text}
+          </div>
+        )}
       </div>
+      {legend}
       {tray}
     </ChartFrame>
   );

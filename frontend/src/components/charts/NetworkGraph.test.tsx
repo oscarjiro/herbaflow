@@ -11,7 +11,7 @@ import { ThemeProvider } from "@/lib/theme";
 // ---------------------------------------------------------------------------
 vi.mock("react-cytoscapejs", () => ({
   default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    cy?.({ png: () => "data:image/png;base64,AAAA" });
+    cy?.({ png: () => "data:image/png;base64,AAAA", on: () => {}, nodes: () => [] });
     return React.createElement("div", {
       "data-testid": "cytoscape",
       "data-count": String(elements?.length ?? 0),
@@ -91,5 +91,32 @@ describe("NetworkGraph", () => {
       expect.anything(),
       expect.objectContaining({ title: "Interaction network", filename: "ppi_network.png" }),
     );
+  });
+
+  it("renders an optional legend below the graph", () => {
+    wrap(
+      <NetworkGraph
+        title="PPI network"
+        filename="ppi.png"
+        elements={[]}
+        stylesheet={[]}
+        legend={<div>Compounds · Targets · Pathways</div>}
+      />,
+    );
+    expect(screen.getByText(/compounds · targets · pathways/i)).toBeInTheDocument();
+  });
+
+  it("wires the nodeTooltip handler without throwing", () => {
+    expect(() =>
+      wrap(
+        <NetworkGraph
+          title="PPI network"
+          filename="ppi.png"
+          elements={[]}
+          stylesheet={[]}
+          nodeTooltip={(data) => String(data["label"] ?? "")}
+        />,
+      ),
+    ).not.toThrow();
   });
 });
