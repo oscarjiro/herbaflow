@@ -75,12 +75,74 @@ function hexToRgb(hex: string): [number, number, number] {
   ];
 }
 
-/** Derive the flow colour palette from the current theme's CSS variables. */
-function flowPalette() {
+/**
+ * Parse a CSS color value (hex or rgb()/rgba()) into [r,g,b] triple (0..1).
+ * Returns null if the value cannot be parsed (empty / unsupported format).
+ */
+export function parseCssColor(value: string): [number, number, number] | null {
+  const v = value.trim();
+  if (!v) return null;
+
+  // hex "#rrggbb" or "#rgb"
+  if (v.startsWith("#")) {
+    const full = v.length === 4 ? "#" + v[1] + v[1] + v[2] + v[2] + v[3] + v[3] : v;
+    if (full.length !== 7) return null;
+    return hexToRgb(full);
+  }
+
+  // rgb(r, g, b) or rgba(r, g, b, a)
+  const m = v.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+  if (m) {
+    return [parseInt(m[1]!, 10) / 255, parseInt(m[2]!, 10) / 255, parseInt(m[3]!, 10) / 255];
+  }
+
+  return null;
+}
+
+// Hard-coded fallbacks (the proven resolved values for each theme).
+// Used when getComputedStyle is unavailable (SSR / jsdom without CSS).
+const FALLBACK_LIGHT = {
+  bg: "#f7f5f2",
+  a: "#8fa084",
+  b: "#b8755c",
+  c: "#6b7e62",
+} as const;
+const FALLBACK_DARK = {
+  bg: "#14130f",
+  a: "#a6b89a",
+  b: "#cb8b72",
+  c: "#8aa07e",
+} as const;
+
+/**
+ * Derive the flow colour palette by reading CSS custom properties at runtime.
+ * Falls back to hard-coded constants when a computed value is empty (jsdom/SSR).
+ *
+ * Reading from `getComputedStyle` means the palette automatically tracks future
+ * token renames without code changes, and changes correctly between light/dark
+ * modes whenever this function is called.
+ */
+export function flowPaletteFromTokens(): {
+  bg: [number, number, number];
+  a: [number, number, number];
+  b: [number, number, number];
+  c: [number, number, number];
+} {
   const isDark = document.documentElement.classList.contains("dark");
-  return isDark
-    ? { bg: "#14130f", a: "#a6b89a", b: "#cb8b72", c: "#8aa07e" }
-    : { bg: "#f7f5f2", a: "#8fa084", b: "#b8755c", c: "#6b7e62" };
+  const fallback = isDark ? FALLBACK_DARK : FALLBACK_LIGHT;
+  const cs = getComputedStyle(document.documentElement);
+
+  function read(prop: string, fallbackHex: string): [number, number, number] {
+    const raw = cs.getPropertyValue(prop);
+    return parseCssColor(raw) ?? (hexToRgb(fallbackHex) as [number, number, number]);
+  }
+
+  return {
+    bg: read("--hf-bg", fallback.bg),
+    a: read("--hf-sage", fallback.a),
+    b: read("--hf-terracotta", fallback.b),
+    c: read("--hf-sage-deep", fallback.c),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -124,6 +186,32 @@ export function BackgroundFX({ glow = "blobs" }: BackgroundFXProps) {
     let geometry: any = null;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let uniforms: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let threeRef: any = null; // cached THREE module for the observer callback
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let sceneRef: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let camRef: any = null;
+
+    // MutationObserver that re-applies the palette when the theme class changes.
+    // Declared here so cleanup can always call .disconnect() even before import resolves.
+    const observer = new MutationObserver(() => {
+      if (disposed || !uniforms || !threeRef) return;
+      const p = flowPaletteFromTokens();
+      uniforms.cBg.value.set(...p.bg);
+      uniforms.cA.value.set(...p.a);
+      uniforms.cB.value.set(...p.b);
+      uniforms.cC.value.set(...p.c);
+      // Under reduced-motion the RAF loop is not running — render one fresh frame
+      // so the static frame picks up the new theme colours.
+      if (reducedMotion && renderer && sceneRef && camRef) {
+        renderer.render(sceneRef, camRef);
+      }
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     const mousePos = { x: 0.5, y: 0.5 };
 
@@ -165,20 +253,17 @@ export function BackgroundFX({ glow = "blobs" }: BackgroundFXProps) {
         const scene = new THREE.Scene();
         const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-        const p = flowPalette();
-        const [bgR, bgG, bgB] = hexToRgb(p.bg);
-        const [aR, aG, aB] = hexToRgb(p.a);
-        const [bR, bG, bB] = hexToRgb(p.b);
-        const [cR, cG, cB] = hexToRgb(p.c);
+        // Read the palette from CSS custom properties (theme-aware, token-tracked).
+        const p = flowPaletteFromTokens();
 
         uniforms = {
           uTime: { value: 0 },
           uRes: { value: new THREE.Vector2(w, h) },
           uMouse: { value: new THREE.Vector2(mousePos.x, mousePos.y) },
-          cBg: { value: new THREE.Vector3(bgR, bgG, bgB) },
-          cA: { value: new THREE.Vector3(aR, aG, aB) },
-          cB: { value: new THREE.Vector3(bR, bG, bB) },
-          cC: { value: new THREE.Vector3(cR, cG, cB) },
+          cBg: { value: new THREE.Vector3(...p.bg) },
+          cA: { value: new THREE.Vector3(...p.a) },
+          cB: { value: new THREE.Vector3(...p.b) },
+          cC: { value: new THREE.Vector3(...p.c) },
         };
 
         material = new THREE.ShaderMaterial({
@@ -192,6 +277,10 @@ export function BackgroundFX({ glow = "blobs" }: BackgroundFXProps) {
 
         container.appendChild(r.domElement);
         renderer = r;
+        // Cache refs needed by the MutationObserver callback.
+        threeRef = THREE;
+        sceneRef = scene;
+        camRef = cam;
 
         // RAF loop (skipped under reduced motion — render one static frame).
         if (reducedMotion) {
@@ -214,9 +303,10 @@ export function BackgroundFX({ glow = "blobs" }: BackgroundFXProps) {
         // Import failure — silently degrade to dots/blobs appearance.
       });
 
-    // Cleanup: cancel RAF, remove listeners, dispose GPU resources.
+    // Cleanup: cancel RAF, remove listeners, disconnect observer, dispose GPU resources.
     return () => {
       disposed = true;
+      observer.disconnect();
       if (rafId !== null) cancelAnimationFrame(rafId);
       window.removeEventListener("mousemove", onMouse);
       window.removeEventListener("resize", onResize);
