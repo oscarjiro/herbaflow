@@ -107,6 +107,9 @@ describe("radius tokens", () => {
   it("--radius-lg is 16px", () => {
     expect(cssRaw).toMatch(/--radius-lg\s*:\s*16px/);
   });
+  it("--radius-xl is 24px", () => {
+    expect(cssRaw).toMatch(/--radius-xl\s*:\s*24px/);
+  });
   it("--radius-pill is 999px", () => {
     const v = value(root, "--radius-pill");
     expect(v).toBe("999px");
@@ -114,8 +117,10 @@ describe("radius tokens", () => {
 });
 
 describe("motion ease alias", () => {
-  it("--ease is defined", () => {
-    expect(cssRaw).toMatch(/--ease\s*:\s*cubic-bezier/);
+  it("--ease is cubic-bezier(0.2, 0.7, 0.2, 1)", () => {
+    const root = block(cssRaw, ":root");
+    const v = value(root, "--ease");
+    expect(v).toBe("cubic-bezier(0.2, 0.7, 0.2, 1)");
   });
 });
 
