@@ -324,6 +324,50 @@
     border-radius: var(--radius-sm);
   }
 
+  /* ----------------------------------------------------------------
+     Animated ink-border focus — Task 6
+     Applied via the .hf-ink-focus utility class on input/textarea.
+     Replaces the placeholder :where(input,...):focus-visible rule above
+     for any element that carries this class.
+     - Base: surface fill, soft border, smooth transition.
+     - Focus: border → ink (--hf-fg-1) + 4px outer glow + 1px inset rim.
+     - Invalid (aria-invalid): same shape but in --hf-danger.
+     - prefers-reduced-motion: show the focused state, skip animation.
+     ---------------------------------------------------------------- */
+  .hf-ink-focus {
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease,
+      background 0.18s ease;
+  }
+  .hf-ink-focus:focus-visible {
+    outline: none;
+    border-color: var(--hf-fg-1);
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--hf-fg-1), transparent 92%),
+      inset 0 0 0 1px var(--hf-fg-1);
+  }
+  /* Invalid focus glow — danger colour in the same shape */
+  .hf-ink-focus[aria-invalid="true"]:focus-visible,
+  .hf-ink-focus[data-invalid="true"]:focus-visible {
+    outline: none;
+    border-color: var(--hf-danger);
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--hf-danger), transparent 88%),
+      inset 0 0 0 1px var(--hf-danger);
+  }
+  /* Invalid base (not focused) */
+  .hf-ink-focus[aria-invalid="true"],
+  .hf-ink-focus[data-invalid="true"] {
+    border-color: var(--hf-danger);
+  }
+  /* Reduced motion: show the ink-border end state immediately, no animation */
+  @media (prefers-reduced-motion: reduce) {
+    .hf-ink-focus {
+      transition: none;
+    }
+  }
+
   /* Hidden document (page) scrollbar — page still scrolls, bar is invisible.
      Does NOT affect .scroll containers (those keep the thin styled bar). */
   html {
