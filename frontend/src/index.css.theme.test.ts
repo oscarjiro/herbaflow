@@ -29,6 +29,18 @@ const REQUIRED = [
   "--hf-info-soft",
 ];
 
+// New liquid-glass tokens: must be defined in both :root and .dark and differ between them
+// (raw CSS string must differ — tokens that use `var()` indirection are tested separately).
+const GLASS_TOKENS = [
+  "--hf-bg-raised",
+  "--hf-glass-tint",
+  "--hf-glass-tint-strong",
+  "--hf-glass-shine",
+  "--hf-glass-shine-2",
+  "--hf-glass-shadow",
+  "--hf-dot",
+];
+
 function block(css: string, selector: string): string {
   const start = css.indexOf(selector + " {");
   if (start === -1) throw new Error(`selector ${selector} not found`);
@@ -51,6 +63,59 @@ describe("hf-* dark ramp parity", () => {
     expect(light, `${token} missing in :root`).toBeTruthy();
     expect(night, `${token} missing in .dark`).toBeTruthy();
     expect(night).not.toBe(light);
+  });
+});
+
+describe("liquid-glass token parity", () => {
+  const root = block(cssRaw, ":root");
+  const dark = block(cssRaw, ".dark");
+
+  it.each(GLASS_TOKENS)("%s is defined in both :root and .dark and differs", (token) => {
+    const light = value(root, token);
+    const night = value(dark, token);
+    expect(light, `${token} missing in :root`).toBeTruthy();
+    expect(night, `${token} missing in .dark`).toBeTruthy();
+    expect(night).not.toBe(light);
+  });
+});
+
+describe("--hf-accent token", () => {
+  // --hf-accent uses `var(--hf-fg-1)` in both light and dark (same indirection string).
+  // The resolved value differs at runtime because --hf-fg-1 is overridden in .dark.
+  // This test only asserts presence (not raw-string inequality).
+  const root = block(cssRaw, ":root");
+  const dark = block(cssRaw, ".dark");
+
+  it("--hf-accent is defined in :root", () => {
+    expect(value(root, "--hf-accent"), "--hf-accent missing in :root").toBeTruthy();
+  });
+  it("--hf-accent is defined in .dark", () => {
+    expect(value(dark, "--hf-accent"), "--hf-accent missing in .dark").toBeTruthy();
+  });
+});
+
+describe("radius tokens", () => {
+  const root = block(cssRaw, ":root");
+
+  it("--radius-sm is 8px (softer scale)", () => {
+    // --radius-sm is set in @theme inline, not :root — check the full CSS text
+    expect(cssRaw).toMatch(/--radius-sm\s*:\s*8px/);
+  });
+  it("--radius-md is 11px", () => {
+    expect(cssRaw).toMatch(/--radius-md\s*:\s*11px/);
+  });
+  it("--radius-lg is 16px", () => {
+    expect(cssRaw).toMatch(/--radius-lg\s*:\s*16px/);
+  });
+  it("--radius-pill is 999px", () => {
+    const v = value(root, "--radius-pill");
+    expect(v).toBe("999px");
+  });
+});
+
+describe("motion ease alias", () => {
+  it("--ease is defined", () => {
+    expect(cssRaw).toMatch(/--ease\s*:\s*cubic-bezier/);
   });
 });
 

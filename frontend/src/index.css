@@ -40,6 +40,9 @@
   --hf-fg-3: var(--hf-neutral-600);
   --hf-fg-4: var(--hf-neutral-500);
 
+  /* Accent — ink in light; resolves to paper in dark via .dark ramp */
+  --hf-accent: var(--hf-fg-1);
+
   /* Status — muted earth tones */
   --hf-success: #6f8b6a;
   --hf-success-soft: #dce5d6;
@@ -50,11 +53,21 @@
   --hf-info: #5c7a8f;
   --hf-info-soft: #d2dde5;
 
-  /* Glass (baseline) */
+  /* Glass (baseline — kept for backward compat) */
   --hf-glass-bg: rgba(255, 255, 255, 0.62);
   --hf-glass-bg-strong: rgba(255, 255, 255, 0.82);
   --hf-glass-border: rgba(255, 255, 255, 0.7);
-  --hf-glass-shadow: 0 1px 1px rgba(26, 26, 26, 0.04), 0 12px 32px -8px rgba(26, 26, 26, 0.1);
+
+  /* Glass — liquid-glass tier tokens (tint/shine/shadow per mockup) */
+  --hf-bg-raised: #fffdfa;
+  --hf-glass-tint: rgba(255, 255, 255, 0.18);
+  --hf-glass-tint-strong: rgba(255, 255, 255, 0.34);
+  --hf-glass-shine: rgba(255, 255, 255, 0.7);
+  --hf-glass-shine-2: rgba(255, 255, 255, 0.55);
+  --hf-glass-shadow: 0 16px 40px -18px rgba(26, 26, 26, 0.3), 0 2px 6px rgba(26, 26, 26, 0.08);
+
+  /* Dotted-glow background */
+  --hf-dot: rgba(26, 26, 26, 0.05);
 
   /* Passthrough scales (used via var()/arbitrary utilities) */
   --lh-tight: 1.05;
@@ -93,6 +106,7 @@
   --shadow-3: 0 18px 48px -16px rgba(26, 26, 26, 0.18);
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --duration-1: 120ms;
   --duration-2: 220ms;
   --duration-3: 380ms;
@@ -117,7 +131,7 @@
   --ring: var(--hf-fg-1);
   --destructive: var(--hf-danger);
   --destructive-foreground: var(--hf-bg);
-  --radius: var(--radius-1);
+  --radius: var(--radius-3);
 }
 
 /* Clinical type pairing (verbatim from source) */
@@ -192,10 +206,11 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
+  /* Softer radius scale per liquid-glass spec §3.2 */
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
 
 @layer base {
@@ -398,11 +413,24 @@
   --hf-info: #7e9db0;
   --hf-info-soft: #1e2a31;
 
-  /* Glass — faint light wash on dark */
+  /* Accent — paper in dark */
+  --hf-accent: var(--hf-fg-1);
+
+  /* Glass — faint light wash on dark (baseline, kept for backward compat) */
   --hf-glass-bg: rgba(247, 245, 242, 0.06);
   --hf-glass-bg-strong: rgba(247, 245, 242, 0.1);
   --hf-glass-border: rgba(247, 245, 242, 0.12);
-  --hf-glass-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+
+  /* Glass — liquid-glass tier tokens (dark) */
+  --hf-bg-raised: #1d1b16;
+  --hf-glass-tint: rgba(247, 245, 242, 0.06);
+  --hf-glass-tint-strong: rgba(247, 245, 242, 0.12);
+  --hf-glass-shine: rgba(247, 245, 242, 0.35);
+  --hf-glass-shine-2: rgba(247, 245, 242, 0.2);
+  --hf-glass-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.75), 0 2px 6px rgba(0, 0, 0, 0.4);
+
+  /* Dotted-glow background (dark) */
+  --hf-dot: rgba(247, 245, 242, 0.06);
 
   color-scheme: dark;
 }
