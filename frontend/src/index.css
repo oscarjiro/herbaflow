@@ -728,6 +728,31 @@
 }
 
 /* =====================================================================
+   Global reduced-motion guard — one canonical home.
+
+   The design system requires every motion to respect
+   prefers-reduced-motion. Component-level guards exist where a static end
+   state must be chosen deliberately (.hf-ink-focus shows the focused
+   border; the AI loader shows a static orb; the background stops drifting).
+   This blanket rule additionally neutralizes the many small entrance
+   animations and transitions that primitives inherit from
+   tailwindcss-animate (animate-in / zoom / fade) and arbitrary transition
+   utilities (e.g. the Select menu and chevron), so no primitive animates
+   for a user who has asked it not to. Duration is collapsed rather than set
+   to none so any animation still reaches its end state instantly.
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =====================================================================
    Warm editorial dark ramp. Inverts paper<->ink but stays warm and
    low-contrast (never pure #000/#FFF). Overrides the raw --hf-* tokens;
    the shadcn aliases and the @theme inline color utilities re-resolve
