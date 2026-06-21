@@ -8,7 +8,7 @@
  * data-sources footer, and the ApprovalBar (approving completes the run).
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
@@ -31,6 +31,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { EnrichmentDotChart } from "@/components/charts/EnrichmentDotChart";
+import { exportPlotlyAsPng } from "@/lib/chartExport";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -120,6 +121,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [page, setPage] = useState(0);
+  const gdRef = useRef<HTMLElement | null>(null);
 
   const terms = useMemo(() => stage8?.terms ?? [], [stage8]);
   const csvRows = useMemo(() => buildS8CsvRows(terms), [terms]);
@@ -301,9 +303,19 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         </Card>
       )}
 
-      {/* Interactive enrichment dot chart (complete-only, only when terms exist) */}
+      {/* Interactive enrichment bubble chart (complete-only, only when terms exist) */}
       {isComplete && terms.length > 0 && (
-        <ChartFrame title="Pathway enrichment" filename="pathway_enrichment.png">
+        <ChartFrame
+          title="Pathway enrichment"
+          filename="pathway_enrichment.png"
+          onExport={async () => {
+            if (gdRef.current)
+              await exportPlotlyAsPng(gdRef.current, {
+                title: "Pathway enrichment",
+                filename: "pathway_enrichment.png",
+              });
+          }}
+        >
           <EnrichmentDotChart
             terms={terms.map((t) => ({
               source: t.source,
@@ -311,6 +323,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
               p_value: t.p_value,
               intersection_size: t.intersection_size,
             }))}
+            onGraphDiv={(gd) => (gdRef.current = gd)}
           />
         </ChartFrame>
       )}

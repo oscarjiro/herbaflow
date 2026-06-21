@@ -1,4 +1,3 @@
-import React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -8,20 +7,13 @@ import { Stage8View } from "./Stage8View";
 import type { AnalysisRead } from "../../api/types.gen";
 
 // ---------------------------------------------------------------------------
-// Mock recharts ResponsiveContainer — jsdom renders it at 0-size otherwise.
+// Mock EnrichmentDotChart (uses Plotly/lazy) to avoid dynamic-import failures
+// in jsdom. The Stage8View gating and table behavior are still covered.
 // ---------------------------------------------------------------------------
 
-vi.mock("recharts", async (orig) => {
-  const actual = await orig<typeof import("recharts")>();
-  return {
-    ...actual,
-    ResponsiveContainer: ({ children }: { children: React.ReactElement }) =>
-      React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
-        width: 800,
-        height: 400,
-      }),
-  };
-});
+vi.mock("@/components/charts/EnrichmentDotChart", () => ({
+  EnrichmentDotChart: () => <div data-testid="enrichment-dot-chart" />,
+}));
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
