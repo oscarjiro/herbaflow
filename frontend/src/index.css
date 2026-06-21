@@ -733,6 +733,73 @@
 }
 
 /* =====================================================================
+   AI loader — glossy spinning orb + sequence-pulsing label.
+   One canonical home. AiLoader.tsx renders these; nothing else replicates
+   the orb gloss or letter-pulse recipe.
+
+   The spin keyframe shifts the orb's inset box-shadow between a sage glow
+   and a terracotta glow as it rotates (the one decorative use of the viz
+   accents, per the foundation spec §9.10). All colour stops resolve from
+   the --hf-* tokens, so the orb re-tints automatically under .dark. The
+   rgba(255,255,255,…) stops are a physical white gloss highlight, not a
+   theme colour.
+
+   .hf-ai-orb provides the static gloss base (the resting/reduced-motion
+   end state): a glossy sage orb. The component conditionally applies the
+   `animate-[hf-orb-spin_…]` utility only when motion is not reduced.
+   ===================================================================== */
+.hf-ai-orb {
+  box-shadow:
+    0 0 28px 2px color-mix(in srgb, var(--hf-sage), transparent 45%),
+    inset 0 8px 14px 0 rgba(255, 255, 255, 0.55),
+    inset 0 16px 26px 0 var(--hf-sage),
+    inset 0 46px 50px 0 var(--hf-sage-deep);
+}
+
+@keyframes hf-orb-spin {
+  0% {
+    transform: rotate(90deg);
+    box-shadow:
+      0 0 28px 2px color-mix(in srgb, var(--hf-sage), transparent 45%),
+      inset 0 8px 14px 0 rgba(255, 255, 255, 0.55),
+      inset 0 16px 26px 0 var(--hf-sage),
+      inset 0 46px 50px 0 var(--hf-sage-deep);
+  }
+  50% {
+    transform: rotate(270deg);
+    box-shadow:
+      0 0 32px 3px color-mix(in srgb, var(--hf-terracotta), transparent 40%),
+      inset 0 8px 14px 0 rgba(255, 255, 255, 0.55),
+      inset 0 16px 12px 0 var(--hf-terracotta),
+      inset 0 40px 50px 0 var(--hf-terracotta-soft);
+  }
+  100% {
+    transform: rotate(450deg);
+    box-shadow:
+      0 0 28px 2px color-mix(in srgb, var(--hf-sage), transparent 45%),
+      inset 0 8px 14px 0 rgba(255, 255, 255, 0.55),
+      inset 0 16px 26px 0 var(--hf-sage),
+      inset 0 46px 50px 0 var(--hf-sage-deep);
+  }
+}
+
+@keyframes hf-letter-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+  40% {
+    opacity: 0.6;
+    transform: translateY(0);
+  }
+}
+
+/* =====================================================================
    Global reduced-motion guard — one canonical home.
 
    The design system requires every motion to respect
