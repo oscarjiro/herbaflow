@@ -6,9 +6,16 @@ import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "@/lib/theme";
 
 // Mock react-cytoscapejs so the graph never really renders in jsdom.
+// The stub cy object includes chainable off/on so that nodeTooltip wiring in
+// NetworkGraph doesn't throw when the prop is provided.
+const stubCy = {
+  png: () => "data:image/png;base64,AAAA",
+  off: () => stubCy,
+  on: () => stubCy,
+};
 vi.mock("react-cytoscapejs", () => ({
   default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    cy?.({ png: () => "data:image/png;base64,AAAA" });
+    cy?.(stubCy);
     return React.createElement("div", {
       "data-testid": "cytoscape",
       "data-count": String(elements?.length ?? 0),
@@ -16,7 +23,7 @@ vi.mock("react-cytoscapejs", () => ({
   },
 }));
 
-import { Stage6View } from "./Stage6View";
+import { Stage6View, buildNetworkElements } from "./Stage6View";
 import type { AnalysisRead } from "../../api/types.gen";
 
 // ---------------------------------------------------------------------------
@@ -269,5 +276,30 @@ describe("Stage6View — overlap too large (blocked)", () => {
     await openPpiPanel();
     expect(screen.getByLabelText("max_proteins")).toBeInTheDocument();
     expect(screen.getByLabelText("Network type")).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — buildNetworkElements (unit, exported for testing)
+// ---------------------------------------------------------------------------
+
+describe("buildNetworkElements — degree annotation", () => {
+  it("annotates each connected node with its degree", () => {
+    const nodes = [
+      { gene_symbol: "A", string_id: null },
+      { gene_symbol: "B", string_id: null },
+      { gene_symbol: "C", string_id: null },
+    ];
+    const edges = [
+      { source: "A", target: "B", confidence: 0.9 },
+      { source: "A", target: "C", confidence: 0.8 },
+    ];
+    const { elements } = buildNetworkElements(
+      nodes as Parameters<typeof buildNetworkElements>[0],
+      edges,
+      [],
+    );
+    const a = elements.find((e) => e.data.id === "A");
+    expect(a?.data.degree).toBe(2);
   });
 });
