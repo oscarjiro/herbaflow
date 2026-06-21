@@ -3,6 +3,8 @@ dist
 pnpm-lock.yaml
 src/api
 src/routeTree.gen.ts
+# Vendored three.js Draco decoder (binary-as-JS) — never reformat.
+public/draco
 # Gitignored local agent docs — not part of the formatted source.
 CLAUDE.md
 AGENTS.md

@@ -67,6 +67,10 @@
   /* Dotted-glow background */
   --hf-dot: rgba(26, 26, 26, 0.05);
 
+  /* Landing hero — ASCII-DNA presentation (theme-independent tuning) */
+  --dna-opacity: 0.23;
+  --dna-bloom: 8.5px;
+
   /* Passthrough scales (used via var()/arbitrary utilities) */
   --lh-tight: 1.05;
   --lh-snug: 1.2;
@@ -730,6 +734,65 @@
     animation: none;
   }
   /* .hf-bg__dots is already handled via the --static modifier class. */
+}
+
+/* =====================================================================
+   Landing hero — ASCII-DNA backdrop layer.
+   One canonical home. LandingHero.tsx / LandingHeroFallback.tsx render these;
+   nothing else replicates the DNA-stage opacity, bloom, or edge-fade recipe.
+
+   Layers:
+     .hf-dna            — fixed, masked, pointer-events:none hero backdrop
+     .hf-dna__inner     — centring grid for the ASCII stage / fallback content
+     .hf-dna__stage     — wrapper the three.js ASCII <pre> mounts into
+   The radial edge-fade mask feathers the intentional crop (helix is larger
+   than the frame at size 0.40) so it never hard-clips at any rotation.
+   ===================================================================== */
+
+.hf-dna {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* Soft radial edge-fade so the over-sized helix never hard-clips. */
+  -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 45%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse 75% 75% at 50% 45%, #000 55%, transparent 100%);
+}
+
+.hf-dna__inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.hf-dna__stage {
+  opacity: var(--dna-opacity);
+  transition: opacity var(--duration-3) var(--ease-out);
+}
+
+/* The three.js ASCII sink is a generated <div>; colour + bloom come from the
+   ink token so it themes light/dark via the MutationObserver re-sync. */
+.hf-dna__stage > div {
+  color: var(--hf-fg-1);
+  background: transparent;
+  text-shadow: 0 0 var(--dna-bloom) currentColor;
+}
+
+/* Static fallback — a soft ink wash tinted with the ink token. The page-wide
+   dotted field is owned by BackgroundFX (.hf-bg__dots), so the fallback does
+   not redraw dots; it only adds a faint central glow so the hero reads as
+   complete without the live model. */
+.hf-dna__fallback {
+  position: absolute;
+  inset: 0;
+  opacity: var(--dna-opacity);
+  background-image: radial-gradient(
+    ellipse 60% 55% at 50% 45%,
+    color-mix(in srgb, var(--hf-fg-1), transparent 86%),
+    transparent 70%
+  );
 }
 
 /* =====================================================================
