@@ -16,7 +16,7 @@ function Chip({ label, onRemove, className, ...props }: ChipProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-[7px] rounded-[var(--radius-pill)] border border-hf-border bg-hf-surface-2 py-[5px] pl-[13px] pr-[7px] text-[13px]",
+        "border-hf-border bg-hf-surface-2 inline-flex items-center gap-[7px] rounded-[var(--radius-pill)] border py-[5px] pr-[7px] pl-[13px] text-[13px]",
         className,
       )}
       {...props}
@@ -27,10 +27,10 @@ function Chip({ label, onRemove, className, ...props }: ChipProps) {
         onClick={onRemove}
         aria-label={`Remove ${label}`}
         className={cn(
-          "inline-flex size-[18px] cursor-pointer items-center justify-center rounded-full text-hf-fg-3",
+          "text-hf-fg-3 inline-flex size-[18px] cursor-pointer items-center justify-center rounded-full",
           "transition-colors duration-[var(--duration-1)]",
           "hover:bg-hf-neutral-300 hover:text-hf-fg-1",
-          "focus-visible:outline-[1.5px] focus-visible:outline-hf-fg-1 focus-visible:outline-offset-1",
+          "focus-visible:outline-hf-fg-1 focus-visible:outline-[1.5px] focus-visible:outline-offset-1",
         )}
       >
         {/* × character — not an em dash, not a real × entity — just plain multiply sign */}
@@ -53,7 +53,7 @@ function OverflowChip({ count, className, ...props }: OverflowChipProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-[var(--radius-pill)] border border-hf-border bg-hf-surface-2 px-[13px] py-[5px] text-[13px] text-hf-fg-3",
+        "border-hf-border bg-hf-surface-2 text-hf-fg-3 inline-flex items-center rounded-[var(--radius-pill)] border px-[13px] py-[5px] text-[13px]",
         className,
       )}
       {...props}

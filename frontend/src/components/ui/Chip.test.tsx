@@ -29,9 +29,7 @@ describe("Chip — removable", () => {
   });
 
   it("accepts and forwards additional className", () => {
-    const { container } = render(
-      <Chip label="Test" onRemove={vi.fn()} className="my-custom" />,
-    );
+    const { container } = render(<Chip label="Test" onRemove={vi.fn()} className="my-custom" />);
     expect(container.firstChild).toHaveClass("my-custom");
   });
 });
