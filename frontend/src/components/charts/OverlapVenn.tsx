@@ -106,8 +106,12 @@ export function OverlapVenn({ compoundCount, diseaseCount, overlapCount, overlap
   return (
     <VennDiagram
       sets={sets}
-      width={460}
-      height={280}
+      width={520}
+      height={320}
+      // The set-name labels are anchored at the circles' outer corners, so they
+      // overflow a tightly-padded canvas. Generous SVG padding (default is 5)
+      // pulls the circles inward enough for the full labels to fit unclipped.
+      padding={96}
       exportButtons={false}
       textColor={colors.fg1}
       valueTextColor={colors.fg1}
