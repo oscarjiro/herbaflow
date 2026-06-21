@@ -119,6 +119,16 @@ describe("buildCtpStylesheet", () => {
     expect(edgeRule?.style["curve-style"]).toBe("bezier");
   });
 
+  it("gives node labels a surface-coloured halo so they stay legible in any theme", () => {
+    const ss = buildCtpStylesheet(COLORS) as Array<{
+      selector: string;
+      style: Record<string, unknown>;
+    }>;
+    const base = ss.find((s) => s.selector === "node");
+    expect(base?.style["text-outline-color"]).toBe(COLORS.surface);
+    expect(Number(base?.style["text-outline-width"])).toBeGreaterThan(0);
+  });
+
   it("uses no raw hex — all colors come from the COLORS fixture (resolved tokens)", () => {
     const ss = buildCtpStylesheet(COLORS) as Array<{
       selector: string;

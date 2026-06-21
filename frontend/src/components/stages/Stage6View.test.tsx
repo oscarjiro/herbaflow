@@ -5,23 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "@/lib/theme";
 
-// Mock react-cytoscapejs so the graph never really renders in jsdom.
-// The stub cy object includes chainable off/on so that nodeTooltip wiring in
-// NetworkGraph doesn't throw when the prop is provided.
-const stubCy = {
-  png: () => "data:image/png;base64,AAAA",
-  off: () => stubCy,
-  on: () => stubCy,
-};
-vi.mock("react-cytoscapejs", () => ({
-  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    cy?.(stubCy);
-    return React.createElement("div", {
-      "data-testid": "cytoscape",
-      "data-count": String(elements?.length ?? 0),
-    });
-  },
-}));
+// Mock react-cytoscapejs via the shared cytoscape stub (one home).
+vi.mock("react-cytoscapejs", () => import("@/test-utils/cytoscapeMock"));
 
 import { Stage6View, buildNetworkElements } from "./Stage6View";
 import type { AnalysisRead } from "../../api/types.gen";

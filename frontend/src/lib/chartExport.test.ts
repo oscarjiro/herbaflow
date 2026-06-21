@@ -164,24 +164,35 @@ describe("exportSvgAsPng — error path", () => {
 // ---------------------------------------------------------------------------
 
 function makeCy() {
-  return { png: vi.fn(() => "data:image/png;base64,AAAA") };
+  return {
+    png: vi.fn(() => "data:image/png;base64,AAAA"),
+    nodes: vi.fn(() => ({ style: vi.fn(), removeStyle: vi.fn() })),
+  };
 }
 
 describe("exportCytoscapeAsPng — success path", () => {
-  it("calls cy.png with full:true, scale:2 and a background string", async () => {
+  it("renders with full:true, scale:2 on a transparent canvas", async () => {
     const { exportCytoscapeAsPng } = await import("./chartExport");
     const cy = makeCy();
     await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
     expect(cy.png).toHaveBeenCalledWith(
-      expect.objectContaining({ full: true, scale: 2, bg: expect.any(String) }),
+      expect.objectContaining({ full: true, scale: 2, bg: "transparent" }),
     );
+    // A transparent export must not paint a background rectangle.
+    expect(fakeCtx.fillRect).not.toHaveBeenCalled();
   });
 
-  it("passes the explicit background through to cy.png", async () => {
+  it("forces black labels for the export, then restores them", async () => {
+    const style = vi.fn();
+    const removeStyle = vi.fn();
+    const cy = {
+      png: vi.fn(() => "data:image/png;base64,AAAA"),
+      nodes: vi.fn(() => ({ style, removeStyle })),
+    };
     const { exportCytoscapeAsPng } = await import("./chartExport");
-    const cy = makeCy();
-    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png", background: "#abcdef" });
-    expect(cy.png).toHaveBeenCalledWith(expect.objectContaining({ bg: "#abcdef" }));
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
+    expect(style).toHaveBeenCalledWith(expect.objectContaining({ color: "#000000" }));
+    expect(removeStyle).toHaveBeenCalled();
   });
 
   it("draws the title via fillText when a title is provided", async () => {

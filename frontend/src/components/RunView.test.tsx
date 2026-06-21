@@ -8,23 +8,8 @@ import { clearActiveRunId, getActiveRunId, setActiveRunId } from "../lib/activeR
 import * as useAnalysisStatusModule from "../hooks/useAnalysisStatus";
 import type { AnalysisRead } from "../api/types.gen";
 
-// Mock react-cytoscapejs so the graph never really renders in jsdom.
-// The stub cy object must have chainable off/on so NetworkGraph's nodeTooltip
-// wiring (cy.off(...).on(...)) does not throw.
-vi.mock("react-cytoscapejs", () => ({
-  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    const stubCy: Record<string, unknown> = {
-      png: () => "data:image/png;base64,AAAA",
-    };
-    stubCy.off = () => stubCy;
-    stubCy.on = () => stubCy;
-    cy?.(stubCy);
-    return React.createElement("div", {
-      "data-testid": "cytoscape",
-      "data-count": String(elements?.length ?? 0),
-    });
-  },
-}));
+// Mock react-cytoscapejs via the shared cytoscape stub (one home).
+vi.mock("react-cytoscapejs", () => import("@/test-utils/cytoscapeMock"));
 
 // Mock sonner so the self-heal toast can be asserted without a mounted Toaster.
 vi.mock("sonner", () => ({

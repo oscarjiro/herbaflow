@@ -15,7 +15,14 @@ import { readChartColors } from "./chartTheme";
  */
 async function composeImageToPng(
   src: string,
-  opts: { filename: string; title?: string; background?: string; width?: number; height?: number },
+  opts: {
+    filename: string;
+    title?: string;
+    background?: string;
+    width?: number;
+    height?: number;
+    transparent?: boolean;
+  },
 ): Promise<void> {
   const colors = readChartColors();
   const bg = opts.background ?? colors.surface ?? colors.bg ?? "#ffffff";
@@ -52,13 +59,17 @@ async function composeImageToPng(
 
         ctx.scale(dpr, dpr);
 
-        // Background fill.
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, width, height + titlePad);
+        // Background fill — skipped for a transparent export so the figure drops
+        // onto any page (e.g. a white thesis page) without a coloured backplate.
+        if (!opts.transparent) {
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, width, height + titlePad);
+        }
 
-        // Optional title strip.
+        // Optional title strip. Black on a transparent export (theme-independent,
+        // prints legibly on white), else the themed foreground.
         if (opts.title) {
-          ctx.fillStyle = colors.fg1 || "#000000";
+          ctx.fillStyle = opts.transparent ? "#000000" : colors.fg1 || "#000000";
           ctx.font = "600 16px ui-sans-serif, system-ui, sans-serif";
           ctx.textBaseline = "middle";
           ctx.fillText(opts.title, 12, titlePad / 2);
@@ -147,11 +158,24 @@ export async function exportSvgAsPng(
  */
 export async function exportCytoscapeAsPng(
   cy: import("cytoscape").Core,
-  opts: { filename: string; title?: string; background?: string },
+  opts: { filename: string; title?: string },
 ): Promise<void> {
-  const bg = opts.background ?? readChartColors().surface;
-  const dataUrl = cy.png({ full: true, scale: 2, bg });
-  return composeImageToPng(dataUrl, { filename: opts.filename, title: opts.title, background: bg });
+  // Print-friendly export: black labels with a white halo (legible on a white
+  // page, independent of the live theme) on a transparent canvas. The temporary
+  // per-node style bypass is removed afterwards so the on-screen graph is intact.
+  const nodes = cy.nodes();
+  nodes.style({ color: "#000000", "text-outline-color": "#ffffff", "text-outline-width": 2 });
+  let dataUrl: string;
+  try {
+    dataUrl = cy.png({ full: true, scale: 2, bg: "transparent" });
+  } finally {
+    nodes.removeStyle("color text-outline-color text-outline-width");
+  }
+  return composeImageToPng(dataUrl, {
+    filename: opts.filename,
+    title: opts.title,
+    transparent: true,
+  });
 }
 
 /**

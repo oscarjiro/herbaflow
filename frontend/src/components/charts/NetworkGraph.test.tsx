@@ -4,28 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/lib/theme";
 
-// ---------------------------------------------------------------------------
-// Mock react-cytoscapejs so cytoscape never really renders in jsdom. The stub
-// invokes the cy callback with a minimal Core and exposes the element count
-// via a data attribute so we can assert the caller passed elements through.
-// ---------------------------------------------------------------------------
-vi.mock("react-cytoscapejs", () => ({
-  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    // Chainable on/off so the tooltip wiring's `cy.off(...).on(...)` runs as it
-    // does against the real cytoscape Core.
-    const core: Record<string, unknown> = {
-      png: () => "data:image/png;base64,AAAA",
-      nodes: () => [],
-    };
-    core.on = () => core;
-    core.off = () => core;
-    cy?.(core);
-    return React.createElement("div", {
-      "data-testid": "cytoscape",
-      "data-count": String(elements?.length ?? 0),
-    });
-  },
-}));
+// Mock react-cytoscapejs via the shared cytoscape stub (one home).
+vi.mock("react-cytoscapejs", () => import("@/test-utils/cytoscapeMock"));
 
 // Mock the export so clicking Download does not touch canvas/Image.
 vi.mock("@/lib/chartExport", () => ({

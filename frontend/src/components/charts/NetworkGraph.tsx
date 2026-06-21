@@ -14,10 +14,11 @@
  * Pan and zoom are Cytoscape's built-in user interactions; no extra config.
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import cytoscape from "cytoscape";
 import fcose from "cytoscape-fcose";
 import CytoscapeComponent from "react-cytoscapejs";
+import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import { ChartFrame } from "./ChartFrame";
 import { exportCytoscapeAsPng } from "@/lib/chartExport";
 
@@ -75,6 +76,23 @@ export function NetworkGraph({
   const cyRef = useRef<cytoscape.Core | null>(null);
   const [tip, setTip] = useState<{ text: string; x: number; y: number } | null>(null);
 
+  // react-cytoscapejs only applies the stylesheet prop at mount, so a theme
+  // toggle (which produces a new resolved-colour stylesheet) would leave the
+  // live graph with stale label/edge colours. Re-apply it whenever it changes.
+  useEffect(() => {
+    cyRef.current?.style(stylesheet);
+  }, [stylesheet]);
+
+  const zoomByFactor = (factor: number) => {
+    const cy = cyRef.current;
+    if (!cy) return;
+    cy.zoom({
+      level: cy.zoom() * factor,
+      renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 },
+    });
+  };
+  const fitToView = () => cyRef.current?.fit(undefined, 24);
+
   return (
     <ChartFrame
       title={title}
@@ -128,6 +146,32 @@ export function NetworkGraph({
             {tip.text}
           </div>
         )}
+        <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
+          <button
+            type="button"
+            aria-label="Zoom in"
+            onClick={() => zoomByFactor(1.2)}
+            className="bg-hf-surface text-hf-fg-2 border-hf-border hover:bg-hf-bg flex h-7 w-7 items-center justify-center rounded-md border shadow-sm"
+          >
+            <ZoomIn size={16} strokeWidth={1.5} />
+          </button>
+          <button
+            type="button"
+            aria-label="Zoom out"
+            onClick={() => zoomByFactor(1 / 1.2)}
+            className="bg-hf-surface text-hf-fg-2 border-hf-border hover:bg-hf-bg flex h-7 w-7 items-center justify-center rounded-md border shadow-sm"
+          >
+            <ZoomOut size={16} strokeWidth={1.5} />
+          </button>
+          <button
+            type="button"
+            aria-label="Fit to view"
+            onClick={fitToView}
+            className="bg-hf-surface text-hf-fg-2 border-hf-border hover:bg-hf-bg flex h-7 w-7 items-center justify-center rounded-md border shadow-sm"
+          >
+            <Maximize2 size={16} strokeWidth={1.5} />
+          </button>
+        </div>
       </div>
       {legend}
       {tray}

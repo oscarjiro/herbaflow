@@ -62,7 +62,12 @@ export function buildCtpStylesheet(colors: ChartColors): cytoscape.StylesheetJso
       style: {
         label: "data(label)",
         color: colors.fg1,
+        // Surface-coloured halo keeps labels legible over dense nodes/edges and
+        // in either theme (re-resolves with the stylesheet on theme toggle).
+        "text-outline-color": colors.surface,
+        "text-outline-width": 2,
         "font-size": 9,
+        "font-weight": 600,
         "text-valign": "bottom",
         "text-halign": "center",
         "text-margin-y": 2,
