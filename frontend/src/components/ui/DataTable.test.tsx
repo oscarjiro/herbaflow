@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./DataTable";
 
@@ -36,16 +37,18 @@ test("paginates with a page-size control (default 10)", () => {
   const many = Array.from({ length: 12 }, (_, i) => ({ gene: `G${i}`, score: i }));
   render(<DataTable columns={cols} data={many} />);
   expect(screen.getAllByRole("row").slice(1)).toHaveLength(10);
-  expect(screen.getByLabelText(/rows per page/i)).toBeInTheDocument();
+  // The rows-per-page control is the Task-7 Select (an accessible combobox).
+  expect(screen.getByRole("combobox", { name: /rows per page/i })).toBeInTheDocument();
 });
 
-test("keeps the all-page selection stable when All is chosen", () => {
+test("shows every row when All is chosen", async () => {
+  const user = userEvent.setup();
   const many = Array.from({ length: 12 }, (_, i) => ({ gene: `G${i}`, score: i }));
   render(<DataTable columns={cols} data={many} />);
 
-  fireEvent.change(screen.getByLabelText(/rows per page/i), { target: { value: "all" } });
+  await user.click(screen.getByRole("combobox", { name: /rows per page/i }));
+  await user.click(screen.getByRole("option", { name: /^all$/i }));
 
-  expect(screen.getByLabelText(/rows per page/i)).toHaveValue("all");
   expect(screen.getAllByRole("row").slice(1)).toHaveLength(12);
 });
 
@@ -71,9 +74,9 @@ test("shows a custom emptyMessage when data is empty", () => {
 test("does not render pagination controls when data is empty", () => {
   render(<DataTable columns={cols} data={[]} />);
 
-  expect(screen.queryByLabelText(/rows per page/i)).not.toBeInTheDocument();
-  expect(screen.queryByRole("button", { name: /prev/i })).not.toBeInTheDocument();
-  expect(screen.queryByRole("button", { name: /next/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("combobox", { name: /rows per page/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /previous page/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /next page/i })).not.toBeInTheDocument();
 });
 
 test("does not render column headers when data is empty", () => {

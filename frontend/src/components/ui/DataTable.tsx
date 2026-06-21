@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DataTablePager } from "@/components/ui/DataTablePager";
 
 export function DataTable<T>({
   columns,
@@ -27,7 +28,6 @@ export function DataTable<T>({
   emptyMessage?: string;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [pageSize, setPageSize] = useState<"10" | "20" | "50" | "all">("10");
   const table = useReactTable({
     data,
     columns,
@@ -44,7 +44,7 @@ export function DataTable<T>({
       <div data-slot="datatable" className="w-full">
         <div
           data-slot="datatable-empty"
-          className="text-hf-fg-3 flex items-center justify-center rounded-md border border-dashed py-10 text-sm"
+          className="text-hf-fg-3 border-hf-border flex items-center justify-center rounded-[var(--radius-lg)] border border-dashed py-10 text-sm"
         >
           {emptyMessage}
         </div>
@@ -53,8 +53,11 @@ export function DataTable<T>({
   }
 
   return (
-    <div data-slot="datatable" className="w-full">
-      <div className="overflow-x-auto max-md:[&_table]:block max-md:[&_tbody_tr]:mb-3 max-md:[&_tbody_tr]:block">
+    <div
+      data-slot="datatable"
+      className="border-hf-border bg-hf-surface w-full overflow-hidden rounded-[var(--radius-lg)] border"
+    >
+      <div className="scroll w-full overflow-x-auto max-md:[&_table]:block max-md:[&_tbody_tr]:mb-3 max-md:[&_tbody_tr]:block">
         <Table className="tabular-nums">
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
@@ -73,7 +76,7 @@ export function DataTable<T>({
                     {h.column.getCanSort() ? (
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1"
+                        className="hover:text-hf-fg-1 inline-flex items-center gap-1 uppercase transition-colors"
                         onClick={h.column.getToggleSortingHandler()}
                       >
                         {flexRender(h.column.columnDef.header, h.getContext())}
@@ -106,36 +109,7 @@ export function DataTable<T>({
           </TableBody>
         </Table>
       </div>
-      <div className="mt-2 flex items-center justify-end gap-2 text-sm">
-        <label htmlFor="dt-page-size">Rows per page</label>
-        <select
-          id="dt-page-size"
-          className="border-border rounded border bg-transparent px-1 py-0.5"
-          value={pageSize}
-          onChange={(e) => {
-            const v = e.target.value;
-            setPageSize(v as "10" | "20" | "50" | "all");
-            table.setPageSize(v === "all" ? data.length || 1 : Number(v));
-          }}
-        >
-          {[10, 20, 50].map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-          <option value="all">All</option>
-        </select>
-        <button
-          type="button"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Prev
-        </button>
-        <button type="button" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-          Next
-        </button>
-      </div>
+      <DataTablePager table={table} />
     </div>
   );
 }
