@@ -1,8 +1,29 @@
 import * as React from "react";
 
 import { cn } from "@/lib/cn";
+import { GlassSurface } from "./GlassSurface";
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+type CardVariant = "solid" | "glass-raised";
+
+interface CardProps extends React.ComponentProps<"div"> {
+  /** Visual mode: solid (default, content-dense) or glass-raised (hero/feature cards). */
+  variant?: CardVariant;
+}
+
+function Card({ className, variant = "solid", children, ...props }: CardProps) {
+  if (variant === "glass-raised") {
+    return (
+      <GlassSurface
+        tier="raised"
+        data-slot="card"
+        className={cn("rounded-[var(--radius-lg)]", className)}
+        {...props}
+      >
+        {children}
+      </GlassSurface>
+    );
+  }
+
   return (
     <div
       data-slot="card"
@@ -11,7 +32,9 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+    </div>
   );
 }
 
