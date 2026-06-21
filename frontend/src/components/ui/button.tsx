@@ -102,6 +102,37 @@ function Button({
   const isGlass = variant === "glass-action";
 
   if (asChild) {
+    // Glass-action + asChild: render the consumer's element (e.g. a router
+    // <Link> -> <a>) AS the glass surface, injecting the same canonical
+    // .hf-glass__* layers used by the non-asChild path and GlassSurface. This
+    // lets a single anchor be the CTA pill — no <a> nested inside a <button>,
+    // and no duplicated glass markup at the call site.
+    if (isGlass && React.isValidElement(children)) {
+      const child = children as React.ReactElement<{
+        children?: React.ReactNode;
+      }>;
+      return (
+        <Slot.Root
+          data-slot="button"
+          data-variant={variant}
+          data-size={size}
+          className={cn(buttonVariants({ variant, size, className }))}
+          {...props}
+        >
+          {React.cloneElement(
+            child,
+            undefined,
+            <>
+              <GlassLayers />
+              <span className="hf-glass__content text-hf-fg-1 inline-flex items-center gap-2 px-[22px] py-[11px] text-[13.5px] font-medium">
+                {child.props.children}
+              </span>
+            </>,
+          )}
+        </Slot.Root>
+      );
+    }
+
     return (
       <Slot.Root
         data-slot="button"

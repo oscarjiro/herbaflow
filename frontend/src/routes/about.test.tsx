@@ -32,28 +32,28 @@ test("/about renders descriptive content about the platform", async () => {
   expect(await screen.findByText(/Indonesian medicinal plants/i)).toBeInTheDocument();
 });
 
-test("/ (landing) renders the app name and a link to /analysis", async () => {
+test("/ (landing) renders the headline and a link to /analysis", async () => {
   const { qc, router } = makeRouter("/");
   render(
     <QueryClientProvider client={qc}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
-  expect(await screen.findByRole("heading", { name: /herbaflow/i })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { name: /network pharmacology/i })).toBeInTheDocument();
   // The CTA link to /analysis must be present
-  const ctaLink = await screen.findByRole("link", { name: /start an analysis/i });
+  const ctaLink = await screen.findByRole("link", { name: /start analysis/i });
   expect(ctaLink).toBeInTheDocument();
   expect(ctaLink).toHaveAttribute("href", "/analysis");
 });
 
-test("/ (landing) renders a link to /about", async () => {
+test("/ (landing) nav contains a link to /about", async () => {
   const { qc, router } = makeRouter("/");
   render(
     <QueryClientProvider client={qc}>
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
-  const aboutLink = await screen.findByRole("link", { name: /learn more/i });
+  const aboutLink = await screen.findByRole("link", { name: /about/i });
   expect(aboutLink).toBeInTheDocument();
   expect(aboutLink).toHaveAttribute("href", "/about");
 });

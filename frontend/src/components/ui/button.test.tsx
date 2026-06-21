@@ -33,6 +33,27 @@ describe("Button variants", () => {
     expect(pill).not.toBeNull();
   });
 
+  it("glass-action with asChild renders one anchor carrying the full glass recipe", () => {
+    render(
+      <Button asChild variant="glass-action">
+        <a href="/analysis">Start analysis</a>
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    // The child element (anchor) is the glass surface — no nested <button>.
+    const link = screen.getByRole("link", { name: /start analysis/i });
+    expect(link.tagName).toBe("A");
+    expect(link).toHaveAttribute("href", "/analysis");
+    expect(link.className).toContain("hf-glass");
+    // The canonical glass layers are injected inside the single anchor.
+    expect(link.querySelector(".hf-glass__refract")).not.toBeNull();
+    expect(link.querySelector(".hf-glass__tint")).not.toBeNull();
+    expect(link.querySelector(".hf-glass__shine")).not.toBeNull();
+    expect(link.querySelector(".hf-glass__content")).not.toBeNull();
+    // No stray <button> from the component when asChild is set.
+    expect(document.querySelector("button")).toBeNull();
+  });
+
   it("secondary variant has surface fill and border", () => {
     render(<Button variant="secondary">Secondary</Button>, { wrapper: Wrapper });
     const btn = screen.getByRole("button", { name: /secondary/i });

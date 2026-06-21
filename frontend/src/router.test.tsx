@@ -28,9 +28,9 @@ test("/ renders the landing page with a CTA link to /analysis", async () => {
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
-  // The landing page renders the app name and the Start an analysis CTA
-  expect(await screen.findByRole("heading", { name: /herbaflow/i })).toBeInTheDocument();
-  expect(await screen.findByRole("link", { name: /start an analysis/i })).toBeInTheDocument();
+  // The landing page renders the headline and the Start analysis CTA
+  expect(await screen.findByRole("heading", { name: /network pharmacology/i })).toBeInTheDocument();
+  expect(await screen.findByRole("link", { name: /start analysis/i })).toBeInTheDocument();
 });
 
 test("/analysis renders the setup view (New analysis heading)", async () => {
