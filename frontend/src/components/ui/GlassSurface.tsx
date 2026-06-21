@@ -1,16 +1,35 @@
 import { cn } from "@/lib/cn";
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
-export function GlassSurface({ children, className }: { children: ReactNode; className?: string }) {
+export type GlassTier = "chrome" | "overlay" | "raised";
+
+interface GlassSurfaceProps extends HTMLAttributes<HTMLDivElement> {
+  /** Visual tier — controls tint/shine strength and hover behaviour.
+   *  chrome  = nav bars, pill buttons (thinner tint, strong blur)
+   *  overlay = dialogs, popovers, menus (stronger tint)
+   *  raised  = stat cards, timeline cards (standard tint + hover lift)
+   *  Default: overlay */
+  tier?: GlassTier;
+  children?: ReactNode;
+}
+
+export function GlassSurface({
+  tier = "overlay",
+  children,
+  className,
+  ...props
+}: GlassSurfaceProps) {
   return (
-    <div
-      className={cn(
-        "border-hf-border rounded-[var(--radius-1)] border bg-[var(--hf-glass-bg)]",
-        "backdrop-blur-md motion-reduce:backdrop-blur-none",
-        className,
-      )}
-    >
-      {children}
+    <div className={cn("hf-glass", `hf-glass--${tier}`, className)} {...props}>
+      {/* Layer 0: refraction — backdrop-filter + SVG displacement (Chromium)
+          or backdrop-filter only (Safari/Firefox frosted fallback via CSS @supports) */}
+      <div className="hf-glass__refract" aria-hidden="true" />
+      {/* Layer 1: tint wash — semi-transparent fill; strength varies by tier */}
+      <div className="hf-glass__tint" aria-hidden="true" />
+      {/* Layer 2: rim-light / shine — inset box-shadow highlights */}
+      <div className="hf-glass__shine" aria-hidden="true" />
+      {/* Layer 3: content slot */}
+      <div className="hf-glass__content">{children}</div>
     </div>
   );
 }

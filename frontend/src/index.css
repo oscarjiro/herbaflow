@@ -53,11 +53,6 @@
   --hf-info: #5c7a8f;
   --hf-info-soft: #d2dde5;
 
-  /* Glass (baseline — kept for backward compat) */
-  --hf-glass-bg: rgba(255, 255, 255, 0.62);
-  --hf-glass-bg-strong: rgba(255, 255, 255, 0.82);
-  --hf-glass-border: rgba(255, 255, 255, 0.7);
-
   /* Glass — liquid-glass tier tokens (tint/shine/shadow per mockup) */
   --hf-bg-raised: #fffdfa;
   --hf-glass-tint: rgba(255, 255, 255, 0.18);
@@ -378,6 +373,136 @@
 }
 
 /* =====================================================================
+   Liquid-glass surface recipe (.hf-glass)
+   Four-layer stacking:  refract → tint → shine → content
+   One canonical home — GlassSurface.tsx renders these classes; nothing
+   else should replicate this recipe.
+
+   Fallback ladder (pure CSS, no JS):
+   1. Chromium (full): backdrop-filter + url(#hf-liquid) displacement.
+   2. Safari / Firefox (frosted): backdrop-filter only, no displacement —
+      @supports not (filter: url('#x')) removes the filter.
+   3. prefers-reduced-transparency / prefers-contrast:more → solid surface
+      (--hf-bg-raised), no blur, no filter.
+   ===================================================================== */
+
+/* Base container */
+.hf-glass {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: var(--hf-glass-shadow);
+  transition: transform var(--duration-3) var(--ease-out);
+}
+
+/* Layer 0 — refraction (displacement + blur) */
+.hf-glass__refract {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  backdrop-filter: blur(2px) saturate(135%);
+  -webkit-backdrop-filter: blur(2px) saturate(135%);
+  filter: url(#hf-liquid);
+}
+
+/* Layer 1 — tint wash */
+.hf-glass__tint {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--hf-glass-tint);
+}
+
+/* Layer 2 — rim-light / shine (inset box-shadow) */
+.hf-glass__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 1.5px 1.5px 1px -1px var(--hf-glass-shine),
+    inset -1px -1px 1px -1px var(--hf-glass-shine-2),
+    inset 0 0 0 1px var(--hf-border);
+}
+
+/* Layer 3 — content slot */
+.hf-glass__content {
+  position: relative;
+  z-index: 3;
+}
+
+/* --- Tier modifiers -------------------------------------------------- */
+
+/* chrome: nav bars, pill buttons — thinner tint, lighter shine */
+.hf-glass--chrome .hf-glass__tint {
+  background: var(--hf-glass-tint);
+}
+.hf-glass--chrome .hf-glass__shine {
+  box-shadow:
+    inset 1px 1px 0.5px -0.5px var(--hf-glass-shine),
+    inset -0.5px -0.5px 0.5px -0.5px var(--hf-glass-shine-2),
+    inset 0 0 0 1px var(--hf-border);
+}
+.hf-glass--chrome .hf-glass__refract {
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+}
+
+/* overlay: dialogs, popovers, menus — stronger tint */
+.hf-glass--overlay .hf-glass__tint {
+  background: var(--hf-glass-tint-strong);
+}
+
+/* raised: stat cards, timeline cards — standard tint, hover lift */
+.hf-glass--raised:hover {
+  transform: translateY(-3px);
+}
+
+/* --- Frosted fallback (Safari / Firefox — no SVG displacement) ------- */
+/* feDisplacementMap via filter: url() is not supported in Safari/Firefox;
+   the filter is removed and blur is increased to keep the frosted look. */
+@supports not (filter: url("#hf-liquid")) {
+  .hf-glass__refract {
+    filter: none;
+    backdrop-filter: blur(12px) saturate(125%);
+    -webkit-backdrop-filter: blur(12px) saturate(125%);
+  }
+}
+
+/* --- Solid fallback (reduced transparency / high contrast) ----------- */
+@media (prefers-reduced-transparency: reduce) {
+  .hf-glass {
+    box-shadow: none;
+  }
+  .hf-glass__refract {
+    display: none;
+  }
+  .hf-glass__tint {
+    background: var(--hf-bg-raised);
+  }
+  .hf-glass__shine {
+    box-shadow: inset 0 0 0 1px var(--hf-border);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .hf-glass {
+    box-shadow: none;
+  }
+  .hf-glass__refract {
+    display: none;
+  }
+  .hf-glass__tint {
+    background: var(--hf-surface);
+  }
+  .hf-glass__shine {
+    box-shadow: inset 0 0 0 1.5px var(--hf-border-strong);
+  }
+}
+
+/* =====================================================================
    Warm editorial dark ramp. Inverts paper<->ink but stays warm and
    low-contrast (never pure #000/#FFF). Overrides the raw --hf-* tokens;
    the shadcn aliases and the @theme inline color utilities re-resolve
@@ -415,11 +540,6 @@
 
   /* Accent — paper in dark */
   --hf-accent: var(--hf-fg-1);
-
-  /* Glass — faint light wash on dark (baseline, kept for backward compat) */
-  --hf-glass-bg: rgba(247, 245, 242, 0.06);
-  --hf-glass-bg-strong: rgba(247, 245, 242, 0.1);
-  --hf-glass-border: rgba(247, 245, 242, 0.12);
 
   /* Glass — liquid-glass tier tokens (dark) */
   --hf-bg-raised: #1d1b16;
