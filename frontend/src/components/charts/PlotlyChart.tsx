@@ -29,7 +29,7 @@ type PlotlyChartProps = {
 export function PlotlyChart({ data, layout, height = 420, onGraphDiv }: PlotlyChartProps) {
   const colors = useChartColors();
   const mergedLayout = useMemo<Partial<Layout>>(
-    () => ({ ...plotlyTemplate(colors), ...layout, autosize: true }),
+    () => ({ ...plotlyTemplate(colors), autosize: true, ...layout }),
     [colors, layout],
   );
   return (
