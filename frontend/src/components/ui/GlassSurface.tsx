@@ -21,8 +21,9 @@ export function GlassSurface({
 }: GlassSurfaceProps) {
   return (
     <div className={cn("hf-glass", `hf-glass--${tier}`, className)} {...props}>
-      {/* Layer 0: refraction — backdrop-filter + SVG displacement (Chromium)
-          or backdrop-filter only (Safari/Firefox frosted fallback via CSS @supports) */}
+      {/* Layer 0: refraction — frosted backdrop blur by default (Safari/Firefox
+          and any unconfirmed engine); real SVG displacement is opted in for
+          Chromium only via html[data-glass-refract="on"] (lib/glassSupport.ts) */}
       <div className="hf-glass__refract" aria-hidden="true" />
       {/* Layer 1: tint wash — semi-transparent fill; strength varies by tier */}
       <div className="hf-glass__tint" aria-hidden="true" />

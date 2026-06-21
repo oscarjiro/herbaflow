@@ -5,6 +5,12 @@ import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./router";
 import "./index.css";
 import "./lib/api";
+import { applyGlassSupport } from "./lib/glassSupport";
+
+// Gate the Chromium-only liquid-glass refraction path before first paint.
+// The CSS default is the frosted look; this opts in to real refraction only
+// where the engine can render it.
+applyGlassSupport();
 
 const queryClient = new QueryClient({
   defaultOptions: {

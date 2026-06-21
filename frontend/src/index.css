@@ -378,12 +378,19 @@
    One canonical home — GlassSurface.tsx renders these classes; nothing
    else should replicate this recipe.
 
-   Fallback ladder (pure CSS, no JS):
-   1. Chromium (full): backdrop-filter + url(#hf-liquid) displacement.
-   2. Safari / Firefox (frosted): backdrop-filter only, no displacement —
-      @supports not (filter: url('#x')) removes the filter.
-   3. prefers-reduced-transparency / prefers-contrast:more → solid surface
-      (--hf-bg-raised), no blur, no filter.
+   Fallback ladder (three tiers):
+   1. Chromium (full refraction): backdrop-filter + url(#hf-liquid)
+      displacement. Opt-in only — gated on html[data-glass-refract="on"],
+      which lib/glassSupport.ts sets at startup ONLY for Chromium engines.
+      feDisplacementMap on a backdrop target is Chromium-only and cannot be
+      detected by CSS @supports (Safari/Firefox report a false positive for
+      `filter: url()`), so a tiny runtime probe drives this attribute.
+   2. Safari / Firefox (frosted): the DEFAULT path — heavier backdrop blur,
+      no displacement filter. This is the safe default whenever refraction is
+      not positively confirmed (incl. SSR / probe failure), so the surface
+      never falls into the broken thin-blur state.
+   3. Solid: @supports not (backdrop-filter), prefers-reduced-transparency,
+      or prefers-contrast:more → opaque surface, no blur, no filter.
    ===================================================================== */
 
 /* Base container */
@@ -396,14 +403,16 @@
   transition: transform var(--duration-3) var(--ease-out);
 }
 
-/* Layer 0 — refraction (displacement + blur) */
+/* Layer 0 — frosted blur (SAFE DEFAULT: Safari / Firefox / unconfirmed).
+   No displacement filter here; the heavier blur stands in for refraction so
+   the surface looks complete. The Chromium refraction path is opted in below
+   via html[data-glass-refract="on"]. */
 .hf-glass__refract {
   position: absolute;
   inset: 0;
   z-index: 0;
-  backdrop-filter: blur(2px) saturate(135%);
-  -webkit-backdrop-filter: blur(2px) saturate(135%);
-  filter: url(#hf-liquid);
+  backdrop-filter: blur(12px) saturate(125%);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
 }
 
 /* Layer 1 — tint wash */
@@ -435,19 +444,19 @@
 
 /* --- Tier modifiers -------------------------------------------------- */
 
-/* chrome: nav bars, pill buttons — thinner tint, lighter shine */
-.hf-glass--chrome .hf-glass__tint {
-  background: var(--hf-glass-tint);
-}
+/* chrome: nav bars, pill buttons. Stays out of the way — lighter rim shine
+   than the base, and a subtler blur (set in both the frosted default and the
+   refraction-on path). Tint is the base low value, shared with the base rule,
+   so chrome deliberately has NO tint override. */
 .hf-glass--chrome .hf-glass__shine {
   box-shadow:
     inset 1px 1px 0.5px -0.5px var(--hf-glass-shine),
     inset -0.5px -0.5px 0.5px -0.5px var(--hf-glass-shine-2),
     inset 0 0 0 1px var(--hf-border);
 }
-.hf-glass--chrome .hf-glass__refract {
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
+:where(.hf-glass--chrome) .hf-glass__refract {
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
 }
 
 /* overlay: dialogs, popovers, menus — stronger tint */
@@ -460,18 +469,38 @@
   transform: translateY(-3px);
 }
 
-/* --- Frosted fallback (Safari / Firefox — no SVG displacement) ------- */
-/* feDisplacementMap via filter: url() is not supported in Safari/Firefox;
-   the filter is removed and blur is increased to keep the frosted look. */
-@supports not (filter: url("#hf-liquid")) {
+/* --- Refraction opt-in (Chromium only) ------------------------------- */
+/* Real lens refraction = the #hf-liquid feDisplacementMap on a lightly
+   blurred backdrop. Enabled ONLY when lib/glassSupport.ts has confirmed a
+   Chromium engine (the attribute below). CSS @supports cannot detect this
+   (Safari/Firefox false-positive on `filter: url()`), so it is runtime-gated.
+   :where() keeps specificity at zero so the solid @media blocks still win. */
+:where(html[data-glass-refract="on"]) .hf-glass__refract {
+  backdrop-filter: blur(2px) saturate(135%);
+  -webkit-backdrop-filter: blur(2px) saturate(135%);
+  filter: url(#hf-liquid);
+}
+:where(html[data-glass-refract="on"] .hf-glass--chrome) .hf-glass__refract {
+  backdrop-filter: blur(2px) saturate(140%);
+  -webkit-backdrop-filter: blur(2px) saturate(140%);
+}
+
+/* --- Solid fallback (no backdrop-filter / reduced transparency / contrast) */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .hf-glass {
+    box-shadow: none;
+  }
   .hf-glass__refract {
-    filter: none;
-    backdrop-filter: blur(12px) saturate(125%);
-    -webkit-backdrop-filter: blur(12px) saturate(125%);
+    display: none;
+  }
+  .hf-glass__tint {
+    background: var(--hf-bg-raised);
+  }
+  .hf-glass__shine {
+    box-shadow: inset 0 0 0 1px var(--hf-border);
   }
 }
 
-/* --- Solid fallback (reduced transparency / high contrast) ----------- */
 @media (prefers-reduced-transparency: reduce) {
   .hf-glass {
     box-shadow: none;
