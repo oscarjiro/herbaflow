@@ -532,6 +532,108 @@
 }
 
 /* =====================================================================
+   BackgroundFX — dotted-glow background layer.
+   One canonical home. BackgroundFX.tsx renders these classes; nothing
+   else should replicate the dots or blob recipe.
+
+   Layers:
+     .hf-bg__dots          — animated radial-gradient dot grid (GPU drift)
+     .hf-bg__dots--static  — prefers-reduced-motion variant (no animation)
+     .hf-bg__blobs         — wrapper for the two ambient glow blobs
+     .hf-bg__glow          — individual blob (shared base)
+     .hf-bg__glow--g1      — sage blob (top-left drift)
+     .hf-bg__glow--g2      — terracotta blob (top-right drift)
+     .hf-bg__flow          — WebGL canvas container (pointer collects mouse)
+   ===================================================================== */
+
+.hf-bg__dots {
+  position: absolute;
+  /* Overshoot by the dot-grid step (22px) so the seam stays off-screen
+     during the drift animation. */
+  inset: -48px;
+  background-image: radial-gradient(circle at 1px 1px, var(--hf-dot) 1px, transparent 0);
+  background-size: 22px 22px;
+  animation: hf-dotfloat 16s linear infinite;
+  will-change: transform;
+}
+
+/* Static variant — reduced motion: grid present but frozen. */
+.hf-bg__dots--static {
+  animation: none;
+}
+
+@keyframes hf-dotfloat {
+  to {
+    transform: translate(22px, 22px);
+  }
+}
+
+.hf-bg__blobs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hf-bg__glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(100px);
+  opacity: 0.16;
+}
+
+.hf-bg__glow--g1 {
+  width: 560px;
+  height: 560px;
+  background: var(--hf-sage);
+  top: -140px;
+  left: 6%;
+  animation: hf-drift1 30s var(--ease) infinite alternate;
+}
+
+.hf-bg__glow--g2 {
+  width: 480px;
+  height: 480px;
+  background: var(--hf-terracotta);
+  top: 180px;
+  right: 3%;
+  opacity: 0.12;
+  animation: hf-drift2 36s var(--ease) infinite alternate;
+}
+
+@keyframes hf-drift1 {
+  to {
+    transform: translate(60px, 50px);
+  }
+}
+
+@keyframes hf-drift2 {
+  to {
+    transform: translate(-50px, 70px);
+  }
+}
+
+.hf-bg__flow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hf-bg__flow canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Honour prefers-reduced-motion for blob/flow animations too. */
+@media (prefers-reduced-motion: reduce) {
+  .hf-bg__glow--g1,
+  .hf-bg__glow--g2 {
+    animation: none;
+  }
+  /* .hf-bg__dots is already handled via the --static modifier class. */
+}
+
+/* =====================================================================
    Warm editorial dark ramp. Inverts paper<->ink but stays warm and
    low-contrast (never pure #000/#FFF). Overrides the raw --hf-* tokens;
    the shadcn aliases and the @theme inline color utilities re-resolve
