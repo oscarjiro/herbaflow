@@ -10,6 +10,7 @@ import * as sdk from "../../api/sdk.gen";
 
 // ---------------------------------------------------------------------------
 // Mock recharts ResponsiveContainer so charts mount in jsdom (0-size otherwise).
+// Mock HubBarChart (uses Plotly/lazy) to avoid dynamic-import failures in jsdom.
 // ---------------------------------------------------------------------------
 
 vi.mock("recharts", async (orig) => {
@@ -23,6 +24,10 @@ vi.mock("recharts", async (orig) => {
       }),
   };
 });
+
+vi.mock("@/components/charts/HubBarChart", () => ({
+  HubBarChart: () => <div data-testid="hub-bar-chart" />,
+}));
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -175,7 +180,7 @@ describe("Stage7View", () => {
     } as unknown as AnalysisRead;
     wrap(<Stage7View data={completeData} />);
     // ChartFrame renders the title and a Download PNG button.
-    expect(screen.getByText("Hub genes by MCC")).toBeInTheDocument();
+    expect(screen.getByText("Hub genes by centrality")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
     // The old server-rendered image must be gone.
     expect(screen.queryByRole("img", { name: /hub/i })).toBeNull();
@@ -183,7 +188,7 @@ describe("Stage7View", () => {
 
   it("does not show the hub gene chart frame when not complete", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.queryByText("Hub genes by MCC")).toBeNull();
+    expect(screen.queryByText("Hub genes by centrality")).toBeNull();
     expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 
