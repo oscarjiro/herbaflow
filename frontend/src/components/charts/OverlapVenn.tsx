@@ -23,7 +23,7 @@
 import type { FC } from "react";
 import { useMemo } from "react";
 import { VennDiagram as RawVennDiagram, asSets, type VennDiagramProps } from "@upsetjs/react";
-import { useChartColors } from "@/lib/chartTheme";
+import { useChartColors, readChartFontFamily } from "@/lib/chartTheme";
 
 // @upsetjs/react ships React 18 types; under React 19 its generic
 // `<T>(p) => ReactElement` signature is not assignable to JSX.ElementType
@@ -89,6 +89,8 @@ function buildVennSets(
 
 export function OverlapVenn({ compoundCount, diseaseCount, overlapCount, overlapGenes }: Props) {
   const colors = useChartColors();
+  // Match the site sans instead of @upsetjs's default font; empty -> library default.
+  const fontFamily = useMemo(() => readChartFontFamily() || undefined, []);
 
   const sets = useMemo(
     () =>
@@ -103,19 +105,23 @@ export function OverlapVenn({ compoundCount, diseaseCount, overlapCount, overlap
     [compoundCount, diseaseCount, overlapCount, overlapGenes, colors.sage, colors.terracotta],
   );
 
+  // Centre the fixed-size SVG in the (wider) chart card; the padding keeps the
+  // corner-anchored set labels inside the canvas while the larger width/height
+  // keeps the circles a readable size. textColor drives the set labels,
+  // valueTextColor the counts; both track the theme via useChartColors.
   return (
-    <VennDiagram
-      sets={sets}
-      width={520}
-      height={320}
-      // The set-name labels are anchored at the circles' outer corners, so they
-      // overflow a tightly-padded canvas. Generous SVG padding (default is 5)
-      // pulls the circles inward enough for the full labels to fit unclipped.
-      padding={96}
-      exportButtons={false}
-      textColor={colors.fg1}
-      valueTextColor={colors.fg1}
-      strokeColor={colors.border}
-    />
+    <div className="flex w-full justify-center">
+      <VennDiagram
+        sets={sets}
+        width={620}
+        height={380}
+        padding={84}
+        fontFamily={fontFamily}
+        exportButtons={false}
+        textColor={colors.fg1}
+        valueTextColor={colors.fg1}
+        strokeColor={colors.border}
+      />
+    </div>
   );
 }

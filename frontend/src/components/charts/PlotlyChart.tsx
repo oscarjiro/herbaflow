@@ -28,10 +28,22 @@ type PlotlyChartProps = {
 
 export function PlotlyChart({ data, layout, height = 420, onGraphDiv }: PlotlyChartProps) {
   const colors = useChartColors();
-  const mergedLayout = useMemo<Partial<Layout>>(
-    () => ({ ...plotlyTemplate(colors), autosize: true, ...layout }),
-    [colors, layout],
-  );
+  const mergedLayout = useMemo<Partial<Layout>>(() => {
+    const template = plotlyTemplate(colors);
+    return {
+      ...template,
+      autosize: true,
+      ...layout,
+      // Deep-merge the axis + font objects so a caller that sets xaxis/yaxis
+      // (e.g. an axis title or automargin) keeps the themed gridcolor /
+      // zerolinecolor / tickfont from the template instead of clobbering the
+      // whole axis — a shallow spread drops those back to Plotly's default light
+      // grid, which reads as a glaring white grid in dark mode.
+      font: { ...template.font, ...layout?.font },
+      xaxis: { ...template.xaxis, ...layout?.xaxis },
+      yaxis: { ...template.yaxis, ...layout?.yaxis },
+    };
+  }, [colors, layout]);
   return (
     <Suspense fallback={<Skeleton className="w-full" style={{ height }} />}>
       <div style={{ width: "100%", height }}>
