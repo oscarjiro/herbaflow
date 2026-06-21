@@ -1,6 +1,9 @@
 import { saveBlob } from "./download";
 import { readChartColors } from "./chartTheme";
 
+/** Theme-independent label colour baked into exported figures (reads on a white page). */
+const EXPORT_TEXT = "#000000";
+
 /**
  * Compose an image source onto a canvas and save it as a PNG.
  *
@@ -164,7 +167,7 @@ export async function exportCytoscapeAsPng(
   // page, independent of the live theme) on a transparent canvas. The temporary
   // per-node style bypass is removed afterwards so the on-screen graph is intact.
   const nodes = cy.nodes();
-  nodes.style({ color: "#000000", "text-outline-color": "#ffffff", "text-outline-width": 2 });
+  nodes.style({ color: EXPORT_TEXT, "text-outline-color": "#ffffff", "text-outline-width": 2 });
   let dataUrl: string;
   try {
     dataUrl = cy.png({ full: true, scale: 2, bg: "transparent" });
@@ -187,13 +190,47 @@ export async function exportCytoscapeAsPng(
  */
 export async function exportPlotlyAsPng(
   graphDiv: HTMLElement,
-  opts: { filename: string; title?: string; background?: string },
+  opts: { filename: string; title?: string },
 ): Promise<void> {
   const Plotly = (await import("plotly.js-dist-min")).default;
-  const bg = opts.background ?? readChartColors().surface;
   const rect = graphDiv.getBoundingClientRect();
   const width = rect.width > 0 ? rect.width : 800;
   const height = rect.height > 0 ? rect.height : 420;
-  const dataUrl = await Plotly.toImage(graphDiv, { format: "png", width, height, scale: 2 });
-  return composeImageToPng(dataUrl, { filename: opts.filename, title: opts.title, background: bg });
+
+  // Render a print-friendly copy: transparent paper/plot and forced black text
+  // (theme-independent) so the figure reads on a white page in either theme.
+  // Built from the live graph's data + layout without mutating the on-screen chart.
+  const gd = graphDiv as HTMLElement & {
+    data?: unknown[];
+    layout?: {
+      font?: { color?: string };
+      xaxis?: { tickfont?: { color?: string } };
+      yaxis?: { tickfont?: { color?: string } };
+      [key: string]: unknown;
+    };
+  };
+  const layout = gd.layout ?? {};
+  const printLayout: Record<string, unknown> = {
+    ...layout,
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { ...(layout.font ?? {}), color: EXPORT_TEXT },
+    xaxis: {
+      ...(layout.xaxis ?? {}),
+      tickfont: { ...(layout.xaxis?.tickfont ?? {}), color: EXPORT_TEXT },
+    },
+    yaxis: {
+      ...(layout.yaxis ?? {}),
+      tickfont: { ...(layout.yaxis?.tickfont ?? {}), color: EXPORT_TEXT },
+    },
+  };
+  const dataUrl = await Plotly.toImage(
+    { data: gd.data ?? [], layout: printLayout },
+    { format: "png", width, height, scale: 2 },
+  );
+  return composeImageToPng(dataUrl, {
+    filename: opts.filename,
+    title: opts.title,
+    transparent: true,
+  });
 }

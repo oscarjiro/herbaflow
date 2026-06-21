@@ -54,11 +54,21 @@ afterEach(() => {
 });
 
 describe("exportPlotlyAsPng", () => {
-  it("renders the graph div to a PNG data URL and saves it", async () => {
+  it("renders a transparent, dark-text figure to a PNG and saves it", async () => {
     const Plotly = (await import("plotly.js-dist-min")).default;
     const gd = document.createElement("div");
-    // jsdom has no canvas image decode; assert toImage is invoked with png.
+    // jsdom has no canvas image decode; assert toImage gets a print-friendly figure.
     await exportPlotlyAsPng(gd, { filename: "x.png", title: "X" });
-    expect(Plotly.toImage).toHaveBeenCalledWith(gd, expect.objectContaining({ format: "png" }));
+    expect(Plotly.toImage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        layout: expect.objectContaining({
+          paper_bgcolor: "rgba(0,0,0,0)",
+          font: expect.objectContaining({ color: "#000000" }),
+        }),
+      }),
+      expect.objectContaining({ format: "png" }),
+    );
+    // Transparent export must not paint a background rectangle.
+    expect(fakeCtx.fillRect).not.toHaveBeenCalled();
   });
 });
