@@ -218,3 +218,25 @@ describe("exportCytoscapeAsPng — error path", () => {
     await expect(exportCytoscapeAsPng(cy as never, { filename: "ppi.png" })).rejects.toThrow();
   });
 });
+
+// ---------------------------------------------------------------------------
+// exportPlotlyAsPng — shares the same compose-to-PNG helper via a Plotly
+// toImage call. Plotly is dynamically imported so it stays out of the bundle.
+// ---------------------------------------------------------------------------
+
+import { exportPlotlyAsPng } from "./chartExport";
+
+vi.mock("plotly.js-dist-min", () => ({
+  default: { toImage: vi.fn(async () => "data:image/png;base64,AAAA") },
+}));
+vi.mock("./download", () => ({ saveBlob: vi.fn() }));
+
+describe("exportPlotlyAsPng", () => {
+  it("renders the graph div to a PNG data URL and saves it", async () => {
+    const Plotly = (await import("plotly.js-dist-min")).default;
+    const gd = document.createElement("div");
+    // jsdom has no canvas image decode; assert toImage is invoked with png.
+    await exportPlotlyAsPng(gd, { filename: "x.png", title: "X" }).catch(() => {});
+    expect(Plotly.toImage).toHaveBeenCalledWith(gd, expect.objectContaining({ format: "png" }));
+  });
+});

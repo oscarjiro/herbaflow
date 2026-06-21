@@ -153,3 +153,23 @@ export async function exportCytoscapeAsPng(
   const dataUrl = cy.png({ full: true, scale: 2, bg });
   return composeImageToPng(dataUrl, { filename: opts.filename, title: opts.title, background: bg });
 }
+
+/**
+ * Export a Plotly graph div as a PNG file. Renders the graph to a PNG data URL
+ * via Plotly.toImage (2x scale), then draws + saves it through the same
+ * composeImageToPng helper that backs the SVG and Cytoscape exports — one save
+ * path, one title strip. Plotly is dynamically imported (cached) so this does
+ * not pull Plotly into the main bundle.
+ */
+export async function exportPlotlyAsPng(
+  graphDiv: HTMLElement,
+  opts: { filename: string; title?: string; background?: string },
+): Promise<void> {
+  const Plotly = (await import("plotly.js-dist-min")).default;
+  const bg = opts.background ?? readChartColors().surface;
+  const rect = graphDiv.getBoundingClientRect();
+  const width = rect.width > 0 ? rect.width : 800;
+  const height = rect.height > 0 ? rect.height : 420;
+  const dataUrl = await Plotly.toImage(graphDiv, { format: "png", width, height, scale: 2 });
+  return composeImageToPng(dataUrl, { filename: opts.filename, title: opts.title, background: bg });
+}
