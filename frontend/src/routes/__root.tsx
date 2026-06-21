@@ -3,7 +3,7 @@ import { LazyMotion, domAnimation } from "motion/react";
 import { ThemeProvider } from "@/lib/theme";
 import { Nav } from "@/components/ui/Nav";
 import { Footer } from "@/components/ui/Footer";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createRootRoute({
   component: () => (
