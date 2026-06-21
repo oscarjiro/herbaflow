@@ -1,4 +1,3 @@
-import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter, createMemoryHistory } from "@tanstack/react-router";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -6,16 +5,8 @@ import { vi } from "vitest";
 import { routeTree } from "./routeTree.gen";
 import "./lib/api";
 
-// Mock react-cytoscapejs so the CTP network graph never tries to use canvas APIs in jsdom.
-vi.mock("react-cytoscapejs", () => ({
-  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    cy?.({ png: () => "data:image/png;base64,AAAA" });
-    return React.createElement("div", {
-      "data-testid": "cytoscape",
-      "data-count": String(elements?.length ?? 0),
-    });
-  },
-}));
+// Mock react-cytoscapejs via the shared cytoscape stub (one home).
+vi.mock("react-cytoscapejs", () => import("@/test-utils/cytoscapeMock"));
 
 test("/ renders the landing page with a CTA link to /analysis", async () => {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

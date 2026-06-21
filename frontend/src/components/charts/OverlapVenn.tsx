@@ -1,140 +1,127 @@
 /**
- * OverlapVenn — dependency-free two-circle SVG Venn diagram.
+ * OverlapVenn — area-proportional two-set Venn via @upsetjs/react.
  *
- * Renders a schematic Venn where circle radii scale with set size and each
- * region is labeled with its target count. Designed as a replacement for the
- * server-rendered stage5_venn.png: pure SVG so ChartFrame can serialize it
- * directly for the Download PNG export path.
+ * @upsetjs is element-based: a circle's area scales with its element count and
+ * the lens area with the count of elements SHARED between the two sets. We only
+ * receive cardinalities (compound-side / disease-side target counts + the
+ * overlap size) plus, optionally, the real shared gene symbols. To make the
+ * auto-computed intersection come out to exactly the overlap size, we synthesize
+ * element-id arrays: a pool of shared ids that appear in BOTH sets, padded with
+ * per-side unique ids so each set's total length equals its real count.
  *
- * Colors come from useChartColors() so the exported PNG carries resolved
- * hf-* values, never unresolved CSS variable references.
+ * Real overlap gene symbols are used as the shared ids first (so they carry
+ * meaning and surface on hover), padded with synthetic ids only when there are
+ * fewer named genes than the overlap count.
+ *
+ * Colors come from useChartColors() as resolved hf-* strings so the serialized
+ * SVG export carries concrete values, never unresolved CSS variable references.
+ * Renders SVG, so ChartFrame's default Download-PNG path serializes it directly.
+ * Same component name + a superset of the prior props (adds optional
+ * overlapGenes), so the Stage 5 call site is unchanged.
  */
 
-import { useChartColors } from "@/lib/chartTheme";
+import type { FC } from "react";
+import { useMemo } from "react";
+import { VennDiagram as RawVennDiagram, asSets, type VennDiagramProps } from "@upsetjs/react";
+import { useChartColors, readChartFontFamily } from "@/lib/chartTheme";
+
+// @upsetjs/react ships React 18 types; under React 19 its generic
+// `<T>(p) => ReactElement` signature is not assignable to JSX.ElementType
+// (the stricter ReactPortal.children rule). Re-type it as a plain FC over the
+// string-element prop shape we use; the runtime component is unchanged.
+const VennDiagram = RawVennDiagram as unknown as FC<VennDiagramProps<string>>;
 
 type Props = {
   compoundCount: number;
   diseaseCount: number;
   overlapCount: number;
+  /** Real shared gene symbols; used as the intersection element ids when present. */
+  overlapGenes?: string[];
 };
 
-export function OverlapVenn({ compoundCount, diseaseCount, overlapCount }: Props) {
+/**
+ * Build the two @upsetjs sets from cardinalities by synthesizing element ids.
+ *
+ * The shared ids are the SAME string values in both sets' elems arrays — that
+ * is what makes the auto-computed distinct intersection equal `overlapCount`.
+ */
+function buildVennSets(
+  compoundCount: number,
+  diseaseCount: number,
+  overlapCount: number,
+  overlapGenes: string[] | undefined,
+  sageColor: string,
+  terracottaColor: string,
+) {
+  // Defensive clamps: counts are non-negative integers; the overlap cannot
+  // exceed the smaller set.
+  const compound = Math.max(0, Math.floor(compoundCount));
+  const disease = Math.max(0, Math.floor(diseaseCount));
+  const overlap = Math.max(0, Math.min(Math.floor(overlapCount), compound, disease));
+
+  // Shared element ids: prefer real gene symbols (meaningful + hover), then pad
+  // with synthetic unique ids up to `overlap`. Truncate if there are more genes
+  // than the overlap count.
+  const named = (overlapGenes ?? []).slice(0, overlap);
+  const sharedIds: string[] = [...named];
+  for (let i = named.length; i < overlap; i += 1) {
+    sharedIds.push(`__shared_${i}`);
+  }
+
+  // Per-side unique ids fill the remainder so each set's length is exact.
+  const compoundOnly: string[] = [];
+  for (let i = 0; i < compound - overlap; i += 1) {
+    compoundOnly.push(`__c_${i}`);
+  }
+  const diseaseOnly: string[] = [];
+  for (let i = 0; i < disease - overlap; i += 1) {
+    diseaseOnly.push(`__d_${i}`);
+  }
+
+  const compoundElems = [...compoundOnly, ...sharedIds]; // length === compound
+  const diseaseElems = [...diseaseOnly, ...sharedIds]; // length === disease
+
+  return asSets([
+    { name: "Compound targets", elems: compoundElems, color: sageColor },
+    { name: "Disease targets", elems: diseaseElems, color: terracottaColor },
+  ]);
+}
+
+export function OverlapVenn({ compoundCount, diseaseCount, overlapCount, overlapGenes }: Props) {
   const colors = useChartColors();
+  // Match the site sans instead of @upsetjs's default font; empty -> library default.
+  const fontFamily = useMemo(() => readChartFontFamily() || undefined, []);
 
-  // Guard derived region counts against negatives from bad data.
-  const onlyCompound = Math.max(0, compoundCount - overlapCount);
-  const onlyDisease = Math.max(0, diseaseCount - overlapCount);
+  const sets = useMemo(
+    () =>
+      buildVennSets(
+        compoundCount,
+        diseaseCount,
+        overlapCount,
+        overlapGenes,
+        colors.sage,
+        colors.terracotta,
+      ),
+    [compoundCount, diseaseCount, overlapCount, overlapGenes, colors.sage, colors.terracotta],
+  );
 
-  // Radii scale with set size relative to the larger set.
-  const maxCount = Math.max(compoundCount, diseaseCount, 1);
-  const radius = (c: number) => Math.max(28, Math.sqrt(c / maxCount) * 92);
-  const rA = radius(compoundCount);
-  const rB = radius(diseaseCount);
-
-  // Overlap distance: partial overlap gives a readable lens intersection.
-  const d = (rA + rB) * 0.62;
-  const cy = 140;
-  const cxA = 230 - d / 2;
-  const cxB = 230 + d / 2;
-
-  // Label positions: region counts sit in the visual center of each region.
-  const labelCompound = { x: cxA - rA * 0.45, y: cy };
-  const labelOverlap = { x: 230, y: cy };
-  const labelDisease = { x: cxB + rB * 0.45, y: cy };
-
-  // Set-name labels sit above each circle center.
-  const nameA = { x: cxA, y: cy - rA - 10 };
-  const nameB = { x: cxB, y: cy - rB - 10 };
-
+  // Centre the fixed-size SVG in the (wider) chart card; the padding keeps the
+  // corner-anchored set labels inside the canvas while the larger width/height
+  // keeps the circles a readable size. textColor drives the set labels,
+  // valueTextColor the counts; both track the theme via useChartColors.
   return (
-    <svg
-      viewBox="0 0 460 280"
-      style={{ width: "100%", display: "block" }}
-      aria-label="Target overlap"
-    >
-      <title>Target overlap</title>
-
-      {/* Circle A — compound targets (sage) */}
-      <circle
-        cx={cxA}
-        cy={cy}
-        r={rA}
-        fill={colors.sage}
-        fillOpacity={0.42}
-        stroke={colors.sage}
-        strokeWidth={1.5}
+    <div className="flex w-full justify-center">
+      <VennDiagram
+        sets={sets}
+        width={620}
+        height={380}
+        padding={84}
+        fontFamily={fontFamily}
+        exportButtons={false}
+        textColor={colors.fg1}
+        valueTextColor={colors.fg1}
+        strokeColor={colors.border}
       />
-
-      {/* Circle B — disease targets (terracotta) */}
-      <circle
-        cx={cxB}
-        cy={cy}
-        r={rB}
-        fill={colors.terracotta}
-        fillOpacity={0.42}
-        stroke={colors.terracotta}
-        strokeWidth={1.5}
-      />
-
-      {/* Region count labels */}
-      <text
-        x={labelCompound.x}
-        y={labelCompound.y}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize={18}
-        fontWeight={600}
-        fill={colors.fg1}
-      >
-        {onlyCompound}
-      </text>
-
-      <text
-        x={labelOverlap.x}
-        y={labelOverlap.y}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize={18}
-        fontWeight={600}
-        fill={colors.fg1}
-      >
-        {overlapCount}
-      </text>
-
-      <text
-        x={labelDisease.x}
-        y={labelDisease.y}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize={18}
-        fontWeight={600}
-        fill={colors.fg1}
-      >
-        {onlyDisease}
-      </text>
-
-      {/* Set-name labels */}
-      <text
-        x={nameA.x}
-        y={nameA.y}
-        textAnchor="middle"
-        dominantBaseline="auto"
-        fontSize={12}
-        fill={colors.fg2}
-      >
-        Compound targets
-      </text>
-
-      <text
-        x={nameB.x}
-        y={nameB.y}
-        textAnchor="middle"
-        dominantBaseline="auto"
-        fontSize={12}
-        fill={colors.fg2}
-      >
-        Disease targets
-      </text>
-    </svg>
+    </div>
   );
 }

@@ -4,20 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/lib/theme";
 
-// ---------------------------------------------------------------------------
-// Mock react-cytoscapejs so cytoscape never really renders in jsdom. The stub
-// invokes the cy callback with a minimal Core and exposes the element count
-// via a data attribute so we can assert the caller passed elements through.
-// ---------------------------------------------------------------------------
-vi.mock("react-cytoscapejs", () => ({
-  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    cy?.({ png: () => "data:image/png;base64,AAAA" });
-    return React.createElement("div", {
-      "data-testid": "cytoscape",
-      "data-count": String(elements?.length ?? 0),
-    });
-  },
-}));
+// Mock react-cytoscapejs via the shared cytoscape stub (one home).
+vi.mock("react-cytoscapejs", () => import("@/test-utils/cytoscapeMock"));
 
 // Mock the export so clicking Download does not touch canvas/Image.
 vi.mock("@/lib/chartExport", () => ({
@@ -89,7 +77,34 @@ describe("NetworkGraph", () => {
     await userEvent.click(screen.getByRole("button", { name: /download png/i }));
     expect(exportCytoscapeAsPng).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ title: "Interaction network", filename: "ppi_network.png" }),
+      expect.objectContaining({ filename: "ppi_network.png" }),
     );
+  });
+
+  it("renders an optional legend below the graph", () => {
+    wrap(
+      <NetworkGraph
+        title="PPI network"
+        filename="ppi.png"
+        elements={[]}
+        stylesheet={[]}
+        legend={<div>Compounds · Targets · Pathways</div>}
+      />,
+    );
+    expect(screen.getByText(/compounds · targets · pathways/i)).toBeInTheDocument();
+  });
+
+  it("wires the nodeTooltip handler without throwing", () => {
+    expect(() =>
+      wrap(
+        <NetworkGraph
+          title="PPI network"
+          filename="ppi.png"
+          elements={[]}
+          stylesheet={[]}
+          nodeTooltip={(data) => String(data["label"] ?? "")}
+        />,
+      ),
+    ).not.toThrow();
   });
 });

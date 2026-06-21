@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { useTheme } from "@/lib/theme";
+import { useEffect, useState } from "react";
 
 /**
  * Concrete color values read from the hf-* CSS custom properties.
@@ -55,10 +54,75 @@ export function readChartColors(): ChartColors {
 }
 
 /**
- * React hook that returns resolved chart colors, re-memoized whenever the
- * active theme (light/dark) changes so charts stay in sync with the toggle.
+ * React hook that returns resolved chart colors, re-resolved whenever the active
+ * theme changes so charts stay in sync with the toggle.
+ *
+ * It reads off the live `<html>` class via a MutationObserver rather than the
+ * theme context. This avoids a render-order race: ThemeProvider toggles the
+ * `.dark` class in an effect that runs AFTER descendant renders, so reading
+ * getComputedStyle during render (keyed on the context value) would resolve the
+ * PREVIOUS theme's tokens and lag a toggle behind. The observer fires after the
+ * class actually changes, so colors always reflect the committed theme.
  */
 export function useChartColors(): ChartColors {
-  const { theme } = useTheme();
-  return useMemo(() => readChartColors(), [theme]);
+  const [colors, setColors] = useState<ChartColors>(readChartColors);
+  useEffect(() => {
+    const sync = () => setColors(readChartColors());
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, []);
+  return colors;
+}
+
+/**
+ * The site sans-serif font stack, resolved from the `--font-sans` token, so
+ * charts that draw their own text (SVG/canvas) match the rest of the UI instead
+ * of falling back to a library default. Empty string if the token is unset.
+ */
+export function readChartFontFamily(): string {
+  return getComputedStyle(document.documentElement).getPropertyValue("--font-sans").trim();
+}
+
+import type { Layout } from "plotly.js";
+
+/**
+ * Plotly layout template themed from resolved hf-* tokens. Transparent
+ * backgrounds let the glass ChartFrame show through; fonts/axes/colorway track
+ * the editorial palette. Charts merge this under their own data-specific layout.
+ */
+export function plotlyTemplate(colors: ChartColors): Partial<Layout> {
+  return {
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: { color: colors.fg2, family: "ui-sans-serif, system-ui, sans-serif", size: 12 },
+    colorway: [
+      colors.sage,
+      colors.terracotta,
+      colors.info,
+      colors.warning,
+      colors.sageDeep,
+      colors.success,
+    ],
+    margin: { l: 8, r: 16, t: 8, b: 40 },
+    xaxis: {
+      gridcolor: colors.border,
+      zerolinecolor: colors.border,
+      tickfont: { color: colors.fg3 },
+    },
+    yaxis: {
+      gridcolor: colors.border,
+      zerolinecolor: colors.border,
+      tickfont: { color: colors.fg2 },
+    },
+    hoverlabel: {
+      bgcolor: colors.surface,
+      bordercolor: colors.border,
+      font: { color: colors.fg1 },
+    },
+  };
 }

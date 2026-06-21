@@ -79,7 +79,6 @@ describe("ChartFrame — default export (calls exportSvgAsPng)", () => {
     renderFrame();
     await user.click(screen.getByRole("button", { name: /download png/i }));
     expect(chartExport.exportSvgAsPng).toHaveBeenCalledWith(expect.any(SVGElement), {
-      title: "Hub genes by MCC",
       filename: "hub_genes_mcc.png",
     });
   });

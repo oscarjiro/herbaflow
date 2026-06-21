@@ -1,4 +1,3 @@
-import React from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
@@ -8,16 +7,8 @@ import { renderWithRouter } from "./renderWithRouter";
 import "../src/lib/api";
 import { server } from "./handlers";
 
-// Mock react-cytoscapejs so the graph never really renders in jsdom.
-vi.mock("react-cytoscapejs", () => ({
-  default: ({ cy, elements }: { cy?: (c: unknown) => void; elements?: unknown[] }) => {
-    cy?.({ png: () => "data:image/png;base64,AAAA" });
-    return React.createElement("div", {
-      "data-testid": "cytoscape",
-      "data-count": String(elements?.length ?? 0),
-    });
-  },
-}));
+// Mock react-cytoscapejs via the shared cytoscape stub (one home).
+vi.mock("react-cytoscapejs", () => import("@/test-utils/cytoscapeMock"));
 
 function wrap(analysisId: string) {
   return renderWithRouter(<RunView analysisId={analysisId} />, {

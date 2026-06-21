@@ -7,7 +7,7 @@
  * `network_too_small` notice, and the StaleNotice.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
@@ -27,6 +27,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { Eyebrow } from "@/components/ui/editorial";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { HubBarChart } from "@/components/charts/HubBarChart";
+import { exportPlotlyAsPng } from "@/lib/chartExport";
 import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -113,6 +114,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [page, setPage] = useState(0);
+  const gdRef = useRef<HTMLElement | null>(null);
 
   const hubs = useMemo(() => stage7?.hubs ?? [], [stage7]);
   const csvRows = useMemo(() => buildS7CsvRows(hubs), [hubs]);
@@ -221,10 +223,27 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         </p>
       )}
 
-      {/* Hub bar chart — interactive recharts (complete-only, gracefully absent when hubs is empty) */}
+      {/* Hub bar chart — tabbed Plotly centrality bars (complete-only, absent when hubs is empty) */}
       {isComplete && hubs.length > 0 && (
-        <ChartFrame title="Hub genes by MCC" filename="hub_genes_mcc.png">
-          <HubBarChart hubs={hubs.map((h) => ({ gene_symbol: h.gene_symbol, mcc: h.mcc }))} />
+        <ChartFrame
+          title="Hub genes by centrality"
+          filename="hub_genes.png"
+          onExport={async () => {
+            if (gdRef.current)
+              await exportPlotlyAsPng(gdRef.current, { filename: "hub_genes.png" });
+          }}
+        >
+          <HubBarChart
+            hubs={hubs.map((h) => ({
+              gene_symbol: h.gene_symbol,
+              mcc: h.mcc,
+              degree: h.degree,
+              betweenness: h.betweenness,
+              closeness: h.closeness,
+              eigenvector: h.eigenvector,
+            }))}
+            onGraphDiv={(gd) => (gdRef.current = gd)}
+          />
         </ChartFrame>
       )}
 

@@ -111,6 +111,7 @@ type NetworkElements = {
   elements: cytoscape.ElementDefinition[];
   isolated: string[];
   maxMcc: number;
+  maxDegree: number;
 };
 
 /**
@@ -123,7 +124,7 @@ type NetworkElements = {
  * collected for the not-connected tray, not drawn). MCC (from Stage 7) sizes the
  * hub nodes; hub nodes are those present in the MCC map.
  */
-function buildNetworkElements(
+export function buildNetworkElements(
   nodes: Stage6Node[],
   edges: Stage6Edge[],
   hubs: Stage7Hub[],
@@ -146,6 +147,7 @@ function buildNetworkElements(
 
   const elements: cytoscape.ElementDefinition[] = [];
   const connected = new Set<string>();
+  const degreeById = new Map<string, number>();
 
   edges.forEach((e, i) => {
     const source = resolve(e.source);
@@ -154,9 +156,12 @@ function buildNetworkElements(
     elements.push({ data: { id: `e-${i}`, source, target, weight: e.confidence } });
     connected.add(source);
     connected.add(target);
+    degreeById.set(source, (degreeById.get(source) ?? 0) + 1);
+    degreeById.set(target, (degreeById.get(target) ?? 0) + 1);
   });
 
   let maxMcc = 0;
+  let maxDegree = 0;
   const isolated: string[] = [];
   for (const n of nodes) {
     const id = n.gene_symbol;
@@ -167,12 +172,20 @@ function buildNetworkElements(
     const mcc =
       mccByKey.get(n.gene_symbol) ?? (n.target_id ? mccByKey.get(n.target_id) : undefined) ?? 0;
     if (mcc > maxMcc) maxMcc = mcc;
+    const degree = degreeById.get(id) ?? 0;
+    if (degree > maxDegree) maxDegree = degree;
     elements.push({
-      data: { id, label: n.gene_symbol, mcc, hub: mccByKey.has(n.gene_symbol) ? "true" : "false" },
+      data: {
+        id,
+        label: n.gene_symbol,
+        mcc,
+        degree,
+        hub: mccByKey.has(n.gene_symbol) ? "true" : "false",
+      },
     });
   }
 
-  return { elements, isolated, maxMcc };
+  return { elements, isolated, maxMcc, maxDegree };
 }
 
 /** Build the Cytoscape stylesheet from resolved hf-* color strings. */
@@ -180,6 +193,7 @@ function buildNetworkStylesheet(
   colors: ReturnType<typeof useChartColors>,
   minConfidence: number,
   maxMcc: number,
+  maxDegree: number,
 ): cytoscape.StylesheetJson {
   const sizeStyle =
     maxMcc > 0
@@ -188,12 +202,21 @@ function buildNetworkStylesheet(
           height: `mapData(mcc, 0, ${maxMcc}, 16, 52)`,
         }
       : { width: 24, height: 24 };
+
+  // Degree-ramp color: faint (low connectivity) → deep (high connectivity).
+  // When maxDegree === 0 (no edges) fall back to a flat mid-tone to avoid a
+  // mapData divide-by-zero.
+  const bgColor =
+    maxDegree > 0
+      ? `mapData(degree, 0, ${maxDegree}, ${colors.sageFaint}, ${colors.sageDeep})`
+      : colors.sageSoft;
+
   return [
     {
       selector: "node",
       style: {
         ...sizeStyle,
-        "background-color": colors.sage,
+        "background-color": bgColor,
         label: "data(label)",
         color: colors.fg1,
         "font-size": 9,
@@ -201,10 +224,6 @@ function buildNetworkStylesheet(
         "text-halign": "center",
         "text-margin-y": 2,
       },
-    },
-    {
-      selector: 'node[hub = "true"]',
-      style: { "background-color": colors.sageDeep },
     },
     {
       selector: "edge",
@@ -265,8 +284,14 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     [computed, hubs],
   );
   const stylesheet = useMemo(
-    () => buildNetworkStylesheet(colors, computed?.min_confidence ?? 0, network.maxMcc),
-    [colors, computed, network.maxMcc],
+    () =>
+      buildNetworkStylesheet(
+        colors,
+        computed?.min_confidence ?? 0,
+        network.maxMcc,
+        network.maxDegree,
+      ),
+    [colors, computed, network.maxMcc, network.maxDegree],
   );
 
   if (!stage6) return null;
@@ -494,6 +519,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
           filename="ppi_network.png"
           elements={network.elements}
           stylesheet={stylesheet}
+          nodeTooltip={(d) => `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`}
           tray={
             network.isolated.length > 0 ? (
               <p className="text-muted-foreground mt-3 text-sm">
