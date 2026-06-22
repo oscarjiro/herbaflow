@@ -270,6 +270,36 @@ describe("ParamPanel", () => {
     expect(screen.queryByText(/the full long description sentence/i)).not.toBeInTheDocument();
   });
 
+  it("param help lives in the info tooltip, not an always-on inline hint", async () => {
+    const tooltipMeta: ParamMeta = {
+      default: 5,
+      min: 0,
+      minExclusive: false,
+      max: 10,
+      recommended_min: 1,
+      recommended_max: 9,
+      description: "the full long description sentence",
+    };
+    const { container } = render(
+      <ParamPanel
+        params={{ score: 5 }}
+        meta={{ score: tooltipMeta }}
+        onRedo={vi.fn()}
+        numericKeys={["score"]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        title="Hint test"
+      />,
+    );
+    await openPanel(/hint test/i);
+    // The info trigger exists and is tagged for the design system.
+    expect(container.querySelector("[data-slot='param-info']")).not.toBeNull();
+    // No always-on inline help paragraph (default/recommended bounds + description
+    // now live inside the tooltip, mirroring the mockup's tooltip mode).
+    expect(container.querySelector("[data-slot='param-hint']")).toBeNull();
+    expect(screen.queryByText(/recommended 1–9/i)).not.toBeInTheDocument();
+  });
+
   describe("collect-mode (onChange + hideRedo)", () => {
     it("hideRedo hides the Redo button", async () => {
       render(

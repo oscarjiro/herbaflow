@@ -30,6 +30,34 @@ export function stageLabel(n: number): string {
   return STAGE_LABELS[n - 1] ?? `Step ${n}`;
 }
 
+// Human-readable param labels. The long help text shown in each param's info
+// tooltip is contract-owned (shared/contracts/analysis.json `description`); the
+// notes below record the external-API source each description was verified
+// against so the wording stays scientifically accurate.
+//
+//   min_pchembl          ChEMBL pChEMBL = −log10(molar IC50/Ki/Kd/EC50/etc.);
+//                        5 ≈ 10 µM, 6 = 1 µM, 7 = 100 nM. Verified: ChEMBL FAQ
+//                        (chembl.gitbook.io chembl-data-questions).
+//   min_assay_confidence ChEMBL target-confidence score 0–9; 9 = direct single
+//                        protein, 7 = direct protein-complex subunits, <4 =
+//                        non-protein/cellular. Verified: ChEMBL FAQ.
+//   min_confidence       STRING combined-score floor (raw API 0–1000; contract
+//                        uses the 0–1 fraction, tiers 0.15/0.4/0.7/0.9, default
+//                        0.4 = medium). Verified: STRING API help (string-db.org/help/api).
+//   network_type         STRING functional (all association evidence) vs
+//                        physical (binding only). Verified: STRING API help.
+//   correction           g:Profiler multiple-testing method: g_SCS (default),
+//                        fdr, bonferroni. Verified: g:Profiler gOSt API
+//                        (biit.cs.ut.ee/gprofiler/page/apis).
+//   no_iea               g:Profiler: exclude GO terms supported only by
+//                        electronic (IEA) annotation. Verified: g:Profiler gOSt API.
+//   significance_threshold g:Profiler user_threshold; corrected-p cutoff, float
+//                        0–1. Verified: g:Profiler gOSt API.
+//   min_term_size        g:Profiler: drop annotation terms smaller than this.
+//                        g:Profiler-side term-size filter (standard g:GOSt option).
+//   min_score            Open Targets overall disease-target association score,
+//                        harmonic-sum heuristic bounded 0–1. Verified: Open
+//                        Targets docs (platform-docs.opentargets.org/associations).
 const LABELS: Record<string, string> = {
   min_term_size: "Minimum term size",
   significance_threshold: "Significance threshold (corrected p ≤)",

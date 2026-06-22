@@ -197,11 +197,13 @@ describe("Stage2View", () => {
     expect(redo).toBeDisabled();
   });
 
-  it("shows param hint with default and recommended range", async () => {
-    wrap(<Stage2View data={makeRun()} />);
+  it("moves the default/recommended hint into the param info tooltip", async () => {
+    const { container } = wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
-    // max_mw has recommended_min=350, recommended_max=600, default=500
-    expect(screen.getByText(/default.*500/i)).toBeInTheDocument();
+    // The default/recommended note is no longer shown as an always-on inline
+    // paragraph; it now lives inside each param's info tooltip.
+    expect(screen.queryByText(/default.*500/i)).not.toBeInTheDocument();
+    expect(container.querySelector("[data-slot='param-info']")).not.toBeNull();
   });
 
   it("renders not_applicable state defensively (greyed)", () => {
