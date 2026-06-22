@@ -24,12 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { humanizeLabel, humanizeValue } from "../../contract/labels";
@@ -246,168 +241,168 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
 
   return (
     <TooltipProvider>
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <button
-          type="button"
-          className="flex w-full items-center gap-2 text-left"
-          aria-expanded={open}
-          onClick={() => setOpen((o) => !o)}
-        >
-          <span className="text-muted-foreground text-xs">{open ? "▾" : "▸"}</span>
-          <CardTitle className="text-sm">{title}</CardTitle>
-        </button>
-      </CardHeader>
+      <Card className="w-full">
+        <CardHeader className="pb-2">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 text-left"
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+          >
+            <span className="text-muted-foreground text-xs">{open ? "▾" : "▸"}</span>
+            <CardTitle className="text-sm">{title}</CardTitle>
+          </button>
+        </CardHeader>
 
-      {open && (
-        <CardContent className="flex flex-col gap-4 pt-0">
-          {numericKeys.map((key) => {
-            const m = meta[key];
-            if (!m) return null;
-            const err = violations[key];
-            const label = humanizeLabel(key);
-            const recHint =
-              m.recommended_min !== undefined && m.recommended_max !== undefined
-                ? `, recommended ${m.recommended_min}–${m.recommended_max}`
-                : "";
-            return (
-              <div key={key} className="flex flex-col gap-1">
-                <div className="flex items-center gap-1">
-                  <Label htmlFor={`param-${key}`}>{label}</Label>
-                  <ParamInfo description={m.description} label={label} />
-                </div>
-                <p className="text-muted-foreground/70 text-xs">
-                  (default {String(m.default)}
-                  {recHint})
-                </p>
-                <Input
-                  id={`param-${key}`}
-                  type="number"
-                  aria-label={label}
-                  value={localStr[key] ?? ""}
-                  disabled={disabled}
-                  onChange={(e) => handleNumericChange(key, e.target.value)}
-                  aria-invalid={err ? true : undefined}
-                  className={cn(err && "border-destructive")}
-                />
-                {err && (
-                  <p className="text-destructive text-xs" role="alert">
-                    {err}
+        {open && (
+          <CardContent className="flex flex-col gap-4 pt-0">
+            {numericKeys.map((key) => {
+              const m = meta[key];
+              if (!m) return null;
+              const err = violations[key];
+              const label = humanizeLabel(key);
+              const recHint =
+                m.recommended_min !== undefined && m.recommended_max !== undefined
+                  ? `, recommended ${m.recommended_min}–${m.recommended_max}`
+                  : "";
+              return (
+                <div key={key} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1">
+                    <Label htmlFor={`param-${key}`}>{label}</Label>
+                    <ParamInfo description={m.description} label={label} />
+                  </div>
+                  <p className="text-muted-foreground/70 text-xs">
+                    (default {String(m.default)}
+                    {recHint})
                   </p>
-                )}
-              </div>
-            );
-          })}
-
-          {booleanKeys.map((key) => {
-            const m = meta[key];
-            if (!m) return null;
-            const label = humanizeLabel(key);
-            return (
-              <div key={key} className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <Checkbox
+                  <Input
                     id={`param-${key}`}
+                    type="number"
                     aria-label={label}
-                    checked={localStr[key] === "true"}
+                    value={localStr[key] ?? ""}
                     disabled={disabled}
-                    onCheckedChange={(checked) => handleBooleanChange(key, checked === true)}
+                    onChange={(e) => handleNumericChange(key, e.target.value)}
+                    aria-invalid={err ? true : undefined}
+                    className={cn(err && "border-destructive")}
                   />
-                  <Label htmlFor={`param-${key}`}>{label}</Label>
-                  <ParamInfo description={m.description} label={label} />
+                  {err && (
+                    <p className="text-destructive text-xs" role="alert">
+                      {err}
+                    </p>
+                  )}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {selectKeys.map((key) => {
-            const m = meta[key];
-            if (!m) return null;
-            const options = m.enum ?? [];
-            const label = humanizeLabel(key);
-            return (
-              <div key={key} className="flex flex-col gap-1">
-                <div className="flex items-center gap-1">
-                  <Label htmlFor={`param-${key}`}>{label}</Label>
-                  <ParamInfo description={m.description} label={label} />
+            {booleanKeys.map((key) => {
+              const m = meta[key];
+              if (!m) return null;
+              const label = humanizeLabel(key);
+              return (
+                <div key={key} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={`param-${key}`}
+                      aria-label={label}
+                      checked={localStr[key] === "true"}
+                      disabled={disabled}
+                      onCheckedChange={(checked) => handleBooleanChange(key, checked === true)}
+                    />
+                    <Label htmlFor={`param-${key}`}>{label}</Label>
+                    <ParamInfo description={m.description} label={label} />
+                  </div>
                 </div>
-                <p className="text-muted-foreground/70 text-xs">
-                  (default {humanizeValue(String(m.default))})
-                </p>
-                <Select
-                  value={localStr[key] ?? String(m.default)}
-                  disabled={disabled}
-                  onValueChange={(value) => handleSelectChange(key, value)}
-                >
-                  <SelectTrigger id={`param-${key}`} aria-label={label} className="w-full">
-                    <SelectValue>{humanizeValue(localStr[key] ?? String(m.default))}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {options.map((o) => (
-                      <SelectItem key={String(o)} value={String(o)}>
-                        {humanizeValue(String(o))}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {arrayKeys.map((key) => {
-            const m = meta[key];
-            if (!m) return null;
-            const options = m.enum?.map(String) ?? [];
-            const selected = localArrays[key] ?? [];
-            const defaultLabel = Array.isArray(m.default)
-              ? m.default.map((value) => humanizeValue(String(value))).join(", ")
-              : String(m.default);
-            const label = humanizeLabel(key);
-            return (
-              <div key={key} className="flex flex-col gap-2">
-                <div className="flex items-center gap-1">
-                  <Label>{label}</Label>
-                  <ParamInfo description={m.description} label={label} />
+            {selectKeys.map((key) => {
+              const m = meta[key];
+              if (!m) return null;
+              const options = m.enum ?? [];
+              const label = humanizeLabel(key);
+              return (
+                <div key={key} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1">
+                    <Label htmlFor={`param-${key}`}>{label}</Label>
+                    <ParamInfo description={m.description} label={label} />
+                  </div>
+                  <p className="text-muted-foreground/70 text-xs">
+                    (default {humanizeValue(String(m.default))})
+                  </p>
+                  <Select
+                    value={localStr[key] ?? String(m.default)}
+                    disabled={disabled}
+                    onValueChange={(value) => handleSelectChange(key, value)}
+                  >
+                    <SelectTrigger id={`param-${key}`} aria-label={label} className="w-full">
+                      <SelectValue>{humanizeValue(localStr[key] ?? String(m.default))}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {options.map((o) => (
+                        <SelectItem key={String(o)} value={String(o)}>
+                          {humanizeValue(String(o))}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <p className="text-muted-foreground/70 text-xs">(default {defaultLabel})</p>
-                <div className="flex flex-col gap-2">
-                  {options.map((option) => {
-                    const id = `param-${key}-${option.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
-                    const label = humanizeValue(option);
-                    return (
-                      <div key={option} className="flex items-center gap-2">
-                        <Checkbox
-                          id={id}
-                          aria-label={label}
-                          checked={selected.includes(option)}
-                          disabled={disabled}
-                          onCheckedChange={(checked) =>
-                            handleArrayToggle(key, option, checked === true)
-                          }
-                        />
-                        <Label htmlFor={id}>{label}</Label>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {!hideRedo && (
-            <Button
-              type="button"
-              disabled={!redoEnabled}
-              onClick={handleRedo}
-              aria-label="Redo from this stage with changed parameters"
-              className="self-start"
-            >
-              Redo
-            </Button>
-          )}
-        </CardContent>
-      )}
-    </Card>
+            {arrayKeys.map((key) => {
+              const m = meta[key];
+              if (!m) return null;
+              const options = m.enum?.map(String) ?? [];
+              const selected = localArrays[key] ?? [];
+              const defaultLabel = Array.isArray(m.default)
+                ? m.default.map((value) => humanizeValue(String(value))).join(", ")
+                : String(m.default);
+              const label = humanizeLabel(key);
+              return (
+                <div key={key} className="flex flex-col gap-2">
+                  <div className="flex items-center gap-1">
+                    <Label>{label}</Label>
+                    <ParamInfo description={m.description} label={label} />
+                  </div>
+                  <p className="text-muted-foreground/70 text-xs">(default {defaultLabel})</p>
+                  <div className="flex flex-col gap-2">
+                    {options.map((option) => {
+                      const id = `param-${key}-${option.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+                      const label = humanizeValue(option);
+                      return (
+                        <div key={option} className="flex items-center gap-2">
+                          <Checkbox
+                            id={id}
+                            aria-label={label}
+                            checked={selected.includes(option)}
+                            disabled={disabled}
+                            onCheckedChange={(checked) =>
+                              handleArrayToggle(key, option, checked === true)
+                            }
+                          />
+                          <Label htmlFor={id}>{label}</Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+            {!hideRedo && (
+              <Button
+                type="button"
+                disabled={!redoEnabled}
+                onClick={handleRedo}
+                aria-label="Redo from this stage with changed parameters"
+                className="self-start"
+              >
+                Redo
+              </Button>
+            )}
+          </CardContent>
+        )}
+      </Card>
     </TooltipProvider>
   );
 }

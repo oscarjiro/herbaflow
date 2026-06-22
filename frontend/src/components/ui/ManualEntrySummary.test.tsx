@@ -8,7 +8,13 @@ test("nonEmptyLineCount ignores blank lines", () => {
 
 test("renders valid/invalid/duplicate counts and the cap", () => {
   render(
-    <ManualEntrySummary validCount={3} invalidCount={1} duplicateCount={2} current={6} max={2000} />,
+    <ManualEntrySummary
+      validCount={3}
+      invalidCount={1}
+      duplicateCount={2}
+      current={6}
+      max={2000}
+    />,
   );
   expect(screen.getByText(/valid/i)).toBeInTheDocument();
   expect(screen.getByText(/invalid/i)).toBeInTheDocument();
@@ -20,7 +26,14 @@ test("Clear fires onClear", async () => {
   const user = userEvent.setup();
   const onClear = vi.fn();
   render(
-    <ManualEntrySummary validCount={0} invalidCount={0} duplicateCount={0} current={0} max={2000} onClear={onClear} />,
+    <ManualEntrySummary
+      validCount={0}
+      invalidCount={0}
+      duplicateCount={0}
+      current={0}
+      max={2000}
+      onClear={onClear}
+    />,
   );
   await user.click(screen.getByRole("button", { name: /clear/i }));
   expect(onClear).toHaveBeenCalled();

@@ -1,13 +1,29 @@
 import type { AnalysisRead } from "@/api/types.gen";
 
 export type StageSlug =
-  | "inputs" | "compounds" | "adme" | "targets" | "disease-targets"
-  | "overlap" | "ppi" | "hubs" | "enrichment" | "final";
+  | "inputs"
+  | "compounds"
+  | "adme"
+  | "targets"
+  | "disease-targets"
+  | "overlap"
+  | "ppi"
+  | "hubs"
+  | "enrichment"
+  | "final";
 
 // Ordered trail: Inputs bookend → the eight pipeline stages → Final bookend.
 export const STAGE_SLUGS: StageSlug[] = [
-  "inputs", "compounds", "adme", "targets", "disease-targets",
-  "overlap", "ppi", "hubs", "enrichment", "final",
+  "inputs",
+  "compounds",
+  "adme",
+  "targets",
+  "disease-targets",
+  "overlap",
+  "ppi",
+  "hubs",
+  "enrichment",
+  "final",
 ];
 
 const SLUG_TO_STAGE: Record<StageSlug, number | null> = {

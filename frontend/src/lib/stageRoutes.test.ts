@@ -1,12 +1,23 @@
 import type { AnalysisRead } from "@/api/types.gen";
 import {
-  STAGE_SLUGS, slugToStage, stageToSlug, isValidStageSlug,
-  isSlugApplicable, isSlugReached, furthestReachedSlug,
+  STAGE_SLUGS,
+  slugToStage,
+  stageToSlug,
+  isValidStageSlug,
+  isSlugApplicable,
+  isSlugReached,
+  furthestReachedSlug,
 } from "./stageRoutes";
 
 const run = (over: Partial<AnalysisRead>): AnalysisRead =>
-  ({ analysis_id: "a", status: "stage_3_awaiting_approval", current_stage: 3,
-     stage_results: { "1": {}, "2": {}, "3": {} }, stage_state: {} , ...over } as AnalysisRead);
+  ({
+    analysis_id: "a",
+    status: "stage_3_awaiting_approval",
+    current_stage: 3,
+    stage_results: { "1": {}, "2": {}, "3": {} },
+    stage_state: {},
+    ...over,
+  }) as AnalysisRead;
 
 test("slug map is bijective over the 8 pipeline stages", () => {
   expect(slugToStage("compounds")).toBe(1);

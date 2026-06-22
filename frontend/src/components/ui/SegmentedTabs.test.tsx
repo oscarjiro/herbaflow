@@ -11,7 +11,12 @@ test("marks the active segment and switches on click", async () => {
   const user = userEvent.setup();
   const onChange = vi.fn();
   render(
-    <SegmentedTabs value="selection" onChange={onChange} options={[...opts]} ariaLabel="Plant input mode" />,
+    <SegmentedTabs
+      value="selection"
+      onChange={onChange}
+      options={[...opts]}
+      ariaLabel="Plant input mode"
+    />,
   );
   const active = screen.getByRole("radio", { name: "Select plants" });
   expect(active).toHaveAttribute("aria-checked", "true");

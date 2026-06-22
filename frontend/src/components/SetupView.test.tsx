@@ -103,9 +103,7 @@ describe("SetupView — plant mode controls", () => {
   it("switching plant mode to manual_compounds shows CompoundValidateBox and plant_label, hides combobox", async () => {
     wrap(<SetupView onCreated={() => {}} />);
 
-    await userEvent.click(
-      within(plantFieldset()).getByRole("radio", { name: /enter compounds/i }),
-    );
+    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /enter compounds/i }));
 
     expect(screen.queryByRole("combobox", { name: /search plants/i })).not.toBeInTheDocument();
     // CompoundValidateBox textarea has default label "Manual compounds"
@@ -130,9 +128,7 @@ describe("SetupView — disease mode controls", () => {
   it("switching disease mode to manual_disease_targets hides combobox and shows target editor + disease_label", async () => {
     wrap(<SetupView onCreated={() => {}} />);
 
-    await userEvent.click(
-      within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }),
-    );
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }));
 
     // Disease combobox should be gone
     expect(screen.queryByRole("combobox", { name: /search disease/i })).not.toBeInTheDocument();
@@ -212,9 +208,7 @@ describe("SetupView — create payload per mode", () => {
 
     // Switch both modes
     await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /enter targets/i }));
-    await userEvent.click(
-      within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }),
-    );
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }));
 
     // Validate plant targets — the plant TargetValidateBox uses label "Plant targets"
     const plantTextarea = screen.getByRole("textbox", { name: /plant targets/i });
@@ -486,9 +480,7 @@ describe("SetupView — manual setup added-pool", () => {
 
   it("disease target pool: validate + Add accumulates; switching away and back keeps pool", async () => {
     wrap(<SetupView onCreated={() => {}} />);
-    await userEvent.click(
-      within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }),
-    );
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }));
 
     await userEvent.type(screen.getByRole("textbox", { name: /disease targets/i }), "EGFR");
     await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
@@ -499,13 +491,13 @@ describe("SetupView — manual setup added-pool", () => {
     await screen.findByRole("list", { name: /added disease targets/i });
 
     // Switch away to selection
-    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /select disease/i }));
+    await userEvent.click(
+      within(diseaseFieldset()).getByRole("radio", { name: /select disease/i }),
+    );
     expect(screen.queryByRole("list", { name: /added disease targets/i })).not.toBeInTheDocument();
 
     // Switch back
-    await userEvent.click(
-      within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }),
-    );
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }));
     await screen.findByRole("list", { name: /added disease targets/i });
     expect(
       within(screen.getByRole("list", { name: /added disease targets/i })).getAllByRole("listitem"),
