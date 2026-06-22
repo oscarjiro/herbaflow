@@ -90,7 +90,7 @@ export function useAsciiDna(containerRef: React.RefObject<HTMLDivElement | null>
     let rig: any = null;
     let model: any = null;
     let mixer: any = null;
-    let clock: any = null;
+    let timer: any = null;
     let modelRadius = 1;
     let framingDist = 1;
     /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -209,7 +209,7 @@ export function useAsciiDna(containerRef: React.RefObject<HTMLDivElement | null>
         rim.position.set(-3, -1, 2);
         scene.add(rim);
 
-        clock = new THREE.Clock();
+        timer = new THREE.Timer();
 
         // Mount the ASCII sink (the canvas itself stays offscreen).
         sizeAscii(w, h);
@@ -273,7 +273,10 @@ export function useAsciiDna(containerRef: React.RefObject<HTMLDivElement | null>
 
         function loop() {
           if (disposed) return;
-          const dt = clock.getDelta();
+          // Timer (replaces deprecated Clock, r183+): update once per frame,
+          // then read the frame-stable delta.
+          timer.update();
+          const dt = timer.getDelta();
           if (mixer) mixer.update(dt * TUNING.spin);
           if (rig) rig.rotation.set(TUNING.rotX, TUNING.rotY, TUNING.rotZ);
           if (model) {
