@@ -14,6 +14,8 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalysisIndexRouteImport } from './routes/analysis.index'
 import { Route as AnalysisIdRouteImport } from './routes/analysis.$id'
+import { Route as AnalysisIdIndexRouteImport } from './routes/analysis.$id.index'
+import { Route as AnalysisIdStageRouteImport } from './routes/analysis.$id.$stage'
 
 const AnalysisRoute = AnalysisRouteImport.update({
   id: '/analysis',
@@ -40,34 +42,64 @@ const AnalysisIdRoute = AnalysisIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AnalysisRoute,
 } as any)
+const AnalysisIdIndexRoute = AnalysisIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AnalysisIdRoute,
+} as any)
+const AnalysisIdStageRoute = AnalysisIdStageRouteImport.update({
+  id: '/$stage',
+  path: '/$stage',
+  getParentRoute: () => AnalysisIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/analysis': typeof AnalysisRouteWithChildren
-  '/analysis/$id': typeof AnalysisIdRoute
+  '/analysis/$id': typeof AnalysisIdRouteWithChildren
   '/analysis/': typeof AnalysisIndexRoute
+  '/analysis/$id/$stage': typeof AnalysisIdStageRoute
+  '/analysis/$id/': typeof AnalysisIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/analysis/$id': typeof AnalysisIdRoute
   '/analysis': typeof AnalysisIndexRoute
+  '/analysis/$id/$stage': typeof AnalysisIdStageRoute
+  '/analysis/$id': typeof AnalysisIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/analysis': typeof AnalysisRouteWithChildren
-  '/analysis/$id': typeof AnalysisIdRoute
+  '/analysis/$id': typeof AnalysisIdRouteWithChildren
   '/analysis/': typeof AnalysisIndexRoute
+  '/analysis/$id/$stage': typeof AnalysisIdStageRoute
+  '/analysis/$id/': typeof AnalysisIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/analysis' | '/analysis/$id' | '/analysis/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/analysis'
+    | '/analysis/$id'
+    | '/analysis/'
+    | '/analysis/$id/$stage'
+    | '/analysis/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/analysis/$id' | '/analysis'
-  id: '__root__' | '/' | '/about' | '/analysis' | '/analysis/$id' | '/analysis/'
+  to: '/' | '/about' | '/analysis' | '/analysis/$id/$stage' | '/analysis/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/analysis'
+    | '/analysis/$id'
+    | '/analysis/'
+    | '/analysis/$id/$stage'
+    | '/analysis/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -113,16 +145,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisIdRouteImport
       parentRoute: typeof AnalysisRoute
     }
+    '/analysis/$id/': {
+      id: '/analysis/$id/'
+      path: '/'
+      fullPath: '/analysis/$id/'
+      preLoaderRoute: typeof AnalysisIdIndexRouteImport
+      parentRoute: typeof AnalysisIdRoute
+    }
+    '/analysis/$id/$stage': {
+      id: '/analysis/$id/$stage'
+      path: '/$stage'
+      fullPath: '/analysis/$id/$stage'
+      preLoaderRoute: typeof AnalysisIdStageRouteImport
+      parentRoute: typeof AnalysisIdRoute
+    }
   }
 }
 
+interface AnalysisIdRouteChildren {
+  AnalysisIdStageRoute: typeof AnalysisIdStageRoute
+  AnalysisIdIndexRoute: typeof AnalysisIdIndexRoute
+}
+
+const AnalysisIdRouteChildren: AnalysisIdRouteChildren = {
+  AnalysisIdStageRoute: AnalysisIdStageRoute,
+  AnalysisIdIndexRoute: AnalysisIdIndexRoute,
+}
+
+const AnalysisIdRouteWithChildren = AnalysisIdRoute._addFileChildren(
+  AnalysisIdRouteChildren,
+)
+
 interface AnalysisRouteChildren {
-  AnalysisIdRoute: typeof AnalysisIdRoute
+  AnalysisIdRoute: typeof AnalysisIdRouteWithChildren
   AnalysisIndexRoute: typeof AnalysisIndexRoute
 }
 
 const AnalysisRouteChildren: AnalysisRouteChildren = {
-  AnalysisIdRoute: AnalysisIdRoute,
+  AnalysisIdRoute: AnalysisIdRouteWithChildren,
   AnalysisIndexRoute: AnalysisIndexRoute,
 }
 
