@@ -69,3 +69,13 @@ test("running stage shows a per-item sub-label from progress", () => {
   renderTrail(<StepperRail data={running} analysisId="a1" activeSlug="targets" />);
   expect(screen.getByText(/132\s*\/\s*180/)).toBeInTheDocument();
 });
+
+test("done steps render a check marker (svg) in icon mode and emit data-state='done'", () => {
+  // stage_results has stages 1, 2, 3 reached; compounds (stage 1) is done
+  const { container } = renderTrail(
+    <StepperRail data={data} analysisId="a1" activeSlug="targets" />,
+  );
+  const doneMarker = container.querySelector("[data-state='done']");
+  expect(doneMarker).not.toBeNull();
+  expect(doneMarker!.querySelector("svg")).not.toBeNull();
+});

@@ -93,11 +93,12 @@ export function StepperRail({
               className={cn(
                 "border-hf-border flex size-6 shrink-0 items-center justify-center rounded-full border font-mono text-xs",
                 state === "active" && "ring-hf-sage-deep border-current ring-2",
-                state === "done" && "bg-hf-surface",
+                state === "done" && "bg-hf-fg-1 border-hf-fg-1 text-hf-bg",
                 state === "blocked" && "border-hf-warning text-hf-warning",
                 state === "locked" && "opacity-50",
                 state === "not_applicable" && "opacity-40",
               )}
+              data-state={state}
               aria-hidden="true"
             >
               {state === "running" ? (
