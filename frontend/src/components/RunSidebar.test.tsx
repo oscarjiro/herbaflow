@@ -25,6 +25,13 @@ describe("RunSidebar", () => {
     expect(screen.getByRole("button", { name: /exit analysis/i })).toBeInTheDocument();
   });
 
+  it("renders the run-identity card with Untitled analysis fallback", () => {
+    renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={() => {}} />, {
+      withTheme: true,
+    });
+    expect(screen.getByText("Untitled analysis")).toBeInTheDocument();
+  });
+
   it("opens the confirm dialog from Exit", () => {
     renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={vi.fn()} />, {
       withTheme: true,
