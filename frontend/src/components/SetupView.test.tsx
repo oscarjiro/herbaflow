@@ -172,7 +172,7 @@ describe("SetupView — create payload per mode", () => {
     await pickComboOption("Search disease", /test disease/i);
 
     // Submit
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
     const body = createSpy.mock.calls[0]![0].body;
@@ -247,7 +247,7 @@ describe("SetupView — create payload per mode", () => {
     await userEvent.type(screen.getByLabelText(/disease label/i), "My Disease");
 
     // Submit
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
     const body = createSpy.mock.calls[0]![0].body;
@@ -275,7 +275,7 @@ describe("SetupView — end-to-end create flow", () => {
     // Select plant and disease via comboboxes
     await pickComboOption("Search plants", /aaa bbb/i);
     await pickComboOption("Search disease", /test disease/i);
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createdId).toBe("r1"));
   });
@@ -340,7 +340,7 @@ describe("SetupView — end-to-end create flow", () => {
 
     // Select a disease via the new combobox
     await pickComboOption("Search disease", /test disease/i);
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createdId).toBe("r1"));
     await waitFor(() =>
@@ -435,7 +435,7 @@ describe("SetupView — manual setup added-pool", () => {
 
     // Select a disease to make form submittable
     await pickComboOption("Search disease", /test disease/i);
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
     const body = createSpy.mock.calls[0]![0].body;
@@ -512,6 +512,19 @@ describe("SetupView — manual setup added-pool", () => {
 // Tests — double-submit guard
 // ---------------------------------------------------------------------------
 
+describe("SetupView — recomposed summary + advance", () => {
+  it("renders a selection summary region, empty by default", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    expect(screen.getByTestId("setup-summary")).toBeInTheDocument();
+  });
+
+  it("advance is a single primary Start analysis button", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    expect(screen.getByRole("button", { name: /start analysis/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /create analysis/i })).not.toBeInTheDocument();
+  });
+});
+
 describe("SetupView — create button double-submit guard", () => {
   it("disables the Create button while the create mutation is in-flight", async () => {
     // Never resolves so the mutation stays pending throughout the test.
@@ -522,7 +535,7 @@ describe("SetupView — create button double-submit guard", () => {
     await pickComboOption("Search plants", /aaa bbb/i);
     await pickComboOption("Search disease", /test disease/i);
 
-    const createBtn = screen.getByRole("button", { name: /create analysis/i });
+    const createBtn = screen.getByRole("button", { name: /start analysis/i });
     expect(createBtn).not.toBeDisabled();
 
     await userEvent.click(createBtn);

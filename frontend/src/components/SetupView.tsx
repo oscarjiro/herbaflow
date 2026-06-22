@@ -41,8 +41,8 @@ import { CompoundValidateBox } from "./CompoundValidateBox";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
 import { TargetValidateBox } from "./TargetValidateBox";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Eyebrow } from "./ui/editorial";
+import { Eyebrow, StatNumber } from "./ui/editorial";
+import { GlassSurface } from "./ui/GlassSurface";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { RunModeCards } from "./setup/RunModeCards";
@@ -337,216 +337,238 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
   const canSubmit = plantReady && diseaseReady;
 
+  // ------- selection summary (serif roll-up) -------
+  const plantCount =
+    plantMode === "selection"
+      ? selectedPlants.length
+      : plantMode === "manual_compounds"
+        ? resolved.length
+        : manualTargets.length;
+  const plantNoun =
+    plantMode === "manual_compounds"
+      ? "compounds"
+      : plantMode === "manual_targets"
+        ? "plant targets"
+        : plantCount === 1
+          ? "plant"
+          : "plants";
+  const diseaseCount =
+    diseaseMode === "selection" ? selectedDisease.length : manualDiseaseTargets.length;
+  const diseaseNoun =
+    diseaseMode === "selection" ? (diseaseCount === 1 ? "disease" : "diseases") : "disease targets";
+  const hasSelection = plantCount > 0 || diseaseCount > 0;
+
   return (
-    <section className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
+    <section className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
       <header className="mb-8 space-y-2">
         <Eyebrow>Setup</Eyebrow>
         <h1>New analysis</h1>
       </header>
 
       <div className="space-y-6">
-        {/* ---- Plant input ---- */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Plant input</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <SegmentedTabs
-              value={plantMode}
-              onChange={(v) =>
-                setValue("plantMode", v as (typeof PLANT_INPUT_MODES)[number], {
-                  shouldValidate: true,
-                })
-              }
-              options={[
-                { value: "selection", label: "Select plants" },
-                { value: "manual_compounds", label: "Enter compounds" },
-                { value: "manual_targets", label: "Enter targets" },
-              ]}
-              ariaLabel="Plant input mode"
-            />
+        <div className="grid gap-5 lg:grid-cols-2">
+          {/* ---- Plant input ---- */}
+          <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
+            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Plant input</h2>
+            <div className="mt-4 space-y-5">
+              <SegmentedTabs
+                value={plantMode}
+                onChange={(v) =>
+                  setValue("plantMode", v as (typeof PLANT_INPUT_MODES)[number], {
+                    shouldValidate: true,
+                  })
+                }
+                options={[
+                  { value: "selection", label: "Select plants" },
+                  { value: "manual_compounds", label: "Enter compounds" },
+                  { value: "manual_targets", label: "Enter targets" },
+                ]}
+                ariaLabel="Plant input mode"
+              />
 
-            {plantMode === "selection" && (
-              <div className="space-y-3">
-                <Label>Search plants</Label>
-                <EntitySearchCombobox
-                  mode="multiple"
-                  selected={selectedPlants}
-                  onChange={(next) => setValue("selectedPlants", next)}
-                  search={searchPlants}
-                  max={MAX_PLANTS}
-                  placeholder="Search plants…"
-                  ariaLabel="Search plants"
-                />
-                <p className="text-muted-foreground text-sm">
-                  {selectedPlants.length} / {MAX_PLANTS} plants
-                </p>
-                {selectedPlants.length > MAX_PLANTS && (
-                  <p role="alert" className="text-destructive text-sm">
-                    Too many plants (max {MAX_PLANTS}).
+              {plantMode === "selection" && (
+                <div className="space-y-3">
+                  <Label>Search plants</Label>
+                  <EntitySearchCombobox
+                    mode="multiple"
+                    selected={selectedPlants}
+                    onChange={(next) => setValue("selectedPlants", next)}
+                    search={searchPlants}
+                    max={MAX_PLANTS}
+                    placeholder="Search plants…"
+                    ariaLabel="Search plants"
+                  />
+                  <p className="text-muted-foreground text-sm">
+                    {selectedPlants.length} / {MAX_PLANTS} plants
                   </p>
-                )}
-              </div>
-            )}
+                  {selectedPlants.length > MAX_PLANTS && (
+                    <p role="alert" className="text-destructive text-sm">
+                      Too many plants (max {MAX_PLANTS}).
+                    </p>
+                  )}
+                </div>
+              )}
 
-            {plantMode === "manual_compounds" && (
-              <>
-                <CompoundValidateBox
-                  showAddButton
-                  onResolved={(incoming) =>
-                    setValue("resolved", mergeById(getValues("resolved"), incoming, "compound_id"))
-                  }
-                />
-                <RemovableChipList
-                  items={resolved}
-                  getKey={(r) => r.compound_id}
-                  getLabel={(r) => r.canonical_name ?? r.canonical_key ?? r.compound_id}
-                  onRemove={(r) =>
-                    setValue(
-                      "resolved",
-                      getValues("resolved").filter((x) => x.compound_id !== r.compound_id),
-                    )
-                  }
-                  ariaLabel="Added compounds"
-                />
-              </>
-            )}
+              {plantMode === "manual_compounds" && (
+                <>
+                  <CompoundValidateBox
+                    showAddButton
+                    onResolved={(incoming) =>
+                      setValue(
+                        "resolved",
+                        mergeById(getValues("resolved"), incoming, "compound_id"),
+                      )
+                    }
+                  />
+                  <RemovableChipList
+                    items={resolved}
+                    getKey={(r) => r.compound_id}
+                    getLabel={(r) => r.canonical_name ?? r.canonical_key ?? r.compound_id}
+                    onRemove={(r) =>
+                      setValue(
+                        "resolved",
+                        getValues("resolved").filter((x) => x.compound_id !== r.compound_id),
+                      )
+                    }
+                    ariaLabel="Added compounds"
+                  />
+                </>
+              )}
 
-            {plantMode === "manual_targets" && (
-              <>
-                <TargetValidateBox
-                  label="Plant targets"
-                  showAddButton
-                  onResolved={(incoming) =>
-                    setValue(
-                      "manualTargets",
-                      mergeById(getValues("manualTargets"), incoming, "target_id"),
-                    )
-                  }
-                />
-                <RemovableChipList
-                  items={manualTargets}
-                  getKey={(t) => t.target_id}
-                  getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
-                  onRemove={(t) =>
-                    setValue(
-                      "manualTargets",
-                      getValues("manualTargets").filter((x) => x.target_id !== t.target_id),
-                    )
-                  }
-                  ariaLabel="Added plant targets"
-                />
-              </>
-            )}
+              {plantMode === "manual_targets" && (
+                <>
+                  <TargetValidateBox
+                    label="Plant targets"
+                    showAddButton
+                    onResolved={(incoming) =>
+                      setValue(
+                        "manualTargets",
+                        mergeById(getValues("manualTargets"), incoming, "target_id"),
+                      )
+                    }
+                  />
+                  <RemovableChipList
+                    items={manualTargets}
+                    getKey={(t) => t.target_id}
+                    getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
+                    onRemove={(t) =>
+                      setValue(
+                        "manualTargets",
+                        getValues("manualTargets").filter((x) => x.target_id !== t.target_id),
+                      )
+                    }
+                    ariaLabel="Added plant targets"
+                  />
+                </>
+              )}
 
-            {plantMode !== "selection" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="plant-label">Plant label (optional)</Label>
-                <Input
-                  id="plant-label"
-                  aria-label="Plant label"
-                  value={plantLabel}
-                  maxLength={200}
-                  onChange={(e) => setValue("plantLabel", e.target.value)}
-                  placeholder="Optional label for this plant set"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {plantMode !== "selection" && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="plant-label">Plant label (optional)</Label>
+                  <Input
+                    id="plant-label"
+                    aria-label="Plant label"
+                    value={plantLabel}
+                    maxLength={200}
+                    onChange={(e) => setValue("plantLabel", e.target.value)}
+                    placeholder="Optional label for this plant set"
+                  />
+                </div>
+              )}
+            </div>
+          </GlassSurface>
 
-        {/* ---- Disease input ---- */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Disease input</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <SegmentedTabs
-              value={diseaseMode}
-              onChange={(v) =>
-                setValue("diseaseMode", v as (typeof DISEASE_INPUT_MODES)[number], {
-                  shouldValidate: true,
-                })
-              }
-              options={[
-                { value: "selection", label: "Select disease" },
-                { value: "manual_disease_targets", label: "Enter targets" },
-              ]}
-              ariaLabel="Disease input mode"
-            />
+          {/* ---- Disease input ---- */}
+          <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
+            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Disease input</h2>
+            <div className="mt-4 space-y-5">
+              <SegmentedTabs
+                value={diseaseMode}
+                onChange={(v) =>
+                  setValue("diseaseMode", v as (typeof DISEASE_INPUT_MODES)[number], {
+                    shouldValidate: true,
+                  })
+                }
+                options={[
+                  { value: "selection", label: "Select disease" },
+                  { value: "manual_disease_targets", label: "Enter targets" },
+                ]}
+                ariaLabel="Disease input mode"
+              />
 
-            {diseaseMode === "selection" && (
-              <div className="space-y-1.5">
-                <Label>Search disease</Label>
-                <EntitySearchCombobox
-                  mode="single"
-                  selected={selectedDisease}
-                  onChange={(next) => setValue("selectedDisease", next)}
-                  search={searchDiseases}
-                  placeholder="Search disease…"
-                  ariaLabel="Search disease"
-                />
-              </div>
-            )}
+              {diseaseMode === "selection" && (
+                <div className="space-y-1.5">
+                  <Label>Search disease</Label>
+                  <EntitySearchCombobox
+                    mode="single"
+                    selected={selectedDisease}
+                    onChange={(next) => setValue("selectedDisease", next)}
+                    search={searchDiseases}
+                    placeholder="Search disease…"
+                    ariaLabel="Search disease"
+                  />
+                </div>
+              )}
 
-            {diseaseMode === "manual_disease_targets" && (
-              <>
-                <TargetValidateBox
-                  label="Disease targets"
-                  showAddButton
-                  onResolved={(incoming) =>
-                    setValue(
-                      "manualDiseaseTargets",
-                      mergeById(getValues("manualDiseaseTargets"), incoming, "target_id"),
-                    )
-                  }
-                />
-                <RemovableChipList
-                  items={manualDiseaseTargets}
-                  getKey={(t) => t.target_id}
-                  getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
-                  onRemove={(t) =>
-                    setValue(
-                      "manualDiseaseTargets",
-                      getValues("manualDiseaseTargets").filter((x) => x.target_id !== t.target_id),
-                    )
-                  }
-                  ariaLabel="Added disease targets"
-                />
-              </>
-            )}
+              {diseaseMode === "manual_disease_targets" && (
+                <>
+                  <TargetValidateBox
+                    label="Disease targets"
+                    showAddButton
+                    onResolved={(incoming) =>
+                      setValue(
+                        "manualDiseaseTargets",
+                        mergeById(getValues("manualDiseaseTargets"), incoming, "target_id"),
+                      )
+                    }
+                  />
+                  <RemovableChipList
+                    items={manualDiseaseTargets}
+                    getKey={(t) => t.target_id}
+                    getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
+                    onRemove={(t) =>
+                      setValue(
+                        "manualDiseaseTargets",
+                        getValues("manualDiseaseTargets").filter(
+                          (x) => x.target_id !== t.target_id,
+                        ),
+                      )
+                    }
+                    ariaLabel="Added disease targets"
+                  />
+                </>
+              )}
 
-            {diseaseMode !== "selection" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="disease-label">Disease label (optional)</Label>
-                <Input
-                  id="disease-label"
-                  aria-label="Disease label"
-                  value={diseaseLabel}
-                  maxLength={200}
-                  onChange={(e) => setValue("diseaseLabel", e.target.value)}
-                  placeholder="Optional label for this disease target set"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {diseaseMode !== "selection" && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="disease-label">Disease label (optional)</Label>
+                  <Input
+                    id="disease-label"
+                    aria-label="Disease label"
+                    value={diseaseLabel}
+                    maxLength={200}
+                    onChange={(e) => setValue("diseaseLabel", e.target.value)}
+                    placeholder="Optional label for this disease target set"
+                  />
+                </div>
+              )}
+            </div>
+          </GlassSurface>
+        </div>
 
-        {/* ---- Mode (auto/guided) ---- */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Mode</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* ---- Run mode ---- */}
+        <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
+          <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Run mode</h2>
+          <div className="mt-4">
             <RunModeCards
               value={mode as "guided" | "auto"}
               onChange={(v) => setValue("mode", v, { shouldValidate: true })}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </GlassSurface>
 
         {/* ---- Advanced parameters ---- */}
-        <div>
+        <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
           <button
             type="button"
             aria-expanded={advancedOpen}
@@ -569,14 +591,34 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
               ))}
             </div>
           )}
-        </div>
+        </GlassSurface>
+
+        {/* ---- Selection summary ---- */}
+        <GlassSurface
+          tier="raised"
+          className="rounded-[var(--radius-lg)] p-5"
+          data-testid="setup-summary"
+        >
+          <Eyebrow>Selection</Eyebrow>
+          <p className="font-display text-hf-fg-1 mt-2 text-xl">
+            {hasSelection ? (
+              <>
+                <StatNumber>{plantCount}</StatNumber> {plantNoun}
+                {" · "}
+                <StatNumber>{diseaseCount}</StatNumber> {diseaseNoun}
+              </>
+            ) : (
+              <span className="text-hf-fg-3">Nothing selected yet.</span>
+            )}
+          </p>
+        </GlassSurface>
 
         <Button
           disabled={!canSubmit || create.isPending}
           onClick={() => create.mutate()}
-          className="w-full sm:w-auto"
+          className="rounded-[var(--radius-pill)]"
         >
-          Create analysis
+          {create.isPending ? "Starting…" : "Start analysis"}
         </Button>
       </div>
     </section>
