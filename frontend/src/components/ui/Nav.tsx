@@ -7,8 +7,9 @@ const navLink =
 
 export function Nav() {
   const matchRoute = useMatchRoute();
-  // The run page (/analysis/$id) uses the fixed RunSidebar as its chrome — hide the top nav there.
-  if (matchRoute({ to: "/analysis/$id" })) return null;
+  // The run page (/analysis/$id and its per-stage children) uses the fixed RunSidebar as its
+  // chrome — hide the top nav there. Fuzzy so the /$stage and /inputs child routes match too.
+  if (matchRoute({ to: "/analysis/$id", fuzzy: true })) return null;
   // In unified shell mode, the setup route also hides the global nav (SetupShell provides its own chrome).
   if (SHELL_MODE === "unified" && matchRoute({ to: "/analysis" })) return null;
 

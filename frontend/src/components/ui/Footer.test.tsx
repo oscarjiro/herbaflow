@@ -17,4 +17,12 @@ describe("Footer", () => {
     renderWithRouter(<Footer />, { initialEntries: ["/analysis/run-1"], withTheme: true });
     expect(screen.queryByText(/Oscar Jiro/)).not.toBeInTheDocument();
   });
+
+  it("hides on a per-stage run route (fuzzy match)", () => {
+    renderWithRouter(<Footer />, {
+      initialEntries: ["/analysis/run-1/compounds"],
+      withTheme: true,
+    });
+    expect(screen.queryByText(/Oscar Jiro/)).not.toBeInTheDocument();
+  });
 });

@@ -25,4 +25,9 @@ describe("Nav", () => {
     renderWithRouter(<Nav />, { initialEntries: ["/analysis/run-1"], withTheme: true });
     expect(screen.queryByRole("link", { name: "Herbaflow home" })).not.toBeInTheDocument();
   });
+
+  it("hides on a per-stage run route (fuzzy match)", () => {
+    renderWithRouter(<Nav />, { initialEntries: ["/analysis/run-1/compounds"], withTheme: true });
+    expect(screen.queryByRole("link", { name: "Herbaflow home" })).not.toBeInTheDocument();
+  });
 });
