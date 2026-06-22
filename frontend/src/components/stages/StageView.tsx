@@ -1,0 +1,112 @@
+import type { AnalysisRead } from "@/api/types.gen";
+import { Eyebrow } from "@/components/ui/editorial";
+import { Button } from "@/components/ui/button";
+import { ApprovalBar } from "@/components/stages/ApprovalBar";
+import { StaleNotice } from "@/components/stages/StaleNotice";
+import { StageRunningSkeleton } from "@/components/stages/StageRunningSkeleton";
+import { useStaleState } from "@/hooks/useStaleState";
+
+type StageResult = { count?: number } | undefined;
+
+export function StageView({
+  data,
+  stage,
+  title,
+  kicker,
+  onApprove,
+  approvePending,
+  onEdit,
+  children,
+}: {
+  data: AnalysisRead;
+  stage: number;
+  title: string;
+  kicker: string;
+  onApprove: () => void;
+  approvePending: boolean;
+  onEdit?: () => void;
+  children: React.ReactNode;
+}) {
+  const { anyStale, rerunFrom } = useStaleState(data);
+  const result = data.stage_results?.[String(stage)] as StageResult;
+  const isRunning = data.status === `stage_${stage}_running` && !result;
+  const isEmpty = Boolean(result) && (result?.count ?? 0) === 0;
+
+  return (
+    <section className="flex flex-col gap-5">
+      <header className="flex flex-col gap-1">
+        <Eyebrow>{kicker}</Eyebrow>
+        <h1 className="font-display text-hf-fg-1 text-3xl tracking-tight">{title}</h1>
+      </header>
+
+      {isRunning ? (
+        <>
+          {data.progress && data.progress.stage === stage && (
+            <div className="flex flex-col gap-1">
+              <div className="text-hf-fg-3 flex items-center justify-between text-sm">
+                <span>Working</span>
+                <span className="tabular-nums">
+                  {data.progress.processed} / {data.progress.total}
+                </span>
+              </div>
+              <div className="bg-hf-surface-2 h-1.5 w-full overflow-hidden rounded-full">
+                <div
+                  className="bg-hf-accent h-full rounded-full transition-[width]"
+                  style={{
+                    width: `${data.progress.total ? (data.progress.processed / data.progress.total) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          <StageRunningSkeleton stage={stage} />
+        </>
+      ) : isEmpty ? (
+        <div
+          role="status"
+          className="border-hf-border bg-hf-surface flex flex-col gap-3 rounded-[var(--radius-lg)] border p-6"
+        >
+          <p className="text-hf-fg-1 font-medium">No results at this step.</p>
+          <p className="text-hf-fg-3 text-sm">
+            This step finished without producing any items, so the run is paused here. Add an item
+            to continue, or go back and adjust the inputs.
+          </p>
+          {onEdit && (
+            <div>
+              <Button variant="outline" size="sm" onClick={onEdit}>
+                Edit / add
+              </Button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {children}
+          {rerunFrom === stage && (
+            <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
+          )}
+          <div className="flex items-center gap-3">
+            {onEdit && (
+              <Button variant="outline" size="sm" onClick={onEdit}>
+                Edit / add
+              </Button>
+            )}
+            <ApprovalBar
+              stage={stage}
+              status={data.status}
+              currentStage={data.current_stage}
+              disabled={(result?.count ?? 0) === 0 || anyStale}
+              disabledReason={
+                anyStale
+                  ? "Run the updated step before continuing."
+                  : "No results to continue with."
+              }
+              pending={approvePending}
+              onApprove={onApprove}
+            />
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
