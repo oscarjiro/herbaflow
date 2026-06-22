@@ -542,3 +542,37 @@ describe("SetupView — create button double-submit guard", () => {
     expect(createBtn).toBeDisabled();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tests — custom analysis name
+// ---------------------------------------------------------------------------
+
+describe("SetupView — custom analysis name", () => {
+  it("sends the entered analysis name in the create body", async () => {
+    const createSpy = vi.spyOn(sdk, "createAnalysis").mockResolvedValue({
+      data: {
+        analysis_id: "r1",
+        analysis_name: "Curcuma vs T2DM",
+        disease_id: "d1",
+        mode: "auto",
+        status: "pending",
+        current_stage: null,
+        stage_results: {},
+        created_at: null,
+        completed_at: null,
+        expires_at: null,
+        error_message: null,
+      },
+    } as never);
+
+    wrap(<SetupView onCreated={() => {}} />);
+
+    await pickComboOption("Search plants", /aaa bbb/i);
+    await pickComboOption("Search disease", /test disease/i);
+    await userEvent.type(screen.getByLabelText(/name this analysis/i), "Curcuma vs T2DM");
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
+
+    await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
+    expect(createSpy.mock.calls[0]![0].body.analysis_name).toBe("Curcuma vs T2DM");
+  });
+});

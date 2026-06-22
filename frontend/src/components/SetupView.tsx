@@ -184,6 +184,7 @@ function AdvancedParamPanel({
 
 type FormValues = {
   mode: string;
+  analysisName: string;
   plantMode: (typeof PLANT_INPUT_MODES)[number];
   diseaseMode: (typeof DISEASE_INPUT_MODES)[number];
   selectedPlants: ComboOption[];
@@ -201,6 +202,7 @@ type FormValues = {
 // (advisory) checks; the structured pools/selections pass through unvalidated.
 const formSchema = z.object({
   mode: z.string(),
+  analysisName: z.string().max(200),
   plantMode: z.custom<FormValues["plantMode"]>(),
   diseaseMode: z.custom<FormValues["diseaseMode"]>(),
   selectedPlants: z.custom<ComboOption[]>().refine((v) => (v?.length ?? 0) <= MAX_PLANTS, {
@@ -217,6 +219,7 @@ const formSchema = z.object({
 
 const DEFAULT_FORM_VALUES: FormValues = {
   mode: DEFAULT_MODE,
+  analysisName: "",
   plantMode: DEFAULT_PLANT_INPUT_MODE,
   diseaseMode: DEFAULT_DISEASE_INPUT_MODE,
   selectedPlants: [],
@@ -241,6 +244,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
   // Live form values used for rendering + the submit gate.
   const mode = watch("mode");
+  const analysisName = watch("analysisName");
   const plantMode = watch("plantMode");
   const diseaseMode = watch("diseaseMode");
   const selectedPlants = watch("selectedPlants");
@@ -299,7 +303,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
       const v = getValues();
       const res = await createAnalysis({
         body: {
-          analysis_name: null,
+          analysis_name: v.analysisName.trim() || null,
           plant_input_mode: v.plantMode,
           disease_input_mode: v.diseaseMode,
           mode: v.mode as "auto" | "guided",
@@ -366,6 +370,18 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
       </header>
 
       <div className="space-y-6">
+        {/* ---- Run name ---- */}
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="analysis-name">Name this analysis</Label>
+          <Input
+            id="analysis-name"
+            value={analysisName}
+            onChange={(e) => setValue("analysisName", e.target.value)}
+            placeholder="e.g. Curcuma vs Type 2 Diabetes"
+            maxLength={200}
+          />
+        </div>
+
         <div className="grid gap-5 lg:grid-cols-2">
           {/* ---- Plant input ---- */}
           <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
