@@ -27,7 +27,6 @@ import {
   HUB_GENES_NUMERIC_PARAMS,
   HUB_GENES_PARAMS,
   MAX_PLANTS,
-  MODES,
   PLANT_INPUT_MODES,
   PPI_BOOLEAN_PARAMS,
   PPI_NUMERIC_PARAMS,
@@ -46,7 +45,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Eyebrow } from "./ui/editorial";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { RunModeCards } from "./setup/RunModeCards";
 import { SegmentedTabs } from "./ui/SegmentedTabs";
 
 // ---------------------------------------------------------------------------
@@ -539,21 +538,10 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
             <CardTitle>Mode</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1.5">
-              <Label htmlFor="mode">Mode</Label>
-              <Select value={mode} onValueChange={(v) => setValue("mode", v)}>
-                <SelectTrigger id="mode" aria-label="Mode" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {MODES.map((m) => (
-                    <SelectItem key={m} value={m}>
-                      {m}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <RunModeCards
+              value={mode as "guided" | "auto"}
+              onChange={(v) => setValue("mode", v, { shouldValidate: true })}
+            />
           </CardContent>
         </Card>
 

@@ -284,9 +284,12 @@ describe("SetupView — end-to-end create flow", () => {
     let createdId: string | null = null;
     wrap(<SetupView onCreated={(id) => (createdId = id)} />);
 
-    // Mode defaults to guided
+    // Mode defaults to guided — now rendered as radio cards
     await waitFor(() =>
-      expect(screen.getByRole("combobox", { name: /mode/i })).toHaveTextContent("guided"),
+      expect(screen.getByRole("radio", { name: /guided/i })).toHaveAttribute(
+        "aria-checked",
+        "true",
+      ),
     );
 
     // Switch plant input mode to manual_compounds to reveal CompoundValidateBox
