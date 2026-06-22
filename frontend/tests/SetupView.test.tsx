@@ -113,7 +113,7 @@ describe("SetupView — advanced parameters section", () => {
     await userEvent.type(maxMwInput, "600");
 
     // Submit.
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => {
       expect(capturedBody).not.toBeNull();
@@ -159,7 +159,7 @@ describe("SetupView — advanced parameters section", () => {
     await fillRequiredFields();
 
     // Submit without touching any advanced parameter.
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => {
       expect(capturedBody).not.toBeNull();
