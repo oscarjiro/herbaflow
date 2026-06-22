@@ -50,7 +50,7 @@ export const LineNumberedTextarea = React.forwardRef<
     <div
       data-slot="manual-paste"
       className={cn(
-        "border-input focus-within:border-ring focus-within:ring-ring/50 flex w-full max-h-64 scroll overflow-hidden rounded-md border bg-transparent shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
+        "border-input focus-within:border-ring focus-within:ring-ring/50 scroll flex max-h-64 w-full overflow-hidden rounded-md border bg-transparent shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
         disabled && "cursor-not-allowed opacity-50",
       )}
     >
