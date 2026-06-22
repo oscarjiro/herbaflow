@@ -1,9 +1,12 @@
 import { useMatchRoute } from "@tanstack/react-router";
+import { SHELL_MODE } from "@/lib/shellMode";
 
 export function Footer() {
   const matchRoute = useMatchRoute();
   // The run page owns its own chrome — no global footer there.
   if (matchRoute({ to: "/analysis/$id" })) return null;
+  // In unified shell mode, the setup route also hides the global footer (SetupShell provides its own chrome).
+  if (SHELL_MODE === "unified" && matchRoute({ to: "/analysis" })) return null;
 
   return (
     <footer className="border-hf-border relative z-20 border-t">
