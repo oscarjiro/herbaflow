@@ -45,17 +45,22 @@ export function deriveSubjects(
   return { plant, disease };
 }
 
+// Pull the entire catalog so any selected id resolves to a name. The backend defaults to 50
+// rows; with 478 plants that silently dropped most names to their raw UUID. There is no
+// get-by-id endpoint, so we fetch the full list once (cached + deduped by TanStack Query).
+const CATALOG_LIMIT = 1000;
+
 /**
  * The single home for resolving a run's plant + disease display strings. Used by the run header
  * and every per-stage context line so the derivation lives once. The two catalog queries are
- * deduped by TanStack Query with SetupView/RunView.
+ * deduped by TanStack Query across the app.
  */
 export function useEntitySubjects(data: AnalysisRead | undefined): {
   plant: string;
   disease: string;
 } {
-  const { data: plantsData } = useQuery(listPlantsOptions());
-  const { data: diseasesData } = useQuery(listDiseasesOptions());
+  const { data: plantsData } = useQuery(listPlantsOptions({ query: { limit: CATALOG_LIMIT } }));
+  const { data: diseasesData } = useQuery(listDiseasesOptions({ query: { limit: CATALOG_LIMIT } }));
 
   if (!data) return { plant: "—", disease: "—" };
 
