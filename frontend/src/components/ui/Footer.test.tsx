@@ -13,6 +13,11 @@ describe("Footer", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
+  it("shows on the setup route (setup lives in the global layout)", () => {
+    renderWithRouter(<Footer />, { initialEntries: ["/analysis"], withTheme: true });
+    expect(screen.getByText(/© 2026 · Herbaflow · Oscar Jiro/)).toBeInTheDocument();
+  });
+
   it("hides on the run page", () => {
     renderWithRouter(<Footer />, { initialEntries: ["/analysis/run-1"], withTheme: true });
     expect(screen.queryByText(/Oscar Jiro/)).not.toBeInTheDocument();

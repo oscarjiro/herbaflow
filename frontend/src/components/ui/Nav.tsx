@@ -1,6 +1,5 @@
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { ThemeToggle } from "./ThemeToggle";
-import { SHELL_MODE } from "@/lib/shellMode";
 
 const navLink =
   "text-hf-fg-2 hover:text-hf-fg-1 text-xs uppercase tracking-[0.16em] transition-colors";
@@ -9,9 +8,8 @@ export function Nav() {
   const matchRoute = useMatchRoute();
   // The run page (/analysis/$id and its per-stage children) uses the fixed RunSidebar as its
   // chrome — hide the top nav there. Fuzzy so the /$stage and /inputs child routes match too.
+  // The setup route (/analysis) keeps the global nav: it lives in the standard site layout.
   if (matchRoute({ to: "/analysis/$id", fuzzy: true })) return null;
-  // In unified shell mode, the setup route also hides the global nav (SetupShell provides its own chrome).
-  if (SHELL_MODE === "unified" && matchRoute({ to: "/analysis" })) return null;
 
   return (
     <header className="relative z-20">

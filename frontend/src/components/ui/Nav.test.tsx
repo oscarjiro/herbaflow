@@ -7,7 +7,6 @@ afterEach(() => cleanup());
 
 describe("Nav", () => {
   it("renders the clustered links + logo and the theme control on non-run routes", () => {
-    // Use "/" (home) — "/analysis" now hides the nav in unified shell mode.
     renderWithRouter(<Nav />, { initialEntries: ["/"], withTheme: true });
     expect(screen.getByRole("link", { name: "Herbaflow home" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Analysis" })).toHaveAttribute("href", "/analysis");
@@ -16,9 +15,9 @@ describe("Nav", () => {
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
-  it("hides on the setup route in unified shell mode", () => {
+  it("shows on the setup route (setup lives in the global layout)", () => {
     renderWithRouter(<Nav />, { initialEntries: ["/analysis"], withTheme: true });
-    expect(screen.queryByRole("link", { name: "Herbaflow home" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Herbaflow home" })).toBeInTheDocument();
   });
 
   it("hides on the run page", () => {

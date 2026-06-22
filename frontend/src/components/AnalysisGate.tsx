@@ -5,8 +5,6 @@ import { getActiveRunId, setActiveRunId } from "@/lib/activeRun";
 import { ServiceUnavailable } from "@/components/ServiceUnavailable";
 import { SetupView } from "@/components/SetupView";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SHELL_MODE } from "@/lib/shellMode";
-import { SetupShell } from "@/components/setup/SetupShell";
 
 export function AnalysisGate() {
   const navigate = useNavigate();
@@ -32,7 +30,9 @@ export function AnalysisGate() {
     return <Navigate to="/analysis/$id" params={{ id: activeId }} replace />;
   }
 
-  const setup = (
+  // Setup lives in the global site layout (Nav + Footer from __root); only the
+  // running analysis (/analysis/$id) uses the immersive run shell.
+  return (
     <SetupView
       onCreated={(id) => {
         setActiveRunId(id);
@@ -40,5 +40,4 @@ export function AnalysisGate() {
       }}
     />
   );
-  return SHELL_MODE === "unified" ? <SetupShell>{setup}</SetupShell> : setup;
 }

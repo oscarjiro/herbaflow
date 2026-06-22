@@ -22,7 +22,7 @@ describe("AnalysisGate", () => {
 
   it("renders Setup when healthy and no active run", async () => {
     server.use(http.get(HEALTH, () => HttpResponse.json({ status: "ok" })));
-    // SetupShell (unified mode) renders ThemeToggle which requires ThemeProvider — use withTheme.
+    // SetupView may render themed controls; withTheme provides the ThemeProvider.
     renderWithRouter(<AnalysisGate />, { initialEntries: ["/analysis"], withTheme: true });
     // SetupView renders "Plant input" as its first card title (unique, exact).
     await screen.findByText("Plant input");
@@ -31,7 +31,7 @@ describe("AnalysisGate", () => {
   it("redirects to the active run when one is cached", async () => {
     server.use(http.get(HEALTH, () => HttpResponse.json({ status: "ok" })));
     setActiveRunId("run-xyz");
-    // withTheme not required here: Navigate fires before SetupShell ever mounts.
+    // withTheme not required here: Navigate fires before SetupView ever mounts.
     const { router } = renderWithRouter(<AnalysisGate />, { initialEntries: ["/analysis"] });
     await waitFor(() => expect(router.state.location.pathname).toBe("/analysis/run-xyz"));
   });
