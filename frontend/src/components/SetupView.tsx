@@ -47,6 +47,7 @@ import { GlassSurface } from "./ui/GlassSurface";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { RunModeCards } from "./setup/RunModeCards";
+import { FieldCap } from "./ui/FieldCap";
 import { SegmentedTabs } from "./ui/SegmentedTabs";
 
 // ---------------------------------------------------------------------------
@@ -427,9 +428,10 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     placeholder="Search plants…"
                     ariaLabel="Search plants"
                   />
-                  <p className="text-muted-foreground text-sm">
-                    {selectedPlants.length} / {MAX_PLANTS} plants
-                  </p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-hf-fg-1 text-sm font-semibold">Plants</span>
+                    <FieldCap current={selectedPlants.length} max={MAX_PLANTS} unit="plants" />
+                  </div>
                   {selectedPlants.length > MAX_PLANTS && (
                     <p role="alert" className="text-destructive text-sm">
                       Too many plants (max {MAX_PLANTS}).

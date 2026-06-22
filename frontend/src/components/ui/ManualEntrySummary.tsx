@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { FieldCap } from "./FieldCap";
 
 export function nonEmptyLineCount(value: string): number {
   return value.split("\n").filter((l) => l.trim().length > 0).length;
@@ -30,9 +31,7 @@ export function ManualEntrySummary({
         <span>{duplicateCount}</span> duplicates
       </span>
       <span className="flex items-center gap-3">
-        <span className="text-hf-fg-4 font-mono text-xs">
-          {current.toLocaleString()} / {max.toLocaleString()}
-        </span>
+        <FieldCap current={current} max={max} />
         {onClear && (
           <Button type="button" variant="ghost" size="sm" onClick={onClear}>
             Clear
