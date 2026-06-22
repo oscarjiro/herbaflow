@@ -86,7 +86,7 @@ function Input({
       <span
         data-slot="char-cap"
         aria-live="polite"
-        className="text-hf-fg-4 pointer-events-none absolute right-2 bottom-1.5 text-xs tabular-nums select-none"
+        className="text-hf-fg-4 pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs tabular-nums select-none"
       >
         {fmtNum(charCount)} / {fmtNum(maxLength!)}
       </span>

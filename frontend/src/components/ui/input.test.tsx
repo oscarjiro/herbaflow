@@ -146,4 +146,11 @@ describe("Input — char cap counter", () => {
     const counter = container.querySelector("[data-slot='char-cap']")!;
     expect(counter.textContent).toMatch(/2,000/);
   });
+
+  it("char-cap counter is vertically centered", () => {
+    const { container } = render(<Input maxLength={200} defaultValue="hi" />);
+    const cap = container.querySelector("[data-slot='char-cap']")!;
+    expect(cap.className).toMatch(/top-1\/2/);
+    expect(cap.className).toMatch(/-translate-y-1\/2/);
+  });
 });
