@@ -257,6 +257,17 @@
     color: var(--hf-fg-1);
   }
 
+  /* Interactive controls get a pointer cursor. Tailwind v4 Preflight no longer
+     sets this on <button>, so clickables looked non-interactive. Disabled
+     controls keep the default arrow. Anchors already get a pointer from the UA. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  label[for],
+  summary,
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+
   h1,
   h2,
   h3,
