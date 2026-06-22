@@ -14,14 +14,32 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 // ---------------------------------------------------------------------------
 
 describe("Button variants", () => {
-  it("primary variant renders ink pill classes", () => {
-    render(<Button variant="primary">Start analysis</Button>, { wrapper: Wrapper });
-    const btn = screen.getByRole("button", { name: /start analysis/i });
-    const cls = btn.className;
-    // ink-filled + pill radius
-    expect(cls).toContain("bg-hf-fg-1");
-    expect(cls).toContain("text-hf-bg");
-    expect(cls).toContain("rounded-[var(--radius-pill)]");
+  it("primary variant renders the glass layer stack, not a solid ink fill", () => {
+    const { container } = render(<Button variant="primary">Start analysis</Button>, {
+      wrapper: Wrapper,
+    });
+    const root = container.querySelector("[data-slot='button']")!;
+    // glass root + layered recipe
+    expect(root.className).toMatch(/hf-glass/);
+    expect(container.querySelector(".hf-glass__refract")).not.toBeNull();
+    expect(container.querySelector(".hf-glass__tint")).not.toBeNull();
+    expect(container.querySelector(".hf-glass__content")).not.toBeNull();
+    // primary tint hook + ink label, NOT the old solid `bg-hf-fg-1` fill
+    expect(root.className).toMatch(/hf-btn--primary/);
+    expect(root.className).not.toMatch(/bg-hf-fg-1/);
+  });
+
+  it("secondary/ghost/danger variants also render glass with their tint class", () => {
+    for (const v of ["secondary", "ghost", "danger"] as const) {
+      const { container, unmount } = render(<Button variant={v}>x</Button>, { wrapper: Wrapper });
+      const root = container.querySelector("[data-slot='button']")!;
+      expect(root.className).toMatch(/hf-glass/);
+      expect(root.className).toMatch(new RegExp(`hf-btn--${v}`));
+      // Unmount each iteration so the motion-wrapped surface stops scheduling
+      // requestAnimationFrame; otherwise pending rAFs leak into the later
+      // fake-timer StatefulButton tests and trip the "infinite loop" guard.
+      unmount();
+    }
   });
 
   it("glass-action variant renders glass pill wrapper", () => {
@@ -52,25 +70,6 @@ describe("Button variants", () => {
     expect(link.querySelector(".hf-glass__content")).not.toBeNull();
     // No stray <button> from the component when asChild is set.
     expect(document.querySelector("button")).toBeNull();
-  });
-
-  it("secondary variant has surface fill and border", () => {
-    render(<Button variant="secondary">Secondary</Button>, { wrapper: Wrapper });
-    const btn = screen.getByRole("button", { name: /secondary/i });
-    expect(btn.className).toContain("bg-hf-surface");
-    expect(btn.className).toContain("border-hf-border-strong");
-  });
-
-  it("ghost variant has transparent background", () => {
-    render(<Button variant="ghost">Ghost</Button>, { wrapper: Wrapper });
-    const btn = screen.getByRole("button", { name: /ghost/i });
-    expect(btn.className).toContain("bg-transparent");
-  });
-
-  it("danger variant has danger text color", () => {
-    render(<Button variant="danger">Delete run</Button>, { wrapper: Wrapper });
-    const btn = screen.getByRole("button", { name: /delete run/i });
-    expect(btn.className).toContain("text-hf-danger");
   });
 
   it("disabled state sets opacity 0.45 and pointer-events-none", () => {

@@ -598,6 +598,37 @@
     transform: translateY(-3px);
   }
 
+  /* --- hf button tint hierarchy (all buttons are glass) ------------------ */
+  /* primary: strongest tint + ink-leaning rim so the CTA dominates */
+  .hf-btn--primary .hf-glass__tint {
+    background: color-mix(in srgb, var(--hf-fg-1), transparent 86%);
+  }
+  .hf-btn--primary .hf-glass__shine {
+    box-shadow:
+      inset 1.5px 1.5px 1px -1px var(--hf-glass-shine),
+      inset 0 0 0 1px color-mix(in srgb, var(--hf-fg-1), transparent 55%);
+  }
+  /* secondary: standard overlay tint (uses the base --hf-glass-tint-strong) */
+  .hf-btn--secondary .hf-glass__tint {
+    background: var(--hf-glass-tint-strong);
+  }
+  /* ghost: no tint at rest, faint surface wash on hover */
+  .hf-btn--ghost .hf-glass__tint {
+    background: transparent;
+  }
+  .hf-btn--ghost:hover .hf-glass__tint {
+    background: var(--hf-glass-tint);
+  }
+  /* danger: terracotta-leaning tint + rim */
+  .hf-btn--danger .hf-glass__tint {
+    background: color-mix(in srgb, var(--hf-terracotta), transparent 80%);
+  }
+  .hf-btn--danger .hf-glass__shine {
+    box-shadow:
+      inset 1.5px 1.5px 1px -1px var(--hf-glass-shine),
+      inset 0 0 0 1px color-mix(in srgb, var(--hf-terracotta), transparent 50%);
+  }
+
   /* --- Refraction opt-in (Chromium only) ------------------------------- */
   /* Real lens refraction = the #hf-liquid feDisplacementMap on a lightly
    blurred backdrop. Enabled ONLY when lib/glassSupport.ts has confirmed a

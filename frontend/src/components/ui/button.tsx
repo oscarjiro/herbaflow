@@ -20,7 +20,13 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
 
         // ── hf design-system variants ─────────────────────────────────────
-        /** Solid ink fill, pill radius — the primary CTA on pages/surfaces. */
+        // NOTE: every hf variant (primary/secondary/ghost/danger) is rendered
+        // by the Button component through the layered .hf-glass path with a
+        // per-variant tint class (hf-btn--{variant}); see the glass branches
+        // below. These cva strings are the legacy non-glass fallback kept ONLY
+        // for the standalone `buttonVariants()` helper / type-compat — the
+        // Button component itself no longer applies them to hf variants.
+        /** (legacy fallback) ink-leaning pill — glass-rendered as the CTA. */
         primary:
           "bg-hf-fg-1 text-hf-bg rounded-[var(--radius-pill)] px-5 py-2.5 hover:shadow-[0_8px_22px_-8px_color-mix(in_srgb,var(--hf-fg-1),transparent_35%)] active:translate-y-px",
 
@@ -118,7 +124,17 @@ function Button({
   children,
   ...props
 }: ButtonProps) {
-  const isGlass = variant === "glass-action";
+  // All hf design-system variants render the layered .hf-glass recipe. Each
+  // carries a per-variant tint class (hf-btn--{variant}) wired in index.css so
+  // the CTA hierarchy is primary > secondary > ghost > danger. glass-action is
+  // the bare overlay pill (no per-variant tint). The shadcn-original variants
+  // (default/destructive/outline/link) stay on the non-glass cva path.
+  const HF_GLASS_VARIANTS = ["primary", "secondary", "ghost", "danger", "glass-action"] as const;
+  // `variant` may be null per VariantProps; the destructure default only covers
+  // undefined, so coalesce before the membership/tint checks.
+  const resolvedVariant = variant ?? "default";
+  const isGlass = (HF_GLASS_VARIANTS as readonly string[]).includes(resolvedVariant);
+  const tintClass = resolvedVariant === "glass-action" ? "" : `hf-btn--${resolvedVariant}`;
 
   if (asChild) {
     // Glass-action + asChild: render the consumer's element (e.g. a router
@@ -135,7 +151,7 @@ function Button({
           data-slot="button"
           data-variant={variant}
           data-size={size}
-          className={cn(GLASS_PILL_BASE, className)}
+          className={cn(GLASS_PILL_BASE, tintClass, className)}
           {...props}
         >
           {React.cloneElement(
@@ -185,7 +201,7 @@ function Button({
         data-slot="button"
         data-variant={variant}
         data-size={size}
-        className={cn(GLASS_PILL_BASE, iconSizeClass, className)}
+        className={cn(GLASS_PILL_BASE, tintClass, iconSizeClass, className)}
         {...props}
       >
         <GlassLayers />
