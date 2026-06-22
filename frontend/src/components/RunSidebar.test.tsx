@@ -39,4 +39,14 @@ describe("RunSidebar", () => {
     fireEvent.click(screen.getByRole("button", { name: /exit analysis/i }));
     expect(screen.getByText(/permanently deleted/i)).toBeInTheDocument();
   });
+
+  it("marks the active stage from the current route path", () => {
+    renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={() => {}} />, {
+      withTheme: true,
+      initialEntries: ["/analysis/run-1/targets"],
+    });
+    const active = document.querySelector('[aria-current="step"]');
+    expect(active).not.toBeNull();
+    expect(active).toHaveTextContent(/targets/i);
+  });
 });

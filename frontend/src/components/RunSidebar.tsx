@@ -1,19 +1,19 @@
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import type { AnalysisRead } from "@/api/types.gen";
 import { StepperRail } from "@/components/ui/StepperRail";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ExitRunDialog } from "@/components/stages/ExitRunDialog";
 import { RunIdentityCard } from "@/components/RunIdentityCard";
 import { GlassSurface } from "@/components/ui/GlassSurface";
-import type { StageSlug } from "@/lib/stageRoutes";
+import { isValidStageSlug, type StageSlug } from "@/lib/stageRoutes";
 
+// Active stage = the trailing slug of /analysis/{id}/{stage}, read from router-state location
+// (resolves whether or not the deep route is matched, so no hook-in-try/catch is needed).
 function useActiveStage(): StageSlug | undefined {
-  try {
-    const params = useParams({ strict: false }) as { stage?: StageSlug };
-    return params.stage;
-  } catch {
-    return undefined;
-  }
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const segments = pathname.split("/").filter(Boolean);
+  const candidate = segments[0] === "analysis" && segments.length >= 3 ? segments[2] : undefined;
+  return candidate && isValidStageSlug(candidate) ? candidate : undefined;
 }
 
 export function RunSidebar({
