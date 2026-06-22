@@ -1,29 +1,34 @@
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { ThemeToggle } from "./ThemeToggle";
 
+const navLink =
+  "text-hf-fg-2 hover:text-hf-fg-1 text-xs uppercase tracking-[0.16em] transition-colors";
+
 export function Nav() {
   const matchRoute = useMatchRoute();
   // The run page (/analysis/$id) uses the fixed RunSidebar as its chrome — hide the top nav there.
   if (matchRoute({ to: "/analysis/$id" })) return null;
 
   return (
-    <header className="border-hf-border bg-hf-bg/80 sticky top-0 z-40 border-b backdrop-blur">
-      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="font-display text-hf-fg-1 text-lg tracking-tight">
-          Herbaflow
-        </Link>
-        <div className="flex items-center gap-6">
-          <Link
-            to="/analysis"
-            className="text-hf-fg-2 hover:text-hf-fg-1 text-sm transition-colors"
-          >
+    <header className="relative z-20">
+      <nav className="mx-auto flex max-w-6xl items-center gap-4 px-6 py-5">
+        <span className="flex-1" aria-hidden="true" />
+        {/* Analysis · logo · About, clustered centrally */}
+        <div className="flex items-center gap-10">
+          <Link to="/analysis" className={navLink}>
             Analysis
           </Link>
-          <Link to="/about" className="text-hf-fg-2 hover:text-hf-fg-1 text-sm transition-colors">
+          <Link to="/" aria-label="Herbaflow home" className="text-hf-fg-1">
+            <span className="hf-logo block h-9 w-[150px]" />
+          </Link>
+          <Link to="/about" className={navLink}>
             About
           </Link>
-          <ThemeToggle />
         </div>
+        {/* Theme control alone at the far right */}
+        <span className="flex flex-1 justify-end">
+          <ThemeToggle />
+        </span>
       </nav>
     </header>
   );

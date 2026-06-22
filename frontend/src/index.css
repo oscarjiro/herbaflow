@@ -433,6 +433,15 @@
   color: var(--hf-fg-3);
 }
 
+/* Wordmark logo. One asset, CSS-masked and filled with currentColor so it
+   recolors per theme. Size per call site with width/height utilities. */
+.hf-logo {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask: url("/assets/herbaflow-logo.svg") center / contain no-repeat;
+  mask: url("/assets/herbaflow-logo.svg") center / contain no-repeat;
+}
+
 /* ASCII rule line — em-dash row */
 .hf-rule {
   display: block;

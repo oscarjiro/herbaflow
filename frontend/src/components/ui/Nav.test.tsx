@@ -6,13 +6,17 @@ import { Nav } from "./Nav";
 afterEach(() => cleanup());
 
 describe("Nav", () => {
-  it("renders on non-run routes", () => {
+  it("renders the clustered links + logo and the theme control on non-run routes", () => {
     renderWithRouter(<Nav />, { initialEntries: ["/analysis"], withTheme: true });
-    expect(screen.getByRole("link", { name: "Herbaflow" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Herbaflow home" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Analysis" })).toHaveAttribute("href", "/analysis");
+    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
+    // The animated icon-only theme switcher (the only button in the nav).
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
   it("hides on the run page", () => {
     renderWithRouter(<Nav />, { initialEntries: ["/analysis/run-1"], withTheme: true });
-    expect(screen.queryByRole("link", { name: "Herbaflow" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Herbaflow home" })).not.toBeInTheDocument();
   });
 });

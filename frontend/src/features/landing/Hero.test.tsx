@@ -25,7 +25,8 @@ function renderLanding() {
 test("Hero renders the full headline", async () => {
   renderLanding();
   expect(await screen.findByText(/End-to-end/i)).toBeInTheDocument();
-  expect(await screen.findByText(/network pharmacology/i)).toBeInTheDocument();
+  // Scope to the hero heading — "network pharmacology" also appears in the footer blurb.
+  expect(await screen.findByRole("heading", { name: /network pharmacology/i })).toBeInTheDocument();
 });
 
 test("Hero renders the lede paragraph", async () => {
