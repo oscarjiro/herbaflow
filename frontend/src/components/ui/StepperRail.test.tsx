@@ -37,10 +37,12 @@ function renderTrail(ui: React.ReactNode) {
   return render(<RouterContextProvider router={router}>{ui}</RouterContextProvider>);
 }
 
-test("renders Inputs and Final bookends plus the eight stages", () => {
+test("renders the eight stages plus the Final bookend, but not Inputs", () => {
   renderTrail(<StepperRail data={data} analysisId="a1" activeSlug="targets" />);
-  expect(screen.getByText(/inputs/i)).toBeInTheDocument();
+  // Inputs belongs to setup, not the run trail — it must not appear as a step.
+  expect(screen.queryByText(/inputs/i)).toBeNull();
   expect(screen.getByText(/final/i)).toBeInTheDocument();
+  expect(screen.getByText(/compounds/i)).toBeInTheDocument();
 });
 
 test("reached applicable stages are links; locked stages are not", () => {

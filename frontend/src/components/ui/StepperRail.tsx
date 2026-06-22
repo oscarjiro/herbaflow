@@ -17,7 +17,7 @@ import {
 import type { AnalysisRead } from "@/api/types.gen";
 import { stageLabel } from "@/contract/labels";
 import {
-  STAGE_SLUGS,
+  TRAIL_SLUGS,
   isSlugApplicable,
   isSlugReached,
   slugToStage,
@@ -78,7 +78,7 @@ export function StepperRail({
   return (
     <nav aria-label="Pipeline steps" className={cn("w-full", className)}>
       <ol className="scroll flex flex-row gap-1 overflow-x-auto lg:flex-col lg:gap-1.5 lg:overflow-x-visible">
-        {STAGE_SLUGS.map((slug) => {
+        {TRAIL_SLUGS.map((slug) => {
           const state = nodeState(slug, data, activeSlug);
           const navigable =
             state === "done" || state === "active" || state === "running" || state === "blocked";

@@ -12,7 +12,9 @@ export type StageSlug =
   | "enrichment"
   | "final";
 
-// Ordered trail: Inputs bookend → the eight pipeline stages → Final bookend.
+// Full ordered set: Inputs bookend → the eight pipeline stages → Final bookend.
+// Used for routing, guards and furthest-reached logic (inputs is still a valid,
+// deep-linkable route — it is just not shown as a trail step, see TRAIL_SLUGS).
 export const STAGE_SLUGS: StageSlug[] = [
   "inputs",
   "compounds",
@@ -25,6 +27,10 @@ export const STAGE_SLUGS: StageSlug[] = [
   "enrichment",
   "final",
 ];
+
+// The slugs the visible trail renders: the eight stages + the Final bookend.
+// Inputs is part of setup, not a pipeline step, so it is omitted from the trail.
+export const TRAIL_SLUGS: StageSlug[] = STAGE_SLUGS.filter((s) => s !== "inputs");
 
 const SLUG_TO_STAGE: Record<StageSlug, number | null> = {
   inputs: null,
