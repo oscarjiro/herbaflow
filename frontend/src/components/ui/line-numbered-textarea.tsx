@@ -48,8 +48,9 @@ export const LineNumberedTextarea = React.forwardRef<
 
   return (
     <div
+      data-slot="manual-paste"
       className={cn(
-        "border-input focus-within:border-ring focus-within:ring-ring/50 flex w-full overflow-hidden rounded-md border bg-transparent shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
+        "border-input focus-within:border-ring focus-within:ring-ring/50 flex w-full max-h-64 scroll overflow-hidden rounded-md border bg-transparent shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
         disabled && "cursor-not-allowed opacity-50",
       )}
     >
@@ -90,7 +91,7 @@ export const LineNumberedTextarea = React.forwardRef<
         placeholder={placeholder}
         rows={rows}
         disabled={disabled}
-        className="placeholder:text-muted-foreground flex min-h-[5rem] w-full resize-y bg-transparent px-3 py-2 font-mono text-sm leading-5 outline-none disabled:cursor-not-allowed"
+        className="placeholder:text-muted-foreground flex min-h-[5rem] w-full resize-none bg-transparent px-3 py-2 font-mono text-sm leading-5 outline-none disabled:cursor-not-allowed"
         spellCheck={false}
       />
     </div>
