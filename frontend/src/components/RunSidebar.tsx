@@ -19,7 +19,7 @@ export function RunSidebar({
         Herbaflow
       </Link>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <StepperRail data={data} />
+        <StepperRail data={data} analysisId={analysisId} />
       </div>
       <div className="flex items-center gap-2">
         <ThemeToggle />
