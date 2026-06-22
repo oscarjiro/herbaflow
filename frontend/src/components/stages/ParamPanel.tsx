@@ -24,8 +24,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { humanizeLabel, humanizeValue } from "../../contract/labels";
+
+function ParamInfo({ description, label }: { description?: string; label: string }) {
+  if (!description) return null;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={`About ${label}`}
+          className="text-hf-fg-4 hover:text-hf-fg-2 inline-flex"
+        >
+          <Info className="size-3.5" aria-hidden="true" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs">{description}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 type ScalarParamValue = number | boolean | string;
 type ParamValue = ScalarParamValue | string[];
@@ -220,6 +245,7 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
   }
 
   return (
+    <TooltipProvider>
     <Card className="w-full">
       <CardHeader className="pb-2">
         <button
@@ -246,14 +272,13 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
                 : "";
             return (
               <div key={key} className="flex flex-col gap-1">
-                <Label htmlFor={`param-${key}`}>{label}</Label>
-                <p className="text-muted-foreground text-xs">
-                  {m.description}
-                  <span className="text-muted-foreground/70">
-                    {" "}
-                    (default {String(m.default)}
-                    {recHint})
-                  </span>
+                <div className="flex items-center gap-1">
+                  <Label htmlFor={`param-${key}`}>{label}</Label>
+                  <ParamInfo description={m.description} label={label} />
+                </div>
+                <p className="text-muted-foreground/70 text-xs">
+                  (default {String(m.default)}
+                  {recHint})
                 </p>
                 <Input
                   id={`param-${key}`}
@@ -289,8 +314,8 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
                     onCheckedChange={(checked) => handleBooleanChange(key, checked === true)}
                   />
                   <Label htmlFor={`param-${key}`}>{label}</Label>
+                  <ParamInfo description={m.description} label={label} />
                 </div>
-                <p className="text-muted-foreground text-xs">{m.description}</p>
               </div>
             );
           })}
@@ -302,13 +327,12 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
             const label = humanizeLabel(key);
             return (
               <div key={key} className="flex flex-col gap-1">
-                <Label htmlFor={`param-${key}`}>{label}</Label>
-                <p className="text-muted-foreground text-xs">
-                  {m.description}
-                  <span className="text-muted-foreground/70">
-                    {" "}
-                    (default {humanizeValue(String(m.default))})
-                  </span>
+                <div className="flex items-center gap-1">
+                  <Label htmlFor={`param-${key}`}>{label}</Label>
+                  <ParamInfo description={m.description} label={label} />
+                </div>
+                <p className="text-muted-foreground/70 text-xs">
+                  (default {humanizeValue(String(m.default))})
                 </p>
                 <Select
                   value={localStr[key] ?? String(m.default)}
@@ -341,11 +365,11 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
             const label = humanizeLabel(key);
             return (
               <div key={key} className="flex flex-col gap-2">
-                <Label>{label}</Label>
-                <p className="text-muted-foreground text-xs">
-                  {m.description}
-                  <span className="text-muted-foreground/70"> (default {defaultLabel})</span>
-                </p>
+                <div className="flex items-center gap-1">
+                  <Label>{label}</Label>
+                  <ParamInfo description={m.description} label={label} />
+                </div>
+                <p className="text-muted-foreground/70 text-xs">(default {defaultLabel})</p>
                 <div className="flex flex-col gap-2">
                   {options.map((option) => {
                     const id = `param-${key}-${option.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
@@ -384,5 +408,6 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
         </CardContent>
       )}
     </Card>
+    </TooltipProvider>
   );
 }
