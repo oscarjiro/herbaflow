@@ -29,6 +29,24 @@ test("/ renders the landing page with a CTA link to /analysis", async () => {
   expect(await screen.findByRole("link", { name: /start analysis/i })).toBeInTheDocument();
 });
 
+test("every page inherits the BackgroundFX dots layer (mounted in the root layout)", async () => {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const router = createRouter({
+    routeTree,
+    history: createMemoryHistory({ initialEntries: ["/about"] }),
+  });
+  const { container } = render(
+    <QueryClientProvider client={qc}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  );
+  // The dots layer lives in BackgroundFX; mounting it in __root means a non-landing
+  // route (here /about) carries it too — it is no longer landing-only.
+  await waitFor(() => {
+    expect(container.querySelector("[data-bg-layer='dots']")).toBeTruthy();
+  });
+});
+
 test("/analysis renders the setup view (New analysis heading)", async () => {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createRouter({

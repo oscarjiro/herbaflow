@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BackgroundFX } from "@/components/ui/BackgroundFX";
 import { LandingHero } from "@/features/landing/LandingHero";
 import { Hero } from "@/features/landing/Hero";
 import { StatCards } from "@/features/landing/StatCards";
@@ -11,12 +10,11 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
-  // The app shell (__root) already provides <main>, <Nav>, and <Footer>. This route
-  // renders only the background layers + the page sections — no nested <main>.
+  // The app shell (__root) provides <main>, <Nav>, <Footer>, and the BackgroundFX
+  // dotted-glow layer. This route renders only the page sections — no nested <main>,
+  // no background (inherited from the root layout).
   return (
     <>
-      {/* Fixed, full-viewport decorative layers behind the content. */}
-      <BackgroundFX glow="blobs" />
       <LandingHero />
       <div className="relative z-10 mx-auto max-w-6xl px-4">
         <Hero />
