@@ -109,6 +109,147 @@ describe("Button variants", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Glass button size geometry (I1 regression guard)
+//
+// Every hf variant renders through the glass path. That path must map the
+// `size` prop to a SCALED glass-pill label geometry — not always emit the
+// landing-CTA pill. Before the fix the non-icon glass branch hard-coded
+// GLASS_PILL_LABEL for sm/default/lg alike, so compact in-form buttons
+// ("Clear", dialog "Cancel") rendered at landing-CTA size.
+// ---------------------------------------------------------------------------
+
+/** The landing-CTA label geometry that must stay reserved for the Hero pill. */
+const LANDING_CTA_PADDING = "py-[16px]";
+const LANDING_CTA_TEXT = "text-[16px]";
+
+/** Read the .hf-glass__content label span className for a glass button. */
+function readGlassLabelClass(container: HTMLElement): string {
+  const label = container.querySelector(".hf-glass__content");
+  expect(label).not.toBeNull();
+  return label!.className;
+}
+
+describe("Button glass size geometry (I1)", () => {
+  it("ghost size='sm' renders COMPACT geometry, distinct from lg and the landing CTA", () => {
+    const sm = render(
+      <Button variant="ghost" size="sm">
+        Clear
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const lg = render(
+      <Button variant="ghost" size="lg">
+        Clear
+      </Button>,
+      { wrapper: Wrapper },
+    );
+
+    const smClass = readGlassLabelClass(sm.container);
+    const lgClass = readGlassLabelClass(lg.container);
+
+    // sm must NOT be the landing-CTA pill geometry.
+    expect(smClass).not.toContain(LANDING_CTA_PADDING);
+    expect(smClass).not.toContain(LANDING_CTA_TEXT);
+    // sm reads as the compact glass pill (small text).
+    expect(smClass).toMatch(/\btext-sm\b/);
+
+    // The core I1 assertion: size actually changes the geometry. Before the
+    // fix sm === lg (both GLASS_PILL_LABEL); now they must differ.
+    expect(smClass).not.toEqual(lgClass);
+
+    sm.unmount();
+    lg.unmount();
+  });
+
+  it("default size renders the MEDIUM glass geometry, distinct from sm and lg", () => {
+    const sm = render(
+      <Button variant="secondary" size="sm">
+        x
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const def = render(
+      <Button variant="secondary" size="default">
+        x
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const lg = render(
+      <Button variant="secondary" size="lg">
+        x
+      </Button>,
+      { wrapper: Wrapper },
+    );
+
+    const smClass = readGlassLabelClass(sm.container);
+    const defClass = readGlassLabelClass(def.container);
+    const lgClass = readGlassLabelClass(lg.container);
+
+    // Three distinct geometries for the three non-icon sizes.
+    expect(defClass).not.toEqual(smClass);
+    expect(defClass).not.toEqual(lgClass);
+    // default is not the landing-CTA pill either.
+    expect(defClass).not.toContain(LANDING_CTA_PADDING);
+
+    sm.unmount();
+    def.unmount();
+    lg.unmount();
+  });
+
+  it("an unset size defaults to the MEDIUM (default) glass geometry", () => {
+    const bare = render(<Button variant="ghost">x</Button>, { wrapper: Wrapper });
+    const def = render(
+      <Button variant="ghost" size="default">
+        x
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    expect(readGlassLabelClass(bare.container)).toEqual(readGlassLabelClass(def.container));
+    bare.unmount();
+    def.unmount();
+  });
+
+  it("landing CTA (glass-action, default size) keeps the large landing pill geometry", () => {
+    const { container } = render(<Button variant="glass-action">Start analysis</Button>, {
+      wrapper: Wrapper,
+    });
+    const labelClass = readGlassLabelClass(container);
+    // Hero CTA must stay the large pill — unchanged by the size-aware change.
+    expect(labelClass).toContain(LANDING_CTA_PADDING);
+    expect(labelClass).toContain(LANDING_CTA_TEXT);
+  });
+
+  it("landing CTA via asChild also keeps the large landing pill geometry", () => {
+    render(
+      <Button asChild variant="glass-action">
+        <a href="/analysis">Start analysis</a>
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const link = screen.getByRole("link", { name: /start analysis/i });
+    const label = link.querySelector(".hf-glass__content");
+    expect(label).not.toBeNull();
+    expect(label!.className).toContain(LANDING_CTA_PADDING);
+    expect(label!.className).toContain(LANDING_CTA_TEXT);
+  });
+
+  it("icon glass sizes are unaffected (square, no label padding)", () => {
+    const { container } = render(
+      <Button variant="glass-action" size="icon-lg" aria-label="Theme">
+        <svg />
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const root = container.querySelector("[data-slot='button']")!;
+    expect(root.className).toMatch(/size-10/);
+    const label = container.querySelector(".hf-glass__content");
+    // Icon content grid, not a label pill.
+    expect(label!.className).toMatch(/place-items-center/);
+    expect(label!.className).not.toContain(LANDING_CTA_PADDING);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // StatefulButton — idle → loading → success → reset
 // ---------------------------------------------------------------------------
 

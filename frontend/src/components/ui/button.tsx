@@ -100,16 +100,42 @@ const GLASS_PILL_BASE = cn(
   "disabled:pointer-events-none disabled:opacity-45",
 );
 
-// Label layout for the non-icon glass pill (mockup .pill__label: 16/18/16/28
-// padding, 24px gap, 16px medium).
+// Label layout for the landing-CTA glass pill (mockup .pill__label: 16/18/16/28
+// padding, 24px gap, 16px medium). Reserved for the Hero CTA (`glass-action`).
 const GLASS_PILL_LABEL =
   "inline-flex items-center gap-[24px] py-[16px] pr-[18px] pl-[28px] text-[16px] font-medium";
+
+// Size-keyed label geometry for non-icon glass buttons. The glass pill is
+// padding-driven (height comes from padding, not a fixed `h-*`, because
+// .hf-glass clips with overflow:hidden), so each size scales its own
+// padding/gap/text — mirroring the pre-glass shadcn size scale (sm < default <
+// lg) so glass buttons feel consistent with it. `default` matches the mockup
+// in-form .btn (11px/22px padding, 9px gap, ~0.86rem text); `sm` is the compact
+// in-form pill ("Clear", dialog "Cancel"); `lg` is a roomier action pill that
+// still stays below the landing CTA. The landing CTA keeps GLASS_PILL_LABEL.
+const GLASS_PILL_BY_SIZE = {
+  sm: "inline-flex items-center gap-[8px] py-[7px] px-[16px] text-sm font-medium",
+  default: "inline-flex items-center gap-[9px] py-[11px] px-[22px] text-sm font-medium",
+  lg: "inline-flex items-center gap-[14px] py-[14px] px-[28px] text-[15px] font-medium",
+} as const;
 
 // ---------------------------------------------------------------------------
 // Button
 // ---------------------------------------------------------------------------
 
 type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
+type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>;
+
+// Resolve the non-icon glass label geometry from the size prop. The landing CTA
+// (`glass-action`) keeps the large GLASS_PILL_LABEL regardless of size so the
+// Hero pill is unchanged; every other glass variant scales by size (sm/lg map
+// to their own geometry; everything else, incl. an unset size, is `default`).
+function glassLabelClass(variant: string, size: ButtonSize | null | undefined): string {
+  if (variant === "glass-action") return GLASS_PILL_LABEL;
+  if (size === "sm") return GLASS_PILL_BY_SIZE.sm;
+  if (size === "lg") return GLASS_PILL_BY_SIZE.lg;
+  return GLASS_PILL_BY_SIZE.default;
+}
 
 interface ButtonProps
   extends Omit<React.ComponentProps<"button">, "ref">, VariantProps<typeof buttonVariants> {
@@ -159,7 +185,12 @@ function Button({
             undefined,
             <>
               <GlassLayers />
-              <span className={cn("hf-glass__content text-hf-fg-1", GLASS_PILL_LABEL)}>
+              <span
+                className={cn(
+                  "hf-glass__content text-hf-fg-1",
+                  glassLabelClass(resolvedVariant, size),
+                )}
+              >
                 {child.props.children}
               </span>
             </>,
@@ -184,7 +215,8 @@ function Button({
   if (isGlass) {
     // Icon-only glass control (e.g. the theme switcher): a fixed square that
     // reads as a circle (square + pill radius), icon centred, no label padding.
-    // Non-icon = the landing CTA pill (mockup .pill label spec).
+    // Non-icon = a size-scaled glass label pill (glass-action stays the large
+    // landing CTA; everything else scales sm/default/lg).
     const iconSizeClass =
       size === "icon"
         ? "size-9"
@@ -209,7 +241,7 @@ function Button({
         <span
           className={cn(
             "hf-glass__content text-hf-fg-1",
-            isIcon ? "grid size-full place-items-center" : GLASS_PILL_LABEL,
+            isIcon ? "grid size-full place-items-center" : glassLabelClass(resolvedVariant, size),
           )}
         >
           {children}
