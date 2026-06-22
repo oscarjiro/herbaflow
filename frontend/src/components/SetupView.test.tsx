@@ -524,8 +524,10 @@ describe("SetupView — recomposed summary + advance", () => {
     expect(screen.queryByRole("button", { name: /create analysis/i })).not.toBeInTheDocument();
   });
 
-  it("summary stat numbers use the serif display font", () => {
+  it("summary stat numbers use the serif display font", async () => {
     wrap(<SetupView onCreated={() => {}} />);
+    // Select a plant so hasSelection is true and the serif stat tiles render.
+    await pickComboOption("Search plants", /aaa bbb/i);
     const tile = screen.getByTestId("setup-summary");
     const num = tile.querySelector("[data-slot='stat-num']")!;
     expect(num).not.toBeNull();
