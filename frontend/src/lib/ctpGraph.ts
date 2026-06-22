@@ -15,16 +15,17 @@ import type { ChartColors } from "./chartTheme";
 
 /** Rank map: higher = closer to the centre of the concentric circles. */
 const RANK: Record<string, number> = {
-  target: 3,
-  compound: 2,
+  compound: 3,
+  target: 2,
   pathway: 1,
   disease: 1,
 };
 
 /**
  * Returns a Cytoscape concentric layout that ranks nodes by biological role:
- * targets at the core, compounds in the middle ring, pathways/diseases on the
- * outer ring. This mirrors the reference figure's layered view.
+ * compounds at the core, targets in the middle ring, pathways/diseases on the
+ * outer ring (C → T → P from the inside out). This mirrors the reference
+ * figure's layered view.
  */
 export function ctpConcentricLayout(): cytoscape.LayoutOptions {
   return {
