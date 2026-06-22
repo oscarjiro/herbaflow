@@ -777,8 +777,15 @@
 }
 
 .hf-dna__stage {
+  /* Start hidden and fade to the target opacity once the model is on screen
+     (data-dna-ready, set by useAsciiDna) so the ASCII helix eases in instead
+     of popping. Reduced-motion users never reach this layer (static fallback).
+     A gentle backdrop reveal — intentionally slower than the UI motion tokens. */
+  opacity: 0;
+  transition: opacity 800ms var(--ease-out);
+}
+.hf-dna__stage[data-dna-ready="true"] {
   opacity: var(--dna-opacity);
-  transition: opacity var(--duration-3) var(--ease-out);
 }
 
 /* The three.js ASCII sink is a generated <div>; colour + bloom come from the

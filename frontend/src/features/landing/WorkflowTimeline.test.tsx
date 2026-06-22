@@ -48,7 +48,7 @@ describe("WorkflowTimeline", () => {
     render(<WorkflowTimeline />);
     expect(screen.getByText("KNApSAcK")).toBeInTheDocument();
     expect(screen.getByText("Lipinski RO5 · Veber")).toBeInTheDocument();
-    expect(screen.getByText("ChEMBL · PubChem BioAssay")).toBeInTheDocument();
+    expect(screen.getByText("ChEMBL · PubChem")).toBeInTheDocument();
     expect(screen.getByText("Open Targets")).toBeInTheDocument();
     expect(screen.getByText("STRING")).toBeInTheDocument();
     expect(screen.getByText("MCC (CytoHubba)")).toBeInTheDocument();

@@ -80,6 +80,25 @@ function GlassLayers() {
   );
 }
 
+// Shared glass-action pill classes — ONE home for both the asChild anchor path
+// and the plain <button> path so the two can't drift. Built directly (not via
+// buttonVariants) because the size variants inject a fixed height (h-9) that,
+// with .hf-glass overflow:hidden, would clip the padding-driven pill. `!` on the
+// radius: the unlayered .hf-glass rule (--radius-xl) would otherwise outrank the
+// utility and leave a rounded rect, not a pill.
+const GLASS_PILL_BASE = cn(
+  "hf-glass hf-glass--overlay inline-flex",
+  "cursor-pointer rounded-[var(--radius-pill)]! border-0 p-0",
+  "hover:-translate-y-0.5 active:translate-y-px",
+  "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+  "disabled:pointer-events-none disabled:opacity-45",
+);
+
+// Label layout for the non-icon glass pill (mockup .pill__label: 16/18/16/28
+// padding, 24px gap, 16px medium).
+const GLASS_PILL_LABEL =
+  "inline-flex items-center gap-[24px] py-[16px] pr-[18px] pl-[28px] text-[16px] font-medium";
+
 // ---------------------------------------------------------------------------
 // Button
 // ---------------------------------------------------------------------------
@@ -116,7 +135,7 @@ function Button({
           data-slot="button"
           data-variant={variant}
           data-size={size}
-          className={cn(buttonVariants({ variant, size, className }))}
+          className={cn(GLASS_PILL_BASE, className)}
           {...props}
         >
           {React.cloneElement(
@@ -124,7 +143,7 @@ function Button({
             undefined,
             <>
               <GlassLayers />
-              <span className="hf-glass__content text-hf-fg-1 inline-flex items-center gap-2 px-[22px] py-[11px] text-[13.5px] font-medium">
+              <span className={cn("hf-glass__content text-hf-fg-1", GLASS_PILL_LABEL)}>
                 {child.props.children}
               </span>
             </>,
@@ -147,28 +166,36 @@ function Button({
   }
 
   if (isGlass) {
+    // Icon-only glass control (e.g. the theme switcher): a fixed square that
+    // reads as a circle (square + pill radius), icon centred, no label padding.
+    // Non-icon = the landing CTA pill (mockup .pill label spec).
+    const iconSizeClass =
+      size === "icon"
+        ? "size-9"
+        : size === "icon-xs"
+          ? "size-6"
+          : size === "icon-sm"
+            ? "size-8"
+            : size === "icon-lg"
+              ? "size-10"
+              : null;
+    const isIcon = iconSizeClass !== null;
     return (
       <button
         data-slot="button"
         data-variant={variant}
         data-size={size}
-        className={cn(
-          // Glass pill base — absolute children need relative parent with overflow:hidden.
-          // .hf-glass sets position:relative, overflow:hidden, isolation:isolate, box-shadow.
-          // We override border-radius to pill, reset padding, set cursor.
-          "hf-glass hf-glass--overlay",
-          "cursor-pointer rounded-[var(--radius-pill)] border-0 p-0",
-          "hover:-translate-y-0.5 active:translate-y-px",
-          "outline-none",
-          "focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-          "disabled:pointer-events-none disabled:opacity-45",
-          className,
-        )}
+        className={cn(GLASS_PILL_BASE, iconSizeClass, className)}
         {...props}
       >
         <GlassLayers />
         {/* Layer 3: content slot — uses .hf-glass__content for z-index:3 */}
-        <span className="hf-glass__content text-hf-fg-1 inline-flex items-center gap-2 px-[22px] py-[11px] text-[13.5px] font-medium">
+        <span
+          className={cn(
+            "hf-glass__content text-hf-fg-1",
+            isIcon ? "grid size-full place-items-center" : GLASS_PILL_LABEL,
+          )}
+        >
           {children}
         </span>
       </button>

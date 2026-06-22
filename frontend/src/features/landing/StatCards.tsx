@@ -33,7 +33,7 @@ export function StatCards({ className }: { className?: string }) {
       {STATS.map(({ icon: Icon, num, label, sub }) => (
         <Card key={label} variant="glass-raised" className="p-5">
           <div className="grid grid-cols-[52px_1fr] items-center gap-4">
-            <div className="bg-hf-surface text-hf-fg-1 border-hf-border grid size-[52px] shrink-0 place-items-center rounded-[var(--radius-md)] border">
+            <div className="text-hf-fg-1 grid size-[52px] shrink-0 place-items-center rounded-[var(--radius-md)] bg-[var(--hf-glass-tint-strong)] [box-shadow:inset_0_1px_0_var(--hf-glass-shine),inset_0_0_0_1px_var(--hf-border)]">
               <Icon size={22} strokeWidth={1.25} aria-hidden="true" />
             </div>
             <div>

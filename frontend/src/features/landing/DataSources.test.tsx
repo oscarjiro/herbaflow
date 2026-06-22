@@ -4,7 +4,7 @@ import { DataSources } from "./DataSources";
 const EXPECTED = [
   ["KNApSAcK", "https://www.knapsackfamily.com/KNApSAcK/"],
   ["ChEMBL", "https://www.ebi.ac.uk/chembl/"],
-  ["PubChem BioAssay", "https://pubchem.ncbi.nlm.nih.gov/"],
+  ["PubChem", "https://pubchem.ncbi.nlm.nih.gov/"],
   ["Open Targets", "https://platform.opentargets.org/"],
   ["STRING", "https://string-db.org/"],
   ["g:Profiler", "https://biit.cs.ut.ee/gprofiler/"],

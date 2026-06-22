@@ -30,7 +30,12 @@ export function LandingHero({ className }: { className?: string }) {
         {showFallback ? (
           <LandingHeroFallback />
         ) : (
-          <div ref={stageRef} data-landing-hero="stage" className="hf-dna__stage" />
+          <div
+            ref={stageRef}
+            data-landing-hero="stage"
+            data-dna-ready={status === "ready" ? "true" : undefined}
+            className="hf-dna__stage"
+          />
         )}
       </div>
     </div>

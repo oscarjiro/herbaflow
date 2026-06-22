@@ -13,8 +13,8 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="ghost"
-      size="icon"
+      variant="glass-action"
+      size="icon-lg"
       aria-label={`Theme: ${pref}. Activate to change.`}
       onClick={() => setPref(NEXT[pref])}
     >
@@ -24,15 +24,18 @@ export function ThemeToggle() {
           data-motion-reduced={shouldReduceMotion ? "true" : undefined}
           initial={shouldReduceMotion ? false : { rotate: -180, scale: 0.4, opacity: 0 }}
           animate={{ rotate: 0, scale: 1, opacity: 1 }}
-          exit={shouldReduceMotion ? {} : { rotate: 180, scale: 0.4, opacity: 0 }}
+          // Mockup hard-swaps the icon (no out-spin); a quick fade stands in so
+          // mode="wait" doesn't double the perceived time.
+          exit={shouldReduceMotion ? {} : { opacity: 0, transition: { duration: 0.12 } }}
           transition={
             shouldReduceMotion
               ? { duration: 0 }
-              : { type: "spring", stiffness: 260, damping: 22, duration: 0.42 }
+              : // mockup .theme-btn icon-in: 0.42s tween, ease cubic-bezier(0.2,0.7,0.2,1)
+                { duration: 0.42, ease: [0.2, 0.7, 0.2, 1] as [number, number, number, number] }
           }
           className="inline-flex"
         >
-          <Icon as={ICON[pref]} />
+          <Icon as={ICON[pref]} className="size-[17px]" />
         </m.span>
       </AnimatePresence>
     </Button>

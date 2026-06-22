@@ -22,7 +22,12 @@ export function Hero({ className }: { className?: string }) {
       <Button asChild variant="glass-action">
         <Link to="/analysis">
           Start analysis
-          <ArrowRight size={14} aria-hidden="true" />
+          <span
+            aria-hidden="true"
+            className="bg-hf-fg-1 text-hf-bg grid size-[30px] place-items-center rounded-full"
+          >
+            <ArrowRight size={14} strokeWidth={1.6} />
+          </span>
         </Link>
       </Button>
     </section>
