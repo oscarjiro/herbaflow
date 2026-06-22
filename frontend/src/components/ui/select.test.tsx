@@ -114,6 +114,14 @@ describe("SelectTrigger — chevron rotation", () => {
     const cls = chevron!.getAttribute("class") ?? "";
     expect(cls).toContain("transition-transform");
   });
+
+  it("select trigger chevron uses the muted fg token", () => {
+    const { container } = render(<ClosedSelect />);
+    const chevron = container.querySelector("[data-slot='select-trigger'] svg");
+    expect(chevron).not.toBeNull();
+    const cls = chevron!.getAttribute("class") ?? "";
+    expect(cls).toMatch(/text-hf-fg-3/);
+  });
 });
 
 // ---------------------------------------------------------------------------
