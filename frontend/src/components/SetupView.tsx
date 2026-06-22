@@ -46,8 +46,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Eyebrow } from "./ui/editorial";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { SegmentedTabs } from "./ui/SegmentedTabs";
 
 // ---------------------------------------------------------------------------
 // Param group definitions for the Advanced parameters section.
@@ -352,24 +352,20 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
             <CardTitle>Plant input</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            <fieldset className="space-y-3">
-              <legend className="hf-eyebrow mb-2">Plant input mode</legend>
-              <RadioGroup
-                value={plantMode}
-                onValueChange={(v) =>
-                  setValue("plantMode", v as (typeof PLANT_INPUT_MODES)[number])
-                }
-              >
-                {PLANT_INPUT_MODES.map((m) => (
-                  <div key={m} className="flex items-center gap-2">
-                    <RadioGroupItem id={`plant-mode-${m}`} value={m} aria-label={m} />
-                    <Label htmlFor={`plant-mode-${m}`} className="font-normal">
-                      {m}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </fieldset>
+            <SegmentedTabs
+              value={plantMode}
+              onChange={(v) =>
+                setValue("plantMode", v as (typeof PLANT_INPUT_MODES)[number], {
+                  shouldValidate: true,
+                })
+              }
+              options={[
+                { value: "selection", label: "Select plants" },
+                { value: "manual_compounds", label: "Enter compounds" },
+                { value: "manual_targets", label: "Enter targets" },
+              ]}
+              ariaLabel="Plant input mode"
+            />
 
             {plantMode === "selection" && (
               <div className="space-y-3">
@@ -466,24 +462,19 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
             <CardTitle>Disease input</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            <fieldset className="space-y-3">
-              <legend className="hf-eyebrow mb-2">Disease input mode</legend>
-              <RadioGroup
-                value={diseaseMode}
-                onValueChange={(v) =>
-                  setValue("diseaseMode", v as (typeof DISEASE_INPUT_MODES)[number])
-                }
-              >
-                {DISEASE_INPUT_MODES.map((m) => (
-                  <div key={m} className="flex items-center gap-2">
-                    <RadioGroupItem id={`disease-mode-${m}`} value={m} aria-label={m} />
-                    <Label htmlFor={`disease-mode-${m}`} className="font-normal">
-                      {m}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </fieldset>
+            <SegmentedTabs
+              value={diseaseMode}
+              onChange={(v) =>
+                setValue("diseaseMode", v as (typeof DISEASE_INPUT_MODES)[number], {
+                  shouldValidate: true,
+                })
+              }
+              options={[
+                { value: "selection", label: "Select disease" },
+                { value: "manual_disease_targets", label: "Enter targets" },
+              ]}
+              ariaLabel="Disease input mode"
+            />
 
             {diseaseMode === "selection" && (
               <div className="space-y-1.5">
