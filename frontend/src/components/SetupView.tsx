@@ -387,7 +387,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
         <div className="grid gap-5 lg:grid-cols-2">
           {/* ---- Plant input ---- */}
           <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
-            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Plant input</h2>
+            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Plants</h2>
             <div className="mt-4 space-y-5">
               <SegmentedTabs
                 value={plantMode}
@@ -511,7 +511,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
           {/* ---- Disease input ---- */}
           <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
-            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Disease input</h2>
+            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Disease</h2>
             <div className="mt-4 space-y-5">
               <SegmentedTabs
                 value={diseaseMode}

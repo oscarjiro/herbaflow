@@ -24,8 +24,8 @@ describe("AnalysisGate", () => {
     server.use(http.get(HEALTH, () => HttpResponse.json({ status: "ok" })));
     // SetupView may render themed controls; withTheme provides the ThemeProvider.
     renderWithRouter(<AnalysisGate />, { initialEntries: ["/analysis"], withTheme: true });
-    // SetupView renders "Plant input" as its first card title (unique, exact).
-    await screen.findByText("Plant input");
+    // SetupView renders "Plants" as its plant panel heading (unique h2 heading).
+    await screen.findByRole("heading", { name: "Plants", level: 2 });
   });
 
   it("redirects to the active run when one is cached", async () => {

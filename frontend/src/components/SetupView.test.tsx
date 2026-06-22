@@ -535,6 +535,63 @@ describe("SetupView — recomposed summary + advance", () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Tests — humanized labels (Task 11)
+// ---------------------------------------------------------------------------
+
+describe("SetupView — humanized field labels", () => {
+  it("plant panel heading reads 'Plants', not 'Plant input'", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    const plantHeading = headings.find((h) => h.textContent === "Plants");
+    expect(plantHeading, "h2 'Plants' heading not found").toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Plant input" })).not.toBeInTheDocument();
+  });
+
+  it("disease panel heading reads 'Disease', not 'Disease input'", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    expect(screen.getByText("Disease")).toBeInTheDocument();
+    expect(screen.queryByText("Disease input")).not.toBeInTheDocument();
+  });
+
+  it("no visible 'Plant Input Mode' text anywhere in the form", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    expect(screen.queryByText(/Plant Input Mode/i)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — theming sweep: restyled controls carry hf-* token classes (Task 11)
+// ---------------------------------------------------------------------------
+
+describe("SetupView — theming sweep", () => {
+  it("plant-mode SegmentedTabs uses hf-* token classes (no raw shadcn accent on radiogroup)", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const rg = screen.getByRole("radiogroup", { name: /plant input mode/i });
+    // The radiogroup wrapper uses hf-surface-2 and hf-border — not bg-accent
+    expect(rg.className).toMatch(/hf-/);
+    expect(rg.className).not.toMatch(/\bbg-accent\b/);
+  });
+
+  it("disease-mode SegmentedTabs uses hf-* token classes", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const rg = screen.getByRole("radiogroup", { name: /disease input mode/i });
+    expect(rg.className).toMatch(/hf-/);
+    expect(rg.className).not.toMatch(/\bbg-accent\b/);
+  });
+
+  it("GlassSurface panels carry hf-glass class (recolors via hf-* tokens)", () => {
+    const { container } = wrap(<SetupView onCreated={() => {}} />);
+    // GlassSurface renders .hf-glass + .hf-glass--{tier}; assert raised surfaces are present
+    const surfaces = container.querySelectorAll(".hf-glass--raised");
+    expect(surfaces.length).toBeGreaterThan(0);
+    surfaces.forEach((s) => {
+      expect(s.className).toMatch(/hf-glass/);
+      expect(s.className).not.toMatch(/\bbg-accent\b/);
+    });
+  });
+});
+
 describe("SetupView — create button double-submit guard", () => {
   it("disables the Create button while the create mutation is in-flight", async () => {
     // Never resolves so the mutation stays pending throughout the test.
