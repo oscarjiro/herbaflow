@@ -1,5 +1,6 @@
 export const INPUT_MODE_DESCRIPTIONS: Record<string, string> = {
   selection: "Pick plants from the catalogue; their compounds seed the pipeline.",
+  disease_selection: "Pick a disease from the catalogue; its associated targets seed the pipeline.",
   manual_compounds: "Paste compound identifiers directly instead of picking plants.",
   manual_targets: "Paste protein targets directly and skip compound discovery.",
   manual_disease_targets: "Paste disease-associated targets directly instead of picking a disease.",

@@ -522,7 +522,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                   {
                     value: "selection",
                     label: "Select disease",
-                    description: INPUT_MODE_DESCRIPTIONS["selection"],
+                    description: INPUT_MODE_DESCRIPTIONS["disease_selection"],
                   },
                   {
                     value: "manual_disease_targets",
