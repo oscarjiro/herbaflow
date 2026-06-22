@@ -35,6 +35,7 @@ import {
   TARGET_NUMERIC_PARAMS,
   TARGET_PARAMS,
 } from "../contract";
+import { INPUT_MODE_DESCRIPTIONS } from "../contract/labels";
 import { RemovableChipList } from "./RemovableChipList";
 import { ParamPanel, type ParamMeta } from "./stages/ParamPanel";
 import { CompoundValidateBox } from "./CompoundValidateBox";
@@ -395,9 +396,21 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                   })
                 }
                 options={[
-                  { value: "selection", label: "Select plants" },
-                  { value: "manual_compounds", label: "Enter compounds" },
-                  { value: "manual_targets", label: "Enter targets" },
+                  {
+                    value: "selection",
+                    label: "Select plants",
+                    description: INPUT_MODE_DESCRIPTIONS["selection"],
+                  },
+                  {
+                    value: "manual_compounds",
+                    label: "Enter compounds",
+                    description: INPUT_MODE_DESCRIPTIONS["manual_compounds"],
+                  },
+                  {
+                    value: "manual_targets",
+                    label: "Enter targets",
+                    description: INPUT_MODE_DESCRIPTIONS["manual_targets"],
+                  },
                 ]}
                 ariaLabel="Plant input mode"
               />
@@ -506,8 +519,16 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                   })
                 }
                 options={[
-                  { value: "selection", label: "Select disease" },
-                  { value: "manual_disease_targets", label: "Enter targets" },
+                  {
+                    value: "selection",
+                    label: "Select disease",
+                    description: INPUT_MODE_DESCRIPTIONS["selection"],
+                  },
+                  {
+                    value: "manual_disease_targets",
+                    label: "Enter targets",
+                    description: INPUT_MODE_DESCRIPTIONS["manual_disease_targets"],
+                  },
                 ]}
                 ariaLabel="Disease input mode"
               />
