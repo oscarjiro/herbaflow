@@ -523,6 +523,14 @@ describe("SetupView — recomposed summary + advance", () => {
     expect(screen.getByRole("button", { name: /start analysis/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /create analysis/i })).not.toBeInTheDocument();
   });
+
+  it("summary stat numbers use the serif display font", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const tile = screen.getByTestId("setup-summary");
+    const num = tile.querySelector("[data-slot='stat-num']")!;
+    expect(num).not.toBeNull();
+    expect(num.className).toMatch(/font-display/);
+  });
 });
 
 describe("SetupView — create button double-submit guard", () => {

@@ -42,7 +42,7 @@ import { CompoundValidateBox } from "./CompoundValidateBox";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
 import { TargetValidateBox } from "./TargetValidateBox";
 import { Button } from "./ui/button";
-import { Eyebrow, StatNumber } from "./ui/editorial";
+import { Eyebrow } from "./ui/editorial";
 import { GlassSurface } from "./ui/GlassSurface";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -639,15 +639,43 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
           data-testid="setup-summary"
         >
           <Eyebrow>Selection</Eyebrow>
-          <p className="font-display text-hf-fg-1 mt-2 text-xl">
+          <p className="mt-2 text-xl">
             {hasSelection ? (
               <>
-                <StatNumber>{plantCount}</StatNumber> {plantNoun}
+                <span
+                  data-slot="stat-num"
+                  className="font-display text-hf-fg-1 text-2xl leading-none"
+                >
+                  {plantCount}
+                </span>{" "}
+                <span className="text-hf-fg-3 text-base">{plantNoun}</span>
                 {" · "}
-                <StatNumber>{diseaseCount}</StatNumber> {diseaseNoun}
+                <span
+                  data-slot="stat-num"
+                  className="font-display text-hf-fg-1 text-2xl leading-none"
+                >
+                  {diseaseCount}
+                </span>{" "}
+                <span className="text-hf-fg-3 text-base">{diseaseNoun}</span>
               </>
             ) : (
-              <span className="text-hf-fg-3">Nothing selected yet.</span>
+              <>
+                <span
+                  data-slot="stat-num"
+                  className="font-display text-hf-fg-3 text-2xl leading-none"
+                >
+                  0
+                </span>{" "}
+                <span className="text-hf-fg-3 text-base">{plantNoun}</span>
+                {" · "}
+                <span
+                  data-slot="stat-num"
+                  className="font-display text-hf-fg-3 text-2xl leading-none"
+                >
+                  0
+                </span>{" "}
+                <span className="text-hf-fg-3 text-base">{diseaseNoun}</span>
+              </>
             )}
           </p>
         </GlassSurface>
