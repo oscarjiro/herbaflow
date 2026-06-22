@@ -1,5 +1,4 @@
 import { Check } from "lucide-react";
-import { GlassSurface } from "@/components/ui/GlassSurface";
 import { cn } from "@/lib/cn";
 
 const MODES = [
@@ -7,8 +6,8 @@ const MODES = [
   { value: "auto" as const, title: "Automatic", blurb: "Run end to end, then review." },
 ];
 
-// Run-mode picker as selection cards: selected = elevated brighter body + filled check, no
-// tint/ring/border. Maps to the contract `mode` enum.
+// Run-mode picker as solid selection cards: controls stay solid (glass = chrome/overlay only).
+// Selected = shadow + 1px lift + filled ink check, no tint/ring/border-color highlight.
 export function RunModeCards({
   value,
   onChange,
@@ -21,35 +20,34 @@ export function RunModeCards({
       {MODES.map((m) => {
         const selected = m.value === value;
         return (
-          <GlassSurface
+          <button
             key={m.value}
-            tier="raised"
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            data-selected={selected || undefined}
+            onClick={() => onChange(m.value)}
             className={cn(
-              "cursor-pointer rounded-[var(--radius-lg)] p-4 transition-shadow",
-              selected ? "shadow-md" : "opacity-90 hover:opacity-100",
+              "bg-hf-surface border-hf-border-strong rounded-[var(--radius-md)] border p-4 text-left transition-all",
+              "hover:border-hf-fg-3",
+              selected && "-translate-y-px shadow-[var(--hf-glass-shadow)]",
             )}
           >
-            <button
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => onChange(m.value)}
-              className="flex w-full items-start gap-3 text-left outline-none"
-            >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-hf-fg-1 text-sm font-semibold">{m.title}</span>
               <span
                 className={cn(
-                  "border-hf-border mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
-                  selected && "border-hf-accent bg-hf-accent text-hf-bg",
+                  "grid size-[19px] place-items-center rounded-full border-[1.5px]",
+                  selected
+                    ? "border-hf-fg-1 bg-hf-fg-1 text-hf-bg"
+                    : "border-hf-border-strong text-transparent",
                 )}
               >
-                {selected && <Check className="size-3.5" aria-hidden="true" />}
+                <Check className="size-3" strokeWidth={3} aria-hidden="true" />
               </span>
-              <span className="flex flex-col gap-1">
-                <span className="text-hf-fg-1 font-medium">{m.title}</span>
-                <span className="text-hf-fg-3 text-sm">{m.blurb}</span>
-              </span>
-            </button>
-          </GlassSurface>
+            </div>
+            <p className="text-hf-fg-3 mt-1.5 text-sm leading-snug">{m.blurb}</p>
+          </button>
         );
       })}
     </div>
