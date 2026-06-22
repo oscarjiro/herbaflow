@@ -1,6 +1,7 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { LazyMotion, domAnimation } from "motion/react";
 import { ThemeProvider } from "@/lib/theme";
+import { BackgroundFX } from "@/components/ui/BackgroundFX";
 import { Nav } from "@/components/ui/Nav";
 import { Footer } from "@/components/ui/Footer";
 import { Toaster } from "@/components/ui/sonner";
@@ -50,6 +51,9 @@ export const Route = createRootRoute({
           </defs>
         </svg>
         <div className="bg-hf-bg text-hf-fg-1 flex min-h-dvh flex-col">
+          {/* Decorative dotted-glow background, fixed behind all content (z-0). One
+              canonical home — every route inherits it; pages must not re-mount it. */}
+          <BackgroundFX glow="blobs" />
           <Nav />
           <main className="flex-1">
             <Outlet />

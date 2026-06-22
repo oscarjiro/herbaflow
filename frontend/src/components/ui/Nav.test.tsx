@@ -7,7 +7,7 @@ afterEach(() => cleanup());
 
 describe("Nav", () => {
   it("renders the clustered links + logo and the theme control on non-run routes", () => {
-    renderWithRouter(<Nav />, { initialEntries: ["/analysis"], withTheme: true });
+    renderWithRouter(<Nav />, { initialEntries: ["/"], withTheme: true });
     expect(screen.getByRole("link", { name: "Herbaflow home" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Analysis" })).toHaveAttribute("href", "/analysis");
     expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
@@ -15,8 +15,18 @@ describe("Nav", () => {
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
+  it("shows on the setup route (setup lives in the global layout)", () => {
+    renderWithRouter(<Nav />, { initialEntries: ["/analysis"], withTheme: true });
+    expect(screen.getByRole("link", { name: "Herbaflow home" })).toBeInTheDocument();
+  });
+
   it("hides on the run page", () => {
     renderWithRouter(<Nav />, { initialEntries: ["/analysis/run-1"], withTheme: true });
+    expect(screen.queryByRole("link", { name: "Herbaflow home" })).not.toBeInTheDocument();
+  });
+
+  it("hides on a per-stage run route (fuzzy match)", () => {
+    renderWithRouter(<Nav />, { initialEntries: ["/analysis/run-1/compounds"], withTheme: true });
     expect(screen.queryByRole("link", { name: "Herbaflow home" })).not.toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, test } from "vitest";
 import { formatSig } from "./format";
+import { formatRelative } from "./format";
 
 describe("formatSig", () => {
   it("rounds to 4 significant figures and trims trailing zeros", () => {
@@ -15,4 +16,9 @@ describe("formatSig", () => {
   it("keeps zero as 0", () => {
     expect(formatSig(0)).toBe("0");
   });
+});
+
+test("formatRelative renders a short relative string", () => {
+  const twoMinAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+  expect(formatRelative(twoMinAgo)).toMatch(/2 min/i);
 });

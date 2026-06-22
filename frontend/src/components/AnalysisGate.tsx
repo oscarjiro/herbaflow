@@ -30,6 +30,8 @@ export function AnalysisGate() {
     return <Navigate to="/analysis/$id" params={{ id: activeId }} replace />;
   }
 
+  // Setup lives in the global site layout (Nav + Footer from __root); only the
+  // running analysis (/analysis/$id) uses the immersive run shell.
   return (
     <SetupView
       onCreated={(id) => {

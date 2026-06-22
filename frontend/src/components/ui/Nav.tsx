@@ -6,8 +6,10 @@ const navLink =
 
 export function Nav() {
   const matchRoute = useMatchRoute();
-  // The run page (/analysis/$id) uses the fixed RunSidebar as its chrome — hide the top nav there.
-  if (matchRoute({ to: "/analysis/$id" })) return null;
+  // The run page (/analysis/$id and its per-stage children) uses the fixed RunSidebar as its
+  // chrome — hide the top nav there. Fuzzy so the /$stage and /inputs child routes match too.
+  // The setup route (/analysis) keeps the global nav: it lives in the standard site layout.
+  if (matchRoute({ to: "/analysis/$id", fuzzy: true })) return null;
 
   return (
     <header className="relative z-20">

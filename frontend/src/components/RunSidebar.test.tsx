@@ -25,11 +25,28 @@ describe("RunSidebar", () => {
     expect(screen.getByRole("button", { name: /exit analysis/i })).toBeInTheDocument();
   });
 
+  it("renders the run-identity card with Untitled analysis fallback", () => {
+    renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={() => {}} />, {
+      withTheme: true,
+    });
+    expect(screen.getByText("Untitled analysis")).toBeInTheDocument();
+  });
+
   it("opens the confirm dialog from Exit", () => {
     renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={vi.fn()} />, {
       withTheme: true,
     });
     fireEvent.click(screen.getByRole("button", { name: /exit analysis/i }));
     expect(screen.getByText(/permanently deleted/i)).toBeInTheDocument();
+  });
+
+  it("marks the active stage from the current route path", () => {
+    renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={() => {}} />, {
+      withTheme: true,
+      initialEntries: ["/analysis/run-1/targets"],
+    });
+    const active = document.querySelector('[aria-current="step"]');
+    expect(active).not.toBeNull();
+    expect(active).toHaveTextContent(/targets/i);
   });
 });

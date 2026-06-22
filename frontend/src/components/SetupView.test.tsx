@@ -24,14 +24,14 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-/** Get the plant-mode fieldset by its legend text. */
+/** Get the plant-mode segmented control by its aria-label. */
 function plantFieldset() {
-  return screen.getByRole("group", { name: /plant input mode/i });
+  return screen.getByRole("radiogroup", { name: /plant input mode/i });
 }
 
-/** Get the disease-mode fieldset by its legend text. */
+/** Get the disease-mode segmented control by its aria-label. */
 function diseaseFieldset() {
-  return screen.getByRole("group", { name: /disease input mode/i });
+  return screen.getByRole("radiogroup", { name: /disease input mode/i });
 }
 
 /**
@@ -58,16 +58,16 @@ describe("SetupView — plant input-mode radios", () => {
   it("renders 3 plant-mode radio options: selection, manual_compounds, manual_targets", async () => {
     wrap(<SetupView onCreated={() => {}} />);
     const pf = plantFieldset();
-    expect(within(pf).getByRole("radio", { name: /selection/i })).toBeInTheDocument();
-    expect(within(pf).getByRole("radio", { name: /manual_compounds/i })).toBeInTheDocument();
-    expect(within(pf).getByRole("radio", { name: /manual_targets/i })).toBeInTheDocument();
+    expect(within(pf).getByRole("radio", { name: /select plants/i })).toBeInTheDocument();
+    expect(within(pf).getByRole("radio", { name: /enter compounds/i })).toBeInTheDocument();
+    expect(within(pf).getByRole("radio", { name: /enter targets/i })).toBeInTheDocument();
   });
 
   it("renders 2 disease-mode radio options: selection, manual_disease_targets", async () => {
     wrap(<SetupView onCreated={() => {}} />);
     const df = diseaseFieldset();
-    expect(within(df).getByRole("radio", { name: /selection/i })).toBeInTheDocument();
-    expect(within(df).getByRole("radio", { name: /manual_disease_targets/i })).toBeInTheDocument();
+    expect(within(df).getByRole("radio", { name: /select disease/i })).toBeInTheDocument();
+    expect(within(df).getByRole("radio", { name: /enter targets/i })).toBeInTheDocument();
   });
 });
 
@@ -88,7 +88,7 @@ describe("SetupView — plant mode controls", () => {
     wrap(<SetupView onCreated={() => {}} />);
 
     // Switch to manual_targets
-    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /manual_targets/i }));
+    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /enter targets/i }));
 
     // Plant combobox should be gone
     expect(screen.queryByRole("combobox", { name: /search plants/i })).not.toBeInTheDocument();
@@ -103,9 +103,7 @@ describe("SetupView — plant mode controls", () => {
   it("switching plant mode to manual_compounds shows CompoundValidateBox and plant_label, hides combobox", async () => {
     wrap(<SetupView onCreated={() => {}} />);
 
-    await userEvent.click(
-      within(plantFieldset()).getByRole("radio", { name: /manual_compounds/i }),
-    );
+    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /enter compounds/i }));
 
     expect(screen.queryByRole("combobox", { name: /search plants/i })).not.toBeInTheDocument();
     // CompoundValidateBox textarea has default label "Manual compounds"
@@ -130,9 +128,7 @@ describe("SetupView — disease mode controls", () => {
   it("switching disease mode to manual_disease_targets hides combobox and shows target editor + disease_label", async () => {
     wrap(<SetupView onCreated={() => {}} />);
 
-    await userEvent.click(
-      within(diseaseFieldset()).getByRole("radio", { name: /manual_disease_targets/i }),
-    );
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }));
 
     // Disease combobox should be gone
     expect(screen.queryByRole("combobox", { name: /search disease/i })).not.toBeInTheDocument();
@@ -176,7 +172,7 @@ describe("SetupView — create payload per mode", () => {
     await pickComboOption("Search disease", /test disease/i);
 
     // Submit
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
     const body = createSpy.mock.calls[0]![0].body;
@@ -211,10 +207,8 @@ describe("SetupView — create payload per mode", () => {
     wrap(<SetupView onCreated={() => {}} />);
 
     // Switch both modes
-    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /manual_targets/i }));
-    await userEvent.click(
-      within(diseaseFieldset()).getByRole("radio", { name: /manual_disease_targets/i }),
-    );
+    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /enter targets/i }));
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }));
 
     // Validate plant targets — the plant TargetValidateBox uses label "Plant targets"
     const plantTextarea = screen.getByRole("textbox", { name: /plant targets/i });
@@ -253,7 +247,7 @@ describe("SetupView — create payload per mode", () => {
     await userEvent.type(screen.getByLabelText(/disease label/i), "My Disease");
 
     // Submit
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
     const body = createSpy.mock.calls[0]![0].body;
@@ -281,7 +275,7 @@ describe("SetupView — end-to-end create flow", () => {
     // Select plant and disease via comboboxes
     await pickComboOption("Search plants", /aaa bbb/i);
     await pickComboOption("Search disease", /test disease/i);
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createdId).toBe("r1"));
   });
@@ -290,13 +284,16 @@ describe("SetupView — end-to-end create flow", () => {
     let createdId: string | null = null;
     wrap(<SetupView onCreated={(id) => (createdId = id)} />);
 
-    // Mode defaults to guided
+    // Mode defaults to guided — now rendered as radio cards
     await waitFor(() =>
-      expect(screen.getByRole("combobox", { name: /mode/i })).toHaveTextContent("guided"),
+      expect(screen.getByRole("radio", { name: /guided/i })).toHaveAttribute(
+        "aria-checked",
+        "true",
+      ),
     );
 
     // Switch plant input mode to manual_compounds to reveal CompoundValidateBox
-    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await userEvent.click(screen.getByRole("radio", { name: /enter compounds/i }));
 
     // Type two lines into the manual compounds textarea
     await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO\nNOTAKEY");
@@ -343,7 +340,7 @@ describe("SetupView — end-to-end create flow", () => {
 
     // Select a disease via the new combobox
     await pickComboOption("Search disease", /test disease/i);
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createdId).toBe("r1"));
     await waitFor(() =>
@@ -370,7 +367,7 @@ describe("SetupView — manual setup added-pool", () => {
 
   it("compound pool: validate + Add accumulates; second Add of same item does not duplicate", async () => {
     wrap(<SetupView onCreated={() => {}} />);
-    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await userEvent.click(screen.getByRole("radio", { name: /enter compounds/i }));
 
     // First Add — MSW always resolves to c1/ethanol
     await validateAndAddCompounds();
@@ -399,7 +396,7 @@ describe("SetupView — manual setup added-pool", () => {
 
   it("compound pool: Remove button removes just that item", async () => {
     wrap(<SetupView onCreated={() => {}} />);
-    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await userEvent.click(screen.getByRole("radio", { name: /enter compounds/i }));
     await validateAndAddCompounds();
 
     // Chip is present
@@ -433,12 +430,12 @@ describe("SetupView — manual setup added-pool", () => {
     } as never);
 
     wrap(<SetupView onCreated={() => {}} />);
-    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await userEvent.click(screen.getByRole("radio", { name: /enter compounds/i }));
     await validateAndAddCompounds();
 
     // Select a disease to make form submittable
     await pickComboOption("Search disease", /test disease/i);
-    await userEvent.click(screen.getByRole("button", { name: /create analysis/i }));
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
 
     await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
     const body = createSpy.mock.calls[0]![0].body;
@@ -447,15 +444,15 @@ describe("SetupView — manual setup added-pool", () => {
 
   it("compound pool: switching away and back to manual_compounds keeps the pool visible", async () => {
     wrap(<SetupView onCreated={() => {}} />);
-    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await userEvent.click(screen.getByRole("radio", { name: /enter compounds/i }));
     await validateAndAddCompounds();
 
     // Switch away — scope to plantFieldset to avoid ambiguity with the disease selection radio
-    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /^selection$/i }));
+    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /select plants/i }));
     expect(screen.queryByRole("list", { name: /added compounds/i })).not.toBeInTheDocument();
 
     // Switch back
-    await userEvent.click(screen.getByRole("radio", { name: /manual_compounds/i }));
+    await userEvent.click(screen.getByRole("radio", { name: /enter compounds/i }));
     await screen.findByRole("list", { name: /added compounds/i });
     expect(
       within(screen.getByRole("list", { name: /added compounds/i })).getAllByRole("listitem"),
@@ -464,7 +461,7 @@ describe("SetupView — manual setup added-pool", () => {
 
   it("plant target pool: validate + Add accumulates and Remove removes", async () => {
     wrap(<SetupView onCreated={() => {}} />);
-    await userEvent.click(screen.getByRole("radio", { name: /manual_targets/i }));
+    await userEvent.click(within(plantFieldset()).getByRole("radio", { name: /enter targets/i }));
 
     await userEvent.type(screen.getByRole("textbox", { name: /plant targets/i }), "EGFR");
     await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
@@ -486,9 +483,7 @@ describe("SetupView — manual setup added-pool", () => {
 
   it("disease target pool: validate + Add accumulates; switching away and back keeps pool", async () => {
     wrap(<SetupView onCreated={() => {}} />);
-    await userEvent.click(
-      within(diseaseFieldset()).getByRole("radio", { name: /manual_disease_targets/i }),
-    );
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }));
 
     await userEvent.type(screen.getByRole("textbox", { name: /disease targets/i }), "EGFR");
     await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
@@ -499,13 +494,13 @@ describe("SetupView — manual setup added-pool", () => {
     await screen.findByRole("list", { name: /added disease targets/i });
 
     // Switch away to selection
-    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /^selection$/i }));
+    await userEvent.click(
+      within(diseaseFieldset()).getByRole("radio", { name: /select disease/i }),
+    );
     expect(screen.queryByRole("list", { name: /added disease targets/i })).not.toBeInTheDocument();
 
     // Switch back
-    await userEvent.click(
-      within(diseaseFieldset()).getByRole("radio", { name: /manual_disease_targets/i }),
-    );
+    await userEvent.click(within(diseaseFieldset()).getByRole("radio", { name: /enter targets/i }));
     await screen.findByRole("list", { name: /added disease targets/i });
     expect(
       within(screen.getByRole("list", { name: /added disease targets/i })).getAllByRole("listitem"),
@@ -517,6 +512,19 @@ describe("SetupView — manual setup added-pool", () => {
 // Tests — double-submit guard
 // ---------------------------------------------------------------------------
 
+describe("SetupView — recomposed summary + advance", () => {
+  it("renders a selection summary region, empty by default", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    expect(screen.getByTestId("setup-summary")).toBeInTheDocument();
+  });
+
+  it("advance is a single primary Start analysis button", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    expect(screen.getByRole("button", { name: /start analysis/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /create analysis/i })).not.toBeInTheDocument();
+  });
+});
+
 describe("SetupView — create button double-submit guard", () => {
   it("disables the Create button while the create mutation is in-flight", async () => {
     // Never resolves so the mutation stays pending throughout the test.
@@ -527,10 +535,44 @@ describe("SetupView — create button double-submit guard", () => {
     await pickComboOption("Search plants", /aaa bbb/i);
     await pickComboOption("Search disease", /test disease/i);
 
-    const createBtn = screen.getByRole("button", { name: /create analysis/i });
+    const createBtn = screen.getByRole("button", { name: /start analysis/i });
     expect(createBtn).not.toBeDisabled();
 
     await userEvent.click(createBtn);
     expect(createBtn).toBeDisabled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — custom analysis name
+// ---------------------------------------------------------------------------
+
+describe("SetupView — custom analysis name", () => {
+  it("sends the entered analysis name in the create body", async () => {
+    const createSpy = vi.spyOn(sdk, "createAnalysis").mockResolvedValue({
+      data: {
+        analysis_id: "r1",
+        analysis_name: "Curcuma vs T2DM",
+        disease_id: "d1",
+        mode: "auto",
+        status: "pending",
+        current_stage: null,
+        stage_results: {},
+        created_at: null,
+        completed_at: null,
+        expires_at: null,
+        error_message: null,
+      },
+    } as never);
+
+    wrap(<SetupView onCreated={() => {}} />);
+
+    await pickComboOption("Search plants", /aaa bbb/i);
+    await pickComboOption("Search disease", /test disease/i);
+    await userEvent.type(screen.getByLabelText(/name this analysis/i), "Curcuma vs T2DM");
+    await userEvent.click(screen.getByRole("button", { name: /start analysis/i }));
+
+    await waitFor(() => expect(createSpy).toHaveBeenCalledOnce());
+    expect(createSpy.mock.calls[0]![0].body.analysis_name).toBe("Curcuma vs T2DM");
   });
 });

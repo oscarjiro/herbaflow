@@ -30,14 +30,14 @@ describe("ctpConcentricLayout", () => {
     expect(layout.name).toBe("concentric");
   });
 
-  it("places targets at the core (rank 3), compounds at 2, pathways/diseases at 1", () => {
+  it("places compounds at the core (rank 3), targets at 2, pathways/diseases at 1", () => {
     const layout = ctpConcentricLayout();
     // The concentric callback takes a node with a .data() method
     const makeNode = (type: string) => ({ data: (key: string) => (key === "type" ? type : "") });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const concentric = (layout as any).concentric as (n: unknown) => number;
-    expect(concentric(makeNode("target"))).toBe(3);
-    expect(concentric(makeNode("compound"))).toBe(2);
+    expect(concentric(makeNode("compound"))).toBe(3);
+    expect(concentric(makeNode("target"))).toBe(2);
     expect(concentric(makeNode("pathway"))).toBe(1);
     expect(concentric(makeNode("disease"))).toBe(1);
     expect(concentric(makeNode("unknown"))).toBe(0);

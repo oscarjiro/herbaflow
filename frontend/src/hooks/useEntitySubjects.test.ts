@@ -1,6 +1,13 @@
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createElement, type ReactNode } from "react";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
-import { deriveSubjects } from "./useEntitySubjects";
-import type { DiseaseRead, PlantRead } from "../api/types.gen";
+import { server } from "../../tests/handlers";
+import { deriveSubjects, useEntitySubjects } from "./useEntitySubjects";
+import type { AnalysisRead, DiseaseRead, PlantRead } from "../api/types.gen";
+
+const BASE = "http://localhost:8000";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -194,5 +201,56 @@ describe("deriveSubjects — missing or empty inputs", () => {
     // plant_id and disease_id used as fallback
     expect(result.plant).toBe("p1");
     expect(result.disease).toBe("d1");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — the hook fetches a complete catalog (regression: plant UUID leak)
+// ---------------------------------------------------------------------------
+
+describe("useEntitySubjects — full catalog resolution", () => {
+  function wrapper() {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return ({ children }: { children: ReactNode }) =>
+      createElement(QueryClientProvider, { client: qc }, children);
+  }
+
+  it("resolves a plant that sorts past the default 50-row page (never leaks the UUID)", async () => {
+    // A 100-plant catalog whose target sits at index 99 — beyond any default 50-row page.
+    // The handler honours `limit`, so resolution only succeeds if the hook asks for the
+    // whole catalog rather than the backend's default of 50.
+    const target: PlantRead = {
+      plant_id: "p-deep",
+      canonical_key: "gbif:deep",
+      canonical_scientific_name: "Curcuma longa",
+      family_name: null,
+    };
+    server.use(
+      http.get(`${BASE}/plants`, ({ request }) => {
+        const limit = Number(new URL(request.url).searchParams.get("limit") ?? "50");
+        const all: PlantRead[] = [
+          ...Array.from({ length: 99 }, (_, i) => ({
+            plant_id: `p${i}`,
+            canonical_key: `gbif:${i}`,
+            canonical_scientific_name: `Plant ${i}`,
+            family_name: null,
+          })),
+          target,
+        ];
+        return HttpResponse.json(all.slice(0, limit));
+      }),
+    );
+
+    const run = {
+      analysis_id: "a1",
+      disease_id: null,
+      parameters: {
+        input_modes: { plant: "selection", disease: "selection" },
+        plant_ids: ["p-deep"],
+      },
+    } as unknown as AnalysisRead;
+
+    const { result } = renderHook(() => useEntitySubjects(run), { wrapper: wrapper() });
+    await waitFor(() => expect(result.current.plant).toBe("Curcuma longa"));
   });
 });

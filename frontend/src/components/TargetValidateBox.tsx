@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { LineNumberedTextarea } from "@/components/ui/line-numbered-textarea";
+import { ManualEntrySummary, nonEmptyLineCount } from "@/components/ui/ManualEntrySummary";
+import { MAX_TARGETS } from "@/contract";
 
 /**
  * Reusable target validate box: line-numbered editor + Validate button +
@@ -47,6 +49,19 @@ export function TargetValidateBox({
       .filter((f): f is FailedInput & { line: number } => typeof f.line === "number")
       .map((f) => [f.line, f.reason]),
   );
+
+  // Repeated non-empty input lines, for the at-a-glance summary roll-up.
+  const duplicateCount = (() => {
+    const seen = new Set<string>();
+    let dup = 0;
+    for (const raw of text.split("\n")) {
+      const v = raw.trim();
+      if (!v) continue;
+      if (seen.has(v)) dup += 1;
+      else seen.add(v);
+    }
+    return dup;
+  })();
 
   const validate = useMutation({
     mutationFn: async () => {
@@ -121,6 +136,21 @@ export function TargetValidateBox({
           editorRef={editorRef}
           controlsId={`${textareaId}-failed`}
         />
+
+        {(resolved.length > 0 || failed.length > 0 || text.trim().length > 0) && (
+          <ManualEntrySummary
+            validCount={resolved.length}
+            invalidCount={failed.length}
+            duplicateCount={duplicateCount}
+            current={nonEmptyLineCount(text)}
+            max={MAX_TARGETS}
+            onClear={() => {
+              setText("");
+              setResolved([]);
+              setFailed([]);
+            }}
+          />
+        )}
 
         {showAddButton && resolved.length > 0 && (
           <Button type="button" size="sm" onClick={handleAdd}>

@@ -244,6 +244,32 @@ describe("ParamPanel", () => {
     expect(screen.getByRole("button", { name: /redo from this stage/i })).toBeDisabled();
   });
 
+  it("param description is behind an info tooltip, not always-visible body text", async () => {
+    const tooltipMeta: ParamMeta = {
+      default: 5,
+      min: 0,
+      minExclusive: false,
+      max: 10,
+      recommended_min: 1,
+      recommended_max: 9,
+      description: "the full long description sentence",
+    };
+    render(
+      <ParamPanel
+        params={{ score: 5 }}
+        meta={{ score: tooltipMeta }}
+        onRedo={vi.fn()}
+        numericKeys={["score"]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        title="Tooltip test"
+      />,
+    );
+    await openPanel(/tooltip test/i);
+    expect(screen.getByRole("button", { name: /about/i })).toBeInTheDocument();
+    expect(screen.queryByText(/the full long description sentence/i)).not.toBeInTheDocument();
+  });
+
   describe("collect-mode (onChange + hideRedo)", () => {
     it("hideRedo hides the Redo button", async () => {
       render(

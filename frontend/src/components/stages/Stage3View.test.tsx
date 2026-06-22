@@ -588,7 +588,7 @@ describe("Stage3View — D-4 toast wiring", () => {
 
     // Open param panel ("Target parameters" is the ParamPanel title)
     await userEvent.click(screen.getByRole("button", { name: /target parameters/i }));
-    const input = screen.getByLabelText(/min.*pchembl/i);
+    const input = screen.getByLabelText("min_pchembl");
     await userEvent.clear(input);
     await userEvent.type(input, "6");
     await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));

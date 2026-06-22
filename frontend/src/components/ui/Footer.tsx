@@ -2,8 +2,10 @@ import { useMatchRoute } from "@tanstack/react-router";
 
 export function Footer() {
   const matchRoute = useMatchRoute();
-  // The run page owns its own chrome — no global footer there.
-  if (matchRoute({ to: "/analysis/$id" })) return null;
+  // The run page (and its per-stage children) owns its own chrome — no global footer there.
+  // Fuzzy so the /$stage and /inputs child routes match too. The setup route (/analysis)
+  // keeps the global footer: it lives in the standard site layout.
+  if (matchRoute({ to: "/analysis/$id", fuzzy: true })) return null;
 
   return (
     <footer className="border-hf-border relative z-20 border-t">

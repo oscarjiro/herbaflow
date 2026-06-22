@@ -35,6 +35,7 @@ export function renderWithRouter(
       stub("/"),
       stub("/analysis"),
       stub("/analysis/$id"),
+      stub("/analysis/$id/$stage"),
       stub("/about"),
     ]),
     history: createMemoryHistory({ initialEntries }),
