@@ -1,88 +1,32 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider } from "@/lib/theme";
 import { EnrichmentDotChart } from "./EnrichmentDotChart";
 
-// ---------------------------------------------------------------------------
-// Mock recharts ResponsiveContainer — gives the chart an explicit size in
-// jsdom (same pattern as HubBarChart.test.tsx).
-// ---------------------------------------------------------------------------
+vi.mock("./PlotlyChart", () => ({
+  PlotlyChart: (p: { data: { y: string[] }[] }) => (
+    <div data-testid="plot">{p.data[0]?.y?.join("|")}</div>
+  ),
+}));
 
-vi.mock("recharts", async (orig) => {
-  const actual = await orig<typeof import("recharts")>();
-  return {
-    ...actual,
-    ResponsiveContainer: ({ children }: { children: React.ReactElement }) =>
-      React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
-        width: 800,
-        height: 400,
-      }),
-  };
-});
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function wrap(ui: React.ReactNode) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <QueryClientProvider client={qc}>
-      <ThemeProvider>{ui}</ThemeProvider>
-    </QueryClientProvider>,
-  );
-}
-
-const SAMPLE_TERMS = [
-  {
-    source: "GO:BP",
-    name: "response to oxidative stress",
-    p_value: 0.001,
-    intersection_size: 5,
-  },
-  {
-    source: "KEGG",
-    name: "PI3K-Akt signaling pathway",
-    p_value: 0.003,
-    intersection_size: 3,
-  },
+const terms = [
+  { source: "GO:BP", name: "apoptotic process", p_value: 1e-8, intersection_size: 12 },
+  { source: "KEGG", name: "PI3K-Akt signaling", p_value: 1e-6, intersection_size: 9 },
 ];
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 describe("EnrichmentDotChart", () => {
-  it("renders scatter symbol elements for the provided terms", () => {
-    const { container } = wrap(<EnrichmentDotChart terms={SAMPLE_TERMS} />);
-    const symbols = container.querySelectorAll(".recharts-scatter-symbol");
-    expect(symbols.length).toBeGreaterThanOrEqual(2);
+  it("renders a tab per present source with humanized labels and switches", async () => {
+    const user = userEvent.setup();
+    render(<EnrichmentDotChart terms={terms} />);
+    expect(screen.getByRole("tab", { name: "Biological Process" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "KEGG Pathway" })).toBeInTheDocument();
+    expect(screen.getByTestId("plot").textContent).toContain("apoptotic process");
+    await user.click(screen.getByRole("tab", { name: "KEGG Pathway" }));
+    expect(screen.getByTestId("plot").textContent).toContain("PI3K-Akt signaling");
   });
 
-  it("shows full-name legend labels for each source", () => {
-    wrap(<EnrichmentDotChart terms={SAMPLE_TERMS} />);
-    expect(screen.getByText("Biological Process")).toBeInTheDocument();
-    expect(screen.getByText("KEGG Pathway")).toBeInTheDocument();
-  });
-
-  it("renders without throwing when terms is empty", () => {
-    expect(() => wrap(<EnrichmentDotChart terms={[]} />)).not.toThrow();
-  });
-
-  it("renders without throwing and produces a finite negLogP for p_value 0", () => {
-    // p_value 0 would yield -log10(0) = Infinity; the clamp to 1e-300 must prevent that.
-    expect(() =>
-      wrap(
-        <EnrichmentDotChart
-          terms={[{ source: "GO:BP", name: "test term", p_value: 0, intersection_size: 2 }]}
-        />,
-      ),
-    ).not.toThrow();
-  });
-
-  it("renders without throwing inside ThemeProvider", () => {
-    expect(() => wrap(<EnrichmentDotChart terms={SAMPLE_TERMS} />)).not.toThrow();
+  it("renders nothing when terms is empty", () => {
+    const { container } = render(<EnrichmentDotChart terms={[]} />);
+    expect(container.firstChild).toBeNull();
   });
 });

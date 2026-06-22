@@ -108,14 +108,7 @@ describe("exportSvgAsPng — success path", () => {
     expect(saveBlobSpy).toHaveBeenCalledWith(expect.any(Blob), "chart.png");
   });
 
-  it("renders the title via fillText when title is provided", async () => {
-    const { exportSvgAsPng } = await import("./chartExport");
-    const svg = makeSvg(400, 200);
-    await exportSvgAsPng(svg, { filename: "hub.png", title: "Hub genes by MCC" });
-    expect(fakeCtx.fillText).toHaveBeenCalledWith("Hub genes by MCC", 12, 16);
-  });
-
-  it("does not call fillText when no title is provided", async () => {
+  it("never bakes a title strip (no fillText) onto the figure", async () => {
     const { exportSvgAsPng } = await import("./chartExport");
     const svg = makeSvg(400, 200);
     await exportSvgAsPng(svg, { filename: "hub.png" });
@@ -134,8 +127,27 @@ describe("exportSvgAsPng — success path", () => {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     // No viewBox, no clientWidth/clientHeight (jsdom returns 0)
     await exportSvgAsPng(svg, { filename: "fallback.png" });
-    // fillRect called with fallback dimensions
-    expect(fakeCtx.fillRect).toHaveBeenCalledWith(0, 0, 800, 400);
+    // Transparent export: no background rect; the image is drawn at fallback size.
+    expect(fakeCtx.fillRect).not.toHaveBeenCalled();
+    expect(fakeCtx.drawImage).toHaveBeenCalledWith(expect.anything(), 0, 0, 800, 400);
+  });
+
+  it("exports transparently (no background fill) and forces black label text", async () => {
+    const serializeSpy = vi.spyOn(XMLSerializer.prototype, "serializeToString");
+    const { exportSvgAsPng } = await import("./chartExport");
+    const svg = makeSvg(400, 200);
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("fill", "#ffffff");
+    text.textContent = "Compound targets";
+    svg.appendChild(text);
+    await exportSvgAsPng(svg, { filename: "venn.png" });
+    // A transparent export must not paint a background rectangle.
+    expect(fakeCtx.fillRect).not.toHaveBeenCalled();
+    // The serialized clone forces black label text (legible on a white page).
+    const serialized = serializeSpy.mock.results.at(-1)?.value as string;
+    expect(serialized).toContain('fill="#000000"');
+    // The live node is untouched (export clones before recolouring).
+    expect(text.getAttribute("fill")).toBe("#ffffff");
   });
 });
 
@@ -164,31 +176,42 @@ describe("exportSvgAsPng — error path", () => {
 // ---------------------------------------------------------------------------
 
 function makeCy() {
-  return { png: vi.fn(() => "data:image/png;base64,AAAA") };
+  return {
+    png: vi.fn(() => "data:image/png;base64,AAAA"),
+    nodes: vi.fn(() => ({ style: vi.fn(), removeStyle: vi.fn() })),
+  };
 }
 
 describe("exportCytoscapeAsPng — success path", () => {
-  it("calls cy.png with full:true, scale:2 and a background string", async () => {
+  it("renders with full:true, scale:2 on a transparent canvas", async () => {
     const { exportCytoscapeAsPng } = await import("./chartExport");
     const cy = makeCy();
     await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
     expect(cy.png).toHaveBeenCalledWith(
-      expect.objectContaining({ full: true, scale: 2, bg: expect.any(String) }),
+      expect.objectContaining({ full: true, scale: 2, bg: "transparent" }),
     );
+    // A transparent export must not paint a background rectangle.
+    expect(fakeCtx.fillRect).not.toHaveBeenCalled();
   });
 
-  it("passes the explicit background through to cy.png", async () => {
+  it("forces black labels for the export, then restores them", async () => {
+    const style = vi.fn();
+    const removeStyle = vi.fn();
+    const cy = {
+      png: vi.fn(() => "data:image/png;base64,AAAA"),
+      nodes: vi.fn(() => ({ style, removeStyle })),
+    };
     const { exportCytoscapeAsPng } = await import("./chartExport");
-    const cy = makeCy();
-    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png", background: "#abcdef" });
-    expect(cy.png).toHaveBeenCalledWith(expect.objectContaining({ bg: "#abcdef" }));
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
+    expect(style).toHaveBeenCalledWith(expect.objectContaining({ color: "#000000" }));
+    expect(removeStyle).toHaveBeenCalled();
   });
 
-  it("draws the title via fillText when a title is provided", async () => {
+  it("never bakes a title strip (no fillText) onto the figure", async () => {
     const { exportCytoscapeAsPng } = await import("./chartExport");
     const cy = makeCy();
-    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png", title: "Interaction network" });
-    expect(fakeCtx.fillText).toHaveBeenCalledWith("Interaction network", 12, 16);
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
+    expect(fakeCtx.fillText).not.toHaveBeenCalled();
   });
 
   it("calls toBlob and saveBlob with the filename", async () => {

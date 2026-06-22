@@ -7,7 +7,7 @@ import { notifyError, notifySuccess } from "@/lib/toast";
 import type { Problem } from "@/lib/problem";
 
 type ChartFrameProps = {
-  /** Chart title shown in the card header and embedded in the exported PNG. */
+  /** Chart title shown in the card header (not baked into the exported PNG). */
   title: string;
   /** Filename (including .png extension) used when saving the export. */
   filename: string;
@@ -42,7 +42,7 @@ export function ChartFrame({ title, filename, description, onExport, children }:
       } else {
         const svg = wrapperRef.current?.querySelector("svg");
         if (!svg) throw new Error("No chart to export");
-        await exportSvgAsPng(svg as SVGSVGElement, { title, filename });
+        await exportSvgAsPng(svg as SVGSVGElement, { filename });
       }
       notifySuccess(`Downloaded ${title}`);
     } catch (err) {

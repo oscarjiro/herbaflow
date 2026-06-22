@@ -178,6 +178,9 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
             compoundCount={stage5.compound_target_count}
             diseaseCount={stage5.disease_target_count}
             overlapCount={stage5.count}
+            overlapGenes={stage5.overlap
+              .map((r) => r.gene_symbol)
+              .filter((g): g is string => Boolean(g))}
           />
         </ChartFrame>
       )}
