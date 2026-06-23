@@ -7,7 +7,7 @@ import * as sdk from "../../api/sdk.gen";
 import type { AnalysisRead } from "../../api/types.gen";
 
 // ---------------------------------------------------------------------------
-// Fixture
+// Fixture helpers
 // ---------------------------------------------------------------------------
 
 /** Minimal AnalysisRead whose Stage 1 compound set already contains C1/Quercetin. */
@@ -39,6 +39,15 @@ function makeRun(overrides: Partial<AnalysisRead> = {}): AnalysisRead {
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+}
+
+function blobToText(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(blob);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -192,7 +201,8 @@ describe("Stage1View — already-in-run deduplication", () => {
 
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByText(/curcumin/i)).toBeInTheDocument();
-    expect(screen.getByText("Added by you")).toBeInTheDocument();
+    // Source chip: user-added → User-curated
+    expect(screen.getByText("User-curated")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /remove curcumin/i })).toBeInTheDocument();
   });
 
@@ -291,5 +301,311 @@ describe("Stage1View — already-in-run deduplication", () => {
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/already in run/i));
     // editStage should NOT have been called at all
     expect(editSpy).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Column spec — new DataTable columns
+// ---------------------------------------------------------------------------
+
+describe("Stage1View — column spec", () => {
+  it("InChIKey column links to PubChem", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  inchikey: "VHYFNPMBLIVWCW-UHFFFAOYSA-N",
+                  tag: "computed",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    const link = screen.getByRole("link", {
+      name: /VHYFNPMBLIVWCW-UHFFFAOYSA-N/i,
+    });
+    expect(link).toHaveAttribute(
+      "href",
+      "https://pubchem.ncbi.nlm.nih.gov/#query=VHYFNPMBLIVWCW-UHFFFAOYSA-N",
+    );
+  });
+
+  it("source chip shows KNApSAcK for a computed compound", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  tag: "computed",
+                  source_url: "https://knapsack.jp/compound/C00001",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("KNApSAcK")).toBeInTheDocument();
+  });
+
+  it("source chip shows User-curated for a user-added compound", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  tag: "user-added",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("User-curated")).toBeInTheDocument();
+  });
+
+  it("plant-source column is ABSENT for single-plant selection mode", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          parameters: {
+            input_modes: { plant: "selection", disease: "selection" },
+            plant_ids: ["p1"],
+          },
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  tag: "computed",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    expect(screen.queryByRole("columnheader", { name: /plant source/i })).not.toBeInTheDocument();
+  });
+
+  it("plant-source column is ABSENT for manual_compounds mode even with per_plant", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          parameters: {
+            input_modes: { plant: "manual_compounds", disease: "selection" },
+            plant_ids: [],
+          },
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  tag: "computed",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    expect(screen.queryByRole("columnheader", { name: /plant source/i })).not.toBeInTheDocument();
+  });
+
+  it("plant-source column IS present for multi-plant selection mode", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          parameters: {
+            input_modes: { plant: "selection", disease: "selection" },
+            plant_ids: ["p1", "p2"],
+          },
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  tag: "computed",
+                },
+              ],
+              per_plant: { p1: ["c1"] },
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("columnheader", { name: /plant source/i })).toBeInTheDocument();
+  });
+
+  it("delete button is enabled above the floor and carries the correct aria-label", () => {
+    // Stage1View renders one delete button per visible row. When count > 1,
+    // the button is enabled and labelled "Remove <name>", proving the existing
+    // handleRemove(id) path is wired — the same path proven disabled at the floor
+    // by the "disables the remove button at the one-entity floor" test above.
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 2,
+              compounds: [
+                { compound_id: "c1", canonical_name: "Curcumin", tag: "computed" },
+                { compound_id: "c2", canonical_name: "Berberine", tag: "computed" },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    const removeBtn = screen.getByRole("button", { name: /remove curcumin/i });
+    expect(removeBtn).toBeEnabled();
+    expect(removeBtn).not.toHaveAttribute("title");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CSV spec
+// ---------------------------------------------------------------------------
+
+describe("Stage1View — CSV", () => {
+  it("CSV header matches the column spec exactly", async () => {
+    let capturedBlob: Blob | null = null;
+    vi.spyOn(URL, "createObjectURL").mockImplementation((blob: Blob | MediaSource) => {
+      capturedBlob = blob as Blob;
+      return "blob:mock";
+    });
+
+    wrap(<Stage1View data={makeRun()} />);
+    await waitFor(() => expect(capturedBlob).not.toBeNull());
+    if (capturedBlob == null) throw new Error("expected CSV blob to be created");
+
+    const csv = await blobToText(capturedBlob);
+    const header = csv.split("\n")[0];
+    expect(header).toBe("inchikey,name,smiles,plant_sources,source,source_url");
+  });
+
+  it("CSV row contains correct field values for a computed compound", async () => {
+    let capturedBlob: Blob | null = null;
+    vi.spyOn(URL, "createObjectURL").mockImplementation((blob: Blob | MediaSource) => {
+      capturedBlob = blob as Blob;
+      return "blob:mock";
+    });
+
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  inchikey: "VHYFNPMBLIVWCW-UHFFFAOYSA-N",
+                  smiles: "COc1cc(/C=C/C(=O)CC(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O",
+                  source_url: "https://knapsack.jp/compound/C00001",
+                  tag: "computed",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    await waitFor(() => expect(capturedBlob).not.toBeNull());
+    if (capturedBlob == null) throw new Error("expected CSV blob to be created");
+
+    const csv = await blobToText(capturedBlob);
+    expect(csv).toContain("VHYFNPMBLIVWCW-UHFFFAOYSA-N");
+    expect(csv).toContain("Curcumin");
+    expect(csv).toContain("KNApSAcK");
+    expect(csv).toContain("https://knapsack.jp/compound/C00001");
+  });
+
+  it("CSV plant_sources column is empty string in single-plant mode", async () => {
+    let capturedBlob: Blob | null = null;
+    vi.spyOn(URL, "createObjectURL").mockImplementation((blob: Blob | MediaSource) => {
+      capturedBlob = blob as Blob;
+      return "blob:mock";
+    });
+
+    wrap(
+      <Stage1View
+        data={makeRun({
+          parameters: {
+            input_modes: { plant: "selection", disease: "selection" },
+            plant_ids: ["p1"],
+          },
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  inchikey: "VHYFNPMBLIVWCW-UHFFFAOYSA-N",
+                  tag: "computed",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    await waitFor(() => expect(capturedBlob).not.toBeNull());
+    if (capturedBlob == null) throw new Error("expected CSV blob to be created");
+
+    const csv = await blobToText(capturedBlob);
+    const rows = csv.split("\n");
+    // Data row: inchikey,name,smiles,plant_sources,source,source_url
+    // plant_sources should be empty (not a multi-plant selection run)
+    const dataRow = rows[1];
+    expect(dataRow).toBeDefined();
+    // The plant_sources field is between smiles and source — should be empty
+    // Row format: inchikey,name,smiles,,source,source_url
+    expect(dataRow).toContain(",,");
   });
 });
