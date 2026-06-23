@@ -3,7 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "@/lib/theme";
-import { Stage7View } from "./Stage7View";
+import { Stage7View, buildS7CsvRows, S7_CSV_HEADER } from "./Stage7View";
+import { uniprotGeneUrl } from "../../lib/externalUrls";
 import type { AnalysisRead } from "../../api/types.gen";
 import * as sdk from "../../api/sdk.gen";
 
@@ -190,6 +191,68 @@ describe("Stage7View", () => {
     );
     expect(screen.queryByText("Hub genes by centrality")).toBeNull();
     expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
+  });
+
+  it("links the gene symbol cell to UniProt via uniprotGeneUrl", () => {
+    wrap(<Stage7View data={makeData(makeComputedResult())} />);
+    // The gene-symbol cell is an anchor; its href must match uniprotGeneUrl for "TNF".
+    const link = screen.getByRole("link", { name: "TNF" });
+    expect(link).toHaveAttribute("href", uniprotGeneUrl("TNF"));
+  });
+
+  it("renders MCC and centrality values as numerics (not empty)", () => {
+    wrap(<Stage7View data={makeData(makeComputedResult())} />);
+    // MCC = 7 (integer, unformatted)
+    expect(screen.getByText("7")).toBeInTheDocument();
+    // degree = 0.41 → formatSig → "0.41"
+    expect(screen.getByText("0.41")).toBeInTheDocument();
+    // betweenness = 0.33 → "0.33"
+    expect(screen.getByText("0.33")).toBeInTheDocument();
+    // closeness = 0.58 → "0.58"
+    expect(screen.getByText("0.58")).toBeInTheDocument();
+    // eigenvector = 0.29 → "0.29"
+    expect(screen.getByText("0.29")).toBeInTheDocument();
+  });
+});
+
+describe("Stage7View — CSV export", () => {
+  it("CSV rows contain gene symbol and numerics but no UniProt link href", () => {
+    const hubs = makeComputedResult().hubs;
+    const rows = buildS7CsvRows(hubs);
+    expect(rows).toHaveLength(1);
+    const [rank, gene, mcc, degree, betweenness, closeness, eigenvector, source_url] = rows[0] as [
+      number,
+      string,
+      number,
+      number,
+      number,
+      number,
+      number,
+      string | null,
+    ];
+    expect(rank).toBe(1);
+    expect(gene).toBe("TNF");
+    expect(mcc).toBe(7);
+    expect(degree).toBe(0.41);
+    expect(betweenness).toBe(0.33);
+    expect(closeness).toBe(0.58);
+    expect(eigenvector).toBe(0.29);
+    // source_url is the persisted URL field — present in CSV; no UniProt gene-search link injected.
+    expect(source_url).toBe("https://www.uniprot.org/uniprotkb/P01375/entry");
+    // The row has exactly 8 columns — no extra link column added.
+    expect(rows[0]).toHaveLength(8);
+    // No cell contains the uniprotGeneUrl pattern for a gene symbol.
+    const rowStr = JSON.stringify(rows[0]);
+    expect(rowStr).not.toContain("uniprotkb?query=gene:");
+  });
+
+  it("S7_CSV_HEADER does not contain a link column", () => {
+    // Header must be exactly the persisted fields — gene_symbol only, no link.
+    expect(S7_CSV_HEADER).toBe(
+      "rank,gene_symbol,mcc,degree,betweenness,closeness,eigenvector,source_url",
+    );
+    expect(S7_CSV_HEADER).not.toContain("link");
+    expect(S7_CSV_HEADER).not.toContain("url_link");
   });
 });
 

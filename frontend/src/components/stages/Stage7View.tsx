@@ -22,9 +22,11 @@ import {
   HUB_GENES_NUMERIC_PARAMS,
   HUB_GENES_PARAMS,
 } from "../../contract";
+import { uniprotGeneUrl } from "../../lib/externalUrls";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { HubBarChart } from "@/components/charts/HubBarChart";
 import { exportPlotlyAsPng } from "@/lib/chartExport";
@@ -66,9 +68,10 @@ type HubParams = Record<string, number | boolean | string>;
 
 const PAGE_SIZES = [10, 20, 50] as const;
 
-const S7_CSV_HEADER = "rank,gene_symbol,mcc,degree,betweenness,closeness,eigenvector,source_url";
+export const S7_CSV_HEADER =
+  "rank,gene_symbol,mcc,degree,betweenness,closeness,eigenvector,source_url";
 
-function buildS7CsvRows(hubs: Hub[]): unknown[][] {
+export function buildS7CsvRows(hubs: Hub[]): unknown[][] {
   return hubs.map((h) => [
     h.rank,
     h.gene_symbol,
@@ -124,50 +127,71 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
   const tooSmall = (stage7.flags ?? []).includes("network_too_small");
 
-  // Column definitions — SAME columns + order as the prior <table>
+  // Column definitions — gene-symbol links via uniprotGeneUrl (display-only; absent from CSV).
+  // Numeric columns carry meta.className:"num" for right-aligned tabular display.
   const columns: ColumnDef<Hub>[] = [
     {
       id: "rank",
       header: "Rank",
+      enableSorting: true,
+      meta: { className: "num" },
       cell: ({ row }) => row.original.rank,
     },
     {
       id: "gene",
       header: "Gene",
-      cell: ({ row }) => {
-        const h = row.original;
-        return h.source_url ? (
-          <a href={h.source_url} target="_blank" rel="noreferrer">
-            {h.gene_symbol}
-          </a>
-        ) : (
-          h.gene_symbol
-        );
-      },
+      enableSorting: true,
+      cell: ({ row }) => (
+        <ExternalLink href={uniprotGeneUrl(row.original.gene_symbol)}>
+          {row.original.gene_symbol}
+        </ExternalLink>
+      ),
     },
     {
       id: "mcc",
       header: "MCC",
+      enableSorting: true,
+      meta: { className: "num" },
       cell: ({ row }) => row.original.mcc,
     },
     {
       id: "degree",
       header: "Degree",
+      enableSorting: true,
+      meta: {
+        className: "num",
+        info: "Number of direct interaction partners in the network (degree centrality).",
+      },
       cell: ({ row }) => formatSig(row.original.degree),
     },
     {
       id: "betweenness",
       header: "Betweenness",
+      enableSorting: true,
+      meta: {
+        className: "num",
+        info: "Fraction of shortest paths passing through this node (betweenness centrality).",
+      },
       cell: ({ row }) => formatSig(row.original.betweenness),
     },
     {
       id: "closeness",
       header: "Closeness",
+      enableSorting: true,
+      meta: {
+        className: "num",
+        info: "Inverse of the average shortest-path distance from this node to all others (closeness centrality).",
+      },
       cell: ({ row }) => formatSig(row.original.closeness),
     },
     {
       id: "eigenvector",
       header: "Eigenvector",
+      enableSorting: true,
+      meta: {
+        className: "num",
+        info: "Influence score weighting connections by neighbour importance (eigenvector centrality).",
+      },
       cell: ({ row }) => formatSig(row.original.eigenvector),
     },
   ];
