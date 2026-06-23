@@ -410,4 +410,36 @@ describe("ParamPanel", () => {
       expect(onChange.mock.calls.length).toBeLessThanOrEqual(5);
     });
   });
+
+  describe("chrome", () => {
+    it("renders the panel title as a serif heading", () => {
+      render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          title="Advanced parameters"
+        />,
+      );
+      expect(screen.getByText("Advanced parameters").className).toContain("font-display");
+    });
+
+    it("renders the container as a glass surface", () => {
+      const { container } = render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          title="Advanced parameters"
+        />,
+      );
+      expect(container.querySelector(".hf-glass-panel")).not.toBeNull();
+    });
+  });
 });

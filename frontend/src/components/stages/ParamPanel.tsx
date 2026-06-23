@@ -14,7 +14,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { ADME_BOOLEAN_PARAMS, ADME_NUMERIC_PARAMS } from "../../contract";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,9 +56,9 @@ function ParamInfo({
           <Info className="size-3.5" aria-hidden="true" />
         </button>
       </TooltipTrigger>
-      <TooltipContent className="max-w-xs space-y-1">
+      <TooltipContent className="max-w-xs space-y-1 leading-relaxed">
         {description ? <p>{description}</p> : null}
-        {hint ? <p className="opacity-80">{hint}</p> : null}
+        {hint ? <p className="italic">{hint}</p> : null}
       </TooltipContent>
     </Tooltip>
   );
@@ -259,27 +258,28 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
 
   return (
     <TooltipProvider>
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <button
-            type="button"
-            className="flex w-full cursor-pointer items-center justify-between gap-2 text-left"
-            aria-expanded={open}
-            onClick={() => setOpen((o) => !o)}
-          >
-            <CardTitle className="text-hf-fg-1 text-sm font-semibold">{title}</CardTitle>
-            <ChevronDown
-              className={cn(
-                "text-hf-fg-3 size-4 shrink-0 transition-transform duration-200",
-                open && "rotate-180",
-              )}
-              aria-hidden="true"
-            />
-          </button>
-        </CardHeader>
+      <div
+        data-slot="param-panel"
+        className="hf-glass-panel w-full overflow-hidden rounded-[var(--radius-lg)]"
+      >
+        <button
+          type="button"
+          className="flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-3 text-left"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+        >
+          <span className="text-hf-fg-1 font-display text-base">{title}</span>
+          <ChevronDown
+            className={cn(
+              "text-hf-fg-3 size-4 shrink-0 transition-transform duration-200",
+              open && "rotate-180",
+            )}
+            aria-hidden="true"
+          />
+        </button>
 
         {open && (
-          <CardContent className="flex flex-col gap-3.5 pt-0">
+          <div className="flex flex-col gap-3.5 px-4 pt-1 pb-4">
             {numericKeys.map((key) => {
               const m = meta[key];
               if (!m) return null;
@@ -434,9 +434,9 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
                 Redo
               </Button>
             )}
-          </CardContent>
+          </div>
         )}
-      </Card>
+      </div>
     </TooltipProvider>
   );
 }
