@@ -8,7 +8,8 @@ import { ThemeProvider } from "@/lib/theme";
 // Mock react-cytoscapejs via the shared cytoscape stub (one home).
 vi.mock("react-cytoscapejs", () => import("@/test-utils/cytoscapeMock"));
 
-import { Stage6View, buildNetworkElements } from "./Stage6View";
+import { Stage6View, buildNetworkElements, buildS6CsvRows, S6_CSV_HEADER } from "./Stage6View";
+import { uniprotGeneUrl } from "../../lib/externalUrls";
 import type { AnalysisRead } from "../../api/types.gen";
 
 // ---------------------------------------------------------------------------
@@ -122,11 +123,19 @@ describe("Stage6View — computed network", () => {
     expect(screen.getByLabelText(/1 edges/i)).toBeInTheDocument();
   });
 
-  it("renders the edge row", () => {
+  it("renders the edge row with gene symbols and confidence", () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
     expect(screen.getByText("EGFR")).toBeInTheDocument();
     expect(screen.getByText("TP53")).toBeInTheDocument();
     expect(screen.getByText("0.92")).toBeInTheDocument();
+  });
+
+  it("links each gene symbol to UniProt via uniprotGeneUrl", () => {
+    wrap(<Stage6View data={makeData(makeComputedResult())} />);
+    const egfrLink = screen.getByRole("link", { name: /egfr/i });
+    const tp53Link = screen.getByRole("link", { name: /tp53/i });
+    expect(egfrLink).toHaveAttribute("href", uniprotGeneUrl("EGFR"));
+    expect(tp53Link).toHaveAttribute("href", uniprotGeneUrl("TP53"));
   });
 
   it("renders the CSV download control", () => {
@@ -204,6 +213,29 @@ describe("Stage6View — interactive network graph", () => {
     expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
     expect(screen.getByText("0.92")).toBeInTheDocument();
   });
+
+  it("renders the Download STRING image button with an href ending in stage6_ppi_network.png", () => {
+    wrap(<Stage6View data={makeCompleteNetworkData()} />);
+    const btn = screen.getByRole("link", { name: /download string image/i });
+    expect(btn).toBeInTheDocument();
+    expect(btn.getAttribute("href")).toMatch(/stage6_ppi_network\.png$/);
+  });
+
+  it("does not render the Download STRING image button when there are no nodes", () => {
+    wrap(
+      <Stage6View
+        data={makeData({
+          ...makeComputedResult(),
+          nodes: [],
+          edges: [],
+          node_count: 0,
+          edge_count: 0,
+          count: 0,
+        })}
+      />,
+    );
+    expect(screen.queryByRole("link", { name: /download string image/i })).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -237,6 +269,26 @@ describe("Stage6View — overlap too large (blocked)", () => {
     await openPpiPanel();
     expect(screen.getByLabelText("Max proteins in network")).toBeInTheDocument();
     expect(screen.getByLabelText("Network type")).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — CSV builder (gene symbols only, no link columns)
+// ---------------------------------------------------------------------------
+
+describe("buildS6CsvRows — link-free CSV", () => {
+  it("header contains only source, target, confidence — no URL columns", () => {
+    expect(S6_CSV_HEADER).toBe("source,target,confidence");
+  });
+
+  it("rows contain gene symbols and numeric confidence, no URLs", () => {
+    const edges = [{ source: "EGFR", target: "TP53", confidence: 0.92 }];
+    const rows = buildS6CsvRows(edges);
+    expect(rows).toHaveLength(1);
+    const firstRow = rows[0]!;
+    expect(firstRow).toEqual(["EGFR", "TP53", 0.92]);
+    // No URL-shaped values in the row
+    expect(firstRow.every((v) => !String(v).startsWith("http"))).toBe(true);
   });
 });
 

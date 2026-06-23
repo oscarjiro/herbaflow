@@ -34,6 +34,8 @@ import {
   PPI_PARAMS,
   PPI_SELECT_PARAMS,
 } from "../../contract";
+import { uniprotGeneUrl } from "../../lib/externalUrls";
+import { exportArtifactUrl } from "../../lib/exportUrl";
 import type cytoscape from "cytoscape";
 import { useChartColors } from "@/lib/chartTheme";
 import { NetworkGraph } from "@/components/charts/NetworkGraph";
@@ -42,6 +44,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 
@@ -99,9 +102,9 @@ function isBlocked(r: Stage6Result): r is Stage6Blocked {
   return (r as Stage6Blocked).blocked === true;
 }
 
-const S6_CSV_HEADER = "source,target,confidence";
+export const S6_CSV_HEADER = "source,target,confidence";
 
-function buildS6CsvRows(edges: Stage6Edge[]): unknown[][] {
+export function buildS6CsvRows(edges: Stage6Edge[]): unknown[][] {
   return edges.map((e) => [e.source, e.target, e.confidence]);
 }
 
@@ -299,21 +302,35 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
-  // Column definitions — SAME columns + order as the prior <table>
+  // Column definitions — gene-symbol pairs with UniProt links; confidence numeric-aligned.
+  // UniProt links use gene-search URLs (gene:X+AND+organism_id:9606) because edge endpoints
+  // are gene symbols, not UniProt accessions. Links are display-only and excluded from the CSV.
   const columns: ColumnDef<Stage6Edge>[] = [
     {
       id: "source",
       header: "Source",
-      cell: ({ row }) => row.original.source,
+      enableSorting: true,
+      cell: ({ row }) => (
+        <ExternalLink href={uniprotGeneUrl(row.original.source)}>
+          {row.original.source}
+        </ExternalLink>
+      ),
     },
     {
       id: "target",
       header: "Target",
-      cell: ({ row }) => row.original.target,
+      enableSorting: true,
+      cell: ({ row }) => (
+        <ExternalLink href={uniprotGeneUrl(row.original.target)}>
+          {row.original.target}
+        </ExternalLink>
+      ),
     },
     {
       id: "confidence",
       header: "Confidence",
+      enableSorting: true,
+      meta: { className: "num" },
       cell: ({ row }) => row.original.confidence,
     },
   ];
@@ -498,20 +515,51 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
           server PNG stays in the export bundle). Blocked / empty states have their own
           UI above, so the graph simply does not render then. */}
       {computed && computed.nodes.length > 0 && (
-        <NetworkGraph
-          title="Interaction network"
-          filename="ppi_network.png"
-          elements={network.elements}
-          stylesheet={stylesheet}
-          nodeTooltip={(d) => `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`}
-          tray={
-            network.isolated.length > 0 ? (
-              <p className="text-muted-foreground mt-3 text-sm">
-                Not connected at this confidence: {network.isolated.join(", ")}
-              </p>
-            ) : undefined
-          }
-        />
+        <>
+          <NetworkGraph
+            title="Interaction network"
+            filename="ppi_network.png"
+            elements={network.elements}
+            stylesheet={stylesheet}
+            nodeTooltip={(d) => `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`}
+            tray={
+              network.isolated.length > 0 ? (
+                <p className="text-muted-foreground mt-3 text-sm">
+                  Not connected at this confidence: {network.isolated.join(", ")}
+                </p>
+              ) : undefined
+            }
+          />
+          {/* STRING server-rendered network image — deterministic export artifact.
+              Not embedded on-screen (stripped from poll payload to keep polls lean);
+              served via the export bundle and available as a direct download here. */}
+          <div className="flex items-center gap-2">
+            <a
+              href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
+              download="stage6_ppi_network.png"
+              className="hf-btn inline-flex items-center gap-1.5 text-sm"
+              aria-label="Download STRING image"
+            >
+              <svg
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download STRING image
+            </a>
+          </div>
+        </>
       )}
 
       {/* PPI param panel — always shown (raise the cap / change settings + Redo) */}
