@@ -38,8 +38,8 @@ function makeCachedRun(): AnalysisRead {
     stage_results: {
       "3": {
         targets: [
-          { target_id: "T1", canonical_name: "PPARG", tag: "computed" },
-          { target_id: "T2", canonical_name: "TP53", tag: "computed" },
+          { target_id: "T1", canonical_name: "PPARG", gene_symbol: "PPARG", tag: "computed" },
+          { target_id: "T2", canonical_name: "TP53", gene_symbol: "TP53", tag: "computed" },
         ],
         compound_targets: [],
         per_compound: {},

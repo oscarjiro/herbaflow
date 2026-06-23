@@ -22,7 +22,16 @@ const TARGET_ID = "11111111-1111-1111-1111-111111111111";
 
 // One covered compound (c1 → TP53/P04637 via ChEMBL) and one 0-coverage compound (c2).
 const SAMPLE_STAGE3_RESULTS = {
-  targets: [{ target_id: TARGET_ID, canonical_name: "TP53", tag: "computed" }],
+  targets: [
+    {
+      target_id: TARGET_ID,
+      canonical_name: "TP53",
+      gene_symbol: "TP53",
+      uniprot_accession: "P04637",
+      source_url: "https://www.uniprot.org/uniprotkb/P04637/entry",
+      tag: "computed",
+    },
+  ],
   compound_targets: [
     {
       compound_id: "c1",
@@ -30,7 +39,7 @@ const SAMPLE_STAGE3_RESULTS = {
       prediction_method: "chembl_bioactivity",
       pchembl_value: 6.2,
       score: null,
-      source_url: "https://www.uniprot.org/uniprotkb/P04637",
+      source_url: "https://www.uniprot.org/uniprotkb/P04637/entry",
       uniprot_accession: "P04637",
     },
   ],
@@ -134,10 +143,10 @@ describe("Stage3View", () => {
     expect(targetsTable(container).getByText("TP53")).toBeInTheDocument();
   });
 
-  it("renders the UniProt accession as a link to its source_url", () => {
+  it("renders the UniProt accession as a link to its UniProt entry page", () => {
     wrap(<Stage3View data={makeRun()} />);
     const link = screen.getByRole("link", { name: "P04637" });
-    expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637");
+    expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637/entry");
   });
 
   it("shows the evidence/method column", () => {
@@ -284,8 +293,8 @@ describe("Stage3View — removed-row hiding + delete column", () => {
       stage_results: {
         "3": {
           targets: [
-            { target_id: "t1", canonical_name: "PPARG", tag: "computed" },
-            { target_id: "t2", canonical_name: "TP53", tag: "user-removed" },
+            { target_id: "t1", canonical_name: "PPARG", gene_symbol: "PPARG", tag: "computed" },
+            { target_id: "t2", canonical_name: "TP53", gene_symbol: "TP53", tag: "user-removed" },
           ],
           compound_targets: [],
           per_compound: {},

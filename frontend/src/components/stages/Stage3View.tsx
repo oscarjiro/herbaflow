@@ -34,6 +34,7 @@ import { notifyError, notifyInfo } from "../../lib/toast";
 import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contract";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig } from "../../lib/format";
+import { uniprotUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +42,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { ExpandableListCell } from "@/components/ui/ExpandableListCell";
+import { ExternalLink } from "@/components/ui/ExternalLink";
+import { SourceChip } from "@/components/ui/SourceChip";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
@@ -59,6 +63,8 @@ type TargetEntry = {
   target_id: string;
   canonical_name: string | null;
   tag: TargetTag;
+  // Emitted by stage3.run alongside canonical_name; canonical_name = gene or accession.
+  gene_symbol?: string | null;
   // Carried on the row by the manual/edit prefill (user_provided mode has no edges); a computed
   // row leaves these undefined and the accession comes from the compound_targets edges instead.
   uniprot_accession?: string | null;
@@ -93,7 +99,10 @@ type Stage2Passed = {
 // A derived, per-target view row.
 type TargetRow = {
   target_id: string;
-  gene_symbol: string;
+  /** The raw gene_symbol from the target entity (null if unknown). */
+  gene_symbol: string | null;
+  /** Display label: gene_symbol ?? uniprot_accession ?? target_id. */
+  display_label: string;
   uniprot_accession: string | null;
   source_url: string | null;
   methods: string[];
@@ -147,10 +156,13 @@ function buildTargetRows(stage3: Stage3Result, nameById: Map<string, string | nu
       // Prefer the row's own identity (carried by the manual/edit prefill — user_provided mode has
       // no edges); fall back to the edge for a computed row. Symmetric with Stage 4, which reads
       // the accession straight off the row.
+      const accession = t.uniprot_accession ?? accEdge?.uniprot_accession ?? null;
+      const geneSymbol = t.gene_symbol ?? null;
       return {
         target_id: t.target_id,
-        gene_symbol: t.canonical_name ?? t.target_id,
-        uniprot_accession: t.uniprot_accession ?? accEdge?.uniprot_accession ?? null,
+        gene_symbol: geneSymbol,
+        display_label: geneSymbol ?? accession ?? t.target_id,
+        uniprot_accession: accession,
         source_url: t.source_url ?? accEdge?.source_url ?? null,
         methods,
         compound_count: compoundIds.length,
@@ -168,7 +180,7 @@ const S3_CSV_HEADER = "gene_symbol,uniprot_accession,prediction_method,source_co
  */
 function buildS3CsvRows(rows: TargetRow[]): unknown[][] {
   return rows.map((r) => [
-    r.gene_symbol,
+    r.display_label,
     r.uniprot_accession,
     r.methods.map(methodLabel).join("; "),
     r.source_compounds.join("; "),
@@ -305,57 +317,73 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     smiles: c.smiles ?? null,
   }));
 
-  // Per-target column definitions — SAME columns + order as the prior table, plus the delete action.
+  // Per-target column definitions — spec-aligned columns in the required order.
   const targetColumns: ColumnDef<TargetRow>[] = [
-    {
-      id: "gene_symbol",
-      header: "Gene symbol",
-      cell: ({ row }) => row.original.gene_symbol,
-    },
+    // 1. UniProt accession → ExternalLink to UniProt entry page.
     {
       id: "uniprot",
       header: "UniProt",
       cell: ({ row }) => {
-        const r = row.original;
-        if (!r.uniprot_accession) return "—";
-        return r.source_url ? (
-          <a
-            href={r.source_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[color:var(--hf-accent)] underline underline-offset-2"
-          >
-            {r.uniprot_accession}
-          </a>
-        ) : (
-          r.uniprot_accession
-        );
+        const acc = row.original.uniprot_accession;
+        if (!acc) return <span className="text-hf-fg-3">—</span>;
+        return <ExternalLink href={uniprotUrl(acc)}>{acc}</ExternalLink>;
       },
     },
+    // 2. Gene symbol (raw gene_symbol field; falls back to display_label).
     {
-      id: "evidence",
-      header: "Evidence",
-      cell: ({ row }) =>
-        row.original.methods.length > 0 ? row.original.methods.map(methodLabel).join(", ") : "—",
+      id: "gene_symbol",
+      header: "Gene symbol",
+      cell: ({ row }) => {
+        const sym = row.original.gene_symbol;
+        if (!sym) return <span className="text-hf-fg-3">—</span>;
+        return <span>{sym}</span>;
+      },
     },
+    // 3. Compound source(s) → ExpandableListCell; HIDDEN when stage is user_provided
+    //    (no compound edges exist for manual-target input).
+    ...(isUserProvided
+      ? []
+      : ([
+          {
+            id: "compound_sources",
+            header: "Compound source(s)",
+            enableSorting: false,
+            cell: ({ row }) => <ExpandableListCell items={row.original.source_compounds} />,
+          },
+        ] as ColumnDef<TargetRow>[])),
+    // 4. Source → SourceChip with prediction-method label; "User-curated" for user-added rows.
     {
-      id: "compounds",
-      header: "# compounds",
-      cell: ({ row }) => row.original.compound_count,
+      id: "source",
+      header: "Source",
+      enableSorting: false,
+      cell: ({ row }) => {
+        const r = row.original;
+        if (r.tag === "user-added" || r.methods.length === 0) {
+          return <SourceChip name="User-curated" />;
+        }
+        // Use the first (or only) prediction method as the chip label. source_url on the
+        // row is the UniProt URL (used by the accession column above), not a method URL.
+        const label = methodLabel(r.methods[0]!);
+        return <SourceChip name={label} />;
+      },
     },
+    // 5. Edit-tag badge (user-added / user-removed indicator).
     {
       id: "tag",
       header: "",
+      enableSorting: false,
       cell: ({ row }) => tagBadge(row.original.tag),
     },
+    // 6. × delete — reuses the existing edit mutation's remove path.
     {
       id: "actions",
       header: "",
+      enableSorting: false,
       cell: ({ row }) => (
         <Button
           variant="ghost"
           size="icon-xs"
-          aria-label={`Remove ${row.original.gene_symbol}`}
+          aria-label={`Remove ${row.original.display_label}`}
           onClick={() => edit.mutate({ add: [], remove: [row.original.target_id] })}
           disabled={atMinEntities(effectiveCount)}
           title={
