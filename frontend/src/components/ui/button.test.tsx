@@ -14,14 +14,32 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 // ---------------------------------------------------------------------------
 
 describe("Button variants", () => {
-  it("primary variant renders ink pill classes", () => {
-    render(<Button variant="primary">Start analysis</Button>, { wrapper: Wrapper });
-    const btn = screen.getByRole("button", { name: /start analysis/i });
-    const cls = btn.className;
-    // ink-filled + pill radius
-    expect(cls).toContain("bg-hf-fg-1");
-    expect(cls).toContain("text-hf-bg");
-    expect(cls).toContain("rounded-[var(--radius-pill)]");
+  it("primary variant renders the glass layer stack, not a solid ink fill", () => {
+    const { container } = render(<Button variant="primary">Start analysis</Button>, {
+      wrapper: Wrapper,
+    });
+    const root = container.querySelector("[data-slot='button']")!;
+    // glass root + layered recipe
+    expect(root.className).toMatch(/hf-glass/);
+    expect(container.querySelector(".hf-glass__refract")).not.toBeNull();
+    expect(container.querySelector(".hf-glass__tint")).not.toBeNull();
+    expect(container.querySelector(".hf-glass__content")).not.toBeNull();
+    // primary tint hook + ink label, NOT the old solid `bg-hf-fg-1` fill
+    expect(root.className).toMatch(/hf-btn--primary/);
+    expect(root.className).not.toMatch(/bg-hf-fg-1/);
+  });
+
+  it("secondary/ghost/danger variants also render glass with their tint class", () => {
+    for (const v of ["secondary", "ghost", "danger"] as const) {
+      const { container, unmount } = render(<Button variant={v}>x</Button>, { wrapper: Wrapper });
+      const root = container.querySelector("[data-slot='button']")!;
+      expect(root.className).toMatch(/hf-glass/);
+      expect(root.className).toMatch(new RegExp(`hf-btn--${v}`));
+      // Unmount each iteration so the motion-wrapped surface stops scheduling
+      // requestAnimationFrame; otherwise pending rAFs leak into the later
+      // fake-timer StatefulButton tests and trip the "infinite loop" guard.
+      unmount();
+    }
   });
 
   it("glass-action variant renders glass pill wrapper", () => {
@@ -52,25 +70,6 @@ describe("Button variants", () => {
     expect(link.querySelector(".hf-glass__content")).not.toBeNull();
     // No stray <button> from the component when asChild is set.
     expect(document.querySelector("button")).toBeNull();
-  });
-
-  it("secondary variant has surface fill and border", () => {
-    render(<Button variant="secondary">Secondary</Button>, { wrapper: Wrapper });
-    const btn = screen.getByRole("button", { name: /secondary/i });
-    expect(btn.className).toContain("bg-hf-surface");
-    expect(btn.className).toContain("border-hf-border-strong");
-  });
-
-  it("ghost variant has transparent background", () => {
-    render(<Button variant="ghost">Ghost</Button>, { wrapper: Wrapper });
-    const btn = screen.getByRole("button", { name: /ghost/i });
-    expect(btn.className).toContain("bg-transparent");
-  });
-
-  it("danger variant has danger text color", () => {
-    render(<Button variant="danger">Delete run</Button>, { wrapper: Wrapper });
-    const btn = screen.getByRole("button", { name: /delete run/i });
-    expect(btn.className).toContain("text-hf-danger");
   });
 
   it("disabled state sets opacity 0.45 and pointer-events-none", () => {
@@ -110,13 +109,163 @@ describe("Button variants", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Glass button size geometry (I1 regression guard)
+//
+// Every hf variant renders through the glass path. That path must map the
+// `size` prop to a SCALED glass-pill label geometry — not always emit the
+// landing-CTA pill. Before the fix the non-icon glass branch hard-coded
+// GLASS_PILL_LABEL for sm/default/lg alike, so compact in-form buttons
+// ("Clear", dialog "Cancel") rendered at landing-CTA size.
+// ---------------------------------------------------------------------------
+
+/** The landing-CTA label geometry that must stay reserved for the Hero pill. */
+const LANDING_CTA_PADDING = "py-[16px]";
+const LANDING_CTA_TEXT = "text-[16px]";
+
+/** Read the .hf-glass__content label span className for a glass button. */
+function readGlassLabelClass(container: HTMLElement): string {
+  const label = container.querySelector(".hf-glass__content");
+  expect(label).not.toBeNull();
+  return label!.className;
+}
+
+describe("Button glass size geometry (I1)", () => {
+  it("ghost size='sm' renders COMPACT geometry, distinct from lg and the landing CTA", () => {
+    const sm = render(
+      <Button variant="ghost" size="sm">
+        Clear
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const lg = render(
+      <Button variant="ghost" size="lg">
+        Clear
+      </Button>,
+      { wrapper: Wrapper },
+    );
+
+    const smClass = readGlassLabelClass(sm.container);
+    const lgClass = readGlassLabelClass(lg.container);
+
+    // sm must NOT be the landing-CTA pill geometry.
+    expect(smClass).not.toContain(LANDING_CTA_PADDING);
+    expect(smClass).not.toContain(LANDING_CTA_TEXT);
+    // sm reads as the compact glass pill (small text).
+    expect(smClass).toMatch(/\btext-sm\b/);
+
+    // The core I1 assertion: size actually changes the geometry. Before the
+    // fix sm === lg (both GLASS_PILL_LABEL); now they must differ.
+    expect(smClass).not.toEqual(lgClass);
+
+    sm.unmount();
+    lg.unmount();
+  });
+
+  it("default size renders the MEDIUM glass geometry, distinct from sm and lg", () => {
+    const sm = render(
+      <Button variant="secondary" size="sm">
+        x
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const def = render(
+      <Button variant="secondary" size="default">
+        x
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const lg = render(
+      <Button variant="secondary" size="lg">
+        x
+      </Button>,
+      { wrapper: Wrapper },
+    );
+
+    const smClass = readGlassLabelClass(sm.container);
+    const defClass = readGlassLabelClass(def.container);
+    const lgClass = readGlassLabelClass(lg.container);
+
+    // Three distinct geometries for the three non-icon sizes.
+    expect(defClass).not.toEqual(smClass);
+    expect(defClass).not.toEqual(lgClass);
+    // default is not the landing-CTA pill either.
+    expect(defClass).not.toContain(LANDING_CTA_PADDING);
+
+    sm.unmount();
+    def.unmount();
+    lg.unmount();
+  });
+
+  it("an unset size defaults to the MEDIUM (default) glass geometry", () => {
+    const bare = render(<Button variant="ghost">x</Button>, { wrapper: Wrapper });
+    const def = render(
+      <Button variant="ghost" size="default">
+        x
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    expect(readGlassLabelClass(bare.container)).toEqual(readGlassLabelClass(def.container));
+    bare.unmount();
+    def.unmount();
+  });
+
+  it("landing CTA (glass-action, default size) keeps the large landing pill geometry", () => {
+    const { container } = render(<Button variant="glass-action">Start analysis</Button>, {
+      wrapper: Wrapper,
+    });
+    const labelClass = readGlassLabelClass(container);
+    // Hero CTA must stay the large pill — unchanged by the size-aware change.
+    expect(labelClass).toContain(LANDING_CTA_PADDING);
+    expect(labelClass).toContain(LANDING_CTA_TEXT);
+  });
+
+  it("landing CTA via asChild also keeps the large landing pill geometry", () => {
+    render(
+      <Button asChild variant="glass-action">
+        <a href="/analysis">Start analysis</a>
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const link = screen.getByRole("link", { name: /start analysis/i });
+    const label = link.querySelector(".hf-glass__content");
+    expect(label).not.toBeNull();
+    expect(label!.className).toContain(LANDING_CTA_PADDING);
+    expect(label!.className).toContain(LANDING_CTA_TEXT);
+  });
+
+  it("icon glass sizes are unaffected (square, no label padding)", () => {
+    const { container } = render(
+      <Button variant="glass-action" size="icon-lg" aria-label="Theme">
+        <svg />
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const root = container.querySelector("[data-slot='button']")!;
+    expect(root.className).toMatch(/size-10/);
+    const label = container.querySelector(".hf-glass__content");
+    // Icon content grid, not a label pill.
+    expect(label!.className).toMatch(/place-items-center/);
+    expect(label!.className).not.toContain(LANDING_CTA_PADDING);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // StatefulButton — idle → loading → success → reset
 // ---------------------------------------------------------------------------
 
 describe("StatefulButton", () => {
-  it("renders idle state with label", () => {
-    render(<StatefulButton>Run analysis</StatefulButton>, { wrapper: Wrapper });
+  it("renders idle state with label on the glass surface", () => {
+    const { container } = render(<StatefulButton>Run analysis</StatefulButton>, {
+      wrapper: Wrapper,
+    });
+    // The button must be present and readable.
     expect(screen.getByRole("button", { name: /run analysis/i })).toBeInTheDocument();
+    // It must render through the canonical glass Button (variant=primary), not a solid pill.
+    const btn = container.querySelector("[data-slot='button']")!;
+    expect(btn).not.toBeNull();
+    expect(btn.getAttribute("data-variant")).toBe("primary");
+    expect(btn.className).toMatch(/hf-glass/);
+    expect(btn.className).not.toMatch(/bg-hf-fg-1/);
   });
 
   it("transitions idle → loading when clicked, shows spinner and 'Working'", async () => {

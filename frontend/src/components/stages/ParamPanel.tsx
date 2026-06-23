@@ -2,7 +2,8 @@
  * ParamPanel — collapsible panel for editing pipeline stage parameters.
  *
  * - Pre-populates from `params` (the frozen/overridden values on the run).
- * - Shows description + "(default X, recommended lo–hi)" hint per field.
+ * - Per field, the long description plus the "default X, recommended lo–hi"
+ *   note live in the info tooltip (no always-on inline hint paragraph).
  * - Redo button arms only when at least one value differs from `params` AND
  *   all values are within hard bounds (E7 rule).
  * - Out-of-hard-range values show an inline error message and block Redo.
@@ -13,8 +14,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { ADME_BOOLEAN_PARAMS, ADME_NUMERIC_PARAMS } from "../../contract";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,25 +23,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { humanizeLabel, humanizeValue } from "../../contract/labels";
 
-function ParamInfo({ description, label }: { description?: string; label: string }) {
-  if (!description) return null;
+/**
+ * Info trigger for a param. The full help text (long description + the
+ * default/recommended/bounds note) lives inside this tooltip — there is no
+ * always-on inline hint paragraph, matching the mockup's tooltip mode.
+ */
+function ParamInfo({
+  description,
+  hint,
+  label,
+}: {
+  description?: string;
+  hint?: string;
+  label: string;
+}) {
+  if (!description && !hint) return null;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
           type="button"
+          data-slot="param-info"
           aria-label={`About ${label}`}
-          className="text-hf-fg-4 hover:text-hf-fg-2 inline-flex"
+          className="text-hf-fg-4 hover:text-hf-fg-2 inline-flex cursor-help"
         >
           <Info className="size-3.5" aria-hidden="true" />
         </button>
       </TooltipTrigger>
-      <TooltipContent className="max-w-xs">{description}</TooltipContent>
+      <TooltipContent className="max-w-xs space-y-1 leading-relaxed">
+        {description ? <p>{description}</p> : null}
+        {hint ? <p className="italic">{hint}</p> : null}
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -241,21 +258,28 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
 
   return (
     <TooltipProvider>
-      <Card className="w-full">
-        <CardHeader className="pb-2">
-          <button
-            type="button"
-            className="flex w-full items-center gap-2 text-left"
-            aria-expanded={open}
-            onClick={() => setOpen((o) => !o)}
-          >
-            <span className="text-muted-foreground text-xs">{open ? "▾" : "▸"}</span>
-            <CardTitle className="text-sm">{title}</CardTitle>
-          </button>
-        </CardHeader>
+      <div
+        data-slot="param-panel"
+        className="hf-glass-panel w-full overflow-hidden rounded-[var(--radius-lg)]"
+      >
+        <button
+          type="button"
+          className="flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-3 text-left"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+        >
+          <span className="text-hf-fg-1 font-display text-base">{title}</span>
+          <ChevronDown
+            className={cn(
+              "text-hf-fg-3 size-4 shrink-0 transition-transform duration-200",
+              open && "rotate-180",
+            )}
+            aria-hidden="true"
+          />
+        </button>
 
         {open && (
-          <CardContent className="flex flex-col gap-4 pt-0">
+          <div className="flex flex-col gap-3.5 px-4 pt-1 pb-4">
             {numericKeys.map((key) => {
               const m = meta[key];
               if (!m) return null;
@@ -265,16 +289,16 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
                 m.recommended_min !== undefined && m.recommended_max !== undefined
                   ? `, recommended ${m.recommended_min}–${m.recommended_max}`
                   : "";
+              const hint = `Default ${String(m.default)}${recHint}.`;
               return (
-                <div key={key} className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1">
+                <div
+                  key={key}
+                  className="border-hf-border grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5 border-b pb-3.5 last:border-b-0 last:pb-0"
+                >
+                  <span className="text-hf-fg-1 flex items-center gap-1.5 text-sm">
                     <Label htmlFor={`param-${key}`}>{label}</Label>
-                    <ParamInfo description={m.description} label={label} />
-                  </div>
-                  <p className="text-muted-foreground/70 text-xs">
-                    (default {String(m.default)}
-                    {recHint})
-                  </p>
+                    <ParamInfo description={m.description} hint={hint} label={label} />
+                  </span>
                   <Input
                     id={`param-${key}`}
                     type="number"
@@ -283,10 +307,10 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
                     disabled={disabled}
                     onChange={(e) => handleNumericChange(key, e.target.value)}
                     aria-invalid={err ? true : undefined}
-                    className={cn(err && "border-destructive")}
+                    className={cn("w-24 text-right font-mono", err && "border-hf-danger")}
                   />
                   {err && (
-                    <p className="text-destructive text-xs" role="alert">
+                    <p className="text-hf-danger col-span-2 text-xs" role="alert">
                       {err}
                     </p>
                   )}
@@ -298,18 +322,25 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
               const m = meta[key];
               if (!m) return null;
               const label = humanizeLabel(key);
+              const hint = `Default ${m.default ? "on" : "off"}.`;
+              const checked = localStr[key] === "true";
               return (
-                <div key={key} className="flex flex-col gap-1">
+                <div
+                  key={key}
+                  className="border-hf-border border-b pb-3.5 last:border-b-0 last:pb-0"
+                >
+                  {/* Switch + Label row. ParamInfo is a sibling button — not nested inside
+                      the Switch (nested <button> inside <button> is invalid HTML). */}
                   <div className="flex items-center gap-2">
-                    <Checkbox
-                      id={`param-${key}`}
-                      aria-label={label}
-                      checked={localStr[key] === "true"}
+                    <Switch
+                      checked={checked}
+                      onCheckedChange={(v) => handleBooleanChange(key, v)}
                       disabled={disabled}
-                      onCheckedChange={(checked) => handleBooleanChange(key, checked === true)}
+                      aria-label={label}
+                      size="sm"
                     />
-                    <Label htmlFor={`param-${key}`}>{label}</Label>
-                    <ParamInfo description={m.description} label={label} />
+                    <Label>{label}</Label>
+                    <ParamInfo description={m.description} hint={hint} label={label} />
                   </div>
                 </div>
               );
@@ -320,21 +351,22 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
               if (!m) return null;
               const options = m.enum ?? [];
               const label = humanizeLabel(key);
+              const hint = `Default ${humanizeValue(String(m.default))}.`;
               return (
-                <div key={key} className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1">
+                <div
+                  key={key}
+                  className="border-hf-border grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5 border-b pb-3.5 last:border-b-0 last:pb-0"
+                >
+                  <span className="text-hf-fg-1 flex items-center gap-1.5 text-sm">
                     <Label htmlFor={`param-${key}`}>{label}</Label>
-                    <ParamInfo description={m.description} label={label} />
-                  </div>
-                  <p className="text-muted-foreground/70 text-xs">
-                    (default {humanizeValue(String(m.default))})
-                  </p>
+                    <ParamInfo description={m.description} hint={hint} label={label} />
+                  </span>
                   <Select
                     value={localStr[key] ?? String(m.default)}
                     disabled={disabled}
                     onValueChange={(value) => handleSelectChange(key, value)}
                   >
-                    <SelectTrigger id={`param-${key}`} aria-label={label} className="w-full">
+                    <SelectTrigger id={`param-${key}`} aria-label={label} className="w-40">
                       <SelectValue>{humanizeValue(localStr[key] ?? String(m.default))}</SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -358,30 +390,50 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
                 ? m.default.map((value) => humanizeValue(String(value))).join(", ")
                 : String(m.default);
               const label = humanizeLabel(key);
+              const hint = `Default ${defaultLabel}.`;
               return (
-                <div key={key} className="flex flex-col gap-2">
-                  <div className="flex items-center gap-1">
+                <div
+                  key={key}
+                  className="border-hf-border border-b pb-3.5 last:border-b-0 last:pb-0"
+                >
+                  <span className="text-hf-fg-1 mb-2 flex items-center gap-1.5 text-sm">
                     <Label>{label}</Label>
-                    <ParamInfo description={m.description} label={label} />
-                  </div>
-                  <p className="text-muted-foreground/70 text-xs">(default {defaultLabel})</p>
-                  <div className="flex flex-col gap-2">
+                    <ParamInfo description={m.description} hint={hint} label={label} />
+                  </span>
+                  {/* .ms: mockup multi-select container */}
+                  <div className="ms">
                     {options.map((option) => {
-                      const id = `param-${key}-${option.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
-                      const label = humanizeValue(option);
+                      const isSelected = selected.includes(option);
+                      const optionLabel = humanizeValue(option);
                       return (
-                        <div key={option} className="flex items-center gap-2">
-                          <Checkbox
-                            id={id}
-                            aria-label={label}
-                            checked={selected.includes(option)}
-                            disabled={disabled}
-                            onCheckedChange={(checked) =>
-                              handleArrayToggle(key, option, checked === true)
-                            }
-                          />
-                          <Label htmlFor={id}>{label}</Label>
-                        </div>
+                        <button
+                          key={option}
+                          type="button"
+                          aria-label={optionLabel}
+                          aria-pressed={isSelected}
+                          disabled={disabled}
+                          onClick={() => handleArrayToggle(key, option, !isSelected)}
+                          className="ms__row"
+                        >
+                          <span className={cn("ms__check", isSelected && "on")}>
+                            {isSelected && (
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                style={{
+                                  width: 13,
+                                  height: 13,
+                                  stroke: "currentColor",
+                                  fill: "none",
+                                  strokeWidth: 2.4,
+                                }}
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            )}
+                          </span>
+                          <span className="ms__nm">{optionLabel}</span>
+                        </button>
                       );
                     })}
                   </div>
@@ -400,9 +452,9 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
                 Redo
               </Button>
             )}
-          </CardContent>
+          </div>
         )}
-      </Card>
+      </div>
     </TooltipProvider>
   );
 }

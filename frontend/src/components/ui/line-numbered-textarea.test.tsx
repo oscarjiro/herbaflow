@@ -77,3 +77,11 @@ test("disabled prop disables the textarea", () => {
   const textarea = screen.getByRole("textbox", { name: "Disabled editor" });
   expect(textarea).toBeDisabled();
 });
+
+test("manual paste input is height-capped with internal scroll", () => {
+  const { container } = render(<LineNumberedTextarea value={""} onChange={() => {}} />);
+  const field = container.querySelector("[data-slot='manual-paste']")!;
+  expect(field).toBeTruthy();
+  expect(field.className).toMatch(/max-h-/);
+  expect(field.className).toMatch(/\bscroll\b/);
+});

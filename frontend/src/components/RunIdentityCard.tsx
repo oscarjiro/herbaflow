@@ -1,18 +1,21 @@
 import type { AnalysisRead } from "@/api/types.gen";
 import { formatRelative } from "@/lib/format";
 
-// The run's identity in the sidebar: its custom name (never the UUID) + a quiet meta line.
-// A SOLID card for contrast against the glass chrome sidebar.
+// Run-card shown in the sidebar chrome — solid surface card for contrast against glass.
+// Layout: label (mono, tiny, uppercase) → name (serif display) → meta (mode · time).
 export function RunIdentityCard({ data }: { data: AnalysisRead }) {
   const name = data.analysis_name?.trim() || "Untitled analysis";
   const created = data.created_at ? formatRelative(data.created_at) : null;
+  const mode = data.mode ? data.mode.charAt(0).toUpperCase() + data.mode.slice(1) : null;
+
   return (
-    <div className="border-hf-border bg-hf-surface rounded-[var(--radius-md)] border p-3">
-      <p className="text-hf-fg-1 truncate font-medium" title={name}>
+    <div className="run-card">
+      <p className="rc-label">Active run</p>
+      <p className="rc-name" title={name}>
         {name}
       </p>
-      <p className="text-hf-fg-4 mt-0.5 font-mono text-[0.65rem] tracking-wide uppercase">
-        {data.mode}
+      <p className="rc-meta">
+        {mode}
         {created ? ` · started ${created}` : ""}
       </p>
     </div>

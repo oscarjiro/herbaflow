@@ -40,7 +40,7 @@ export interface MultiSelectRowsProps {
  * @media (prefers-reduced-motion) guard already in index.css).
  *
  * A11y: rows use role="option" with aria-selected, are keyboard-focusable,
- * and carry the Task-4 focus ring.
+ * and carry a keyboard-only focus ring (focus-visible:ring-hf-fg-1/40).
  */
 function MultiSelectRows({ items, selected, onChange, className }: MultiSelectRowsProps) {
   function toggle(id: string) {
@@ -94,7 +94,7 @@ function MultiSelectRows({ items, selected, onChange, className }: MultiSelectRo
               "hover:bg-hf-surface-2",
               // Background transition (duration-1 = 120ms, matches mockup --d1)
               "transition-colors duration-[var(--duration-1)] ease-[var(--ease)]",
-              // Focus ring — Task-4 contract (soft ring, no border change)
+              // Focus ring — soft ring, no border change
               "outline-none",
               "focus-visible:ring-hf-fg-1/40 focus-visible:ring-2",
               "focus-visible:ring-offset-hf-bg focus-visible:ring-offset-2",

@@ -7,7 +7,7 @@
  * genuine pagination behavior.
  *
  * Controls under test: first / prev / page-jump input / next / last + a
- * rows-per-page Select (Task-7) with 10/20/50/All options.
+ * rows-per-page Select with 10/20/50/All options.
  */
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

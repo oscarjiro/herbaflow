@@ -4,8 +4,10 @@
  * Param-bearing (`enrichment`: significance_threshold, min_term_size, correction, no_iea,
  * sources). Renders summary
  * cards (input/background gene counts + the shown custom background source), the enriched-terms
- * table + CSV, the param panel (Redo via reset-from/8), honest-null + degraded notices, the
- * data-sources footer, and the ApprovalBar (approving completes the run).
+ * table + CSV, the param panel (Redo via reset-from/8), honest-null + degraded notices, and the
+ * data-sources footer.
+ *
+ * The stage header, ApprovalBar, and StaleNotice are owned by the StageView shell.
  */
 
 import { useMemo, useRef, useState } from "react";
@@ -13,7 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
-import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import {
@@ -23,16 +25,13 @@ import {
   ENRICHMENT_PARAMS,
   ENRICHMENT_SELECT_PARAMS,
 } from "../../contract";
-import { useStaleState } from "../../hooks/useStaleState";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
-import { Eyebrow } from "@/components/ui/editorial";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { EnrichmentDotChart } from "@/components/charts/EnrichmentDotChart";
 import { exportPlotlyAsPng } from "@/lib/chartExport";
-import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 
@@ -98,14 +97,8 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   const enrichParams = (data.parameters as Record<string, unknown> | undefined)?.enrichment as
     | EnrichmentParams
     | undefined;
-  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
-  const advance = useMutation({
-    mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
-  });
   const redo = useMutation({
     mutationFn: (changed: EnrichmentParams) =>
       resetFrom({
@@ -135,8 +128,6 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     currentPage * effectivePageSize,
     (currentPage + 1) * effectivePageSize,
   );
-
-  const isComplete = data.status === "complete";
 
   // Column definitions — SAME columns + order as the prior <table>
   const columns: ColumnDef<Term>[] = [
@@ -174,12 +165,6 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="flex flex-col gap-6">
-      {/* Editorial header */}
-      <div className="flex flex-col gap-1">
-        <Eyebrow>Step 8</Eyebrow>
-        <h2 className="hf-heading-serif">Step 8: Functional Enrichment</h2>
-      </div>
-
       <StageDataSources stage={8} />
 
       {/* Summary cards */}
@@ -303,8 +288,8 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         </Card>
       )}
 
-      {/* Interactive enrichment bubble chart (complete-only, only when terms exist) */}
-      {isComplete && terms.length > 0 && (
+      {/* Interactive enrichment bubble chart (shown once terms exist) */}
+      {terms.length > 0 && (
         <ChartFrame
           title="Pathway enrichment"
           filename="pathway_enrichment.png"
@@ -337,22 +322,6 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           title="Enrichment parameters"
           disabled={redo.isPending}
           onRedo={(changed) => redo.mutate(changed)}
-        />
-      )}
-
-      {isComplete ? (
-        <p className="text-muted-foreground text-sm" role="status">
-          Analysis complete. All eight steps finished.
-        </p>
-      ) : (
-        <ApprovalBar
-          stage={8}
-          status={data.status}
-          currentStage={data.current_stage}
-          disabled={anyStale}
-          disabledReason="Run the updated step before continuing."
-          pending={advance.isPending}
-          onApprove={() => advance.mutate()}
         />
       )}
 

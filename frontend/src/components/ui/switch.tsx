@@ -44,7 +44,7 @@ function Switch({
         "data-[state=checked]:bg-hf-fg-1",
         // Transition (track colour fades)
         "transition-colors duration-[var(--duration-2)] ease-[var(--ease)]",
-        // Focus ring (Task 4 contract — soft ring, no border change)
+        // Focus ring — soft ring, no border change
         "outline-none",
         "focus-visible:ring-hf-fg-1/40 focus-visible:ring-2",
         "focus-visible:ring-offset-hf-bg focus-visible:ring-offset-2",

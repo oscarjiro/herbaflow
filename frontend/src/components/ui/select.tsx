@@ -42,7 +42,7 @@ function SelectTrigger({
         // Typography
         "text-hf-fg-1 text-sm",
         "data-[placeholder]:text-hf-fg-4",
-        // Animated ink-border focus — reuse Task 6 utility, NO ring
+        // Animated ink-border focus — reuse the ink-focus utility, NO ring
         "hf-ink-focus",
         "outline-none",
         // Suppress default :where(input,select,textarea):focus-visible from index.css
@@ -106,7 +106,7 @@ function SelectContent({
           "min-w-[8rem]",
           "max-h-[var(--radix-select-content-available-height)]",
           "origin-[var(--radix-select-content-transform-origin)]",
-          // Internal scroll — reuse .scroll utility (Task 4: thin styled scrollbar)
+          // Internal scroll — reuse .scroll utility (thin styled scrollbar)
           "scroll overflow-x-hidden overflow-y-auto",
           // Entrance animation — scale + fade via Radix data-state + Tailwind animate-*
           // Closed → open: fade in + scale from 0.95 to 1

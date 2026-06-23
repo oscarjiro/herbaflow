@@ -3,8 +3,10 @@
  *
  * Param-bearing (`hub_genes`: top_n). Renders summary cards, the ranked hub table (rank, gene,
  * MCC, and the four individual centralities for transparency) with per-row UniProt links + CSV,
- * the param panel (Redo via reset-from/7), the StageDataSources footer, the ApprovalBar, a
- * `network_too_small` notice, and the StaleNotice.
+ * the param panel (Redo via reset-from/7), the StageDataSources footer, and a
+ * `network_too_small` notice.
+ *
+ * The stage header, ApprovalBar, and StaleNotice are owned by the StageView shell.
  */
 
 import { useMemo, useRef, useState } from "react";
@@ -12,7 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
-import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import {
@@ -20,15 +22,12 @@ import {
   HUB_GENES_NUMERIC_PARAMS,
   HUB_GENES_PARAMS,
 } from "../../contract";
-import { useStaleState } from "../../hooks/useStaleState";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
-import { Eyebrow } from "@/components/ui/editorial";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { HubBarChart } from "@/components/charts/HubBarChart";
 import { exportPlotlyAsPng } from "@/lib/chartExport";
-import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 
@@ -91,14 +90,8 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   const hubParams = (data.parameters as Record<string, unknown> | undefined)?.hub_genes as
     | HubParams
     | undefined;
-  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
-  const advance = useMutation({
-    mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
-  });
   const redo = useMutation({
     mutationFn: (changed: HubParams) =>
       resetFrom({
@@ -130,7 +123,6 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
   );
 
   const tooSmall = (stage7.flags ?? []).includes("network_too_small");
-  const isComplete = data.status === "complete";
 
   // Column definitions — SAME columns + order as the prior <table>
   const columns: ColumnDef<Hub>[] = [
@@ -182,12 +174,6 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="flex flex-col gap-6">
-      {/* Editorial header */}
-      <div className="flex flex-col gap-1">
-        <Eyebrow>Step 7</Eyebrow>
-        <h2 className="hf-heading-serif">Step 7: Hub Genes</h2>
-      </div>
-
       <StageDataSources stage={7} />
 
       {/* Summary cards */}
@@ -223,8 +209,8 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
         </p>
       )}
 
-      {/* Hub bar chart — tabbed Plotly centrality bars (complete-only, absent when hubs is empty) */}
-      {isComplete && hubs.length > 0 && (
+      {/* Hub bar chart — tabbed Plotly centrality bars (shown once hubs exist) */}
+      {hubs.length > 0 && (
         <ChartFrame
           title="Hub genes by centrality"
           filename="hub_genes.png"
@@ -322,16 +308,6 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
           onRedo={(changed) => redo.mutate(changed)}
         />
       )}
-
-      <ApprovalBar
-        stage={7}
-        status={data.status}
-        currentStage={data.current_stage}
-        disabled={anyStale}
-        disabledReason="Run the updated step before continuing."
-        pending={advance.isPending}
-        onApprove={() => advance.mutate()}
-      />
 
       <footer className="text-muted-foreground text-sm">
         <p>

@@ -1,7 +1,8 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { http, HttpResponse } from "msw";
+import { LazyMotion, domAnimation } from "motion/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SetupView } from "./SetupView";
 import * as sdk from "../api/sdk.gen";
@@ -13,7 +14,11 @@ import { server } from "../../tests/handlers";
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <LazyMotion features={domAnimation}>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </LazyMotion>,
+  );
 }
 
 // Unmount + clear any Radix portal nodes left in document.body between tests so a
@@ -35,13 +40,18 @@ function diseaseFieldset() {
 }
 
 /**
- * Open the EntitySearchCombobox for the given ariaLabel and pick an option by text.
- * Waits for the option to appear in the command list before clicking it.
+ * Type into the EntitySearchCombobox for the given ariaLabel and pick an option by text.
+ * The combobox is now a direct-type input — no click-to-open trigger needed.
+ * Waits for the option to appear in the results dropdown before clicking it.
  */
 async function pickComboOption(ariaLabel: string, optionText: string | RegExp) {
-  await userEvent.click(screen.getByRole("combobox", { name: ariaLabel }));
+  // Type a short query to open the results dropdown (any non-empty string triggers it).
+  const input = screen.getByRole("combobox", { name: ariaLabel });
+  await userEvent.type(input, "a");
   // Scope to the command-list options so a matching selected-chip never wins the lookup.
-  const options = await screen.findAllByRole("option");
+  // Generous timeout: the input debounces 300ms before searching, and under full-suite
+  // parallel load the debounce + async results render can exceed the 1s default.
+  const options = await screen.findAllByRole("option", undefined, { timeout: 5000 });
   const match = options.find((el) => {
     const text = el.textContent ?? "";
     return typeof optionText === "string" ? text.includes(optionText) : optionText.test(text);
@@ -518,16 +528,89 @@ describe("SetupView — recomposed summary + advance", () => {
     expect(screen.getByTestId("setup-summary")).toBeInTheDocument();
   });
 
+  it("renders the empty-state prose in the serif display font", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const empty = screen.getByText("Nothing selected yet.");
+    expect(empty.className).toMatch(/font-display/);
+  });
+
   it("advance is a single primary Start analysis button", () => {
     wrap(<SetupView onCreated={() => {}} />);
     expect(screen.getByRole("button", { name: /start analysis/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /create analysis/i })).not.toBeInTheDocument();
   });
+
+  it("summary stat numbers use the serif display font", async () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    // Select a plant so hasSelection is true and the serif stat tiles render.
+    await pickComboOption("Search plants", /aaa bbb/i);
+    const tile = screen.getByTestId("setup-summary");
+    const num = tile.querySelector("[data-slot='stat-num']")!;
+    expect(num).not.toBeNull();
+    expect(num.className).toMatch(/font-display/);
+  });
 });
 
-describe("SetupView — create button double-submit guard", () => {
-  it("disables the Create button while the create mutation is in-flight", async () => {
-    // Never resolves so the mutation stays pending throughout the test.
+// ---------------------------------------------------------------------------
+// Tests — humanized labels
+// ---------------------------------------------------------------------------
+
+describe("SetupView — humanized field labels", () => {
+  it("plant panel heading reads 'Plants', not 'Plant input'", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const headings = screen.getAllByRole("heading", { level: 2 });
+    const plantHeading = headings.find((h) => h.textContent === "Plants");
+    expect(plantHeading, "h2 'Plants' heading not found").toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Plant input" })).not.toBeInTheDocument();
+  });
+
+  it("disease panel heading reads 'Disease', not 'Disease input'", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    expect(screen.getByText("Disease")).toBeInTheDocument();
+    expect(screen.queryByText("Disease input")).not.toBeInTheDocument();
+  });
+
+  it("no visible 'Plant Input Mode' text anywhere in the form", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    expect(screen.queryByText(/Plant Input Mode/i)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests — theming sweep: restyled controls carry hf-* token classes
+// ---------------------------------------------------------------------------
+
+describe("SetupView — theming sweep", () => {
+  it("plant-mode SegmentedTabs uses hf-* token classes (no raw shadcn accent on radiogroup)", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const rg = screen.getByRole("radiogroup", { name: /plant input mode/i });
+    // The radiogroup wrapper uses hf-surface-2 and hf-border — not bg-accent
+    expect(rg.className).toMatch(/hf-/);
+    expect(rg.className).not.toMatch(/\bbg-accent\b/);
+  });
+
+  it("disease-mode SegmentedTabs uses hf-* token classes", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const rg = screen.getByRole("radiogroup", { name: /disease input mode/i });
+    expect(rg.className).toMatch(/hf-/);
+    expect(rg.className).not.toMatch(/\bbg-accent\b/);
+  });
+
+  it("GlassSurface panels carry hf-glass class (recolors via hf-* tokens)", () => {
+    const { container } = wrap(<SetupView onCreated={() => {}} />);
+    // GlassSurface renders .hf-glass + .hf-glass--{tier}; assert raised surfaces are present
+    const surfaces = container.querySelectorAll(".hf-glass--raised");
+    expect(surfaces.length).toBeGreaterThan(0);
+    surfaces.forEach((s) => {
+      expect(s.className).toMatch(/hf-glass/);
+      expect(s.className).not.toMatch(/\bbg-accent\b/);
+    });
+  });
+});
+
+describe("SetupView — Start analysis stateful button", () => {
+  it("shows the loading state while the create mutation is in-flight", async () => {
+    // Never resolves so the mutation stays in-flight throughout the test.
     vi.spyOn(sdk, "createAnalysis").mockReturnValue(new Promise(() => {}));
 
     wrap(<SetupView onCreated={() => {}} />);
@@ -538,8 +621,47 @@ describe("SetupView — create button double-submit guard", () => {
     const createBtn = screen.getByRole("button", { name: /start analysis/i });
     expect(createBtn).not.toBeDisabled();
 
-    await userEvent.click(createBtn);
-    expect(createBtn).toBeDisabled();
+    // fireEvent.click is synchronous; StatefulButton sets state to "loading"
+    // before the await, so a synchronous act flush captures the loading state.
+    act(() => {
+      fireEvent.click(createBtn);
+    });
+
+    // Once loading, the button label changes to "Working…".
+    // Query by the visible loading label text which is unique in the DOM.
+    expect(screen.getByText("Working…")).toBeInTheDocument();
+    // The StatefulButton itself carries aria-busy while in-flight.
+    const busyBtn = document.querySelector("button[aria-busy='true']");
+    expect(busyBtn).not.toBeNull();
+  });
+
+  it("transitions to the success state after the create mutation resolves", async () => {
+    vi.spyOn(sdk, "createAnalysis").mockResolvedValue({
+      data: {
+        analysis_id: "r1",
+        analysis_name: null,
+        disease_id: "d1",
+        mode: "auto",
+        status: "pending",
+        current_stage: null,
+        stage_results: {},
+        created_at: null,
+        completed_at: null,
+        expires_at: null,
+        error_message: null,
+      },
+    } as never);
+
+    wrap(<SetupView onCreated={() => {}} />);
+
+    await pickComboOption("Search plants", /aaa bbb/i);
+    await pickComboOption("Search disease", /test disease/i);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /start analysis/i }));
+    });
+
+    expect(screen.getByText("Done")).toBeInTheDocument();
   });
 });
 

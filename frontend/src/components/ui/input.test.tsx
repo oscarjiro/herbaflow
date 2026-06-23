@@ -1,10 +1,10 @@
 /**
- * Task 6 — Input: animated ink-border focus, invalid state, char cap.
+ * Input: animated ink-border focus, invalid state, char cap.
  *
  * jsdom cannot simulate :focus-visible or CSS transitions, so we assert:
  * - the component renders with the correct base classes / data attributes
  * - the data-focused attribute is applied when the component receives focus
- * - reduced-motion is handled at the CSS layer (tested in index.css.task6.test.ts)
+ * - reduced-motion is handled at the CSS layer (tested in index.css.ink-focus.test.ts)
  * - aria-invalid renders the invalid treatment (class present)
  * - the char-cap counter renders and updates as value length changes
  */
@@ -145,5 +145,12 @@ describe("Input — char cap counter", () => {
     const { container } = render(<Input maxLength={2000} defaultValue="" />);
     const counter = container.querySelector("[data-slot='char-cap']")!;
     expect(counter.textContent).toMatch(/2,000/);
+  });
+
+  it("char-cap counter is vertically centered", () => {
+    const { container } = render(<Input maxLength={200} defaultValue="hi" />);
+    const cap = container.querySelector("[data-slot='char-cap']")!;
+    expect(cap.className).toMatch(/top-1\/2/);
+    expect(cap.className).toMatch(/-translate-y-1\/2/);
   });
 });

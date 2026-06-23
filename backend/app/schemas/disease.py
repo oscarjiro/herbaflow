@@ -19,3 +19,4 @@ class DiseaseRead(BaseModel):
     source_url: str | None
     retrieved_at: datetime | None
     matched_alias: str | None = None
+    target_count: int = 0

@@ -27,17 +27,21 @@ function wrap() {
 
 /** Helper: pick a plant via the combobox + pick a disease so the form becomes submittable. */
 async function fillRequiredFields() {
-  // Select plant input mode "selection" is the default — click the search combobox.
-  // The EntitySearchCombobox renders a button that opens the popover when clicked.
+  // The EntitySearchCombobox is now a direct-type input — type to open the results dropdown.
   const plantCombo = await screen.findByRole("combobox", { name: /search plants/i });
-  await userEvent.click(plantCombo);
-  const plantOption = await screen.findByRole("option", { name: /Aaa bbb/i });
+  await userEvent.type(plantCombo, "a");
+  // Generous timeout: 300ms search debounce + async render can exceed the 1s default under load.
+  const plantOption = await screen.findByRole("option", { name: /Aaa bbb/i }, { timeout: 5000 });
   await userEvent.click(plantOption);
 
   // Disease: same pattern
   const diseaseCombo = await screen.findByRole("combobox", { name: /search disease/i });
-  await userEvent.click(diseaseCombo);
-  const diseaseOption = await screen.findByRole("option", { name: /Test Disease/i });
+  await userEvent.type(diseaseCombo, "a");
+  const diseaseOption = await screen.findByRole(
+    "option",
+    { name: /Test Disease/i },
+    { timeout: 5000 },
+  );
   await userEvent.click(diseaseOption);
 }
 
@@ -107,8 +111,8 @@ describe("SetupView — advanced parameters section", () => {
     await userEvent.click(screen.getByRole("button", { name: /adme screening/i }));
 
     // Change max_mw to a non-default value (default = 500).
-    // The field has no humanized label entry so it renders as the raw key "max_mw".
-    const maxMwInput = screen.getByLabelText("max_mw");
+    // The field renders via its humanized label from labels.ts.
+    const maxMwInput = screen.getByLabelText("Max molecular weight (Da)");
     await userEvent.clear(maxMwInput);
     await userEvent.type(maxMwInput, "600");
 

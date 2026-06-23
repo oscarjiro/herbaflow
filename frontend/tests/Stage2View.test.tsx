@@ -64,24 +64,6 @@ afterEach(() => {
 });
 
 describe("Stage2View", () => {
-  it("uses cleaned Step 2 heading and empty-result approval copy", () => {
-    wrap(
-      <Stage2View
-        data={makeRun({
-          stage_results: {
-            "2": { ...SAMPLE_STAGE2_RESULTS, count: 0, passed: [], filtered: [] },
-          } as AnalysisRead["stage_results"],
-        })}
-      />,
-    );
-
-    expect(screen.getByRole("heading", { name: "Step 2: ADME Screening" })).toBeInTheDocument();
-    expect(
-      screen.getByText("No compounds passed ADME. Adjust the settings and run this step again."),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/No compounds passed ADME —/)).not.toBeInTheDocument();
-  });
-
   it("renders passed compound rows", () => {
     wrap(<Stage2View data={makeRun()} />);
     expect(screen.getByText("Curcumin")).toBeInTheDocument();
@@ -151,7 +133,7 @@ describe("Stage2View", () => {
     await openAdmePanel();
     // The long description now lives behind a per-param info tooltip (compaction), reachable
     // via the "About max_mw" trigger rather than rendered as always-visible body text.
-    expect(screen.getByRole("button", { name: /about max_mw/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /about Max molecular weight/i })).toBeInTheDocument();
   });
 
   it("Redo button is disabled when no values differ from frozen params", async () => {
@@ -165,7 +147,7 @@ describe("Stage2View", () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "400");
     const redo = screen.getByRole("button", { name: /redo/i });
@@ -176,7 +158,7 @@ describe("Stage2View", () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "400");
     await user.clear(input);
@@ -190,18 +172,20 @@ describe("Stage2View", () => {
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
     // max_mw hard max is 2000; set to 99999 to exceed it
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "99999");
     const redo = screen.getByRole("button", { name: /redo/i });
     expect(redo).toBeDisabled();
   });
 
-  it("shows param hint with default and recommended range", async () => {
-    wrap(<Stage2View data={makeRun()} />);
+  it("moves the default/recommended hint into the param info tooltip", async () => {
+    const { container } = wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
-    // max_mw has recommended_min=350, recommended_max=600, default=500
-    expect(screen.getByText(/default.*500/i)).toBeInTheDocument();
+    // The default/recommended note is no longer shown as an always-on inline
+    // paragraph; it now lives inside each param's info tooltip.
+    expect(screen.queryByText(/default.*500/i)).not.toBeInTheDocument();
+    expect(container.querySelector("[data-slot='param-info']")).not.toBeNull();
   });
 
   it("renders not_applicable state defensively (greyed)", () => {
@@ -357,15 +341,26 @@ describe("Stage2View", () => {
   });
 });
 
-describe("ApprovalBar via RunView integration", () => {
-  it("shows approve button at stage_2_awaiting_approval", async () => {
-    wrap(<Stage2View data={makeRun({ status: "stage_2_awaiting_approval" })} />);
-    expect(screen.getByRole("button", { name: /approve/i })).toBeInTheDocument();
-  });
-
-  it("hides approve button when complete", () => {
-    wrap(<Stage2View data={makeRun({ status: "complete" })} />);
-    expect(screen.queryByRole("button", { name: /approve/i })).not.toBeInTheDocument();
+describe("ParamPanel double-box regression", () => {
+  it("ParamPanel is not wrapped in a shadcn Card element", async () => {
+    const { container } = wrap(<Stage2View data={makeRun()} />);
+    await userEvent.click(screen.getByRole("button", { name: /adme parameters/i }));
+    // The param panel renders inside its own .hf-glass-panel.
+    // It must NOT be nested inside a shadcn card ([data-slot="card"]).
+    const card = container.querySelector("[data-slot='card']");
+    if (card) {
+      // If a card exists (the table card), ensure ParamPanel is not inside it.
+      const panelInsideCard = card.querySelector("[data-slot='param-panel']");
+      expect(panelInsideCard).toBeNull();
+    }
+    // ParamPanel's collapsible trigger must exist at the top level of the section, not inside a card.
+    const trigger = screen.getByRole("button", { name: /adme parameters/i });
+    // Walk up: none of the ancestors should be a shadcn card element.
+    let node: HTMLElement | null = trigger.parentElement;
+    while (node && node !== container) {
+      expect(node.dataset["slot"]).not.toBe("card");
+      node = node.parentElement;
+    }
   });
 });
 
@@ -403,7 +398,7 @@ describe("ParamPanel E7 arming rule", () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "9999");
     expect(screen.getByText(/exceeds.*maximum/i)).toBeInTheDocument();
@@ -414,7 +409,7 @@ describe("ParamPanel E7 arming rule", () => {
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
     // recommended_max=600, hard max=2000. Enter 1500 — allowed but outside recommended.
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "1500");
     expect(screen.queryByText(/exceeds.*maximum/i)).not.toBeInTheDocument();

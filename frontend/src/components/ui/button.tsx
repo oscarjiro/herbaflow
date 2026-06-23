@@ -5,8 +5,8 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/cn";
 
 const buttonVariants = cva(
-  // Base — shared across all non-glass variants. Focus ring kept from Task 4
-  // (focus-visible:ring-[3px]) for keyboard-only soft ring.
+  // Base — shared across all non-glass variants. Keeps the keyboard-only focus ring
+  // (focus-visible:ring-[3px]) for soft, accessible keyboard navigation.
   "inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-45 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
@@ -20,7 +20,13 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
 
         // ── hf design-system variants ─────────────────────────────────────
-        /** Solid ink fill, pill radius — the primary CTA on pages/surfaces. */
+        // NOTE: every hf variant (primary/secondary/ghost/danger) is rendered
+        // by the Button component through the layered .hf-glass path with a
+        // per-variant tint class (hf-btn--{variant}); see the glass branches
+        // below. These cva strings are the legacy non-glass fallback kept ONLY
+        // for the standalone `buttonVariants()` helper / type-compat — the
+        // Button component itself no longer applies them to hf variants.
+        /** (legacy fallback) ink-leaning pill — glass-rendered as the CTA. */
         primary:
           "bg-hf-fg-1 text-hf-bg rounded-[var(--radius-pill)] px-5 py-2.5 hover:shadow-[0_8px_22px_-8px_color-mix(in_srgb,var(--hf-fg-1),transparent_35%)] active:translate-y-px",
 
@@ -65,7 +71,7 @@ const buttonVariants = cva(
 
 // ---------------------------------------------------------------------------
 // Glass-action pill inner layers — uses the canonical .hf-glass__* CSS classes
-// from Task 2 (index.css) so they pick up all tier/fallback/refraction rules.
+// from index.css so they pick up all tier/fallback/refraction rules.
 // ---------------------------------------------------------------------------
 function GlassLayers() {
   return (
@@ -94,16 +100,42 @@ const GLASS_PILL_BASE = cn(
   "disabled:pointer-events-none disabled:opacity-45",
 );
 
-// Label layout for the non-icon glass pill (mockup .pill__label: 16/18/16/28
-// padding, 24px gap, 16px medium).
+// Label layout for the landing-CTA glass pill (mockup .pill__label: 16/18/16/28
+// padding, 24px gap, 16px medium). Reserved for the Hero CTA (`glass-action`).
 const GLASS_PILL_LABEL =
   "inline-flex items-center gap-[24px] py-[16px] pr-[18px] pl-[28px] text-[16px] font-medium";
+
+// Size-keyed label geometry for non-icon glass buttons. The glass pill is
+// padding-driven (height comes from padding, not a fixed `h-*`, because
+// .hf-glass clips with overflow:hidden), so each size scales its own
+// padding/gap/text — mirroring the pre-glass shadcn size scale (sm < default <
+// lg) so glass buttons feel consistent with it. `default` matches the mockup
+// in-form .btn (11px/22px padding, 9px gap, ~0.86rem text); `sm` is the compact
+// in-form pill ("Clear", dialog "Cancel"); `lg` is a roomier action pill that
+// still stays below the landing CTA. The landing CTA keeps GLASS_PILL_LABEL.
+const GLASS_PILL_BY_SIZE = {
+  sm: "inline-flex items-center gap-[8px] py-[7px] px-[16px] text-sm font-medium",
+  default: "inline-flex items-center gap-[9px] py-[11px] px-[22px] text-sm font-medium",
+  lg: "inline-flex items-center gap-[14px] py-[14px] px-[28px] text-[15px] font-medium",
+} as const;
 
 // ---------------------------------------------------------------------------
 // Button
 // ---------------------------------------------------------------------------
 
 type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
+type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>;
+
+// Resolve the non-icon glass label geometry from the size prop. The landing CTA
+// (`glass-action`) keeps the large GLASS_PILL_LABEL regardless of size so the
+// Hero pill is unchanged; every other glass variant scales by size (sm/lg map
+// to their own geometry; everything else, incl. an unset size, is `default`).
+function glassLabelClass(variant: string, size: ButtonSize | null | undefined): string {
+  if (variant === "glass-action") return GLASS_PILL_LABEL;
+  if (size === "sm") return GLASS_PILL_BY_SIZE.sm;
+  if (size === "lg") return GLASS_PILL_BY_SIZE.lg;
+  return GLASS_PILL_BY_SIZE.default;
+}
 
 interface ButtonProps
   extends Omit<React.ComponentProps<"button">, "ref">, VariantProps<typeof buttonVariants> {
@@ -118,7 +150,17 @@ function Button({
   children,
   ...props
 }: ButtonProps) {
-  const isGlass = variant === "glass-action";
+  // All hf design-system variants render the layered .hf-glass recipe. Each
+  // carries a per-variant tint class (hf-btn--{variant}) wired in index.css so
+  // the CTA hierarchy is primary > secondary > ghost > danger. glass-action is
+  // the bare overlay pill (no per-variant tint). The shadcn-original variants
+  // (default/destructive/outline/link) stay on the non-glass cva path.
+  const HF_GLASS_VARIANTS = ["primary", "secondary", "ghost", "danger", "glass-action"] as const;
+  // `variant` may be null per VariantProps; the destructure default only covers
+  // undefined, so coalesce before the membership/tint checks.
+  const resolvedVariant = variant ?? "default";
+  const isGlass = (HF_GLASS_VARIANTS as readonly string[]).includes(resolvedVariant);
+  const tintClass = resolvedVariant === "glass-action" ? "" : `hf-btn--${resolvedVariant}`;
 
   if (asChild) {
     // Glass-action + asChild: render the consumer's element (e.g. a router
@@ -135,7 +177,7 @@ function Button({
           data-slot="button"
           data-variant={variant}
           data-size={size}
-          className={cn(GLASS_PILL_BASE, className)}
+          className={cn(GLASS_PILL_BASE, tintClass, className)}
           {...props}
         >
           {React.cloneElement(
@@ -143,7 +185,12 @@ function Button({
             undefined,
             <>
               <GlassLayers />
-              <span className={cn("hf-glass__content text-hf-fg-1", GLASS_PILL_LABEL)}>
+              <span
+                className={cn(
+                  "hf-glass__content text-hf-fg-1",
+                  glassLabelClass(resolvedVariant, size),
+                )}
+              >
                 {child.props.children}
               </span>
             </>,
@@ -168,7 +215,8 @@ function Button({
   if (isGlass) {
     // Icon-only glass control (e.g. the theme switcher): a fixed square that
     // reads as a circle (square + pill radius), icon centred, no label padding.
-    // Non-icon = the landing CTA pill (mockup .pill label spec).
+    // Non-icon = a size-scaled glass label pill (glass-action stays the large
+    // landing CTA; everything else scales sm/default/lg).
     const iconSizeClass =
       size === "icon"
         ? "size-9"
@@ -185,7 +233,7 @@ function Button({
         data-slot="button"
         data-variant={variant}
         data-size={size}
-        className={cn(GLASS_PILL_BASE, iconSizeClass, className)}
+        className={cn(GLASS_PILL_BASE, tintClass, iconSizeClass, className)}
         {...props}
       >
         <GlassLayers />
@@ -193,7 +241,7 @@ function Button({
         <span
           className={cn(
             "hf-glass__content text-hf-fg-1",
-            isIcon ? "grid size-full place-items-center" : GLASS_PILL_LABEL,
+            isIcon ? "grid size-full place-items-center" : glassLabelClass(resolvedVariant, size),
           )}
         >
           {children}

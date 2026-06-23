@@ -54,7 +54,9 @@ export function RunStageContent({ analysisId, slug }: { analysisId: string; slug
       stage={n}
       title={title}
       kicker={`${kickerNum} · ${title}`}
-      onApprove={() => advance.mutate()}
+      onApprove={async () => {
+        await advance.mutateAsync();
+      }}
       approvePending={advance.isPending}
     >
       <View data={data} />

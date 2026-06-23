@@ -23,16 +23,16 @@ function getForwardedProps(): ToasterProps {
   return sonnerProps.mock.calls.at(-1)![0];
 }
 
-describe("Toaster — ink surface + status dot", () => {
-  it("forwards an ink-surface toast className through toastOptions", () => {
+describe("Toaster — glass surface + status dot", () => {
+  it("forwards a glass toast className through toastOptions", () => {
     const props = getForwardedProps();
     const toastClass = props.toastOptions?.classNames?.toast ?? "";
-    // Ink panel: ink background + paper text (both flip under .dark via tokens).
-    expect(toastClass).toContain("bg-hf-fg-1");
-    expect(toastClass).toContain("text-hf-bg");
+    // Glass panel: translucent inline-glass surface + normal foreground text.
+    expect(toastClass).toContain("hf-glass-panel");
+    expect(toastClass).toContain("text-hf-fg-1");
   });
 
-  it("renders the toast unstyled so the ink classNames fully control the look", () => {
+  it("renders the toast unstyled so the glass classNames fully control the look", () => {
     const props = getForwardedProps();
     expect(props.toastOptions?.unstyled).toBe(true);
   });

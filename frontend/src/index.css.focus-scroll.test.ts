@@ -1,5 +1,5 @@
 /**
- * Task 4 — Focus, scrollbars, hidden page scrollbar, Motion provider
+ * Focus, scrollbars, and hidden page scrollbar — CSS assertions.
  *
  * All assertions read the literal CSS text (same pattern as index.css.theme.test.ts).
  * jsdom cannot compute :focus-visible styles, so we assert the rules are present and

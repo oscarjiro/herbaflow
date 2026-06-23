@@ -35,17 +35,19 @@ import {
   TARGET_NUMERIC_PARAMS,
   TARGET_PARAMS,
 } from "../contract";
+import { INPUT_MODE_DESCRIPTIONS } from "../contract/labels";
 import { RemovableChipList } from "./RemovableChipList";
 import { ParamPanel, type ParamMeta } from "./stages/ParamPanel";
 import { CompoundValidateBox } from "./CompoundValidateBox";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
 import { TargetValidateBox } from "./TargetValidateBox";
-import { Button } from "./ui/button";
-import { Eyebrow, StatNumber } from "./ui/editorial";
+import { StatefulButton } from "./ui/StatefulButton";
+import { Eyebrow } from "./ui/editorial";
 import { GlassSurface } from "./ui/GlassSurface";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { RunModeCards } from "./setup/RunModeCards";
+import { FieldCap } from "./ui/FieldCap";
 import { SegmentedTabs } from "./ui/SegmentedTabs";
 
 // ---------------------------------------------------------------------------
@@ -277,6 +279,9 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
       value: p.plant_id,
       label: p.canonical_scientific_name ?? p.plant_id,
       hint: p.matched_alias ?? null,
+      familyName: p.family_name ?? null,
+      count: p.compound_count ?? 0,
+      kind: "plant" as const,
     }));
   }, []);
 
@@ -286,6 +291,8 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
       value: d.disease_id,
       label: d.disease_name ?? d.disease_id,
       hint: d.matched_alias ?? null,
+      count: d.target_count ?? 0,
+      kind: "disease" as const,
     }));
   }, []);
 
@@ -385,7 +392,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
         <div className="grid gap-5 lg:grid-cols-2">
           {/* ---- Plant input ---- */}
           <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
-            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Plant input</h2>
+            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Plants</h2>
             <div className="mt-4 space-y-5">
               <SegmentedTabs
                 value={plantMode}
@@ -395,9 +402,21 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                   })
                 }
                 options={[
-                  { value: "selection", label: "Select plants" },
-                  { value: "manual_compounds", label: "Enter compounds" },
-                  { value: "manual_targets", label: "Enter targets" },
+                  {
+                    value: "selection",
+                    label: "Select plants",
+                    description: INPUT_MODE_DESCRIPTIONS["selection"],
+                  },
+                  {
+                    value: "manual_compounds",
+                    label: "Enter compounds",
+                    description: INPUT_MODE_DESCRIPTIONS["manual_compounds"],
+                  },
+                  {
+                    value: "manual_targets",
+                    label: "Enter targets",
+                    description: INPUT_MODE_DESCRIPTIONS["manual_targets"],
+                  },
                 ]}
                 ariaLabel="Plant input mode"
               />
@@ -414,9 +433,10 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     placeholder="Search plants…"
                     ariaLabel="Search plants"
                   />
-                  <p className="text-muted-foreground text-sm">
-                    {selectedPlants.length} / {MAX_PLANTS} plants
-                  </p>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-hf-fg-1 text-sm font-semibold">Plants</span>
+                    <FieldCap current={selectedPlants.length} max={MAX_PLANTS} unit="plants" />
+                  </div>
                   {selectedPlants.length > MAX_PLANTS && (
                     <p role="alert" className="text-destructive text-sm">
                       Too many plants (max {MAX_PLANTS}).
@@ -496,7 +516,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
 
           {/* ---- Disease input ---- */}
           <GlassSurface tier="raised" className="rounded-[var(--radius-lg)] p-5">
-            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Disease input</h2>
+            <h2 className="font-display text-hf-fg-1 text-lg tracking-tight">Disease</h2>
             <div className="mt-4 space-y-5">
               <SegmentedTabs
                 value={diseaseMode}
@@ -506,8 +526,16 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                   })
                 }
                 options={[
-                  { value: "selection", label: "Select disease" },
-                  { value: "manual_disease_targets", label: "Enter targets" },
+                  {
+                    value: "selection",
+                    label: "Select disease",
+                    description: INPUT_MODE_DESCRIPTIONS["disease_selection"],
+                  },
+                  {
+                    value: "manual_disease_targets",
+                    label: "Enter targets",
+                    description: INPUT_MODE_DESCRIPTIONS["manual_disease_targets"],
+                  },
                 ]}
                 ariaLabel="Disease input mode"
               />
@@ -593,7 +621,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
             onClick={() => setAdvancedOpen((o) => !o)}
           >
             <span className="text-muted-foreground text-xs">{advancedOpen ? "▾" : "▸"}</span>
-            <span className="text-sm font-medium">Advanced parameters</span>
+            <span className="font-display text-base">Advanced parameters</span>
           </button>
 
           {advancedOpen && (
@@ -616,26 +644,40 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
           data-testid="setup-summary"
         >
           <Eyebrow>Selection</Eyebrow>
-          <p className="font-display text-hf-fg-1 mt-2 text-xl">
+          <p className="mt-2 text-xl">
             {hasSelection ? (
               <>
-                <StatNumber>{plantCount}</StatNumber> {plantNoun}
+                <span
+                  data-slot="stat-num"
+                  className="font-display text-hf-fg-1 text-2xl leading-none"
+                >
+                  {plantCount}
+                </span>{" "}
+                <span className="text-hf-fg-3 text-base">{plantNoun}</span>
                 {" · "}
-                <StatNumber>{diseaseCount}</StatNumber> {diseaseNoun}
+                <span
+                  data-slot="stat-num"
+                  className="font-display text-hf-fg-1 text-2xl leading-none"
+                >
+                  {diseaseCount}
+                </span>{" "}
+                <span className="text-hf-fg-3 text-base">{diseaseNoun}</span>
               </>
             ) : (
-              <span className="text-hf-fg-3">Nothing selected yet.</span>
+              <span className="font-display text-hf-fg-3 italic">Nothing selected yet.</span>
             )}
           </p>
         </GlassSurface>
 
-        <Button
-          disabled={!canSubmit || create.isPending}
-          onClick={() => create.mutate()}
+        <StatefulButton
+          disabled={!canSubmit}
+          onClickAsync={async () => {
+            await create.mutateAsync();
+          }}
           className="rounded-[var(--radius-pill)]"
         >
-          {create.isPending ? "Starting…" : "Start analysis"}
-        </Button>
+          Start analysis
+        </StatefulButton>
       </div>
     </section>
   );

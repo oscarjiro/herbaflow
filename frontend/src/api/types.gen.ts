@@ -113,6 +113,7 @@ export type DiseaseRead = {
     source_url: string | null;
     retrieved_at: string | null;
     matched_alias?: string | null;
+    target_count?: number;
 };
 
 export type FailedInput = {
@@ -135,6 +136,7 @@ export type PlantRead = {
     canonical_scientific_name: string | null;
     family_name: string | null;
     matched_alias?: string | null;
+    compound_count?: number;
 };
 
 /**

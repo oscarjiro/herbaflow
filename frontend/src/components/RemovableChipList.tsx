@@ -20,13 +20,13 @@ export function RemovableChipList<T>({
         const label = getLabel(item);
         return (
           <li key={getKey(item)}>
-            <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <span className="bg-hf-bg border-hf-border-strong text-hf-fg-1 inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border py-1 pr-1.5 pl-3 font-mono text-xs">
               {label}
               <button
                 type="button"
                 aria-label={`Remove ${label}`}
                 onClick={() => onRemove(item)}
-                className="hover:text-foreground ml-0.5 rounded-full opacity-60 transition-opacity hover:opacity-100"
+                className="text-hf-fg-4 hover:text-hf-terracotta grid size-4 place-items-center rounded-full transition-colors"
               >
                 <XIcon className="size-3" />
               </button>

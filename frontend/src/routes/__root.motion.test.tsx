@@ -1,5 +1,5 @@
 /**
- * Task 4 — LazyMotion provider smoke test
+ * LazyMotion provider smoke test
  *
  * Verifies that __root.tsx wraps routed content in LazyMotion so m.* components
  * can animate app-wide. We do NOT attempt to render the real TanStack router

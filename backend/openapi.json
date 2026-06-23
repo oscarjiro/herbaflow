@@ -1631,6 +1631,11 @@
               }
             ],
             "title": "Matched Alias"
+          },
+          "target_count": {
+            "type": "integer",
+            "title": "Target Count",
+            "default": 0
           }
         },
         "type": "object",
@@ -1747,6 +1752,11 @@
               }
             ],
             "title": "Matched Alias"
+          },
+          "compound_count": {
+            "type": "integer",
+            "title": "Compound Count",
+            "default": 0
           }
         },
         "type": "object",

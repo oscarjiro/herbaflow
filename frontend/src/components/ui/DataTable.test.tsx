@@ -37,7 +37,7 @@ test("paginates with a page-size control (default 10)", () => {
   const many = Array.from({ length: 12 }, (_, i) => ({ gene: `G${i}`, score: i }));
   render(<DataTable columns={cols} data={many} />);
   expect(screen.getAllByRole("row").slice(1)).toHaveLength(10);
-  // The rows-per-page control is the Task-7 Select (an accessible combobox).
+  // The rows-per-page control is the Select component (an accessible combobox).
   expect(screen.getByRole("combobox", { name: /rows per page/i })).toBeInTheDocument();
 });
 

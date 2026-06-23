@@ -61,7 +61,7 @@ function Textarea({
         "outline-none",
         // Disabled
         "disabled:cursor-not-allowed disabled:opacity-50",
-        // Animated ink-border focus (Task 6): no ring, border animates to ink + soft glow
+        // Animated ink-border focus: no ring, border animates to ink + soft glow
         "hf-ink-focus",
         // Invalid state
         "aria-invalid:border-hf-danger",
@@ -79,7 +79,7 @@ function Textarea({
       <span
         data-slot="char-cap"
         aria-live="polite"
-        className="text-hf-fg-4 pointer-events-none absolute right-2 bottom-2 text-xs tabular-nums select-none"
+        className="text-hf-fg-4 pointer-events-none absolute right-3 bottom-2 text-xs tabular-nums select-none"
       >
         {fmtNum(charCount)} / {fmtNum(maxLength!)}
       </span>

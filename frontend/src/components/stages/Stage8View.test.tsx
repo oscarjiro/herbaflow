@@ -77,7 +77,6 @@ describe("Stage8View", () => {
     } as unknown as AnalysisRead;
     const { container } = render(wrap(<Stage8View data={data} />));
     const stage8 = container.firstElementChild as HTMLElement;
-    expect(screen.getByText("Step 8: Functional Enrichment")).toBeInTheDocument();
     expect(screen.getAllByText("PI3K-Akt").length).toBeGreaterThanOrEqual(1);
     expect(
       screen.getByText(/Background: compound target universe \(800 genes\)\./i),
@@ -86,7 +85,6 @@ describe("Stage8View", () => {
     expect(stage8).not.toHaveTextContent("methodologically-correct");
     expect(stage8).not.toHaveTextContent("honest null");
     expect(stage8).not.toHaveTextContent("Pipeline complete");
-    expect(screen.getByText("Analysis complete. All eight steps finished.")).toBeInTheDocument();
     // Interactive chart replaces the six server-rendered PNGs.
     expect(screen.getByText("Pathway enrichment")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
@@ -177,14 +175,49 @@ describe("Stage8View", () => {
     ).toBeInTheDocument();
   });
 
-  it("uses cleaned stale approval copy", () => {
+  it("shows the enrichment chart once terms exist, even before the run completes", () => {
     const data = {
       ...base,
       status: "stage_8_awaiting_approval",
-      parameters: {
-        ...base.parameters,
-        rerun_from: 7,
+      stage_results: {
+        "8": {
+          state: "computed",
+          terms: [
+            {
+              source: "KEGG",
+              term_id: "KEGG:04151",
+              name: "PI3K-Akt",
+              p_value: 3.1e-6,
+              term_size: 354,
+              query_size: 3,
+              intersection_size: 2,
+              intersection: ["AKT1", "TNF"],
+            },
+          ],
+          input_gene_count: 3,
+          background_gene_count: 800,
+          background_source: "compound_target_universe",
+          correction: "fdr",
+          significance_threshold: 0.05,
+          min_term_size: 5,
+          sources: ["GO:BP", "KEGG"],
+          degraded: false,
+          count: 1,
+          flags: [],
+        },
       },
+    } as unknown as AnalysisRead;
+
+    render(wrap(<Stage8View data={data} />));
+
+    expect(screen.getByText("Pathway enrichment")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
+  });
+
+  it("does not render the enrichment chart when there are no terms", () => {
+    const data = {
+      ...base,
+      status: "complete",
       stage_results: {
         "8": {
           state: "computed",
@@ -199,17 +232,13 @@ describe("Stage8View", () => {
           degraded: false,
           count: 0,
           flags: [],
-          stale: true,
         },
       },
     } as unknown as AnalysisRead;
 
     render(wrap(<Stage8View data={data} />));
 
-    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
-    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
-    expect(
-      screen.queryByText("Re-run the out-of-date step before continuing."),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Pathway enrichment")).toBeNull();
+    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 });

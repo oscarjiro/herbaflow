@@ -54,11 +54,6 @@ function wrap(ui: React.ReactNode) {
 }
 
 describe("Stage5View — overlap view", () => {
-  it("renders the cleaned Step 5 heading", () => {
-    wrap(<Stage5View data={makeData()} />);
-    expect(screen.getByText("Step 5: Target Overlap")).toBeInTheDocument();
-  });
-
   it("renders the overlap count card", () => {
     wrap(<Stage5View data={makeData()} />);
     expect(screen.getByLabelText(/2 overlap targets/i)).toBeInTheDocument();
@@ -103,44 +98,26 @@ describe("Stage5View — overlap view", () => {
     expect(screen.queryByRole("img", { name: /target overlap/i })).toBeNull();
   });
 
-  it("does not render the venn chart when not complete", () => {
+  it("renders the venn once the step has results, even before the run completes", () => {
+    // counts > 0 on an awaiting-approval (not yet complete) run — the chart shows.
     wrap(<Stage5View data={makeData()} />);
-    expect(screen.queryByText("Target overlap")).toBeNull();
-    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
+    expect(screen.getAllByText("Target overlap").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
   });
 
-  it("renders the cleaned zero-overlap approval reason", () => {
+  it("does not render the venn when both set sizes are zero", () => {
     const data = makeData({ overlap: [] });
     data.stage_results = {
       "5": {
         ...makeStage5Result({ overlap: [] }),
         count: 0,
-      },
-    };
-
-    wrap(<Stage5View data={data} />);
-    expect(
-      screen.getByText("No overlap targets. Check Step 3 and Step 4 results."),
-    ).toBeInTheDocument();
-  });
-
-  it("uses cleaned stale approval copy", () => {
-    const data = makeData();
-    data.parameters = { rerun_from: 4 } as AnalysisRead["parameters"];
-    data.stage_results = {
-      "5": {
-        ...makeStage5Result(),
-        stale: true,
+        compound_target_count: 0,
+        disease_target_count: 0,
       },
     } as unknown as AnalysisRead["stage_results"];
-
     wrap(<Stage5View data={data} />);
-
-    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
-    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
-    expect(
-      screen.queryByText("Re-run the out-of-date step before continuing."),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Target overlap")).toBeNull();
+    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 
   it("does NOT render a StaleNotice even when the stage is stale (notice belongs under the edited stage, never here)", () => {

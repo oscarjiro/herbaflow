@@ -1115,6 +1115,17 @@ Omitting `q` (or passing an empty string) returns the full list ordered by canon
 The search reads the existing `plant_aliases` / `disease_aliases` tables. No new tables or
 migrations are required.
 
+**Catalog counts on search rows:** each result row carries an aggregate count computed at
+query time — no new column or migration:
+
+- `compound_count` (plants) — `COUNT(DISTINCT compound_id)` over `plant_compounds` for each
+  returned plant. Plants with no compounds return `0`.
+- `target_count` (diseases) — `COUNT(DISTINCT target_id)` over `disease_targets` for each
+  returned disease, unfiltered (all association scores). Diseases with no seeded targets return `0`.
+
+Both counts are batched in a single query per entity type after the candidate page is assembled,
+so the search remains two DB round-trips regardless of page size.
+
 ---
 
 ## Results-handoff export (read-only)

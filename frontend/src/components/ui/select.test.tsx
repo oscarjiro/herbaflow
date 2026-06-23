@@ -1,5 +1,5 @@
 /**
- * Task 7 — Select re-skin: input-like trigger, animated menu, selected dot, chevron rotation.
+ * Select re-skin: input-like trigger, animated menu, selected dot, chevron rotation.
  *
  * jsdom cannot simulate :focus-visible or CSS transitions, so we assert:
  * - the trigger renders with input-like classes (bg-hf-surface, border-hf-border-strong,
@@ -113,6 +113,14 @@ describe("SelectTrigger — chevron rotation", () => {
     const chevron = trigger.querySelector("svg");
     const cls = chevron!.getAttribute("class") ?? "";
     expect(cls).toContain("transition-transform");
+  });
+
+  it("select trigger chevron uses the muted fg token", () => {
+    const { container } = render(<ClosedSelect />);
+    const chevron = container.querySelector("[data-slot='select-trigger'] svg");
+    expect(chevron).not.toBeNull();
+    const cls = chevron!.getAttribute("class") ?? "";
+    expect(cls).toMatch(/text-hf-fg-3/);
   });
 });
 

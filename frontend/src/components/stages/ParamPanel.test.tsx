@@ -139,7 +139,7 @@ describe("ParamPanel", () => {
     expect(screen.getByLabelText("Significance threshold (corrected p ≤)")).toBeInTheDocument();
   });
 
-  it("renders boolean params as a checkbox", async () => {
+  it("renders boolean params as a Switch toggle, not a .box checkbox", async () => {
     render(
       <ParamPanel
         params={{ flag: false }}
@@ -151,7 +151,71 @@ describe("ParamPanel", () => {
       />,
     );
     await openPanel();
-    expect(screen.getByLabelText("flag")).toBeInTheDocument();
+    // The control is a Radix Switch (role="switch"), not role="checkbox"
+    expect(screen.getByRole("switch", { name: /flag/i })).toBeInTheDocument();
+    // Unchecked state
+    expect(screen.getByRole("switch", { name: /flag/i })).toHaveAttribute(
+      "data-state",
+      "unchecked",
+    );
+    // A <Label> element is rendered alongside the switch (font consistency).
+    // "flag" is an unmapped test fixture key — humanizeLabel returns the raw key.
+    expect(screen.getByText("flag")).toBeInTheDocument();
+  });
+
+  it("boolean Switch toggles to checked when clicked and arms Redo", async () => {
+    render(
+      <ParamPanel
+        params={{ flag: false }}
+        meta={{ flag: booleanMeta }}
+        onRedo={vi.fn()}
+        numericKeys={[]}
+        booleanKeys={["flag"]}
+        selectKeys={[]}
+      />,
+    );
+    await openPanel();
+    await userEvent.click(screen.getByRole("switch", { name: /flag/i }));
+    expect(screen.getByRole("switch", { name: /flag/i })).toHaveAttribute("data-state", "checked");
+    // Redo should be armed now (flag changed from false to true)
+    expect(screen.getByRole("button", { name: /redo from this stage/i })).not.toBeDisabled();
+  });
+
+  it("boolean Switch Redo submits the toggled boolean value", async () => {
+    const onRedo = vi.fn();
+    render(
+      <ParamPanel
+        params={{ flag: false }}
+        meta={{ flag: booleanMeta }}
+        onRedo={onRedo}
+        numericKeys={[]}
+        booleanKeys={["flag"]}
+        selectKeys={[]}
+      />,
+    );
+    await openPanel();
+    await userEvent.click(screen.getByRole("switch", { name: /flag/i }));
+    await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
+    expect(onRedo).toHaveBeenCalledWith({ flag: true });
+  });
+
+  it("boolean param info button is a sibling of the Switch, not nested inside it", async () => {
+    render(
+      <ParamPanel
+        params={{ flag: false }}
+        meta={{ flag: booleanMeta }}
+        onRedo={vi.fn()}
+        numericKeys={[]}
+        booleanKeys={["flag"]}
+        selectKeys={[]}
+      />,
+    );
+    await openPanel();
+    // The Switch must not contain any nested <button> (invalid HTML / hydration error)
+    const toggle = screen.getByRole("switch", { name: /flag/i });
+    expect(toggle.querySelector("button")).toBeNull();
+    // The info tooltip trigger must still be present as a sibling (not lost)
+    expect(screen.getByRole("button", { name: /about flag/i })).toBeInTheDocument();
   });
 
   it("renders select params with humanized enum options", async () => {
@@ -203,6 +267,69 @@ describe("ParamPanel", () => {
     );
     await openPanel();
     await userEvent.click(screen.getByLabelText("Reactome"));
+    expect(screen.getByRole("button", { name: /redo from this stage/i })).not.toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
+    expect(onRedo).toHaveBeenCalledWith({ sources: ["GO:BP", "REAC"] });
+  });
+
+  it("renders array-enum params as a .ms multi-select container with .ms__row per option", async () => {
+    const { container } = render(
+      <ParamPanel
+        params={{ sources: ["GO:BP"] }}
+        meta={{ sources: arraySelectMeta }}
+        onRedo={vi.fn()}
+        numericKeys={[]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        arrayKeys={["sources"]}
+      />,
+    );
+    await openPanel();
+    // .ms container must exist
+    expect(container.querySelector(".ms")).not.toBeNull();
+    // One .ms__row per enum option (6 options in arraySelectMeta)
+    expect(container.querySelectorAll(".ms__row")).toHaveLength(6);
+  });
+
+  it(".ms rows show .on for selected options and not for unselected", async () => {
+    const { container } = render(
+      <ParamPanel
+        params={{ sources: ["GO:BP"] }}
+        meta={{ sources: arraySelectMeta }}
+        onRedo={vi.fn()}
+        numericKeys={[]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        arrayKeys={["sources"]}
+      />,
+    );
+    await openPanel();
+    // GO:BP is selected → its row check should have .on
+    const rows = container.querySelectorAll(".ms__row");
+    const firstRowCheck = rows[0]!.querySelector(".ms__check");
+    expect(firstRowCheck?.classList.contains("on")).toBe(true);
+    // GO:MF is not selected
+    const secondRowCheck = rows[1]!.querySelector(".ms__check");
+    expect(secondRowCheck?.classList.contains("on")).toBe(false);
+  });
+
+  it(".ms row click toggles membership and arms Redo", async () => {
+    const onRedo = vi.fn();
+    const { container } = render(
+      <ParamPanel
+        params={{ sources: ["GO:BP"] }}
+        meta={{ sources: arraySelectMeta }}
+        onRedo={onRedo}
+        numericKeys={[]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        arrayKeys={["sources"]}
+      />,
+    );
+    await openPanel();
+    // Click the Reactome row (index 4, humanized = "Reactome")
+    const rows = container.querySelectorAll(".ms__row");
+    await userEvent.click(rows[4] as HTMLElement);
     expect(screen.getByRole("button", { name: /redo from this stage/i })).not.toBeDisabled();
     await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
     expect(onRedo).toHaveBeenCalledWith({ sources: ["GO:BP", "REAC"] });
@@ -268,6 +395,36 @@ describe("ParamPanel", () => {
     await openPanel(/tooltip test/i);
     expect(screen.getByRole("button", { name: /about/i })).toBeInTheDocument();
     expect(screen.queryByText(/the full long description sentence/i)).not.toBeInTheDocument();
+  });
+
+  it("param help lives in the info tooltip, not an always-on inline hint", async () => {
+    const tooltipMeta: ParamMeta = {
+      default: 5,
+      min: 0,
+      minExclusive: false,
+      max: 10,
+      recommended_min: 1,
+      recommended_max: 9,
+      description: "the full long description sentence",
+    };
+    const { container } = render(
+      <ParamPanel
+        params={{ score: 5 }}
+        meta={{ score: tooltipMeta }}
+        onRedo={vi.fn()}
+        numericKeys={["score"]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        title="Hint test"
+      />,
+    );
+    await openPanel(/hint test/i);
+    // The info trigger exists and is tagged for the design system.
+    expect(container.querySelector("[data-slot='param-info']")).not.toBeNull();
+    // No always-on inline help paragraph (default/recommended bounds + description
+    // now live inside the tooltip, mirroring the mockup's tooltip mode).
+    expect(container.querySelector("[data-slot='param-hint']")).toBeNull();
+    expect(screen.queryByText(/recommended 1–9/i)).not.toBeInTheDocument();
   });
 
   describe("collect-mode (onChange + hideRedo)", () => {
@@ -378,6 +535,38 @@ describe("ParamPanel", () => {
       // "7" produces 1 change event; allow up to 3 calls total (clear + type + any
       // re-sync); the critical guarantee is that we don't get dozens of calls.
       expect(onChange.mock.calls.length).toBeLessThanOrEqual(5);
+    });
+  });
+
+  describe("chrome", () => {
+    it("renders the panel title as a serif heading", () => {
+      render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          title="Advanced parameters"
+        />,
+      );
+      expect(screen.getByText("Advanced parameters").className).toContain("font-display");
+    });
+
+    it("renders the container as a glass surface", () => {
+      const { container } = render(
+        <ParamPanel
+          params={{ score: 5 }}
+          meta={{ score: numericMeta }}
+          onRedo={vi.fn()}
+          numericKeys={["score"]}
+          booleanKeys={[]}
+          selectKeys={[]}
+          title="Advanced parameters"
+        />,
+      );
+      expect(container.querySelector(".hf-glass-panel")).not.toBeNull();
     });
   });
 });

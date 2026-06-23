@@ -1,5 +1,5 @@
 /**
- * Task 6 — CSS assertions: animated ink-border focus for input/textarea/select.
+ * CSS assertions: animated ink-border focus for input/textarea/select.
  *
  * jsdom cannot simulate :focus-visible pseudo-classes, so we assert the rule
  * text in index.css is correct rather than testing rendered styles.
@@ -96,8 +96,8 @@ describe(".hf-ink-focus — prefers-reduced-motion", () => {
 
 describe("index.css input focus-visible override", () => {
   it("the base :where(input,select,textarea):focus-visible rule is replaced or dominated by .hf-ink-focus", () => {
-    // Task 4 left a placeholder rule. Task 6 adds .hf-ink-focus to override it cleanly.
-    // Verify both coexist (the old placeholder stays for non-hf-ink-focus elements)
+    // The placeholder rule stays for non-hf-ink-focus elements;
+    // .hf-ink-focus overrides it cleanly for inputs/textareas/selects.
     expect(cssRaw).toMatch(/:where\(input[^)]*\):focus-visible/);
   });
 });

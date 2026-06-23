@@ -55,9 +55,9 @@ function RunShell() {
   }
 
   return (
-    <div className="lg:pl-64">
+    <div className="lg:flex">
       <RunSidebar data={data} analysisId={id} onExit={() => navigate({ to: "/analysis" })} />
-      <main className="mx-auto flex max-w-[920px] min-w-0 flex-col gap-6 p-6">
+      <main className="mx-auto flex max-w-[920px] min-w-0 flex-col gap-6 p-6 lg:flex-1">
         <Outlet />
       </main>
     </div>

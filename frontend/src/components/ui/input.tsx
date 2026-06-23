@@ -68,7 +68,7 @@ function Input({
         "outline-none",
         // Disabled state
         "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-        // Animated ink-border focus (Task 6): border animates to ink + soft glow; no ring
+        // Animated ink-border focus: border animates to ink + soft glow; no ring
         "hf-ink-focus",
         // Invalid state — danger border colour (CSS .hf-ink-focus rule handles the rest)
         "aria-invalid:border-hf-danger",
@@ -86,7 +86,7 @@ function Input({
       <span
         data-slot="char-cap"
         aria-live="polite"
-        className="text-hf-fg-4 pointer-events-none absolute right-2 bottom-1.5 text-xs tabular-nums select-none"
+        className="text-hf-fg-4 pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs tabular-nums select-none"
       >
         {fmtNum(charCount)} / {fmtNum(maxLength!)}
       </span>

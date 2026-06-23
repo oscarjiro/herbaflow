@@ -8,7 +8,7 @@
  * is disabled transiently while the mutation is in-flight; no reason is shown.
  */
 
-import { Button } from "@/components/ui/button";
+import { StatefulButton } from "@/components/ui/StatefulButton";
 
 export function ApprovalBar({
   stage,
@@ -22,7 +22,7 @@ export function ApprovalBar({
   stage: number;
   status: string | null | undefined;
   currentStage: number | null | undefined;
-  onApprove: () => void;
+  onApprove: () => Promise<void>;
   disabled?: boolean;
   disabledReason?: string;
   /** True while the advance mutation is in-flight — disables the button without showing a reason. */
@@ -34,9 +34,9 @@ export function ApprovalBar({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <Button onClick={onApprove} disabled={disabled || pending}>
+      <StatefulButton onClickAsync={onApprove} disabled={disabled || pending}>
         Approve &amp; Continue
-      </Button>
+      </StatefulButton>
       {disabled && disabledReason && (
         <p className="text-muted-foreground text-sm" role="status">
           {disabledReason}

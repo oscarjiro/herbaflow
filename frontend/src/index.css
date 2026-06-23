@@ -330,14 +330,14 @@
   }
 
   /* Refined focus ring — soft radius, thinner stroke; keeps AA keyboard visibility.
-     Inputs/textarea/select opt OUT: Task 6 provides the animated-border focus for those. */
+     Inputs/textarea/select opt OUT: the animated ink-border utility handles focus for those. */
   :where(button, a, [role="button"], [tabindex]):focus-visible {
     outline: 1.5px solid var(--hf-fg-1);
     outline-offset: 3px;
     border-radius: var(--radius-md);
   }
-  /* Inputs keep a visible ring (AA) but use a subtler colour; Task 6 will replace
-     this with the animated border. Isolated selector so Task 6 can override cleanly. */
+  /* Inputs keep a visible ring (AA) but use a subtler colour; the ink-border utility
+     replaces this with the animated border. Isolated selector so it can override cleanly. */
   :where(input, select, textarea):focus-visible {
     outline: 1.5px solid var(--hf-border-strong);
     outline-offset: 0;
@@ -345,8 +345,8 @@
   }
 
   /* ----------------------------------------------------------------
-     Animated ink-border focus — Task 6
-     Applied via the .hf-ink-focus utility class on input/textarea.
+     Animated ink-border focus
+     Applied via the .hf-ink-focus utility class on input/textarea/select.
      Replaces the placeholder :where(input,...):focus-visible rule above
      for any element that carries this class.
      - Base: surface fill, soft border, smooth transition.
@@ -598,6 +598,51 @@
     transform: translateY(-3px);
   }
 
+  /* hf-glass-panel: lightweight inline glass for selection/form surfaces
+   (run-mode cards, param panels) that need a translucent glassy fill applied
+   to an existing box. Distinct from GlassSurface (the heavy 4-layer standalone
+   surface): a single class, preserves the host's own padding/layout, and has
+   NO hover lift. Apply only to a box with no competing bg/border/shadow utility
+   so this component-layer surface wins. */
+  .hf-glass-panel {
+    background: var(--hf-glass-tint-strong);
+    backdrop-filter: blur(12px) saturate(125%);
+    -webkit-backdrop-filter: blur(12px) saturate(125%);
+    border: 1px solid var(--hf-border);
+    box-shadow: var(--hf-glass-shadow);
+  }
+
+  /* --- hf button tint hierarchy (all buttons are glass) ------------------ */
+  /* primary: strongest tint + ink-leaning rim so the CTA dominates */
+  .hf-btn--primary .hf-glass__tint {
+    background: color-mix(in srgb, var(--hf-fg-1), transparent 86%);
+  }
+  .hf-btn--primary .hf-glass__shine {
+    box-shadow:
+      inset 1.5px 1.5px 1px -1px var(--hf-glass-shine),
+      inset 0 0 0 1px color-mix(in srgb, var(--hf-fg-1), transparent 55%);
+  }
+  /* secondary: standard overlay tint (uses the base --hf-glass-tint-strong) */
+  .hf-btn--secondary .hf-glass__tint {
+    background: var(--hf-glass-tint-strong);
+  }
+  /* ghost: no tint at rest, faint surface wash on hover */
+  .hf-btn--ghost .hf-glass__tint {
+    background: transparent;
+  }
+  .hf-btn--ghost:hover .hf-glass__tint {
+    background: var(--hf-glass-tint);
+  }
+  /* danger: terracotta-leaning tint + rim */
+  .hf-btn--danger .hf-glass__tint {
+    background: color-mix(in srgb, var(--hf-terracotta), transparent 80%);
+  }
+  .hf-btn--danger .hf-glass__shine {
+    box-shadow:
+      inset 1.5px 1.5px 1px -1px var(--hf-glass-shine),
+      inset 0 0 0 1px color-mix(in srgb, var(--hf-terracotta), transparent 50%);
+  }
+
   /* --- Refraction opt-in (Chromium only) ------------------------------- */
   /* Real lens refraction = the #hf-liquid feDisplacementMap on a lightly
    blurred backdrop. Enabled ONLY when lib/glassSupport.ts has confirmed a
@@ -659,7 +704,469 @@
       box-shadow: inset 0 0 0 1.5px var(--hf-border-strong);
     }
   }
+  /* =====================================================================
+     Run-shell sidebar, trail, run-card, and side-foot.
+     These classes mirror the analysis.html mockup exactly.
+     One canonical home: index.css @layer components.
+     ===================================================================== */
+
+  /* ----- sidebar chrome ----- */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 20px 16px 16px;
+    width: 264px;
+    background: var(--hf-glass-tint-strong);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border-right: 1px solid var(--hf-border);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* brand wordmark */
+  .sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 2px 8px 14px;
+    text-decoration: none;
+    color: var(--hf-fg-1);
+  }
+  .sidebar .brand .mark {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  /* ----- run-card ----- */
+  .run-card {
+    margin: 0 4px 14px;
+    padding: 11px 12px;
+    border: 1px solid var(--hf-border);
+    border-radius: var(--radius-md);
+    background: var(--hf-surface);
+  }
+  .run-card .rc-label {
+    font-family: var(--font-mono);
+    font-size: 0.56rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--hf-fg-4);
+  }
+  .run-card .rc-name {
+    font-family: var(--font-display);
+    font-size: 1.18rem;
+    line-height: 1.15;
+    color: var(--hf-fg-1);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .run-card .rc-meta {
+    font-size: 0.72rem;
+    color: var(--hf-fg-3);
+    margin-top: 3px;
+  }
+
+  /* ----- stage trail ----- */
+  .trail {
+    position: relative;
+  }
+  .trail ol {
+    list-style: none;
+    margin: 0;
+    padding: 2px 4px;
+  }
+  .trail-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.16s var(--ease-out);
+    color: inherit;
+  }
+  .trail-item + .trail-item {
+    margin-top: 1px;
+  }
+
+  /* connector spine: vertical line from node bottom to next item */
+  .trail li:not(:last-child) .node::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 28px;
+    transform: translateX(-50%);
+    width: 1.5px;
+    height: calc(100% + 9px);
+    background: var(--hf-border-strong);
+  }
+
+  /* ----- node circle ----- */
+  .node {
+    position: relative;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1.5px solid var(--hf-border-strong);
+    background: var(--hf-bg);
+    color: var(--hf-fg-3);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  .node .ic {
+    width: 15px;
+    height: 15px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    fill: none;
+  }
+  .node .check {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    fill: none;
+    display: none;
+  }
+
+  /* ----- t-label ----- */
+  .t-label {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-width: 0;
+  }
+  .t-name {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--hf-fg-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .t-sub {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--hf-fg-4);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ----- trail item states ----- */
+
+  /* done */
+  .trail-item.is-done .node {
+    background: var(--hf-fg-1);
+    border-color: var(--hf-fg-1);
+    color: var(--hf-bg);
+  }
+  .trail-item.is-done .node .ic {
+    display: none;
+  }
+  .trail-item.is-done .node .check {
+    display: block;
+  }
+  .trail-item.is-done .t-name {
+    color: var(--hf-fg-1);
+  }
+
+  /* running */
+  .trail-item.is-running .node {
+    border-color: var(--hf-sage);
+    color: var(--hf-sage);
+  }
+  /* outer spinning ring via ::before pseudo-element */
+  .trail-item.is-running .node::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    border-top-color: var(--hf-sage);
+    animation: hf-spin 0.9s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .trail-item.is-running .node::before {
+      animation: none;
+    }
+  }
+  .trail-item.is-running .t-name {
+    color: var(--hf-fg-1);
+  }
+
+  /* locked */
+  .trail-item.is-locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .trail-item.is-locked .node {
+    border-style: dashed;
+  }
+
+  /* active */
+  .trail-item.is-active {
+    background: var(--hf-surface-2);
+  }
+  .trail-item.is-active .node {
+    box-shadow: 0 0 0 3px var(--hf-sage-soft);
+  }
+
+  /* hover (non-locked) */
+  .trail-item:hover:not(.is-locked) {
+    background: var(--hf-surface-2);
+  }
+
+  /* Final bookend — dashed separator above */
+  .trail-item.bookend-final {
+    margin-top: 8px;
+    padding-top: 12px;
+  }
+  .trail-item.bookend-final::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    right: 9px;
+    top: 0;
+    border-top: 1px dashed var(--hf-border);
+  }
+
+  /* ----- side-foot ----- */
+  .side-foot {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    margin-top: 6px;
+    border-top: 1px solid var(--hf-border);
+  }
+  .foot-row {
+    display: flex;
+    gap: 8px;
+  }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--hf-border);
+    background: none;
+    color: var(--hf-fg-3);
+    font-family: var(--font-sans);
+    font-size: 0.74rem;
+    cursor: pointer;
+    transition:
+      color 0.16s var(--ease-out),
+      border-color 0.16s var(--ease-out);
+  }
+  .icon-btn:hover {
+    color: var(--hf-fg-1);
+    border-color: var(--hf-border-strong);
+  }
+  .icon-btn.danger:hover {
+    color: var(--hf-terracotta);
+    border-color: var(--hf-terracotta);
+  }
+  .icon-btn svg {
+    width: 15px;
+    height: 15px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    fill: none;
+  }
+  /* =====================================================================
+     ParamPanel controls — .ms multi-select rows.
+     Mirrors primitives.html .ms / .ms__row spec exactly.
+     One canonical home: index.css @layer components.
+     ===================================================================== */
+
+  /* Multi-select container (.ms) */
+  .ms {
+    border: 1px solid var(--hf-border);
+    border-radius: var(--radius-md, 11px);
+    overflow: hidden;
+    background: var(--hf-surface);
+  }
+
+  /* Each selectable row */
+  .ms__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--hf-border);
+    background: transparent;
+    color: var(--hf-fg-1);
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.14s ease;
+  }
+
+  .ms__row:last-child {
+    border-bottom: none;
+  }
+
+  .ms__row:hover:not(:disabled) {
+    background: var(--hf-surface-2);
+  }
+
+  .ms__row:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* 20px check indicator inside each row */
+  .ms__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--hf-border-strong);
+    border-radius: 6px;
+    background: var(--hf-surface);
+    color: var(--hf-bg);
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .ms__check.on {
+    background: var(--hf-fg-1);
+    border-color: var(--hf-fg-1);
+    color: var(--hf-bg);
+  }
+
+  /* Option name inside the row */
+  .ms__nm {
+    font-size: 14px;
+    color: var(--hf-fg-1);
+  }
+
+  /* ----------------------------------------------------------------
+     Stage progress block — gradient pulse fill + shimmer skeleton.
+     Used by StageView when a stage is running.
+
+     .progress-bar   — 7px pill track (surface-2 background)
+     .progress-fill  — sage→terracotta gradient fill; pulse-w anim
+     .sk             — shimmer skeleton row
+     .sk--wide / .sk--mid / .sk--narrow — width variants
+     ---------------------------------------------------------------- */
+  .progress-bar {
+    height: 7px;
+    border-radius: 999px;
+    background: var(--hf-surface-2);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--hf-sage), var(--hf-terracotta));
+    animation: pulse-w 2.4s ease-in-out infinite;
+  }
+
+  .sk {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(
+      90deg,
+      var(--hf-surface-2) 25%,
+      var(--hf-border) 37%,
+      var(--hf-surface-2) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+
+  /* Animated "Working…" ellipsis label */
+  .working-label::after {
+    content: "...";
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: working-dots 1.2s steps(4, end) infinite;
+    width: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill {
+      animation: none;
+    }
+    .sk {
+      animation: none;
+      background: var(--hf-surface-2);
+    }
+    .working-label::after {
+      content: "…";
+      animation: none;
+      width: auto;
+    }
+  }
 } /* end @layer components (glass recipe) */
+
+@keyframes hf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-w {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Animated "Working…" ellipsis — clips "..." by cycling width. */
+@keyframes working-dots {
+  0% {
+    width: 0;
+  }
+  33% {
+    width: 0.4em;
+  }
+  66% {
+    width: 0.8em;
+  }
+  100% {
+    width: 1.2em;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
 
 /* =====================================================================
    BackgroundFX — dotted-glow background layer.

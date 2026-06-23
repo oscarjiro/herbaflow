@@ -2,8 +2,7 @@
  * Stage4View — disease → target collection results (DB read of the seeded Open Targets snapshot).
  *
  * Renders:
- *  - Editorial header (Eyebrow + serif h2) with summary count cards: target count + the applied
- *    min_score (min_score hidden for user_provided)
+ *  - Summary count cards: target count + the applied min_score (min_score hidden for user_provided)
  *  - Disease-targets DataTable (one row per target): gene symbol, UniProt accession (linked), Open
  *    Targets score (display-rounded), edit tag badge, in-table delete; pagination (10/20/50/all);
  *    CSV keyed on gene_symbol + uniprot_accession + opentargets_score + source_url (NEVER a UUID; the
@@ -11,10 +10,12 @@
  *  - User-removed rows are hidden from the table AND the CSV (data still persists)
  *  - Target remove via the in-table delete column; add via a standalone EntityAddControl +
  *    TargetValidateBox (editStage stage 4)
- *  - ParamPanel (min_score) + Redo (resetFrom stage 4) and ApprovalBar — both the ParamPanel and
- *    the min-score card are hidden for user_provided; at count 0 the ApprovalBar is disabled with a
- *    reason (blocking-stop); recover via Redo or a manual add
+ *  - ParamPanel (min_score) + Redo (resetFrom stage 4) — both the ParamPanel and the min-score card
+ *    are hidden for user_provided; at count 0 a status note explains the blocking-stop; recover via
+ *    Redo or a manual add
  *  - Footer: "Disease targets: Open Targets (database snapshot). Human targets only (9606)."
+ *
+ * The stage header, ApprovalBar, and StaleNotice are owned by the StageView shell.
  *
  * State (stage_state["4"]):
  *  - "not_applicable" → greyed note
@@ -31,7 +32,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { getAnalysisOptions } from "../../api/@tanstack/react-query.gen";
-import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
+import { editStage, resetFrom } from "../../api/sdk.gen";
 import { markEntitiesRemoved } from "../../lib/optimisticEdit";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
@@ -43,21 +44,17 @@ import {
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig } from "../../lib/format";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
-import { useStaleState } from "../../hooks/useStaleState";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
-import { Eyebrow } from "@/components/ui/editorial";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
-import { ApprovalBar } from "./ApprovalBar";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
-import { StaleNotice } from "./StaleNotice";
 import { TargetValidateBox } from "../TargetValidateBox";
 
 type TargetTag = "computed" | "user-added" | "user-removed" | string;
@@ -138,14 +135,8 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   const dtParams = (data.parameters as Record<string, unknown> | undefined)?.disease_targets as
     | Record<string, number | boolean>
     | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
 
   const qc = useQueryClient();
-  const advance = useMutation({
-    mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
-  });
   const redo = useMutation({
     mutationFn: (changed: Record<string, number | boolean | string>) =>
       resetFrom({
@@ -274,14 +265,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="flex flex-col gap-6">
-      {/* Editorial header */}
-      <div className="flex flex-col gap-1">
-        <Eyebrow>Step 4</Eyebrow>
-        <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">Step 4: Disease Targets</h2>
-        </div>
-        <StageEntityContext data={data} side="disease" />
-      </div>
+      <StageEntityContext data={data} side="disease" />
 
       <StageDataSources stage={4} userProvided={isUserProvided} />
 
@@ -408,21 +392,6 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
           onRedo={(changed) => redo.mutate(changed)}
         />
       )}
-
-      {rerunFrom === 4 && <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />}
-      <ApprovalBar
-        stage={4}
-        status={data.status}
-        currentStage={data.current_stage}
-        disabled={stage4.count === 0 || anyStale}
-        disabledReason={
-          anyStale
-            ? "Run the updated step before continuing."
-            : "No disease targets found. Lower the minimum score, run this step again, or add one to continue."
-        }
-        pending={advance.isPending}
-        onApprove={() => advance.mutate()}
-      />
 
       {/* Footer */}
       <p className="text-muted-foreground text-sm">

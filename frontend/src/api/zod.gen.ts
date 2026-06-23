@@ -203,7 +203,8 @@ export const zDiseaseRead = z.object({
     matched_alias: z.union([
         z.string(),
         z.null()
-    ]).optional()
+    ]).optional(),
+    target_count: z.number().int().optional().default(0)
 });
 
 export const zFailedInput = z.object({
@@ -250,7 +251,8 @@ export const zPlantRead = z.object({
     matched_alias: z.union([
         z.string(),
         z.null()
-    ]).optional()
+    ]).optional(),
+    compound_count: z.number().int().optional().default(0)
 });
 
 export const zProgressRead = z.object({

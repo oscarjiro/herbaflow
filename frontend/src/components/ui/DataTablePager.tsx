@@ -26,7 +26,7 @@ import {
  * parallel reimplementation.
  *
  * Controls (per the mockup .pager): first / prev / type-a-page jump / next /
- * last, plus a rows-per-page selector reusing the Task-7 Select. The "All"
+ * last, plus a rows-per-page selector reusing the Select component. The "All"
  * option sets the page size to the full row count so every row renders on one
  * page.
  */

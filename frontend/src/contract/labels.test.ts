@@ -1,5 +1,42 @@
 import { expect, test } from "vitest";
 import { humanizeLabel, humanizeValue, STAGE_LABELS, stageLabel } from "./labels";
+import {
+  ADME_NUMERIC_PARAMS,
+  ADME_BOOLEAN_PARAMS,
+  TARGET_NUMERIC_PARAMS,
+  DISEASE_TARGETS_NUMERIC_PARAMS,
+  PPI_NUMERIC_PARAMS,
+  PPI_BOOLEAN_PARAMS,
+  PPI_SELECT_PARAMS,
+  HUB_GENES_NUMERIC_PARAMS,
+  ENRICHMENT_NUMERIC_PARAMS,
+  ENRICHMENT_BOOLEAN_PARAMS,
+  ENRICHMENT_SELECT_PARAMS,
+  ENRICHMENT_ARRAY_PARAMS,
+} from "./index";
+
+// Every parameter the ParamPanel renders must have a human label; a raw key
+// (e.g. "max_mw") leaking to the UI is the bug this guards against.
+const ALL_PARAM_KEYS: string[] = [
+  ...ADME_NUMERIC_PARAMS,
+  ...ADME_BOOLEAN_PARAMS,
+  ...TARGET_NUMERIC_PARAMS,
+  ...DISEASE_TARGETS_NUMERIC_PARAMS,
+  ...PPI_NUMERIC_PARAMS,
+  ...PPI_BOOLEAN_PARAMS,
+  ...PPI_SELECT_PARAMS,
+  ...HUB_GENES_NUMERIC_PARAMS,
+  ...ENRICHMENT_NUMERIC_PARAMS,
+  ...ENRICHMENT_BOOLEAN_PARAMS,
+  ...ENRICHMENT_SELECT_PARAMS,
+  ...ENRICHMENT_ARRAY_PARAMS,
+];
+
+test.each(ALL_PARAM_KEYS)("humanizeLabel(%s) never leaks the raw key", (key) => {
+  const label = humanizeLabel(key);
+  expect(label).not.toBe(key);
+  expect(label.length).toBeGreaterThan(0);
+});
 
 test("humanizes param keys", () => {
   expect(humanizeLabel("min_term_size")).toBe("Minimum term size");

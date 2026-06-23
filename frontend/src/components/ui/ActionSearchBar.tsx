@@ -8,7 +8,7 @@
  * Uses:
  * - Radix Popover (side="bottom", width bound to trigger via CSS var)
  * - cmdk Command primitive for filtering + keyboard nav
- * - Task-6 focus model (.hf-ink-focus) on the field wrapper
+ * - Animated ink-border focus model (.hf-ink-focus) on the field wrapper
  * - @/lib/cn for class merging
  * - lucide-react LeafIcon as the row icon
  */
@@ -122,7 +122,7 @@ function ActionSearchBar({
         <PopoverPrimitive.Trigger asChild>
           {/*
            * The field wrapper carries:
-           * - hf-ink-focus (Task-6 animated ink-border focus model)
+           * - hf-ink-focus (animated ink-border focus model)
            * - bg-hf-surface + border-hf-border-strong (solid form control)
            * - rounded-md (softened radius from spec §3)
            * data-slot lets tests target it

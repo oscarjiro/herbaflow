@@ -67,7 +67,7 @@ function ModeCardGroup({ children, className, ...props }: ModeCardGroupProps) {
  * Reduced-motion: handled by the global @media guard already in index.css.
  *
  * A11y: role="radio" + aria-checked; keyboard Space/Enter activate;
- * focus ring follows the Task-4 contract (focus-visible:ring-hf-fg-1/40).
+ * focus ring uses focus-visible:ring-hf-fg-1/40 (soft ring, no border change).
  */
 function ModeCard({ id, title, description, icon, selected, onSelect, className }: ModeCardProps) {
   function handleClick() {
@@ -105,7 +105,7 @@ function ModeCard({ id, title, description, icon, selected, onSelect, className 
         // Selected: brighter elevated body (light: surface; dark: surface-2) + glass shadow
         // NO ring, NO colored border, NO tint — elevation + check only
         selected && ["bg-hf-surface shadow-[var(--hf-glass-shadow)]", "dark:bg-hf-surface-2"],
-        // Focus ring — Task-4 contract (soft ring, no border-color change)
+        // Focus ring — soft ring, no border-color change
         "outline-none",
         "focus-visible:ring-hf-fg-1/40 focus-visible:ring-2",
         "focus-visible:ring-offset-hf-bg focus-visible:ring-offset-2",
