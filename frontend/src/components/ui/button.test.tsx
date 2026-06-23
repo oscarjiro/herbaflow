@@ -254,9 +254,18 @@ describe("Button glass size geometry (I1)", () => {
 // ---------------------------------------------------------------------------
 
 describe("StatefulButton", () => {
-  it("renders idle state with label", () => {
-    render(<StatefulButton>Run analysis</StatefulButton>, { wrapper: Wrapper });
+  it("renders idle state with label on the glass surface", () => {
+    const { container } = render(<StatefulButton>Run analysis</StatefulButton>, {
+      wrapper: Wrapper,
+    });
+    // The button must be present and readable.
     expect(screen.getByRole("button", { name: /run analysis/i })).toBeInTheDocument();
+    // It must render through the canonical glass Button (variant=primary), not a solid pill.
+    const btn = container.querySelector("[data-slot='button']")!;
+    expect(btn).not.toBeNull();
+    expect(btn.getAttribute("data-variant")).toBe("primary");
+    expect(btn.className).toMatch(/hf-glass/);
+    expect(btn.className).not.toMatch(/bg-hf-fg-1/);
   });
 
   it("transitions idle → loading when clicked, shows spinner and 'Working'", async () => {

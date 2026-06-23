@@ -6,6 +6,10 @@
  *  loading → promise resolves → success (✓ Done)
  *  success → after `successDuration` ms → idle (reset)
  *
+ * Rendered through the canonical `Button` component (variant="primary") so it
+ * shares the same layered .hf-glass recipe as every other button in the app.
+ * Do NOT hand-roll glass classes here — Button is the one canonical glass home.
+ *
  * Animation uses Motion (`m.*` from `motion/react`; LazyMotion is already
  * provided app-wide in __root.tsx). Respects `prefers-reduced-motion`:
  * when reduced motion is on, the spinner and check-mark still appear but
@@ -19,8 +23,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { m, useReducedMotion } from "motion/react";
+import { type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
+import { Button, buttonVariants } from "./button";
 
+type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>;
 type ButtonState = "idle" | "loading" | "success";
 
 interface StatefulButtonProps extends Omit<React.ComponentProps<"button">, "onClick"> {
@@ -30,6 +37,8 @@ interface StatefulButtonProps extends Omit<React.ComponentProps<"button">, "onCl
   onClickAsync?: () => Promise<void>;
   /** How long (ms) to stay in the success state before resetting. Default 1800. */
   successDuration?: number;
+  /** Size passed through to the base Button. Defaults to "default". */
+  size?: ButtonSize;
 }
 
 export function StatefulButton({
@@ -38,6 +47,7 @@ export function StatefulButton({
   onClickAsync,
   successDuration = 1800,
   disabled,
+  size = "default",
   ...props
 }: StatefulButtonProps) {
   const [state, setState] = useState<ButtonState>("idle");
@@ -74,26 +84,15 @@ export function StatefulButton({
   const dur = shouldReduceMotion ? 0 : 0.18;
 
   return (
-    <div className="relative inline-flex flex-col items-start">
-      <button
+    <span className="relative inline-flex flex-col items-start">
+      <Button
         type="button"
+        variant="primary"
+        size={size}
         aria-busy={isLoading ? "true" : undefined}
         disabled={disabled}
         onClick={handleClick}
-        className={cn(
-          // Base: same as `primary` variant (ink pill) + min-width for stable layout
-          "inline-flex min-w-[168px] items-center justify-center gap-2",
-          "rounded-[var(--radius-pill)] px-5 py-2.5 text-sm font-medium",
-          "bg-hf-fg-1 text-hf-bg",
-          "transition-all outline-none",
-          "focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-          "disabled:pointer-events-none disabled:opacity-45",
-          // Prevent interaction while busy
-          isBusy && "pointer-events-none",
-          // Success: sage tint to signal completion
-          isSuccess && "bg-hf-success text-hf-bg",
-          className,
-        )}
+        className={cn("min-w-[168px] justify-center", isBusy && "pointer-events-none", className)}
         {...props}
       >
         <m.span
@@ -118,13 +117,13 @@ export function StatefulButton({
           )}
           {state === "idle" && children}
         </m.span>
-      </button>
+      </Button>
 
       {/* Visually hidden aria-live region — announces state changes to screen readers. */}
       <span aria-live="polite" aria-atomic="true" className="sr-only">
         {isLoading ? "Working, please wait." : isSuccess ? "Done." : ""}
       </span>
-    </div>
+    </span>
   );
 }
 
@@ -132,7 +131,7 @@ export function StatefulButton({
 // Internal micro-components
 // ---------------------------------------------------------------------------
 
-/** Animated spinner ring — matches .ring in primitives-v2.html */
+/** Animated spinner ring — tuned for the glass surface (fg-1 color, not bg). */
 function Spinner() {
   const shouldReduceMotion = useReducedMotion();
   return (
@@ -140,7 +139,7 @@ function Spinner() {
       aria-hidden="true"
       className={cn(
         "block size-[15px] rounded-full",
-        "border-t-hf-bg border-2 border-[color-mix(in_srgb,var(--hf-bg),transparent_55%)]",
+        "border-t-hf-fg-1 border-2 border-[color-mix(in_srgb,var(--hf-fg-1),transparent_65%)]",
         !shouldReduceMotion && "animate-spin",
       )}
       style={
