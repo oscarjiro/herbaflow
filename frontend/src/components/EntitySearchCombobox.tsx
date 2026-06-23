@@ -280,7 +280,7 @@ export function EntitySearchCombobox({
         </PopoverAnchor>
 
         <PopoverContent
-          className="bg-hf-surface w-[--radix-popover-trigger-width] overflow-hidden rounded-[11px] border-[var(--hf-border)] p-0 shadow-md"
+          className="bg-hf-surface w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-[11px] border-[var(--hf-border)] p-0 shadow-md"
           align="start"
           sideOffset={6}
           onOpenAutoFocus={(e) => e.preventDefault()}
