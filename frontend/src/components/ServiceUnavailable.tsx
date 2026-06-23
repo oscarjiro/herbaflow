@@ -9,7 +9,8 @@ export function ServiceUnavailable({ onRetry }: { onRetry: () => void }) {
     >
       <h1 className="text-2xl font-semibold tracking-tight">Service unavailable</h1>
       <p className="text-hf-fg-2">
-        Herbaflow can&apos;t reach its database right now. Please try again in a moment.
+        Herbaflow can&apos;t reach its database right now. This can happen during a brief outage or
+        when the hosted database is temporarily over its usage limit. Please try again in a moment.
       </p>
       <div className="flex items-center gap-3">
         <Button onClick={onRetry}>Retry</Button>

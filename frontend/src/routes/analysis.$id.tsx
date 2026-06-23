@@ -4,8 +4,9 @@ import { toast } from "sonner";
 import { useAnalysisStatus } from "@/hooks/useAnalysisStatus";
 import { clearActiveRunId, getActiveRunId, setActiveRunId } from "@/lib/activeRun";
 import { RunSidebar } from "@/components/RunSidebar";
+import { ServiceUnavailable } from "@/components/ServiceUnavailable";
 import { Skeleton } from "@/components/ui/skeleton";
-import { humanizeProblem, type Problem } from "@/lib/problem";
+import { humanizeProblem, isServiceOutage, type Problem } from "@/lib/problem";
 
 export const Route = createFileRoute("/analysis/$id")({
   component: RunShell,
@@ -14,12 +15,16 @@ export const Route = createFileRoute("/analysis/$id")({
 function RunShell() {
   const { id } = useParams({ from: "/analysis/$id" });
   const navigate = useNavigate();
-  const { data, isError, error } = useAnalysisStatus(id);
+  const { data, isError, error, refetch } = useAnalysisStatus(id);
 
-  // Self-heal a stale cached run: a 404 means the run was deleted or expired.
-  // The poll throws the RFC 9457 problem body, which carries the HTTP status.
+  // Self-heal an unusable cached run: a 404 means the run was deleted or expired;
+  // a 422 means the id is malformed (e.g. a stale "null"), which would otherwise
+  // retry every second forever. The poll throws the RFC 9457 problem body, which
+  // carries the HTTP status. Outage statuses (402/503) are NOT self-healed here —
+  // they surface the service-unavailable screen below so the run can resume.
   useEffect(() => {
-    if (isError && (error as Problem)?.status === 404) {
+    const status = (error as Problem)?.status;
+    if (isError && (status === 404 || status === 422)) {
       clearActiveRunId();
       toast.error("That analysis is no longer available.");
       navigate({ to: "/analysis" });
@@ -34,6 +39,9 @@ function RunShell() {
   }, [data, id]);
 
   if (!data) {
+    if (isError && isServiceOutage(error as Problem)) {
+      return <ServiceUnavailable onRetry={() => void refetch()} />;
+    }
     if (isError) {
       return (
         <div
