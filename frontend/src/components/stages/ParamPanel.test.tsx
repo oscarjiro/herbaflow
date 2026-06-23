@@ -139,8 +139,8 @@ describe("ParamPanel", () => {
     expect(screen.getByLabelText("Significance threshold (corrected p ≤)")).toBeInTheDocument();
   });
 
-  it("renders boolean params as a .box checkbox, not a shadcn Checkbox", async () => {
-    const { container } = render(
+  it("renders boolean params as a Switch toggle, not a .box checkbox", async () => {
+    render(
       <ParamPanel
         params={{ flag: false }}
         meta={{ flag: booleanMeta }}
@@ -151,16 +151,20 @@ describe("ParamPanel", () => {
       />,
     );
     await openPanel();
-    // The mockup .box control must be present
-    expect(container.querySelector(".box")).not.toBeNull();
-    // Unchecked: no .on class
-    expect(container.querySelector(".box.on")).toBeNull();
-    // The label wraps both box and text (.ctrl class)
-    expect(container.querySelector(".ctrl")).not.toBeNull();
+    // The control is a Radix Switch (role="switch"), not role="checkbox"
+    expect(screen.getByRole("switch", { name: /flag/i })).toBeInTheDocument();
+    // Unchecked state
+    expect(screen.getByRole("switch", { name: /flag/i })).toHaveAttribute(
+      "data-state",
+      "unchecked",
+    );
+    // A <Label> element is rendered alongside the switch (font consistency).
+    // "flag" is an unmapped test fixture key — humanizeLabel returns the raw key.
+    expect(screen.getByText("flag")).toBeInTheDocument();
   });
 
-  it("boolean .box checkbox toggles .on when clicked", async () => {
-    const { container } = render(
+  it("boolean Switch toggles to checked when clicked and arms Redo", async () => {
+    render(
       <ParamPanel
         params={{ flag: false }}
         meta={{ flag: booleanMeta }}
@@ -171,14 +175,13 @@ describe("ParamPanel", () => {
       />,
     );
     await openPanel();
-    // The boolean control is a button[role=checkbox]
-    await userEvent.click(screen.getByRole("checkbox", { name: /flag/i }));
-    expect(container.querySelector(".box.on")).not.toBeNull();
+    await userEvent.click(screen.getByRole("switch", { name: /flag/i }));
+    expect(screen.getByRole("switch", { name: /flag/i })).toHaveAttribute("data-state", "checked");
     // Redo should be armed now (flag changed from false to true)
     expect(screen.getByRole("button", { name: /redo from this stage/i })).not.toBeDisabled();
   });
 
-  it("boolean .box Redo submits the toggled boolean value", async () => {
+  it("boolean Switch Redo submits the toggled boolean value", async () => {
     const onRedo = vi.fn();
     render(
       <ParamPanel
@@ -191,12 +194,12 @@ describe("ParamPanel", () => {
       />,
     );
     await openPanel();
-    await userEvent.click(screen.getByRole("checkbox", { name: /flag/i }));
+    await userEvent.click(screen.getByRole("switch", { name: /flag/i }));
     await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
     expect(onRedo).toHaveBeenCalledWith({ flag: true });
   });
 
-  it("boolean param info button is a sibling of the checkbox, not nested inside it", async () => {
+  it("boolean param info button is a sibling of the Switch, not nested inside it", async () => {
     render(
       <ParamPanel
         params={{ flag: false }}
@@ -208,9 +211,9 @@ describe("ParamPanel", () => {
       />,
     );
     await openPanel();
-    // The checkbox button must not contain any nested <button> (invalid HTML / hydration error)
-    const checkbox = screen.getByRole("checkbox", { name: /flag/i });
-    expect(checkbox.querySelector("button")).toBeNull();
+    // The Switch must not contain any nested <button> (invalid HTML / hydration error)
+    const toggle = screen.getByRole("switch", { name: /flag/i });
+    expect(toggle.querySelector("button")).toBeNull();
     // The info tooltip trigger must still be present as a sibling (not lost)
     expect(screen.getByRole("button", { name: /about flag/i })).toBeInTheDocument();
   });

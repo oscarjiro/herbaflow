@@ -994,49 +994,10 @@
     fill: none;
   }
   /* =====================================================================
-     ParamPanel controls — .box checkbox and .ms multi-select rows.
-     Mirrors primitives.html .box / .ms / .ms__row spec exactly.
+     ParamPanel controls — .ms multi-select rows.
+     Mirrors primitives.html .ms / .ms__row spec exactly.
      One canonical home: index.css @layer components.
      ===================================================================== */
-
-  /* Boolean checkbox: 18px square, filled when .on */
-  .box {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    flex: 0 0 18px;
-    border: 1.5px solid var(--hf-border-strong);
-    border-radius: 5px;
-    background: var(--hf-surface);
-    color: var(--hf-bg);
-    transition:
-      background 0.15s var(--hf-ease, ease),
-      border-color 0.15s var(--hf-ease, ease);
-  }
-
-  .box.on {
-    background: var(--hf-fg-1);
-    border-color: var(--hf-fg-1);
-    color: var(--hf-bg);
-  }
-
-  /* Label wrapper for .box boolean control */
-  .ctrl {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    font-size: 14px;
-    color: var(--hf-fg-2);
-    cursor: pointer;
-  }
-
-  .ctrl:disabled,
-  .ctrl[aria-disabled="true"] {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 
   /* Multi-select container (.ms) */
   .ms {

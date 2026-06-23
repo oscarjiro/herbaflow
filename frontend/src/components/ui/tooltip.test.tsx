@@ -60,4 +60,13 @@ describe("TooltipContent — explicit inverted surface tokens", () => {
     expect(portalHtml).toContain("fill-hf-fg-1");
     expect(portalHtml).not.toContain("fill-foreground");
   });
+
+  it("carries [&_p]:text-current so nested <p> children use the inverted surface colour", () => {
+    // Without this class, the @layer base `p { color: var(--hf-fg-2) }` reset overrides the
+    // container's inherited text-hf-bg, making tooltip body text muted gray on the light
+    // tooltip surface — low contrast in both themes.
+    renderTooltip();
+    const content = document.querySelector("[data-slot='tooltip-content']");
+    expect(content!.className).toContain("[&_p]:text-current");
+  });
 });
