@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { deleteAnalysis } from "@/api/sdk.gen";
@@ -20,9 +20,13 @@ import {
 export function ExitRunDialog({
   analysisId,
   onExited,
+  trigger,
 }: {
   analysisId: string;
   onExited: () => void;
+  /** Optional custom trigger element rendered via DialogTrigger asChild.
+   * When omitted the default "Exit analysis" outline button is used. */
+  trigger?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const del = useMutation({
@@ -40,9 +44,11 @@ export function ExitRunDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full">
-          Exit analysis
-        </Button>
+        {trigger ?? (
+          <Button variant="outline" size="sm" className="w-full">
+            Exit analysis
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

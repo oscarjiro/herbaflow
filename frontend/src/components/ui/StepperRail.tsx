@@ -1,19 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import {
-  Activity,
-  Check,
-  Crosshair,
-  Droplets,
-  FileCheck,
-  FlaskConical,
-  GitCompareArrows,
-  Hexagon,
-  Loader2,
-  ListTree,
-  Minus,
-  Share2,
-  Sprout,
-} from "lucide-react";
 import type { AnalysisRead } from "@/api/types.gen";
 import { stageLabel } from "@/contract/labels";
 import {
@@ -23,7 +8,79 @@ import {
   slugToStage,
   type StageSlug,
 } from "@/lib/stageRoutes";
+import { doneSub, runningSub } from "@/lib/stageSummary";
 import { cn } from "@/lib/cn";
+
+// ---------------------------------------------------------------------------
+// Stage icon SVG paths (from analysis.html mockup — stroke, 15×15 viewBox 0 0 24 24)
+// ---------------------------------------------------------------------------
+const SLUG_ICON_PATH: Record<StageSlug, string> = {
+  inputs: "M7 20h10M12 20V8M12 8C12 5 9 3 6 4c0 3 3 5 6 4zM12 10c0-3 3-5 6-4 0 3-3 5-6 4z",
+  compounds: "M9 3h6M10 3v6l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V3",
+  adme: "M3 5h18l-7 8v6l-4-2v-4z",
+  targets: "", // two concentric circles — rendered with <circle> elements
+  "disease-targets": "M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z",
+  overlap: "", // two overlapping circles — rendered with <circle> elements
+  ppi: "", // network dots — rendered separately
+  hubs: "M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3",
+  enrichment: "M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17l9 5 9-5",
+  final: "M5 3v18M5 4h13l-2.5 4L18 12H5",
+};
+
+// Icon renderer — some stages use multiple SVG primitives, not a single <path>
+function StageIcon({ slug, className }: { slug: StageSlug; className?: string }) {
+  const base = "ic";
+  const cls = cn(base, className);
+
+  if (slug === "targets") {
+    return (
+      <svg className={cls} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6" />
+        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+  if (slug === "overlap") {
+    return (
+      <svg className={cls} viewBox="0 0 24 24" fill="none">
+        <circle cx="9" cy="12" r="6" stroke="currentColor" strokeWidth="1.6" />
+        <circle cx="15" cy="12" r="6" stroke="currentColor" strokeWidth="1.6" />
+      </svg>
+    );
+  }
+  if (slug === "ppi") {
+    return (
+      <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <circle cx="6" cy="6" r="2.5" />
+        <circle cx="18" cy="7" r="2.5" />
+        <circle cx="12" cy="18" r="2.5" />
+        <path d="M8 7l8 1M7 8l5 8M16 9l-4 7" />
+      </svg>
+    );
+  }
+  if (slug === "hubs") {
+    return (
+      <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <circle cx="12" cy="12" r="3" />
+        <path d={SLUG_ICON_PATH[slug]} />
+      </svg>
+    );
+  }
+  return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d={SLUG_ICON_PATH[slug]} />
+    </svg>
+  );
+}
+
+// Check SVG (14×14, strokeWidth 2.4)
+function CheckIcon() {
+  return (
+    <svg className="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+      <path d="M5 12l4 4L19 7" />
+    </svg>
+  );
+}
 
 function slugLabel(slug: StageSlug): string {
   if (slug === "inputs") return "Inputs";
@@ -32,19 +89,6 @@ function slugLabel(slug: StageSlug): string {
   return n != null ? stageLabel(n) : slug;
 }
 
-const SLUG_ICON: Record<StageSlug, typeof Sprout> = {
-  inputs: Sprout,
-  compounds: FlaskConical,
-  adme: Droplets,
-  targets: Crosshair,
-  "disease-targets": Activity,
-  overlap: GitCompareArrows,
-  ppi: Share2,
-  hubs: Hexagon,
-  enrichment: ListTree,
-  final: FileCheck,
-};
-
 type NodeState = "done" | "running" | "active" | "locked" | "not_applicable" | "blocked";
 
 function nodeState(slug: StageSlug, data: AnalysisRead, activeSlug?: StageSlug): NodeState {
@@ -52,14 +96,35 @@ function nodeState(slug: StageSlug, data: AnalysisRead, activeSlug?: StageSlug):
   const n = slugToStage(slug);
   const runningMatch = /^stage_(\d+)_running$/.exec(data.status ?? "");
   if (n != null && runningMatch && Number(runningMatch[1]) === n) return "running";
-  if (slug === activeSlug) return "active";
-  if (isSlugReached(slug, data)) {
+  // active can co-exist with done per the mockup spec — check done first so we can
+  // apply both classes, then fall through to active check below
+  const reached = isSlugReached(slug, data);
+  if (reached) {
     const result =
       n != null ? (data.stage_results?.[String(n)] as { count?: number } | undefined) : undefined;
     if (result && result.count === 0) return "blocked";
+    if (slug === activeSlug) return "active";
     return "done";
   }
+  if (slug === activeSlug) return "active";
   return "locked";
+}
+
+/**
+ * Returns the t-sub mini-summary that is ALWAYS shown below the node label.
+ * - running: live progress string (e.g. "Enriching 132 / 180")
+ * - done/blocked: count-based summary (e.g. "342 found")
+ * - active (unreached): empty string (node has no results yet)
+ * - locked / not_applicable: "Locked" / "N/A"
+ */
+function nodeSub(slug: StageSlug, state: NodeState, isDone: boolean, data: AnalysisRead): string {
+  const n = slugToStage(slug);
+  if (state === "running" && n != null) return runningSub(n, data);
+  if (state === "locked") return "Locked";
+  if (state === "not_applicable") return "N/A";
+  if (isDone && n != null) return doneSub(n, data);
+  if (slug === "final" && data.status === "complete") return "Complete";
+  return "";
 }
 
 export function StepperRail({
@@ -67,98 +132,76 @@ export function StepperRail({
   analysisId,
   activeSlug,
   className,
-  markers = "icon",
 }: {
   data: AnalysisRead;
   analysisId: string;
   activeSlug?: StageSlug;
   className?: string;
-  markers?: "icon" | "number";
 }) {
   return (
-    <nav aria-label="Pipeline steps" className={cn("w-full", className)}>
-      <ol className="scroll flex flex-row gap-1 overflow-x-auto lg:flex-col lg:gap-1.5 lg:overflow-x-visible">
+    <nav aria-label="Pipeline steps" className={cn("trail w-full", className)}>
+      <ol>
         {TRAIL_SLUGS.map((slug) => {
           const state = nodeState(slug, data, activeSlug);
+          const isReached = isSlugReached(slug, data);
+          // A node can be both done AND active (mockup allows co-existence)
+          const isDone =
+            state === "done" || state === "blocked" || (state === "active" && isReached);
+          const isActive = state === "active" || activeSlug === slug;
+          const isRunning = state === "running";
+          const isLocked = state === "locked";
+          const isNA = state === "not_applicable";
           const navigable =
             state === "done" || state === "active" || state === "running" || state === "blocked";
+          const isFinal = slug === "final";
           const label = slugLabel(slug);
-          const Icon = SLUG_ICON[slug];
-          const n = slugToStage(slug);
-          const showProgress =
-            state === "running" && data.progress != null && n != null && data.progress.stage === n;
-
-          const marker = (
-            <span
-              className={cn(
-                "border-hf-border flex size-6 shrink-0 items-center justify-center rounded-full border font-mono text-xs",
-                state === "active" && "ring-hf-sage-deep border-current ring-2",
-                state === "done" && "bg-hf-fg-1 border-hf-fg-1 text-hf-bg",
-                state === "blocked" && "border-hf-warning text-hf-warning",
-                state === "locked" && "opacity-50",
-                state === "not_applicable" && "opacity-40",
-              )}
-              data-state={state}
-              aria-hidden="true"
-            >
-              {state === "running" ? (
-                <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" />
-              ) : state === "done" ? (
-                <Check className="size-3.5" />
-              ) : state === "not_applicable" ? (
-                <Minus className="size-3.5" />
-              ) : markers === "number" && n != null ? (
-                n
-              ) : (
-                <Icon className="size-3.5" />
-              )}
-            </span>
-          );
-
-          const body = (
-            <span className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate">{label}</span>
-              {showProgress && (
-                <span className="text-hf-fg-4 font-mono text-[0.65rem]">
-                  Working {data.progress!.processed} / {data.progress!.total}
-                </span>
-              )}
-              {state === "not_applicable" && (
-                <span className="text-hf-fg-4 font-mono text-[0.65rem]">Not applicable</span>
-              )}
-              {state === "blocked" && (
-                <span className="text-hf-warning font-mono text-[0.65rem]">No results</span>
-              )}
-            </span>
-          );
+          const sub = nodeSub(slug, state, isDone, data);
 
           const itemClass = cn(
-            "flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-            state === "active" && "bg-hf-surface text-hf-fg-1 font-semibold",
-            state === "done" && "text-hf-fg-2",
-            state === "running" && "text-hf-fg-1",
-            state === "locked" && "text-hf-fg-3",
-            state === "not_applicable" && "text-hf-fg-3 opacity-60",
+            "trail-item",
+            isDone && "is-done",
+            isRunning && "is-running",
+            isActive && "is-active",
+            isLocked && "is-locked",
+            isFinal && "bookend-final",
+          );
+
+          const nodeEl = (
+            <span className="node" data-state={state} aria-hidden="true">
+              <StageIcon slug={slug} />
+              <CheckIcon />
+            </span>
+          );
+
+          const labelEl = (
+            <span className="t-label">
+              <span className="t-name">{label}</span>
+              {sub ? <span className="t-sub">{sub}</span> : null}
+              {isNA && !sub ? <span className="t-sub">N/A</span> : null}
+            </span>
           );
 
           if (navigable) {
             return (
-              <li key={slug} aria-current={state === "active" ? "step" : undefined}>
+              <li key={slug} aria-current={isActive && !isDone ? "step" : undefined}>
                 <Link
                   to="/analysis/$id/$stage"
                   params={{ id: analysisId, stage: slug }}
-                  className={cn(itemClass, "hover:bg-hf-surface w-full")}
+                  className={itemClass}
                 >
-                  {marker}
-                  {body}
+                  {nodeEl}
+                  {labelEl}
                 </Link>
               </li>
             );
           }
+
           return (
-            <li key={slug} aria-disabled="true" className={cn(itemClass, "cursor-not-allowed")}>
-              {marker}
-              {body}
+            <li key={slug} aria-disabled={isLocked || isNA ? "true" : undefined}>
+              <span className={itemClass}>
+                {nodeEl}
+                {labelEl}
+              </span>
             </li>
           );
         })}

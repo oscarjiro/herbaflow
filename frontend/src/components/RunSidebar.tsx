@@ -1,20 +1,26 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Trash2 } from "lucide-react";
 import type { AnalysisRead } from "@/api/types.gen";
 import { StepperRail } from "@/components/ui/StepperRail";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ExitRunDialog } from "@/components/stages/ExitRunDialog";
 import { RunIdentityCard } from "@/components/RunIdentityCard";
-import { GlassSurface } from "@/components/ui/GlassSurface";
 import { isValidStageSlug, type StageSlug } from "@/lib/stageRoutes";
 
-// Active stage = the trailing slug of /analysis/{id}/{stage}, read from router-state location
-// (resolves whether or not the deep route is matched, so no hook-in-try/catch is needed).
+// Active stage = the trailing slug of /analysis/{id}/{stage}, read from router-state location.
 function useActiveStage(): StageSlug | undefined {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const segments = pathname.split("/").filter(Boolean);
   const candidate = segments[0] === "analysis" && segments.length >= 3 ? segments[2] : undefined;
   return candidate && isValidStageSlug(candidate) ? candidate : undefined;
 }
+
+const cancelTrigger = (
+  <button type="button" className="icon-btn danger" style={{ flex: 1 }}>
+    <Trash2 aria-hidden="true" style={{ width: 15, height: 15 }} />
+    Cancel run
+  </button>
+);
 
 export function RunSidebar({
   data,
@@ -26,24 +32,32 @@ export function RunSidebar({
   onExit: () => void;
 }) {
   const activeSlug = useActiveStage();
+
   return (
-    <GlassSurface
-      tier="chrome"
-      className="flex flex-col gap-4 rounded-none border-0 px-4 pt-6 pb-5 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:w-64 lg:border-r"
-    >
-      <Link to="/" aria-label="Herbaflow home" className="text-hf-fg-1 block px-2 pt-0.5">
-        <span className="hf-logo block h-7 w-[124px]" />
+    <aside className="sidebar">
+      {/* Brand */}
+      <Link to="/" aria-label="Herbaflow home" className="brand">
+        <span className="mark">Herbaflow</span>
       </Link>
+
+      {/* Run identity card */}
       <RunIdentityCard data={data} />
-      <div className="scroll min-h-0 flex-1 overflow-y-auto">
+
+      {/* Scrollable stage trail */}
+      <div
+        className="scroll"
+        style={{ flex: 1, minHeight: 0, overflowY: "auto", marginRight: "-4px" }}
+      >
         <StepperRail data={data} analysisId={analysisId} activeSlug={activeSlug} />
       </div>
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
-        <div className="flex-1">
-          <ExitRunDialog analysisId={analysisId} onExited={onExit} />
+
+      {/* Sidebar footer: theme toggle + cancel run */}
+      <div className="side-foot">
+        <div className="foot-row">
+          <ThemeToggle />
+          <ExitRunDialog analysisId={analysisId} onExited={onExit} trigger={cancelTrigger} />
         </div>
       </div>
-    </GlassSurface>
+    </aside>
   );
 }
