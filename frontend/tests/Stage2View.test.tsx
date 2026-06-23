@@ -151,7 +151,7 @@ describe("Stage2View", () => {
     await openAdmePanel();
     // The long description now lives behind a per-param info tooltip (compaction), reachable
     // via the "About max_mw" trigger rather than rendered as always-visible body text.
-    expect(screen.getByRole("button", { name: /about max_mw/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /about Max molecular weight/i })).toBeInTheDocument();
   });
 
   it("Redo button is disabled when no values differ from frozen params", async () => {
@@ -165,7 +165,7 @@ describe("Stage2View", () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "400");
     const redo = screen.getByRole("button", { name: /redo/i });
@@ -176,7 +176,7 @@ describe("Stage2View", () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "400");
     await user.clear(input);
@@ -190,7 +190,7 @@ describe("Stage2View", () => {
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
     // max_mw hard max is 2000; set to 99999 to exceed it
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "99999");
     const redo = screen.getByRole("button", { name: /redo/i });
@@ -405,7 +405,7 @@ describe("ParamPanel E7 arming rule", () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "9999");
     expect(screen.getByText(/exceeds.*maximum/i)).toBeInTheDocument();
@@ -416,7 +416,7 @@ describe("ParamPanel E7 arming rule", () => {
     wrap(<Stage2View data={makeRun()} />);
     await openAdmePanel();
     // recommended_max=600, hard max=2000. Enter 1500 — allowed but outside recommended.
-    const input = screen.getByLabelText("max_mw");
+    const input = screen.getByLabelText("Max molecular weight (Da)");
     await user.clear(input);
     await user.type(input, "1500");
     expect(screen.queryByText(/exceeds.*maximum/i)).not.toBeInTheDocument();

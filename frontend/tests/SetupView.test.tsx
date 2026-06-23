@@ -107,8 +107,8 @@ describe("SetupView — advanced parameters section", () => {
     await userEvent.click(screen.getByRole("button", { name: /adme screening/i }));
 
     // Change max_mw to a non-default value (default = 500).
-    // The field has no humanized label entry so it renders as the raw key "max_mw".
-    const maxMwInput = screen.getByLabelText("max_mw");
+    // The field renders via its humanized label from labels.ts.
+    const maxMwInput = screen.getByLabelText("Max molecular weight (Da)");
     await userEvent.clear(maxMwInput);
     await userEvent.type(maxMwInput, "600");
 

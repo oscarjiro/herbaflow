@@ -143,8 +143,8 @@ describe("Stage6View — computed network", () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
     await openPpiPanel();
     // numeric + boolean + both enum selects are present
-    expect(screen.getByLabelText("max_proteins")).toBeInTheDocument();
-    expect(screen.getByLabelText("allow_top_n_cap")).toBeInTheDocument();
+    expect(screen.getByLabelText("Max proteins in network")).toBeInTheDocument();
+    expect(screen.getByLabelText("Cap network to top-ranked proteins")).toBeInTheDocument();
     expect(screen.getByLabelText("Minimum confidence")).toBeInTheDocument();
     expect(screen.getByLabelText("Network type")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
@@ -259,7 +259,7 @@ describe("Stage6View — overlap too large (blocked)", () => {
   it("still renders the ppi param panel when blocked", async () => {
     wrap(<Stage6View data={makeData(makeBlockedResult())} />);
     await openPpiPanel();
-    expect(screen.getByLabelText("max_proteins")).toBeInTheDocument();
+    expect(screen.getByLabelText("Max proteins in network")).toBeInTheDocument();
     expect(screen.getByLabelText("Network type")).toBeInTheDocument();
   });
 });
