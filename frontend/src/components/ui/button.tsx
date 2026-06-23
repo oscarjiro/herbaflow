@@ -5,8 +5,8 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/cn";
 
 const buttonVariants = cva(
-  // Base — shared across all non-glass variants. Focus ring kept from Task 4
-  // (focus-visible:ring-[3px]) for keyboard-only soft ring.
+  // Base — shared across all non-glass variants. Keeps the keyboard-only focus ring
+  // (focus-visible:ring-[3px]) for soft, accessible keyboard navigation.
   "inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-45 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
@@ -71,7 +71,7 @@ const buttonVariants = cva(
 
 // ---------------------------------------------------------------------------
 // Glass-action pill inner layers — uses the canonical .hf-glass__* CSS classes
-// from Task 2 (index.css) so they pick up all tier/fallback/refraction rules.
+// from index.css so they pick up all tier/fallback/refraction rules.
 // ---------------------------------------------------------------------------
 function GlassLayers() {
   return (

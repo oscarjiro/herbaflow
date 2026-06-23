@@ -1,5 +1,5 @@
 /**
- * Task 11 — Action search bar: debounced command combobox with rich result rows.
+ * ActionSearchBar — debounced command combobox with rich result rows.
  *
  * Tests:
  * 1. Typing filters rows AFTER debounce elapses (fake timers)
@@ -238,7 +238,7 @@ describe("ActionSearchBar — popup width matches field", () => {
 });
 
 // ---------------------------------------------------------------------------
-// 6. Field carries hf-ink-focus (Task-6 focus model)
+// 6. Field carries hf-ink-focus (animated ink-border focus model)
 // ---------------------------------------------------------------------------
 
 describe("ActionSearchBar — field focus model", () => {

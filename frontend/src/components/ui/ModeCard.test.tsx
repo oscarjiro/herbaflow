@@ -1,5 +1,5 @@
 /**
- * Task 10 — ModeCard: selectable option card with elevated body and filled check.
+ * ModeCard: selectable option card with elevated body and filled check.
  *
  * jsdom cannot evaluate CSS variables or transitions, so we assert:
  * - card renders title and description
@@ -11,7 +11,7 @@
  * - selected state does NOT add a ring, tinted-border, or tint class
  * - onSelect fires when clicked
  * - keyboard Space and Enter trigger onSelect
- * - focus-visible ring class is present (Task-4 contract)
+ * - focus-visible ring class is present
  * - role="radio" with aria-checked semantics
  */
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -344,7 +344,7 @@ describe("ModeCard — a11y", () => {
     expect(card.getAttribute("tabindex")).toBe("0");
   });
 
-  it("carries a focus-visible ring class (Task-4 contract)", () => {
+  it("carries a focus-visible ring class", () => {
     render(
       <ModeCard
         id="a"

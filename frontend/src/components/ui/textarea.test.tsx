@@ -1,5 +1,5 @@
 /**
- * Task 6 — Textarea: animated ink-border focus, invalid state, char cap.
+ * Textarea: animated ink-border focus, invalid state, char cap.
  */
 import { render, fireEvent } from "@testing-library/react";
 import { Textarea } from "./textarea";

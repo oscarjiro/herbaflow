@@ -330,14 +330,14 @@
   }
 
   /* Refined focus ring — soft radius, thinner stroke; keeps AA keyboard visibility.
-     Inputs/textarea/select opt OUT: Task 6 provides the animated-border focus for those. */
+     Inputs/textarea/select opt OUT: the animated ink-border utility handles focus for those. */
   :where(button, a, [role="button"], [tabindex]):focus-visible {
     outline: 1.5px solid var(--hf-fg-1);
     outline-offset: 3px;
     border-radius: var(--radius-md);
   }
-  /* Inputs keep a visible ring (AA) but use a subtler colour; Task 6 will replace
-     this with the animated border. Isolated selector so Task 6 can override cleanly. */
+  /* Inputs keep a visible ring (AA) but use a subtler colour; the ink-border utility
+     replaces this with the animated border. Isolated selector so it can override cleanly. */
   :where(input, select, textarea):focus-visible {
     outline: 1.5px solid var(--hf-border-strong);
     outline-offset: 0;
@@ -345,8 +345,8 @@
   }
 
   /* ----------------------------------------------------------------
-     Animated ink-border focus — Task 6
-     Applied via the .hf-ink-focus utility class on input/textarea.
+     Animated ink-border focus
+     Applied via the .hf-ink-focus utility class on input/textarea/select.
      Replaces the placeholder :where(input,...):focus-visible rule above
      for any element that carries this class.
      - Base: surface fill, soft border, smooth transition.

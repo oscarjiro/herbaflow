@@ -1,5 +1,5 @@
 /**
- * Task 9 — MultiSelectRows: selectable list rows with hover fill and animated check.
+ * MultiSelectRows: selectable list rows with hover fill and animated check.
  *
  * jsdom cannot evaluate CSS variables or transitions, so we assert:
  * - rows render with their labels
@@ -10,7 +10,7 @@
  * - the check element is present for every row (hidden via CSS when unselected)
  * - the container carries the correct token-based class for hover fill
  * - keyboard Space/Enter toggles a row
- * - focus ring class is present (Task-4 contract)
+ * - focus ring class is present
  */
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
@@ -175,7 +175,7 @@ describe("MultiSelectRows — CSS class tokens", () => {
     });
   });
 
-  it("each row carries a focus-visible ring class (Task-4 contract)", () => {
+  it("each row carries a focus-visible ring class", () => {
     render(<MultiSelectRows items={items} selected={new Set()} onChange={() => {}} />);
     const rows = screen.getAllByRole("option");
     rows.forEach((row) => {

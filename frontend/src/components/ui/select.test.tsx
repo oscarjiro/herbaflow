@@ -1,5 +1,5 @@
 /**
- * Task 7 — Select re-skin: input-like trigger, animated menu, selected dot, chevron rotation.
+ * Select re-skin: input-like trigger, animated menu, selected dot, chevron rotation.
  *
  * jsdom cannot simulate :focus-visible or CSS transitions, so we assert:
  * - the trigger renders with input-like classes (bg-hf-surface, border-hf-border-strong,

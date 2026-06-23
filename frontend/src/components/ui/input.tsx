@@ -68,7 +68,7 @@ function Input({
         "outline-none",
         // Disabled state
         "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-        // Animated ink-border focus (Task 6): border animates to ink + soft glow; no ring
+        // Animated ink-border focus: border animates to ink + soft glow; no ring
         "hf-ink-focus",
         // Invalid state — danger border colour (CSS .hf-ink-focus rule handles the rest)
         "aria-invalid:border-hf-danger",

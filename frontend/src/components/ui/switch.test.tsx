@@ -1,5 +1,5 @@
 /**
- * Task 8 — Switch: theme-aware on/off contrast.
+ * Switch: theme-aware on/off contrast.
  *
  * jsdom cannot evaluate CSS variables or transitions, so we assert:
  * - clicking toggles aria-checked true↔false (Radix a11y contract)
@@ -198,10 +198,10 @@ describe("Switch — disabled", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Focus ring (from Task 4 — must be preserved)
+// Focus ring (keyboard-only — must be preserved)
 // ---------------------------------------------------------------------------
 
-describe("Switch — focus-visible ring (Task 4 contract)", () => {
+describe("Switch — focus-visible ring", () => {
   it("carries a focus-visible ring class", () => {
     const { container } = render(<Switch aria-label="f" />);
     const root = container.querySelector("[data-slot='switch']")!;

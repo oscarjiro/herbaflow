@@ -61,7 +61,7 @@ function Textarea({
         "outline-none",
         // Disabled
         "disabled:cursor-not-allowed disabled:opacity-50",
-        // Animated ink-border focus (Task 6): no ring, border animates to ink + soft glow
+        // Animated ink-border focus: no ring, border animates to ink + soft glow
         "hf-ink-focus",
         // Invalid state
         "aria-invalid:border-hf-danger",

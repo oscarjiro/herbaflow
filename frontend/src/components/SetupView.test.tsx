@@ -547,7 +547,7 @@ describe("SetupView — recomposed summary + advance", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests — humanized labels (Task 11)
+// Tests — humanized labels
 // ---------------------------------------------------------------------------
 
 describe("SetupView — humanized field labels", () => {
@@ -572,7 +572,7 @@ describe("SetupView — humanized field labels", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests — theming sweep: restyled controls carry hf-* token classes (Task 11)
+// Tests — theming sweep: restyled controls carry hf-* token classes
 // ---------------------------------------------------------------------------
 
 describe("SetupView — theming sweep", () => {
