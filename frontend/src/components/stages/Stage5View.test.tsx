@@ -200,15 +200,9 @@ describe("Stage5View — overlap view", () => {
     wrap(<Stage5View data={makeData()} />);
     // Both accessions must appear as links pointing to UniProt.
     const egfrLink = screen.getByRole("link", { name: "P00533" });
-    expect(egfrLink).toHaveAttribute(
-      "href",
-      "https://www.uniprot.org/uniprotkb/P00533/entry",
-    );
+    expect(egfrLink).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P00533/entry");
     const tp53Link = screen.getByRole("link", { name: "P04637" });
-    expect(tp53Link).toHaveAttribute(
-      "href",
-      "https://www.uniprot.org/uniprotkb/P04637/entry",
-    );
+    expect(tp53Link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637/entry");
   });
 
   it("renders the compound-source column for app-enriched runs (stage_state[3] !== user_provided)", () => {

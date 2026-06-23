@@ -33,8 +33,6 @@ describe("uniprotGeneUrl", () => {
 
   it("percent-encodes special characters in the gene symbol", () => {
     const url = uniprotGeneUrl("foo bar");
-    expect(url).toBe(
-      "https://www.uniprot.org/uniprotkb?query=gene:foo%20bar+AND+organism_id:9606",
-    );
+    expect(url).toBe("https://www.uniprot.org/uniprotkb?query=gene:foo%20bar+AND+organism_id:9606");
   });
 });
