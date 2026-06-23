@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { ChevronsUpDownIcon, SearchIcon, XIcon } from "lucide-react";
+import { SearchIcon, XIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { Button } from "./ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Popover, PopoverAnchor, PopoverContent } from "./ui/popover";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 
 // ---------------------------------------------------------------------------
@@ -198,17 +197,17 @@ export function EntitySearchCombobox({
   placeholder = "Search…",
   ariaLabel,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ComboOption[]>([]);
   const [loading, setLoading] = useState(false);
 
   const debouncedQuery = useDebouncedValue(query, 300);
 
-  // Fire search only while the popover is open and the debounced query settles, so a
-  // pre-rendered combobox does not hit the server on mount before the user opens it.
+  // Fire search only while the input is focused and the debounced query settles,
+  // so a pre-rendered combobox does not hit the server on mount before the user types.
   useEffect(() => {
-    if (!open) return;
+    if (!focused) return;
     let cancelled = false;
     setLoading(true);
     search(debouncedQuery)
@@ -221,7 +220,7 @@ export function EntitySearchCombobox({
     return () => {
       cancelled = true;
     };
-  }, [open, debouncedQuery, search]);
+  }, [focused, debouncedQuery, search]);
 
   const atCap = mode === "multiple" && max !== undefined && selected.length >= max;
 
@@ -232,7 +231,8 @@ export function EntitySearchCombobox({
   function toggle(opt: ComboOption) {
     if (mode === "single") {
       onChange([opt]);
-      setOpen(false);
+      setQuery("");
+      setFocused(false);
       return;
     }
     // multiple
@@ -248,65 +248,45 @@ export function EntitySearchCombobox({
     onChange(selected.filter((o) => o.value !== value));
   }
 
-  // Trigger label
-  let triggerLabel: string;
-  if (mode === "single") {
-    triggerLabel = selected[0]?.label ?? placeholder;
-  } else {
-    triggerLabel = selected.length > 0 ? `${selected.length} selected` : placeholder;
-  }
+  // Dropdown appears only while the input is focused AND the user has typed something.
+  const dropdownOpen = focused && query.trim().length > 0;
 
   return (
     <div className="space-y-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            aria-label={ariaLabel}
-            className="w-full justify-between font-normal"
-          >
-            <span className="flex min-w-0 items-center gap-2">
-              <SearchIcon className="size-4 shrink-0 opacity-50" aria-hidden="true" />
-              <span className={cn("truncate", !selected.length && "text-muted-foreground")}>
-                {triggerLabel}
-              </span>
-            </span>
-            <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
+      <Popover
+        open={dropdownOpen}
+        onOpenChange={(o) => {
+          if (!o) setFocused(false);
+        }}
+      >
+        <PopoverAnchor asChild>
+          <div className="relative">
+            <SearchIcon
+              className="text-hf-fg-4 pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              role="combobox"
+              aria-expanded={dropdownOpen}
+              aria-label={ariaLabel}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setFocused(true)}
+              placeholder={placeholder}
+              className="border-hf-border-strong text-hf-fg-1 placeholder:text-hf-fg-4 bg-hf-bg focus:border-hf-fg-1 w-full rounded-[11px] border py-[11px] pr-[14px] pl-9 font-sans text-[0.88rem] outline-none focus:shadow-[0_2px_12px_-2px_var(--hf-sage)]"
+            />
+          </div>
+        </PopoverAnchor>
 
-        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <PopoverContent
+          className="bg-hf-surface w-[--radix-popover-trigger-width] overflow-hidden rounded-[11px] border-[var(--hf-border)] p-0 shadow-md"
+          align="start"
+          sideOffset={6}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <Command shouldFilter={false}>
-            {/* Styled search input matching the mockup */}
-            <div className="relative border-b border-[var(--hf-border)]">
-              <SearchIcon
-                className="text-hf-fg-4 pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
-                aria-hidden="true"
-              />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={placeholder}
-                className="text-hf-fg-1 placeholder:text-hf-fg-4 bg-hf-bg focus:border-hf-fg-1 w-full py-[11px] pr-[14px] pl-9 font-sans text-[0.88rem] outline-none"
-                style={{
-                  boxShadow: "none",
-                }}
-                onFocus={(e) => {
-                  (e.target.closest("[data-search-wrap]") as HTMLElement | null)?.setAttribute(
-                    "data-focused",
-                    "true",
-                  );
-                }}
-                onBlur={(e) => {
-                  (e.target.closest("[data-search-wrap]") as HTMLElement | null)?.removeAttribute(
-                    "data-focused",
-                  );
-                }}
-              />
-            </div>
-            <CommandList>
+            <CommandList className="scroll max-h-72">
               {loading && (
                 <CommandGroup>
                   <CommandItem disabled>Searching…</CommandItem>

@@ -27,16 +27,15 @@ function wrap() {
 
 /** Helper: pick a plant via the combobox + pick a disease so the form becomes submittable. */
 async function fillRequiredFields() {
-  // Select plant input mode "selection" is the default — click the search combobox.
-  // The EntitySearchCombobox renders a button that opens the popover when clicked.
+  // The EntitySearchCombobox is now a direct-type input — type to open the results dropdown.
   const plantCombo = await screen.findByRole("combobox", { name: /search plants/i });
-  await userEvent.click(plantCombo);
+  await userEvent.type(plantCombo, "a");
   const plantOption = await screen.findByRole("option", { name: /Aaa bbb/i });
   await userEvent.click(plantOption);
 
   // Disease: same pattern
   const diseaseCombo = await screen.findByRole("combobox", { name: /search disease/i });
-  await userEvent.click(diseaseCombo);
+  await userEvent.type(diseaseCombo, "a");
   const diseaseOption = await screen.findByRole("option", { name: /Test Disease/i });
   await userEvent.click(diseaseOption);
 }

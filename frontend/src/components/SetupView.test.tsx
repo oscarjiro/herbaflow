@@ -40,11 +40,14 @@ function diseaseFieldset() {
 }
 
 /**
- * Open the EntitySearchCombobox for the given ariaLabel and pick an option by text.
- * Waits for the option to appear in the command list before clicking it.
+ * Type into the EntitySearchCombobox for the given ariaLabel and pick an option by text.
+ * The combobox is now a direct-type input — no click-to-open trigger needed.
+ * Waits for the option to appear in the results dropdown before clicking it.
  */
 async function pickComboOption(ariaLabel: string, optionText: string | RegExp) {
-  await userEvent.click(screen.getByRole("combobox", { name: ariaLabel }));
+  // Type a short query to open the results dropdown (any non-empty string triggers it).
+  const input = screen.getByRole("combobox", { name: ariaLabel });
+  await userEvent.type(input, "a");
   // Scope to the command-list options so a matching selected-chip never wins the lookup.
   const options = await screen.findAllByRole("option");
   const match = options.find((el) => {
