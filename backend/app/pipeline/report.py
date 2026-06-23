@@ -370,8 +370,15 @@ def _s5_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
 
 
 def _s6_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
+    s6 = sr.get("6") or {}
+    n = s6.get("node_count", 0)
+    if n == 0 and not s6.get("nodes"):
+        return (
+            "No protein interactions were found among the shared targets at the chosen confidence "
+            "threshold, so the interaction network is empty."
+        )
     connected, isolated = _ppi_connectivity(sr)
-    n = (sr.get("6") or {}).get("node_count", connected + isolated)
+    n = s6.get("node_count", connected + isolated)
     return (
         f"The {fmt_num(n)} shared targets form a STRING functional-association network: "
         f"{connected} interconnected, {isolated} isolated. Interconnection suggests a coordinated "
@@ -380,13 +387,14 @@ def _s6_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], 
 
 
 def _s7_finding(sr: dict[str, Any], labels: dict[str, Any], im: dict[str, Any], _p: Any) -> str:
+    s7 = sr.get("7") or {}
     hubs = sorted(
-        (sr.get("7") or {}).get("hubs", []),
+        s7.get("hubs", []),
         key=lambda h: h.get("mcc") or 0.0,
         reverse=True,
     )
     if not hubs:
-        return "No hub genes were identified (the shared-target network is too sparse to rank)."
+        return "The interaction network was too small to rank hub genes."
     top = ", ".join(h.get("gene_symbol") or str(h.get("target_id")) for h in hubs[:3])
     return (
         f"Maximal Clique Centrality (Chin 2014) ranks {top} as the most topologically central "
@@ -460,6 +468,25 @@ _FINDERS = {
     8: _s8_finding,
 }
 
+# Stages whose charts are only drawable when the stage produced non-empty results.
+_CHART_REQUIRES_DATA = {6, 7, 8}
+
+
+def _stage_has_chart_data(n: int, sr: dict[str, Any]) -> bool:
+    """Return True when stage n produced enough data that a chart may have been drawn.
+
+    Used only for the chart-suppression check: if this returns False, do not reference
+    a figure for this stage even if one appears in the figures list."""
+    if n == 6:
+        s6 = sr.get("6") or {}
+        return bool(s6.get("node_count") or s6.get("nodes"))
+    if n == 7:
+        return bool((sr.get("7") or {}).get("hubs"))
+    if n == 8:
+        terms = (sr.get("8") or {}).get("terms", [])
+        return any(t.get("p_value") is not None for t in terms)
+    return True
+
 
 def build_report_model(
     run_meta: dict[str, Any],
@@ -510,7 +537,12 @@ def build_report_model(
                     SourceLink(name=str(s["name"]), url=s.get("url"))
                     for s in contracts.stage_sources(n, user_provided=_is_up(n, im))
                 ],
-                figure=fig_for.get(n),
+                figure=(
+                    fig_for.get(n)
+                    if n not in _CHART_REQUIRES_DATA
+                    or _stage_has_chart_data(n, stage_results or {})
+                    else None
+                ),
                 csv=_csv_pointer(n),
                 preview=(
                     _hub_preview(stage_results or {})

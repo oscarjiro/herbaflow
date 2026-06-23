@@ -311,3 +311,158 @@ def test_rendered_report_has_no_em_or_en_dashes_or_internal_jargon():
     assert "§" not in md, "section sign (internal jargon) found in rendered report"
     assert "Lock" not in md, "'Lock' (internal jargon) found in rendered report"
     assert "ETL" not in md, "'ETL' (internal jargon) found in rendered report"
+
+
+# ---------------------------------------------------------------------------
+# Empty-network stage sections (computed but zero results)
+# ---------------------------------------------------------------------------
+
+_EMPTY_NETWORK_SR = {
+    "1": {"count": 10},
+    "2": {"count": 8, "passed": [1] * 8, "filtered": [1] * 2},
+    "3": {"count": 5, "targets": [], "coverage_pct": 50},
+    "4": {"count": 3, "targets": []},
+    "5": {"count": 2, "compound_target_count": 5, "disease_target_count": 3},
+    "6": {"node_count": 0, "nodes": [], "edges": []},
+    "7": {"hubs": [], "ranking_metric": "mcc", "node_count": 0, "count": 0, "flags": ["network_too_small"]},
+    "8": {"terms": [], "flags": []},
+}
+
+
+def test_empty_network_stages_all_present():
+    """All three network stages must appear in the report even when their counts are zero."""
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        _EMPTY_NETWORK_SR,
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "selection", "disease": "selection"},
+        frontend_url="u",
+        figures=[
+            ("stage6_ppi.png", True, "ok"),
+            ("stage7_hubs.png", True, "ok"),
+            ("stage8_enrichment_BP.png", True, "ok"),
+        ],
+    )
+    stage_ns = {s.n for s in m.stages}
+    assert 6 in stage_ns, "Stage 6 section missing from report"
+    assert 7 in stage_ns, "Stage 7 section missing from report"
+    assert 8 in stage_ns, "Stage 8 section missing from report"
+
+
+def test_empty_stage6_honest_null_finding():
+    """Stage 6 with zero nodes emits the correct honest-null sentence."""
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        _EMPTY_NETWORK_SR,
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "selection", "disease": "selection"},
+        frontend_url="u",
+        figures=[],
+    )
+    s6 = next(s for s in m.stages if s.n == 6)
+    assert "No protein interactions were found" in s6.finding
+    assert "network is empty" in s6.finding
+    # No em dash in copy
+    assert "—" not in s6.finding
+
+
+def test_empty_stage7_honest_null_finding():
+    """Stage 7 with zero hubs emits the correct honest-null sentence."""
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        _EMPTY_NETWORK_SR,
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "selection", "disease": "selection"},
+        frontend_url="u",
+        figures=[],
+    )
+    s7 = next(s for s in m.stages if s.n == 7)
+    assert "interaction network was too small to rank hub genes" in s7.finding
+    assert "—" not in s7.finding
+
+
+def test_empty_stage8_honest_null_finding():
+    """Stage 8 with no significant terms emits the honest-null sentence."""
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        _EMPTY_NETWORK_SR,
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "selection", "disease": "selection"},
+        frontend_url="u",
+        figures=[],
+    )
+    s8 = next(s for s in m.stages if s.n == 8)
+    assert "No functional enrichment terms reached significance" in s8.finding
+    assert "—" not in s8.finding
+
+
+def test_empty_network_stages_no_figure_reference():
+    """When stages 6/7/8 are empty, no figure filename should appear in the rendered markdown."""
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        _EMPTY_NETWORK_SR,
+        {"plant": "P", "disease": "D"},
+        input_modes={"plant": "selection", "disease": "selection"},
+        frontend_url="u",
+        figures=[
+            ("stage6_ppi.png", True, "drawn"),
+            ("stage7_hubs.png", True, "drawn"),
+            ("stage8_enrichment_BP.png", True, "drawn"),
+        ],
+    )
+    # Even though figures were passed as included, the sections must suppress them.
+    for s in m.stages:
+        if s.n in (6, 7, 8):
+            assert s.figure is None, f"Stage {s.n}: figure should be None for empty stage"
+    md = report.render_markdown(m)
+    assert "stage6_ppi.png" not in md, "Stage 6 figure referenced in markdown for empty stage"
+    assert "stage7_hubs.png" not in md, "Stage 7 figure referenced in markdown for empty stage"
+    assert "stage8_enrichment_BP.png" not in md, "Stage 8 figure referenced in markdown for empty stage"
+
+
+def test_non_empty_network_stages_keep_figure_reference():
+    """Regression: when stages 6/7/8 have real results, the figure pointer is preserved."""
+    sr = {
+        "5": {"count": 4, "compound_target_count": 10, "disease_target_count": 20},
+        "6": {
+            "node_count": 4,
+            "nodes": [{"gene_symbol": g} for g in ["A", "B", "C", "D"]],
+            "edges": [{"source": "A", "target": "B"}],
+        },
+        "7": {"hubs": [{"gene_symbol": "A", "mcc": 5}]},
+        "8": {
+            "terms": [
+                {
+                    "term_id": "GO:1",
+                    "name": "blood circulation",
+                    "source": "GO:BP",
+                    "p_value": 1e-5,
+                    "intersection": ["A"],
+                }
+            ]
+        },
+    }
+    m = report.build_report_model(
+        {"mode": "auto"},
+        {},
+        sr,
+        {"plant": "P", "disease": "D"},
+        input_modes={},
+        frontend_url="u",
+        figures=[
+            ("stage6_ppi.png", True, "drawn"),
+            ("stage7_hubs.png", True, "drawn"),
+            ("stage8_enrichment_BP.png", True, "drawn"),
+        ],
+    )
+    s6 = next(s for s in m.stages if s.n == 6)
+    s7 = next(s for s in m.stages if s.n == 7)
+    s8 = next(s for s in m.stages if s.n == 8)
+    assert s6.figure == "stage6_ppi.png", "Stage 6 figure missing for non-empty stage"
+    assert s7.figure == "stage7_hubs.png", "Stage 7 figure missing for non-empty stage"
+    assert s8.figure == "stage8_enrichment_BP.png", "Stage 8 figure missing for non-empty stage"
