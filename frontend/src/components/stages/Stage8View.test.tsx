@@ -289,9 +289,7 @@ describe("Stage8View", () => {
     },
   ] as const;
 
-  function makeRealisticData(
-    terms: readonly (typeof REALISTIC_TERMS)[number][],
-  ): AnalysisRead {
+  function makeRealisticData(terms: readonly (typeof REALISTIC_TERMS)[number][]): AnalysisRead {
     return {
       ...base,
       status: "complete",

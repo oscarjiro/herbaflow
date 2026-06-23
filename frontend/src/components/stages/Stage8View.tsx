@@ -181,10 +181,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
       id: "genes",
       header: "Genes in term",
       cell: ({ row }) => (
-        <ExpandableListCell
-          items={row.original.intersection ?? []}
-          collapsedCount={0}
-        />
+        <ExpandableListCell items={row.original.intersection ?? []} collapsedCount={0} />
       ),
     },
   ];
