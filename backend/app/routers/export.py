@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import get_session
 from app.errors import NotFoundProblem
+from app.pipeline.results_handoff import ctp_is_emittable
 from app.schemas.graph import CtpGraph
 from app.services.export import ExportArtifacts, assemble_ctp_graph, assemble_export
 
@@ -27,6 +28,16 @@ def _require_compounds(a: ExportArtifacts) -> None:
     if not a.has_compounds:
         raise NotFoundProblem(
             "compound-target-pathway exports are not available for a target-only run"
+        )
+
+
+def _require_ctp(a: ExportArtifacts) -> None:
+    """404 when C-T-P output is not emittable: no compounds, no Stage-5 overlap, or no
+    Stage-8 pathways. Replaces the compound-only _require_compounds guard for CTP routes."""
+    if not ctp_is_emittable(a.stage_results, has_compounds=a.has_compounds):
+        raise NotFoundProblem(
+            "compound-target-pathway exports are not available: the run has no compounds, "
+            "no overlap targets, or no enriched pathways"
         )
 
 
@@ -56,8 +67,11 @@ async def export_network(
     analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> StreamingResponse:
     a = await assemble_export(session, analysis_id)
-    _require_compounds(a)
-    return _zip_response(a.network_bundle(), f"{a.slug}_network.zip")
+    _require_ctp(a)
+    bundle = a.network_bundle()
+    if bundle is None:  # _require_ctp guarantees emittable; None is unreachable but satisfies mypy
+        raise NotFoundProblem("compound-target-pathway network bundle is not available")
+    return _zip_response(bundle, f"{a.slug}_network.zip")
 
 
 @router.get("/analyses/{analysis_id}/export/stages.zip")
@@ -88,7 +102,7 @@ async def export_ctp_nodes(
     analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> Response:
     a = await assemble_export(session, analysis_id)
-    _require_compounds(a)
+    _require_ctp(a)
     return Response(a.ctp_nodes, media_type="text/csv", headers=_disposition("ctp-nodes.csv"))
 
 
@@ -97,7 +111,7 @@ async def export_ctp_edges(
     analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> Response:
     a = await assemble_export(session, analysis_id)
-    _require_compounds(a)
+    _require_ctp(a)
     return Response(a.ctp_edges, media_type="text/csv", headers=_disposition("ctp-edges.csv"))
 
 

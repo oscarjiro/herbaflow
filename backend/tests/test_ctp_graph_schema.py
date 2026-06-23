@@ -20,10 +20,12 @@ def _stage_results() -> dict:
             ]
         },
         "5": {
-            "overlap": [{"target_id": tid, "gene_symbol": "PPARG", "uniprot_accession": "P37231"}]
+            "count": 1,
+            "overlap": [{"target_id": tid, "gene_symbol": "PPARG", "uniprot_accession": "P37231"}],
         },
         "7": {"hubs": [{"target_id": tid, "gene_symbol": "PPARG"}]},
         "8": {
+            "count": 1,
             "terms": [
                 {
                     "term_id": "KEGG:04151",
@@ -32,7 +34,7 @@ def _stage_results() -> dict:
                     "p_value": 1.2e-4,
                     "intersection": ["PPARG"],
                 }
-            ]
+            ],
         },
     }
 

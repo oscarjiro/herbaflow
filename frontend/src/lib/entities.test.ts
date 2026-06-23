@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { atMinEntities, isUserRemoved, runHasCompounds } from "./entities";
+import { atMinEntities, isUserRemoved, runHasCompounds, runHasCtp } from "./entities";
 
 describe("isUserRemoved", () => {
   it("is true only for the user-removed tag", () => {
@@ -29,5 +29,38 @@ describe("runHasCompounds", () => {
     );
     expect(runHasCompounds({})).toBe(true);
     expect(runHasCompounds(null)).toBe(true);
+  });
+});
+
+describe("runHasCtp", () => {
+  const withCounts = (overlap: number, terms: number, plant = "selection") => ({
+    parameters: { input_modes: { plant } },
+    stage_results: {
+      "5": { count: overlap },
+      "8": { count: terms },
+    },
+  });
+
+  it("is false when plant mode is manual_targets (no compounds)", () => {
+    expect(runHasCtp(withCounts(5, 3, "manual_targets"))).toBe(false);
+  });
+
+  it("is false when Stage-8 term count is 0", () => {
+    expect(runHasCtp(withCounts(5, 0))).toBe(false);
+  });
+
+  it("is false when Stage-5 overlap count is 0", () => {
+    expect(runHasCtp(withCounts(0, 3))).toBe(false);
+  });
+
+  it("is true when compounds, overlap > 0, and terms > 0", () => {
+    expect(runHasCtp(withCounts(5, 3))).toBe(true);
+    expect(runHasCtp(withCounts(1, 1, "manual_compounds"))).toBe(true);
+  });
+
+  it("is false when stage_results are absent", () => {
+    expect(runHasCtp({ parameters: { input_modes: { plant: "selection" } } })).toBe(false);
+    expect(runHasCtp(null)).toBe(false);
+    expect(runHasCtp(undefined)).toBe(false);
   });
 });

@@ -14,6 +14,7 @@ from app.config import settings
 from app.errors import ConflictProblem, NotFoundProblem
 from app.pipeline import charts, entry_modes, report, state
 from app.pipeline import results_handoff as rh
+from app.pipeline.results_handoff import ctp_is_emittable
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
@@ -35,9 +36,13 @@ class ExportArtifacts:
     stage_pngs: dict[str, bytes] = field(default_factory=dict)
     input_modes: dict[str, Any] = field(default_factory=dict)
     has_compounds: bool = True
+    stage_results: dict[str, Any] = field(default_factory=dict)
+
+    def _ctp_emittable(self) -> bool:
+        return ctp_is_emittable(self.stage_results, has_compounds=self.has_compounds)
 
     def _network_files(self) -> dict[str, str | bytes | None]:
-        if not self.has_compounds:
+        if not self._ctp_emittable():
             return {}
         return {
             "ctp-nodes.csv": self.ctp_nodes,
@@ -54,7 +59,10 @@ class ExportArtifacts:
         files.update(self.stage_pngs)  # e.g. stage5_venn.png -> bytes (wired in a later task)
         return files
 
-    def network_bundle(self) -> bytes:
+    def network_bundle(self) -> bytes | None:
+        """Returns None when C-T-P is not emittable (router must 404 in that case)."""
+        if not self._ctp_emittable():
+            return None
         return rh.build_network_bundle(
             ctp_nodes=self.ctp_nodes,
             ctp_edges=self.ctp_edges,
@@ -202,11 +210,7 @@ async def assemble_ctp_graph(session: AsyncSession, analysis_id: uuid.UUID) -> C
         raise ConflictProblem("the C-T-P graph is available only when the run is complete")
 
     sr, compounds_by_id, targets_by_id, has_compounds = await _load_ctp_lookups(session, run)
-    graph = (
-        rh.build_ctp_graph(sr, compounds_by_id, targets_by_id)
-        if has_compounds
-        else {"nodes": [], "edges": []}
-    )
+    graph = rh.build_ctp_graph(sr, compounds_by_id, targets_by_id, has_compounds=has_compounds)
     return CtpGraph.model_validate(graph)
 
 
@@ -229,13 +233,14 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
     params = run.parameters or {}
     input_modes = params.get("input_modes") or {}
 
+    ctp_emittable = ctp_is_emittable(sr, has_compounds=has_compounds)
     ctp_graph = (
-        rh.build_ctp_graph(sr, compounds_by_id, targets_by_id)
-        if has_compounds
+        rh.build_ctp_graph(sr, compounds_by_id, targets_by_id, has_compounds=has_compounds)
+        if ctp_emittable
         else {"nodes": [], "edges": []}
     )
     ppi_graph = rh.build_ppi_graph(sr)
-    network_png = charts.render_ctp_network(ctp_graph) if has_compounds else None
+    network_png = charts.render_ctp_network(ctp_graph) if ctp_emittable else None
     stage_pngs: dict[str, bytes] = {}
     venn = charts.render_venn(
         sr.get("5", {}),
@@ -262,7 +267,7 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
             stage_pngs[f"stage8_enrichment_{charts.category_slug(cat)}.png"] = png
 
     figures: list[tuple[str, bool, str]] = []
-    if has_compounds:
+    if ctp_emittable:
         figures.append(
             ("ctp-network.png", network_png is not None, "sparse C-T-P network (no edges)")
         )
@@ -292,8 +297,8 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         stage_csvs={
             n: rh.build_stage_csv(n, sr, compounds_by_id, targets_by_id) for n in range(1, 9)
         },
-        ctp_nodes=(rh.build_ctp_nodes(sr, compounds_by_id, targets_by_id) if has_compounds else ""),
-        ctp_edges=(rh.build_ctp_edges(sr, compounds_by_id, targets_by_id) if has_compounds else ""),
+        ctp_nodes=(rh.build_ctp_nodes(sr, compounds_by_id, targets_by_id) if ctp_emittable else ""),
+        ctp_edges=(rh.build_ctp_edges(sr, compounds_by_id, targets_by_id) if ctp_emittable else ""),
         ppi_nodes=rh.build_ppi_nodes(sr),
         ppi_edges=rh.build_ppi_edges(sr),
         slug=rh.bundle_slug(labels, run.completed_at),
@@ -301,4 +306,5 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         stage_pngs=stage_pngs,
         input_modes=input_modes,
         has_compounds=has_compounds,
+        stage_results=sr,
     )

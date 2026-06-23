@@ -70,14 +70,34 @@ _CTP_NODE_COLS = (
 _CTP_EDGE_COLS = ("source", "target", "interaction", "prediction_method", "p_value")
 
 
+def ctp_is_emittable(stage_results: dict[str, Any], *, has_compounds: bool) -> bool:
+    """C-T-P output is emitted only with compounds AND overlap targets AND pathways."""
+    overlap = stage_results.get("5") or {}
+    enrich = stage_results.get("8") or {}
+    return (
+        bool(has_compounds)
+        and (overlap.get("count", 0) or 0) > 0
+        and (enrich.get("count", 0) or 0) > 0
+    )
+
+
 def build_ctp_graph(
     stage_results: dict[str, Any],
     compounds_by_id: dict[str, dict[str, Any]],
     targets_by_id: dict[str, dict[str, Any]],
+    *,
+    has_compounds: bool = True,
 ) -> dict[str, list[dict[str, Any]]]:
     """Single C-T-P graph-data home: node + edge dicts shared by the CSV builders and the chart.
     Node ids are de-UUID'd (compound=InChIKey, target=gene symbol, pathway=term id); edge endpoints
-    reference those same ids (graph-join rule)."""
+    reference those same ids (graph-join rule).
+
+    Returns an empty graph when ``ctp_is_emittable`` is false (no compounds, no overlap, or no
+    pathways). Callers that already have the ``has_compounds`` flag should pass it explicitly;
+    the default ``True`` preserves backward compatibility for direct callers that already gate
+    on compound presence themselves."""
+    if not ctp_is_emittable(stage_results, has_compounds=has_compounds):
+        return {"nodes": [], "edges": []}
     overlap = stage_results.get("5", {}).get("overlap", [])
     hubs = stage_results.get("7", {}).get("hubs", [])
     terms = stage_results.get("8", {}).get("terms", [])

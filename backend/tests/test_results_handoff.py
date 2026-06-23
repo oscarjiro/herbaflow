@@ -2,6 +2,7 @@ import io as _io
 import zipfile as _zipfile
 
 from app.pipeline import results_handoff as rh
+from app.pipeline.results_handoff import ctp_is_emittable
 
 
 def _csv_rows(text: str) -> list[list[str]]:
@@ -35,6 +36,7 @@ SR_FULL = {
         ]
     },
     "5": {
+        "count": 1,
         "overlap": [
             {
                 "target_id": "t1",
@@ -42,10 +44,11 @@ SR_FULL = {
                 "uniprot_accession": "P37231",
                 "opentargets_score": 0.8,
             }
-        ]
+        ],
     },
     "7": {"hubs": [{"rank": 1, "target_id": "t1", "gene_symbol": "PPARG"}]},
     "8": {
+        "count": 1,
         "terms": [
             {
                 "source": "KEGG",
@@ -54,7 +57,7 @@ SR_FULL = {
                 "p_value": 1.2e-4,
                 "intersection": ["PPARG"],
             }
-        ]
+        ],
     },
 }
 COMPOUNDS = {
@@ -160,9 +163,13 @@ _SR = {
             {"compound_id": "c2", "target_id": "t9", "prediction_method": "chembl"},  # not overlap
         ]
     },
-    "5": {"overlap": [{"target_id": "t1", "gene_symbol": "PPARG", "uniprot_accession": "P37231"}]},
+    "5": {
+        "count": 1,
+        "overlap": [{"target_id": "t1", "gene_symbol": "PPARG", "uniprot_accession": "P37231"}],
+    },
     "7": {"hubs": [{"target_id": "t1", "gene_symbol": "PPARG"}]},
     "8": {
+        "count": 1,
         "terms": [
             {
                 "term_id": "GO:0001",
@@ -171,7 +178,7 @@ _SR = {
                 "p_value": 0.001,
                 "intersection": ["PPARG"],
             }
-        ]
+        ],
     },
 }
 _COMP = {"c1": {"name": "Curcumin", "inchi_key": "VFLDPWHFBUODDF-FCXRPNKRSA-N", "smiles": "O=C"}}
@@ -701,3 +708,57 @@ def test_all_results_bundle_omits_network_subtree_when_network_files_empty():
     assert "stages/stage6_ppi_nodes.csv" in names  # PPI kept
     assert not any(n.startswith("network/") for n in names)  # CTP network section absent
     assert "report.md" in names
+
+
+# ---------------------------------------------------------------------------
+# ctp_is_emittable + build_ctp_graph empty-when-not-emittable
+# ---------------------------------------------------------------------------
+
+
+def test_ctp_is_emittable_true() -> None:
+    sr = {"5": {"count": 3}, "8": {"count": 2}}
+    assert ctp_is_emittable(sr, has_compounds=True) is True
+
+
+def test_ctp_is_emittable_false_no_compounds() -> None:
+    sr = {"5": {"count": 3}, "8": {"count": 2}}
+    assert ctp_is_emittable(sr, has_compounds=False) is False
+
+
+def test_ctp_is_emittable_false_zero_stage8_count() -> None:
+    sr = {"5": {"count": 3}, "8": {"count": 0}}
+    assert ctp_is_emittable(sr, has_compounds=True) is False
+
+
+def test_ctp_is_emittable_false_zero_stage5_count() -> None:
+    sr = {"5": {"count": 0}, "8": {"count": 2}}
+    assert ctp_is_emittable(sr, has_compounds=True) is False
+
+
+def test_ctp_is_emittable_false_missing_stages() -> None:
+    assert ctp_is_emittable({}, has_compounds=True) is False
+
+
+def test_build_ctp_graph_empty_when_no_compounds() -> None:
+    """has_compounds=False -> empty graph regardless of overlap/terms in SR_FULL."""
+    g = rh.build_ctp_graph(SR_FULL, COMPOUNDS, TARGETS, has_compounds=False)
+    assert g == {"nodes": [], "edges": []}
+
+
+def test_build_ctp_graph_empty_when_zero_stage8_count() -> None:
+    """Stage-8 count=0 -> empty graph (no pathways)."""
+    sr_no_terms = {**SR_FULL, "8": {"count": 0, "terms": []}}
+    g = rh.build_ctp_graph(sr_no_terms, COMPOUNDS, TARGETS, has_compounds=True)
+    assert g == {"nodes": [], "edges": []}
+
+
+def test_build_ctp_graph_non_empty_when_emittable() -> None:
+    """SR_FULL with explicit has_compounds=True -> nodes present (regression guard)."""
+    sr_with_count = {
+        **SR_FULL,
+        "5": {**SR_FULL["5"], "count": 1},  # type: ignore[arg-type]
+        "8": {**SR_FULL["8"], "count": 1},  # type: ignore[arg-type]
+    }
+    g = rh.build_ctp_graph(sr_with_count, COMPOUNDS, TARGETS, has_compounds=True)
+    assert len(g["nodes"]) > 0
+    assert len(g["edges"]) > 0

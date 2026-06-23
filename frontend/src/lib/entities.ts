@@ -24,6 +24,29 @@ export function runHasCompounds(
 }
 
 /**
+ * True when the run's C-T-P output is emittable: it has compounds, a non-empty Stage-5
+ * overlap (count > 0), AND non-empty Stage-8 pathways (count > 0).
+ *
+ * Mirrors the backend ``ctp_is_emittable`` predicate. Use this to hide the C-T-P graph and
+ * network.zip download when the combined gate is false (PPI is unaffected and must stay shown).
+ */
+export function runHasCtp(
+  run:
+    | {
+        parameters?: { input_modes?: { plant?: string } };
+        stage_results?: { [key: string]: unknown };
+      }
+    | null
+    | undefined,
+): boolean {
+  if (!runHasCompounds(run)) return false;
+  const sr = run?.stage_results ?? {};
+  const overlap = (sr["5"] as { count?: number } | null | undefined)?.count ?? 0;
+  const terms = (sr["8"] as { count?: number } | null | undefined)?.count ?? 0;
+  return overlap > 0 && terms > 0;
+}
+
+/**
  * Merge `incoming` items into `existing`, deduplicating by the given id key.
  * Existing items come first; genuinely new items are appended in their original order.
  * Pure — returns a new array; never mutates either input.
