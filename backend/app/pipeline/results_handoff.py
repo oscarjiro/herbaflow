@@ -193,58 +193,6 @@ def _fmt_p(p: Any) -> str:
     return "" if p is None else repr(float(p))
 
 
-def build_docking_table(
-    stage_results: dict[str, Any],
-    compounds_by_id: dict[str, dict[str, Any]],
-    targets_by_id: dict[str, dict[str, Any]],
-) -> str:
-    """One row per Stage-7 hub target x binding compound (compounds whose Stage-3 edges include
-    that hub). AlphaFold id = the hub's UniProt accession (recovered from targets_by_id; the hub
-    row itself does not carry it). Empty hub set / no binding compounds -> header + stated note."""
-    hubs = stage_results.get("7", {}).get("hubs", [])
-    edges = stage_results.get("3", {}).get("compound_targets", [])
-
-    edges_by_tid: dict[str, list[dict[str, Any]]] = {}
-    for e in edges:
-        edges_by_tid.setdefault(e["target_id"], []).append(e)
-
-    rows: list[tuple[Any, ...]] = [
-        (
-            "hub_gene_symbol",
-            "hub_uniprot_accession",
-            "alphafold_id",
-            "compound_name",
-            "compound_inchikey",
-            "compound_smiles",
-            "prediction_method",
-            "source_url",
-        )
-    ]
-    for h in hubs:
-        tid = h["target_id"]
-        gene = h.get("gene_symbol") or ""
-        acc = targets_by_id.get(tid, {}).get("uniprot_accession") or ""
-        af_url = f"https://alphafold.ebi.ac.uk/entry/{acc}" if acc else ""
-        for e in edges_by_tid.get(tid, []):
-            c = compounds_by_id.get(e["compound_id"], {})
-            rows.append(
-                (
-                    gene,
-                    acc,
-                    acc,
-                    c.get("name") or e["compound_id"],
-                    c.get("inchi_key") or "",
-                    c.get("smiles") or "",
-                    e.get("prediction_method") or "",
-                    af_url,
-                )
-            )
-    out = _csv(rows)
-    if len(rows) == 1:
-        out += "# no hub targets with binding compounds for this run\n"
-    return out
-
-
 def build_report(
     run_meta: dict[str, Any],
     params: dict[str, Any],
@@ -540,20 +488,15 @@ def build_stage_csv(
 
 def build_network_readme() -> str:
     return """\
-# Network & docking handoff
+# C-T-P Cytoscape network export
 
 This folder contains the compound-target-pathway (C-T-P) network in a format ready for
-Cytoscape, a static PNG rendering of that network, and a docking-preparation table that pairs
-each hub protein with the compounds that bind it.
+Cytoscape and a static PNG rendering of that network.
 
 ## Files
 
 - `ctp-nodes.csv` / `ctp-edges.csv`: the C-T-P network (Cytoscape node and edge tables).
 - `ctp-network.png`: a static rendering of the network (may be absent for very large networks).
-- `ppi-nodes.csv` / `ppi-edges.csv`: the protein-protein interaction (PPI) sub-network
-  (Stage 6); useful if you want to visualise only the target layer.
-- `docking.csv`: one row per hub protein x binding compound pair, ready to feed into a
-  structure-based docking tool (e.g. AutoDock Vina).
 
 ## Import the network into Cytoscape (desktop)
 
@@ -574,7 +517,7 @@ The edge endpoint strings equal the node `id` strings, so the join is exact.
 | `label` | Human-readable display name (compound name, gene symbol, or term name). |
 | `type` | Node type: `compound`, `target`, or `pathway`. |
 | `inchikey` | InChIKey for compound nodes (27-char structural hash); blank otherwise. |
-| `smiles` | **SMILES** of the compound (2-D); ligand input for docking. Blank otherwise. |
+| `smiles` | SMILES of the compound (2-D structure); blank for non-compound nodes. |
 | `uniprot_accession` | UniProt accession (e.g. `P37231`) for target nodes; blank otherwise. |
 | `is_hub` | `true` if this target was ranked as a hub gene (Stage 7); blank for non-target nodes. |
 | `source` | Pathway DB source for pathway nodes (e.g. `KEGG`, `GO:BP`, `REAC`); blank otherwise. |
@@ -588,36 +531,6 @@ The edge endpoint strings equal the node `id` strings, so the join is exact.
 | `interaction` | `compound-target` (Stage 3 bioactivity) or `target-pathway` (Stage 8). |
 | `prediction_method` | Compound-target evidence: `chembl_bioactivity` or `pubchem_bioassay`. |
 | `p_value` | Target-pathway edges: BH-corrected enrichment p-value (full precision); else blank. |
-
-### docking.csv
-
-| Column | Meaning |
-|---|---|
-| `hub_gene_symbol` | Gene symbol of the hub target (Stage 7 top-ranked proteins). |
-| `hub_uniprot_accession` | UniProt accession of the hub protein. |
-| `alphafold_id` | **AlphaFold** model id (= `hub_uniprot_accession`); predicted 3-D structure. |
-| `compound_name` | Common name of the binding compound. |
-| `compound_inchikey` | InChIKey of the binding compound (stable structural identifier). |
-| `compound_smiles` | **SMILES** of the binding compound (the ligand input for docking). |
-| `prediction_method` | Evidence source for the compound-target interaction. |
-| `source_url` | AlphaFold model page for the hub protein (links to the predicted structure). |
-
-## How to use docking.csv
-
-Each row in `docking.csv` describes one candidate docking experiment:
-
-- **Protein (receptor)**: download the **AlphaFold** predicted structure for the UniProt accession
-  in `hub_uniprot_accession` (the `source_url` column links directly to the model page). Save the
-  structure as PDB or mmCIF.
-- **Ligand**: the compound's **SMILES** string in `compound_smiles` encodes its 2-D chemical
-  structure. Convert it to a 3-D conformer using a tool such as RDKit or OpenBabel, then prepare
-  the ligand file in the format your docking tool expects (e.g. PDBQT for AutoDock Vina).
-- **Docking**: run your chosen docking tool (e.g. AutoDock Vina) with the AlphaFold receptor
-  structure and the prepared ligand. The predicted binding affinity (kcal/mol) is your primary
-  output.
-
-The table already filters to hub proteins only. These are the mechanistically central targets
-identified by the network analysis, so they are the highest-priority candidates for docking.
 """
 
 
@@ -795,8 +708,7 @@ def build_root_readme() -> str:
     return (
         "# Herbaflow analysis: full results\n\n"
         "- `report.md`: the human-readable run report.\n"
-        "- `network-and-docking/`: the C-T-P network (Cytoscape) + docking pairing table"
-        " + network PNG.\n"
+        "- `network/`: the C-T-P network (Cytoscape) + network PNG.\n"
         "- `stages/`: one CSV (and chart, where applicable) per pipeline stage.\n\n"
         "See each folder's README for column details and import steps.\n"
     )
@@ -814,14 +726,13 @@ def _zip(files: dict[str, str | bytes | None]) -> bytes:
 
 
 def build_network_bundle(
-    *, ctp_nodes: str, ctp_edges: str, docking: str, network_png: bytes | None, readme: str
+    *, ctp_nodes: str, ctp_edges: str, network_png: bytes | None, readme: str
 ) -> bytes:
-    """Network-and-docking zip: CSVs always present; PNG only when not None."""
+    """C-T-P Cytoscape network zip: CSVs always present; PNG only when not None."""
     return _zip(
         {
             "ctp-nodes.csv": ctp_nodes,
             "ctp-edges.csv": ctp_edges,
-            "docking.csv": docking,
             "ctp-network.png": network_png,
             "README.md": readme,
         }
@@ -868,7 +779,7 @@ def build_all_results_bundle(
     stage_files: dict[str, str | bytes | None],
     input_modes: dict[str, Any] | None = None,
 ) -> bytes:
-    """All-results superset zip: report + network-and-docking/ + stages/ subdirectories.
+    """All-results superset zip: report + network/ + stages/ subdirectories.
 
     Embeds a README.md at the root and sub-READMEs in each subdirectory so the bundle is
     self-contained: a reader opening any folder finds column-level documentation without
@@ -883,9 +794,9 @@ def build_all_results_bundle(
         "stages/README.md": build_stages_readme(),
     }
     if network_files:
-        files["network-and-docking/README.md"] = build_network_readme()
+        files["network/README.md"] = build_network_readme()
         for name, content in network_files.items():
-            files[f"network-and-docking/{name}"] = content
+            files[f"network/{name}"] = content
     for name, content in filtered_stages.items():
         files[f"stages/{name}"] = content
     return _zip(files)

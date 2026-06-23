@@ -30,7 +30,6 @@ class ExportArtifacts:
     ctp_edges: str
     ppi_nodes: str
     ppi_edges: str
-    docking: str
     slug: str = "herbaflow_analysis"
     network_png: bytes | None = None
     stage_pngs: dict[str, bytes] = field(default_factory=dict)
@@ -43,7 +42,6 @@ class ExportArtifacts:
         return {
             "ctp-nodes.csv": self.ctp_nodes,
             "ctp-edges.csv": self.ctp_edges,
-            "docking.csv": self.docking,
             "ctp-network.png": self.network_png,
         }
 
@@ -60,7 +58,6 @@ class ExportArtifacts:
         return rh.build_network_bundle(
             ctp_nodes=self.ctp_nodes,
             ctp_edges=self.ctp_edges,
-            docking=self.docking,
             network_png=self.network_png,
             readme=rh.build_network_readme(),
         )
@@ -299,9 +296,6 @@ async def assemble_export(session: AsyncSession, analysis_id: uuid.UUID) -> Expo
         ctp_edges=(rh.build_ctp_edges(sr, compounds_by_id, targets_by_id) if has_compounds else ""),
         ppi_nodes=rh.build_ppi_nodes(sr),
         ppi_edges=rh.build_ppi_edges(sr),
-        docking=(
-            rh.build_docking_table(sr, compounds_by_id, targets_by_id) if has_compounds else ""
-        ),
         slug=rh.bundle_slug(labels, run.completed_at),
         network_png=network_png,
         stage_pngs=stage_pngs,

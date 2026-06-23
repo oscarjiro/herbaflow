@@ -159,10 +159,10 @@ async def test_complete_run_export_zip_has_four_files(client, seed_complete_run)
         names = set(zf.namelist())
     assert {
         "README.md",
-        "network-and-docking/README.md",
+        "network/README.md",
         "stages/README.md",
         "report.md",
-        "network-and-docking/ctp-nodes.csv",
+        "network/ctp-nodes.csv",
         "stages/stage5_overlap.csv",
     } <= names
 
@@ -187,13 +187,12 @@ async def test_per_artifact_content_types(client, seed_complete_run):
 
 
 @pytest.mark.asyncio
-async def test_docking_csv_has_hub_compound_row(client, seed_complete_run):
+async def test_docking_csv_route_removed(client, seed_complete_run):
+    """The docking.csv per-artifact route no longer exists; it must return 404."""
     c, _ = client
     aid = seed_complete_run
     resp = await c.get(f"/analyses/{aid}/export/docking.csv")
-    assert resp.status_code == 200
-    body = resp.text
-    assert "PPARG" in body and "P37231" in body and "CURCUMIN" in body
+    assert resp.status_code == 404
 
 
 @pytest.mark.asyncio
@@ -209,7 +208,7 @@ async def test_bundle_endpoints(client, seed_complete_run):
     aid = seed_complete_run
     cases = [
         ("report.md", "text/markdown"),
-        ("network-and-docking.zip", "application/zip"),
+        ("network.zip", "application/zip"),
         ("stages.zip", "application/zip"),
         ("all-results.zip", "application/zip"),
     ]
@@ -271,3 +270,26 @@ async def test_omitted_chart_404s(client, seed_complete_run):
     aid = seed_complete_run
     r = await c.get(f"/analyses/{aid}/export/stage6_ppi_network.png")
     assert r.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_network_zip_route_renamed(client, seed_complete_run):
+    """network.zip (renamed) returns 200; the old network-and-docking.zip route is gone."""
+    c, _ = client
+    aid = seed_complete_run
+    assert (await c.get(f"/analyses/{aid}/export/network.zip")).status_code == 200
+    assert (await c.get(f"/analyses/{aid}/export/network-and-docking.zip")).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_network_zip_has_ctp_files_not_docking(client, seed_complete_run):
+    """network.zip contains ctp-nodes.csv and ctp-edges.csv but NOT docking.csv."""
+    c, _ = client
+    aid = seed_complete_run
+    resp = await c.get(f"/analyses/{aid}/export/network.zip")
+    assert resp.status_code == 200
+    with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
+        names = zf.namelist()
+    assert "ctp-nodes.csv" in names
+    assert "ctp-edges.csv" in names
+    assert "docking.csv" not in names

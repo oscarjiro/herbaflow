@@ -26,7 +26,7 @@ def _disposition(filename: str) -> dict[str, str]:
 def _require_compounds(a: ExportArtifacts) -> None:
     if not a.has_compounds:
         raise NotFoundProblem(
-            "compound-target-pathway and docking exports are not available for a target-only run"
+            "compound-target-pathway exports are not available for a target-only run"
         )
 
 
@@ -51,13 +51,13 @@ async def export_report(
     )
 
 
-@router.get("/analyses/{analysis_id}/export/network-and-docking.zip")
+@router.get("/analyses/{analysis_id}/export/network.zip")
 async def export_network(
     analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> StreamingResponse:
     a = await assemble_export(session, analysis_id)
     _require_compounds(a)
-    return _zip_response(a.network_bundle(), f"{a.slug}_network-and-docking.zip")
+    return _zip_response(a.network_bundle(), f"{a.slug}_network.zip")
 
 
 @router.get("/analyses/{analysis_id}/export/stages.zip")
@@ -99,15 +99,6 @@ async def export_ctp_edges(
     a = await assemble_export(session, analysis_id)
     _require_compounds(a)
     return Response(a.ctp_edges, media_type="text/csv", headers=_disposition("ctp-edges.csv"))
-
-
-@router.get("/analyses/{analysis_id}/export/docking.csv")
-async def export_docking(
-    analysis_id: uuid.UUID, session: AsyncSession = Depends(get_session)
-) -> Response:
-    a = await assemble_export(session, analysis_id)
-    _require_compounds(a)
-    return Response(a.docking, media_type="text/csv", headers=_disposition("docking.csv"))
 
 
 @router.get("/analyses/{analysis_id}/export/stage6_ppi_nodes.csv")

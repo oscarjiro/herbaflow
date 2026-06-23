@@ -73,7 +73,6 @@ def _artifacts(input_modes: dict[str, Any]) -> ExportArtifacts:
         ctp_edges="ctp_edges",
         ppi_nodes="ppi_nodes",
         ppi_edges="ppi_edges",
-        docking="docking",
         input_modes=input_modes,
     )
 

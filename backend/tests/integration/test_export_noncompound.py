@@ -1,8 +1,8 @@
 """Integration coverage for compound-free (target-only) run exports.
 
 A ``manual_targets`` plant side introduces no compounds, so the compound-target-pathway
-and docking artifacts are not applicable. The export endpoints that build those artifacts
-directly (the network-and-docking bundle and the CTP/docking CSVs) must 404, while the
+artifacts are not applicable. The export endpoints that build those artifacts
+directly (the network bundle and the CTP CSVs) must 404, while the
 compound-independent PPI/stage outputs stay available.
 """
 
@@ -80,12 +80,16 @@ async def seed_noncompound_run(engine):
 
 
 @pytest.mark.asyncio
-async def test_noncompound_export_drops_ctp_and_docking(client, seed_noncompound_run):
+async def test_noncompound_export_drops_ctp(client, seed_noncompound_run):
     c, _ = client
     aid = seed_noncompound_run
-    assert (await c.get(f"/analyses/{aid}/export/network-and-docking.zip")).status_code == 404
+    # network.zip and CTP CSVs 404 for compound-free runs:
+    assert (await c.get(f"/analyses/{aid}/export/network.zip")).status_code == 404
     assert (await c.get(f"/analyses/{aid}/export/ctp-nodes.csv")).status_code == 404
     assert (await c.get(f"/analyses/{aid}/export/ctp-edges.csv")).status_code == 404
+    # old network-and-docking.zip route is gone entirely:
+    assert (await c.get(f"/analyses/{aid}/export/network-and-docking.zip")).status_code == 404
+    # docking.csv route is gone entirely:
     assert (await c.get(f"/analyses/{aid}/export/docking.csv")).status_code == 404
     # PPI stays available:
     assert (await c.get(f"/analyses/{aid}/export/stage6_ppi_nodes.csv")).status_code == 200

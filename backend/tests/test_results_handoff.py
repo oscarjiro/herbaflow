@@ -117,32 +117,6 @@ def test_ctp_edges_ct_into_overlap_and_tp_from_term_intersection():
     assert tp[0][4] != ""
 
 
-def test_docking_table_one_row_per_hub_x_binding_compound_alphafold_is_accession():
-    text = rh.build_docking_table(SR_FULL, COMPOUNDS, TARGETS)
-    rows = _csv_rows(text)
-    header, data = rows[0], rows[1:]
-    assert header == [
-        "hub_gene_symbol",
-        "hub_uniprot_accession",
-        "alphafold_id",
-        "compound_name",
-        "compound_inchikey",
-        "compound_smiles",
-        "prediction_method",
-        "source_url",
-    ]
-    assert len(data) == 2
-    assert all(r[0] == "PPARG" for r in data)
-    assert all(r[1] == "P37231" and r[2] == "P37231" for r in data)
-    assert {r[3] for r in data} == {"CURCUMIN", "ASPIRIN"}
-
-
-def test_docking_table_empty_hub_set_yields_header_plus_note():
-    sr = {**SR_FULL, "7": {"hubs": []}}
-    text = rh.build_docking_table(sr, COMPOUNDS, TARGETS)
-    assert text.splitlines()[0].startswith("hub_gene_symbol")
-    assert any(line.startswith("#") for line in text.splitlines())
-
 
 def test_build_report_is_interpretive():
     # build_report is now a thin delegate to the report model + renderer (the single home for the
@@ -481,7 +455,7 @@ def test_network_readme_has_cytoscape_steps():
     md = rh.build_network_readme()
     assert "Import Network from File" in md
     assert "Import Table from File" in md
-    assert "ctp-nodes.csv" in md and "ctp-edges.csv" in md and "docking.csv" in md
+    assert "ctp-nodes.csv" in md and "ctp-edges.csv" in md
 
 
 def test_stages_readme_lists_files():
@@ -491,7 +465,7 @@ def test_stages_readme_lists_files():
 
 def test_root_readme_lists_bundles():
     md = rh.build_root_readme()
-    assert "report.md" in md and "network-and-docking" in md.lower() and "stages/" in md
+    assert "report.md" in md and "network/" in md and "stages/" in md
 
 
 def _names(data: bytes) -> set[str]:
@@ -500,15 +474,16 @@ def _names(data: bytes) -> set[str]:
 
 def test_network_bundle_contents():
     b = rh.build_network_bundle(
-        ctp_nodes="a", ctp_edges="b", docking="c", network_png=None, readme="r"
+        ctp_nodes="a", ctp_edges="b", network_png=None, readme="r"
     )
-    # network_png=None -> png omitted; CSVs + README always present
-    assert _names(b) == {"ctp-nodes.csv", "ctp-edges.csv", "docking.csv", "README.md"}
+    # network_png=None -> png omitted; CSVs + README always present; no docking.csv
+    assert _names(b) == {"ctp-nodes.csv", "ctp-edges.csv", "README.md"}
+    assert "docking.csv" not in _names(b)
 
 
 def test_network_bundle_includes_png_when_present():
     b = rh.build_network_bundle(
-        ctp_nodes="a", ctp_edges="b", docking="c", network_png=b"\x89PNG", readme="r"
+        ctp_nodes="a", ctp_edges="b", network_png=b"\x89PNG", readme="r"
     )
     assert "ctp-network.png" in _names(b)
 
@@ -521,15 +496,9 @@ def test_all_results_superset_layout():
     )
     names = _names(b)
     assert "README.md" in names and "report.md" in names  # root README is now .md
-    assert "network-and-docking/ctp-nodes.csv" in names
+    assert "network/ctp-nodes.csv" in names
     assert "stages/stage5_overlap.csv" in names
 
-
-def test_docking_table_has_source_url():
-    csv = rh.build_docking_table(SR_FULL, COMPOUNDS, TARGETS)
-    header = csv.splitlines()[0]
-    assert header.endswith("source_url")
-    assert "alphafold.ebi.ac.uk" in csv
 
 
 def test_term_url_derivation():
@@ -576,13 +545,14 @@ def test_all_results_bundle_embeds_subreadmes_as_md():
     )
     names = zipfile.ZipFile(io.BytesIO(blob)).namelist()
     assert "README.md" in names  # root, .md not .txt
-    assert "network-and-docking/README.md" in names  # sub-readmes embedded
+    assert "network/README.md" in names  # sub-readmes embedded
     assert "stages/README.md" in names
 
 
-def test_network_readme_explains_docking_and_glossary():
+def test_network_readme_describes_ctp_network():
     r = rh.build_network_readme()
-    assert "docking.csv" in r and "SMILES" in r and "AlphaFold" in r and "Columns" in r
+    assert "ctp-nodes.csv" in r and "ctp-edges.csv" in r and "Columns" in r
+    assert "docking.csv" not in r
 
 
 def test_stages_readme_maps_pngs_and_is_accurate():
@@ -723,11 +693,11 @@ def test_all_results_bundle_omits_network_subtree_when_network_files_empty():
 
     data = rh.build_all_results_bundle(
         report="# r",
-        network_files={},  # no compounds -> no CTP/docking
+        network_files={},  # no compounds -> no CTP network files
         stage_files={"stage6_ppi_nodes.csv": "id\n", "stage5_overlap.csv": "g\n"},
         input_modes={"plant": "manual_targets", "disease": "manual_disease_targets"},
     )
     names = set(zipfile.ZipFile(io.BytesIO(data)).namelist())
     assert "stages/stage6_ppi_nodes.csv" in names  # PPI kept
-    assert not any(n.startswith("network-and-docking/") for n in names)  # CTP/docking gone
+    assert not any(n.startswith("network/") for n in names)  # CTP network section absent
     assert "report.md" in names

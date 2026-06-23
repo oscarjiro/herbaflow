@@ -77,8 +77,8 @@ def frozen_stages_from_params(parameters: dict[str, Any]) -> frozenset[int]:
 
 
 # Plant modes that introduce compounds (Stage 1/3 compound path). manual_targets supplies
-# resolved targets directly and has NO compounds, so compound-only outputs (CTP network,
-# docking) are not applicable to it.
+# resolved targets directly and has NO compounds, so compound-only outputs (CTP network)
+# are not applicable to it.
 _COMPOUND_PLANT_MODES = ("selection", "manual_compounds")
 
 
