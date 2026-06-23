@@ -24,16 +24,9 @@ def _disposition(filename: str) -> dict[str, str]:
     return {"Content-Disposition": f'attachment; filename="{filename}"'}
 
 
-def _require_compounds(a: ExportArtifacts) -> None:
-    if not a.has_compounds:
-        raise NotFoundProblem(
-            "compound-target-pathway exports are not available for a target-only run"
-        )
-
-
 def _require_ctp(a: ExportArtifacts) -> None:
     """404 when C-T-P output is not emittable: no compounds, no Stage-5 overlap, or no
-    Stage-8 pathways. Replaces the compound-only _require_compounds guard for CTP routes."""
+    Stage-8 pathways."""
     if not ctp_is_emittable(a.stage_results, has_compounds=a.has_compounds):
         raise NotFoundProblem(
             "compound-target-pathway exports are not available: the run has no compounds, "
