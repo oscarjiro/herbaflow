@@ -59,14 +59,36 @@ export function stageLabel(n: number): string {
 //                        harmonic-sum heuristic bounded 0–1. Verified: Open
 //                        Targets docs (platform-docs.opentargets.org/associations).
 const LABELS: Record<string, string> = {
+  // Druglikeness (Stage 2)
+  max_mw: "Max molecular weight (Da)",
+  max_logp: "Max logP",
+  max_hbd: "Max hydrogen-bond donors",
+  max_hba: "Max hydrogen-bond acceptors",
+  max_tpsa: "Max polar surface area (Å²)",
+  max_rotatable_bonds: "Max rotatable bonds",
+  np_exception_threshold: "Natural-product exception threshold",
+  max_violations: "Max rule violations allowed",
+  apply_veber: "Apply Veber rule",
+  apply_np_exception: "Allow natural-product exceptions",
+  skip_adme: "Skip druglikeness filtering",
+  // Compound targets (Stage 3)
+  min_pchembl: "Minimum activity (pChEMBL)",
+  min_assay_confidence: "Minimum assay confidence",
+  // Disease targets (Stage 4)
+  min_score: "Minimum score",
+  // Interaction network (Stage 6)
+  max_proteins: "Max proteins in network",
+  allow_top_n_cap: "Cap network to top-ranked proteins",
+  min_confidence: "Minimum confidence",
+  network_type: "Network type",
+  // Hub genes (Stage 7)
+  top_n: "Top N",
+  // Pathway enrichment (Stage 8)
   min_term_size: "Minimum term size",
   significance_threshold: "Significance threshold (corrected p ≤)",
   correction: "Correction",
-  network_type: "Network type",
-  top_n: "Top N",
-  min_confidence: "Minimum confidence",
-  min_score: "Minimum score",
   no_iea: "Exclude electronic annotations (IEA)",
+  sources: "Annotation sources",
 };
 
 const VALUES: Record<string, string> = {
