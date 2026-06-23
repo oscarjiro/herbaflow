@@ -25,10 +25,13 @@ import {
   ENRICHMENT_PARAMS,
   ENRICHMENT_SELECT_PARAMS,
 } from "../../contract";
+import { enrichmentTermUrl } from "../../lib/externalUrls";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
+import { ExpandableListCell } from "@/components/ui/ExpandableListCell";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { EnrichmentDotChart } from "@/components/charts/EnrichmentDotChart";
 import { exportPlotlyAsPng } from "@/lib/chartExport";
@@ -74,9 +77,10 @@ type EnrichmentParams = Record<string, number | boolean | string | string[]>;
 
 const PAGE_SIZES = [10, 20, 50] as const;
 
-const S8_CSV_HEADER = "source,term_id,name,p_value,term_size,intersection_size,intersection";
+export const S8_CSV_HEADER =
+  "source,term_id,name,p_value,term_size,intersection_size,intersection,term_url,term_genes";
 
-function buildS8CsvRows(terms: Term[]): unknown[][] {
+export function buildS8CsvRows(terms: Term[]): unknown[][] {
   return terms.map((t) => [
     t.source,
     t.term_id,
@@ -85,6 +89,8 @@ function buildS8CsvRows(terms: Term[]): unknown[][] {
     t.term_size,
     t.intersection_size,
     (t.intersection ?? []).join(" "),
+    enrichmentTermUrl(t.source, t.term_id),
+    (t.intersection ?? []).join(";"),
   ]);
 }
 
@@ -129,7 +135,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
-  // Column definitions — SAME columns + order as the prior <table>
+  // Column definitions — term name links to the term page; genes-in-term uses ExpandableListCell.
   const columns: ColumnDef<Term>[] = [
     {
       id: "source",
@@ -144,22 +150,42 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     {
       id: "name",
       header: "Name",
-      cell: ({ row }) => row.original.name,
+      cell: ({ row }) => {
+        const url = enrichmentTermUrl(row.original.source, row.original.term_id);
+        return url ? (
+          <ExternalLink href={url}>{row.original.name}</ExternalLink>
+        ) : (
+          row.original.name
+        );
+      },
     },
     {
       id: "corrected_p",
       header: "Corrected p",
+      meta: { className: "num" },
       cell: ({ row }) => formatSig(row.original.p_value),
     },
     {
       id: "term_size",
       header: "Term size",
+      meta: { className: "num" },
       cell: ({ row }) => row.original.term_size,
     },
     {
       id: "overlap",
       header: "Overlap",
+      meta: { className: "num" },
       cell: ({ row }) => row.original.intersection_size,
+    },
+    {
+      id: "genes",
+      header: "Genes in term",
+      cell: ({ row }) => (
+        <ExpandableListCell
+          items={row.original.intersection ?? []}
+          collapsedCount={0}
+        />
+      ),
     },
   ];
 
