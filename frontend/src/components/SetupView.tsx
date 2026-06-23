@@ -659,7 +659,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                 <span className="text-hf-fg-3 text-base">{diseaseNoun}</span>
               </>
             ) : (
-              <span className="text-hf-fg-3">Nothing selected yet.</span>
+              <span className="font-display text-hf-fg-3 italic">Nothing selected yet.</span>
             )}
           </p>
         </GlassSurface>

@@ -518,6 +518,12 @@ describe("SetupView — recomposed summary + advance", () => {
     expect(screen.getByTestId("setup-summary")).toBeInTheDocument();
   });
 
+  it("renders the empty-state prose in the serif display font", () => {
+    wrap(<SetupView onCreated={() => {}} />);
+    const empty = screen.getByText("Nothing selected yet.");
+    expect(empty.className).toMatch(/font-display/);
+  });
+
   it("advance is a single primary Start analysis button", () => {
     wrap(<SetupView onCreated={() => {}} />);
     expect(screen.getByRole("button", { name: /start analysis/i })).toBeInTheDocument();
