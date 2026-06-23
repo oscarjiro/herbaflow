@@ -17,6 +17,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTablePager } from "@/components/ui/DataTablePager";
+import { ColumnInfo } from "@/components/ui/ColumnInfo";
+import { cn } from "@/lib/cn";
+import "@/components/ui/dataTable.types";
 
 export function DataTable<T>({
   columns,
@@ -65,6 +68,7 @@ export function DataTable<T>({
                 {hg.headers.map((h) => (
                   <TableHead
                     key={h.id}
+                    className={cn(h.column.columnDef.meta?.className)}
                     aria-sort={
                       h.column.getIsSorted() === "asc"
                         ? "ascending"
@@ -73,24 +77,36 @@ export function DataTable<T>({
                           : "none"
                     }
                   >
-                    {h.column.getCanSort() ? (
-                      <button
-                        type="button"
-                        className="hover:text-hf-fg-1 inline-flex items-center gap-1 uppercase transition-colors"
-                        onClick={h.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(h.column.columnDef.header, h.getContext())}
-                        <span aria-hidden>
-                          {h.column.getIsSorted() === "asc"
-                            ? "↑"
-                            : h.column.getIsSorted() === "desc"
-                              ? "↓"
-                              : ""}
-                        </span>
-                      </button>
-                    ) : (
-                      flexRender(h.column.columnDef.header, h.getContext())
-                    )}
+                    <span className="inline-flex items-center gap-1">
+                      {h.column.getCanSort() ? (
+                        <button
+                          type="button"
+                          className="hover:text-hf-fg-1 inline-flex items-center gap-1 uppercase transition-colors"
+                          onClick={h.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(h.column.columnDef.header, h.getContext())}
+                          <span aria-hidden>
+                            {h.column.getIsSorted() === "asc"
+                              ? "↑"
+                              : h.column.getIsSorted() === "desc"
+                                ? "↓"
+                                : ""}
+                          </span>
+                        </button>
+                      ) : (
+                        flexRender(h.column.columnDef.header, h.getContext())
+                      )}
+                      {h.column.columnDef.meta?.info ? (
+                        <ColumnInfo
+                          text={h.column.columnDef.meta.info}
+                          label={
+                            typeof h.column.columnDef.header === "string"
+                              ? `About ${h.column.columnDef.header}`
+                              : undefined
+                          }
+                        />
+                      ) : null}
+                    </span>
                   </TableHead>
                 ))}
               </TableRow>
@@ -100,7 +116,7 @@ export function DataTable<T>({
             {table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className={cn(cell.column.columnDef.meta?.className)}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
