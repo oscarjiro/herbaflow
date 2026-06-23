@@ -186,8 +186,8 @@ const ENTRIES: TimelineEntry[] = [
     label: "Handoff",
     name: "Export",
     description:
-      "A publishable figure set, Cytoscape-ready edge tables, and a docking-ready pairing table of hub targets against the compounds that bind them.",
-    source: "figures · CSV · docking table",
+      "A publishable figure set and Cytoscape-ready compound-target-pathway edge tables for downstream network analysis.",
+    source: "figures · CSV",
     isBookend: true,
     icon: (
       <NodeIcon>

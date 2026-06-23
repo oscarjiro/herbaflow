@@ -648,7 +648,7 @@
         }
       }
     },
-    "/analyses/{analysis_id}/export/network-and-docking.zip": {
+    "/analyses/{analysis_id}/export/network.zip": {
       "get": {
         "tags": [
           "export"
@@ -819,47 +819,6 @@
         ],
         "summary": "Export Ctp Edges",
         "operationId": "export_ctp_edges",
-        "parameters": [
-          {
-            "name": "analysis_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Analysis Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/analyses/{analysis_id}/export/docking.csv": {
-      "get": {
-        "tags": [
-          "export"
-        ],
-        "summary": "Export Docking",
-        "operationId": "export_docking",
         "parameters": [
           {
             "name": "analysis_id",

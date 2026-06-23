@@ -569,7 +569,7 @@ export type ExportNetworkData = {
         analysis_id: string;
     };
     query?: never;
-    url: '/analyses/{analysis_id}/export/network-and-docking.zip';
+    url: '/analyses/{analysis_id}/export/network.zip';
 };
 
 export type ExportNetworkErrors = {
@@ -682,31 +682,6 @@ export type ExportCtpEdgesErrors = {
 export type ExportCtpEdgesError = ExportCtpEdgesErrors[keyof ExportCtpEdgesErrors];
 
 export type ExportCtpEdgesResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type ExportDockingData = {
-    body?: never;
-    path: {
-        analysis_id: string;
-    };
-    query?: never;
-    url: '/analyses/{analysis_id}/export/docking.csv';
-};
-
-export type ExportDockingErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ExportDockingError = ExportDockingErrors[keyof ExportDockingErrors];
-
-export type ExportDockingResponses = {
     /**
      * Successful Response
      */

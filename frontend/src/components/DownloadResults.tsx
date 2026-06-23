@@ -10,6 +10,8 @@ import {
   exportReportUrl,
   exportStagesBundleUrl,
 } from "../lib/exportUrl";
+import { runHasCtp } from "../lib/entities";
+import type { AnalysisRead } from "../api/types.gen";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Eyebrow } from "./ui/editorial";
@@ -27,17 +29,18 @@ type DownloadLink = {
 export function DownloadResults({
   status,
   analysisId,
-  hasCompounds = true,
+  run,
 }: {
   status: string | null | undefined;
   analysisId: string;
-  hasCompounds?: boolean;
+  run: AnalysisRead;
 }) {
   if (status !== "complete") return null;
 
-  // The network-and-docking bundle holds compound-target-pathway and docking artifacts only;
-  // a target-only run has none, and the backend 404s that bundle, so do not offer it. The PPI
-  // network stays available via the stages and all-results bundles.
+  // The Cytoscape network bundle holds compound-target-pathway edge tables; it requires
+  // compounds, a non-empty Stage-5 overlap, and non-empty Stage-8 pathways. Without all
+  // three the backend 404s that bundle, so only show it when runHasCtp is true. The PPI
+  // network stays available via the stages and all-results bundles regardless.
   const links: DownloadLink[] = [
     {
       label: "Report (.md)",
@@ -45,10 +48,10 @@ export function DownloadResults({
       icon: FileText,
       variant: "default",
     },
-    ...(hasCompounds
+    ...(runHasCtp(run)
       ? ([
           {
-            label: "Network & docking (.zip)",
+            label: "Cytoscape network (.zip)",
             href: exportNetworkBundleUrl(analysisId),
             icon: Network,
             variant: "outline",

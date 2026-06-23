@@ -96,7 +96,7 @@ export function FinalView({ analysisId, data }: { analysisId: string; data: Anal
           />
         ) : null)}
 
-      <DownloadResults status={data.status} analysisId={analysisId} hasCompounds={hasCompounds} />
+      <DownloadResults status={data.status} analysisId={analysisId} run={data} />
     </section>
   );
 }

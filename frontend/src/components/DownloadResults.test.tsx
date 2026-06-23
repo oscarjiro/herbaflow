@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import type { AnalysisRead } from "../api/types.gen";
 import { DownloadResults } from "./DownloadResults";
 
 // ---------------------------------------------------------------------------
@@ -33,6 +34,38 @@ function wrap(ui: React.ReactNode) {
   return <QueryClientProvider client={qc}>{ui}</QueryClientProvider>;
 }
 
+/** Minimal AnalysisRead fixture. Defaults to a completed run with compounds,
+ * overlap (Stage 5 count > 0) and pathways (Stage 8 count > 0) — i.e. runHasCtp = true. */
+function makeRun(
+  overrides: Partial<{
+    status: string;
+    plant: string;
+    stage5Count: number;
+    stage8Count: number;
+  }> = {},
+): AnalysisRead {
+  const { status = "complete", plant = "selection", stage5Count = 3, stage8Count = 5 } = overrides;
+  return {
+    analysis_id: "a1",
+    analysis_name: null,
+    disease_id: null,
+    mode: "guided",
+    status,
+    current_stage: null,
+    parameters: { input_modes: { plant } },
+    stage_results: {
+      "5": { count: stage5Count },
+      "8": { count: stage8Count },
+    },
+    progress: null,
+    created_at: null,
+    completed_at: null,
+    expires_at: null,
+    error_message: null,
+    stage_states: {},
+  } as unknown as AnalysisRead;
+}
+
 // ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
@@ -51,31 +84,51 @@ afterEach(() => {
 
 describe("DownloadResults", () => {
   it("renders nothing when not complete", () => {
+    const run = makeRun({ status: "stage_8_awaiting_approval" });
     const { container } = render(
-      wrap(<DownloadResults status="stage_8_awaiting_approval" analysisId="a1" />),
+      wrap(<DownloadResults status="stage_8_awaiting_approval" analysisId="a1" run={run} />),
     );
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders 4 download buttons when complete (with compounds)", () => {
-    render(wrap(<DownloadResults status="complete" analysisId="a1" />));
+  it("renders 4 download buttons when complete with compounds, overlap and pathways", () => {
+    const run = makeRun();
+    render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
     expect(screen.getByRole("button", { name: /report/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /network/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /cytoscape network/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /all stages/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /all results/i })).toBeInTheDocument();
   });
 
-  it("hides the network-and-docking bundle for target-only runs (it would 404)", () => {
-    render(wrap(<DownloadResults status="complete" analysisId="a1" hasCompounds={false} />));
-    expect(screen.queryByRole("button", { name: /network/i })).toBeNull();
+  it("hides the Cytoscape network bundle when the run has no pathways (runHasCtp false)", () => {
+    // Stage-8 count is zero so runHasCtp returns false even though compounds exist.
+    const run = makeRun({ stage8Count: 0 });
+    render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
+    expect(screen.queryByRole("button", { name: /cytoscape network/i })).toBeNull();
     // PPI stays reachable through the stages and all-results bundles.
     expect(screen.getByRole("button", { name: /all stages/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /all results/i })).toBeInTheDocument();
   });
 
+  it("hides the Cytoscape network bundle for target-only runs (no compounds)", () => {
+    const run = makeRun({ plant: "manual_targets" });
+    render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
+    expect(screen.queryByRole("button", { name: /cytoscape network/i })).toBeNull();
+    // PPI stays reachable through the stages and all-results bundles.
+    expect(screen.getByRole("button", { name: /all stages/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /all results/i })).toBeInTheDocument();
+  });
+
+  it("shows the Cytoscape network bundle when the run has compounds, overlap and pathways", () => {
+    const run = makeRun({ stage5Count: 2, stage8Count: 4 });
+    render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
+    expect(screen.getByRole("button", { name: /cytoscape network/i })).toBeInTheDocument();
+  });
+
   it("calls fetchBlobDownload with the correct URL on button click", async () => {
     mockFetchBlobDownload.mockResolvedValue(undefined);
-    render(wrap(<DownloadResults status="complete" analysisId="a1" />));
+    const run = makeRun();
+    render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
 
     await userEvent.click(screen.getByRole("button", { name: /report/i }));
 
@@ -88,7 +141,8 @@ describe("DownloadResults", () => {
 
   it("calls notifySuccess with Downloaded <label> on success", async () => {
     mockFetchBlobDownload.mockResolvedValue(undefined);
-    render(wrap(<DownloadResults status="complete" analysisId="a1" />));
+    const run = makeRun();
+    render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
 
     await userEvent.click(screen.getByRole("button", { name: /report/i }));
 
@@ -100,7 +154,8 @@ describe("DownloadResults", () => {
   it("calls notifyError with the problem on a failed download", async () => {
     const problem = { status: 404, title: "Not Found", detail: "Report not found." };
     mockFetchBlobDownload.mockRejectedValue(problem);
-    render(wrap(<DownloadResults status="complete" analysisId="a1" />));
+    const run = makeRun();
+    render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
 
     await userEvent.click(screen.getByRole("button", { name: /report/i }));
 
@@ -118,7 +173,8 @@ describe("DownloadResults", () => {
       }),
     );
 
-    render(wrap(<DownloadResults status="complete" analysisId="a1" />));
+    const run = makeRun();
+    render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
 
     await userEvent.click(screen.getByRole("button", { name: /report/i }));
 
