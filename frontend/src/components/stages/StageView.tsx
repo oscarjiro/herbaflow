@@ -22,7 +22,7 @@ export function StageView({
   stage: number;
   title: string;
   kicker: string;
-  onApprove: () => void;
+  onApprove: () => Promise<void>;
   approvePending: boolean;
   onEdit?: () => void;
   children: React.ReactNode;

@@ -41,7 +41,7 @@ import { ParamPanel, type ParamMeta } from "./stages/ParamPanel";
 import { CompoundValidateBox } from "./CompoundValidateBox";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
 import { TargetValidateBox } from "./TargetValidateBox";
-import { Button } from "./ui/button";
+import { StatefulButton } from "./ui/StatefulButton";
 import { Eyebrow } from "./ui/editorial";
 import { GlassSurface } from "./ui/GlassSurface";
 import { Input } from "./ui/input";
@@ -669,13 +669,15 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
           </p>
         </GlassSurface>
 
-        <Button
-          disabled={!canSubmit || create.isPending}
-          onClick={() => create.mutate()}
+        <StatefulButton
+          disabled={!canSubmit}
+          onClickAsync={async () => {
+            await create.mutateAsync();
+          }}
           className="rounded-[var(--radius-pill)]"
         >
-          {create.isPending ? "Starting…" : "Start analysis"}
-        </Button>
+          Start analysis
+        </StatefulButton>
       </div>
     </section>
   );

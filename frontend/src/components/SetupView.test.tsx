@@ -1,7 +1,8 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { http, HttpResponse } from "msw";
+import { LazyMotion, domAnimation } from "motion/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SetupView } from "./SetupView";
 import * as sdk from "../api/sdk.gen";
@@ -13,7 +14,11 @@ import { server } from "../../tests/handlers";
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <LazyMotion features={domAnimation}>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </LazyMotion>,
+  );
 }
 
 // Unmount + clear any Radix portal nodes left in document.body between tests so a
@@ -598,9 +603,9 @@ describe("SetupView — theming sweep", () => {
   });
 });
 
-describe("SetupView — create button double-submit guard", () => {
-  it("disables the Create button while the create mutation is in-flight", async () => {
-    // Never resolves so the mutation stays pending throughout the test.
+describe("SetupView — Start analysis stateful button", () => {
+  it("shows the loading state while the create mutation is in-flight", async () => {
+    // Never resolves so the mutation stays in-flight throughout the test.
     vi.spyOn(sdk, "createAnalysis").mockReturnValue(new Promise(() => {}));
 
     wrap(<SetupView onCreated={() => {}} />);
@@ -611,8 +616,47 @@ describe("SetupView — create button double-submit guard", () => {
     const createBtn = screen.getByRole("button", { name: /start analysis/i });
     expect(createBtn).not.toBeDisabled();
 
-    await userEvent.click(createBtn);
-    expect(createBtn).toBeDisabled();
+    // fireEvent.click is synchronous; StatefulButton sets state to "loading"
+    // before the await, so a synchronous act flush captures the loading state.
+    act(() => {
+      fireEvent.click(createBtn);
+    });
+
+    // Once loading, the button label changes to "Working…".
+    // Query by the visible loading label text which is unique in the DOM.
+    expect(screen.getByText("Working…")).toBeInTheDocument();
+    // The StatefulButton itself carries aria-busy while in-flight.
+    const busyBtn = document.querySelector("button[aria-busy='true']");
+    expect(busyBtn).not.toBeNull();
+  });
+
+  it("transitions to the success state after the create mutation resolves", async () => {
+    vi.spyOn(sdk, "createAnalysis").mockResolvedValue({
+      data: {
+        analysis_id: "r1",
+        analysis_name: null,
+        disease_id: "d1",
+        mode: "auto",
+        status: "pending",
+        current_stage: null,
+        stage_results: {},
+        created_at: null,
+        completed_at: null,
+        expires_at: null,
+        error_message: null,
+      },
+    } as never);
+
+    wrap(<SetupView onCreated={() => {}} />);
+
+    await pickComboOption("Search plants", /aaa bbb/i);
+    await pickComboOption("Search disease", /test disease/i);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /start analysis/i }));
+    });
+
+    expect(screen.getByText("Done")).toBeInTheDocument();
   });
 });
 

@@ -26,7 +26,7 @@ function renderStage(data: AnalysisRead) {
       stage={3}
       title="Targets"
       kicker="03 · Targets"
-      onApprove={() => {}}
+      onApprove={() => Promise.resolve()}
       approvePending={false}
     >
       <div data-testid="slot">table goes here</div>
@@ -91,7 +91,7 @@ test("stage-1 running with no per-item progress renders shimmer skeleton (not an
       stage={1}
       title="Compounds"
       kicker="01 · Compounds"
-      onApprove={() => {}}
+      onApprove={() => Promise.resolve()}
       approvePending={false}
     >
       <div data-testid="slot">table goes here</div>
@@ -147,7 +147,7 @@ function renderStage5Composition() {
       stage={5}
       title="Shared targets"
       kicker="05 · Shared targets"
-      onApprove={() => {}}
+      onApprove={() => Promise.resolve()}
       approvePending={false}
     >
       <Stage5View data={STAGE5_DATA} />
