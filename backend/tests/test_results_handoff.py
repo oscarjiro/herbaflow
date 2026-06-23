@@ -120,7 +120,6 @@ def test_ctp_edges_ct_into_overlap_and_tp_from_term_intersection():
     assert tp[0][4] != ""
 
 
-
 def test_build_report_is_interpretive():
     # build_report is now a thin delegate to the report model + renderer (the single home for the
     # run's human-readable science). The output is the new interpretive markdown, not the old
@@ -480,18 +479,14 @@ def _names(data: bytes) -> set[str]:
 
 
 def test_network_bundle_contents():
-    b = rh.build_network_bundle(
-        ctp_nodes="a", ctp_edges="b", network_png=None, readme="r"
-    )
+    b = rh.build_network_bundle(ctp_nodes="a", ctp_edges="b", network_png=None, readme="r")
     # network_png=None -> png omitted; CSVs + README always present; no docking.csv
     assert _names(b) == {"ctp-nodes.csv", "ctp-edges.csv", "README.md"}
     assert "docking.csv" not in _names(b)
 
 
 def test_network_bundle_includes_png_when_present():
-    b = rh.build_network_bundle(
-        ctp_nodes="a", ctp_edges="b", network_png=b"\x89PNG", readme="r"
-    )
+    b = rh.build_network_bundle(ctp_nodes="a", ctp_edges="b", network_png=b"\x89PNG", readme="r")
     assert "ctp-network.png" in _names(b)
 
 
@@ -505,7 +500,6 @@ def test_all_results_superset_layout():
     assert "README.md" in names and "report.md" in names  # root README is now .md
     assert "network/ctp-nodes.csv" in names
     assert "stages/stage5_overlap.csv" in names
-
 
 
 def test_term_url_derivation():

@@ -324,7 +324,13 @@ _EMPTY_NETWORK_SR = {
     "4": {"count": 3, "targets": []},
     "5": {"count": 2, "compound_target_count": 5, "disease_target_count": 3},
     "6": {"node_count": 0, "nodes": [], "edges": []},
-    "7": {"hubs": [], "ranking_metric": "mcc", "node_count": 0, "count": 0, "flags": ["network_too_small"]},
+    "7": {
+        "hubs": [],
+        "ranking_metric": "mcc",
+        "node_count": 0,
+        "count": 0,
+        "flags": ["network_too_small"],
+    },
     "8": {"terms": [], "flags": []},
 }
 
@@ -422,7 +428,9 @@ def test_empty_network_stages_no_figure_reference():
     md = report.render_markdown(m)
     assert "stage6_ppi.png" not in md, "Stage 6 figure referenced in markdown for empty stage"
     assert "stage7_hubs.png" not in md, "Stage 7 figure referenced in markdown for empty stage"
-    assert "stage8_enrichment_BP.png" not in md, "Stage 8 figure referenced in markdown for empty stage"
+    assert (
+        "stage8_enrichment_BP.png" not in md
+    ), "Stage 8 figure referenced in markdown for empty stage"
 
 
 def test_non_empty_network_stages_keep_figure_reference():

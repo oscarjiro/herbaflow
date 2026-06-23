@@ -150,20 +150,14 @@ describe("Stage3View — UniProt accession column", () => {
   it("renders accession as an ExternalLink to the UniProt entry page", () => {
     wrap(<Stage3View data={makeRun("computed", STAGE3_COMPUTED)} />);
     const link = screen.getByRole("link", { name: "P00533" });
-    expect(link).toHaveAttribute(
-      "href",
-      "https://www.uniprot.org/uniprotkb/P00533/entry",
-    );
+    expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P00533/entry");
     expect(link).toHaveAttribute("target", "_blank");
   });
 
   it("renders UniProt accession for a user_provided row (row-first, no edges)", () => {
     wrap(<Stage3View data={makeRun("user_provided", STAGE3_USER_PROVIDED)} />);
     const link = screen.getByRole("link", { name: "P04637" });
-    expect(link).toHaveAttribute(
-      "href",
-      "https://www.uniprot.org/uniprotkb/P04637/entry",
-    );
+    expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637/entry");
   });
 });
 
@@ -183,9 +177,7 @@ describe("Stage3View — Gene symbol column", () => {
 describe("Stage3View — Compound source(s) column (conditional)", () => {
   it("shows the Compound source(s) column when stage is app-enriched (computed)", () => {
     wrap(<Stage3View data={makeRun("computed", STAGE3_COMPUTED)} />);
-    expect(
-      screen.getByRole("columnheader", { name: /Compound source/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: /Compound source/i })).toBeInTheDocument();
     // The compound name "Curcumin" (c1) should appear as a chip in the ExpandableListCell.
     // It may also appear in the per-compound coverage table, so use getAllByText.
     expect(screen.getAllByText("Curcumin").length).toBeGreaterThan(0);
@@ -228,9 +220,7 @@ describe("Stage3View — Source chip column", () => {
     // "PubChem BioAssay" also appears in the data-sources footer, so use getAllByText.
     expect(screen.getAllByText("PubChem BioAssay").length).toBeGreaterThan(0);
     // Verify specifically that a SourceChip (monospace span) is rendered for the method.
-    const chips = document.querySelectorAll(
-      'span[class*="font-mono"]',
-    );
+    const chips = document.querySelectorAll('span[class*="font-mono"]');
     const chipTexts = Array.from(chips).map((c) => c.textContent);
     expect(chipTexts).toContain("PubChem BioAssay");
   });
@@ -246,9 +236,7 @@ describe("Stage3View — delete (remove) path", () => {
   it("user-removed rows are not rendered in the table", () => {
     const stage3 = {
       ...STAGE3_COMPUTED,
-      targets: [
-        { ...STAGE3_COMPUTED.targets[0], tag: "user-removed" },
-      ],
+      targets: [{ ...STAGE3_COMPUTED.targets[0], tag: "user-removed" }],
     };
     wrap(<Stage3View data={makeRun("computed", stage3)} />);
     // The accession link should not be present for a user-removed target.

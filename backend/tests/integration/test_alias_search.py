@@ -142,8 +142,16 @@ async def alias_client(alias_engine):
                 "insert into plant_compounds(plant_compound_id, plant_id, compound_id) values"
                 " (:r1, :p1, :c1), (:r2, :p1, :c2), (:r3, :p2, :c3)"
             ),
-            {"r1": uuid.uuid4(), "p1": p1_id, "c1": c1, "r2": uuid.uuid4(),
-             "c2": c2, "r3": uuid.uuid4(), "p2": p2_id, "c3": c3},
+            {
+                "r1": uuid.uuid4(),
+                "p1": p1_id,
+                "c1": c1,
+                "r2": uuid.uuid4(),
+                "c2": c2,
+                "r3": uuid.uuid4(),
+                "p2": p2_id,
+                "c3": c3,
+            },
         )
         await s.execute(
             text(
@@ -154,7 +162,8 @@ async def alias_client(alias_engine):
         )
         await s.execute(
             text(
-                "insert into disease_targets(disease_target_id, disease_id, target_id, opentargets_score) values"
+                "insert into disease_targets"
+                "(disease_target_id, disease_id, target_id, opentargets_score) values"
                 " (:x1, :d1, :t1, 0.9), (:x2, :d1, :t2, 0.4)"
             ),
             {"x1": uuid.uuid4(), "d1": d1_id, "t1": t1, "x2": uuid.uuid4(), "t2": t2},
