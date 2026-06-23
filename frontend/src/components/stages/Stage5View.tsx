@@ -6,27 +6,20 @@
  *  - Overlap table: gene symbol, UniProt accession (linked), opentargets_score; paginated
  *  - CSV download of the overlap rows
  *  - StageDataSources footer
- *  - ApprovalBar (self-gates to stage 5 being the current awaiting stage)
  *
+ * The stage header and ApprovalBar are owned by the StageView shell.
  * No param panel, no Redo, no entity add/remove, no TargetValidateBox.
  */
 
 import { useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
-import { advanceAnalysis } from "../../api/sdk.gen";
-import type { Problem } from "../../lib/problem";
-import { notifyError } from "../../lib/toast";
-import { useStaleState } from "../../hooks/useStaleState";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { OverlapVenn } from "@/components/charts/OverlapVenn";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
-import { Eyebrow } from "@/components/ui/editorial";
-import { ApprovalBar } from "./ApprovalBar";
 import { StageDataSources } from "./StageDataSources";
 
 // ---------------------------------------------------------------------------
@@ -72,15 +65,6 @@ function buildS5CsvRows(rows: OverlapRow[]): unknown[][] {
 
 export function Stage5View({ data }: { data: AnalysisRead }) {
   const stage5 = data.stage_results?.["5"] as Stage5Result | undefined;
-  const { anyStale } = useStaleState(data);
-  const isComplete = data.status === "complete";
-
-  const qc = useQueryClient();
-  const advance = useMutation({
-    mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
-  });
 
   const [pageSize, setPageSize] = useState<number | "all">(10);
   const [page, setPage] = useState(0);
@@ -134,12 +118,6 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="flex flex-col gap-6">
-      {/* Editorial header */}
-      <div className="flex flex-col gap-1">
-        <Eyebrow>Step 5</Eyebrow>
-        <h2 className="hf-heading-serif">Step 5: Target Overlap</h2>
-      </div>
-
       <StageDataSources stage={5} />
 
       {/* Summary cards */}
@@ -171,8 +149,8 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
         </div>
       </div>
 
-      {/* Interactive Venn diagram (complete-only; hidden when both counts are zero) */}
-      {isComplete && (stage5.compound_target_count > 0 || stage5.disease_target_count > 0) && (
+      {/* Interactive Venn diagram (shown once this step has results; hidden when both counts are zero) */}
+      {(stage5.compound_target_count > 0 || stage5.disease_target_count > 0) && (
         <ChartFrame title="Target overlap" filename="target_overlap.png">
           <OverlapVenn
             compoundCount={stage5.compound_target_count}
@@ -252,21 +230,6 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
           </div>
         )}
       </Card>
-
-      {/* Approval */}
-      <ApprovalBar
-        stage={5}
-        status={data.status}
-        currentStage={data.current_stage}
-        disabled={stage5.count === 0 || anyStale}
-        disabledReason={
-          anyStale
-            ? "Run the updated step before continuing."
-            : "No overlap targets. Check Step 3 and Step 4 results."
-        }
-        pending={advance.isPending}
-        onApprove={() => advance.mutate()}
-      />
     </section>
   );
 }

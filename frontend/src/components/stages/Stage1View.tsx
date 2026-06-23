@@ -14,8 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
-import { Separator } from "@/components/ui/separator";
-import { Eyebrow } from "@/components/ui/editorial";
 import { CompoundValidateBox } from "../CompoundValidateBox";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
@@ -134,16 +132,6 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="flex flex-col gap-4">
-      {/* Editorial header */}
-      <div className="flex flex-col gap-1">
-        <Eyebrow>Step 1</Eyebrow>
-        <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">Step 1: Compounds ({current})</h2>
-        </div>
-      </div>
-
-      <Separator className="opacity-50" />
-
       {/* Context + sources */}
       <div className="flex flex-col gap-1">
         <StageEntityContext data={data} side="plant" />

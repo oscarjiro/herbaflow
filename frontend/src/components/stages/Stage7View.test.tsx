@@ -83,7 +83,6 @@ async function openHubPanel() {
 describe("Stage7View", () => {
   it("renders the hub table with the gene and MCC", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.getByText("Step 7: Hub Genes")).toBeInTheDocument();
     expect(screen.getByText("TNF")).toBeInTheDocument();
     expect(screen.getByText("7")).toBeInTheDocument();
   });
@@ -172,41 +171,30 @@ describe("Stage7View", () => {
     expect(screen.queryByRole("img", { name: /hub/i })).toBeNull();
   });
 
-  it("does not show the hub gene chart frame when not complete", () => {
+  it("shows the hub gene chart frame once the step has hubs, even before the run completes", () => {
+    // The computed result has hubs on an awaiting-approval (not yet complete) run.
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.queryByText("Hub genes by centrality")).toBeNull();
-    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
+    expect(screen.getByText("Hub genes by centrality")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
   });
 
-  it("uses cleaned stale approval copy", () => {
-    const data = makeData({ ...makeComputedResult(), stale: true });
-    data.parameters = { hub_genes: HUB_PARAM_VALUES, rerun_from: 6 } as AnalysisRead["parameters"];
-
-    wrap(<Stage7View data={data} />);
-
-    expect(screen.getByRole("button", { name: /approve & continue/i })).toBeDisabled();
-    expect(screen.getByText("Run the updated step before continuing.")).toBeInTheDocument();
-    expect(
-      screen.queryByText("Re-run the out-of-date step before continuing."),
-    ).not.toBeInTheDocument();
+  it("does not show the hub gene chart frame when there are no hubs", () => {
+    wrap(
+      <Stage7View
+        data={makeData({
+          ...makeComputedResult(),
+          hubs: [],
+          count: 0,
+        })}
+      />,
+    );
+    expect(screen.queryByText("Hub genes by centrality")).toBeNull();
+    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 });
 
 describe("Stage7View — double-submit guards", () => {
   afterEach(() => vi.restoreAllMocks());
-
-  it("disables Approve & Continue while the advance mutation is in-flight", async () => {
-    // Never resolves so the mutation stays pending throughout the test.
-    vi.spyOn(sdk, "advanceAnalysis").mockReturnValue(new Promise(() => {}));
-    vi.spyOn(sdk, "resetFrom").mockResolvedValue({ data: {} } as never);
-
-    wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    const approveBtn = screen.getByRole("button", { name: /approve & continue/i });
-    expect(approveBtn).not.toBeDisabled();
-
-    await userEvent.click(approveBtn);
-    expect(approveBtn).toBeDisabled();
-  });
 
   it("disables the Redo button inside the param panel while the redo mutation is in-flight", async () => {
     vi.spyOn(sdk, "advanceAnalysis").mockResolvedValue({ data: {} } as never);

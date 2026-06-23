@@ -2,14 +2,14 @@
  * Stage2View — ADME screening results.
  *
  * Renders:
- *  - Editorial header (Eyebrow + serif h2) with summary count cards
+ *  - Stage entity context + summary count cards
  *  - A combined passed + filtered DataTable with Stage 2 outcomes, source links,
  *    and reasons for filtered rows
  *  - CsvDownloadButton (same header + rows as before)
  *  - Collapsible ParamPanel wired to resetFrom
- *  - ApprovalBar (approve → advance)
  *  - "Tools & data sources" footer
  *
+ * The stage header and ApprovalBar are owned by the StageView shell.
  * Defensive rendering: greyed out when state === "not_applicable".
  */
 
@@ -17,18 +17,15 @@ import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
-import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import { ADME_PARAMS } from "../../contract";
-import { useStaleState } from "../../hooks/useStaleState";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
-import { Eyebrow } from "@/components/ui/editorial";
-import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
@@ -270,15 +267,8 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   const admeParams = (data.parameters as Record<string, unknown> | undefined)?.adme as
     | Record<string, number | boolean>
     | undefined;
-  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
-
-  const advance = useMutation({
-    mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
-  });
 
   const redo = useMutation({
     mutationFn: (changed: Record<string, number | boolean | string>) =>
@@ -329,14 +319,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="flex flex-col gap-6">
-      {/* Editorial header */}
-      <div className="flex flex-col gap-1">
-        <Eyebrow>Step 2</Eyebrow>
-        <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">Step 2: ADME Screening</h2>
-        </div>
-        <StageEntityContext data={data} side="plant" />
-      </div>
+      <StageEntityContext data={data} side="plant" />
 
       <StageDataSources stage={2} userProvided={isUserProvided} />
 
@@ -404,21 +387,6 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
           </CardContent>
         </Card>
       )}
-
-      {/* Approval */}
-      <ApprovalBar
-        stage={2}
-        status={data.status}
-        currentStage={data.current_stage}
-        disabled={stage2.count === 0 || anyStale}
-        disabledReason={
-          anyStale
-            ? "Run the updated step before continuing."
-            : "No compounds passed ADME. Adjust the settings and run this step again."
-        }
-        pending={advance.isPending}
-        onApprove={() => advance.mutate()}
-      />
 
       {/* Footer */}
       <p className="text-muted-foreground text-sm">

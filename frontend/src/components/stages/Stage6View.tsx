@@ -16,15 +16,16 @@
  *    a paginated edge-list table (source, target, confidence) + CSV of the edges.
  *
  * Always: the ppi param panel (Redo via reset-from/6 with only the changed `ppi`
- * values — incl. the two enum selects), the StageDataSources footer, the ApprovalBar
- * (mirroring Stage5View), and the StaleNotice if stale.
+ * values — incl. the two enum selects) and the StageDataSources footer.
+ *
+ * The stage header, ApprovalBar, and StaleNotice are owned by the StageView shell.
  */
 
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
-import { advanceAnalysis, resetFrom } from "../../api/sdk.gen";
+import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import {
@@ -34,7 +35,6 @@ import {
   PPI_SELECT_PARAMS,
 } from "../../contract";
 import type cytoscape from "cytoscape";
-import { useStaleState } from "../../hooks/useStaleState";
 import { useChartColors } from "@/lib/chartTheme";
 import { NetworkGraph } from "@/components/charts/NetworkGraph";
 import { Badge } from "@/components/ui/badge";
@@ -42,8 +42,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
-import { Eyebrow } from "@/components/ui/editorial";
-import { ApprovalBar } from "./ApprovalBar";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 
@@ -246,14 +244,8 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   const ppiParams = (data.parameters as Record<string, unknown> | undefined)?.ppi as
     | PpiParams
     | undefined;
-  const { anyStale } = useStaleState(data);
 
   const qc = useQueryClient();
-  const advance = useMutation({
-    mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
-  });
   const redo = useMutation({
     mutationFn: (changed: PpiParams) =>
       resetFrom({
@@ -307,8 +299,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     (currentPage + 1) * effectivePageSize,
   );
 
-  const isComplete = data.status === "complete";
-
   // Column definitions — SAME columns + order as the prior <table>
   const columns: ColumnDef<Stage6Edge>[] = [
     {
@@ -343,12 +333,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="flex flex-col gap-6">
-      {/* Editorial header */}
-      <div className="flex flex-col gap-1">
-        <Eyebrow>Step 6</Eyebrow>
-        <h2 className="hf-heading-serif">Step 6: PPI Network</h2>
-      </div>
-
       <StageDataSources stage={6} />
 
       {blocked ? (
@@ -510,10 +494,10 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
         )
       )}
 
-      {/* Interactive PPI network (complete-only; the deterministic server PNG
-          stays in the export bundle). Blocked / empty states have their own UI
-          above, so the graph simply does not render then. */}
-      {isComplete && computed && computed.nodes.length > 0 && (
+      {/* Interactive PPI network (shown once this step has nodes; the deterministic
+          server PNG stays in the export bundle). Blocked / empty states have their own
+          UI above, so the graph simply does not render then. */}
+      {computed && computed.nodes.length > 0 && (
         <NetworkGraph
           title="Interaction network"
           filename="ppi_network.png"
@@ -532,22 +516,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
 
       {/* PPI param panel — always shown (raise the cap / change settings + Redo) */}
       {paramPanel}
-
-      <ApprovalBar
-        stage={6}
-        status={data.status}
-        currentStage={data.current_stage}
-        disabled={Boolean(blocked) || (computed?.node_count ?? 0) === 0 || anyStale}
-        disabledReason={
-          anyStale
-            ? "Run the updated step before continuing."
-            : blocked
-              ? "Overlap too large. Enable the top-N cap and Redo, or narrow the inputs."
-              : "No PPI nodes. Adjust the parameters and Redo, or narrow the inputs."
-        }
-        pending={advance.isPending}
-        onApprove={() => advance.mutate()}
-      />
     </section>
   );
 }

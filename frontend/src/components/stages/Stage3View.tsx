@@ -2,8 +2,8 @@
  * Stage3View — compound → target identification results.
  *
  * Renders:
- *  - Editorial header (Eyebrow + serif h2) with summary count cards: target count,
- *    coverage %, and per-source edge counts (ChEMBL bioactivity / PubChem BioAssay)
+ *  - Summary count cards: target count, coverage %, and per-source edge counts
+ *    (ChEMBL bioactivity / PubChem BioAssay)
  *  - Targets DataTable (one row per target): gene symbol, UniProt accession (linked),
  *    evidence/method(s), # compounds, an edit tag badge, and an in-table delete action
  *  - Pagination (10 / 20 / 50 / all) and a CsvDownloadButton keyed on gene symbol +
@@ -11,8 +11,10 @@
  *  - Per-compound coverage DataTable (0-coverage rows always visible)
  *  - Target remove via the in-table delete column; add via a standalone EntityAddControl +
  *    TargetValidateBox (editStage). User-removed rows are hidden from the table and the CSV.
- *  - ParamPanel + Redo (resetFrom) and ApprovalBar
+ *  - ParamPanel + Redo (resetFrom)
  *  - StpDialog for manual SwissTargetPrediction paste-back
+ *
+ * The stage header, ApprovalBar, and StaleNotice are owned by the StageView shell.
  *
  * State handling (stage_state["3"]):
  *  - "not_applicable" → greyed/disabled note
@@ -25,7 +27,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
 import { getAnalysisOptions } from "../../api/@tanstack/react-query.gen";
-import { advanceAnalysis, editStage, resetFrom } from "../../api/sdk.gen";
+import { editStage, resetFrom } from "../../api/sdk.gen";
 import { markEntitiesRemoved } from "../../lib/optimisticEdit";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
@@ -33,21 +35,17 @@ import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contrac
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig } from "../../lib/format";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
-import { useStaleState } from "../../hooks/useStaleState";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
-import { Eyebrow } from "@/components/ui/editorial";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
-import { ApprovalBar } from "./ApprovalBar";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
-import { StaleNotice } from "./StaleNotice";
 import { StpDialog, type StpCompound } from "./StpDialog";
 import { TargetValidateBox } from "../TargetValidateBox";
 
@@ -207,15 +205,8 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   const targetParams = (data.parameters as Record<string, unknown> | undefined)?.target as
     | Record<string, number | boolean>
     | undefined;
-  const { anyStale, rerunFrom } = useStaleState(data);
 
   const qc = useQueryClient();
-
-  const advance = useMutation({
-    mutationFn: () => advanceAnalysis({ path: { analysis_id: data.analysis_id } }),
-    onSuccess: () => qc.invalidateQueries(),
-    onError: (error) => notifyError(error as Problem),
-  });
 
   const redo = useMutation({
     mutationFn: (changed: Record<string, number | boolean | string>) =>
@@ -407,14 +398,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
 
   return (
     <section className="flex flex-col gap-6">
-      {/* Editorial header */}
-      <div className="flex flex-col gap-1">
-        <Eyebrow>Step 3</Eyebrow>
-        <div className="flex flex-wrap items-baseline gap-2">
-          <h2 className="hf-heading-serif">Step 3: Target Identification</h2>
-        </div>
-        <StageEntityContext data={data} side="plant" />
-      </div>
+      <StageEntityContext data={data} side="plant" />
 
       <StageDataSources stage={3} userProvided={isUserProvided} />
 
@@ -576,22 +560,6 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
           onAddTargets={handleAddTargets}
         />
       )}
-
-      {/* Approval */}
-      {rerunFrom === 3 && <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />}
-      <ApprovalBar
-        stage={3}
-        status={data.status}
-        currentStage={data.current_stage}
-        disabled={stage3.count === 0 || anyStale}
-        disabledReason={
-          anyStale
-            ? "Run the updated step before continuing."
-            : "No targets found. Adjust the settings or add one to continue."
-        }
-        pending={advance.isPending}
-        onApprove={() => advance.mutate()}
-      />
 
       {/* Footer */}
       <p className="text-muted-foreground text-sm">

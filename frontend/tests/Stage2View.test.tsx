@@ -64,24 +64,6 @@ afterEach(() => {
 });
 
 describe("Stage2View", () => {
-  it("uses cleaned Step 2 heading and empty-result approval copy", () => {
-    wrap(
-      <Stage2View
-        data={makeRun({
-          stage_results: {
-            "2": { ...SAMPLE_STAGE2_RESULTS, count: 0, passed: [], filtered: [] },
-          } as AnalysisRead["stage_results"],
-        })}
-      />,
-    );
-
-    expect(screen.getByRole("heading", { name: "Step 2: ADME Screening" })).toBeInTheDocument();
-    expect(
-      screen.getByText("No compounds passed ADME. Adjust the settings and run this step again."),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/No compounds passed ADME —/)).not.toBeInTheDocument();
-  });
-
   it("renders passed compound rows", () => {
     wrap(<Stage2View data={makeRun()} />);
     expect(screen.getByText("Curcumin")).toBeInTheDocument();
@@ -356,18 +338,6 @@ describe("Stage2View", () => {
     expect(csv).toContain("CSV-INCHIKEY");
     expect(csv).not.toContain("compound_id");
     expect(csv).not.toContain("c1");
-  });
-});
-
-describe("ApprovalBar via RunView integration", () => {
-  it("shows approve button at stage_2_awaiting_approval", async () => {
-    wrap(<Stage2View data={makeRun({ status: "stage_2_awaiting_approval" })} />);
-    expect(screen.getByRole("button", { name: /approve/i })).toBeInTheDocument();
-  });
-
-  it("hides approve button when complete", () => {
-    wrap(<Stage2View data={makeRun({ status: "complete" })} />);
-    expect(screen.queryByRole("button", { name: /approve/i })).not.toBeInTheDocument();
   });
 });
 
