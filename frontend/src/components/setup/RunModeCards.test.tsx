@@ -2,17 +2,19 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RunModeCards } from "./RunModeCards";
 
-test("renders solid selection cards (no glass) with guided selectable", async () => {
+test("renders glass selection cards with guided selected", async () => {
   const onChange = vi.fn();
   const { container } = render(<RunModeCards value="guided" onChange={onChange} />);
-  // no glass surface inside the cards
-  expect(container.querySelector(".hf-glass")).toBeNull();
-  // selected card is marked + shows the filled check
+  // selection surfaces use the inline glass treatment (D1)
+  expect(container.querySelector(".hf-glass-panel")).not.toBeNull();
+  // selected card is marked, aria-checked, and shows the filled check
   const selected = container.querySelector("[data-selected='true']")!;
   expect(selected).not.toBeNull();
+  expect(selected).toHaveAttribute("aria-checked", "true");
   expect(selected.querySelector("svg")).not.toBeNull(); // lucide Check tick
-  // solid surface class present
-  expect(selected.className).toMatch(/bg-hf-surface/);
+  // the other card is an unchecked radio
+  const radios = Array.from(container.querySelectorAll("[role='radio']"));
+  expect(radios.some((r) => r.getAttribute("aria-checked") === "false")).toBe(true);
   await userEvent.click(screen.getByText(/automatic/i));
   expect(onChange).toHaveBeenCalledWith("auto");
 });

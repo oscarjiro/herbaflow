@@ -6,8 +6,8 @@ const MODES = [
   { value: "auto" as const, title: "Automatic", blurb: "Run end to end, then review." },
 ];
 
-// Run-mode picker as solid selection cards: controls stay solid (glass = chrome/overlay only).
-// Selected = shadow + 1px lift + filled ink check, no tint/ring/border-color highlight.
+// Run-mode picker as glass selection cards (the inline hf-glass-panel surface).
+// Selected = 1px lift + filled ink check, no tint/ring/border-color highlight.
 export function RunModeCards({
   value,
   onChange,
@@ -28,9 +28,9 @@ export function RunModeCards({
             data-selected={selected || undefined}
             onClick={() => onChange(m.value)}
             className={cn(
-              "bg-hf-surface border-hf-border-strong rounded-[var(--radius-md)] border p-4 text-left transition-all",
+              "hf-glass-panel rounded-[var(--radius-md)] p-4 text-left transition-all",
               "hover:border-hf-fg-3",
-              selected && "-translate-y-px shadow-[var(--hf-glass-shadow)]",
+              selected && "-translate-y-px",
             )}
           >
             <div className="flex items-center justify-between gap-2">
