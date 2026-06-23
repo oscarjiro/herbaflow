@@ -457,6 +457,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     }
                   />
                   <RemovableChipList
+                    overflowKind="compounds"
                     items={resolved}
                     getKey={(r) => r.compound_id}
                     getLabel={(r) => r.canonical_name ?? r.canonical_key ?? r.compound_id}
@@ -484,6 +485,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     }
                   />
                   <RemovableChipList
+                    overflowKind="targets"
                     items={manualTargets}
                     getKey={(t) => t.target_id}
                     getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
@@ -567,6 +569,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     }
                   />
                   <RemovableChipList
+                    overflowKind="targets"
                     items={manualDiseaseTargets}
                     getKey={(t) => t.target_id}
                     getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}

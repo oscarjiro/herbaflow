@@ -134,6 +134,75 @@ test("column without meta.info renders no column-info button", () => {
   expect(document.querySelector("[data-slot='column-info']")).not.toBeInTheDocument();
 });
 
+// ── meta.filterable — per-column filter inputs ───────────────────────────────
+
+type FilterRow = { gene: string; score: number };
+
+test("column with meta.filterable renders a labelled filter input", () => {
+  const filterCols: ColumnDef<FilterRow>[] = [
+    { accessorKey: "gene", header: "Gene", meta: { filterable: true } },
+    { accessorKey: "score", header: "Score" },
+  ];
+  render(
+    <DataTable
+      columns={filterCols}
+      data={[
+        { gene: "EGFR", score: 0.9 },
+        { gene: "TP53", score: 0.2 },
+      ]}
+    />,
+  );
+
+  expect(screen.getByRole("textbox", { name: /filter gene/i })).toBeInTheDocument();
+});
+
+test("typing in the filter input narrows visible rows", async () => {
+  const user = userEvent.setup();
+  const filterCols: ColumnDef<FilterRow>[] = [
+    { accessorKey: "gene", header: "Gene", meta: { filterable: true } },
+    { accessorKey: "score", header: "Score" },
+  ];
+  render(
+    <DataTable
+      columns={filterCols}
+      data={[
+        { gene: "EGFR", score: 0.9 },
+        { gene: "TP53", score: 0.2 },
+        { gene: "BRCA1", score: 0.5 },
+      ]}
+    />,
+  );
+
+  const input = screen.getByRole("textbox", { name: /filter gene/i });
+  await user.type(input, "EGFR");
+
+  const rows = screen.getAllByRole("row").filter((r) => !r.closest("thead"));
+  expect(rows).toHaveLength(1);
+  expect(rows[0]).toHaveTextContent("EGFR");
+  expect(screen.queryByText("TP53")).not.toBeInTheDocument();
+});
+
+test("table with no filterable column renders no filter row", () => {
+  const plainCols: ColumnDef<FilterRow>[] = [
+    { accessorKey: "gene", header: "Gene" },
+    { accessorKey: "score", header: "Score" },
+  ];
+  render(
+    <DataTable
+      columns={plainCols}
+      data={[
+        { gene: "EGFR", score: 0.9 },
+        { gene: "TP53", score: 0.2 },
+      ]}
+    />,
+  );
+
+  // No filter inputs should be present
+  expect(screen.queryByRole("textbox", { name: /filter/i })).not.toBeInTheDocument();
+  // No filter row data-slot
+  expect(document.querySelector('[data-slot="filter-row"]')).not.toBeInTheDocument();
+});
+
 // ── meta.className — cell/header class propagation ───────────────────────────
 
 test("meta.className is applied to header <th> cells", () => {
