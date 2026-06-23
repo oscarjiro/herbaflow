@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
+import { CheckIcon, ChevronsUpDownIcon, SearchIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { RemovableChipList } from "./RemovableChipList";
 import { Button } from "./ui/button";
@@ -116,7 +116,12 @@ export function EntitySearchCombobox({
             aria-label={ariaLabel}
             className="w-full justify-between font-normal"
           >
-            <span className={cn(!selected.length && "text-muted-foreground")}>{triggerLabel}</span>
+            <span className="flex min-w-0 items-center gap-2">
+              <SearchIcon className="size-4 shrink-0 opacity-50" aria-hidden="true" />
+              <span className={cn("truncate", !selected.length && "text-muted-foreground")}>
+                {triggerLabel}
+              </span>
+            </span>
             <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
