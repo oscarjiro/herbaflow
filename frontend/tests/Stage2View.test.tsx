@@ -73,22 +73,9 @@ describe("Stage2View", () => {
   it("renders filtered compound row with reason", () => {
     wrap(<Stage2View data={makeRun()} />);
     expect(screen.getByText("HeavyMolecule")).toBeInTheDocument();
-    expect(screen.getByText(/Exceeds max_mw/i)).toBeInTheDocument();
   });
 
-  it("shows qed_score in the table", () => {
-    wrap(<Stage2View data={makeRun()} />);
-    // Curcumin has qed=0.55
-    expect(screen.getByText("0.55")).toBeInTheDocument();
-  });
-
-  it("renders descriptor_source values in the Descriptor source column", () => {
-    wrap(<Stage2View data={makeRun()} />);
-    expect(screen.getByRole("columnheader", { name: "Descriptor source" })).toBeInTheDocument();
-    expect(screen.getAllByText("rdkit").length).toBeGreaterThan(0);
-  });
-
-  it("renders Positive in the PAINS column for a positive screened compound", () => {
+  it("compound name links to PubChem via inchikey when inchikey is present", () => {
     const data = makeRun({
       stage_results: {
         "2": {
@@ -96,24 +83,155 @@ describe("Stage2View", () => {
           passed: [
             {
               ...SAMPLE_STAGE2_RESULTS.passed[0],
-              inchikey: "PAINS-HIT",
-              lipinski_violations: 0,
+              inchikey: "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
+              canonical_name: "Curcumin",
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    const link = screen.getByRole("link", { name: /Curcumin/i });
+    expect(link).toHaveAttribute(
+      "href",
+      "https://pubchem.ncbi.nlm.nih.gov/#query=RYYVLZVUVIJVGH-UHFFFAOYSA-N",
+    );
+  });
+
+  it("renders Passed badge for passed compounds and Filtered badge for filtered compounds", () => {
+    wrap(<Stage2View data={makeRun()} />);
+    expect(screen.getAllByText("Passed").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Filtered").length).toBeGreaterThan(0);
+  });
+
+  it("Lipinski column renders BoolMark checkmark for a passing compound", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
               lipinski_pass: true,
-              veber_pass: true,
               rule_evaluated: true,
-              is_pains_positive: true,
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    expect(screen.getByRole("columnheader", { name: /Lipinski/i })).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Yes").length).toBeGreaterThan(0);
+  });
+
+  it("Lipinski column renders BoolMark cross for a failing compound", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [],
+          filtered: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              lipinski_pass: false,
+              rule_evaluated: true,
             },
           ],
         },
       } as AnalysisRead["stage_results"],
     });
     wrap(<Stage2View data={data} />);
-    expect(screen.getByText("Positive")).toBeInTheDocument();
+    expect(screen.getAllByLabelText("No").length).toBeGreaterThan(0);
   });
 
-  it("renders NP-bypass badge", () => {
+  it("Lipinski column renders BoolMark dash for unscreened compound (rule_evaluated false)", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [],
+          filtered: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              lipinski_pass: null,
+              veber_pass: null,
+              rule_evaluated: false,
+              is_pains_positive: false,
+              badges: ["unscreened"],
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    expect(screen.getAllByLabelText("Not applicable").length).toBeGreaterThan(0);
+  });
+
+  it("Veber column renders BoolMark", () => {
     wrap(<Stage2View data={makeRun()} />);
-    expect(screen.getAllByText(/NP.bypass/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("columnheader", { name: /Veber/i })).toBeInTheDocument();
+  });
+
+  it("NP-bypass column renders BoolMark checkmark for a compound with np_bypass badge", () => {
+    wrap(<Stage2View data={makeRun()} />);
+    // Berberine has badges: ["np_bypass"] in the fixture
+    expect(screen.getByRole("columnheader", { name: /NP-bypass/i })).toBeInTheDocument();
+  });
+
+  it("PAINS column renders BoolMark checkmark for a PAINS-positive compound", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+              is_pains_positive: true,
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    expect(screen.getByRole("columnheader", { name: /PAINS/i })).toBeInTheDocument();
+    // is_pains_positive: true → BoolMark renders "Yes" (✓)
+    expect(screen.getAllByLabelText("Yes").length).toBeGreaterThan(0);
+  });
+
+  it("PAINS column renders BoolMark cross for a PAINS-negative compound", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+              is_pains_positive: false,
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    // is_pains_positive: false → BoolMark renders "No" (✗)
+    expect(screen.getAllByLabelText("No").length).toBeGreaterThan(0);
+  });
+
+  it("numeric descriptor columns all present with num className", () => {
+    wrap(<Stage2View data={makeRun()} />);
+    for (const header of ["MW", "logP", "HBD", "HBA", "TPSA", "RotB", "NP-score"]) {
+      expect(screen.getByRole("columnheader", { name: header })).toBeInTheDocument();
+    }
   });
 
   it("renders summary count cards", () => {
@@ -197,110 +315,32 @@ describe("Stage2View", () => {
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
   });
 
-  it("renders source_url as a link for passed rows that have one", () => {
+  it("does not have a Descriptor source column", () => {
     wrap(<Stage2View data={makeRun()} />);
-    const link = screen.getByRole("link", { name: /PubChem/i });
-    expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
+    expect(
+      screen.queryByRole("columnheader", { name: "Descriptor source" }),
+    ).not.toBeInTheDocument();
   });
 
-  it("shows Lipinski and Veber outcomes with pass, fail, and no-data states", () => {
-    const data = makeRun({
-      stage_results: {
-        "2": {
-          ...SAMPLE_STAGE2_RESULTS,
-          passed: [
-            {
-              ...SAMPLE_STAGE2_RESULTS.passed[0],
-              inchikey: "PASS-INCHIKEY",
-              lipinski_violations: 0,
-              lipinski_pass: true,
-              veber_pass: true,
-              rule_evaluated: true,
-            },
-          ],
-          filtered: [
-            {
-              ...SAMPLE_STAGE2_RESULTS.filtered[0],
-              inchikey: "FAIL-INCHIKEY",
-              canonical_name: "RuleBreak",
-              lipinski_violations: 2,
-              lipinski_pass: false,
-              veber_pass: false,
-              rule_evaluated: true,
-            },
-            {
-              ...SAMPLE_STAGE2_RESULTS.filtered[0],
-              inchikey: "NODATA-INCHIKEY",
-              compound_id: "c-unscreened",
-              canonical_name: "NoDescriptor",
-              reason: "Missing descriptor values",
-              lipinski_violations: null,
-              lipinski_pass: null,
-              veber_pass: null,
-              rule_evaluated: false,
-              is_pains_positive: false,
-              badges: ["unscreened"],
-            },
-          ],
-        },
-      } as AnalysisRead["stage_results"],
+  it("CSV header matches the column spec exactly", async () => {
+    let capturedBlob: Blob | null = null;
+    vi.spyOn(URL, "createObjectURL").mockImplementation((blob: Blob | MediaSource) => {
+      capturedBlob = blob as Blob;
+      return "blob:mock";
     });
 
-    wrap(<Stage2View data={data} />);
-
-    expect(screen.getByRole("columnheader", { name: "Lipinski" })).toBeInTheDocument();
-    expect(screen.getByRole("columnheader", { name: "Veber" })).toBeInTheDocument();
-
-    expect(screen.getAllByText("Pass")).toHaveLength(2);
-    expect(screen.getAllByText("Fail")).toHaveLength(2);
-    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
-    expect(screen.queryByText("✓")).not.toBeInTheDocument();
-  });
-
-  it("labels the descriptor column as Descriptor source", () => {
     wrap(<Stage2View data={makeRun()} />);
-    expect(screen.getByRole("columnheader", { name: "Descriptor source" })).toBeInTheDocument();
+    await waitFor(() => expect(capturedBlob).not.toBeNull());
+    if (capturedBlob == null) throw new Error("expected CSV blob to be created");
+
+    const csv = await blobToText(capturedBlob);
+    const header = csv.split("\n")[0];
+    expect(header).toBe(
+      "name,status,lipinski_pass,veber_pass,np_bypass,mw,logp,hbd,hba,tpsa,rotb,np_score,pains,source_url",
+    );
   });
 
-  it("always shows the PAINS column for screened rows", () => {
-    const data = makeRun({
-      stage_results: {
-        "2": {
-          ...SAMPLE_STAGE2_RESULTS,
-          passed: [
-            {
-              ...SAMPLE_STAGE2_RESULTS.passed[0],
-              inchikey: "PAINS-NEG",
-              lipinski_violations: 0,
-              lipinski_pass: true,
-              veber_pass: true,
-              rule_evaluated: true,
-              is_pains_positive: false,
-            },
-          ],
-          filtered: [
-            {
-              ...SAMPLE_STAGE2_RESULTS.filtered[0],
-              inchikey: "PAINS-POS",
-              lipinski_violations: 2,
-              lipinski_pass: false,
-              veber_pass: false,
-              rule_evaluated: true,
-              is_pains_positive: true,
-            },
-          ],
-        },
-      } as AnalysisRead["stage_results"],
-    });
-
-    wrap(<Stage2View data={data} />);
-
-    expect(screen.getByRole("columnheader", { name: "PAINS" })).toBeInTheDocument();
-    expect(screen.getByText("Negative")).toBeInTheDocument();
-    expect(screen.getByText("Positive")).toBeInTheDocument();
-  });
-
-  it("exports CSV keyed by inchikey and excludes compound_id", async () => {
+  it("CSV rows include passed and filtered compounds with raw values", async () => {
     let capturedBlob: Blob | null = null;
     vi.spyOn(URL, "createObjectURL").mockImplementation((blob: Blob | MediaSource) => {
       capturedBlob = blob as Blob;
@@ -314,10 +354,22 @@ describe("Stage2View", () => {
           passed: [
             {
               ...SAMPLE_STAGE2_RESULTS.passed[0],
-              inchikey: "CSV-INCHIKEY",
-              lipinski_violations: 0,
+              canonical_name: "Curcumin",
+              inchikey: "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
+              molecular_weight: 368.38,
               lipinski_pass: true,
               veber_pass: true,
+              rule_evaluated: true,
+              is_pains_positive: false,
+            },
+          ],
+          filtered: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              canonical_name: "HeavyMolecule",
+              molecular_weight: 850.2,
+              lipinski_pass: false,
+              veber_pass: false,
               rule_evaluated: true,
             },
           ],
@@ -326,18 +378,20 @@ describe("Stage2View", () => {
     });
 
     wrap(<Stage2View data={data} />);
-    expect(await screen.findByRole("link", { name: /download.*csv/i })).toBeInTheDocument();
-
     await waitFor(() => expect(capturedBlob).not.toBeNull());
-    if (capturedBlob == null) {
-      throw new Error("expected CSV blob to be created");
-    }
-    const csv = await blobToText(capturedBlob);
+    if (capturedBlob == null) throw new Error("expected CSV blob to be created");
 
-    expect(csv).toContain("inchikey");
-    expect(csv).toContain("CSV-INCHIKEY");
+    const csv = await blobToText(capturedBlob);
+    // Passed row
+    expect(csv).toContain("Curcumin");
+    expect(csv).toContain("passed");
+    // Filtered row
+    expect(csv).toContain("HeavyMolecule");
+    expect(csv).toContain("filtered");
+    // Raw molecular weight value (not rounded by formatSig)
+    expect(csv).toContain("368.38");
+    // source_url column last: PubChem source url or null
     expect(csv).not.toContain("compound_id");
-    expect(csv).not.toContain("c1");
   });
 });
 

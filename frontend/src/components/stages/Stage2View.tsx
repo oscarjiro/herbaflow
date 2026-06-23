@@ -21,10 +21,14 @@ import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import { ADME_PARAMS } from "../../contract";
+import { formatSig } from "../../lib/format";
+import { pubchemUrl } from "../../lib/externalUrls";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
+import { BoolMark } from "@/components/ui/BoolMark";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -77,70 +81,36 @@ type DisplayRow = CompoundRow & { _kind: "passed" | "filtered" };
 // Helpers
 // ---------------------------------------------------------------------------
 
-function fmt(n: number | null, decimals = 2): string {
-  if (n == null) return "—";
-  return n.toFixed(decimals);
+/** Derive a boolean NP-bypass value from the row's badges array. */
+function npBypass(row: CompoundRow): boolean | null {
+  if (!row.rule_evaluated) return null;
+  return row.badges?.includes("np_bypass") ?? false;
 }
 
-function fmtOutcome(
-  passed: boolean | null | undefined,
-  evaluated: boolean | null | undefined,
-): string {
-  if (!evaluated || passed == null) return "—";
-  return passed ? "Pass" : "Fail";
-}
+// ---------------------------------------------------------------------------
+// CSV builder
+// ---------------------------------------------------------------------------
 
-function RowBadges({ row }: { row: CompoundRow }) {
-  const items: React.ReactElement[] = [];
-  if (row.badges?.includes("np_bypass")) {
-    items.push(
-      <Badge key="np" variant="outline" className="text-[10px]">
-        NP-bypass
-      </Badge>,
-    );
-  }
-  if (row.badges?.includes("unscreened")) {
-    items.push(
-      <Badge key="unscreened" variant="outline" className="text-muted-foreground text-[10px]">
-        unscreened
-      </Badge>,
-    );
-  }
-  if (row.badges?.includes("could_not_screen")) {
-    items.push(
-      <Badge key="cns" variant="outline" className="text-muted-foreground text-[10px]">
-        could-not-screen
-      </Badge>,
-    );
-  }
-  return <span className="flex flex-wrap gap-1">{items}</span>;
-}
-
-const CSV_COLS: (keyof CompoundRow)[] = [
-  "inchikey",
-  "canonical_name",
-  "descriptor_source",
-  "molecular_weight",
-  "logp",
-  "hbond_donors",
-  "hbond_acceptors",
-  "tpsa",
-  "rotatable_bonds",
-  "qed_score",
-  "np_likeness_score",
-  "lipinski_violations",
-  "lipinski_pass",
-  "veber_pass",
-  "rule_evaluated",
-  "is_pains_positive",
-  "source_url",
-  "reason",
-];
-
-const CSV_HEADER = CSV_COLS.join(",");
+const CSV_HEADER =
+  "name,status,lipinski_pass,veber_pass,np_bypass,mw,logp,hbd,hba,tpsa,rotb,np_score,pains,source_url";
 
 function buildCsvRows(rows: DisplayRow[]): unknown[][] {
-  return rows.map((r) => CSV_COLS.map((c) => r[c] ?? null));
+  return rows.map((r) => [
+    r.canonical_name ?? r.inchikey ?? r.compound_id,
+    r._kind,
+    r.lipinski_pass ?? null,
+    r.veber_pass ?? null,
+    npBypass(r),
+    r.molecular_weight ?? null,
+    r.logp ?? null,
+    r.hbond_donors ?? null,
+    r.hbond_acceptors ?? null,
+    r.tpsa ?? null,
+    r.rotatable_bonds ?? null,
+    r.np_likeness_score ?? null,
+    r.is_pains_positive,
+    r.source_url ?? null,
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -153,21 +123,11 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     header: "Name",
     cell: ({ row }) => {
       const r = row.original;
-      return (
-        <span className="flex flex-col gap-0.5">
-          {r.source_url && (
-            <a
-              href={r.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-[color:var(--hf-accent)] underline underline-offset-2"
-            >
-              PubChem
-            </a>
-          )}
-          <span>{r.canonical_name ?? r.inchikey ?? r.compound_id}</span>
-        </span>
-      );
+      const label = r.canonical_name ?? r.inchikey ?? r.compound_id;
+      if (r.inchikey) {
+        return <ExternalLink href={pubchemUrl(r.inchikey)}>{label}</ExternalLink>;
+      }
+      return <span>{label}</span>;
     },
   },
   {
@@ -177,84 +137,87 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
       const kind = row.original._kind;
       return (
         <Badge variant={kind === "passed" ? "default" : "destructive"} className="text-[10px]">
-          {kind}
+          {kind === "passed" ? "Passed" : "Filtered"}
         </Badge>
       );
     },
   },
   {
-    id: "badges",
-    header: "Badges",
-    cell: ({ row }) => <RowBadges row={row.original} />,
+    id: "lipinski",
+    header: "Lipinski",
+    meta: { info: "Passes Lipinski's rule of five" },
+    cell: ({ row }) => {
+      const r = row.original;
+      if (!r.rule_evaluated) return <BoolMark value={null} />;
+      return <BoolMark value={r.lipinski_pass} />;
+    },
   },
   {
-    accessorKey: "descriptor_source",
-    header: "Descriptor source",
+    id: "veber",
+    header: "Veber",
+    cell: ({ row }) => {
+      const r = row.original;
+      if (!r.rule_evaluated) return <BoolMark value={null} />;
+      return <BoolMark value={r.veber_pass} />;
+    },
+  },
+  {
+    id: "np_bypass",
+    header: "NP-bypass",
+    meta: { info: "Natural-product likeness bypasses the rule filters" },
+    cell: ({ row }) => <BoolMark value={npBypass(row.original)} />,
   },
   {
     id: "mw",
     header: "MW",
-    cell: ({ row }) => fmt(row.original.molecular_weight, 1),
+    meta: { className: "num" },
+    cell: ({ row }) => formatSig(row.original.molecular_weight),
   },
   {
     id: "logp",
     header: "logP",
-    cell: ({ row }) => fmt(row.original.logp),
+    meta: { className: "num" },
+    cell: ({ row }) => formatSig(row.original.logp),
   },
   {
     id: "hbd",
     header: "HBD",
+    meta: { className: "num" },
     cell: ({ row }) => row.original.hbond_donors ?? "—",
   },
   {
     id: "hba",
     header: "HBA",
+    meta: { className: "num" },
     cell: ({ row }) => row.original.hbond_acceptors ?? "—",
   },
   {
     id: "tpsa",
     header: "TPSA",
-    cell: ({ row }) => fmt(row.original.tpsa, 1),
+    meta: { className: "num" },
+    cell: ({ row }) => formatSig(row.original.tpsa),
   },
   {
     id: "rotb",
     header: "RotB",
+    meta: { className: "num" },
     cell: ({ row }) => row.original.rotatable_bonds ?? "—",
   },
   {
-    id: "qed",
-    header: "QED",
-    cell: ({ row }) => fmt(row.original.qed_score),
-  },
-  {
-    id: "np",
-    header: "NP score",
-    cell: ({ row }) => fmt(row.original.np_likeness_score),
-  },
-  {
-    id: "lipinski",
-    header: "Lipinski",
-    cell: ({ row }) => fmtOutcome(row.original.lipinski_pass, row.original.rule_evaluated),
-  },
-  {
-    id: "veber",
-    header: "Veber",
-    cell: ({ row }) => fmtOutcome(row.original.veber_pass, row.original.rule_evaluated),
+    id: "np_score",
+    header: "NP-score",
+    meta: { className: "num" },
+    cell: ({ row }) => formatSig(row.original.np_likeness_score),
   },
   {
     id: "pains",
     header: "PAINS",
-    cell: ({ row }) =>
-      row.original.rule_evaluated
-        ? row.original.is_pains_positive
-          ? "Positive"
-          : "Negative"
-        : "—",
-  },
-  {
-    id: "reason",
-    header: "Reason",
-    cell: ({ row }) => row.original.reason ?? "",
+    meta: { info: "Pan-assay interference flag" },
+    cell: ({ row }) => {
+      const r = row.original;
+      if (!r.rule_evaluated) return <BoolMark value={null} />;
+      return <BoolMark value={r.is_pains_positive} />;
+    },
   },
 ];
 
