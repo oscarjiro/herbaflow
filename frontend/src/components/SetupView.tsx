@@ -616,7 +616,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
             onClick={() => setAdvancedOpen((o) => !o)}
           >
             <span className="text-muted-foreground text-xs">{advancedOpen ? "▾" : "▸"}</span>
-            <span className="text-sm font-medium">Advanced parameters</span>
+            <span className="font-display text-base">Advanced parameters</span>
           </button>
 
           {advancedOpen && (
