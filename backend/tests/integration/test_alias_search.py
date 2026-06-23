@@ -126,6 +126,39 @@ async def alias_client(alias_engine):
                 "d2": d2_id,
             },
         )
+        c1, c2, c3 = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
+        t1, t2 = uuid.uuid4(), uuid.uuid4()
+        await s.execute(
+            text(
+                "insert into compounds(compound_id, canonical_key, canonical_name) values"
+                " (:c1, 'inchikey:AAA', 'Curcumin'),"
+                " (:c2, 'inchikey:BBB', 'Demethoxycurcumin'),"
+                " (:c3, 'inchikey:CCC', 'Gingerol')"
+            ),
+            {"c1": c1, "c2": c2, "c3": c3},
+        )
+        await s.execute(
+            text(
+                "insert into plant_compounds(plant_compound_id, plant_id, compound_id) values"
+                " (:r1, :p1, :c1), (:r2, :p1, :c2), (:r3, :p2, :c3)"
+            ),
+            {"r1": uuid.uuid4(), "p1": p1_id, "c1": c1, "r2": uuid.uuid4(),
+             "c2": c2, "r3": uuid.uuid4(), "p2": p2_id, "c3": c3},
+        )
+        await s.execute(
+            text(
+                "insert into targets(target_id, canonical_key, gene_symbol) values"
+                " (:t1, 'uniprot:P1', 'TNF'), (:t2, 'uniprot:P2', 'IL6')"
+            ),
+            {"t1": t1, "t2": t2},
+        )
+        await s.execute(
+            text(
+                "insert into disease_targets(disease_target_id, disease_id, target_id, opentargets_score) values"
+                " (:x1, :d1, :t1, 0.9), (:x2, :d1, :t2, 0.4)"
+            ),
+            {"x1": uuid.uuid4(), "d1": d1_id, "t1": t1, "x2": uuid.uuid4(), "t2": t2},
+        )
         await s.commit()
 
     db.set_sessionmaker(maker)
@@ -292,3 +325,44 @@ async def test_disease_limit_offset_paging(alias_client) -> None:
     resp_two = await c.get("/diseases", params={"limit": 1, "offset": 1})
     assert resp_two.status_code == 200
     assert [r["disease_id"] for r in resp_two.json()] == all_ids[1:]
+
+
+# ---------------------------------------------------------------------------
+# Catalog count tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_plant_search_includes_compound_count(alias_client) -> None:
+    c, ids = alias_client
+    resp = await c.get("/plants", params={"q": "Curcuma longa"})
+    assert resp.status_code == 200
+    row = next(r for r in resp.json() if r["plant_id"] == str(ids["p1"]))
+    assert row["compound_count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_plant_full_list_has_zero_count_for_plant_without_compounds(alias_client) -> None:
+    c, ids = alias_client
+    resp = await c.get("/plants")  # empty q → full list
+    assert resp.status_code == 200
+    by_id = {r["plant_id"]: r for r in resp.json()}
+    assert by_id[str(ids["p3"])]["compound_count"] == 0  # Allium sativum: no plant_compounds
+
+
+@pytest.mark.asyncio
+async def test_disease_search_includes_target_count(alias_client) -> None:
+    c, ids = alias_client
+    resp = await c.get("/diseases", params={"q": "Type 2 Diabetes"})
+    assert resp.status_code == 200
+    row = next(r for r in resp.json() if r["disease_id"] == str(ids["d1"]))
+    assert row["target_count"] == 2  # unfiltered total (both 0.9 and 0.4 counted)
+
+
+@pytest.mark.asyncio
+async def test_disease_full_list_has_zero_count_for_disease_without_targets(alias_client) -> None:
+    c, ids = alias_client
+    resp = await c.get("/diseases")
+    assert resp.status_code == 200
+    by_id = {r["disease_id"]: r for r in resp.json()}
+    assert by_id[str(ids["d2"])]["target_count"] == 0  # Alzheimer: no disease_targets seeded

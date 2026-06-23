@@ -9,6 +9,7 @@ link alongside the Open Targets association score. NULL scores are excluded by
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 from typing import Any
 
 from sqlalchemy import func, select
@@ -64,3 +65,22 @@ class DiseaseTargetRepository:
             DiseaseTarget.opentargets_score >= min_score,
         )
         return int((await self.session.execute(stmt)).scalar_one())
+
+    async def target_counts(self, disease_ids: Sequence[uuid.UUID]) -> dict[uuid.UUID, int]:
+        """Distinct **total** (unfiltered) disease-target count per disease (catalog display).
+
+        Distinct from ``count_for_disease`` (single id, score-filtered, run-time). This is the
+        unfiltered catalog scale shown on search rows / selected cards.
+        """
+        if not disease_ids:
+            return {}
+        stmt = (
+            select(
+                DiseaseTarget.disease_id,
+                func.count(func.distinct(DiseaseTarget.target_id)),
+            )
+            .where(DiseaseTarget.disease_id.in_(disease_ids))
+            .group_by(DiseaseTarget.disease_id)
+        )
+        rows = (await self.session.execute(stmt)).all()
+        return {row[0]: int(row[1]) for row in rows}

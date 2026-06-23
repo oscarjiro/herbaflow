@@ -42,41 +42,43 @@ class PlantService:
         if not term:
             # Empty query: rows already ordered by canonical name; just page.
             paged = rows[offset : offset + limit]
-            result = [PlantRead.model_validate(plant) for plant, _ in paged]
-            logger.info("plant search q=%r count=%d", q, len(result))
-            return result
+            reads = [(PlantRead.model_validate(plant), plant.plant_id) for plant, _ in paged]
+        else:
+            # Build flat candidate list: (plant_id, rank, matched_alias | None)
+            candidates: list[tuple[Hashable, int, str | None]] = []
+            for plant, alias in rows:
+                r = rank_match(term, canonical=plant.canonical_scientific_name)
+                if r is not None:
+                    candidates.append((plant.plant_id, r, None))
+                    continue
+                r = rank_match(term, alias=alias)
+                if r is not None:
+                    candidates.append((plant.plant_id, r, alias))
 
-        # Build flat candidate list: (plant_id, rank, matched_alias | None)
-        candidates: list[tuple[Hashable, int, str | None]] = []
-        for plant, alias in rows:
-            r = rank_match(term, canonical=plant.canonical_scientific_name)
-            if r is not None:
-                candidates.append((plant.plant_id, r, None))
-                continue
-            r = rank_match(term, alias=alias)
-            if r is not None:
-                candidates.append((plant.plant_id, r, alias))
+            merged = merge_candidates(candidates)
 
-        merged = merge_candidates(candidates)
+            # Map back to Plant objects for the response; sort ties by canonical name.
+            plant_by_id: dict[uuid.UUID, Plant] = {plant.plant_id: plant for plant, _ in rows}
 
-        # Map back to Plant objects for the response; sort ties by canonical name.
-        plant_by_id: dict[uuid.UUID, Plant] = {plant.plant_id: plant for plant, _ in rows}
+            def sort_key(row: tuple[Hashable, int, str | None]) -> tuple[int, str]:
+                key, rank, _alias = row
+                plant = plant_by_id[key]  # type: ignore[index]
+                name = (plant.canonical_scientific_name or "").lower()
+                return (rank, name)
 
-        def sort_key(row: tuple[Hashable, int, str | None]) -> tuple[int, str]:
-            key, rank, _alias = row
-            plant = plant_by_id[key]  # type: ignore[index]
-            name = (plant.canonical_scientific_name or "").lower()
-            return (rank, name)
+            merged.sort(key=sort_key)
+            page: list[tuple[Hashable, int, str | None]] = merged[offset : offset + limit]
 
-        merged.sort(key=sort_key)
-        page: list[tuple[Hashable, int, str | None]] = merged[offset : offset + limit]
+            reads = []
+            for plant_id, _rank, matched_alias in page:
+                plant = plant_by_id[plant_id]  # type: ignore[index]
+                read = PlantRead.model_validate(plant)
+                read.matched_alias = matched_alias
+                reads.append((read, plant.plant_id))
 
-        result = []
-        for plant_id, _rank, matched_alias in page:
-            plant = plant_by_id[plant_id]  # type: ignore[index]
-            read = PlantRead.model_validate(plant)
-            read.matched_alias = matched_alias
-            result.append(read)
-
+        counts = await self.repo.compound_counts([pid for _, pid in reads])
+        for read, pid in reads:
+            read.compound_count = counts.get(pid, 0)
+        result = [read for read, _ in reads]
         logger.info("plant search q=%r count=%d", q, len(result))
         return result
