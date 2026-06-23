@@ -1103,11 +1103,107 @@
     font-size: 14px;
     color: var(--hf-fg-1);
   }
+
+  /* ----------------------------------------------------------------
+     Stage progress block — gradient pulse fill + shimmer skeleton.
+     Used by StageView when a stage is running.
+
+     .progress-bar   — 7px pill track (surface-2 background)
+     .progress-fill  — sage→terracotta gradient fill; pulse-w anim
+     .sk             — shimmer skeleton row
+     .sk--wide / .sk--mid / .sk--narrow — width variants
+     ---------------------------------------------------------------- */
+  .progress-bar {
+    height: 7px;
+    border-radius: 999px;
+    background: var(--hf-surface-2);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--hf-sage), var(--hf-terracotta));
+    animation: pulse-w 2.4s ease-in-out infinite;
+  }
+
+  .sk {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(
+      90deg,
+      var(--hf-surface-2) 25%,
+      var(--hf-border) 37%,
+      var(--hf-surface-2) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+
+  /* Animated "Working…" ellipsis label */
+  .working-label::after {
+    content: "...";
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: working-dots 1.2s steps(4, end) infinite;
+    width: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill {
+      animation: none;
+    }
+    .sk {
+      animation: none;
+      background: var(--hf-surface-2);
+    }
+    .working-label::after {
+      content: "…";
+      animation: none;
+      width: auto;
+    }
+  }
 } /* end @layer components (glass recipe) */
 
 @keyframes hf-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-w {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Animated "Working…" ellipsis — clips "..." by cycling width. */
+@keyframes working-dots {
+  0% {
+    width: 0;
+  }
+  33% {
+    width: 0.4em;
+  }
+  66% {
+    width: 0.8em;
+  }
+  100% {
+    width: 1.2em;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
   }
 }
 

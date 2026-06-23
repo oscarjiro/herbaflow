@@ -41,22 +41,37 @@ export function StageView({
 
       {isRunning ? (
         <>
-          {data.progress && data.progress.stage === stage && (
-            <div className="flex flex-col gap-1">
-              <div className="text-hf-fg-3 flex items-center justify-between text-sm">
-                <span>Working</span>
-                <span className="tabular-nums">
+          {data.progress && data.progress.stage === stage ? (
+            /* Stages 2 & 3 emit per-item progress — gradient pulse fill */
+            <div className="flex flex-col gap-2">
+              <div className="progress-top flex items-baseline justify-between">
+                <span className="working-label text-hf-fg-1 text-[0.9rem]">Working</span>
+                <span className="text-hf-fg-2 text-[0.9rem] font-semibold tabular-nums">
                   {data.progress.processed} / {data.progress.total}
                 </span>
               </div>
-              <div className="bg-hf-surface-2 h-1.5 w-full overflow-hidden rounded-full">
+              <div className="progress-bar w-full">
                 <div
-                  className="bg-hf-accent h-full rounded-full transition-[width]"
+                  className="progress-fill"
                   style={{
                     width: `${data.progress.total ? (data.progress.processed / data.progress.total) * 100 : 0}%`,
                   }}
+                  aria-valuenow={data.progress.processed}
+                  aria-valuemax={data.progress.total}
+                  role="progressbar"
                 />
               </div>
+            </div>
+          ) : (
+            /* Stages 1, 4–8 have no per-item progress — shimmer skeleton */
+            <div
+              aria-label={`Step ${stage} loading`}
+              aria-busy="true"
+              className="flex flex-col gap-3"
+            >
+              <div className="sk sk--wide" style={{ width: "60%" }} />
+              <div className="sk sk--mid" style={{ width: "85%" }} />
+              <div className="sk sk--narrow" style={{ width: "45%" }} />
             </div>
           )}
           <StageRunningSkeleton stage={stage} />
