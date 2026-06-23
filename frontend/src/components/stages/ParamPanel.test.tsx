@@ -139,8 +139,8 @@ describe("ParamPanel", () => {
     expect(screen.getByLabelText("Significance threshold (corrected p ≤)")).toBeInTheDocument();
   });
 
-  it("renders boolean params as a checkbox", async () => {
-    render(
+  it("renders boolean params as a .box checkbox, not a shadcn Checkbox", async () => {
+    const { container } = render(
       <ParamPanel
         params={{ flag: false }}
         meta={{ flag: booleanMeta }}
@@ -151,7 +151,49 @@ describe("ParamPanel", () => {
       />,
     );
     await openPanel();
-    expect(screen.getByLabelText("flag")).toBeInTheDocument();
+    // The mockup .box control must be present
+    expect(container.querySelector(".box")).not.toBeNull();
+    // Unchecked: no .on class
+    expect(container.querySelector(".box.on")).toBeNull();
+    // The label wraps both box and text (.ctrl class)
+    expect(container.querySelector(".ctrl")).not.toBeNull();
+  });
+
+  it("boolean .box checkbox toggles .on when clicked", async () => {
+    const { container } = render(
+      <ParamPanel
+        params={{ flag: false }}
+        meta={{ flag: booleanMeta }}
+        onRedo={vi.fn()}
+        numericKeys={[]}
+        booleanKeys={["flag"]}
+        selectKeys={[]}
+      />,
+    );
+    await openPanel();
+    // The boolean control is a button[role=checkbox]
+    await userEvent.click(screen.getByRole("checkbox", { name: /flag/i }));
+    expect(container.querySelector(".box.on")).not.toBeNull();
+    // Redo should be armed now (flag changed from false to true)
+    expect(screen.getByRole("button", { name: /redo from this stage/i })).not.toBeDisabled();
+  });
+
+  it("boolean .box Redo submits the toggled boolean value", async () => {
+    const onRedo = vi.fn();
+    render(
+      <ParamPanel
+        params={{ flag: false }}
+        meta={{ flag: booleanMeta }}
+        onRedo={onRedo}
+        numericKeys={[]}
+        booleanKeys={["flag"]}
+        selectKeys={[]}
+      />,
+    );
+    await openPanel();
+    await userEvent.click(screen.getByRole("checkbox", { name: /flag/i }));
+    await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
+    expect(onRedo).toHaveBeenCalledWith({ flag: true });
   });
 
   it("renders select params with humanized enum options", async () => {
@@ -203,6 +245,69 @@ describe("ParamPanel", () => {
     );
     await openPanel();
     await userEvent.click(screen.getByLabelText("Reactome"));
+    expect(screen.getByRole("button", { name: /redo from this stage/i })).not.toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
+    expect(onRedo).toHaveBeenCalledWith({ sources: ["GO:BP", "REAC"] });
+  });
+
+  it("renders array-enum params as a .ms multi-select container with .ms__row per option", async () => {
+    const { container } = render(
+      <ParamPanel
+        params={{ sources: ["GO:BP"] }}
+        meta={{ sources: arraySelectMeta }}
+        onRedo={vi.fn()}
+        numericKeys={[]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        arrayKeys={["sources"]}
+      />,
+    );
+    await openPanel();
+    // .ms container must exist
+    expect(container.querySelector(".ms")).not.toBeNull();
+    // One .ms__row per enum option (6 options in arraySelectMeta)
+    expect(container.querySelectorAll(".ms__row")).toHaveLength(6);
+  });
+
+  it(".ms rows show .on for selected options and not for unselected", async () => {
+    const { container } = render(
+      <ParamPanel
+        params={{ sources: ["GO:BP"] }}
+        meta={{ sources: arraySelectMeta }}
+        onRedo={vi.fn()}
+        numericKeys={[]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        arrayKeys={["sources"]}
+      />,
+    );
+    await openPanel();
+    // GO:BP is selected → its row check should have .on
+    const rows = container.querySelectorAll(".ms__row");
+    const firstRowCheck = rows[0]!.querySelector(".ms__check");
+    expect(firstRowCheck?.classList.contains("on")).toBe(true);
+    // GO:MF is not selected
+    const secondRowCheck = rows[1]!.querySelector(".ms__check");
+    expect(secondRowCheck?.classList.contains("on")).toBe(false);
+  });
+
+  it(".ms row click toggles membership and arms Redo", async () => {
+    const onRedo = vi.fn();
+    const { container } = render(
+      <ParamPanel
+        params={{ sources: ["GO:BP"] }}
+        meta={{ sources: arraySelectMeta }}
+        onRedo={onRedo}
+        numericKeys={[]}
+        booleanKeys={[]}
+        selectKeys={[]}
+        arrayKeys={["sources"]}
+      />,
+    );
+    await openPanel();
+    // Click the Reactome row (index 4, humanized = "Reactome")
+    const rows = container.querySelectorAll(".ms__row");
+    await userEvent.click(rows[4] as HTMLElement);
     expect(screen.getByRole("button", { name: /redo from this stage/i })).not.toBeDisabled();
     await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
     expect(onRedo).toHaveBeenCalledWith({ sources: ["GO:BP", "REAC"] });

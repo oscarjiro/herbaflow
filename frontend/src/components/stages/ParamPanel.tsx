@@ -14,7 +14,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { ADME_BOOLEAN_PARAMS, ADME_NUMERIC_PARAMS } from "../../contract";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -323,22 +322,42 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
               if (!m) return null;
               const label = humanizeLabel(key);
               const hint = `Default ${m.default ? "on" : "off"}.`;
+              const checked = localStr[key] === "true";
               return (
                 <div
                   key={key}
-                  className="border-hf-border flex items-center gap-2 border-b pb-3.5 last:border-b-0 last:pb-0"
+                  className="border-hf-border border-b pb-3.5 last:border-b-0 last:pb-0"
                 >
-                  <Checkbox
-                    id={`param-${key}`}
+                  {/* .ctrl / .box: mockup checkbox control */}
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={checked}
                     aria-label={label}
-                    checked={localStr[key] === "true"}
                     disabled={disabled}
-                    onCheckedChange={(checked) => handleBooleanChange(key, checked === true)}
-                  />
-                  <Label htmlFor={`param-${key}`} className="text-hf-fg-1">
-                    {label}
-                  </Label>
-                  <ParamInfo description={m.description} hint={hint} label={label} />
+                    className="ctrl"
+                    onClick={() => handleBooleanChange(key, !checked)}
+                  >
+                    <span className={cn("box", checked && "on")}>
+                      {checked && (
+                        <svg
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                          style={{
+                            width: 14,
+                            height: 14,
+                            stroke: "currentColor",
+                            fill: "none",
+                            strokeWidth: 2.4,
+                          }}
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </span>
+                    <span>{label}</span>
+                    <ParamInfo description={m.description} hint={hint} label={label} />
+                  </button>
                 </div>
               );
             })}
@@ -391,31 +410,46 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
               return (
                 <div
                   key={key}
-                  className="border-hf-border flex flex-col gap-2 border-b pb-3.5 last:border-b-0 last:pb-0"
+                  className="border-hf-border border-b pb-3.5 last:border-b-0 last:pb-0"
                 >
-                  <span className="text-hf-fg-1 flex items-center gap-1.5 text-sm">
+                  <span className="text-hf-fg-1 mb-2 flex items-center gap-1.5 text-sm">
                     <Label>{label}</Label>
                     <ParamInfo description={m.description} hint={hint} label={label} />
                   </span>
-                  <div className="flex flex-col gap-2">
+                  {/* .ms: mockup multi-select container */}
+                  <div className="ms">
                     {options.map((option) => {
-                      const id = `param-${key}-${option.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+                      const isSelected = selected.includes(option);
                       const optionLabel = humanizeValue(option);
                       return (
-                        <div key={option} className="flex items-center gap-2">
-                          <Checkbox
-                            id={id}
-                            aria-label={optionLabel}
-                            checked={selected.includes(option)}
-                            disabled={disabled}
-                            onCheckedChange={(checked) =>
-                              handleArrayToggle(key, option, checked === true)
-                            }
-                          />
-                          <Label htmlFor={id} className="text-hf-fg-1">
-                            {optionLabel}
-                          </Label>
-                        </div>
+                        <button
+                          key={option}
+                          type="button"
+                          aria-label={optionLabel}
+                          aria-pressed={isSelected}
+                          disabled={disabled}
+                          onClick={() => handleArrayToggle(key, option, !isSelected)}
+                          className="ms__row"
+                        >
+                          <span className={cn("ms__check", isSelected && "on")}>
+                            {isSelected && (
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                style={{
+                                  width: 13,
+                                  height: 13,
+                                  stroke: "currentColor",
+                                  fill: "none",
+                                  strokeWidth: 2.4,
+                                }}
+                              >
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            )}
+                          </span>
+                          <span className="ms__nm">{optionLabel}</span>
+                        </button>
                       );
                     })}
                   </div>
