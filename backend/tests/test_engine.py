@@ -270,3 +270,165 @@ async def test_guided_parks_empty_stage3_then_refuses_advance() -> None:
     with pytest.raises(ConflictProblem):
         await engine.advance_run(repo, run.analysis_id, runners)
     assert run.status == "stage_3_awaiting_approval"  # unchanged
+
+
+# ---------------------------------------------------------------------------
+# Stage 6 empty-network exemption (0-count PPI is an honest-null, not a failure)
+# ---------------------------------------------------------------------------
+
+
+def _runners_with_empty_stage6(stage1_count=2, stage2_count=2, stage3_count=1, stage4_count=1):
+    """Like _runners() but Stage 6 returns 0 nodes and 0 edges (fully empty network)."""
+    base = _runners(stage1_count, stage2_count, stage3_count, stage4_count)
+
+    async def stage6_empty(r):
+        return {
+            "state": "computed",
+            "nodes": [],
+            "edges": [],
+            "node_count": 0,
+            "edge_count": 0,
+            "count": 0,
+            "flags": ["sparse_or_empty_network"],
+        }
+
+    return {**base, 6: stage6_empty}
+
+
+def _runners_with_blocked_stage6(stage1_count=2, stage2_count=2, stage3_count=1, stage4_count=1):
+    """Like _runners() but Stage 6 returns the blocked-overflow marker."""
+    base = _runners(stage1_count, stage2_count, stage3_count, stage4_count)
+
+    async def stage6_blocked(r):
+        return {
+            "blocked": True,
+            "reason": "overlap_too_large",
+            "overlap_count": 600,
+            "max_proteins": 400,
+        }
+
+    return {**base, 6: stage6_blocked}
+
+
+@pytest.mark.asyncio
+async def test_auto_completes_when_stage6_empty_network() -> None:
+    """Auto run: valid Stage-5 overlap + 0-edge/0-node Stage-6 => complete (not failed)."""
+    run = _run("auto")
+    repo = FakeRepo(run)
+
+    await engine.execute_run(repo, run.analysis_id, _runners_with_empty_stage6())
+
+    assert run.status == "complete"
+    assert run.stage_results["6"]["count"] == 0
+    # Stages 7 and 8 still ran.
+    assert "7" in run.stage_results
+    assert "8" in run.stage_results
+
+
+@pytest.mark.asyncio
+async def test_guided_parks_stage6_empty_then_advance_succeeds() -> None:
+    """Guided run: empty Stage-6 parks at S6 checkpoint; advance is NOT refused; run completes."""
+    run = _run("guided")
+    repo = FakeRepo(run)
+    runners = _runners_with_empty_stage6()
+
+    await engine.execute_run(repo, run.analysis_id, runners)  # park S1
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S2, park S2
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S3, park S3
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S4, park S4
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S5, park S5
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S6 (empty), park S6
+    assert run.status == "stage_6_awaiting_approval"
+    assert run.stage_results["6"]["count"] == 0
+
+    # Approving an empty Stage 6 must NOT raise ConflictProblem (was the bug).
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S7, park S7
+    assert run.status == "stage_7_awaiting_approval"
+
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S8, park S8
+    assert run.status == "stage_8_awaiting_approval"
+
+    await engine.advance_run(repo, run.analysis_id, runners)  # complete
+    assert run.status == "complete"
+
+
+def _runners_no_s5_overlap():
+    """Runner set where S3 and S4 have disjoint target sets so Stage 5 produces 0 overlap."""
+    base = _runners(2, 2, stage3_count=1, stage4_count=1)
+
+    async def stage3_no_match(r):
+        return {
+            "targets": [{"target_id": "t_compound_only", "gene_symbol": "G1"}],
+            "compound_targets": [],
+            "per_compound": {},
+            "coverage_pct": 0.0,
+            "count": 1,
+            "state": "computed",
+        }
+
+    async def stage4_no_match(r):
+        return {
+            "targets": [{"target_id": "t_disease_only", "gene_symbol": "G2"}],
+            "count": 1,
+            "min_score_applied": 0.3,
+            "state": "computed",
+        }
+
+    return {**base, 3: stage3_no_match, 4: stage4_no_match}
+
+
+@pytest.mark.asyncio
+async def test_regression_stage5_zero_overlap_still_fails_auto() -> None:
+    """Regression: Stage-5 producing 0 overlap is a terminal hard-stop in auto mode."""
+    run = _run("auto")
+    repo = FakeRepo(run)
+    await engine.execute_run(repo, run.analysis_id, _runners_no_s5_overlap())
+    assert run.status == "failed"
+    assert "overlap" in run.error_message.lower() or "network" in run.error_message.lower()
+
+
+@pytest.mark.asyncio
+async def test_regression_stage5_zero_overlap_still_fails_guided() -> None:
+    """Regression: Stage-5 producing 0 overlap is a terminal hard-stop in guided mode."""
+    run = _run("guided")
+    repo = FakeRepo(run)
+    runners = _runners_no_s5_overlap()
+
+    await engine.execute_run(repo, run.analysis_id, runners)  # park S1
+    await engine.advance_run(repo, run.analysis_id, runners)  # park S2
+    await engine.advance_run(repo, run.analysis_id, runners)  # park S3
+    await engine.advance_run(repo, run.analysis_id, runners)  # park S4
+    # Advance from S4 runs S5 which finds 0 overlap — terminal fail, even in guided mode.
+    await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "failed"
+    assert "overlap" in run.error_message.lower() or "network" in run.error_message.lower()
+
+
+@pytest.mark.asyncio
+async def test_regression_stage6_blocked_overflow_auto_fails() -> None:
+    """Regression: Stage-6 blocked (overflow) in auto mode still hard-fails."""
+    run = _run("auto")
+    repo = FakeRepo(run)
+
+    await engine.execute_run(repo, run.analysis_id, _runners_with_blocked_stage6())
+
+    assert run.status == "failed"
+    assert run.stage_results["6"].get("blocked") is True
+
+
+@pytest.mark.asyncio
+async def test_regression_stage6_blocked_overflow_guided_parks() -> None:
+    """Regression: Stage-6 blocked (overflow) in guided mode parks at S6 (not an error)."""
+    run = _run("guided")
+    repo = FakeRepo(run)
+    runners = _runners_with_blocked_stage6()
+
+    await engine.execute_run(repo, run.analysis_id, runners)  # park S1
+    await engine.advance_run(repo, run.analysis_id, runners)  # park S2
+    await engine.advance_run(repo, run.analysis_id, runners)  # park S3
+    await engine.advance_run(repo, run.analysis_id, runners)  # park S4
+    await engine.advance_run(repo, run.analysis_id, runners)  # park S5
+    await engine.advance_run(repo, run.analysis_id, runners)  # run S6 => blocked => park S6
+
+    assert run.status == "stage_6_awaiting_approval"
+    assert run.stage_results["6"].get("blocked") is True

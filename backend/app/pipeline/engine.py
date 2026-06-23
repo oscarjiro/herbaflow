@@ -224,9 +224,9 @@ async def execute_run(
 
         # Empty downstream entity/gate stage (S2/S3/S4; S1 hard-failed above):
         # guided -> blocking checkpoint (advance is refused); auto -> hard-stop.
-        # The terminal computed leaves S7/S8 are EXEMPT: a 0-hub or 0-term result is a
-        # valid honest-null completion (Stage 8 EN-5), not an empty-gate stop.
-        if stage not in (7, 8) and result["count"] == 0:
+        # The terminal computed leaves S6/S7/S8 are EXEMPT: a 0-edge PPI network,
+        # 0-hub, or 0-term result is a valid honest-null completion, not an empty-gate stop.
+        if stage not in (6, 7, 8) and result["count"] == 0:
             if run.mode == "guided":
                 logger.info("run %s: stage %d produced 0 — parking (blocking)", rid, stage)
                 await repo.set_status(run, state.stage_status(stage, "awaiting_approval"))
@@ -272,7 +272,7 @@ async def advance_run(
         )
     current = run.current_stage or 0
     cur = run.stage_results.get(str(current))
-    if current not in (7, 8) and cur is not None and cur.get("count", 0) == 0:
+    if current not in (6, 7, 8) and cur is not None and cur.get("count", 0) == 0:
         raise ConflictProblem(
             detail=(
                 f"Step {current} has no results to carry forward — lower its parameters "
