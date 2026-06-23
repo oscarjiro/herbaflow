@@ -279,6 +279,9 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
       value: p.plant_id,
       label: p.canonical_scientific_name ?? p.plant_id,
       hint: p.matched_alias ?? null,
+      familyName: p.family_name ?? null,
+      count: p.compound_count ?? 0,
+      kind: "plant" as const,
     }));
   }, []);
 
@@ -288,6 +291,8 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
       value: d.disease_id,
       label: d.disease_name ?? d.disease_id,
       hint: d.matched_alias ?? null,
+      count: d.target_count ?? 0,
+      kind: "disease" as const,
     }));
   }, []);
 

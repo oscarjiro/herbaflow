@@ -13,6 +13,25 @@ const OPT_A: ComboOption = { value: "a1", label: "Alpha Plant", hint: null };
 const OPT_B: ComboOption = { value: "b1", label: "Beta Plant", hint: "beta-alias" };
 const OPT_C: ComboOption = { value: "c1", label: "Gamma Plant", hint: null };
 
+// Rich plant option with count + family
+const PLANT_RICH: ComboOption = {
+  value: "p1",
+  label: "Curcuma longa",
+  hint: null,
+  familyName: "Zingiberaceae",
+  count: 1248,
+  kind: "plant",
+};
+
+// Rich disease option with count
+const DISEASE_RICH: ComboOption = {
+  value: "d1",
+  label: "Type 2 Diabetes Mellitus",
+  hint: null,
+  count: 1248,
+  kind: "disease",
+};
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -350,5 +369,125 @@ describe("EntitySearchCombobox — multiple mode", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: /remove alpha plant/i }));
     expect(onChange).toHaveBeenCalledWith([OPT_B]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rich result rows (.sres)
+// ---------------------------------------------------------------------------
+
+describe("EntitySearchCombobox — rich result rows (.sres)", () => {
+  it("renders plant binomial name, family, and compound count badge", async () => {
+    const search = vi.fn().mockResolvedValue([PLANT_RICH]);
+    render(
+      <EntitySearchCombobox
+        mode="multiple"
+        selected={[]}
+        onChange={() => {}}
+        search={search}
+        ariaLabel="Search plants"
+        max={10}
+      />,
+    );
+    await openCombobox("Search plants");
+    expect(await screen.findByText("Curcuma longa")).toBeInTheDocument();
+    expect(await screen.findByText("Zingiberaceae")).toBeInTheDocument();
+    expect(await screen.findByText("1,248 compounds")).toBeInTheDocument();
+  });
+
+  it("renders disease name and target count badge without family", async () => {
+    const search = vi.fn().mockResolvedValue([DISEASE_RICH]);
+    render(
+      <EntitySearchCombobox
+        mode="single"
+        selected={[]}
+        onChange={() => {}}
+        search={search}
+        ariaLabel="Search disease"
+      />,
+    );
+    await openCombobox("Search disease");
+    expect(await screen.findByText("Type 2 Diabetes Mellitus")).toBeInTheDocument();
+    expect(await screen.findByText("1,248 disease targets")).toBeInTheDocument();
+    expect(screen.queryByText(/Zingiberaceae/i)).not.toBeInTheDocument();
+  });
+
+  it("formats large counts with thousands separators", async () => {
+    const search = vi.fn().mockResolvedValue([{ ...PLANT_RICH, count: 10000 }]);
+    render(
+      <EntitySearchCombobox
+        mode="multiple"
+        selected={[]}
+        onChange={() => {}}
+        search={search}
+        ariaLabel="Search plants"
+        max={10}
+      />,
+    );
+    await openCombobox("Search plants");
+    expect(await screen.findByText("10,000 compounds")).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Selected entity cards (.sel-card)
+// ---------------------------------------------------------------------------
+
+describe("EntitySearchCombobox — selected entity cards (.sel-card)", () => {
+  it("renders selected plant as a card with name, family·count meta, and remove button", () => {
+    const onChange = vi.fn();
+    render(
+      <EntitySearchCombobox
+        mode="multiple"
+        selected={[PLANT_RICH]}
+        onChange={onChange}
+        search={vi.fn().mockResolvedValue([])}
+        ariaLabel="Search plants"
+        max={10}
+      />,
+    );
+    // Name rendered in the card
+    expect(screen.getByText("Curcuma longa")).toBeInTheDocument();
+    // Meta line: "Zingiberaceae · 1,248 compounds"
+    expect(screen.getByText(/Zingiberaceae/)).toBeInTheDocument();
+    expect(screen.getByText(/1,248 compounds/)).toBeInTheDocument();
+    // Remove button
+    expect(screen.getByRole("button", { name: /remove curcuma longa/i })).toBeInTheDocument();
+  });
+
+  it("renders selected disease as a card with name, target count meta, and remove button", () => {
+    const onChange = vi.fn();
+    render(
+      <EntitySearchCombobox
+        mode="single"
+        selected={[DISEASE_RICH]}
+        onChange={onChange}
+        search={vi.fn().mockResolvedValue([])}
+        ariaLabel="Search disease"
+      />,
+    );
+    // Scope to the sel-card list to avoid matching the trigger button text
+    const cardList = screen.getByRole("list", { name: /selected search disease/i });
+    expect(within(cardList).getByText("Type 2 Diabetes Mellitus")).toBeInTheDocument();
+    expect(within(cardList).getByText(/1,248 disease targets/)).toBeInTheDocument();
+    expect(
+      within(cardList).getByRole("button", { name: /remove type 2 diabetes mellitus/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("clicking remove on a sel-card calls onChange without that option", async () => {
+    const onChange = vi.fn();
+    render(
+      <EntitySearchCombobox
+        mode="multiple"
+        selected={[PLANT_RICH]}
+        onChange={onChange}
+        search={vi.fn().mockResolvedValue([])}
+        ariaLabel="Search plants"
+        max={10}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: /remove curcuma longa/i }));
+    expect(onChange).toHaveBeenCalledWith([]);
   });
 });
