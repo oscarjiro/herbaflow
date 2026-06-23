@@ -328,36 +328,40 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
                   key={key}
                   className="border-hf-border border-b pb-3.5 last:border-b-0 last:pb-0"
                 >
-                  {/* .ctrl / .box: mockup checkbox control */}
-                  <button
-                    type="button"
-                    role="checkbox"
-                    aria-checked={checked}
-                    aria-label={label}
-                    disabled={disabled}
-                    className="ctrl"
-                    onClick={() => handleBooleanChange(key, !checked)}
-                  >
-                    <span className={cn("box", checked && "on")}>
-                      {checked && (
-                        <svg
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                          style={{
-                            width: 14,
-                            height: 14,
-                            stroke: "currentColor",
-                            fill: "none",
-                            strokeWidth: 2.4,
-                          }}
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      )}
-                    </span>
-                    <span>{label}</span>
+                  {/* Flex row so ParamInfo sits beside .ctrl — not nested inside the button
+                      (nested <button> inside <button> is invalid HTML and causes a hydration error). */}
+                  <div className="flex items-center gap-2">
+                    {/* .ctrl / .box: mockup checkbox control */}
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={checked}
+                      aria-label={label}
+                      disabled={disabled}
+                      className="ctrl"
+                      onClick={() => handleBooleanChange(key, !checked)}
+                    >
+                      <span className={cn("box", checked && "on")}>
+                        {checked && (
+                          <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            style={{
+                              width: 14,
+                              height: 14,
+                              stroke: "currentColor",
+                              fill: "none",
+                              strokeWidth: 2.4,
+                            }}
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </span>
+                      <span>{label}</span>
+                    </button>
                     <ParamInfo description={m.description} hint={hint} label={label} />
-                  </button>
+                  </div>
                 </div>
               );
             })}

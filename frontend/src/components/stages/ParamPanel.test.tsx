@@ -196,6 +196,25 @@ describe("ParamPanel", () => {
     expect(onRedo).toHaveBeenCalledWith({ flag: true });
   });
 
+  it("boolean param info button is a sibling of the checkbox, not nested inside it", async () => {
+    render(
+      <ParamPanel
+        params={{ flag: false }}
+        meta={{ flag: booleanMeta }}
+        onRedo={vi.fn()}
+        numericKeys={[]}
+        booleanKeys={["flag"]}
+        selectKeys={[]}
+      />,
+    );
+    await openPanel();
+    // The checkbox button must not contain any nested <button> (invalid HTML / hydration error)
+    const checkbox = screen.getByRole("checkbox", { name: /flag/i });
+    expect(checkbox.querySelector("button")).toBeNull();
+    // The info tooltip trigger must still be present as a sibling (not lost)
+    expect(screen.getByRole("button", { name: /about flag/i })).toBeInTheDocument();
+  });
+
   it("renders select params with humanized enum options", async () => {
     render(
       <ParamPanel
