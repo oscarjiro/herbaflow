@@ -30,13 +30,18 @@ async function fillRequiredFields() {
   // The EntitySearchCombobox is now a direct-type input — type to open the results dropdown.
   const plantCombo = await screen.findByRole("combobox", { name: /search plants/i });
   await userEvent.type(plantCombo, "a");
-  const plantOption = await screen.findByRole("option", { name: /Aaa bbb/i });
+  // Generous timeout: 300ms search debounce + async render can exceed the 1s default under load.
+  const plantOption = await screen.findByRole("option", { name: /Aaa bbb/i }, { timeout: 5000 });
   await userEvent.click(plantOption);
 
   // Disease: same pattern
   const diseaseCombo = await screen.findByRole("combobox", { name: /search disease/i });
   await userEvent.type(diseaseCombo, "a");
-  const diseaseOption = await screen.findByRole("option", { name: /Test Disease/i });
+  const diseaseOption = await screen.findByRole(
+    "option",
+    { name: /Test Disease/i },
+    { timeout: 5000 },
+  );
   await userEvent.click(diseaseOption);
 }
 

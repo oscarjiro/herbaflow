@@ -49,7 +49,9 @@ async function pickComboOption(ariaLabel: string, optionText: string | RegExp) {
   const input = screen.getByRole("combobox", { name: ariaLabel });
   await userEvent.type(input, "a");
   // Scope to the command-list options so a matching selected-chip never wins the lookup.
-  const options = await screen.findAllByRole("option");
+  // Generous timeout: the input debounces 300ms before searching, and under full-suite
+  // parallel load the debounce + async results render can exceed the 1s default.
+  const options = await screen.findAllByRole("option", undefined, { timeout: 5000 });
   const match = options.find((el) => {
     const text = el.textContent ?? "";
     return typeof optionText === "string" ? text.includes(optionText) : optionText.test(text);
