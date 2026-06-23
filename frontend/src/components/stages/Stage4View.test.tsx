@@ -181,4 +181,186 @@ describe("Stage4View — single editable table", () => {
     // The disease-target ParamPanel is gated on !user_provided.
     expect(screen.queryByText("Disease-target parameters")).not.toBeInTheDocument();
   });
+
+  it("renders UniProt accession as an ExternalLink to the UniProt entry page", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "PPARG",
+              gene_symbol: "PPARG",
+              uniprot_accession: "P37231",
+              opentargets_score: 0.75,
+              source_url: "https://platform.opentargets.org/target/ENSG00000132170",
+              tag: "computed",
+            },
+          ],
+          count: 1,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    // UniProt accession is a link to the UniProt entry page (not source_url).
+    const link = screen.getByRole("link", { name: /P37231/i });
+    expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P37231/entry");
+  });
+
+  it("renders SourceChip as 'Open Targets' with source_url for enriched rows", () => {
+    const otUrl = "https://platform.opentargets.org/target/ENSG00000132170";
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "PPARG",
+              gene_symbol: "PPARG",
+              uniprot_accession: "P37231",
+              opentargets_score: 0.75,
+              source_url: otUrl,
+              tag: "computed",
+            },
+          ],
+          count: 1,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    // Source chip for an enriched row: the chip is rendered as an ExternalLink
+    // whose href === source_url (the Open Targets page URL).
+    const links = screen.getAllByRole("link").filter((el) => el.getAttribute("href") === otUrl);
+    expect(links.length).toBeGreaterThan(0);
+    expect(links[0]).toHaveTextContent(/Open Targets/i);
+  });
+
+  it("renders SourceChip as 'User-curated' (no link) for manually-added rows", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "user_provided" },
+      parameters: {
+        input_modes: { plant: "selection", disease: "manual" },
+        disease_targets: {},
+      },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "m1",
+              canonical_name: "MANUALTGT",
+              gene_symbol: "MANUALTGT",
+              uniprot_accession: "Q99999",
+              opentargets_score: null,
+              source_url: null,
+              tag: "user-added",
+            },
+          ],
+          count: 1,
+          min_score_applied: 0,
+          state: "user_provided",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    // The source chip is plain text "User-curated" (no link).
+    expect(screen.getByText("User-curated")).toBeInTheDocument();
+    // No link for User-curated (the pill renders as a <span>).
+    const chipLinks = screen
+      .queryAllByRole("link")
+      .filter((el) => /user.curated/i.test(el.textContent ?? ""));
+    expect(chipLinks.length).toBe(0);
+  });
+
+  it("hides the Open Targets score column when stage_state is user_provided", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "user_provided" },
+      parameters: {
+        input_modes: { plant: "selection", disease: "manual" },
+        disease_targets: {},
+      },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "m1",
+              canonical_name: "MANUALTGT",
+              gene_symbol: "MANUALTGT",
+              uniprot_accession: "Q99999",
+              opentargets_score: 0.9,
+              source_url: null,
+              tag: "user-added",
+            },
+          ],
+          count: 1,
+          min_score_applied: 0,
+          state: "user_provided",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    // The score column header must not appear.
+    expect(screen.queryByText("Open Targets score")).not.toBeInTheDocument();
+    // The score value itself must not appear either.
+    expect(screen.queryByText("0.9")).not.toBeInTheDocument();
+  });
+
+  it("delete button reuses the existing remove handler", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "GENEA",
+              gene_symbol: "GENEA",
+              uniprot_accession: "P11111",
+              opentargets_score: 0.6,
+              source_url: null,
+              tag: "computed",
+            },
+            {
+              target_id: "t2",
+              canonical_name: "GENEB",
+              gene_symbol: "GENEB",
+              uniprot_accession: "P22222",
+              opentargets_score: 0.5,
+              source_url: null,
+              tag: "computed",
+            },
+          ],
+          count: 2,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    // Both rows have in-table delete buttons via aria-label.
+    expect(screen.getByRole("button", { name: "Remove GENEA" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove GENEB" })).toBeInTheDocument();
+    // Neither is disabled (effectiveCount > 1, so min-entities floor not hit).
+    expect(screen.getByRole("button", { name: "Remove GENEA" })).not.toBeDisabled();
+  });
 });

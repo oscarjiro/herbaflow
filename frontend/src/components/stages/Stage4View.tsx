@@ -43,6 +43,7 @@ import {
 } from "../../contract";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig } from "../../lib/format";
+import { uniprotUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { ExternalLink } from "@/components/ui/ExternalLink";
+import { SourceChip } from "@/components/ui/SourceChip";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
@@ -204,46 +207,62 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
 
   const isUserProvided = stageState === "user_provided";
 
-  // Per-target column definitions — SAME columns + order as the prior table, plus the delete action.
+  // Per-target column definitions — spec-aligned columns in the required order.
   const columns: ColumnDef<Row>[] = [
+    // 1. UniProt accession → ExternalLink to UniProt entry page.
+    {
+      id: "uniprot",
+      header: "UniProt",
+      cell: ({ row }) => {
+        const acc = row.original.uniprot_accession;
+        if (!acc) return <span className="text-hf-fg-3">—</span>;
+        return <ExternalLink href={uniprotUrl(acc)}>{acc}</ExternalLink>;
+      },
+    },
+    // 2. Gene symbol.
     {
       id: "gene_symbol",
       header: "Gene symbol",
       cell: ({ row }) => row.original.gene_symbol,
     },
+    // 3. Source → SourceChip: "Open Targets" with source_url for enriched rows;
+    //    "User-curated" (no URL) for manually-added targets.
     {
-      id: "uniprot",
-      header: "UniProt",
+      id: "source",
+      header: "Source",
+      enableSorting: false,
       cell: ({ row }) => {
         const r = row.original;
-        if (!r.uniprot_accession) return "—";
-        return r.source_url ? (
-          <a
-            href={r.source_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[color:var(--hf-accent)] underline underline-offset-2"
-          >
-            {r.uniprot_accession}
-          </a>
-        ) : (
-          r.uniprot_accession
-        );
+        if (r.tag === "user-added" || r.tag === "user-removed") {
+          return <SourceChip name="User-curated" />;
+        }
+        return <SourceChip name="Open Targets" url={r.source_url} />;
       },
     },
-    {
-      id: "opentargets_score",
-      header: "Open Targets score",
-      cell: ({ row }) => formatSig(row.original.opentargets_score),
-    },
+    // 4. Open Targets score — HIDDEN when stage_state === "user_provided" (manual runs have no score).
+    ...(isUserProvided
+      ? []
+      : ([
+          {
+            id: "opentargets_score",
+            header: "Open Targets score",
+            meta: { className: "num" },
+            cell: ({ row }: { row: { original: Row } }) =>
+              formatSig(row.original.opentargets_score),
+          },
+        ] as ColumnDef<Row>[])),
+    // 5. Edit-tag badge (user-added indicator).
     {
       id: "tag",
       header: "",
+      enableSorting: false,
       cell: ({ row }) => tagBadge(row.original.tag),
     },
+    // 6. × delete — reuses the existing edit mutation's remove path.
     {
       id: "actions",
       header: "",
+      enableSorting: false,
       cell: ({ row }) => (
         <Button
           variant="ghost"
