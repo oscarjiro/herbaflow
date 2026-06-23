@@ -376,16 +376,12 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
 
       {/* Param panel */}
       {admeParams && (
-        <Card>
-          <CardContent className="pt-6">
-            <ParamPanel
-              params={admeParams}
-              meta={ADME_PARAMS}
-              disabled={redo.isPending}
-              onRedo={(changed) => redo.mutate(changed)}
-            />
-          </CardContent>
-        </Card>
+        <ParamPanel
+          params={admeParams}
+          meta={ADME_PARAMS}
+          disabled={redo.isPending}
+          onRedo={(changed) => redo.mutate(changed)}
+        />
       )}
 
       {/* Footer */}

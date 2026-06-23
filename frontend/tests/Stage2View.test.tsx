@@ -341,6 +341,29 @@ describe("Stage2View", () => {
   });
 });
 
+describe("ParamPanel double-box regression", () => {
+  it("ParamPanel is not wrapped in a shadcn Card element", async () => {
+    const { container } = wrap(<Stage2View data={makeRun()} />);
+    await userEvent.click(screen.getByRole("button", { name: /adme parameters/i }));
+    // The param panel renders inside its own .hf-glass-panel.
+    // It must NOT be nested inside a shadcn card ([data-slot="card"]).
+    const card = container.querySelector("[data-slot='card']");
+    if (card) {
+      // If a card exists (the table card), ensure ParamPanel is not inside it.
+      const panelInsideCard = card.querySelector("[data-slot='param-panel']");
+      expect(panelInsideCard).toBeNull();
+    }
+    // ParamPanel's collapsible trigger must exist at the top level of the section, not inside a card.
+    const trigger = screen.getByRole("button", { name: /adme parameters/i });
+    // Walk up: none of the ancestors should be a shadcn card element.
+    let node: HTMLElement | null = trigger.parentElement;
+    while (node && node !== container) {
+      expect(node.dataset["slot"]).not.toBe("card");
+      node = node.parentElement;
+    }
+  });
+});
+
 describe("ApprovalBar primitive", () => {
   it("renders nothing when status does not match current stage", () => {
     const { container } = render(
