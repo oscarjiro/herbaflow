@@ -19,7 +19,7 @@ describe("RunSidebar", () => {
     renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={() => {}} />, {
       withTheme: true,
     });
-    expect(screen.getByText("Herbaflow")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /herbaflow home/i })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: /pipeline steps/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /theme:/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /exit analysis/i })).toBeInTheDocument();

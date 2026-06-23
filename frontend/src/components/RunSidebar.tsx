@@ -29,13 +29,10 @@ export function RunSidebar({
   return (
     <GlassSurface
       tier="chrome"
-      className="flex flex-col gap-1 rounded-none border-0 px-4 pt-5 pb-4 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:w-64 lg:border-r"
+      className="flex flex-col gap-4 rounded-none border-0 px-4 pt-6 pb-5 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:w-64 lg:border-r"
     >
-      <Link
-        to="/"
-        className="font-display text-hf-fg-1 px-2 pt-0.5 pb-3.5 text-2xl leading-none tracking-[-0.01em]"
-      >
-        Herbaflow
+      <Link to="/" aria-label="Herbaflow home" className="text-hf-fg-1 block px-2 pt-0.5">
+        <span className="hf-logo block h-7 w-[124px]" />
       </Link>
       <RunIdentityCard data={data} />
       <div className="scroll min-h-0 flex-1 overflow-y-auto">
