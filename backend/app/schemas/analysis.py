@@ -128,6 +128,8 @@ class StageEditRequest(BaseModel):
 
     add: list[uuid.UUID] = Field(default_factory=list)
     remove: list[uuid.UUID] = Field(default_factory=list)
+    stp_compound_id: uuid.UUID | None = None
+    stp_target_ids: list[uuid.UUID] = Field(default_factory=list)
 
 
 class ProgressRead(BaseModel):

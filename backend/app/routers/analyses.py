@@ -113,6 +113,13 @@ async def edit_stage(
     session: AsyncSession = Depends(get_session),
 ) -> AnalysisRead:
     service = AnalysisService.from_session(session)
-    await service.edit_stage(analysis_id, stage, add=payload.add, remove=payload.remove)
+    await service.edit_stage(
+        analysis_id,
+        stage,
+        add=payload.add,
+        remove=payload.remove,
+        stp_compound_id=payload.stp_compound_id,
+        stp_target_ids=payload.stp_target_ids,
+    )
     await _commit(session)
     return await service.get(analysis_id)

@@ -298,7 +298,12 @@ export const zResolvedTarget = z.object({
 
 export const zStageEditRequest = z.object({
     add: z.array(z.string().uuid()).optional(),
-    remove: z.array(z.string().uuid()).optional()
+    remove: z.array(z.string().uuid()).optional(),
+    stp_compound_id: z.union([
+        z.string().uuid(),
+        z.null()
+    ]).optional(),
+    stp_target_ids: z.array(z.string().uuid()).optional()
 });
 
 export const zTargetInput = z.object({

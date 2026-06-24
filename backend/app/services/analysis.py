@@ -339,6 +339,71 @@ class AnalysisService:
             ),
         }
 
+    @staticmethod
+    def _apply_stp_run_links(
+        stage3: dict[str, Any], *, compound_id: str, target_ids: list[str]
+    ) -> None:
+        """Attach STP links to the run-scoped Stage-3 result and recompute coverage."""
+        per_compound = stage3.get("per_compound")
+        if not isinstance(per_compound, dict) or compound_id not in per_compound:
+            raise ValidationProblem(
+                detail="SwissTargetPrediction compound must be present in Stage 3 coverage."
+            )
+
+        target_by_id = {
+            str(row.get("target_id")): row
+            for row in stage3.get("targets", [])
+            if row.get("tag") != "user-removed"
+        }
+        missing = [tid for tid in target_ids if tid not in target_by_id]
+        if missing:
+            raise ValidationProblem(
+                detail="SwissTargetPrediction target ids must be present in Stage 3 targets.",
+                invalid_target_ids=missing,
+            )
+
+        edges = [dict(edge) for edge in stage3.get("compound_targets", [])]
+        existing_pairs = {
+            (str(edge.get("compound_id")), str(edge.get("target_id"))) for edge in edges
+        }
+        for target_id in dict.fromkeys(target_ids):
+            pair = (compound_id, target_id)
+            if pair in existing_pairs:
+                continue
+            target = target_by_id[target_id]
+            edges.append(
+                {
+                    "compound_id": compound_id,
+                    "target_id": target_id,
+                    "prediction_method": "stp_import",
+                    "pchembl_value": None,
+                    "score": None,
+                    "source_url": target.get("source_url"),
+                    "uniprot_accession": target.get("uniprot_accession"),
+                }
+            )
+            existing_pairs.add(pair)
+
+        active_target_ids = set(target_by_id)
+        coverage_by_compound: dict[str, set[str]] = {str(cid): set() for cid in per_compound}
+        for edge in edges:
+            cid = str(edge.get("compound_id"))
+            tid = str(edge.get("target_id"))
+            if cid in coverage_by_compound and tid in active_target_ids:
+                coverage_by_compound[cid].add(tid)
+
+        stage3["compound_targets"] = edges
+        updated_per_compound: dict[str, dict[str, Any]] = {}
+        for cid, tids in coverage_by_compound.items():
+            existing = per_compound.get(cid)
+            base = dict(existing) if isinstance(existing, dict) else {}
+            base["coverage"] = len(tids)
+            updated_per_compound[cid] = base
+        stage3["per_compound"] = updated_per_compound
+        covered = sum(1 for tids in coverage_by_compound.values() if tids)
+        total = len(coverage_by_compound)
+        stage3["coverage_pct"] = round(100.0 * covered / total, 1) if total else 0.0
+
     async def get(self, analysis_id: uuid.UUID) -> AnalysisRead:
         run = await self.analysis_repo.get(analysis_id)
         if run is None:
@@ -454,6 +519,8 @@ class AnalysisService:
         *,
         add: list[uuid.UUID],
         remove: list[uuid.UUID],
+        stp_compound_id: uuid.UUID | None = None,
+        stp_target_ids: list[uuid.UUID] | None = None,
     ) -> None:
         """Apply a durable in-stage entity edit (add/remove) and stage the change.
 
@@ -464,6 +531,20 @@ class AnalysisService:
         records ``parameters.rerun_from``; nothing is re-run (D3). Recompute happens only on an
         explicit reset-from.
         """
+        stp_target_ids = stp_target_ids or []
+        if stp_compound_id is not None or stp_target_ids:
+            if stage != 3:
+                raise ValidationProblem(
+                    detail="SwissTargetPrediction links can only be attached to Stage 3."
+                )
+            if stp_compound_id is None or not stp_target_ids:
+                raise ValidationProblem(
+                    detail=(
+                        "SwissTargetPrediction imports require one compound and at "
+                        "least one target."
+                    )
+                )
+
         entity_keys = _STAGE_ENTITY.get(stage)
         if entity_keys is None:
             raise ValidationProblem(detail=f"Stage {stage} is not an editable entity stage.")
@@ -485,10 +566,12 @@ class AnalysisService:
         if existing_result is None:
             raise ValidationProblem(detail=f"Stage {stage} has not been computed yet.")
 
-        # Verify added ids exist.
-        if add:
-            existing_ids = await repo.existing_ids(add)
-            missing = [c for c in add if c not in existing_ids]
+        # Verify ids exist. STP target ids may include targets that are already in the run,
+        # so validate the union while still applying the edit layer only to fresh additions.
+        ids_to_verify = list(dict.fromkeys([*add, *stp_target_ids]))
+        if ids_to_verify:
+            existing_ids = await repo.existing_ids(ids_to_verify)
+            missing = [c for c in ids_to_verify if c not in existing_ids]
             if missing:
                 raise ValidationProblem(
                     detail=f"Unknown {entity} ids.",
@@ -563,7 +646,14 @@ class AnalysisService:
         await self.analysis_repo.set_parameters(run)
 
         preserved = {k: v for k, v in existing_result.items() if k not in frag and k != list_key}
-        await self.analysis_repo.set_stage_result(run, stage, {**preserved, **frag})
+        result = {**preserved, **frag}
+        if stage == 3 and stp_compound_id is not None:
+            self._apply_stp_run_links(
+                result,
+                compound_id=str(stp_compound_id),
+                target_ids=[str(tid) for tid in stp_target_ids],
+            )
+        await self.analysis_repo.set_stage_result(run, stage, result)
 
         # Stage the edit only (D3): the edited stage was re-derived in place above; the
         # produced downstream is flagged stale and NOT re-run. Recompute happens only on an

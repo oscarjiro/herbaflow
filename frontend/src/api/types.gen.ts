@@ -185,6 +185,8 @@ export type ResolvedTarget = {
 export type StageEditRequest = {
     add?: Array<string>;
     remove?: Array<string>;
+    stp_compound_id?: string | null;
+    stp_target_ids?: Array<string>;
 };
 
 export type TargetInput = {

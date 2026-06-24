@@ -10,13 +10,12 @@
  *  2. Copy their SMILES to the clipboard and open SwissTargetPrediction.
  *  3. Paste the STP result CSV; it is parsed (parseStpCsv) at the chosen
  *     probability threshold and previewed.
- *  4. Import -> the pasted accessions are resolved via POST /targets/validate and the
- *     resolved targets are added to the run's Step-3 target set, exactly like a
- *     manual target add. STP is user-asserted, so NO canonical compound→target edge
- *     is written; the targets are run-scoped only.
+ *  4. Import -> the pasted accessions are resolved via POST /targets/validate. Fresh
+ *     targets are added to the run's Step-3 target set, and all resolved targets are
+ *     linked to the selected compound inside the analysis run only. STP is user-asserted,
+ *     so NO canonical database compound-target edge is written.
  *
- * The compound picker is purely a convenience for copying SMILES into STP; it does
- * not scope the import (the resolved targets join the run's flat target set).
+ * The compound picker scopes the run-local STP links and also copies the selected SMILES.
  */
 
 import { useMemo, useState } from "react";
@@ -52,6 +51,11 @@ export type StpCompound = {
   source_url?: string | null;
 };
 
+export type StpLinkContext = {
+  compoundId: string;
+  targetIds: string[];
+};
+
 type ImportSummary = { added: number; alreadyInRun: number; failed: number };
 
 export function StpDialog({
@@ -63,7 +67,7 @@ export function StpDialog({
   compounds: StpCompound[];
   perCompound: Record<string, { coverage: number }>;
   existingTargetIds: string[];
-  onAddTargets: (resolved: ResolvedTarget[]) => void;
+  onAddTargets: (resolved: ResolvedTarget[], link?: StpLinkContext) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [selectedCompoundId, setSelectedCompoundId] = useState<string | null>(null);
@@ -112,7 +116,12 @@ export function StpDialog({
       const failed = data?.failed ?? [];
       // Only add targets not already in the run's set (the edit layer de-dupes too).
       const fresh = resolved.filter((t) => !existing.has(t.target_id));
-      if (fresh.length > 0) onAddTargets(fresh);
+      if (selectedCompoundId && resolved.length > 0) {
+        onAddTargets(fresh, {
+          compoundId: selectedCompoundId,
+          targetIds: resolved.map((t) => t.target_id),
+        });
+      }
       return {
         added: fresh.length,
         alreadyInRun: resolved.length - fresh.length,
@@ -141,7 +150,7 @@ export function StpDialog({
     }
   }
 
-  const canImport = parsedRows.length > 0 && !importMut.isPending;
+  const canImport = Boolean(selectedCompoundId) && parsedRows.length > 0 && !importMut.isPending;
   const parsedTargetLabel = `${parsedRows.length} protein ${
     parsedRows.length === 1 ? "target" : "targets"
   } read from CSV at or above threshold.`;

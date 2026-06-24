@@ -6,7 +6,12 @@ import { markEntitiesRemoved } from "../lib/optimisticEdit";
 import type { Problem } from "../lib/problem";
 import { notifyError, notifySuccess } from "../lib/toast";
 
-type EditBody = { add: string[]; remove: string[] };
+type EditBody = {
+  add: string[];
+  remove: string[];
+  stp_compound_id?: string;
+  stp_target_ids?: string[];
+};
 
 type EntityCopy = {
   singular: string;

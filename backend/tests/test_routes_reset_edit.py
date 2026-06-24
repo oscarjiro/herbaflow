@@ -231,6 +231,8 @@ def test_edit_stage_409_when_not_settled(monkeypatch) -> None:
             *,
             add: list,
             remove: list,
+            stp_compound_id: uuid.UUID | None = None,
+            stp_target_ids: list[uuid.UUID] | None = None,
             defer: bool = False,
         ) -> int | None:
             raise ConflictProblem(detail="Run is still running.")
@@ -268,6 +270,8 @@ def test_edit_stage_422_on_unknown_add_id(monkeypatch) -> None:
             *,
             add: list,
             remove: list,
+            stp_compound_id: uuid.UUID | None = None,
+            stp_target_ids: list[uuid.UUID] | None = None,
             defer: bool = False,
         ) -> int | None:
             raise ValidationProblem(
@@ -308,6 +312,8 @@ def test_edit_stage_422_on_cap_overflow(monkeypatch) -> None:
             *,
             add: list,
             remove: list,
+            stp_compound_id: uuid.UUID | None = None,
+            stp_target_ids: list[uuid.UUID] | None = None,
             defer: bool = False,
         ) -> int | None:
             raise ValidationProblem(
@@ -351,6 +357,8 @@ def test_edit_stage_202_happy_path_passes_add_remove(monkeypatch) -> None:
             *,
             add: list,
             remove: list,
+            stp_compound_id: uuid.UUID | None = None,
+            stp_target_ids: list[uuid.UUID] | None = None,
             defer: bool = False,
         ) -> int | None:
             captured["stage"] = stage

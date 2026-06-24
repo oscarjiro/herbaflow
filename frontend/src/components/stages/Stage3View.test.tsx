@@ -537,6 +537,56 @@ describe("Stage3View — already-in-run deduplication", () => {
     expect(editSpy).not.toHaveBeenCalled();
   });
 
+  it("sends selected compound link metadata for SwissTargetPrediction imports", async () => {
+    const editSpy = vi.spyOn(sdk, "editStage").mockResolvedValue({ data: {} } as never);
+
+    vi.spyOn(sdk, "validateTargets").mockResolvedValue({
+      data: {
+        resolved: [
+          {
+            target_id: TARGET_ID,
+            gene_symbol: "TP53",
+            uniprot_accession: "P04637",
+            canonical_key: "uniprot:P04637",
+          },
+          {
+            target_id: "22222222-2222-2222-2222-222222222222",
+            gene_symbol: "EGFR",
+            uniprot_accession: "P00533",
+            canonical_key: "uniprot:P00533",
+          },
+        ],
+        failed: [],
+      },
+    } as never);
+
+    wrap(<Stage3View data={makeRun()} />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /add swisstargetprediction targets/i }),
+    );
+    await userEvent.click(screen.getByRole("radio", { name: /select berberine/i }));
+    const csv = `"Target","Common name","Uniprot ID","Probability*"
+"Cellular tumor antigen p53","TP53","P04637","0.90"
+"Epidermal growth factor receptor","EGFR","P00533","0.80"`;
+    await userEvent.type(screen.getByLabelText("Paste SwissTargetPrediction CSV"), csv);
+    await userEvent.click(screen.getByRole("button", { name: /^import$/i }));
+
+    await waitFor(() =>
+      expect(editSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: { analysis_id: "r3t", stage: 3 },
+          body: {
+            add: ["22222222-2222-2222-2222-222222222222"],
+            remove: [],
+            stp_compound_id: "c2",
+            stp_target_ids: [TARGET_ID, "22222222-2222-2222-2222-222222222222"],
+          },
+        }),
+      ),
+    );
+  });
+
   it("shows a success toast after a target add is committed", async () => {
     vi.spyOn(sdk, "editStage").mockResolvedValue({ data: {} } as never);
     const notifySuccessSpy = vi.spyOn(toastLib, "notifySuccess").mockImplementation(() => {});

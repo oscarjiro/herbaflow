@@ -314,6 +314,7 @@ test("uses cleaned import result summary", async () => {
   );
 
   await openDialog();
+  await userEvent.click(screen.getByRole("radio", { name: /select beta-curcumene/i }));
   fireEvent.change(screen.getByLabelText("Paste SwissTargetPrediction CSV"), {
     target: { value: CSV },
   });
@@ -337,6 +338,7 @@ test("summarizes parsed STP targets without rendering a preview table", async ()
   );
 
   await openDialog();
+  await userEvent.click(screen.getByRole("radio", { name: /select beta-curcumene/i }));
   fireEvent.change(screen.getByLabelText("Paste SwissTargetPrediction CSV"), {
     target: { value: CSV },
   });
@@ -391,6 +393,7 @@ test("import resolves via /targets/validate and adds only fresh targets to the r
 
   // Open the dialog first.
   await openDialog();
+  await userEvent.click(screen.getByRole("radio", { name: /select beta-curcumene/i }));
 
   fireEvent.change(screen.getByLabelText("Paste SwissTargetPrediction CSV"), {
     target: { value: CSV },
@@ -407,7 +410,10 @@ test("import resolves via /targets/validate and adds only fresh targets to the r
 
   // Only the fresh target (t1) is added to the run; t2 is already present.
   await waitFor(() => expect(onAddTargets).toHaveBeenCalledTimes(1));
-  expect(onAddTargets).toHaveBeenCalledWith([expect.objectContaining({ target_id: "t1" })]);
+  expect(onAddTargets).toHaveBeenCalledWith([expect.objectContaining({ target_id: "t1" })], {
+    compoundId: "c1",
+    targetIds: ["t1", "t2"],
+  });
 
   // Counters reflect added / already-in-run / failed.
   await screen.findByText("Added 1 target. 1 was already present. 0 could not be matched.");
@@ -439,6 +445,7 @@ test("uses the shared stateful button for STP import progress", async () => {
   );
 
   await openDialog();
+  await userEvent.click(screen.getByRole("radio", { name: /select beta-curcumene/i }));
   fireEvent.change(screen.getByLabelText("Paste SwissTargetPrediction CSV"), {
     target: { value: CSV },
   });
@@ -522,6 +529,7 @@ describe("StpDialog — D-4 toast wiring", () => {
     );
 
     await openDialog();
+    await userEvent.click(screen.getByRole("radio", { name: /select beta-curcumene/i }));
     fireEvent.change(screen.getByLabelText("Paste SwissTargetPrediction CSV"), {
       target: { value: CSV },
     });
@@ -547,6 +555,7 @@ describe("StpDialog — D-4 toast wiring", () => {
     );
 
     await openDialog();
+    await userEvent.click(screen.getByRole("radio", { name: /select beta-curcumene/i }));
     fireEvent.change(screen.getByLabelText("Paste SwissTargetPrediction CSV"), {
       target: { value: CSV },
     });

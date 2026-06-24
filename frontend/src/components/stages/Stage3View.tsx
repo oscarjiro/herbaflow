@@ -90,6 +90,11 @@ type Stage3Result = {
   state: string;
 };
 
+type StpLinkContext = {
+  compoundId: string;
+  targetIds: string[];
+};
+
 type Stage2Passed = {
   compound_id: string;
   canonical_name: string | null;
@@ -222,10 +227,18 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   });
 
   const currentTargetIds = new Set((stage3?.targets ?? []).map((t) => t.target_id));
-  const { alreadyInRun, handleAdd: handleAddTargets } = useAddWithDedup<ResolvedTarget>({
+  const { alreadyInRun, handleAdd: handleAddTargets } = useAddWithDedup<
+    ResolvedTarget,
+    StpLinkContext
+  >({
     currentIds: currentTargetIds,
     getId: (r) => r.target_id,
-    onAddIds: (ids) => edit.mutate({ add: ids, remove: [] }),
+    onAddIds: (ids, link) =>
+      edit.mutate({
+        add: ids,
+        remove: [],
+        ...(link ? { stp_compound_id: link.compoundId, stp_target_ids: link.targetIds } : {}),
+      }),
   });
 
   const passed = useMemo(() => stage2?.passed ?? [], [stage2]);

@@ -1885,6 +1885,26 @@
             },
             "type": "array",
             "title": "Remove"
+          },
+          "stp_compound_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stp Compound Id"
+          },
+          "stp_target_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Stp Target Ids"
           }
         },
         "type": "object",

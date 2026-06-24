@@ -95,6 +95,17 @@ class FakeCompoundRepo:
         ]
 
 
+class FakeTargetRepo:
+    def __init__(self, rows: dict[uuid.UUID, SimpleNamespace]) -> None:
+        self._rows = rows
+
+    async def existing_ids(self, ids: list[uuid.UUID]) -> set[uuid.UUID]:
+        return {i for i in ids if i in self._rows}
+
+    async def get_many(self, ids: list[uuid.UUID]) -> list[SimpleNamespace]:
+        return [self._rows[i] for i in ids if i in self._rows]
+
+
 def _adme() -> dict[str, Any]:
     return dict(contracts.adme_defaults())
 
@@ -159,6 +170,47 @@ def _service(run: SimpleNamespace, names: dict[uuid.UUID, str]) -> AnalysisServi
         disease_repo=SimpleNamespace(),
         analysis_repo=repo,
         compound_repo=FakeCompoundRepo(names),
+    )
+
+
+def _service_with_targets(
+    run: SimpleNamespace,
+    rows: dict[uuid.UUID, SimpleNamespace],
+) -> AnalysisService:
+    repo = FakeRepo(run)
+    return AnalysisService(
+        plant_repo=SimpleNamespace(),
+        disease_repo=SimpleNamespace(),
+        analysis_repo=repo,
+        compound_repo=FakeCompoundRepo({}),
+        target_repo=FakeTargetRepo(rows),
+    )
+
+
+def _stage3_run_for_stp(compound_id: uuid.UUID, targets: list[dict[str, Any]]) -> SimpleNamespace:
+    return SimpleNamespace(
+        analysis_id=uuid.uuid4(),
+        mode="guided",
+        status="stage_3_awaiting_approval",
+        current_stage=3,
+        error_message=None,
+        parameters={
+            "plant_ids": [str(uuid.uuid4())],
+            "manual_compounds": [],
+            "stage_edits": {},
+            "target": dict(contracts.target_defaults()),
+        },
+        stage_results={
+            "3": {
+                "targets": targets,
+                "computed_ids": [str(target["target_id"]) for target in targets],
+                "compound_targets": [],
+                "per_compound": {str(compound_id): {"coverage": 0}},
+                "coverage_pct": 0.0,
+                "count": len(targets),
+                "state": "computed",
+            },
+        },
     )
 
 
@@ -461,6 +513,105 @@ async def test_guided_edit_of_current_awaiting_stage_reparks_without_advancing(
     assert run.stage_results["1"].get("stale") is None  # edited stage is fresh
     assert "2" not in run.stage_results  # nothing downstream existed to stale
     assert "rerun_from" not in run.parameters  # no downstream -> no confirm target
+
+
+@pytest.mark.asyncio
+async def test_stage3_stp_import_adds_run_scoped_compound_target_edges() -> None:
+    compound_id = uuid.uuid4()
+    t1, t2 = uuid.uuid4(), uuid.uuid4()
+    rows = {
+        t1: SimpleNamespace(
+            target_id=t1,
+            protein_name="Cellular tumor antigen p53",
+            gene_symbol="TP53",
+            uniprot_accession="P04637",
+        ),
+        t2: SimpleNamespace(
+            target_id=t2,
+            protein_name="Epidermal growth factor receptor",
+            gene_symbol="EGFR",
+            uniprot_accession="P00533",
+        ),
+    }
+    run = _stage3_run_for_stp(compound_id, [])
+    svc = _service_with_targets(run, rows)
+
+    await svc.edit_stage(
+        run.analysis_id,
+        3,
+        add=[t1, t2],
+        remove=[],
+        stp_compound_id=compound_id,
+        stp_target_ids=[t1, t2],
+    )
+
+    stage3 = run.stage_results["3"]
+    assert stage3["per_compound"][str(compound_id)]["coverage"] == 2
+    assert stage3["coverage_pct"] == 100.0
+    assert {edge["target_id"] for edge in stage3["compound_targets"]} == {str(t1), str(t2)}
+    assert {edge["compound_id"] for edge in stage3["compound_targets"]} == {str(compound_id)}
+    assert {edge["prediction_method"] for edge in stage3["compound_targets"]} == {"stp_import"}
+    assert {edge["uniprot_accession"] for edge in stage3["compound_targets"]} == {
+        "P04637",
+        "P00533",
+    }
+
+
+@pytest.mark.asyncio
+async def test_stage3_stp_import_links_existing_run_target_without_duplicate_add() -> None:
+    compound_id = uuid.uuid4()
+    target_id = uuid.uuid4()
+    run = _stage3_run_for_stp(
+        compound_id,
+        [
+            {
+                "target_id": str(target_id),
+                "canonical_name": "TP53",
+                "gene_symbol": "TP53",
+                "uniprot_accession": "P04637",
+                "source_url": "https://www.uniprot.org/uniprotkb/P04637/entry",
+                "tag": "computed",
+            }
+        ],
+    )
+    run.stage_results["3"]["count"] = 1
+    svc = _service_with_targets(
+        run,
+        {
+            target_id: SimpleNamespace(
+                target_id=target_id,
+                protein_name="Cellular tumor antigen p53",
+                gene_symbol="TP53",
+                uniprot_accession="P04637",
+            )
+        },
+    )
+
+    await svc.edit_stage(
+        run.analysis_id,
+        3,
+        add=[],
+        remove=[],
+        stp_compound_id=compound_id,
+        stp_target_ids=[target_id],
+    )
+
+    stage3 = run.stage_results["3"]
+    assert stage3["count"] == 1
+    assert [target["target_id"] for target in stage3["targets"]] == [str(target_id)]
+    assert stage3["per_compound"][str(compound_id)]["coverage"] == 1
+    assert stage3["coverage_pct"] == 100.0
+    assert stage3["compound_targets"] == [
+        {
+            "compound_id": str(compound_id),
+            "target_id": str(target_id),
+            "prediction_method": "stp_import",
+            "pchembl_value": None,
+            "score": None,
+            "source_url": "https://www.uniprot.org/uniprotkb/P04637/entry",
+            "uniprot_accession": "P04637",
+        }
+    ]
 
 
 # ---------------------------------------------------------------------------
