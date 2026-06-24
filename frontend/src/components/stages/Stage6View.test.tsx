@@ -9,7 +9,7 @@ import { ThemeProvider } from "@/lib/theme";
 vi.mock("react-cytoscapejs", () => import("@/test-utils/cytoscapeMock"));
 
 import { Stage6View, buildNetworkElements, buildS6CsvRows, S6_CSV_HEADER } from "./Stage6View";
-import { uniprotGeneUrl } from "../../lib/externalUrls";
+import { uniprotUrl } from "../../lib/externalUrls";
 import type { AnalysisRead } from "../../api/types.gen";
 
 // ---------------------------------------------------------------------------
@@ -20,8 +20,16 @@ function makeComputedResult() {
   return {
     state: "computed",
     nodes: [
-      { gene_symbol: "EGFR", string_id: "9606.ENSP00000275493" },
-      { gene_symbol: "TP53", string_id: "9606.ENSP00000269305" },
+      {
+        gene_symbol: "EGFR",
+        string_id: "9606.ENSP00000275493",
+        uniprot_accession: "P00533",
+      },
+      {
+        gene_symbol: "TP53",
+        string_id: "9606.ENSP00000269305",
+        uniprot_accession: "P04637",
+      },
     ],
     edges: [{ source: "EGFR", target: "TP53", confidence: 0.92 }],
     node_count: 2,
@@ -75,9 +83,21 @@ function makeCompleteNetworkData(): AnalysisRead {
     {
       ...makeComputedResult(),
       nodes: [
-        { gene_symbol: "EGFR", string_id: "9606.ENSP00000275493" },
-        { gene_symbol: "TP53", string_id: "9606.ENSP00000269305" },
-        { gene_symbol: "ABCA1", string_id: "9606.ENSP00000374736" },
+        {
+          gene_symbol: "EGFR",
+          string_id: "9606.ENSP00000275493",
+          uniprot_accession: "P00533",
+        },
+        {
+          gene_symbol: "TP53",
+          string_id: "9606.ENSP00000269305",
+          uniprot_accession: "P04637",
+        },
+        {
+          gene_symbol: "ABCA1",
+          string_id: "9606.ENSP00000374736",
+          uniprot_accession: "P22001",
+        },
       ],
       node_count: 3,
     },
@@ -87,9 +107,21 @@ function makeCompleteNetworkData(): AnalysisRead {
         "6": {
           ...makeComputedResult(),
           nodes: [
-            { gene_symbol: "EGFR", string_id: "9606.ENSP00000275493" },
-            { gene_symbol: "TP53", string_id: "9606.ENSP00000269305" },
-            { gene_symbol: "ABCA1", string_id: "9606.ENSP00000374736" },
+            {
+              gene_symbol: "EGFR",
+              string_id: "9606.ENSP00000275493",
+              uniprot_accession: "P00533",
+            },
+            {
+              gene_symbol: "TP53",
+              string_id: "9606.ENSP00000269305",
+              uniprot_accession: "P04637",
+            },
+            {
+              gene_symbol: "ABCA1",
+              string_id: "9606.ENSP00000374736",
+              uniprot_accession: "P22001",
+            },
           ],
           node_count: 3,
         },
@@ -130,12 +162,14 @@ describe("Stage6View — computed network", () => {
     expect(screen.getByText("0.92")).toBeInTheDocument();
   });
 
-  it("links each gene symbol to UniProt via uniprotGeneUrl", () => {
+  it("links each gene symbol to UniProt via the node accession", () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
     const egfrLink = screen.getByRole("link", { name: /egfr/i });
     const tp53Link = screen.getByRole("link", { name: /tp53/i });
-    expect(egfrLink).toHaveAttribute("href", uniprotGeneUrl("EGFR"));
-    expect(tp53Link).toHaveAttribute("href", uniprotGeneUrl("TP53"));
+    expect(egfrLink).toHaveAttribute("href", uniprotUrl("P00533"));
+    expect(tp53Link).toHaveAttribute("href", uniprotUrl("P04637"));
+    expect(egfrLink).not.toHaveAttribute("href", expect.stringContaining("query=gene:"));
+    expect(tp53Link).not.toHaveAttribute("href", expect.stringContaining("query=gene:"));
   });
 
   it("renders the CSV download control", () => {

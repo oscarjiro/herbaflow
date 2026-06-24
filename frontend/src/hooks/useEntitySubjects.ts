@@ -24,6 +24,7 @@ export function deriveSubjects(
   const plant: string = (() => {
     if (!inputModes || inputModes.plant === "selection") {
       if (!plantIds || plantIds.length === 0) return "—";
+      if (plants === undefined) return "—";
       const byId = new Map((plants ?? []).map((p) => [p.plant_id, p]));
       const names = plantIds.map(
         (id) => byId.get(id)?.canonical_scientific_name ?? byId.get(id)?.plant_id ?? id,
@@ -36,6 +37,7 @@ export function deriveSubjects(
   const disease: string = (() => {
     if (!inputModes || inputModes.disease === "selection") {
       if (!diseaseId) return "—";
+      if (diseases === undefined) return "—";
       const byId = new Map((diseases ?? []).map((d) => [d.disease_id, d]));
       return byId.get(diseaseId)?.disease_name ?? diseaseId;
     }

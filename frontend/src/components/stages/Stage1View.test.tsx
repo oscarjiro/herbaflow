@@ -377,7 +377,7 @@ describe("Stage1View — column spec", () => {
     expect(within(plantsCard as HTMLElement).getByText("2")).toHaveClass("font-display");
   });
 
-  it("InChIKey column links to PubChem", () => {
+  it("links InChIKey through the persisted source_url when present", () => {
     wrap(
       <Stage1View
         data={makeRun({
@@ -389,6 +389,7 @@ describe("Stage1View — column spec", () => {
                   compound_id: "c1",
                   canonical_name: "Curcumin",
                   inchikey: "VHYFNPMBLIVWCW-UHFFFAOYSA-N",
+                  source_url: "https://pubchem.ncbi.nlm.nih.gov/compound/969516",
                   tag: "computed",
                 },
               ],
@@ -399,13 +400,9 @@ describe("Stage1View — column spec", () => {
       />,
     );
 
-    const link = screen.getByRole("link", {
-      name: /VHYFNPMBLIVWCW-UHFFFAOYSA-N/i,
-    });
-    expect(link).toHaveAttribute(
-      "href",
-      "https://pubchem.ncbi.nlm.nih.gov/#query=VHYFNPMBLIVWCW-UHFFFAOYSA-N",
-    );
+    const link = screen.getByRole("link", { name: /VHYFNPMBLIVWCW-UHFFFAOYSA-N/i });
+    expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
+    expect(link).not.toHaveAttribute("href", expect.stringContaining("#query"));
   });
 
   it("does not render a KNApSAcK source chip for a computed compound", () => {
@@ -419,6 +416,7 @@ describe("Stage1View — column spec", () => {
                 {
                   compound_id: "c1",
                   canonical_name: "Curcumin",
+                  inchikey: "CURCUMIN-KEY",
                   tag: "computed",
                   source_url: "https://knapsack.jp/compound/C00001",
                 },
@@ -433,6 +431,11 @@ describe("Stage1View — column spec", () => {
     const table = compoundsTable(container);
     expect(table.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
     expect(table.queryByText("KNApSAcK")).not.toBeInTheDocument();
+    expect(table.queryByRole("link", { name: /^Curcumin$/ })).not.toBeInTheDocument();
+    expect(table.getByRole("link", { name: /curcumin-key/i })).toHaveAttribute(
+      "href",
+      "https://knapsack.jp/compound/C00001",
+    );
   });
 
   it("does not render a User-curated source chip for a user-added compound", () => {

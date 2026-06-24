@@ -7,12 +7,15 @@ import { EntryOverflowDialog } from "./EntryOverflowDialog";
 // Helpers
 // ---------------------------------------------------------------------------
 
-const mockCompounds: ResolvedCompound[] = [
+type TestResolvedCompound = ResolvedCompound & { source_url?: string | null };
+
+const mockCompounds: TestResolvedCompound[] = [
   {
     compound_id: "c1",
     canonical_key: "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
     canonical_name: "Curcumin",
     validation_status: "ok",
+    source_url: "https://pubchem.ncbi.nlm.nih.gov/compound/969516",
   },
   {
     compound_id: "c2",
@@ -67,7 +70,7 @@ describe("EntryOverflowDialog — compounds", () => {
     expect(screen.getByText("Quercetin")).toBeInTheDocument();
   });
 
-  it("renders InChIKey as an external link to PubChem", () => {
+  it("links InChIKey through the persisted source_url when present", () => {
     render(
       <EntryOverflowDialog
         kind="compounds"
@@ -79,14 +82,10 @@ describe("EntryOverflowDialog — compounds", () => {
     );
 
     const link = screen.getByRole("link", {
-      name: /pubchem entry for RYYVLZVUVIJVGH-UHFFFAOYSA-N/i,
+      name: /compound source for RYYVLZVUVIJVGH-UHFFFAOYSA-N/i,
     });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute(
-      "href",
-      "https://pubchem.ncbi.nlm.nih.gov/#query=RYYVLZVUVIJVGH-UHFFFAOYSA-N",
-    );
-    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
+    expect(link).not.toHaveAttribute("href", expect.stringContaining("#query"));
   });
 
   it("filter input narrows compound rows", async () => {

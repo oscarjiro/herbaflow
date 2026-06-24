@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { ThemeProvider } from "@/lib/theme";
 import { Stage7View, buildS7CsvRows, S7_CSV_HEADER } from "./Stage7View";
-import { uniprotGeneUrl } from "../../lib/externalUrls";
+import { uniprotUrl } from "../../lib/externalUrls";
 import type { AnalysisRead } from "../../api/types.gen";
 import * as sdk from "../../api/sdk.gen";
 
@@ -224,11 +224,11 @@ describe("Stage7View", () => {
     expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 
-  it("links the gene symbol cell to UniProt via uniprotGeneUrl", () => {
+  it("links the gene symbol cell to the persisted canonical UniProt URL", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    // The gene-symbol cell is an anchor; its href must match uniprotGeneUrl for "TNF".
     const link = screen.getByRole("link", { name: "TNF" });
-    expect(link).toHaveAttribute("href", uniprotGeneUrl("TNF"));
+    expect(link).toHaveAttribute("href", uniprotUrl("P01375"));
+    expect(link).not.toHaveAttribute("href", expect.stringContaining("query=gene:"));
   });
 
   it("renders MCC and centrality values as numerics (not empty)", () => {
@@ -272,9 +272,8 @@ describe("Stage7View — CSV export", () => {
     expect(source_url).toBe("https://www.uniprot.org/uniprotkb/P01375/entry");
     // The row has exactly 8 columns — no extra link column added.
     expect(rows[0]).toHaveLength(8);
-    // No cell contains the uniprotGeneUrl pattern for a gene symbol.
     const rowStr = JSON.stringify(rows[0]);
-    expect(rowStr).not.toContain("uniprotkb?query=gene:");
+    expect(rowStr).not.toContain("query=gene:");
   });
 
   it("S7_CSV_HEADER does not contain a link column", () => {

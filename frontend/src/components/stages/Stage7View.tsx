@@ -22,7 +22,6 @@ import {
   HUB_GENES_NUMERIC_PARAMS,
   HUB_GENES_PARAMS,
 } from "../../contract";
-import { uniprotGeneUrl } from "../../lib/externalUrls";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
@@ -116,7 +115,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
   const tooSmall = (stage7.flags ?? []).includes("network_too_small");
 
-  // Column definitions — gene-symbol links via uniprotGeneUrl (display-only; absent from CSV).
+  // Column definitions — gene-symbol links use the persisted canonical UniProt URL when present.
   // Numeric columns carry meta.className:"num" for right-aligned tabular display.
   const columns: ColumnDef<Hub>[] = [
     {
@@ -130,11 +129,12 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       id: "gene",
       header: "Gene",
       enableSorting: true,
-      cell: ({ row }) => (
-        <ExternalLink href={uniprotGeneUrl(row.original.gene_symbol)}>
-          {row.original.gene_symbol}
-        </ExternalLink>
-      ),
+      cell: ({ row }) =>
+        row.original.source_url ? (
+          <ExternalLink href={row.original.source_url}>{row.original.gene_symbol}</ExternalLink>
+        ) : (
+          <span>{row.original.gene_symbol}</span>
+        ),
     },
     {
       id: "mcc",

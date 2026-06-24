@@ -4,7 +4,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { listPlantsOptions } from "../../api/@tanstack/react-query.gen";
 import type { AnalysisRead, PlantRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
-import { pubchemUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
@@ -200,11 +199,14 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
       cell: ({ row }) => {
         const r = row.original;
         if (!r.inchikey) return <span className="text-hf-fg-3">—</span>;
-        return (
-          <ExternalLink href={pubchemUrl(r.inchikey)} className="font-mono text-xs">
-            {r.inchikey}
-          </ExternalLink>
-        );
+        if (r.source_url) {
+          return (
+            <ExternalLink href={r.source_url} className="font-mono text-xs">
+              {r.inchikey}
+            </ExternalLink>
+          );
+        }
+        return <span className="font-mono text-xs">{r.inchikey}</span>;
       },
     },
     {

@@ -83,7 +83,7 @@ describe("Stage2View", () => {
     expect(screen.getByText("HeavyMolecule")).toBeInTheDocument();
   });
 
-  it("compound name links to PubChem via inchikey when inchikey is present", () => {
+  it("renders compound name as plain text when no PubChem CID is present", () => {
     const data = makeRun({
       stage_results: {
         "2": {
@@ -100,11 +100,8 @@ describe("Stage2View", () => {
       } as AnalysisRead["stage_results"],
     });
     wrap(<Stage2View data={data} />);
-    const link = screen.getByRole("link", { name: /Curcumin/i });
-    expect(link).toHaveAttribute(
-      "href",
-      "https://pubchem.ncbi.nlm.nih.gov/#query=RYYVLZVUVIJVGH-UHFFFAOYSA-N",
-    );
+    expect(screen.getByText("Curcumin")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Curcumin/i })).not.toBeInTheDocument();
   });
 
   it("renders Passed badge for passed compounds and Filtered badge for filtered compounds", () => {

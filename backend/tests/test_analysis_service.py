@@ -70,7 +70,18 @@ class FakeCompoundRepo:
     async def get_many(self, ids):
         from types import SimpleNamespace
 
-        return [SimpleNamespace(compound_id=i, canonical_name=f"compound-{i}") for i in ids]
+        return [
+            SimpleNamespace(
+                compound_id=i,
+                canonical_name=f"compound-{i}",
+                inchi_key=f"INCHIKEY-{str(i)[:8]}",
+                smiles="CCO",
+                source_url=(
+                    "https://pubchem.ncbi.nlm.nih.gov/compound/" f"{str(i).replace('-', '')[:8]}"
+                ),
+            )
+            for i in ids
+        ]
 
 
 def _service(plant_missing=None, disease_exists=True, run=None, compound_existing=None):
@@ -111,6 +122,26 @@ def test_target_add_entry_source_url_none_without_accession() -> None:
         target_id=uuid.uuid4(), gene_symbol="X", protein_name=None, uniprot_accession=None
     )
     assert AnalysisService._target_add_entry(t)["source_url"] is None
+
+
+def test_compound_add_entry_carries_structure_and_source_url() -> None:
+    """The shared compound edit entry carries Stage-1 identity fields for manual/user-added rows."""
+    from types import SimpleNamespace
+
+    cid = uuid.uuid4()
+    c = SimpleNamespace(
+        compound_id=cid,
+        canonical_name="Curcumin",
+        inchi_key="VFLDPWHFBUODDF-FCXRPNKRSA-N",
+        smiles="COc1cc(O)ccc1",
+        source_url="https://pubchem.ncbi.nlm.nih.gov/compound/969516",
+    )
+    entry = AnalysisService._compound_add_entry(c)
+    assert entry["compound_id"] == str(cid)
+    assert entry["canonical_name"] == "Curcumin"
+    assert entry["inchikey"] == "VFLDPWHFBUODDF-FCXRPNKRSA-N"
+    assert entry["smiles"] == "COc1cc(O)ccc1"
+    assert entry["source_url"] == "https://pubchem.ncbi.nlm.nih.gov/compound/969516"
 
 
 @pytest.mark.asyncio

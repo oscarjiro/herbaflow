@@ -11,7 +11,16 @@ class _StubCompoundRepo:
         self._names = names
 
     async def get_many(self, ids: list[uuid.UUID]):
-        return [SimpleNamespace(compound_id=i, canonical_name=self._names[i]) for i in ids]
+        return [
+            SimpleNamespace(
+                compound_id=i,
+                canonical_name=self._names[i],
+                inchi_key="VFLDPWHFBUODDF-FCXRPNKRSA-N",
+                smiles="COc1cc(O)ccc1",
+                source_url="https://pubchem.ncbi.nlm.nih.gov/compound/969516",
+            )
+            for i in ids
+        ]
 
 
 @pytest.mark.asyncio
@@ -31,3 +40,6 @@ async def test_prefill_compound_stage_carries_canonical_name() -> None:
     compounds = stage_results["1"]["compounds"]
     assert compounds[0]["compound_id"] == str(cid)
     assert compounds[0]["canonical_name"] == "curcumin"
+    assert compounds[0]["inchikey"] == "VFLDPWHFBUODDF-FCXRPNKRSA-N"
+    assert compounds[0]["smiles"] == "COc1cc(O)ccc1"
+    assert compounds[0]["source_url"] == "https://pubchem.ncbi.nlm.nih.gov/compound/969516"

@@ -202,6 +202,17 @@ describe("deriveSubjects — missing or empty inputs", () => {
     expect(result.plant).toBe("p1");
     expect(result.disease).toBe("d1");
   });
+
+  it("does not expose raw ids while selection catalogs are still loading", () => {
+    const result = deriveSubjects(
+      { input_modes: { plant: "selection", disease: "selection" }, plant_ids: ["p1"] },
+      "d1",
+      undefined,
+      undefined,
+    );
+    expect(result.plant).toBe("—");
+    expect(result.disease).toBe("—");
+  });
 });
 
 // ---------------------------------------------------------------------------

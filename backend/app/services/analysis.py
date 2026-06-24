@@ -245,11 +245,9 @@ class AnalysisService:
         (symmetric with selection mode + the Stage-3 target prefill). Existence was
         verified upstream in ``create`` (``_verify_entities``), so every id resolves.
         """
-        rows = await self.compound_repo.get_many(ids)
-        name_by_id = {str(c.compound_id): c.canonical_name for c in rows}
         edit = edits.normalize_edit(
             edits.empty_edit(),
-            [{"compound_id": str(i), "canonical_name": name_by_id.get(str(i))} for i in ids],
+            [self._compound_add_entry(c) for c in await self.compound_repo.get_many(ids)],
             [],
             id_key="compound_id",
         )
@@ -305,6 +303,17 @@ class AnalysisService:
         stage_results["4"] = {
             **edits.build_stage_entities([], edit, id_key="target_id", list_key="targets"),
             "min_score_applied": None,
+        }
+
+    @staticmethod
+    def _compound_add_entry(c: Any) -> dict[str, Any]:
+        """Edit-layer add entry for a compound, carrying its Stage-1 identity fields."""
+        return {
+            "compound_id": str(c.compound_id),
+            "canonical_name": c.canonical_name,
+            "inchikey": getattr(c, "inchi_key", None),
+            "smiles": getattr(c, "smiles", None),
+            "source_url": getattr(c, "source_url", None),
         }
 
     @staticmethod
@@ -454,12 +463,7 @@ class AnalysisService:
                 if entity == "target":
                     add_entries.append(self._target_add_entry(obj))
                 else:
-                    add_entries.append(
-                        {
-                            id_key: str(getattr(obj, id_key)),
-                            "canonical_name": getattr(obj, "canonical_name", None),
-                        }
-                    )
+                    add_entries.append(self._compound_add_entry(obj))
 
         # Fold into the durable edit layer (computed; not yet persisted).
         prior_edit = run.parameters.get("stage_edits", {}).get(skey, edits.empty_edit())

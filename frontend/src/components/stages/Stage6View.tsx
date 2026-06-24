@@ -34,7 +34,7 @@ import {
   PPI_PARAMS,
   PPI_SELECT_PARAMS,
 } from "../../contract";
-import { uniprotGeneUrl } from "../../lib/externalUrls";
+import { uniprotUrl } from "../../lib/externalUrls";
 import { exportArtifactUrl } from "../../lib/exportUrl";
 import type cytoscape from "cytoscape";
 import { useChartColors } from "@/lib/chartTheme";
@@ -274,6 +274,15 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     () => buildNetworkElements(computed?.nodes ?? [], computed?.edges ?? [], hubs),
     [computed, hubs],
   );
+  const accessionByNodeKey = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const node of computed?.nodes ?? []) {
+      if (!node.uniprot_accession) continue;
+      map.set(node.gene_symbol, node.uniprot_accession);
+      if (node.string_id) map.set(node.string_id, node.uniprot_accession);
+    }
+    return map;
+  }, [computed]);
   const stylesheet = useMemo(
     () =>
       buildNetworkStylesheet(
@@ -289,29 +298,26 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
 
   const blocked = isBlocked(stage6) ? stage6 : undefined;
 
-  // Column definitions — gene-symbol pairs with UniProt links; confidence numeric-aligned.
-  // UniProt links use gene-search URLs (gene:X+AND+organism_id:9606) because edge endpoints
-  // are gene symbols, not UniProt accessions. Links are display-only and excluded from the CSV.
+  function renderGeneLink(gene: string) {
+    const accession = accessionByNodeKey.get(gene);
+    if (!accession) return <span>{gene}</span>;
+    return <ExternalLink href={uniprotUrl(accession)}>{gene}</ExternalLink>;
+  }
+
+  // Column definitions — edge endpoints display gene symbols and link through the matching
+  // Stage-6 node accession. Links are display-only and excluded from the CSV.
   const columns: ColumnDef<Stage6Edge>[] = [
     {
       id: "source",
       header: "Source",
       enableSorting: true,
-      cell: ({ row }) => (
-        <ExternalLink href={uniprotGeneUrl(row.original.source)}>
-          {row.original.source}
-        </ExternalLink>
-      ),
+      cell: ({ row }) => renderGeneLink(row.original.source),
     },
     {
       id: "target",
       header: "Target",
       enableSorting: true,
-      cell: ({ row }) => (
-        <ExternalLink href={uniprotGeneUrl(row.original.target)}>
-          {row.original.target}
-        </ExternalLink>
-      ),
+      cell: ({ row }) => renderGeneLink(row.original.target),
     },
     {
       id: "confidence",

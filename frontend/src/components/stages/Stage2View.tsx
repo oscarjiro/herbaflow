@@ -3,8 +3,7 @@
  *
  * Renders:
  *  - Stage entity context + summary count cards
- *  - A combined passed + filtered DataTable with Stage 2 outcomes, source links,
- *    and reasons for filtered rows
+ *  - A combined passed + filtered DataTable with Stage 2 outcomes and reasons for filtered rows
  *  - CsvDownloadButton (same header + rows as before)
  *  - Collapsible ParamPanel wired to resetFrom
  *  - "Tools & data sources" footer
@@ -22,13 +21,11 @@ import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import { ADME_PARAMS } from "../../contract";
 import { formatSig } from "../../lib/format";
-import { pubchemUrl } from "../../lib/externalUrls";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { BoolMark } from "@/components/ui/BoolMark";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
-import { ExternalLink } from "@/components/ui/ExternalLink";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
@@ -125,9 +122,6 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     cell: ({ row }) => {
       const r = row.original;
       const label = r.canonical_name ?? r.inchikey ?? r.compound_id;
-      if (r.inchikey) {
-        return <ExternalLink href={pubchemUrl(r.inchikey)}>{label}</ExternalLink>;
-      }
       return <span>{label}</span>;
     },
   },

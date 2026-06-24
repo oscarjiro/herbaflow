@@ -4,7 +4,7 @@ import type { ResolvedCompound, ResolvedTarget } from "@/api/types.gen";
 import { ExternalLink } from "@/components/ui/ExternalLink";
 import { DataTable } from "@/components/ui/DataTable";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { pubchemUrl, uniprotUrl } from "@/lib/externalUrls";
+import { uniprotUrl } from "@/lib/externalUrls";
 
 // ---------------------------------------------------------------------------
 // EntryOverflowDialog
@@ -19,9 +19,11 @@ interface BaseProps {
   onOpenChange: (open: boolean) => void;
 }
 
+type CompoundWithSourceUrl = ResolvedCompound & { source_url?: string | null };
+
 interface CompoundsProps extends BaseProps {
   kind: "compounds";
-  items: ResolvedCompound[];
+  items: CompoundWithSourceUrl[];
   onRemove: (id: string) => void;
 }
 
@@ -37,7 +39,7 @@ type EntryOverflowDialogProps = CompoundsProps | TargetsProps;
 // Compound columns
 // ---------------------------------------------------------------------------
 
-function buildCompoundColumns(onRemove: (id: string) => void): ColumnDef<ResolvedCompound>[] {
+function buildCompoundColumns(onRemove: (id: string) => void): ColumnDef<CompoundWithSourceUrl>[] {
   return [
     {
       accessorKey: "canonical_key",
@@ -45,11 +47,15 @@ function buildCompoundColumns(onRemove: (id: string) => void): ColumnDef<Resolve
       meta: { filterable: true },
       cell: ({ row }) => {
         const key = row.original.canonical_key;
-        return (
-          <ExternalLink href={pubchemUrl(key)} label={`PubChem entry for ${key}`}>
-            <span className="font-mono text-xs">{key}</span>
-          </ExternalLink>
-        );
+        const sourceUrl = row.original.source_url;
+        if (sourceUrl) {
+          return (
+            <ExternalLink href={sourceUrl} label={`Compound source for ${key}`}>
+              <span className="font-mono text-xs">{key}</span>
+            </ExternalLink>
+          );
+        }
+        return <span className="font-mono text-xs">{key}</span>;
       },
     },
     {
