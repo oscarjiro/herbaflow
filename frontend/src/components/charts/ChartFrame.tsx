@@ -13,6 +13,8 @@ type ChartFrameProps = {
   filename: string;
   /** Optional one-line description rendered below the title in muted text. */
   description?: string;
+  /** Optional extra actions rendered next to the Download PNG control. */
+  actions?: React.ReactNode;
   /**
    * Custom export handler. When provided it is called instead of the default
    * SVG-to-PNG path. Useful for canvas-based charts (e.g. Cytoscape) that
@@ -30,7 +32,14 @@ type ChartFrameProps = {
  * shared exportSvgAsPng path. All chart components wrap their content in this
  * frame rather than each implementing their own download button.
  */
-export function ChartFrame({ title, filename, description, onExport, children }: ChartFrameProps) {
+export function ChartFrame({
+  title,
+  filename,
+  description,
+  actions,
+  onExport,
+  children,
+}: ChartFrameProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -56,7 +65,7 @@ export function ChartFrame({ title, filename, description, onExport, children }:
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardAction>
+        <CardAction className="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -66,6 +75,7 @@ export function ChartFrame({ title, filename, description, onExport, children }:
             <DownloadIcon className="size-4 shrink-0" strokeWidth={1.5} />
             Download PNG
           </Button>
+          {actions}
         </CardAction>
         {description && (
           <p className="text-muted-foreground col-span-full text-sm">{description}</p>

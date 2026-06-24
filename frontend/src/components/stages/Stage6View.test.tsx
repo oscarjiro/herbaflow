@@ -296,6 +296,16 @@ describe("Stage6View — interactive network graph", () => {
     expect(btn.getAttribute("href")).toMatch(/stage6_ppi_network\.png$/);
   });
 
+  it("places the Download STRING image button next to the chart Download PNG button", () => {
+    wrap(<Stage6View data={makeCompleteNetworkData()} />);
+    const stringImage = screen.getByRole("link", { name: /download string image/i });
+    const chartPng = screen.getByRole("button", { name: /download png/i });
+    expect(stringImage.parentElement).toBe(chartPng.parentElement);
+    expect(stringImage).toHaveAttribute("data-slot", chartPng.getAttribute("data-slot"));
+    expect(stringImage).toHaveAttribute("data-variant", chartPng.getAttribute("data-variant"));
+    expect(stringImage).toHaveAttribute("data-size", chartPng.getAttribute("data-size"));
+  });
+
   it("does not render the Download STRING image button when there are no nodes", () => {
     wrap(
       <Stage6View

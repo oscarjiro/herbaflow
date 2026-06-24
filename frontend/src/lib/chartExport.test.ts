@@ -176,22 +176,35 @@ describe("exportSvgAsPng — error path", () => {
 // ---------------------------------------------------------------------------
 
 function makeCy() {
+  const pan = vi.fn(() => ({ x: 4, y: 8 }));
+  const zoom = vi.fn(() => 1.25);
   return {
     png: vi.fn(() => "data:image/png;base64,AAAA"),
+    fit: vi.fn(),
+    pan,
+    zoom,
     nodes: vi.fn(() => ({ style: vi.fn(), removeStyle: vi.fn() })),
   };
 }
 
 describe("exportCytoscapeAsPng — success path", () => {
-  it("renders with full:true, scale:2 on a transparent canvas", async () => {
+  it("fits the graph into the viewport instead of exporting the full layout bounds", async () => {
     const { exportCytoscapeAsPng } = await import("./chartExport");
     const cy = makeCy();
     await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
-    expect(cy.png).toHaveBeenCalledWith(
-      expect.objectContaining({ full: true, scale: 2, bg: "transparent" }),
-    );
+    expect(cy.fit).toHaveBeenCalledWith(undefined, 24);
+    expect(cy.png).toHaveBeenCalledWith(expect.objectContaining({ scale: 8, bg: "transparent" }));
+    expect(cy.png).not.toHaveBeenCalledWith(expect.objectContaining({ full: true }));
     // A transparent export must not paint a background rectangle.
     expect(fakeCtx.fillRect).not.toHaveBeenCalled();
+  });
+
+  it("restores the user's pan and zoom after fitting for export", async () => {
+    const { exportCytoscapeAsPng } = await import("./chartExport");
+    const cy = makeCy();
+    await exportCytoscapeAsPng(cy as never, { filename: "ppi.png" });
+    expect(cy.zoom).toHaveBeenLastCalledWith(1.25);
+    expect(cy.pan).toHaveBeenLastCalledWith({ x: 4, y: 8 });
   });
 
   it("forces black labels for the export, then restores them", async () => {
@@ -199,6 +212,9 @@ describe("exportCytoscapeAsPng — success path", () => {
     const removeStyle = vi.fn();
     const cy = {
       png: vi.fn(() => "data:image/png;base64,AAAA"),
+      fit: vi.fn(),
+      pan: vi.fn(() => ({ x: 0, y: 0 })),
+      zoom: vi.fn(() => 1),
       nodes: vi.fn(() => ({ style, removeStyle })),
     };
     const { exportCytoscapeAsPng } = await import("./chartExport");

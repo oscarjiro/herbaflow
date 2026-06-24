@@ -237,6 +237,56 @@ async def test_get_expired_is_410() -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_hydrates_legacy_stage1_added_compound_identity() -> None:
+    from datetime import timedelta
+    from types import SimpleNamespace
+
+    from app.clock import now_utc
+
+    cid = uuid.uuid4()
+    aid = uuid.uuid4()
+    run = SimpleNamespace(
+        analysis_id=aid,
+        analysis_name=None,
+        disease_id=uuid.uuid4(),
+        mode=Mode.guided,
+        status="stage_1_awaiting_approval",
+        current_stage=1,
+        parameters={"input_modes": {"plant": "selection", "disease": "selection"}},
+        stage_results={
+            "1": {
+                "state": "user_provided",
+                "count": 1,
+                "computed_ids": [],
+                "compounds": [
+                    {
+                        "compound_id": str(cid),
+                        "canonical_name": "legacy add",
+                        "tag": "user-added",
+                        "inchikey": None,
+                        "smiles": None,
+                        "source_url": None,
+                    }
+                ],
+            }
+        },
+        progress=None,
+        created_at=now_utc(),
+        completed_at=None,
+        expires_at=now_utc() + timedelta(hours=1),
+        error_message=None,
+    )
+    svc = _service(run=run, compound_existing=[cid])
+
+    read = await svc.get(aid)
+
+    row = read.stage_results["1"]["compounds"][0]
+    assert row["inchikey"] == f"INCHIKEY-{str(cid)[:8]}"
+    assert row["smiles"] == "CCO"
+    assert row["source_url"].startswith("https://pubchem.ncbi.nlm.nih.gov/compound/")
+
+
+@pytest.mark.asyncio
 async def test_create_freezes_adme_defaults() -> None:
     P = uuid.uuid4()
     D = uuid.uuid4()

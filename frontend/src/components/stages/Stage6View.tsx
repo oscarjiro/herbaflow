@@ -432,6 +432,33 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
                   filename="ppi_network.png"
                   elements={network.elements}
                   stylesheet={stylesheet}
+                  actions={
+                    <Button variant="outline" size="sm" asChild>
+                      <a
+                        href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
+                        download="stage6_ppi_network.png"
+                        aria-label="Download STRING image"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Download STRING image
+                      </a>
+                    </Button>
+                  }
                   nodeTooltip={(d) =>
                     `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`
                   }
@@ -443,35 +470,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
                     ) : undefined
                   }
                 />
-                {/* STRING server-rendered network image — deterministic export artifact.
-                    Not embedded on-screen (stripped from poll payload to keep polls lean);
-                    served via the export bundle and available as a direct download here. */}
-                <div className="flex items-center gap-2">
-                  <a
-                    href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
-                    download="stage6_ppi_network.png"
-                    className="hf-btn inline-flex items-center gap-1.5 text-sm"
-                    aria-label="Download STRING image"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" y1="15" x2="12" y2="3" />
-                    </svg>
-                    Download STRING image
-                  </a>
-                </div>
               </>
             )}
 

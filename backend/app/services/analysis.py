@@ -345,11 +345,65 @@ class AnalysisService:
         if run.expires_at is not None and run.expires_at < now_utc():
             raise GoneProblem(detail="Analysis run has expired.")
         read = AnalysisRead.model_validate(run)
+        await self._hydrate_stage1_compound_identity(read)
         if run.status in _PROGRESS_RUNNING and self.progress_repo is not None:
             row = await self.progress_repo.get(analysis_id)
             if row is not None:
                 read.progress = ProgressRead.model_validate(row)
         return read
+
+    async def _hydrate_stage1_compound_identity(self, read: AnalysisRead) -> None:
+        """Fill legacy Stage-1 compound rows that predate edit-layer identity carry.
+
+        Current manual prefill/edit rows already carry these fields. This read-time
+        compatibility path only patches old stored rows with missing identity values
+        so the API and frontend display the canonical compound record consistently.
+        """
+        stage1 = read.stage_results.get("1")
+        if not isinstance(stage1, dict):
+            return
+        rows = stage1.get("compounds")
+        if not isinstance(rows, list):
+            return
+
+        ids: list[uuid.UUID] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            if not any(row.get(key) in (None, "") for key in ("inchikey", "smiles", "source_url")):
+                continue
+            try:
+                ids.append(uuid.UUID(str(row["compound_id"])))
+            except (KeyError, TypeError, ValueError):
+                continue
+        if not ids:
+            return
+
+        compounds = await self.compound_repo.get_many(ids)
+        by_id = {str(c.compound_id): self._compound_add_entry(c) for c in compounds}
+
+        changed = False
+        hydrated_rows: list[Any] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                hydrated_rows.append(row)
+                continue
+            patch = by_id.get(str(row.get("compound_id")))
+            if patch is None:
+                hydrated_rows.append(row)
+                continue
+            next_row = dict(row)
+            for key in ("canonical_name", "inchikey", "smiles", "source_url"):
+                if next_row.get(key) in (None, "") and patch.get(key) is not None:
+                    next_row[key] = patch[key]
+                    changed = True
+            hydrated_rows.append(next_row)
+
+        if changed:
+            read.stage_results = {
+                **read.stage_results,
+                "1": {**stage1, "compounds": hydrated_rows},
+            }
 
     async def list_recent(self, *, limit: int, offset: int) -> list[AnalysisListItem]:
         runs = await self.analysis_repo.list_recent(limit=limit, offset=offset)
@@ -452,11 +506,8 @@ class AnalysisService:
                     )
                 ) from e
 
-        # Resolve added entities (self-contained edit layer). Targets go through the shared
-        # _target_add_entry so an ADDED target carries the SAME identity + UniProt source_url as a
-        # prefilled/computed one (gene_symbol/uniprot_accession kept for the Stage 8 background +
-        # the Stage 3/4 view link — B2-sym); no inline target-entry duplicate. Compounds carry just
-        # id + canonical_name (they attach nothing extra).
+        # Resolve added entities through the shared edit entries so manual rows
+        # carry the same identity/link fields as prefilled or computed rows.
         add_entries: list[dict[str, Any]] = []
         if add:
             for obj in await repo.get_many(add):

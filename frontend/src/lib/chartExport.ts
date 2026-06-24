@@ -3,6 +3,7 @@ import { readChartColors } from "./chartTheme";
 
 /** Theme-independent label colour baked into exported figures (reads on a white page). */
 const EXPORT_TEXT = "#000000";
+const CYTOSCAPE_EXPORT_SCALE = 8;
 
 /**
  * Compose an image source onto a canvas and save it as a PNG.
@@ -155,8 +156,8 @@ export async function exportSvgAsPng(
 /**
  * Export a Cytoscape graph as a PNG file saved to the user's filesystem.
  *
- * Renders the full graph to a PNG data URL via cy.png (2x scale, background
- * matching the surface), then draws and saves it through the same
+ * Renders the fitted graph to a high-resolution PNG data URL via cy.png, then
+ * draws and saves it through the same
  * composeImageToPng helper so the save path is shared with the SVG export.
  */
 export async function exportCytoscapeAsPng(
@@ -166,12 +167,20 @@ export async function exportCytoscapeAsPng(
   // Print-friendly export: black labels with a white halo (legible on a white
   // page, independent of the live theme) on a transparent canvas. The temporary
   // per-node style bypass is removed afterwards so the on-screen graph is intact.
+  // Export a fitted viewport rather than `full:true`: dense layouts can have a
+  // very large bounding box, which produces a huge mostly-transparent PNG that
+  // looks blank in image viewers.
   const nodes = cy.nodes();
+  const zoom = cy.zoom();
+  const pan = cy.pan();
   nodes.style({ color: EXPORT_TEXT, "text-outline-color": "#ffffff", "text-outline-width": 2 });
   let dataUrl: string;
   try {
-    dataUrl = cy.png({ full: true, scale: 2, bg: "transparent" });
+    cy.fit(undefined, 24);
+    dataUrl = cy.png({ full: false, scale: CYTOSCAPE_EXPORT_SCALE, bg: "transparent" });
   } finally {
+    cy.zoom(zoom);
+    cy.pan(pan);
     nodes.removeStyle("color text-outline-color text-outline-width");
   }
   return composeImageToPng(dataUrl, {

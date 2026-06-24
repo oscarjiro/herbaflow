@@ -44,6 +44,8 @@ type NetworkGraphProps = {
   tray?: React.ReactNode;
   /** Optional one-line description rendered under the title. */
   description?: string;
+  /** Optional actions rendered next to the Download PNG control. */
+  actions?: React.ReactNode;
   /** Graph canvas height in pixels (default 420). */
   height?: number;
   /**
@@ -69,6 +71,7 @@ export function NetworkGraph({
   layout,
   tray,
   description,
+  actions,
   height,
   nodeTooltip,
   legend,
@@ -98,6 +101,7 @@ export function NetworkGraph({
       title={title}
       filename={filename}
       description={description}
+      actions={actions}
       onExport={async () => {
         if (cyRef.current) {
           await exportCytoscapeAsPng(cyRef.current, { filename });
