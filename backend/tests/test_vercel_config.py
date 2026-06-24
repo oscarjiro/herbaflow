@@ -11,7 +11,7 @@ def test_backend_service_includes_shared_contract() -> None:
 
     backend = config["experimentalServices"]["backend"]
 
-    assert "../shared/contracts/analysis.json" in backend["includeFiles"]
+    assert "../../shared/contracts/analysis.json" in backend["includeFiles"]
 
 
 def test_contract_path_resolves_from_vercel_backend_bundle_layout(tmp_path: Path) -> None:

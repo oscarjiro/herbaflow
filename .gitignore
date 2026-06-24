@@ -139,3 +139,4 @@ supabase/_baseline_work/
 backend/tests/scientific/fixtures/gd2_*.json
 docs/validation/golden-hito-pancreatic/
 
+.vercel
