@@ -416,6 +416,59 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
               </p>
             )}
 
+            {/* Interactive PPI network (shown once this step has nodes; the deterministic
+                server PNG stays in the export bundle). Blocked / empty states have their own
+                UI above, so the graph simply does not render then. */}
+            {computed.nodes.length > 0 && (
+              <>
+                <NetworkGraph
+                  title="Interaction network"
+                  filename="ppi_network.png"
+                  elements={network.elements}
+                  stylesheet={stylesheet}
+                  nodeTooltip={(d) =>
+                    `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`
+                  }
+                  tray={
+                    network.isolated.length > 0 ? (
+                      <p className="text-muted-foreground mt-3 text-sm">
+                        Not connected at this confidence: {network.isolated.join(", ")}
+                      </p>
+                    ) : undefined
+                  }
+                />
+                {/* STRING server-rendered network image — deterministic export artifact.
+                    Not embedded on-screen (stripped from poll payload to keep polls lean);
+                    served via the export bundle and available as a direct download here. */}
+                <div className="flex items-center gap-2">
+                  <a
+                    href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
+                    download="stage6_ppi_network.png"
+                    className="hf-btn inline-flex items-center gap-1.5 text-sm"
+                    aria-label="Download STRING image"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Download STRING image
+                  </a>
+                </div>
+              </>
+            )}
+
             {/* Edge-list table card */}
             <Card>
               <CardHeader>
@@ -434,57 +487,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
             </Card>
           </>
         )
-      )}
-
-      {/* Interactive PPI network (shown once this step has nodes; the deterministic
-          server PNG stays in the export bundle). Blocked / empty states have their own
-          UI above, so the graph simply does not render then. */}
-      {computed && computed.nodes.length > 0 && (
-        <>
-          <NetworkGraph
-            title="Interaction network"
-            filename="ppi_network.png"
-            elements={network.elements}
-            stylesheet={stylesheet}
-            nodeTooltip={(d) => `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`}
-            tray={
-              network.isolated.length > 0 ? (
-                <p className="text-muted-foreground mt-3 text-sm">
-                  Not connected at this confidence: {network.isolated.join(", ")}
-                </p>
-              ) : undefined
-            }
-          />
-          {/* STRING server-rendered network image — deterministic export artifact.
-              Not embedded on-screen (stripped from poll payload to keep polls lean);
-              served via the export bundle and available as a direct download here. */}
-          <div className="flex items-center gap-2">
-            <a
-              href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
-              download="stage6_ppi_network.png"
-              className="hf-btn inline-flex items-center gap-1.5 text-sm"
-              aria-label="Download STRING image"
-            >
-              <svg
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              Download STRING image
-            </a>
-          </div>
-        </>
       )}
 
       {/* PPI param panel — always shown (raise the cap / change settings + Redo) */}

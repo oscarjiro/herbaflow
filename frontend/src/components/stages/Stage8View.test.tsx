@@ -355,6 +355,16 @@ describe("Stage8View", () => {
     expect(link).toHaveAttribute("download", "enrichment.csv");
   });
 
+  it("renders the enrichment chart before the terms table", () => {
+    render(wrap(<Stage8View data={makeRealisticData(REALISTIC_TERMS)} />));
+    const chartTitle = screen.getByText("Pathway enrichment");
+    const csvLink = screen.getByRole("link", { name: /download csv/i });
+
+    expect(
+      chartTitle.compareDocumentPosition(csvLink) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("passes every enrichment row to DataTable so the shared pager owns pagination", () => {
     const terms = Array.from({ length: 12 }, (_, i) => ({
       source: "GO:BP",

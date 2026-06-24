@@ -226,24 +226,6 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
         </p>
       )}
 
-      {terms.length > 0 && (
-        <Card>
-          <CardHeader>
-            <div className="flex flex-wrap items-center gap-3">
-              <CsvDownloadButton
-                header={S8_CSV_HEADER}
-                rows={csvRows}
-                filename="enrichment.csv"
-                label="Download CSV"
-              />
-            </div>
-          </CardHeader>
-          <CardContent className="px-0">
-            <DataTable columns={columns} data={terms} />
-          </CardContent>
-        </Card>
-      )}
-
       {/* Interactive enrichment bubble chart (shown once terms exist) */}
       {terms.length > 0 && (
         <ChartFrame
@@ -264,6 +246,24 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
             onGraphDiv={(gd) => (gdRef.current = gd)}
           />
         </ChartFrame>
+      )}
+
+      {terms.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex flex-wrap items-center gap-3">
+              <CsvDownloadButton
+                header={S8_CSV_HEADER}
+                rows={csvRows}
+                filename="enrichment.csv"
+                label="Download CSV"
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="px-0">
+            <DataTable columns={columns} data={terms} />
+          </CardContent>
+        </Card>
       )}
 
       {/* Enrichment param panel */}

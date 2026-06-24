@@ -245,6 +245,16 @@ describe("Stage6View — interactive network graph", () => {
     expect(screen.getByText("0.92")).toBeInTheDocument();
   });
 
+  it("renders the interaction graph before the edge-list table", () => {
+    wrap(<Stage6View data={makeCompleteNetworkData()} />);
+    const chartTitle = screen.getByText("Interaction network");
+    const csvLink = screen.getByRole("link", { name: /download csv/i });
+
+    expect(
+      chartTitle.compareDocumentPosition(csvLink) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("renders the Download STRING image button with an href ending in stage6_ppi_network.png", () => {
     wrap(<Stage6View data={makeCompleteNetworkData()} />);
     const btn = screen.getByRole("link", { name: /download string image/i });
