@@ -5,7 +5,7 @@ import type { FailedInput, ResolvedTarget, ValidateTargetsResponse } from "../ap
 import type { Problem } from "../lib/problem";
 import { notifyError } from "../lib/toast";
 import { FailedInputList } from "./FailedInputList";
-import { Badge } from "@/components/ui/badge";
+import { RemovableChipList } from "./RemovableChipList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -118,17 +118,16 @@ export function TargetValidateBox({
           Validate
         </Button>
 
-        {resolved.length > 0 && (
-          <ul aria-label="Resolved targets" className="flex flex-wrap gap-1.5">
-            {resolved.map((r) => (
-              <li key={r.target_id} className="list-none">
-                <Badge variant="secondary">
-                  {r.gene_symbol ?? r.uniprot_accession ?? r.canonical_key}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        )}
+        <RemovableChipList
+          overflowKind="targets"
+          items={resolved}
+          getKey={(r) => r.target_id}
+          getLabel={(r) => r.gene_symbol ?? r.uniprot_accession ?? r.canonical_key}
+          onRemove={(r) =>
+            setResolved((current) => current.filter((x) => x.target_id !== r.target_id))
+          }
+          ariaLabel="Resolved targets"
+        />
 
         <FailedInputList
           failed={failed}

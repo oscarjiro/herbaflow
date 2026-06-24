@@ -3,7 +3,13 @@ import { XIcon } from "lucide-react";
 import type { ResolvedCompound, ResolvedTarget } from "@/api/types.gen";
 import { ExternalLink } from "@/components/ui/ExternalLink";
 import { DataTable } from "@/components/ui/DataTable";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { uniprotUrl } from "@/lib/externalUrls";
 
 // ---------------------------------------------------------------------------
@@ -17,6 +23,7 @@ import { uniprotUrl } from "@/lib/externalUrls";
 interface BaseProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  title?: string;
 }
 
 type CompoundWithSourceUrl = ResolvedCompound & { source_url?: string | null };
@@ -149,13 +156,16 @@ function buildTargetColumns(onRemove: (id: string) => void): ColumnDef<ResolvedT
 export function EntryOverflowDialog(props: EntryOverflowDialogProps) {
   const { open, onOpenChange, kind, onRemove } = props;
 
-  const title = kind === "compounds" ? "Added compounds" : "Added targets";
+  const title = props.title ?? (kind === "compounds" ? "Added compounds" : "Added targets");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Full list of {title.toLowerCase()} with remove controls.
+          </DialogDescription>
         </DialogHeader>
 
         {kind === "compounds" ? (

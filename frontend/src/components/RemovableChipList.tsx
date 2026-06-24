@@ -153,6 +153,7 @@ export function RemovableChipList<T>(
           kind="compounds"
           open={dialogOpen}
           onOpenChange={setDialogOpen}
+          title={ariaLabel}
           items={compoundProps.items}
           onRemove={(id) => {
             const found = compoundProps.items.find((x) => x.compound_id === id);
@@ -185,6 +186,7 @@ export function RemovableChipList<T>(
           kind="targets"
           open={dialogOpen}
           onOpenChange={setDialogOpen}
+          title={ariaLabel}
           items={targetProps.items}
           onRemove={(id) => {
             const found = targetProps.items.find((x) => x.target_id === id);

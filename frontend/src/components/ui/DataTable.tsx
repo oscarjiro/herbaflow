@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -74,7 +74,7 @@ export function DataTable<T>({
         <Table className="tabular-nums">
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
-              <>
+              <Fragment key={hg.id}>
                 <TableRow key={hg.id}>
                   {hg.headers.map((h) => (
                     <TableHead
@@ -147,7 +147,7 @@ export function DataTable<T>({
                     ))}
                   </TableRow>
                 )}
-              </>
+              </Fragment>
             ))}
           </TableHeader>
           <TableBody>

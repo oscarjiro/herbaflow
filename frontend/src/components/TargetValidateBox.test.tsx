@@ -26,6 +26,16 @@ const FAILED_TARGET = {
   line: 2,
 };
 
+function makeResolvedTargets(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    target_id: `t${index}`,
+    canonical_key: `uniprot:P${String(index).padStart(5, "0")}`,
+    gene_symbol: `GENE${index}`,
+    uniprot_accession: `P${String(index).padStart(5, "0")}`,
+    validation_status: "externally_validated",
+  }));
+}
+
 test("renders resolved and failed lists, Add button fires onResolved", async () => {
   server.use(
     http.post("http://localhost:8000/targets/validate", () =>
@@ -90,6 +100,32 @@ test("failed item without a line number renders without Line N: prefix", async (
   const failedList = await screen.findByRole("list", { name: "Failed inputs" });
   expect(failedList).not.toHaveTextContent(/Line \d+:/);
   expect(failedList).toHaveTextContent(/not recognised/i);
+});
+
+test("collapses large resolved-target batches behind the shared overflow dialog", async () => {
+  server.use(
+    http.post("http://localhost:8000/targets/validate", () =>
+      HttpResponse.json({
+        resolved: makeResolvedTargets(12),
+        failed: [],
+      }),
+    ),
+  );
+
+  render(wrap(<TargetValidateBox onResolved={vi.fn()} showAddButton />));
+  await userEvent.type(screen.getByLabelText("Add targets"), "TP53");
+  await userEvent.click(screen.getByRole("button", { name: /validate/i }));
+
+  await screen.findByRole("list", { name: "Resolved targets" });
+  expect(screen.getByText("GENE0")).toBeInTheDocument();
+  expect(screen.queryByText("GENE10")).not.toBeInTheDocument();
+
+  const overflow = screen.getByRole("button", { name: /show all 12 items/i });
+  expect(overflow).toHaveTextContent("+2 more");
+
+  await userEvent.click(overflow);
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+  expect(screen.getByText(/of 12/i)).toBeInTheDocument();
 });
 
 test("the line-numbered editor still drives text state", async () => {

@@ -26,6 +26,15 @@ const FAILED_COMPOUND = {
   line: 2,
 };
 
+function makeResolvedCompounds(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    compound_id: `c${index}`,
+    canonical_key: `inchikey:COMPOUND${index}`,
+    canonical_name: `Compound ${index}`,
+    validation_status: "externally_validated",
+  }));
+}
+
 test("renders resolved and failed lists, Add button fires onResolved", async () => {
   server.use(
     http.post("http://localhost:8000/compounds/validate", () =>
@@ -90,6 +99,32 @@ test("failed item without a line number renders without Line N: prefix", async (
   const failedList = await screen.findByRole("list", { name: "Failed inputs" });
   expect(failedList).not.toHaveTextContent(/Line \d+:/);
   expect(failedList).toHaveTextContent(/not found anywhere/i);
+});
+
+test("collapses large resolved-compound batches behind the shared overflow dialog", async () => {
+  server.use(
+    http.post("http://localhost:8000/compounds/validate", () =>
+      HttpResponse.json({
+        resolved: makeResolvedCompounds(12),
+        failed: [],
+      }),
+    ),
+  );
+
+  render(wrap(<CompoundValidateBox onResolved={vi.fn()} showAddButton />));
+  await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO");
+  await userEvent.click(screen.getByRole("button", { name: /validate/i }));
+
+  await screen.findByRole("list", { name: "Resolved compounds" });
+  expect(screen.getByText("Compound 0")).toBeInTheDocument();
+  expect(screen.queryByText("Compound 10")).not.toBeInTheDocument();
+
+  const overflow = screen.getByRole("button", { name: /show all 12 items/i });
+  expect(overflow).toHaveTextContent("+2 more");
+
+  await userEvent.click(overflow);
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+  expect(screen.getByText(/of 12/i)).toBeInTheDocument();
 });
 
 test("the line-numbered editor still drives text state", async () => {

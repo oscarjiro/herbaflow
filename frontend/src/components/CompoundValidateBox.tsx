@@ -5,7 +5,7 @@ import type { FailedInput, ResolvedCompound, ValidateResponse } from "../api/typ
 import type { Problem } from "../lib/problem";
 import { notifyError } from "../lib/toast";
 import { FailedInputList } from "./FailedInputList";
-import { Badge } from "@/components/ui/badge";
+import { RemovableChipList } from "./RemovableChipList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -118,18 +118,20 @@ export function CompoundValidateBox({
           Validate
         </Button>
 
-        {resolved.length > 0 && (
-          <ul aria-label="Resolved compounds" className="flex flex-wrap gap-1.5">
-            {resolved.map((r) => (
-              <li key={r.compound_id} className="list-none">
-                <Badge variant="secondary">
-                  {r.canonical_name ?? r.canonical_key}
-                  {r.validation_status === "structure_only" && " (structure only)"}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        )}
+        <RemovableChipList
+          overflowKind="compounds"
+          items={resolved}
+          getKey={(r) => r.compound_id}
+          getLabel={(r) =>
+            `${r.canonical_name ?? r.canonical_key}${
+              r.validation_status === "structure_only" ? " (structure only)" : ""
+            }`
+          }
+          onRemove={(r) =>
+            setResolved((current) => current.filter((x) => x.compound_id !== r.compound_id))
+          }
+          ariaLabel="Resolved compounds"
+        />
 
         <FailedInputList
           failed={failed}
