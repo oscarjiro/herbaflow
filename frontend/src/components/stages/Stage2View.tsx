@@ -213,11 +213,11 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
   {
     id: "pains",
     header: "PAINS",
-    meta: { info: "Pan-assay interference flag" },
+    meta: { info: "Checkmark means no PAINS alert. Cross means a PAINS alert was detected." },
     cell: ({ row }) => {
       const r = row.original;
       if (!r.rule_evaluated) return <BoolMark value={null} />;
-      return <BoolMark value={r.is_pains_positive} />;
+      return <BoolMark value={!r.is_pains_positive} />;
     },
   },
 ];

@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Stage2View } from "../src/components/stages/Stage2View";
@@ -57,6 +57,14 @@ function blobToText(blob: Blob): Promise<string> {
 
 async function openAdmePanel() {
   await userEvent.click(screen.getByRole("button", { name: /adme parameters/i }));
+}
+
+function painsCellFor(rowName: string): HTMLElement {
+  const row = screen.getByText(rowName).closest("tr");
+  if (!row) throw new Error(`expected row for ${rowName}`);
+  const painsCell = row.querySelectorAll("td")[12];
+  if (!painsCell) throw new Error(`expected PAINS cell for ${rowName}`);
+  return painsCell as HTMLElement;
 }
 
 afterEach(() => {
@@ -180,7 +188,7 @@ describe("Stage2View", () => {
     expect(screen.getByRole("columnheader", { name: /NP-bypass/i })).toBeInTheDocument();
   });
 
-  it("PAINS column renders BoolMark checkmark for a PAINS-positive compound", () => {
+  it("PAINS column renders BoolMark checkmark for a clean compound", () => {
     const data = makeRun({
       stage_results: {
         "2": {
@@ -188,30 +196,7 @@ describe("Stage2View", () => {
           passed: [
             {
               ...SAMPLE_STAGE2_RESULTS.passed[0],
-              lipinski_pass: true,
-              veber_pass: true,
-              rule_evaluated: true,
-              is_pains_positive: true,
-            },
-          ],
-          filtered: [],
-        },
-      } as AnalysisRead["stage_results"],
-    });
-    wrap(<Stage2View data={data} />);
-    expect(screen.getByRole("columnheader", { name: /PAINS/i })).toBeInTheDocument();
-    // is_pains_positive: true → BoolMark renders "Yes" (✓)
-    expect(screen.getAllByLabelText("Yes").length).toBeGreaterThan(0);
-  });
-
-  it("PAINS column renders BoolMark cross for a PAINS-negative compound", () => {
-    const data = makeRun({
-      stage_results: {
-        "2": {
-          ...SAMPLE_STAGE2_RESULTS,
-          passed: [
-            {
-              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              canonical_name: "CleanCompound",
               lipinski_pass: true,
               veber_pass: true,
               rule_evaluated: true,
@@ -223,8 +208,65 @@ describe("Stage2View", () => {
       } as AnalysisRead["stage_results"],
     });
     wrap(<Stage2View data={data} />);
-    // is_pains_positive: false → BoolMark renders "No" (✗)
-    expect(screen.getAllByLabelText("No").length).toBeGreaterThan(0);
+    expect(screen.getByRole("columnheader", { name: /PAINS/i })).toBeInTheDocument();
+    expect(within(painsCellFor("CleanCompound")).getByLabelText("Yes")).toBeInTheDocument();
+  });
+
+  it("PAINS column renders BoolMark cross for a PAINS alert", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              canonical_name: "AlertCompound",
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+              is_pains_positive: true,
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    expect(within(painsCellFor("AlertCompound")).getByLabelText("No")).toBeInTheDocument();
+  });
+
+  it("PAINS column renders BoolMark dash when PAINS was not evaluated", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              canonical_name: "UnevaluatedCompound",
+              lipinski_pass: null,
+              veber_pass: null,
+              rule_evaluated: false,
+              is_pains_positive: false,
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    expect(
+      within(painsCellFor("UnevaluatedCompound")).getByLabelText("Not applicable"),
+    ).toBeInTheDocument();
+  });
+
+  it("PAINS column tooltip explains that checkmark means clean", async () => {
+    const user = userEvent.setup();
+    wrap(<Stage2View data={makeRun()} />);
+    await user.hover(screen.getByRole("button", { name: /about PAINS/i }));
+    expect((await screen.findAllByText(/checkmark means no PAINS alert/i)).length).toBeGreaterThan(
+      0,
+    );
   });
 
   it("numeric descriptor columns all present with num className", () => {
