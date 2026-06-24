@@ -9,7 +9,7 @@
  * The stage header, ApprovalBar, and StaleNotice are owned by the StageView shell.
  */
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig } from "../../lib/format";
@@ -66,8 +66,6 @@ type HubParams = Record<string, number | boolean | string>;
 // Helpers
 // ---------------------------------------------------------------------------
 
-const PAGE_SIZES = [10, 20, 50] as const;
-
 export const S7_CSV_HEADER =
   "rank,gene_symbol,mcc,degree,betweenness,closeness,eigenvector,source_url";
 
@@ -108,22 +106,12 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
     onError: (error) => notifyError(error as Problem),
   });
 
-  const [pageSize, setPageSize] = useState<number | "all">(10);
-  const [page, setPage] = useState(0);
   const gdRef = useRef<HTMLElement | null>(null);
 
   const hubs = useMemo(() => stage7?.hubs ?? [], [stage7]);
   const csvRows = useMemo(() => buildS7CsvRows(hubs), [hubs]);
 
   if (!stage7) return null;
-
-  const effectivePageSize = pageSize === "all" ? Math.max(1, hubs.length) : pageSize;
-  const totalPages = Math.max(1, Math.ceil(hubs.length / effectivePageSize));
-  const currentPage = Math.min(page, totalPages - 1);
-  const visible = hubs.slice(
-    currentPage * effectivePageSize,
-    (currentPage + 1) * effectivePageSize,
-  );
 
   const tooSmall = (stage7.flags ?? []).includes("network_too_small");
 
@@ -261,28 +249,6 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label htmlFor="t7-page-size" className="text-muted-foreground text-sm">
-                Rows per page
-              </label>
-              <select
-                id="t7-page-size"
-                className="bg-background rounded border px-2 py-1 text-sm"
-                value={pageSize}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setPageSize(v === "all" ? "all" : Number(v));
-                  setPage(0);
-                }}
-              >
-                {PAGE_SIZES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-                <option value="all">All</option>
-              </select>
-            </div>
             <CsvDownloadButton
               header={S7_CSV_HEADER}
               rows={csvRows}
@@ -292,31 +258,8 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
           </div>
         </CardHeader>
         <CardContent className="px-0">
-          <DataTable columns={columns} data={visible} />
+          <DataTable columns={columns} data={hubs} />
         </CardContent>
-
-        {/* Pagination */}
-        {pageSize !== "all" && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 px-6 pb-4">
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage === 0}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Previous
-            </button>
-            <span className="text-muted-foreground text-sm">
-              Page {currentPage + 1} / {totalPages}
-            </span>
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
-          </div>
-        )}
       </Card>
 
       {/* Hub-ranking param panel */}

@@ -6,8 +6,8 @@
  *    (ChEMBL bioactivity / PubChem BioAssay)
  *  - Targets DataTable (one row per target): gene symbol, UniProt accession (linked),
  *    evidence/method(s), # compounds, an edit tag badge, and an in-table delete action
- *  - Pagination (10 / 20 / 50 / all) and a CsvDownloadButton keyed on gene symbol +
- *    UniProt accession + method + source_compounds + source_url (NEVER a UUID column)
+ *  - DataTable owns pagination, and CsvDownloadButton exports rows keyed on gene
+ *    symbol + UniProt accession + method + source_compounds + source_url (NEVER a UUID column)
  *  - Per-compound coverage DataTable (0-coverage rows always visible)
  *  - Target remove via the in-table delete column; add via a standalone EntityAddControl +
  *    TargetValidateBox (editStage). User-removed rows are hidden from the table and the CSV.
@@ -22,7 +22,7 @@
  *  - otherwise (computed) → full view
  */
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
@@ -121,8 +121,6 @@ type CoverageRow = {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-const PAGE_SIZES = [10, 20, 50] as const;
 
 const METHOD_LABELS: Record<string, string> = {
   chembl_bioactivity: "ChEMBL",
@@ -252,9 +250,6 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     onSettled: () => qc.invalidateQueries(),
   });
 
-  const [pageSize, setPageSize] = useState<number | "all">(10);
-  const [page, setPage] = useState(0);
-
   const currentTargetIds = new Set((stage3?.targets ?? []).map((t) => t.target_id));
   const { alreadyInRun, handleAdd: handleAddTargets } = useAddWithDedup<ResolvedTarget>({
     currentIds: currentTargetIds,
@@ -298,15 +293,6 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     acc[e.prediction_method] = (acc[e.prediction_method] ?? 0) + 1;
     return acc;
   }, {});
-
-  // Pagination over the target rows.
-  const effectivePageSize = pageSize === "all" ? Math.max(1, targetRows.length) : pageSize;
-  const totalPages = Math.max(1, Math.ceil(targetRows.length / effectivePageSize));
-  const currentPage = Math.min(page, totalPages - 1);
-  const visibleRows = targetRows.slice(
-    currentPage * effectivePageSize,
-    (currentPage + 1) * effectivePageSize,
-  );
 
   // Effective target count for cap enforcement (exclude user-removed).
   const effectiveCount = stage3.targets.filter((t) => t.tag !== "user-removed").length;
@@ -481,28 +467,6 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label htmlFor="t3-page-size" className="text-muted-foreground text-sm">
-                Rows per page
-              </label>
-              <select
-                id="t3-page-size"
-                className="bg-background rounded border px-2 py-1 text-sm"
-                value={pageSize}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setPageSize(v === "all" ? "all" : Number(v));
-                  setPage(0);
-                }}
-              >
-                {PAGE_SIZES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-                <option value="all">All</option>
-              </select>
-            </div>
             <CsvDownloadButton
               header={S3_CSV_HEADER}
               rows={csvRows}
@@ -514,32 +478,9 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         <CardContent className="px-0">
           {/* Targets table */}
           <div className="table-wrapper">
-            <DataTable columns={targetColumns} data={visibleRows} />
+            <DataTable columns={targetColumns} data={targetRows} />
           </div>
         </CardContent>
-
-        {/* Pagination */}
-        {pageSize !== "all" && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 px-6 pb-4">
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage === 0}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Previous
-            </button>
-            <span className="text-muted-foreground text-sm">
-              Page {currentPage + 1} / {totalPages}
-            </span>
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
-          </div>
-        )}
       </Card>
 
       {/* Per-compound coverage — skipped for user_provided (no compounds) */}

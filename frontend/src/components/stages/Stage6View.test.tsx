@@ -143,6 +143,35 @@ describe("Stage6View — computed network", () => {
     expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
   });
 
+  it("passes every edge row to DataTable so the shared pager owns pagination", () => {
+    const edges = Array.from({ length: 12 }, (_, i) => ({
+      source: `SRC${i}`,
+      target: `DST${i}`,
+      confidence: 0.9 - i / 100,
+    }));
+    const nodes = edges.flatMap((edge) => [
+      { gene_symbol: edge.source, string_id: null },
+      { gene_symbol: edge.target, string_id: null },
+    ]);
+
+    wrap(
+      <Stage6View
+        data={makeData({
+          ...makeComputedResult(),
+          nodes,
+          edges,
+          node_count: nodes.length,
+          edge_count: edges.length,
+          count: nodes.length,
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Showing 1–10 of 12")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Previous" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+  });
+
   it("renders the ppi param panel including the network_type select and a Redo button", async () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
     await openPpiPanel();

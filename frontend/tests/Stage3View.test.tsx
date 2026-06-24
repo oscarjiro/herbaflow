@@ -244,6 +244,37 @@ describe("Stage3View — delete (remove) path", () => {
   });
 });
 
+describe("Stage3View — pagination ownership", () => {
+  it("passes every target row to DataTable so the shared pager owns pagination", () => {
+    const targets = Array.from({ length: 12 }, (_, i) => ({
+      target_id: `t${i}`,
+      canonical_name: `GENE${i}`,
+      gene_symbol: `GENE${i}`,
+      uniprot_accession: `P${String(i).padStart(5, "0")}`,
+      source_url: `https://www.uniprot.org/uniprotkb/P${String(i).padStart(5, "0")}/entry`,
+      tag: "computed",
+    }));
+    const stage3 = {
+      ...STAGE3_COMPUTED,
+      targets,
+      compound_targets: targets.map((target) => ({
+        compound_id: "c1",
+        target_id: target.target_id,
+        prediction_method: "chembl_bioactivity",
+        source_url: target.source_url,
+        uniprot_accession: target.uniprot_accession,
+      })),
+      count: targets.length,
+    };
+
+    wrap(<Stage3View data={makeRun("computed", stage3)} />);
+
+    expect(screen.getByText("Showing 1–10 of 12")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Previous" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Next" })).not.toBeInTheDocument();
+  });
+});
+
 describe("Stage3View — coverage cards gate (user_provided)", () => {
   it("shows coverage % and source-count cards for computed runs", () => {
     wrap(<Stage3View data={makeRun("computed", STAGE3_COMPUTED)} />);

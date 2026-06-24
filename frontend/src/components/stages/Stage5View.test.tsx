@@ -227,4 +227,19 @@ describe("Stage5View — overlap view", () => {
     // No add-target input.
     expect(screen.queryByRole("textbox", { name: /add/i })).toBeNull();
   });
+
+  it("passes every overlap row to DataTable so the shared pager owns pagination", () => {
+    const overlap = Array.from({ length: 12 }, (_, i) => ({
+      target_id: `T${i}`,
+      gene_symbol: `GENE${i}`,
+      uniprot_accession: `P${String(i).padStart(5, "0")}`,
+      opentargets_score: 0.9 - i / 100,
+    }));
+
+    wrap(<Stage5View data={makeData({ overlap })} />);
+
+    expect(screen.getByText("Showing 1–10 of 12")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Previous" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+  });
 });

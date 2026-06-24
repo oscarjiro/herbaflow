@@ -289,7 +289,18 @@ describe("Stage8View", () => {
     },
   ] as const;
 
-  function makeRealisticData(terms: readonly (typeof REALISTIC_TERMS)[number][]): AnalysisRead {
+  type EnrichmentTermFixture = {
+    source: string;
+    term_id: string;
+    name: string;
+    p_value: number;
+    term_size: number;
+    query_size: number;
+    intersection_size: number;
+    intersection: readonly string[];
+  };
+
+  function makeRealisticData(terms: readonly EnrichmentTermFixture[]): AnalysisRead {
     return {
       ...base,
       status: "complete",
@@ -336,6 +347,25 @@ describe("Stage8View", () => {
       "https://reactome.org/content/detail/R-HSA-109581",
     );
     expect(wpApoptosis).toHaveAttribute("href", "https://www.wikipathways.org/pathways/WP254");
+  });
+
+  it("passes every enrichment row to DataTable so the shared pager owns pagination", () => {
+    const terms = Array.from({ length: 12 }, (_, i) => ({
+      source: "GO:BP",
+      term_id: `GO:${String(i).padStart(7, "0")}`,
+      name: `term ${i}`,
+      p_value: 0.001 + i / 10000,
+      term_size: 100 + i,
+      query_size: 10,
+      intersection_size: 2,
+      intersection: ["AKT1", "TNF"],
+    }));
+
+    render(wrap(<Stage8View data={makeRealisticData(terms)} />));
+
+    expect(screen.getByText("Showing 1–10 of 12")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Previous" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
   });
 
   it("genes-in-term cell shows a collapsed count and expands to gene chips", async () => {

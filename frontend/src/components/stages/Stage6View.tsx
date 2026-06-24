@@ -13,7 +13,7 @@
  *    a hint to narrow the inputs upstream. Still render the param panel + ApprovalBar
  *    (guided parks here).
  *  - computed → summary cards (node/edge counts, min_confidence, network_type, unmapped),
- *    a paginated edge-list table (source, target, confidence) + CSV of the edges.
+ *    an edge-list table (source, target, confidence) + CSV of the edges.
  *
  * Always: the ppi param panel (Redo via reset-from/6 with only the changed `ppi`
  * values — incl. the two enum selects) and the StageDataSources footer.
@@ -21,7 +21,7 @@
  * The stage header, ApprovalBar, and StaleNotice are owned by the StageView shell.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
@@ -95,8 +95,6 @@ type PpiParams = Record<string, number | boolean | string>;
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-const PAGE_SIZES = [10, 20, 50] as const;
 
 function isBlocked(r: Stage6Result): r is Stage6Blocked {
   return (r as Stage6Blocked).blocked === true;
@@ -262,9 +260,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     onError: (error) => notifyError(error as Problem),
   });
 
-  const [pageSize, setPageSize] = useState<number | "all">(10);
-  const [page, setPage] = useState(0);
-
   const computed = stage6 && !isBlocked(stage6) ? stage6 : undefined;
   const edges = useMemo(() => computed?.edges ?? [], [computed]);
   const csvRows = useMemo(() => buildS6CsvRows(edges), [edges]);
@@ -292,15 +287,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   if (!stage6) return null;
 
   const blocked = isBlocked(stage6) ? stage6 : undefined;
-
-  // Pagination over edges (computed only)
-  const effectivePageSize = pageSize === "all" ? Math.max(1, edges.length) : pageSize;
-  const totalPages = Math.max(1, Math.ceil(edges.length / effectivePageSize));
-  const currentPage = Math.min(page, totalPages - 1);
-  const visibleEdges = edges.slice(
-    currentPage * effectivePageSize,
-    (currentPage + 1) * effectivePageSize,
-  );
 
   // Column definitions — gene-symbol pairs with UniProt links; confidence numeric-aligned.
   // UniProt links use gene-search URLs (gene:X+AND+organism_id:9606) because edge endpoints
@@ -450,28 +436,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
             <Card>
               <CardHeader>
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="t6-page-size" className="text-muted-foreground text-sm">
-                      Rows per page
-                    </label>
-                    <select
-                      id="t6-page-size"
-                      className="bg-background rounded border px-2 py-1 text-sm"
-                      value={pageSize}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        setPageSize(v === "all" ? "all" : Number(v));
-                        setPage(0);
-                      }}
-                    >
-                      {PAGE_SIZES.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                      <option value="all">All</option>
-                    </select>
-                  </div>
                   <CsvDownloadButton
                     header={S6_CSV_HEADER}
                     rows={csvRows}
@@ -481,31 +445,8 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
                 </div>
               </CardHeader>
               <CardContent className="px-0">
-                <DataTable columns={columns} data={visibleEdges} />
+                <DataTable columns={columns} data={edges} />
               </CardContent>
-
-              {/* Pagination */}
-              {pageSize !== "all" && totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 px-6 pb-4">
-                  <button
-                    className="hf-btn text-sm"
-                    disabled={currentPage === 0}
-                    onClick={() => setPage((p) => p - 1)}
-                  >
-                    Previous
-                  </button>
-                  <span className="text-muted-foreground text-sm">
-                    Page {currentPage + 1} / {totalPages}
-                  </span>
-                  <button
-                    className="hf-btn text-sm"
-                    disabled={currentPage >= totalPages - 1}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
             </Card>
           </>
         )

@@ -10,7 +10,7 @@
  *         HIDDEN when the plant side is manual_targets (stage_state["3"] === "user_provided";
  *         in that mode Stage 3 has no compound edges so there are no source compounds).
  *    No delete column, no add box, no param panel.
- *  - Sortable; paginated (10/20/50/all)
+ *  - DataTable owns sorting and pagination
  *  - CSV download (header: gene_symbol,uniprot_accession,opentargets_score,source_url — unchanged)
  *  - StageDataSources footer
  *
@@ -25,7 +25,7 @@
  * No param panel, no Redo, no entity add/remove, no TargetValidateBox.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
 import { uniprotUrl } from "../../lib/externalUrls";
@@ -84,8 +84,6 @@ type OverlapViewRow = OverlapRow & {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const PAGE_SIZES = [10, 20, 50] as const;
-
 /**
  * CSV header — kept exactly as the original (raw values, no display rounding).
  * source_url is derived from the UniProt accession when present.
@@ -137,9 +135,6 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
   const stageState3 = (data as { stage_state?: Record<string, string> }).stage_state?.["3"];
   const isManualTargets = stageState3 === "user_provided";
 
-  const [pageSize, setPageSize] = useState<number | "all">(10);
-  const [page, setPage] = useState(0);
-
   // Build compound-name map from Stage 2 passed list.
   const nameById = useMemo<Map<string, string | null>>(
     () => new Map((stage2?.passed ?? []).map((c) => [c.compound_id, c.canonical_name])),
@@ -155,16 +150,6 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
   const csvRows = useMemo(() => buildS5CsvRows(stage5?.overlap ?? []), [stage5]);
 
   if (!stage5) return null;
-
-  // Pagination
-  const rows = overlapViewRows;
-  const effectivePageSize = pageSize === "all" ? Math.max(1, rows.length) : pageSize;
-  const totalPages = Math.max(1, Math.ceil(rows.length / effectivePageSize));
-  const currentPage = Math.min(page, totalPages - 1);
-  const visibleRows = rows.slice(
-    currentPage * effectivePageSize,
-    (currentPage + 1) * effectivePageSize,
-  );
 
   // Column definitions — spec-aligned, in the required order. Read-only: no delete/actions column.
   const columns: ColumnDef<OverlapViewRow>[] = [
@@ -257,28 +242,6 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label htmlFor="t5-page-size" className="text-muted-foreground text-sm">
-                Rows per page
-              </label>
-              <select
-                id="t5-page-size"
-                className="bg-background rounded border px-2 py-1 text-sm"
-                value={pageSize}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setPageSize(v === "all" ? "all" : Number(v));
-                  setPage(0);
-                }}
-              >
-                {PAGE_SIZES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-                <option value="all">All</option>
-              </select>
-            </div>
             <CsvDownloadButton
               header={S5_CSV_HEADER}
               rows={csvRows}
@@ -291,34 +254,11 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
           <div className="table-wrapper">
             <DataTable
               columns={columns}
-              data={visibleRows}
+              data={overlapViewRows}
               emptyMessage="No shared targets found."
             />
           </div>
         </CardContent>
-
-        {/* Pagination */}
-        {pageSize !== "all" && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 px-6 pb-4">
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage === 0}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Previous
-            </button>
-            <span className="text-muted-foreground text-sm">
-              Page {currentPage + 1} / {totalPages}
-            </span>
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
-          </div>
-        )}
       </Card>
     </section>
   );

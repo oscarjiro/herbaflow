@@ -4,7 +4,7 @@
  * Renders:
  *  - Summary count cards: target count + the applied min_score (min_score hidden for user_provided)
  *  - Disease-targets DataTable (one row per target): gene symbol, UniProt accession (linked), Open
- *    Targets score (display-rounded), edit tag badge, in-table delete; pagination (10/20/50/all);
+ *    Targets score (display-rounded), edit tag badge, in-table delete; DataTable-owned pagination;
  *    CSV keyed on gene_symbol + uniprot_accession + opentargets_score + source_url (NEVER a UUID; the
  *    near-constant association_type is kept on the data type but no longer surfaced or exported)
  *  - User-removed rows are hidden from the table AND the CSV (data still persists)
@@ -27,7 +27,7 @@
  * Stage 3 user-added targets).
  */
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
@@ -90,8 +90,6 @@ type Row = {
   source_url: string | null;
   tag: TargetTag;
 };
-
-const PAGE_SIZES = [10, 20, 50] as const;
 
 function buildRows(stage4: Stage4Result): Row[] {
   return stage4.targets
@@ -171,9 +169,6 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
     onSettled: () => qc.invalidateQueries(),
   });
 
-  const [pageSize, setPageSize] = useState<number | "all">(10);
-  const [page, setPage] = useState(0);
-
   const currentTargetIds = new Set((stage4?.targets ?? []).map((t) => t.target_id));
   const { alreadyInRun, handleAdd: handleAddTargets } = useAddWithDedup<ResolvedTarget>({
     currentIds: currentTargetIds,
@@ -194,14 +189,6 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       </section>
     );
   }
-
-  const effectivePageSize = pageSize === "all" ? Math.max(1, rows.length) : pageSize;
-  const totalPages = Math.max(1, Math.ceil(rows.length / effectivePageSize));
-  const currentPage = Math.min(page, totalPages - 1);
-  const visibleRows = rows.slice(
-    currentPage * effectivePageSize,
-    (currentPage + 1) * effectivePageSize,
-  );
 
   const effectiveCount = stage4.targets.filter((t) => t.tag !== "user-removed").length;
 
@@ -326,28 +313,6 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <label htmlFor="t4-page-size" className="text-muted-foreground text-sm">
-                Rows per page
-              </label>
-              <select
-                id="t4-page-size"
-                className="bg-background rounded border px-2 py-1 text-sm"
-                value={pageSize}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setPageSize(v === "all" ? "all" : Number(v));
-                  setPage(0);
-                }}
-              >
-                {PAGE_SIZES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-                <option value="all">All</option>
-              </select>
-            </div>
             <CsvDownloadButton
               header={S4_CSV_HEADER}
               rows={csvRows}
@@ -358,32 +323,9 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         </CardHeader>
         <CardContent className="px-0">
           <div className="table-wrapper">
-            <DataTable columns={columns} data={visibleRows} />
+            <DataTable columns={columns} data={rows} />
           </div>
         </CardContent>
-
-        {/* Pagination */}
-        {pageSize !== "all" && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 px-6 pb-4">
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage === 0}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Previous
-            </button>
-            <span className="text-muted-foreground text-sm">
-              Page {currentPage + 1} / {totalPages}
-            </span>
-            <button
-              className="hf-btn text-sm"
-              disabled={currentPage >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
-          </div>
-        )}
       </Card>
 
       {/* Disease-target add (the table above owns remove) */}

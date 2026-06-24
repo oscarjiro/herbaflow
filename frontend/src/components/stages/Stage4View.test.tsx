@@ -363,4 +363,34 @@ describe("Stage4View — single editable table", () => {
     // Neither is disabled (effectiveCount > 1, so min-entities floor not hit).
     expect(screen.getByRole("button", { name: "Remove GENEA" })).not.toBeDisabled();
   });
+
+  it("passes every target row to DataTable so the shared pager owns pagination", () => {
+    const targets = Array.from({ length: 12 }, (_, i) => ({
+      target_id: `t${i}`,
+      canonical_name: `GENE${i}`,
+      gene_symbol: `GENE${i}`,
+      uniprot_accession: `P${String(i).padStart(5, "0")}`,
+      opentargets_score: 0.9 - i / 100,
+      source_url: null,
+      tag: "computed",
+    }));
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets,
+          count: targets.length,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    expect(screen.getByText("Showing 1–10 of 12")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Previous" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Next" })).not.toBeInTheDocument();
+  });
 });

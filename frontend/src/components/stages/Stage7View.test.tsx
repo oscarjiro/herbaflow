@@ -132,6 +132,35 @@ describe("Stage7View", () => {
     expect(screen.getByText("Eigenvector")).toBeInTheDocument();
   });
 
+  it("passes every hub row to DataTable so the shared pager owns pagination", () => {
+    const hubs = Array.from({ length: 12 }, (_, i) => ({
+      rank: i + 1,
+      target_id: `t${i}`,
+      gene_symbol: `GENE${i}`,
+      degree: 0.4,
+      betweenness: 0.3,
+      closeness: 0.5,
+      eigenvector: 0.2,
+      mcc: 12 - i,
+      source_url: null,
+    }));
+
+    wrap(
+      <Stage7View
+        data={makeData({
+          ...makeComputedResult(),
+          hubs,
+          node_count: hubs.length,
+          count: hubs.length,
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Showing 1–10 of 12")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Previous" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+  });
+
   it("rounds centralities to 4 sig figs and shows MCC as integer", () => {
     const result = {
       state: "computed",
