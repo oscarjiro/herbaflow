@@ -9,7 +9,7 @@
             "entrypoint": "backend/app/main.py",
             "routePrefix": "/_/backend",
             "framework": "fastapi",
-            "includeFiles": ["shared/contracts/analysis.json"]
+            "includeFiles": ["../shared/contracts/analysis.json"]
         }
     }
 }
