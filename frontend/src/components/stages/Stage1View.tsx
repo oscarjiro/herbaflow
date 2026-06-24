@@ -306,7 +306,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
             <CsvDownloadButton
               header={CSV_HEADER}
               rows={csvRows}
-              filename="stage1-compounds.csv"
+              filename="compounds.csv"
               label="Download CSV"
             />
           </div>

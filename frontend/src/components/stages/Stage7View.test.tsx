@@ -112,7 +112,9 @@ describe("Stage7View", () => {
 
   it("renders the CSV download control", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /download csv/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("download", "hubs.csv");
   });
 
   it("renders the hub_genes param panel with a Redo button", async () => {

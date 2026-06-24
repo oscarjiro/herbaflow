@@ -423,7 +423,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
                   <CsvDownloadButton
                     header={S6_CSV_HEADER}
                     rows={csvRows}
-                    filename="ppi-edges.csv"
+                    filename="ppi.csv"
                     label="Download CSV"
                   />
                 </div>

@@ -316,6 +316,12 @@ describe("Stage1View — already-in-run deduplication", () => {
 // ---------------------------------------------------------------------------
 
 describe("Stage1View — column spec", () => {
+  it("downloads compounds with the bare CSV slug", () => {
+    wrap(<Stage1View data={makeRun()} />);
+    const link = screen.getByRole("link", { name: /download csv/i });
+    expect(link).toHaveAttribute("download", "compounds.csv");
+  });
+
   it("renders summary cards for total compounds and selected plants with editorial numbers", () => {
     wrap(
       <Stage1View

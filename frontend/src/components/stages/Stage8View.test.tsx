@@ -349,6 +349,12 @@ describe("Stage8View", () => {
     expect(wpApoptosis).toHaveAttribute("href", "https://www.wikipathways.org/pathways/WP254");
   });
 
+  it("downloads enrichment terms with the bare CSV slug", () => {
+    render(wrap(<Stage8View data={makeRealisticData(REALISTIC_TERMS)} />));
+    const link = screen.getByRole("link", { name: /download csv/i });
+    expect(link).toHaveAttribute("download", "enrichment.csv");
+  });
+
   it("passes every enrichment row to DataTable so the shared pager owns pagination", () => {
     const terms = Array.from({ length: 12 }, (_, i) => ({
       source: "GO:BP",

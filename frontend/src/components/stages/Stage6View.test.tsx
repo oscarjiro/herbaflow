@@ -140,7 +140,9 @@ describe("Stage6View — computed network", () => {
 
   it("renders the CSV download control", () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
-    expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /download csv/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("download", "ppi.csv");
   });
 
   it("passes every edge row to DataTable so the shared pager owns pagination", () => {

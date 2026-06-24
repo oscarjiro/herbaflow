@@ -210,7 +210,9 @@ describe("Stage3View", () => {
 
     wrap(<Stage3View data={makeRun()} />);
     // The download control must be present.
-    expect(screen.getByRole("link", { name: /download.*csv/i })).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /download.*csv/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("download", "compound-targets.csv");
 
     expect(capturedBlob).not.toBeNull();
     const csv = await blobToText(capturedBlob as unknown as Blob);

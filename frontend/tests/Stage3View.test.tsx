@@ -174,6 +174,14 @@ describe("Stage3View — Gene symbol column", () => {
   });
 });
 
+describe("Stage3View — CSV download", () => {
+  it("downloads compound targets with the bare CSV slug", () => {
+    wrap(<Stage3View data={makeRun("computed", STAGE3_COMPUTED)} />);
+    const link = screen.getByRole("link", { name: /download.*csv/i });
+    expect(link).toHaveAttribute("download", "compound-targets.csv");
+  });
+});
+
 describe("Stage3View — Compound source(s) column (conditional)", () => {
   it("shows the Compound source(s) column when stage is app-enriched (computed)", () => {
     wrap(<Stage3View data={makeRun("computed", STAGE3_COMPUTED)} />);

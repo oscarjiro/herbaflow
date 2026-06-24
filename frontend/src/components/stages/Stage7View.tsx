@@ -246,7 +246,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
             <CsvDownloadButton
               header={S7_CSV_HEADER}
               rows={csvRows}
-              filename="hub-genes.csv"
+              filename="hubs.csv"
               label="Download CSV"
             />
           </div>

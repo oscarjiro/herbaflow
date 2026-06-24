@@ -244,6 +244,7 @@ describe("Stage2View", () => {
     wrap(<Stage2View data={makeRun()} />);
     const link = screen.getByRole("link", { name: /download.*csv/i });
     expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("download", "adme.csv");
   });
 
   it("param panel shows description for max_mw", async () => {

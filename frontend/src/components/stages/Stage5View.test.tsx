@@ -119,7 +119,9 @@ describe("Stage5View — overlap view", () => {
 
   it("renders the CSV download control", () => {
     wrap(<Stage5View data={makeData()} />);
-    expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /download csv/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("download", "overlap.csv");
   });
 
   it("does NOT render Jaccard, p-value, or a significance badge", () => {

@@ -156,7 +156,9 @@ describe("Stage4View — single editable table", () => {
     // "Open Targets" appears in both the footer and the data-sources block — use getAllByText.
     expect(screen.getAllByText(/Open Targets/i).length).toBeGreaterThan(0);
     // CSV download is rendered as a link.
-    expect(screen.getByRole("link", { name: /Download CSV/i })).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /Download CSV/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("download", "disease-targets.csv");
   });
 
   it("hides the min-score card, param panel, and user-added tag for a user_provided run", () => {

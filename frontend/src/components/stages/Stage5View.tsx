@@ -238,7 +238,7 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
             <CsvDownloadButton
               header={S5_CSV_HEADER}
               rows={csvRows}
-              filename="overlap-targets.csv"
+              filename="overlap.csv"
               label="Download CSV"
             />
           </div>

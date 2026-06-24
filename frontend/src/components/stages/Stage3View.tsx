@@ -417,7 +417,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
             <CsvDownloadButton
               header={S3_CSV_HEADER}
               rows={csvRows}
-              filename="targets.csv"
+              filename="compound-targets.csv"
               label="Download CSV"
             />
           </div>
