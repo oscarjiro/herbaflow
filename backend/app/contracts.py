@@ -11,7 +11,16 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
 
-_CONTRACT_PATH = Path(__file__).resolve().parents[2] / "shared" / "contracts" / "analysis.json"
+
+def _resolve_contract_path(module_path: Path) -> Path:
+    for parent in module_path.resolve().parents:
+        candidate = parent / "shared" / "contracts" / "analysis.json"
+        if candidate.exists():
+            return candidate
+    return module_path.resolve().parents[2] / "shared" / "contracts" / "analysis.json"
+
+
+_CONTRACT_PATH = _resolve_contract_path(Path(__file__))
 
 
 @lru_cache(maxsize=1)
