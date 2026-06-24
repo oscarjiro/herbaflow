@@ -94,6 +94,50 @@ test("uses cleaned SMILES copy note when selected compounds include missing SMIL
   expect(screen.queryByText(/skipped — no SMILES/)).not.toBeInTheDocument();
 });
 
+test("filters the least-covered compound list by name", async () => {
+  render(
+    wrap(
+      <StpDialog
+        compounds={COMPOUNDS_MULTI}
+        perCompound={PER_COMPOUND_MULTI}
+        existingTargetIds={[]}
+        onAddTargets={() => {}}
+      />,
+    ),
+  );
+
+  await openDialog();
+
+  expect(screen.getByText("Quercetin")).toBeInTheDocument();
+  expect(screen.getByText("Curcumin")).toBeInTheDocument();
+
+  await userEvent.type(screen.getByRole("searchbox", { name: /search compounds/i }), "quer");
+
+  expect(screen.getByText("Quercetin")).toBeInTheDocument();
+  expect(screen.queryByText("Curcumin")).not.toBeInTheDocument();
+});
+
+test("renders icon-backed STP utility actions with command labels", async () => {
+  render(
+    wrap(
+      <StpDialog
+        compounds={COMPOUNDS_MULTI}
+        perCompound={PER_COMPOUND_MULTI}
+        existingTargetIds={[]}
+        onAddTargets={() => {}}
+      />,
+    ),
+  );
+
+  await openDialog();
+
+  const copyButton = screen.getByRole("button", { name: /copy smiles/i });
+  const openLink = screen.getByRole("link", { name: /open swisstargetprediction/i });
+
+  expect(copyButton.querySelector("svg")).not.toBeNull();
+  expect(openLink.querySelector("svg")).not.toBeNull();
+});
+
 test("uses cleaned import result summary", async () => {
   server.use(
     http.post("http://localhost:8000/targets/validate", () =>

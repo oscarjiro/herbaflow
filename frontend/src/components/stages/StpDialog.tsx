@@ -21,6 +21,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { Copy, ExternalLink, Search } from "lucide-react";
 import { validateTargets } from "../../api/sdk.gen";
 import type { ResolvedTarget, ValidateTargetsResponse } from "../../api/types.gen";
 import type { Problem } from "../../lib/problem";
@@ -30,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -62,6 +64,7 @@ export function StpDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [compoundQuery, setCompoundQuery] = useState("");
   const [threshold, setThreshold] = useState(0.6);
   const [pasteText, setPasteText] = useState("");
   const [copyNote, setCopyNote] = useState<string | null>(null);
@@ -75,6 +78,14 @@ export function StpDialog({
       return (a.canonical_name ?? a.compound_id).localeCompare(b.canonical_name ?? b.compound_id);
     });
   }, [compounds, perCompound]);
+
+  const filteredCompounds = useMemo(() => {
+    const query = compoundQuery.trim().toLowerCase();
+    if (!query) return sorted;
+    return sorted.filter((compound) =>
+      `${compound.canonical_name ?? ""} ${compound.compound_id}`.toLowerCase().includes(query),
+    );
+  }, [sorted, compoundQuery]);
 
   const parse = useMemo(() => parseStpCsv(pasteText, threshold), [pasteText, threshold]);
   const parsedRows: StpRow[] = parse.error ? [] : parse.rows;
@@ -151,22 +162,42 @@ export function StpDialog({
       >
         <DialogHeader>
           <DialogTitle>Add targets from SwissTargetPrediction</DialogTitle>
+          <DialogDescription>
+            Select compounds with few target matches, copy their SMILES into SwissTargetPrediction,
+            then paste the CSV here. New targets are added only to this analysis.
+          </DialogDescription>
         </DialogHeader>
 
-        <p className="text-sm [color:var(--hf-fg-3)]">
-          Select compounds with few target matches, copy their SMILES into SwissTargetPrediction,
-          then paste the CSV here. New targets are added only to this analysis.
-        </p>
-
         {/* Compound picker: lowest coverage first (copy-SMILES convenience only). */}
-        <fieldset className="flex flex-col gap-1.5">
-          <legend className="mb-1 text-sm font-medium">Compounds to screen</legend>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="text-sm font-medium">Compounds to screen</legend>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="stp-compound-search">Search compounds</Label>
+            <div className="relative">
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2 [color:var(--hf-fg-3)]"
+              />
+              <Input
+                id="stp-compound-search"
+                type="search"
+                value={compoundQuery}
+                onChange={(e) => setCompoundQuery(e.target.value)}
+                placeholder="Search compound name or id"
+                className="pl-8"
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-3 text-xs [color:var(--hf-fg-3)]">
+            <span>Least-covered compounds first</span>
+            <span className="tabular-nums">{selected.size} selected</span>
+          </div>
           <ul aria-label="Compounds to screen" className="flex flex-col gap-1">
-            {sorted.map((c) => {
+            {filteredCompounds.map((c) => {
               const coverage = perCompound[c.compound_id]?.coverage ?? 0;
               return (
                 <li key={c.compound_id} className="list-none">
-                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <label className="border-hf-border flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-sm">
                     <input
                       type="checkbox"
                       aria-label={`Select ${c.canonical_name ?? c.compound_id}`}
@@ -174,16 +205,23 @@ export function StpDialog({
                       onChange={() => toggle(c.compound_id)}
                       className="h-4 w-4 rounded [accent-color:var(--hf-accent)]"
                     />
-                    <span>{c.canonical_name ?? c.compound_id}</span>
-                    <span className="text-xs [color:var(--hf-fg-3)]">coverage {coverage}</span>
+                    <span className="min-w-0 flex-1 truncate">
+                      {c.canonical_name ?? c.compound_id}
+                    </span>
+                    <span className="shrink-0 text-xs [color:var(--hf-fg-3)]">
+                      coverage {coverage}
+                    </span>
                     {!c.smiles && (
-                      <span className="text-xs [color:var(--hf-fg-3)]">(no SMILES)</span>
+                      <span className="shrink-0 text-xs [color:var(--hf-fg-3)]">(no SMILES)</span>
                     )}
                   </label>
                 </li>
               );
             })}
           </ul>
+          {filteredCompounds.length === 0 && (
+            <p className="text-sm [color:var(--hf-fg-3)]">No compounds match this search.</p>
+          )}
         </fieldset>
 
         <div className="flex flex-wrap gap-2">
@@ -194,10 +232,12 @@ export function StpDialog({
             disabled={selected.size === 0}
             onClick={handleCopySmiles}
           >
+            <Copy aria-hidden="true" className="size-4" />
             Copy SMILES
           </Button>
           <Button type="button" variant="ghost" size="sm" asChild>
             <a href={STP_URL} target="_blank" rel="noopener noreferrer">
+              <ExternalLink aria-hidden="true" className="size-4" />
               Open SwissTargetPrediction
             </a>
           </Button>

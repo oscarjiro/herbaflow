@@ -438,6 +438,18 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         labels={alreadyInRun.map((t) => t.gene_symbol ?? t.uniprot_accession ?? t.target_id)}
       />
 
+      {/* STP paste-back — computed runs only */}
+      {!isUserProvided && (
+        <StpDialog
+          compounds={stpCompounds}
+          perCompound={stage3.per_compound}
+          existingTargetIds={stage3.targets
+            .filter((t) => t.tag !== "user-removed")
+            .map((t) => t.target_id)}
+          onAddTargets={handleAddTargets}
+        />
+      )}
+
       {/* Param panel */}
       {targetParams && !isUserProvided && (
         <ParamPanel
@@ -448,18 +460,6 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
           title="Target parameters"
           disabled={redo.isPending}
           onRedo={(changed) => redo.mutate(changed)}
-        />
-      )}
-
-      {/* STP paste-back — computed runs only */}
-      {!isUserProvided && (
-        <StpDialog
-          compounds={stpCompounds}
-          perCompound={stage3.per_compound}
-          existingTargetIds={stage3.targets
-            .filter((t) => t.tag !== "user-removed")
-            .map((t) => t.target_id)}
-          onAddTargets={handleAddTargets}
         />
       )}
 

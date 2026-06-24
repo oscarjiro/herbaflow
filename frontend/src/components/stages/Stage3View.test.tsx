@@ -279,6 +279,17 @@ describe("Stage3View", () => {
       screen.getByRole("button", { name: /add swisstargetprediction targets/i }),
     ).toBeInTheDocument();
   });
+
+  it("places the SwissTargetPrediction helper with Add targets before target parameters", () => {
+    wrap(<Stage3View data={makeRun()} />);
+
+    const stpTrigger = screen.getByRole("button", {
+      name: /add swisstargetprediction targets/i,
+    });
+    const paramsTitle = screen.getByText("Target parameters");
+
+    expect(stpTrigger.compareDocumentPosition(paramsTitle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });
 
 // ---------------------------------------------------------------------------
