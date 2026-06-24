@@ -191,22 +191,21 @@ describe("Stage3View — Compound source(s) column (conditional)", () => {
   });
 });
 
-describe("Stage3View — Source chip column", () => {
-  it("renders a SourceChip for a computed ChEMBL target", () => {
+describe("Stage3View — no separate source chip column", () => {
+  it("does not render a Source column or SourceChip for a computed ChEMBL target", () => {
     wrap(<Stage3View data={makeRun("computed", STAGE3_COMPUTED)} />);
-    // Use exact name to distinguish "Source" from "Compound source(s)".
-    expect(screen.getByRole("columnheader", { name: "Source" })).toBeInTheDocument();
-    // methodLabel("chembl_bioactivity") = "ChEMBL"
-    // Use getAllByText since "ChEMBL" also appears in the data-sources footer link.
-    expect(screen.getAllByText("ChEMBL").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
+    const chips = document.querySelectorAll('span[class*="font-mono"]');
+    const chipTexts = Array.from(chips).map((c) => c.textContent);
+    expect(chipTexts).not.toContain("ChEMBL");
   });
 
-  it("renders 'User-curated' SourceChip for a user-added target", () => {
+  it("does not render a User-curated SourceChip for a user-added target", () => {
     wrap(<Stage3View data={makeRun("user_provided", STAGE3_USER_PROVIDED)} />);
-    expect(screen.getByText("User-curated")).toBeInTheDocument();
+    expect(screen.queryByText("User-curated")).not.toBeInTheDocument();
   });
 
-  it("renders PubChem BioAssay chip for pubchem_bioassay method", () => {
+  it("does not render a PubChem BioAssay SourceChip for pubchem_bioassay method", () => {
     const stage3 = {
       ...STAGE3_COMPUTED,
       compound_targets: [
@@ -217,12 +216,10 @@ describe("Stage3View — Source chip column", () => {
       ],
     };
     wrap(<Stage3View data={makeRun("computed", stage3)} />);
-    // "PubChem BioAssay" also appears in the data-sources footer, so use getAllByText.
-    expect(screen.getAllByText("PubChem BioAssay").length).toBeGreaterThan(0);
-    // Verify specifically that a SourceChip (monospace span) is rendered for the method.
+    expect(screen.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
     const chips = document.querySelectorAll('span[class*="font-mono"]');
     const chipTexts = Array.from(chips).map((c) => c.textContent);
-    expect(chipTexts).toContain("PubChem BioAssay");
+    expect(chipTexts).not.toContain("PubChem BioAssay");
   });
 });
 

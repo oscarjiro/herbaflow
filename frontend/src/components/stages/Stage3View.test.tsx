@@ -149,10 +149,11 @@ describe("Stage3View", () => {
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637/entry");
   });
 
-  it("shows the evidence/method column", () => {
+  it("does not render a separate source column in the targets table", () => {
     const { container } = wrap(<Stage3View data={makeRun()} />);
-    // The method cell in the targets table shows "ChEMBL".
-    expect(targetsTable(container).getByText("ChEMBL")).toBeInTheDocument();
+    const table = targetsTable(container);
+    expect(table.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
+    expect(table.queryByText("ChEMBL")).not.toBeInTheDocument();
   });
 
   it("shows the coverage percentage card", () => {
@@ -362,9 +363,12 @@ describe("Stage3View — UniProt accession from the target row (B2)", () => {
   }
 
   it("renders the linked accession from the row when there are no compound edges", () => {
-    wrap(<Stage3View data={makeUserProvidedData()} />);
+    const { container } = wrap(<Stage3View data={makeUserProvidedData()} />);
     const link = screen.getByRole("link", { name: "P31749" });
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P31749/entry");
+    const table = targetsTable(container);
+    expect(table.queryByText("user-added")).not.toBeInTheDocument();
+    expect(table.queryByText("User-curated")).not.toBeInTheDocument();
   });
 });
 

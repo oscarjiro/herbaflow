@@ -19,7 +19,6 @@ import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ExpandableListCell } from "@/components/ui/ExpandableListCell";
 import { ExternalLink } from "@/components/ui/ExternalLink";
-import { SourceChip } from "@/components/ui/SourceChip";
 import { CompoundValidateBox } from "../CompoundValidateBox";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
@@ -66,7 +65,7 @@ type Stage1Row = {
 // CSV builder (inline — raw values, no formatSig)
 // ---------------------------------------------------------------------------
 
-const CSV_HEADER = "inchikey,name,smiles,plant_sources,source,source_url";
+const CSV_HEADER = "inchikey,name,smiles,plant_sources,source_url";
 
 function buildCsvRows(rows: Stage1Row[], showPlantSources: boolean): unknown[][] {
   return rows.map((r) => [
@@ -74,7 +73,6 @@ function buildCsvRows(rows: Stage1Row[], showPlantSources: boolean): unknown[][]
     r.label,
     r.smiles ?? null,
     showPlantSources ? r.plantNames.join(";") : "",
-    r.tag === "user-added" ? "User-curated" : "KNApSAcK",
     r.source_url ?? null,
   ]);
 }
@@ -253,18 +251,6 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
           },
         ] as ColumnDef<Stage1Row>[])
       : []),
-    {
-      id: "source",
-      header: "Source",
-      enableSorting: false,
-      cell: ({ row }) => {
-        const r = row.original;
-        if (r.tag === "user-added") {
-          return <SourceChip name="User-curated" />;
-        }
-        return <SourceChip name="KNApSAcK" url={r.source_url} />;
-      },
-    },
     {
       id: "actions",
       header: "",

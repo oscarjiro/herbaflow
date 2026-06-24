@@ -4,7 +4,7 @@
  * Renders:
  *  - Summary count cards: target count + the applied min_score (min_score hidden for user_provided)
  *  - Disease-targets DataTable (one row per target): gene symbol, UniProt accession (linked), Open
- *    Targets score (display-rounded), edit tag badge, in-table delete; DataTable-owned pagination;
+ *    Targets score (display-rounded), in-table delete; DataTable-owned pagination;
  *    CSV keyed on gene_symbol + uniprot_accession + opentargets_score + source_url (NEVER a UUID; the
  *    near-constant association_type is kept on the data type but no longer surfaced or exported)
  *  - User-removed rows are hidden from the table AND the CSV (data still persists)
@@ -52,7 +52,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ExternalLink } from "@/components/ui/ExternalLink";
-import { SourceChip } from "@/components/ui/SourceChip";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
@@ -111,24 +110,6 @@ const S4_CSV_HEADER = "gene_symbol,uniprot_accession,opentargets_score,source_ur
 
 function buildS4CsvRows(rows: Row[]): unknown[][] {
   return rows.map((r) => [r.gene_symbol, r.uniprot_accession, r.opentargets_score, r.source_url]);
-}
-
-function tagBadge(tag: TargetTag): React.ReactElement | null {
-  if (tag === "user-added") {
-    return (
-      <Badge variant="secondary" className="text-[10px]">
-        user-added
-      </Badge>
-    );
-  }
-  if (tag === "user-removed") {
-    return (
-      <Badge variant="destructive" className="text-[10px]">
-        user-removed
-      </Badge>
-    );
-  }
-  return null;
 }
 
 export function Stage4View({ data }: { data: AnalysisRead }) {
@@ -213,21 +194,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       header: "Gene symbol",
       cell: ({ row }) => row.original.gene_symbol,
     },
-    // 3. Source → SourceChip: "Open Targets" with source_url for enriched rows;
-    //    "User-curated" (no URL) for manually-added targets.
-    {
-      id: "source",
-      header: "Source",
-      enableSorting: false,
-      cell: ({ row }) => {
-        const r = row.original;
-        if (r.tag === "user-added" || r.tag === "user-removed") {
-          return <SourceChip name="User-curated" />;
-        }
-        return <SourceChip name="Open Targets" url={r.source_url} />;
-      },
-    },
-    // 4. Open Targets score — HIDDEN when stage_state === "user_provided" (manual runs have no score).
+    // 3. Open Targets score — HIDDEN when stage_state === "user_provided" (manual runs have no score).
     ...(isUserProvided
       ? []
       : ([
@@ -239,14 +206,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
               formatSig(row.original.opentargets_score),
           },
         ] as ColumnDef<Row>[])),
-    // 5. Edit-tag badge (user-added indicator).
-    {
-      id: "tag",
-      header: "",
-      enableSorting: false,
-      cell: ({ row }) => tagBadge(row.original.tag),
-    },
-    // 6. × delete — reuses the existing edit mutation's remove path.
+    // 4. × delete — reuses the existing edit mutation's remove path.
     {
       id: "actions",
       header: "",

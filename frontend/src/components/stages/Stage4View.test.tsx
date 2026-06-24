@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { AnalysisRead } from "../../api/types.gen";
 import { Stage4View } from "./Stage4View";
@@ -7,6 +7,12 @@ import { Stage4View } from "./Stage4View";
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+}
+
+function diseaseTargetsTable(container: HTMLElement) {
+  const el = container.querySelector(".table-wrapper");
+  if (!el) throw new Error("disease targets table not found");
+  return within(el as HTMLElement);
 }
 
 const base = {
@@ -153,7 +159,7 @@ describe("Stage4View — single editable table", () => {
     expect(screen.getByRole("link", { name: /Download CSV/i })).toBeInTheDocument();
   });
 
-  it("hides the min-score card and param panel for a user_provided run", () => {
+  it("hides the min-score card, param panel, and user-added tag for a user_provided run", () => {
     const data = {
       ...base,
       stage_state: { "4": "user_provided" },
@@ -171,11 +177,11 @@ describe("Stage4View — single editable table", () => {
       },
     } as unknown as AnalysisRead;
 
-    wrap(<Stage4View data={data} />);
+    const { container } = wrap(<Stage4View data={data} />);
 
-    // The manually-added target is shown with the user-added badge.
+    // The manually-added target is shown without a redundant tag badge.
     expect(screen.getByText("MANUALG")).toBeInTheDocument();
-    expect(screen.getByText("user-added")).toBeInTheDocument();
+    expect(diseaseTargetsTable(container).queryByText("user-added")).not.toBeInTheDocument();
     // The min-score card is gated on !user_provided.
     expect(screen.queryByText("min score")).not.toBeInTheDocument();
     // The disease-target ParamPanel is gated on !user_provided.
@@ -213,7 +219,7 @@ describe("Stage4View — single editable table", () => {
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P37231/entry");
   });
 
-  it("renders SourceChip as 'Open Targets' with source_url for enriched rows", () => {
+  it("does not render a separate source column for enriched rows", () => {
     const otUrl = "https://platform.opentargets.org/target/ENSG00000132170";
     const data = {
       ...base,
@@ -238,16 +244,18 @@ describe("Stage4View — single editable table", () => {
       },
     } as unknown as AnalysisRead;
 
-    wrap(<Stage4View data={data} />);
+    const { container } = wrap(<Stage4View data={data} />);
 
-    // Source chip for an enriched row: the chip is rendered as an ExternalLink
-    // whose href === source_url (the Open Targets page URL).
-    const links = screen.getAllByRole("link").filter((el) => el.getAttribute("href") === otUrl);
-    expect(links.length).toBeGreaterThan(0);
-    expect(links[0]).toHaveTextContent(/Open Targets/i);
+    const table = diseaseTargetsTable(container);
+    expect(table.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
+    const sourceLinks = table
+      .queryAllByRole("link")
+      .filter((el) => el.getAttribute("href") === otUrl);
+    expect(sourceLinks).toHaveLength(0);
+    expect(table.queryByText("Open Targets")).not.toBeInTheDocument();
   });
 
-  it("renders SourceChip as 'User-curated' (no link) for manually-added rows", () => {
+  it("does not render a separate user-curated source chip for manually-added rows", () => {
     const data = {
       ...base,
       stage_state: { "4": "user_provided" },
@@ -275,15 +283,12 @@ describe("Stage4View — single editable table", () => {
       },
     } as unknown as AnalysisRead;
 
-    wrap(<Stage4View data={data} />);
+    const { container } = wrap(<Stage4View data={data} />);
 
-    // The source chip is plain text "User-curated" (no link).
-    expect(screen.getByText("User-curated")).toBeInTheDocument();
-    // No link for User-curated (the pill renders as a <span>).
-    const chipLinks = screen
-      .queryAllByRole("link")
-      .filter((el) => /user.curated/i.test(el.textContent ?? ""));
-    expect(chipLinks.length).toBe(0);
+    const table = diseaseTargetsTable(container);
+    expect(table.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
+    expect(table.queryByText("User-curated")).not.toBeInTheDocument();
+    expect(table.queryByText("user-added")).not.toBeInTheDocument();
   });
 
   it("hides the Open Targets score column when stage_state is user_provided", () => {

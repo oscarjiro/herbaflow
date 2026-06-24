@@ -41,6 +41,12 @@ function wrap(ui: React.ReactNode) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+function compoundsTable(container: HTMLElement) {
+  const el = container.querySelector(".table-wrapper");
+  if (!el) throw new Error("compounds table not found");
+  return within(el as HTMLElement);
+}
+
 function blobToText(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -184,8 +190,8 @@ describe("Stage1View — already-in-run deduplication", () => {
     expect(removeButton).toHaveAttribute("title", "A stage must keep at least one entry.");
   });
 
-  it("renders compounds in the shared table with a provenance chip and an in-table delete", () => {
-    wrap(
+  it("renders compounds in the shared table without a separate source column", () => {
+    const { container } = wrap(
       <Stage1View
         data={makeRun({
           stage_results: {
@@ -199,10 +205,11 @@ describe("Stage1View — already-in-run deduplication", () => {
       />,
     );
 
-    expect(screen.getByRole("table")).toBeInTheDocument();
-    expect(screen.getByText(/curcumin/i)).toBeInTheDocument();
-    // Source chip: user-added → User-curated
-    expect(screen.getByText("User-curated")).toBeInTheDocument();
+    const table = compoundsTable(container);
+    expect(table.getByRole("table")).toBeInTheDocument();
+    expect(table.getByText(/curcumin/i)).toBeInTheDocument();
+    expect(table.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
+    expect(table.queryByText("User-curated")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /remove curcumin/i })).toBeInTheDocument();
   });
 
@@ -372,8 +379,8 @@ describe("Stage1View — column spec", () => {
     );
   });
 
-  it("source chip shows KNApSAcK for a computed compound", () => {
-    wrap(
+  it("does not render a KNApSAcK source chip for a computed compound", () => {
+    const { container } = wrap(
       <Stage1View
         data={makeRun({
           stage_results: {
@@ -394,11 +401,13 @@ describe("Stage1View — column spec", () => {
       />,
     );
 
-    expect(screen.getByText("KNApSAcK")).toBeInTheDocument();
+    const table = compoundsTable(container);
+    expect(table.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
+    expect(table.queryByText("KNApSAcK")).not.toBeInTheDocument();
   });
 
-  it("source chip shows User-curated for a user-added compound", () => {
-    wrap(
+  it("does not render a User-curated source chip for a user-added compound", () => {
+    const { container } = wrap(
       <Stage1View
         data={makeRun({
           stage_results: {
@@ -418,7 +427,9 @@ describe("Stage1View — column spec", () => {
       />,
     );
 
-    expect(screen.getByText("User-curated")).toBeInTheDocument();
+    const table = compoundsTable(container);
+    expect(table.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
+    expect(table.queryByText("User-curated")).not.toBeInTheDocument();
   });
 
   it("plant-source column is ABSENT for single-plant selection mode", () => {
@@ -552,7 +563,7 @@ describe("Stage1View — CSV", () => {
 
     const csv = await blobToText(capturedBlob);
     const header = csv.split("\n")[0];
-    expect(header).toBe("inchikey,name,smiles,plant_sources,source,source_url");
+    expect(header).toBe("inchikey,name,smiles,plant_sources,source_url");
   });
 
   it("CSV row contains correct field values for a computed compound", async () => {
@@ -591,8 +602,8 @@ describe("Stage1View — CSV", () => {
     const csv = await blobToText(capturedBlob);
     expect(csv).toContain("VHYFNPMBLIVWCW-UHFFFAOYSA-N");
     expect(csv).toContain("Curcumin");
-    expect(csv).toContain("KNApSAcK");
     expect(csv).toContain("https://knapsack.jp/compound/C00001");
+    expect(csv).not.toContain("KNApSAcK");
   });
 
   it("CSV plant_sources column is empty string in single-plant mode", async () => {
@@ -632,12 +643,12 @@ describe("Stage1View — CSV", () => {
 
     const csv = await blobToText(capturedBlob);
     const rows = csv.split("\n");
-    // Data row: inchikey,name,smiles,plant_sources,source,source_url
+    // Data row: inchikey,name,smiles,plant_sources,source_url
     // plant_sources should be empty (not a multi-plant selection run)
     const dataRow = rows[1];
     expect(dataRow).toBeDefined();
-    // The plant_sources field is between smiles and source — should be empty
-    // Row format: inchikey,name,smiles,,source,source_url
+    // The plant_sources field is between smiles and source_url — should be empty.
+    // Row format: inchikey,name,smiles,,source_url
     expect(dataRow).toContain(",,");
   });
 });

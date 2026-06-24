@@ -5,7 +5,7 @@
  *  - Summary count cards: target count, coverage %, and per-source edge counts
  *    (ChEMBL bioactivity / PubChem BioAssay)
  *  - Targets DataTable (one row per target): gene symbol, UniProt accession (linked),
- *    evidence/method(s), # compounds, an edit tag badge, and an in-table delete action
+ *    compound source list, and an in-table delete action
  *  - DataTable owns pagination, and CsvDownloadButton exports rows keyed on gene
  *    symbol + UniProt accession + method + source_compounds + source_url (NEVER a UUID column)
  *  - Per-compound coverage DataTable (0-coverage rows always visible)
@@ -44,7 +44,6 @@ import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ExpandableListCell } from "@/components/ui/ExpandableListCell";
 import { ExternalLink } from "@/components/ui/ExternalLink";
-import { SourceChip } from "@/components/ui/SourceChip";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
@@ -187,24 +186,6 @@ function buildS3CsvRows(rows: TargetRow[]): unknown[][] {
   ]);
 }
 
-function tagBadge(tag: TargetTag): React.ReactElement | null {
-  if (tag === "user-added") {
-    return (
-      <Badge variant="secondary" className="text-[10px]">
-        user-added
-      </Badge>
-    );
-  }
-  if (tag === "user-removed") {
-    return (
-      <Badge variant="destructive" className="text-[10px]">
-        user-removed
-      </Badge>
-    );
-  }
-  return null;
-}
-
 // ---------------------------------------------------------------------------
 // Stage3View
 // ---------------------------------------------------------------------------
@@ -338,30 +319,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
             cell: ({ row }) => <ExpandableListCell items={row.original.source_compounds} />,
           },
         ] as ColumnDef<TargetRow>[])),
-    // 4. Source → SourceChip with prediction-method label; "User-curated" for user-added rows.
-    {
-      id: "source",
-      header: "Source",
-      enableSorting: false,
-      cell: ({ row }) => {
-        const r = row.original;
-        if (r.tag === "user-added" || r.methods.length === 0) {
-          return <SourceChip name="User-curated" />;
-        }
-        // Use the first (or only) prediction method as the chip label. source_url on the
-        // row is the UniProt URL (used by the accession column above), not a method URL.
-        const label = methodLabel(r.methods[0]!);
-        return <SourceChip name={label} />;
-      },
-    },
-    // 5. Edit-tag badge (user-added / user-removed indicator).
-    {
-      id: "tag",
-      header: "",
-      enableSorting: false,
-      cell: ({ row }) => tagBadge(row.original.tag),
-    },
-    // 6. × delete — reuses the existing edit mutation's remove path.
+    // 4. × delete — reuses the existing edit mutation's remove path.
     {
       id: "actions",
       header: "",
