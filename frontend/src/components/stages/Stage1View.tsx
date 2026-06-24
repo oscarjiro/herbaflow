@@ -265,12 +265,10 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
   ];
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex flex-col gap-6">
       {/* Context + sources */}
-      <div className="flex flex-col gap-1">
-        <StageEntityContext data={data} side="plant" />
-        <StageDataSources stage={1} userProvided={isUserProvided} />
-      </div>
+      <StageEntityContext data={data} side="plant" />
+      <StageDataSources stage={1} userProvided={isUserProvided} />
 
       {isUserProvided && (
         <div>

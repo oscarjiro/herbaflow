@@ -56,8 +56,13 @@ const SAMPLE_STAGE2_PASSED = {
   count: 2,
   state: "computed",
   passed: [
-    { compound_id: "c1", canonical_name: "Curcumin", smiles: "CCO" },
-    { compound_id: "c2", canonical_name: "Berberine", smiles: "CCN" },
+    {
+      compound_id: "c1",
+      canonical_name: "Curcumin",
+      smiles: "CCO",
+      source_url: "https://pubchem.ncbi.nlm.nih.gov/compound/969516",
+    },
+    { compound_id: "c2", canonical_name: "Berberine", smiles: "CCN", source_url: null },
   ],
   filtered: [],
   annotations: { pains: [], np_bypass: [], unscreened: [], could_not_screen: [] },
@@ -198,6 +203,23 @@ describe("Stage3View", () => {
     expect(within(coverage).getByText("Berberine")).toBeInTheDocument();
     // Curcumin (c1) covered, Berberine (c2) uncovered — both rendered.
     expect(within(coverage).getByText("Curcumin")).toBeInTheDocument();
+  });
+
+  it("links covered compounds in the coverage table to their source URL", () => {
+    const { container } = wrap(<Stage3View data={makeRun()} />);
+    const coverage = container.querySelector(".coverage-table") as HTMLElement;
+    const curcuminLink = within(coverage).getByRole("link", {
+      name: "Open source for Curcumin",
+    });
+
+    expect(curcuminLink).toHaveAttribute(
+      "href",
+      "https://pubchem.ncbi.nlm.nih.gov/compound/969516",
+    );
+    expect(curcuminLink.querySelector("svg")).not.toBeNull();
+    expect(
+      within(coverage).queryByRole("link", { name: "Open source for Berberine" }),
+    ).not.toBeInTheDocument();
   });
 
   it("CSV is keyed on gene symbol/uniprot/method/source_url and has NO UUID column", async () => {

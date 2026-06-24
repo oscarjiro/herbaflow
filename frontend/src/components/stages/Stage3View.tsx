@@ -43,6 +43,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ExpandableListCell } from "@/components/ui/ExpandableListCell";
 import { ExternalLink } from "@/components/ui/ExternalLink";
+import { SourceIconLink } from "@/components/ui/SourceIconLink";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
@@ -93,6 +94,7 @@ type Stage2Passed = {
   compound_id: string;
   canonical_name: string | null;
   smiles?: string | null;
+  source_url?: string | null;
 };
 
 // A derived, per-target view row.
@@ -114,6 +116,7 @@ type TargetRow = {
 type CoverageRow = {
   compound_id: string;
   compound: string;
+  source_url: string | null;
   coverage: number;
 };
 
@@ -230,6 +233,10 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     () => new Map(passed.map((c) => [c.compound_id, c.canonical_name])),
     [passed],
   );
+  const sourceUrlById = useMemo(
+    () => new Map(passed.map((c) => [c.compound_id, c.source_url ?? null])),
+    [passed],
+  );
 
   const targetRows = useMemo(
     () => (stage3 ? buildTargetRows(stage3, nameById) : []),
@@ -269,6 +276,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     compound_id: c.compound_id,
     canonical_name: c.canonical_name,
     smiles: c.smiles ?? null,
+    source_url: c.source_url ?? null,
   }));
 
   // Per-target column definitions — spec-aligned columns in the required order.
@@ -334,6 +342,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     ([compoundId, info]) => ({
       compound_id: compoundId,
       compound: nameById.get(compoundId) ?? compoundId,
+      source_url: sourceUrlById.get(compoundId) ?? null,
       coverage: info.coverage,
     }),
   );
@@ -343,8 +352,19 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       id: "compound",
       header: "Compound",
       cell: ({ row }) => (
-        <span className={row.original.coverage === 0 ? "[color:var(--hf-fg-3)]" : undefined}>
-          {row.original.compound}
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5",
+            row.original.coverage === 0 && "[color:var(--hf-fg-3)]",
+          )}
+        >
+          <span>{row.original.compound}</span>
+          {row.original.source_url && (
+            <SourceIconLink
+              href={row.original.source_url}
+              label={`Open source for ${row.original.compound}`}
+            />
+          )}
         </span>
       ),
     },
