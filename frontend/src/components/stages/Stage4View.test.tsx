@@ -1,8 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AnalysisRead } from "../../api/types.gen";
 import { Stage4View } from "./Stage4View";
+import * as sdk from "../../api/sdk.gen";
+import * as toastLib from "../../lib/toast";
 
 function wrap(ui: React.ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -25,6 +28,10 @@ const base = {
   diseases: [],
   compounds: [],
 } as unknown as AnalysisRead;
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("Stage4View — single editable table", () => {
   it("uses cleaned heading in the not-applicable state", () => {
@@ -369,6 +376,147 @@ describe("Stage4View — single editable table", () => {
     expect(screen.getByRole("button", { name: "Remove GENEB" })).toBeInTheDocument();
     // Neither is disabled (effectiveCount > 1, so min-entities floor not hit).
     expect(screen.getByRole("button", { name: "Remove GENEA" })).not.toBeDisabled();
+  });
+
+  it("shows a success toast after a disease target add is committed", async () => {
+    vi.spyOn(sdk, "editStage").mockResolvedValue({ data: {} } as never);
+    const notifySuccessSpy = vi.spyOn(toastLib, "notifySuccess").mockImplementation(() => {});
+
+    vi.spyOn(sdk, "validateTargets").mockResolvedValue({
+      data: {
+        resolved: [
+          {
+            target_id: "t2",
+            gene_symbol: "GENEB",
+            uniprot_accession: "P22222",
+            canonical_key: "geneb",
+          },
+        ],
+        failed: [],
+      },
+    } as never);
+
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "GENEA",
+              gene_symbol: "GENEA",
+              uniprot_accession: "P11111",
+              source_url: null,
+              tag: "computed",
+            },
+          ],
+          count: 1,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    const textarea = screen.getByRole("textbox", { name: /add disease targets/i });
+    await userEvent.type(textarea, "GENEB");
+    await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
+    await screen.findByRole("list", { name: /resolved targets/i });
+    await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+
+    await waitFor(() => expect(notifySuccessSpy).toHaveBeenCalledWith("Added 1 target"));
+  });
+
+  it("shows a success toast after a disease target remove is committed", async () => {
+    vi.spyOn(sdk, "editStage").mockResolvedValue({ data: {} } as never);
+    const notifySuccessSpy = vi.spyOn(toastLib, "notifySuccess").mockImplementation(() => {});
+
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "GENEA",
+              gene_symbol: "GENEA",
+              uniprot_accession: "P11111",
+              opentargets_score: 0.6,
+              source_url: null,
+              tag: "computed",
+            },
+            {
+              target_id: "t2",
+              canonical_name: "GENEB",
+              gene_symbol: "GENEB",
+              uniprot_accession: "P22222",
+              opentargets_score: 0.5,
+              source_url: null,
+              tag: "computed",
+            },
+          ],
+          count: 2,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove GENEA" }));
+
+    await waitFor(() => expect(notifySuccessSpy).toHaveBeenCalledWith("Removed 1 target"));
+  });
+
+  it("shows a rollback toast when a disease target remove fails", async () => {
+    vi.spyOn(sdk, "editStage").mockRejectedValue({ title: "Edit failed" } as never);
+    const notifyErrorSpy = vi.spyOn(toastLib, "notifyError").mockImplementation(() => {});
+
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "GENEA",
+              gene_symbol: "GENEA",
+              uniprot_accession: "P11111",
+              opentargets_score: 0.6,
+              source_url: null,
+              tag: "computed",
+            },
+            {
+              target_id: "t2",
+              canonical_name: "GENEB",
+              gene_symbol: "GENEB",
+              uniprot_accession: "P22222",
+              opentargets_score: 0.5,
+              source_url: null,
+              tag: "computed",
+            },
+          ],
+          count: 2,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove GENEA" }));
+
+    await waitFor(() =>
+      expect(notifyErrorSpy).toHaveBeenCalledWith({
+        title: "Could not remove target. Your list was restored.",
+      }),
+    );
   });
 
   it("passes every target row to DataTable so the shared pager owns pagination", () => {

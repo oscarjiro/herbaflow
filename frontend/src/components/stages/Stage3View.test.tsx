@@ -503,6 +503,35 @@ describe("Stage3View — already-in-run deduplication", () => {
     // editStage should NOT have been called at all
     expect(editSpy).not.toHaveBeenCalled();
   });
+
+  it("shows a success toast after a target add is committed", async () => {
+    vi.spyOn(sdk, "editStage").mockResolvedValue({ data: {} } as never);
+    const notifySuccessSpy = vi.spyOn(toastLib, "notifySuccess").mockImplementation(() => {});
+
+    vi.spyOn(sdk, "validateTargets").mockResolvedValue({
+      data: {
+        resolved: [
+          {
+            target_id: "T3",
+            gene_symbol: "CCC",
+            uniprot_accession: "P00003",
+            canonical_key: "ccc",
+          },
+        ],
+        failed: [],
+      },
+    } as never);
+
+    wrap(<Stage3View data={makeData()} />);
+
+    const textarea = screen.getByRole("textbox", { name: /add targets/i });
+    await userEvent.type(textarea, "CCC");
+    await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
+    await waitFor(() => screen.getByRole("list", { name: /resolved targets/i }));
+    await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+
+    await waitFor(() => expect(notifySuccessSpy).toHaveBeenCalledWith("Added 1 target"));
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -533,5 +562,40 @@ describe("Stage3View — D-4 toast wiring", () => {
     await userEvent.click(screen.getByRole("button", { name: /redo from this stage/i }));
 
     await waitFor(() => expect(notifyInfoSpy).toHaveBeenCalledWith("Re-running from step 3"));
+  });
+});
+
+describe("Stage3View — edit toasts", () => {
+  it("shows a success toast after a target remove is committed", async () => {
+    vi.spyOn(sdk, "editStage").mockResolvedValue({ data: {} } as never);
+    const notifySuccessSpy = vi.spyOn(toastLib, "notifySuccess").mockImplementation(() => {});
+
+    wrap(
+      <Stage3View
+        data={makeRun({
+          stage_results: {
+            "2": SAMPLE_STAGE2_PASSED,
+            "3": {
+              ...SAMPLE_STAGE3_RESULTS,
+              count: 2,
+              targets: [
+                ...SAMPLE_STAGE3_RESULTS.targets,
+                {
+                  target_id: "22222222-2222-2222-2222-222222222222",
+                  canonical_name: "AKT1",
+                  gene_symbol: "AKT1",
+                  uniprot_accession: "P31749",
+                  tag: "computed",
+                },
+              ],
+            },
+          } as unknown as AnalysisRead["stage_results"],
+        })}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove TP53" }));
+
+    await waitFor(() => expect(notifySuccessSpy).toHaveBeenCalledWith("Removed 1 target"));
   });
 });

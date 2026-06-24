@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { Stage1View } from "./Stage1View";
 import * as sdk from "../../api/sdk.gen";
+import * as toastLib from "../../lib/toast";
 import type { AnalysisRead } from "../../api/types.gen";
 
 // ---------------------------------------------------------------------------
@@ -308,6 +309,28 @@ describe("Stage1View — already-in-run deduplication", () => {
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(/already in run/i));
     // editStage should NOT have been called at all
     expect(editSpy).not.toHaveBeenCalled();
+  });
+
+  it("shows a success toast after a compound add is committed", async () => {
+    vi.spyOn(sdk, "editStage").mockResolvedValue({ data: {} } as never);
+    const notifySuccessSpy = vi.spyOn(toastLib, "notifySuccess").mockImplementation(() => {});
+
+    vi.spyOn(sdk, "validateCompounds").mockResolvedValue({
+      data: {
+        resolved: [{ compound_id: "C3", canonical_name: "Rutin", canonical_key: "rutin" }],
+        failed: [],
+      },
+    } as never);
+
+    wrap(<Stage1View data={makeRun()} />);
+
+    const textarea = screen.getByRole("textbox", { name: /add compounds/i });
+    await userEvent.type(textarea, "Rutin");
+    await userEvent.click(screen.getByRole("button", { name: /^validate$/i }));
+    await waitFor(() => screen.getByRole("list", { name: /resolved compounds/i }));
+    await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+
+    await waitFor(() => expect(notifySuccessSpy).toHaveBeenCalledWith("Added 1 compound"));
   });
 });
 

@@ -1,15 +1,12 @@
 import { useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { getAnalysisOptions, listPlantsOptions } from "../../api/@tanstack/react-query.gen";
-import { editStage } from "../../api/sdk.gen";
+import { listPlantsOptions } from "../../api/@tanstack/react-query.gen";
 import type { AnalysisRead, PlantRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
-import { markEntitiesRemoved } from "../../lib/optimisticEdit";
 import { pubchemUrl } from "../../lib/externalUrls";
-import type { Problem } from "../../lib/problem";
-import { notifyError } from "../../lib/toast";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
+import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
@@ -130,26 +127,10 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
   // Fetch the plant catalog (deduped by TanStack Query; only needed for the column).
   const { data: plantsData } = useQuery(listPlantsOptions({ query: { limit: CATALOG_LIMIT } }));
 
-  const qc = useQueryClient();
-
-  // Hooks must be called unconditionally before any early return.
-  const edit = useMutation({
-    mutationFn: (body: { add: string[]; remove: string[] }) =>
-      editStage({ path: { analysis_id: analysisId, stage: 1 }, body }),
-    onMutate: async (body) => {
-      if (body.remove.length === 0) return { prev: undefined };
-      const key = getAnalysisOptions({ path: { analysis_id: analysisId } }).queryKey;
-      await qc.cancelQueries({ queryKey: key });
-      const prev = qc.getQueryData<AnalysisRead>(key);
-      if (prev) qc.setQueryData<AnalysisRead>(key, markEntitiesRemoved(prev, 1, body.remove));
-      return { prev };
-    },
-    onError: (error, _body, ctx) => {
-      const key = getAnalysisOptions({ path: { analysis_id: analysisId } }).queryKey;
-      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
-      notifyError(error as Problem);
-    },
-    onSettled: () => qc.invalidateQueries(),
+  const edit = useStageEntityEdit({
+    analysisId,
+    stage: 1,
+    entity: { singular: "compound", plural: "compounds" },
   });
 
   const currentCompoundIds = new Set((stage1.compounds ?? []).map((c) => c.compound_id));

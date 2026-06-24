@@ -31,9 +31,7 @@ import { useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
-import { getAnalysisOptions } from "../../api/@tanstack/react-query.gen";
-import { editStage, resetFrom } from "../../api/sdk.gen";
-import { markEntitiesRemoved } from "../../lib/optimisticEdit";
+import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import {
@@ -45,6 +43,7 @@ import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig } from "../../lib/format";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
+import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -132,23 +131,10 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
     },
     onError: (error) => notifyError(error as Problem),
   });
-  const edit = useMutation({
-    mutationFn: (body: { add: string[]; remove: string[] }) =>
-      editStage({ path: { analysis_id: data.analysis_id, stage: 4 }, body }),
-    onMutate: async (body) => {
-      if (body.remove.length === 0) return { prev: undefined };
-      const key = getAnalysisOptions({ path: { analysis_id: data.analysis_id } }).queryKey;
-      await qc.cancelQueries({ queryKey: key });
-      const prev = qc.getQueryData<AnalysisRead>(key);
-      if (prev) qc.setQueryData<AnalysisRead>(key, markEntitiesRemoved(prev, 4, body.remove));
-      return { prev };
-    },
-    onError: (error, _body, ctx) => {
-      const key = getAnalysisOptions({ path: { analysis_id: data.analysis_id } }).queryKey;
-      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
-      notifyError(error as Problem);
-    },
-    onSettled: () => qc.invalidateQueries(),
+  const edit = useStageEntityEdit({
+    analysisId: data.analysis_id,
+    stage: 4,
+    entity: { singular: "target", plural: "targets" },
   });
 
   const currentTargetIds = new Set((stage4?.targets ?? []).map((t) => t.target_id));
