@@ -206,7 +206,7 @@ describe("EntryOverflowDialog — targets", () => {
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 
-  it("renders protein name column", () => {
+  it("renders target accession and gene columns", () => {
     render(
       <EntryOverflowDialog
         kind="targets"
@@ -217,7 +217,34 @@ describe("EntryOverflowDialog — targets", () => {
       />,
     );
 
-    expect(screen.getByText("Epidermal growth factor receptor")).toBeInTheDocument();
+    expect(screen.getByText("Accession")).toBeInTheDocument();
+    expect(screen.getByText("Gene")).toBeInTheDocument();
+    expect(screen.getByText("P00533")).toBeInTheDocument();
+    expect(screen.getByText("EGFR")).toBeInTheDocument();
+  });
+
+  it("does not present the internal canonical key as a protein name", () => {
+    render(
+      <EntryOverflowDialog
+        kind="targets"
+        open={true}
+        onOpenChange={() => {}}
+        items={[
+          {
+            target_id: "t3",
+            canonical_key: "uniprot:P04637",
+            gene_symbol: "TP53",
+            uniprot_accession: "P04637",
+            validation_status: "ok",
+          },
+        ]}
+        onRemove={() => {}}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: /protein name/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("uniprot:P04637")).not.toBeInTheDocument();
+    expect(screen.getByText("TP53")).toBeInTheDocument();
   });
 
   it("does not render when closed", () => {

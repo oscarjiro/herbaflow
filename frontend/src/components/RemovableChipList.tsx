@@ -44,12 +44,15 @@ function ChipList<T>({
   if (items.length === 0) return null;
 
   return (
-    <ul aria-label={ariaLabel} className="flex flex-wrap gap-1.5">
+    <ul
+      aria-label={ariaLabel}
+      className="bg-hf-sage-faint border-hf-sage dark:border-hf-border-strong flex flex-wrap gap-1.5 rounded-[var(--radius-md)] border p-2 shadow-[0_10px_24px_-20px_var(--hf-sage-deep),inset_0_1px_0_rgba(255,255,255,0.7)] dark:bg-transparent dark:shadow-none"
+    >
       {visibleItems.map((item) => {
         const label = getLabel(item);
         return (
           <li key={getKey(item)}>
-            <span className="bg-hf-bg border-hf-border-strong text-hf-fg-1 inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border py-1 pr-1.5 pl-3 font-mono text-xs">
+            <span className="bg-hf-surface border-hf-sage text-hf-fg-1 dark:border-hf-border-strong inline-flex items-center gap-1.5 rounded-[var(--radius-pill)] border py-1 pr-1.5 pl-3 font-mono text-xs shadow-[0_1px_2px_rgba(26,26,26,0.08)]">
               {label}
               <button
                 type="button"
@@ -70,7 +73,7 @@ function ChipList<T>({
             type="button"
             aria-label={`Show all ${totalCount} items`}
             onClick={onShowMore}
-            className="bg-hf-bg border-hf-border-strong text-hf-fg-3 hover:text-hf-fg-1 hover:border-hf-border inline-flex items-center rounded-[var(--radius-pill)] border px-3 py-1 font-mono text-xs transition-colors"
+            className="bg-hf-surface border-hf-sage text-hf-fg-3 hover:text-hf-fg-1 hover:border-hf-sage-deep dark:border-hf-border-strong dark:hover:border-hf-border inline-flex items-center rounded-[var(--radius-pill)] border px-3 py-1 font-mono text-xs transition-colors"
           >
             +{hiddenCount} more
           </button>

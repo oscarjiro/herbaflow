@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { LazyMotion, domAnimation } from "motion/react";
 import { http, HttpResponse } from "msw";
 import { expect, test, vi } from "vitest";
 import { CompoundValidateBox } from "./CompoundValidateBox";
@@ -9,7 +10,11 @@ import { server } from "../../tests/handlers";
 
 function wrap(ui: ReactNode) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return <QueryClientProvider client={qc}>{ui}</QueryClientProvider>;
+  return (
+    <LazyMotion features={domAnimation}>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </LazyMotion>
+  );
 }
 
 const RESOLVED_COMPOUND = {
@@ -125,6 +130,48 @@ test("collapses large resolved-compound batches behind the shared overflow dialo
   await userEvent.click(overflow);
   expect(screen.getByRole("dialog")).toBeInTheDocument();
   expect(screen.getByText(/of 12/i)).toBeInTheDocument();
+});
+
+test("shows the shared busy button and progress bar while compounds validate", async () => {
+  server.use(
+    http.post("http://localhost:8000/compounds/validate", () => new Promise(() => undefined)),
+  );
+
+  render(wrap(<CompoundValidateBox onResolved={vi.fn()} showAddButton />));
+  await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO\nCO\nCCC");
+  await userEvent.click(screen.getByRole("button", { name: /validate/i }));
+
+  const button = await screen.findByRole("button", { name: /working/i });
+  expect(button).toHaveAttribute("aria-busy", "true");
+  expect(button).toHaveAttribute("data-variant", "secondary");
+  expect(button).toHaveClass("w-full");
+  expect(button.parentElement).toHaveClass("w-full");
+  expect(screen.getByText("Validating... 0/3")).toBeInTheDocument();
+  expect(
+    screen.getByRole("progressbar", { name: /validating 3 compound entries/i }),
+  ).toHaveAttribute("aria-valuenow", "0");
+});
+
+test("requires adding the validated compound batch before validating again", async () => {
+  server.use(
+    http.post("http://localhost:8000/compounds/validate", () =>
+      HttpResponse.json({
+        resolved: [RESOLVED_COMPOUND],
+        failed: [],
+      }),
+    ),
+  );
+
+  render(wrap(<CompoundValidateBox onResolved={vi.fn()} showAddButton />));
+  await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO");
+  await userEvent.click(screen.getByRole("button", { name: /validate/i }));
+
+  await screen.findByRole("button", { name: /^add$/i });
+  const validateButton = screen.getByRole("button", { name: /validate/i });
+  expect(validateButton).toBeDisabled();
+
+  await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+  expect(validateButton).not.toBeDisabled();
 });
 
 test("the line-numbered editor still drives text state", async () => {

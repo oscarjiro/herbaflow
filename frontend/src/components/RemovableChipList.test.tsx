@@ -15,9 +15,17 @@ test("renders hf-token chips and removes on click", async () => {
     />,
   );
   // Classes live on the <span> inside <li>
+  const list = screen.getByRole("list", { name: "compounds" });
+  expect(list.className).toMatch(/bg-hf-sage-faint/);
+  expect(list.className).toMatch(/border-hf-sage/);
+  expect(list.className).toMatch(/dark:bg-transparent/);
+  expect(list.className).not.toMatch(/bg-hf-bg/);
+
   const chip = container.querySelector("li span")!;
   expect(chip.className).toMatch(/font-mono/);
-  expect(chip.className).toMatch(/border-hf-border-strong/);
+  expect(chip.className).toMatch(/border-hf-sage/);
+  expect(chip.className).toMatch(/bg-hf-surface/);
+  expect(chip.className).not.toMatch(/bg-hf-bg/);
   expect(chip.className).not.toMatch(/bg-accent\b/);
   await userEvent.click(screen.getByRole("button"));
   expect(onRemove).toHaveBeenCalled();

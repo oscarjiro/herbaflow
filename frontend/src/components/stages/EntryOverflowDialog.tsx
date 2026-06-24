@@ -115,12 +115,6 @@ function buildTargetColumns(onRemove: (id: string) => void): ColumnDef<ResolvedT
       },
     },
     {
-      accessorKey: "canonical_key",
-      header: "Protein name",
-      meta: { filterable: true },
-      cell: ({ row }) => <span className="text-hf-fg-1 text-sm">{row.original.canonical_key}</span>,
-    },
-    {
       accessorKey: "gene_symbol",
       header: "Gene",
       meta: { filterable: true },

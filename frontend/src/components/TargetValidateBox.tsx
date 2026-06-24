@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { LineNumberedTextarea } from "@/components/ui/line-numbered-textarea";
+import { ManualValidateProgress } from "@/components/ui/ManualValidateProgress";
 import { ManualEntrySummary, nonEmptyLineCount } from "@/components/ui/ManualEntrySummary";
+import { StatefulButton } from "@/components/ui/StatefulButton";
 import { MAX_TARGETS } from "@/contract";
 
 /**
@@ -51,6 +53,8 @@ export function TargetValidateBox({
   );
 
   // Repeated non-empty input lines, for the at-a-glance summary roll-up.
+  const inputCount = nonEmptyLineCount(text);
+  const mustAddValidatedBatch = showAddButton === true && resolved.length > 0;
   const duplicateCount = (() => {
     const seen = new Set<string>();
     let dup = 0;
@@ -108,15 +112,22 @@ export function TargetValidateBox({
           rows={3}
           errorLines={errorLines}
         />
-        <Button
-          type="button"
+        <StatefulButton
           variant="secondary"
           size="sm"
-          disabled={validate.isPending || disabled}
-          onClick={() => validate.mutate()}
+          successDuration={0}
+          className="w-full"
+          wrapperClassName="w-full"
+          disabled={validate.isPending || disabled || mustAddValidatedBatch}
+          title={
+            mustAddValidatedBatch ? "Add the validated batch before validating again." : undefined
+          }
+          onClickAsync={() => validate.mutateAsync().then(() => undefined)}
         >
           Validate
-        </Button>
+        </StatefulButton>
+
+        {validate.isPending && <ManualValidateProgress kind="target" entryCount={inputCount} />}
 
         <RemovableChipList
           overflowKind="targets"
@@ -141,7 +152,7 @@ export function TargetValidateBox({
             validCount={resolved.length}
             invalidCount={failed.length}
             duplicateCount={duplicateCount}
-            current={nonEmptyLineCount(text)}
+            current={inputCount}
             max={MAX_TARGETS}
             onClear={() => {
               setText("");

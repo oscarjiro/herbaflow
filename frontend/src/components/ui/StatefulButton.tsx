@@ -25,7 +25,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { m, useReducedMotion } from "motion/react";
 import { type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
-import { Button, buttonVariants } from "./button";
+import { Button, type ButtonVariant, buttonVariants } from "./button";
 
 type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>;
 type ButtonState = "idle" | "loading" | "success";
@@ -39,6 +39,10 @@ interface StatefulButtonProps extends Omit<React.ComponentProps<"button">, "onCl
   successDuration?: number;
   /** Size passed through to the base Button. Defaults to "default". */
   size?: ButtonSize;
+  /** Visual variant passed through to the base Button. Defaults to "primary". */
+  variant?: ButtonVariant;
+  /** Optional class for the outer state wrapper. */
+  wrapperClassName?: string;
 }
 
 export function StatefulButton({
@@ -48,6 +52,8 @@ export function StatefulButton({
   successDuration = 1800,
   disabled,
   size = "default",
+  variant = "primary",
+  wrapperClassName,
   ...props
 }: StatefulButtonProps) {
   const [state, setState] = useState<ButtonState>("idle");
@@ -84,10 +90,10 @@ export function StatefulButton({
   const dur = shouldReduceMotion ? 0 : 0.18;
 
   return (
-    <span className="relative inline-flex flex-col items-start">
+    <span className={cn("relative inline-flex flex-col items-start", wrapperClassName)}>
       <Button
         type="button"
-        variant="primary"
+        variant={variant}
         size={size}
         aria-busy={isLoading ? "true" : undefined}
         disabled={disabled}
