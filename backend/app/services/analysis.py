@@ -313,6 +313,7 @@ class AnalysisService:
             "canonical_name": c.canonical_name,
             "inchikey": getattr(c, "inchi_key", None),
             "smiles": getattr(c, "smiles", None),
+            "pubchem_cid": getattr(c, "pubchem_cid", None),
             "source_url": getattr(c, "source_url", None),
         }
 
@@ -370,7 +371,10 @@ class AnalysisService:
         for row in rows:
             if not isinstance(row, dict):
                 continue
-            if not any(row.get(key) in (None, "") for key in ("inchikey", "smiles", "source_url")):
+            if not any(
+                row.get(key) in (None, "")
+                for key in ("inchikey", "smiles", "pubchem_cid", "source_url")
+            ):
                 continue
             try:
                 ids.append(uuid.UUID(str(row["compound_id"])))
@@ -393,7 +397,7 @@ class AnalysisService:
                 hydrated_rows.append(row)
                 continue
             next_row = dict(row)
-            for key in ("canonical_name", "inchikey", "smiles", "source_url"):
+            for key in ("canonical_name", "inchikey", "smiles", "pubchem_cid", "source_url"):
                 if next_row.get(key) in (None, "") and patch.get(key) is not None:
                     next_row[key] = patch[key]
                     changed = True

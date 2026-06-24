@@ -47,9 +47,11 @@ def test_select_compounds_carries_structure_fields() -> None:
                 canonical_name="Curcumin",
                 smiles="C/C=C/...",
                 inchikey="VFLDPWHFBUODDF-...",
+                pubchem_cid="969516",
                 source_url="https://pubchem.ncbi.nlm.nih.gov/compound/969516",
             )
         ],
     )
     c = out["compounds"][0]
     assert c["smiles"] and c["inchikey"] and c["source_url"]
+    assert c["pubchem_cid"] == "969516"

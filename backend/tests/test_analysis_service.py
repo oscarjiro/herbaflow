@@ -76,6 +76,7 @@ class FakeCompoundRepo:
                 canonical_name=f"compound-{i}",
                 inchi_key=f"INCHIKEY-{str(i)[:8]}",
                 smiles="CCO",
+                pubchem_cid=str(i).replace("-", "")[:8],
                 source_url=(
                     "https://pubchem.ncbi.nlm.nih.gov/compound/" f"{str(i).replace('-', '')[:8]}"
                 ),
@@ -134,6 +135,7 @@ def test_compound_add_entry_carries_structure_and_source_url() -> None:
         canonical_name="Curcumin",
         inchi_key="VFLDPWHFBUODDF-FCXRPNKRSA-N",
         smiles="COc1cc(O)ccc1",
+        pubchem_cid="969516",
         source_url="https://pubchem.ncbi.nlm.nih.gov/compound/969516",
     )
     entry = AnalysisService._compound_add_entry(c)
@@ -141,6 +143,7 @@ def test_compound_add_entry_carries_structure_and_source_url() -> None:
     assert entry["canonical_name"] == "Curcumin"
     assert entry["inchikey"] == "VFLDPWHFBUODDF-FCXRPNKRSA-N"
     assert entry["smiles"] == "COc1cc(O)ccc1"
+    assert entry["pubchem_cid"] == "969516"
     assert entry["source_url"] == "https://pubchem.ncbi.nlm.nih.gov/compound/969516"
 
 
@@ -283,6 +286,7 @@ async def test_get_hydrates_legacy_stage1_added_compound_identity() -> None:
     row = read.stage_results["1"]["compounds"][0]
     assert row["inchikey"] == f"INCHIKEY-{str(cid)[:8]}"
     assert row["smiles"] == "CCO"
+    assert row["pubchem_cid"] == str(cid).replace("-", "")[:8]
     assert row["source_url"].startswith("https://pubchem.ncbi.nlm.nih.gov/compound/")
 
 

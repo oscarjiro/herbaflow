@@ -1795,6 +1795,17 @@
             ],
             "title": "Canonical Name"
           },
+          "pubchem_cid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pubchem Cid"
+          },
           "validation_status": {
             "type": "string",
             "title": "Validation Status"

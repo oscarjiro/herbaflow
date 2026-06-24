@@ -28,6 +28,7 @@ class FakeCompound:
     canonical_key: str
     canonical_name: str | None
     validation_status: str
+    pubchem_cid: str | None = None
 
 
 class FakeRepo:
@@ -75,6 +76,7 @@ async def test_smiles_already_in_db_reused_no_pubchem() -> None:
         canonical_key=ETHANOL_KEY,
         canonical_name="ethanol",
         validation_status="externally_validated",
+        pubchem_cid="702",
     )
     repo = FakeRepo({ETHANOL_KEY: db_row})
     pubchem = FakePubChem(record=_pubchem_record())
@@ -89,6 +91,7 @@ async def test_smiles_already_in_db_reused_no_pubchem() -> None:
     assert r.compound_id == db_row.compound_id
     assert r.canonical_key == ETHANOL_KEY
     assert r.canonical_name == "ethanol"
+    assert r.pubchem_cid == "702"
     assert r.validation_status == "externally_validated"
     assert len(pubchem.calls) == 0
     assert repo.upserted == []
@@ -121,6 +124,7 @@ async def test_smiles_not_in_db_pubchem_hit_externally_validated() -> None:
     assert r.validation_status == "externally_validated"
     assert r.canonical_name == "ethanol"
     assert r.canonical_key == ETHANOL_KEY
+    assert r.pubchem_cid == "702"
 
 
 @pytest.mark.asyncio
@@ -160,6 +164,7 @@ async def test_inchikey_in_db_reused_no_pubchem() -> None:
         canonical_key=ETHANOL_KEY,
         canonical_name="ethanol",
         validation_status="externally_validated",
+        pubchem_cid="702",
     )
     repo = FakeRepo({ETHANOL_KEY: db_row})
     pubchem = FakePubChem(record=_pubchem_record())
@@ -171,6 +176,7 @@ async def test_inchikey_in_db_reused_no_pubchem() -> None:
     assert failed == []
     assert len(resolved) == 1
     assert resolved[0].compound_id == db_row.compound_id
+    assert resolved[0].pubchem_cid == "702"
     assert len(pubchem.calls) == 0
     assert repo.upserted == []
 

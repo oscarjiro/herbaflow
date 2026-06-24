@@ -87,6 +87,7 @@ async def resolve_compounds(
                 compound_id=existing.compound_id,
                 canonical_key=existing.canonical_key,
                 canonical_name=existing.canonical_name,
+                pubchem_cid=getattr(existing, "pubchem_cid", None),
                 validation_status=existing.validation_status,
             )
             continue
@@ -143,6 +144,7 @@ async def resolve_compounds(
             compound_id=cid,
             canonical_key=canonical_key,
             canonical_name=row["canonical_name"],
+            pubchem_cid=row.get("pubchem_cid"),
             validation_status=status,
         )
 

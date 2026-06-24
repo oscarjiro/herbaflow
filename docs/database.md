@@ -594,10 +594,12 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
 - `stage_results["1"].compounds[*].canonical_name` is populated from the compound row on a
   `manual_compounds` prefill (was previously `null` — Stage 1 was showing the UUID). Display only;
   no schema change. Symmetric with the Stage-3 target prefill which already carried names.
-- `stage_results["1"].compounds[*]` also carries `smiles`, `inchikey`, and `source_url` from the
-  compound row so downstream exports and UI surfaces can render structure provenance without an
-  extra lookup. The emitted JSON key is `inchikey`, mirroring the rest of the contract, even though
-  the ORM field is `Compound.inchi_key`.
+- `stage_results["1"].compounds[*]` also carries `smiles`, `inchikey`, `pubchem_cid`, and `source_url`
+  from the compound row so downstream exports and UI surfaces can render structure provenance and
+  canonical PubChem entry links without an extra lookup. The emitted JSON key is `inchikey`, mirroring
+  the rest of the contract, even though the ORM field is `Compound.inchi_key`.
+- The `POST /compounds/validate` response `ResolvedCompound` objects carry `pubchem_cid` when the
+  canonical compound row has one, matching the Stage 1 identity carry.
 - The `POST /compounds/validate` response `FailedInput` objects carry an optional 1-based **`line`**
   field on compound failures (parity with `resolve_targets` which already reported line indices;
   Software Lock §4.5 per-line reason). No schema change — the `line` field is in the response body

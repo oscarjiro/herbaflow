@@ -275,6 +275,10 @@ export const zResolvedCompound = z.object({
         z.string(),
         z.null()
     ]),
+    pubchem_cid: z.union([
+        z.string(),
+        z.null()
+    ]).optional(),
     validation_status: z.string()
 });
 

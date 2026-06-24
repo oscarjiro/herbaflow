@@ -23,6 +23,7 @@ class CompoundRow:
     canonical_name: str | None
     smiles: str | None = None
     inchikey: str | None = None
+    pubchem_cid: str | None = None
     source_url: str | None = None
 
 
@@ -39,6 +40,7 @@ def select_compounds(rows: list[CompoundRow]) -> dict[str, Any]:
                 "canonical_name": row.canonical_name,
                 "smiles": row.smiles,
                 "inchikey": row.inchikey,
+                "pubchem_cid": row.pubchem_cid,
                 "source_url": row.source_url,
             },
         )
@@ -62,6 +64,7 @@ async def run(session: AsyncSession, plant_ids: list[uuid.UUID]) -> dict[str, An
             Compound.canonical_name,
             Compound.smiles,
             Compound.inchi_key,
+            Compound.pubchem_cid,
             Compound.source_url,
         )
         .join(Compound, Compound.compound_id == PlantCompound.compound_id)
@@ -75,6 +78,7 @@ async def run(session: AsyncSession, plant_ids: list[uuid.UUID]) -> dict[str, An
             canonical_name=r.canonical_name,
             smiles=r.smiles,
             inchikey=r.inchi_key,
+            pubchem_cid=r.pubchem_cid,
             source_url=r.source_url,
         )
         for r in result.all()

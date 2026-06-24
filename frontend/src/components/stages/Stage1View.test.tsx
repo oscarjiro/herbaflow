@@ -405,6 +405,59 @@ describe("Stage1View — column spec", () => {
     expect(link).not.toHaveAttribute("href", expect.stringContaining("#query"));
   });
 
+  it("links compound names through the persisted PubChem CID when present", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  inchikey: "VHYFNPMBLIVWCW-UHFFFAOYSA-N",
+                  pubchem_cid: "969516",
+                  tag: "computed",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    const link = screen.getByRole("link", { name: /^Curcumin$/i });
+    expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
+  });
+
+  it("renders compound names as text when PubChem CID is absent", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          stage_results: {
+            "1": {
+              count: 1,
+              compounds: [
+                {
+                  compound_id: "c1",
+                  canonical_name: "Curcumin",
+                  inchikey: "VHYFNPMBLIVWCW-UHFFFAOYSA-N",
+                  tag: "computed",
+                },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    expect(screen.queryByRole("link", { name: /^Curcumin$/i })).not.toBeInTheDocument();
+    expect(screen.getByText("Curcumin")).toBeInTheDocument();
+  });
+
   it("does not render a KNApSAcK source chip for a computed compound", () => {
     const { container } = wrap(
       <Stage1View

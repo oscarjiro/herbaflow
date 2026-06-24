@@ -167,6 +167,7 @@ export type ResolvedCompound = {
     compound_id: string;
     canonical_key: string;
     canonical_name: string | null;
+    pubchem_cid?: string | null;
     validation_status: string;
 };
 
