@@ -144,6 +144,29 @@ describe("EntitySearchCombobox — type-to-search", () => {
     expect(await screen.findByText("Alpha Plant")).toBeInTheDocument();
     expect(search).toHaveBeenCalled();
   });
+
+  it("continues searching after the focused input is cleared with Backspace and reused", async () => {
+    const search = vi.fn(async (q: string) => (q.includes("b") ? [OPT_B] : [OPT_A]));
+    render(
+      <EntitySearchCombobox
+        mode="single"
+        selected={[]}
+        onChange={() => {}}
+        search={search}
+        ariaLabel="Search plants"
+      />,
+    );
+
+    const input = screen.getByRole("combobox", { name: "Search plants" });
+    await userEvent.type(input, "a");
+    expect(await screen.findByText("Alpha Plant")).toBeInTheDocument();
+
+    await userEvent.keyboard("{Backspace}");
+    expect(input).toHaveFocus();
+
+    await userEvent.type(input, "b");
+    expect(await screen.findByText("Beta Plant")).toBeInTheDocument();
+  });
 });
 
 // ---------------------------------------------------------------------------

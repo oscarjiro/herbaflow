@@ -62,6 +62,9 @@ The UI implements two execution modes:
 
 Status polling (2-second intervals via TanStack Query) drives stage panel visibility and sidebar state. When status transitions to a terminal state (complete, failed), polling ceases automatically.
 
+The run sidebar uses the same masked Herbaflow wordmark asset as the global navigation, so brand rendering
+comes from one CSS class instead of a separately typeset sidebar label.
+
 ## Key Design Decisions
 
 ### Stage 5: Overlap View (no client-side Venn yet)
@@ -281,8 +284,9 @@ such as "Complete" and "Waiting for review". Stale-stage approval blocks use the
 
 ### Step 2 results view
 
-The ADME results panel renders two tables, **Passed** and **Filtered**, switchable by tab.
-Each row carries:
+The ADME results panel renders one combined passed-and-filtered table. The compound name links to
+the row's persisted `source_url` when a canonical external page is available; otherwise it remains
+plain text. Each row carries:
 
 - The descriptor values (MW, logP, HBD, HBA, TPSA, rotatable bonds).
 - `qed_score` (QED: Quantitative Estimate of Drug-likeness, 0-1).
@@ -300,7 +304,9 @@ NP-bypass / PAINS) and the parameter values used for the run.
 **Components:** `src/components/stages/Stage3View.tsx`, `src/components/stages/StpDialog.tsx`,
 `src/components/TargetValidateBox.tsx`.
 
-**Results view:** Renders a target table keyed by **UniProt accession + gene symbol**. Each computed
+**Results view:** Renders a target table keyed by **UniProt accession + gene symbol**. The UniProt
+accession is rendered as a linked monospace identifier, and both identifier columns use the shared
+table sort/filter controls. Each computed
 row carries a source method (`chembl_bioactivity` or `pubchem_bioassay`) and a `pchembl_value` for
 ChEMBL rows. Targets added by the researcher, including targets from SwissTargetPrediction, appear
 in the analysis target set without a source-method edge. A **per-compound coverage** summary is
@@ -341,6 +347,9 @@ offers **add / remove** controls via the shared target-add path (`TargetValidate
 shown as a plain note, not an error: "No disease targets match this score. Lower the minimum score,
 run this step again, or add targets manually." Remove controls are disabled once one target remains,
 with the reason "Keep at least one target before removing another."
+
+The UniProt accession uses the same linked monospace identifier treatment as Step 3. The UniProt and
+gene-symbol columns expose real accessors to the shared table sort/filter controls.
 
 **CSV export:** Columns are UniProt accession + gene symbol + Open Targets score.
 

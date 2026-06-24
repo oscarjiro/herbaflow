@@ -27,6 +27,7 @@ import { BoolMark } from "@/components/ui/BoolMark";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
@@ -118,11 +119,14 @@ function buildCsvRows(rows: DisplayRow[]): unknown[][] {
 const COLUMNS: ColumnDef<DisplayRow>[] = [
   {
     id: "name",
+    accessorFn: (row) => row.canonical_name ?? row.inchikey ?? row.compound_id,
     header: "Name",
+    meta: { filterable: true },
     cell: ({ row }) => {
       const r = row.original;
       const label = r.canonical_name ?? r.inchikey ?? r.compound_id;
-      return <span>{label}</span>;
+      if (!r.source_url) return <span>{label}</span>;
+      return <ExternalLink href={r.source_url}>{label}</ExternalLink>;
     },
   },
   {

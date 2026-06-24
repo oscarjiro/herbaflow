@@ -37,7 +37,7 @@ export function RunSidebar({
     <aside className="sidebar">
       {/* Brand */}
       <Link to="/" aria-label="Herbaflow home" className="brand">
-        <span className="mark">Herbaflow</span>
+        <span className="hf-logo block h-8 w-[132px]" aria-hidden="true" />
       </Link>
 
       {/* Run identity card */}

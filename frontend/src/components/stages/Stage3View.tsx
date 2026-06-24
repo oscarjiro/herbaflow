@@ -297,17 +297,25 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     // 1. UniProt accession → ExternalLink to UniProt entry page.
     {
       id: "uniprot",
+      accessorFn: (row) => row.uniprot_accession ?? "",
       header: "UniProt",
+      meta: { className: "font-mono", filterable: true },
       cell: ({ row }) => {
         const acc = row.original.uniprot_accession;
         if (!acc) return <span className="text-hf-fg-3">—</span>;
-        return <ExternalLink href={uniprotUrl(acc)}>{acc}</ExternalLink>;
+        return (
+          <ExternalLink href={uniprotUrl(acc)} className="font-mono">
+            {acc}
+          </ExternalLink>
+        );
       },
     },
     // 2. Gene symbol (raw gene_symbol field; falls back to display_label).
     {
       id: "gene_symbol",
+      accessorFn: (row) => row.gene_symbol ?? "",
       header: "Gene symbol",
+      meta: { filterable: true },
       cell: ({ row }) => {
         const sym = row.original.gene_symbol;
         if (!sym) return <span className="text-hf-fg-3">—</span>;

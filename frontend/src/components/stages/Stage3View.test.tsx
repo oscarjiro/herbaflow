@@ -154,6 +154,11 @@ describe("Stage3View", () => {
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637/entry");
   });
 
+  it("renders the UniProt accession in the monospace data font", () => {
+    wrap(<Stage3View data={makeRun()} />);
+    expect(screen.getByRole("link", { name: "P04637" }).className).toMatch(/font-mono/);
+  });
+
   it("does not render a separate source column in the targets table", () => {
     const { container } = wrap(<Stage3View data={makeRun()} />);
     const table = targetsTable(container);

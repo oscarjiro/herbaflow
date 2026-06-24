@@ -228,6 +228,35 @@ describe("Stage4View — single editable table", () => {
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P37231/entry");
   });
 
+  it("renders the UniProt accession in the monospace data font", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "PPARG",
+              gene_symbol: "PPARG",
+              uniprot_accession: "P37231",
+              opentargets_score: 0.75,
+              source_url: null,
+              tag: "computed",
+            },
+          ],
+          count: 1,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    wrap(<Stage4View data={data} />);
+
+    expect(screen.getByRole("link", { name: /P37231/i }).className).toMatch(/font-mono/);
+  });
+
   it("does not render a separate source column for enriched rows", () => {
     const otUrl = "https://platform.opentargets.org/target/ENSG00000132170";
     const data = {

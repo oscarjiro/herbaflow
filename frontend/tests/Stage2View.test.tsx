@@ -83,7 +83,13 @@ describe("Stage2View", () => {
     expect(screen.getByText("HeavyMolecule")).toBeInTheDocument();
   });
 
-  it("renders compound name as plain text when no PubChem CID is present", () => {
+  it("links compound names to their persisted source URL when present", () => {
+    wrap(<Stage2View data={makeRun()} />);
+    const link = screen.getByRole("link", { name: /Curcumin/i });
+    expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
+  });
+
+  it("renders compound name as plain text when no source URL is present", () => {
     const data = makeRun({
       stage_results: {
         "2": {
@@ -93,6 +99,7 @@ describe("Stage2View", () => {
               ...SAMPLE_STAGE2_RESULTS.passed[0],
               inchikey: "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
               canonical_name: "Curcumin",
+              source_url: null,
             },
           ],
           filtered: [],

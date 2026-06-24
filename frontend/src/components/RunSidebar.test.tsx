@@ -19,7 +19,9 @@ describe("RunSidebar", () => {
     renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={() => {}} />, {
       withTheme: true,
     });
-    expect(screen.getByRole("link", { name: /herbaflow home/i })).toBeInTheDocument();
+    const brandLink = screen.getByRole("link", { name: /herbaflow home/i });
+    expect(brandLink).toBeInTheDocument();
+    expect(brandLink.querySelector(".hf-logo")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: /pipeline steps/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /theme:/i })).toBeInTheDocument();
     // Cancel run button (danger trigger for ExitRunDialog)
