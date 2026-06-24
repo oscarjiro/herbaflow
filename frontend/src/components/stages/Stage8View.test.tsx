@@ -355,6 +355,13 @@ describe("Stage8View", () => {
     expect(link).toHaveAttribute("download", "enrichment.csv");
   });
 
+  it("labels the enrichment source column as Category", () => {
+    render(wrap(<Stage8View data={makeRealisticData(REALISTIC_TERMS)} />));
+
+    expect(screen.getByRole("columnheader", { name: "Category" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
+  });
+
   it("renders the enrichment chart before the terms table", () => {
     render(wrap(<Stage8View data={makeRealisticData(REALISTIC_TERMS)} />));
     const chartTitle = screen.getByText("Pathway enrichment");

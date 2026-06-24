@@ -128,7 +128,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
   const columns: ColumnDef<Term>[] = [
     {
       id: "source",
-      header: "Source",
+      header: "Category",
       cell: ({ row }) => row.original.source,
     },
     {
