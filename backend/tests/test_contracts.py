@@ -108,6 +108,21 @@ def test_stage_sources_computed():
     assert names == ["ChEMBL", "PubChem BioAssay", "UniProt"]
 
 
+def test_stage_source_labels_use_public_tool_names():
+    assert [s["name"] for s in contracts.stage_sources(1)] == [
+        "KNApSAcK (plant-compound)",
+        "PubChem",
+    ]
+    assert [s["name"] for s in contracts.stage_sources(2)] == [
+        "RDKit (MW/logP/HBD/HBA/TPSA/RotB/NP-score/PAINS)"
+    ]
+    assert [s["name"] for s in contracts.stage_sources(7)] == [
+        "NetworkX (centrality analysis)",
+        "STRING PPI network (undirected)",
+    ]
+    assert [s["name"] for s in contracts.stage_sources(8)] == ["g:Profiler"]
+
+
 def test_stage_sources_user_provided_overrides():
     srcs = contracts.stage_sources(3, user_provided=True)
     assert len(srcs) == 1

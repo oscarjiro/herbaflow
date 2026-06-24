@@ -56,10 +56,10 @@
           "properties": {
             "1": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
               { "name": "KNApSAcK (plant-compound)", "url": "http://www.knapsackfamily.com/" },
-              { "name": "PubChem (manual enrichment)", "url": "https://pubchem.ncbi.nlm.nih.gov/" }
+              { "name": "PubChem", "url": "https://pubchem.ncbi.nlm.nih.gov/" }
             ]},
             "2": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "RDKit (descriptors, PAINS)", "url": "https://www.rdkit.org/" }
+              { "name": "RDKit (MW/logP/HBD/HBA/TPSA/RotB/NP-score/PAINS)", "url": "https://www.rdkit.org/" }
             ]},
             "3": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
               { "name": "ChEMBL", "url": "https://www.ebi.ac.uk/chembl/" },
@@ -78,11 +78,11 @@
               { "name": "Human only (species 9606); functional or physical", "url": null }
             ]},
             "7": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "networkx (centrality analysis)", "url": "https://networkx.org/" },
+              { "name": "NetworkX (centrality analysis)", "url": "https://networkx.org/" },
               { "name": "STRING PPI network (undirected)", "url": null }
             ]},
             "8": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "g:Profiler (GO + KEGG enrichment)", "url": "https://biit.cs.ut.ee/gprofiler/" }
+              { "name": "g:Profiler", "url": "https://biit.cs.ut.ee/gprofiler/" }
             ]}
           }
         },

@@ -16,6 +16,24 @@ it("includes UniProt alongside Open Targets for stage 4", () => {
   expect(screen.getByText(/UniProt/)).toBeInTheDocument();
 });
 
+it("renders exact source labels from the shared contract", () => {
+  const { rerender } = render(<StageDataSources stage={1} />);
+  expect(screen.getByRole("link", { name: "PubChem" })).toBeInTheDocument();
+  expect(screen.queryByText(/manual enrichment/i)).not.toBeInTheDocument();
+
+  rerender(<StageDataSources stage={2} />);
+  expect(
+    screen.getByRole("link", { name: "RDKit (MW/logP/HBD/HBA/TPSA/RotB/NP-score/PAINS)" }),
+  ).toBeInTheDocument();
+
+  rerender(<StageDataSources stage={7} />);
+  expect(screen.getByRole("link", { name: "NetworkX (centrality analysis)" })).toBeInTheDocument();
+
+  rerender(<StageDataSources stage={8} />);
+  expect(screen.getByRole("link", { name: "g:Profiler" })).toBeInTheDocument();
+  expect(screen.queryByText(/GO \+ KEGG enrichment/i)).not.toBeInTheDocument();
+});
+
 it("renders nothing for an unknown stage", () => {
   const { container } = render(<StageDataSources stage={9} />);
   expect(container).toBeEmptyDOMElement();
