@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi, beforeEach } from "vitest";
@@ -309,6 +309,38 @@ describe("Stage1View — already-in-run deduplication", () => {
 // ---------------------------------------------------------------------------
 
 describe("Stage1View — column spec", () => {
+  it("renders summary cards for total compounds and selected plants with editorial numbers", () => {
+    wrap(
+      <Stage1View
+        data={makeRun({
+          parameters: {
+            input_modes: { plant: "selection", disease: "selection" },
+            plant_ids: ["p1", "p2"],
+          },
+          stage_results: {
+            "1": {
+              count: 3,
+              compounds: [
+                { compound_id: "c1", canonical_name: "Curcumin", tag: "computed" },
+                { compound_id: "c2", canonical_name: "Quercetin", tag: "computed" },
+                { compound_id: "c3", canonical_name: "Berberine", tag: "computed" },
+              ],
+              state: "computed",
+            },
+          },
+        })}
+      />,
+    );
+
+    const compoundsCard = screen.getByText("Total compounds").closest("div");
+    const plantsCard = screen.getByText("Selected plants").closest("div");
+
+    expect(compoundsCard).not.toBeNull();
+    expect(plantsCard).not.toBeNull();
+    expect(within(compoundsCard as HTMLElement).getByText("3")).toHaveClass("font-display");
+    expect(within(plantsCard as HTMLElement).getByText("2")).toHaveClass("font-display");
+  });
+
   it("InChIKey column links to PubChem", () => {
     wrap(
       <Stage1View

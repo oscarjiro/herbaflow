@@ -50,6 +50,7 @@ import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
+import { StageSummaryCard } from "./StageSummaryCard";
 import { StpDialog, type StpCompound } from "./StpDialog";
 import { TargetValidateBox } from "../TargetValidateBox";
 
@@ -418,42 +419,30 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
 
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage3.count} targets`}
-        >
-          <span className="hf-num text-2xl font-semibold tabular-nums">{stage3.count}</span>
-          <span className="text-muted-foreground text-xs">targets</span>
-        </div>
+        <StageSummaryCard
+          value={stage3.count}
+          label="targets"
+          ariaLabel={`${stage3.count} targets`}
+        />
         {!isUserProvided && (
           <>
-            <div
-              className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-              aria-label={`${formatSig(stage3.coverage_pct)}% coverage`}
-            >
-              <span className="hf-num text-2xl font-semibold tabular-nums">
-                {formatSig(stage3.coverage_pct)}%
-              </span>
-              <span className="text-muted-foreground text-xs">coverage</span>
-            </div>
-            <div
-              className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-              aria-label={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL target links`}
-            >
-              <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-                {sourceCounts.chembl_bioactivity ?? 0}
-              </span>
-              <span className="text-muted-foreground text-xs">ChEMBL</span>
-            </div>
-            <div
-              className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-              aria-label={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay target links`}
-            >
-              <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-                {sourceCounts.pubchem_bioassay ?? 0}
-              </span>
-              <span className="text-muted-foreground text-xs">PubChem BioAssay</span>
-            </div>
+            <StageSummaryCard
+              value={`${formatSig(stage3.coverage_pct)}%`}
+              label="coverage"
+              ariaLabel={`${formatSig(stage3.coverage_pct)}% coverage`}
+            />
+            <StageSummaryCard
+              value={sourceCounts.chembl_bioactivity ?? 0}
+              label="ChEMBL"
+              ariaLabel={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL target links`}
+              muted
+            />
+            <StageSummaryCard
+              value={sourceCounts.pubchem_bioassay ?? 0}
+              label="PubChem BioAssay"
+              ariaLabel={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay target links`}
+              muted
+            />
           </>
         )}
       </div>

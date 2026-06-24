@@ -32,6 +32,7 @@ import { HubBarChart } from "@/components/charts/HubBarChart";
 import { exportPlotlyAsPng } from "@/lib/chartExport";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
+import { StageSummaryCard } from "./StageSummaryCard";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 7 result shape (narrowed from unknown)
@@ -190,29 +191,22 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
 
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage7.node_count} nodes`}
-        >
-          <span className="hf-num text-2xl font-semibold tabular-nums">{stage7.node_count}</span>
-          <span className="text-muted-foreground text-xs">network nodes</span>
-        </div>
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${hubs.length} hubs`}
-        >
-          <span className="hf-num text-2xl font-semibold tabular-nums">{hubs.length}</span>
-          <span className="text-muted-foreground text-xs">hubs reported</span>
-        </div>
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`metric ${stage7.ranking_metric}`}
-        >
-          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-            {stage7.ranking_metric}
-          </span>
-          <span className="text-muted-foreground text-xs">ranking metric</span>
-        </div>
+        <StageSummaryCard
+          value={stage7.node_count}
+          label="network nodes"
+          ariaLabel={`${stage7.node_count} nodes`}
+        />
+        <StageSummaryCard
+          value={hubs.length}
+          label="hubs reported"
+          ariaLabel={`${hubs.length} hubs`}
+        />
+        <StageSummaryCard
+          value={stage7.ranking_metric}
+          label="ranking metric"
+          ariaLabel={`metric ${stage7.ranking_metric}`}
+          muted
+        />
       </div>
 
       {tooSmall && (

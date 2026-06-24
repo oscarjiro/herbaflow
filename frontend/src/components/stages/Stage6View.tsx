@@ -47,6 +47,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { ExternalLink } from "@/components/ui/ExternalLink";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
+import { StageSummaryCard } from "./StageSummaryCard";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 6 result shapes (narrowed from unknown)
@@ -372,51 +373,34 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
           <>
             {/* Summary cards */}
             <div className="flex flex-wrap gap-3">
-              <div
-                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-                aria-label={`${computed.node_count} nodes`}
-              >
-                <span className="hf-num text-2xl font-semibold tabular-nums">
-                  {computed.node_count}
-                </span>
-                <span className="text-muted-foreground text-xs">nodes</span>
-              </div>
-              <div
-                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-                aria-label={`${computed.edge_count} edges`}
-              >
-                <span className="hf-num text-2xl font-semibold tabular-nums">
-                  {computed.edge_count}
-                </span>
-                <span className="text-muted-foreground text-xs">edges</span>
-              </div>
-              <div
-                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-                aria-label={`min confidence ${computed.min_confidence}`}
-              >
-                <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-                  {computed.min_confidence}
-                </span>
-                <span className="text-muted-foreground text-xs">min confidence</span>
-              </div>
-              <div
-                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-                aria-label={`network type ${computed.network_type}`}
-              >
-                <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-                  {computed.network_type}
-                </span>
-                <span className="text-muted-foreground text-xs">network type</span>
-              </div>
-              <div
-                className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-                aria-label={`${computed.unmapped.length} unmapped`}
-              >
-                <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-                  {computed.unmapped.length}
-                </span>
-                <span className="text-muted-foreground text-xs">unmapped</span>
-              </div>
+              <StageSummaryCard
+                value={computed.node_count}
+                label="nodes"
+                ariaLabel={`${computed.node_count} nodes`}
+              />
+              <StageSummaryCard
+                value={computed.edge_count}
+                label="edges"
+                ariaLabel={`${computed.edge_count} edges`}
+              />
+              <StageSummaryCard
+                value={computed.min_confidence}
+                label="min confidence"
+                ariaLabel={`min confidence ${computed.min_confidence}`}
+                muted
+              />
+              <StageSummaryCard
+                value={computed.network_type}
+                label="network type"
+                ariaLabel={`network type ${computed.network_type}`}
+                muted
+              />
+              <StageSummaryCard
+                value={computed.unmapped.length}
+                label="unmapped"
+                ariaLabel={`${computed.unmapped.length} unmapped`}
+                muted
+              />
             </div>
 
             {computed.capped.applied && (

@@ -37,6 +37,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { ExpandableListCell } from "@/components/ui/ExpandableListCell";
 import { ExternalLink } from "@/components/ui/ExternalLink";
 import { StageDataSources } from "./StageDataSources";
+import { StageSummaryCard } from "./StageSummaryCard";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 5 result shape (narrowed from unknown)
@@ -191,31 +192,23 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
 
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage5.count} overlap targets`}
-        >
-          <span className="hf-num text-2xl font-semibold tabular-nums">{stage5.count}</span>
-          <span className="text-muted-foreground text-xs">overlap targets</span>
-        </div>
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage5.compound_target_count} compound-side targets`}
-        >
-          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-            {stage5.compound_target_count}
-          </span>
-          <span className="text-muted-foreground text-xs">compound-side targets</span>
-        </div>
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage5.disease_target_count} disease-side targets`}
-        >
-          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-            {stage5.disease_target_count}
-          </span>
-          <span className="text-muted-foreground text-xs">disease-side targets</span>
-        </div>
+        <StageSummaryCard
+          value={stage5.count}
+          label="overlap targets"
+          ariaLabel={`${stage5.count} overlap targets`}
+        />
+        <StageSummaryCard
+          value={stage5.compound_target_count}
+          label="compound-side targets"
+          ariaLabel={`${stage5.compound_target_count} compound-side targets`}
+          muted
+        />
+        <StageSummaryCard
+          value={stage5.disease_target_count}
+          label="disease-side targets"
+          ariaLabel={`${stage5.disease_target_count} disease-side targets`}
+          muted
+        />
       </div>
 
       {/* Interactive Venn diagram (shown once this step has results; hidden when both counts are zero) */}

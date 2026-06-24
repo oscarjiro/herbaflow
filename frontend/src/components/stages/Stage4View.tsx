@@ -58,6 +58,7 @@ import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
+import { StageSummaryCard } from "./StageSummaryCard";
 import { TargetValidateBox } from "../TargetValidateBox";
 
 type TargetTag = "computed" | "user-added" | "user-removed" | string;
@@ -277,23 +278,18 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
 
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage4.count} targets`}
-        >
-          <span className="hf-num text-2xl font-semibold tabular-nums">{stage4.count}</span>
-          <span className="text-muted-foreground text-xs">targets</span>
-        </div>
+        <StageSummaryCard
+          value={stage4.count}
+          label="targets"
+          ariaLabel={`${stage4.count} targets`}
+        />
         {!isUserProvided && (
-          <div
-            className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-            aria-label={`min score ${stage4.min_score_applied}`}
-          >
-            <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-              {stage4.min_score_applied}
-            </span>
-            <span className="text-muted-foreground text-xs">min score</span>
-          </div>
+          <StageSummaryCard
+            value={stage4.min_score_applied}
+            label="min score"
+            ariaLabel={`min score ${stage4.min_score_applied}`}
+            muted
+          />
         )}
       </div>
 

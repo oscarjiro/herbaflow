@@ -37,6 +37,7 @@ import { EnrichmentDotChart } from "@/components/charts/EnrichmentDotChart";
 import { exportPlotlyAsPng } from "@/lib/chartExport";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
+import { StageSummaryCard } from "./StageSummaryCard";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 8 result shape (narrowed from unknown)
@@ -180,40 +181,29 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
 
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage8.count} terms`}
-        >
-          <span className="hf-num text-2xl font-semibold tabular-nums">{stage8.count}</span>
-          <span className="text-muted-foreground text-xs">enriched terms</span>
-        </div>
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage8.input_gene_count} query genes`}
-        >
-          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-            {stage8.input_gene_count}
-          </span>
-          <span className="text-muted-foreground text-xs">query genes</span>
-        </div>
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${stage8.background_gene_count} background genes`}
-        >
-          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-            {stage8.background_gene_count}
-          </span>
-          <span className="text-muted-foreground text-xs">background genes</span>
-        </div>
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`correction ${stage8.correction}`}
-        >
-          <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-            {stage8.correction}
-          </span>
-          <span className="text-muted-foreground text-xs">correction</span>
-        </div>
+        <StageSummaryCard
+          value={stage8.count}
+          label="enriched terms"
+          ariaLabel={`${stage8.count} terms`}
+        />
+        <StageSummaryCard
+          value={stage8.input_gene_count}
+          label="query genes"
+          ariaLabel={`${stage8.input_gene_count} query genes`}
+          muted
+        />
+        <StageSummaryCard
+          value={stage8.background_gene_count}
+          label="background genes"
+          ariaLabel={`${stage8.background_gene_count} background genes`}
+          muted
+        />
+        <StageSummaryCard
+          value={stage8.correction}
+          label="correction"
+          ariaLabel={`correction ${stage8.correction}`}
+          muted
+        />
       </div>
 
       <p className="text-muted-foreground text-sm">

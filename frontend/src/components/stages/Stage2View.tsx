@@ -33,6 +33,7 @@ import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ParamPanel } from "./ParamPanel";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
+import { StageSummaryCard } from "./StageSummaryCard";
 
 // ---------------------------------------------------------------------------
 // Local types for the Stage 2 result shape (narrowed from unknown)
@@ -288,30 +289,19 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
 
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${passedCount} passed`}
-        >
-          <span className="hf-num text-2xl font-semibold tabular-nums">{passedCount}</span>
-          <span className="text-muted-foreground text-xs">passed</span>
-        </div>
-        <div
-          className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-          aria-label={`${filteredCount} filtered`}
-        >
-          <span className="hf-num text-2xl font-semibold tabular-nums">{filteredCount}</span>
-          <span className="text-muted-foreground text-xs">filtered</span>
-        </div>
+        <StageSummaryCard value={passedCount} label="passed" ariaLabel={`${passedCount} passed`} />
+        <StageSummaryCard
+          value={filteredCount}
+          label="filtered"
+          ariaLabel={`${filteredCount} filtered`}
+        />
         {unscreenedCount > 0 && (
-          <div
-            className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-            aria-label={`${unscreenedCount} unscreened`}
-          >
-            <span className="hf-num text-muted-foreground text-2xl font-semibold tabular-nums">
-              {unscreenedCount}
-            </span>
-            <span className="text-muted-foreground text-xs">unscreened</span>
-          </div>
+          <StageSummaryCard
+            value={unscreenedCount}
+            label="unscreened"
+            ariaLabel={`${unscreenedCount} unscreened`}
+            muted
+          />
         )}
       </div>
 

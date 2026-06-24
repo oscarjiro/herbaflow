@@ -25,6 +25,7 @@ import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
+import { StageSummaryCard } from "./StageSummaryCard";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -121,6 +122,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
 
   const params = data.parameters as Record<string, unknown> | undefined;
   const inputModes = params?.input_modes as { plant?: string; disease?: string } | undefined;
+  const labels = params?.labels as { plant?: string; disease?: string } | undefined;
   const plantIds = params?.plant_ids as string[] | undefined;
 
   // Show the plant-source column only in multi-plant selection mode.
@@ -165,6 +167,11 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
 
   const compounds = stage1.compounds ?? [];
   const current = stage1.count ?? compounds.filter((c) => c.tag !== "user-removed").length;
+  const totalPlants = isSelectionMode
+    ? (plantIds?.length ?? Object.keys(stage1.per_plant ?? {}).length)
+    : labels?.plant && labels.plant !== "N/A"
+      ? 1
+      : 0;
   const atMin = atMinEntities(current);
 
   const rows: Stage1Row[] = useMemo(
@@ -290,6 +297,21 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
           <Badge variant="secondary">Provided by you</Badge>
         </div>
       )}
+
+      {/* Summary cards */}
+      <div className="flex flex-wrap gap-3">
+        <StageSummaryCard
+          value={current}
+          label="Total compounds"
+          ariaLabel={`${current} total compounds`}
+        />
+        <StageSummaryCard
+          value={totalPlants}
+          label="Selected plants"
+          ariaLabel={`${totalPlants} selected plants`}
+          muted
+        />
+      </div>
 
       {/* Compound list card */}
       <Card>
