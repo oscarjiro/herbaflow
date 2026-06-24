@@ -159,6 +159,13 @@ describe("Stage3View", () => {
     expect(screen.getByRole("link", { name: "P04637" }).className).toMatch(/font-mono/);
   });
 
+  it("does not render UniProt or gene symbol column filters", () => {
+    const { container } = wrap(<Stage3View data={makeRun()} />);
+    const table = targetsTable(container);
+    expect(table.queryByRole("textbox", { name: /filter uniprot/i })).not.toBeInTheDocument();
+    expect(table.queryByRole("textbox", { name: /filter gene symbol/i })).not.toBeInTheDocument();
+  });
+
   it("does not render a separate source column in the targets table", () => {
     const { container } = wrap(<Stage3View data={makeRun()} />);
     const table = targetsTable(container);

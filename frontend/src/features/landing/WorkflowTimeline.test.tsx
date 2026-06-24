@@ -46,12 +46,13 @@ describe("WorkflowTimeline", () => {
 
   it("renders source lines for steps that have them", () => {
     render(<WorkflowTimeline />);
-    expect(screen.getByText("KNApSAcK")).toBeInTheDocument();
+    expect(screen.getByText("KNApSAcK WorldMap Indonesia")).toBeInTheDocument();
     expect(screen.getByText("Lipinski RO5 · Veber")).toBeInTheDocument();
     expect(screen.getByText("ChEMBL · PubChem")).toBeInTheDocument();
     expect(screen.getByText("Open Targets")).toBeInTheDocument();
     expect(screen.getByText("STRING")).toBeInTheDocument();
-    expect(screen.getByText("MCC (CytoHubba)")).toBeInTheDocument();
+    expect(screen.getByText("MCC (CytoHubba), NetworkX")).toBeInTheDocument();
+    expect(screen.getByText("g:Profiler")).toBeInTheDocument();
   });
 
   it("Step 05 (Target overlap) has no source tag rendered", () => {

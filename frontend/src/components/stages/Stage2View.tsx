@@ -121,7 +121,6 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     id: "name",
     accessorFn: (row) => row.canonical_name ?? row.inchikey ?? row.compound_id,
     header: "Name",
-    meta: { filterable: true },
     cell: ({ row }) => {
       const r = row.original;
       const label = r.canonical_name ?? r.inchikey ?? r.compound_id;

@@ -95,7 +95,9 @@ describe("DownloadResults", () => {
     const run = makeRun();
     render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
     expect(screen.getByRole("button", { name: /report/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /cytoscape network/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /compound–target–pathway network \(\.zip\)/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /all stages/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /all results/i })).toBeInTheDocument();
   });
@@ -104,7 +106,9 @@ describe("DownloadResults", () => {
     // Stage-8 count is zero so runHasCtp returns false even though compounds exist.
     const run = makeRun({ stage8Count: 0 });
     render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
-    expect(screen.queryByRole("button", { name: /cytoscape network/i })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /compound–target–pathway network \(\.zip\)/i }),
+    ).toBeNull();
     // PPI stays reachable through the stages and all-results bundles.
     expect(screen.getByRole("button", { name: /all stages/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /all results/i })).toBeInTheDocument();
@@ -113,7 +117,9 @@ describe("DownloadResults", () => {
   it("hides the Cytoscape network bundle for target-only runs (no compounds)", () => {
     const run = makeRun({ plant: "manual_targets" });
     render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
-    expect(screen.queryByRole("button", { name: /cytoscape network/i })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /compound–target–pathway network \(\.zip\)/i }),
+    ).toBeNull();
     // PPI stays reachable through the stages and all-results bundles.
     expect(screen.getByRole("button", { name: /all stages/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /all results/i })).toBeInTheDocument();
@@ -122,7 +128,9 @@ describe("DownloadResults", () => {
   it("shows the Cytoscape network bundle when the run has compounds, overlap and pathways", () => {
     const run = makeRun({ stage5Count: 2, stage8Count: 4 });
     render(wrap(<DownloadResults status="complete" analysisId="a1" run={run} />));
-    expect(screen.getByRole("button", { name: /cytoscape network/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /compound–target–pathway network \(\.zip\)/i }),
+    ).toBeInTheDocument();
   });
 
   it("calls fetchBlobDownload with the correct URL on button click", async () => {

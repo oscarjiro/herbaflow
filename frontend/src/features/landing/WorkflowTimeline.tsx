@@ -22,7 +22,7 @@ function NodeIcon({ children }: { children: ReactNode }) {
 }
 
 // ---------------------------------------------------------------------------
-// Data — verbatim from the landing page design spec §5
+// Data for the landing workflow timeline.
 // ---------------------------------------------------------------------------
 
 interface TimelineEntry {
@@ -32,7 +32,7 @@ interface TimelineEntry {
   name: string;
   /** One-line plain-science description */
   description: string;
-  /** Source attribution line — null for steps with no source tag (Step 05, Step 08) */
+  /** Source attribution line; null for bookends and steps with no external source tag. */
   source: string | null;
   /** True for the Inputs and Export bookend rows */
   isBookend: boolean;
@@ -45,7 +45,7 @@ const ENTRIES: TimelineEntry[] = [
     label: "Inputs",
     name: "Plant and disease",
     description: "Choose the medicinal plant or plants to study and the disease to investigate.",
-    source: "plant · disease",
+    source: null,
     isBookend: true,
     icon: (
       <NodeIcon>
@@ -59,7 +59,7 @@ const ENTRIES: TimelineEntry[] = [
     label: "Step 01",
     name: "Compound selection",
     description: "Pull the bioactive compounds reported for your chosen plant.",
-    source: "KNApSAcK",
+    source: "KNApSAcK WorldMap Indonesia",
     isBookend: false,
     icon: (
       <NodeIcon>
@@ -117,7 +117,7 @@ const ENTRIES: TimelineEntry[] = [
     name: "Target overlap",
     description:
       "The proteins where compound reach and disease biology meet, drawn as a Venn diagram.",
-    // Spec §5 explicitly: Step 05 has no source tag
+    // Target overlap is a set operation, so it has no external source tag.
     source: null,
     isBookend: false,
     icon: (
@@ -150,7 +150,7 @@ const ENTRIES: TimelineEntry[] = [
     name: "Hub genes",
     description:
       "The most central proteins in the network, ranked by maximal clique centrality, with four classical centrality measures reported alongside.",
-    source: "MCC (CytoHubba)",
+    source: "MCC (CytoHubba), NetworkX",
     isBookend: false,
     icon: (
       <NodeIcon>
@@ -169,10 +169,9 @@ const ENTRIES: TimelineEntry[] = [
   {
     label: "Step 08",
     name: "Functional enrichment",
-    // Spec §5: Step 08's tools live in its description, not a tag
     description:
       "The biological processes and pathways the network is built from, found with g:Profiler across GO and KEGG and corrected for multiple testing.",
-    source: null,
+    source: "g:Profiler",
     isBookend: false,
     icon: (
       <NodeIcon>
@@ -187,7 +186,7 @@ const ENTRIES: TimelineEntry[] = [
     name: "Export",
     description:
       "A publishable figure set and Cytoscape-ready compound-target-pathway edge tables for downstream network analysis.",
-    source: "figures · CSV",
+    source: null,
     isBookend: true,
     icon: (
       <NodeIcon>
@@ -213,14 +212,14 @@ function TimelineNode({ isBookend, icon }: { isBookend: boolean; icon: ReactNode
         "grid flex-none place-items-center rounded-full",
         "h-11 w-11 border",
         // Non-bookend: ghost node with raised background
-        // bg-[var(--hf-bg-raised)] — --color-hf-bg-raised is not in @theme inline,
+        // bg-[var(--hf-bg-raised)] is used because --color-hf-bg-raised is not in @theme inline,
         // so we use the CSS-variable arbitrary form instead of a utility alias.
         !isBookend && [
           "border-hf-border-strong text-hf-fg-1 bg-[var(--hf-bg-raised)]",
           "[box-shadow:0_2px_8px_-4px_rgba(26,26,26,0.2)]",
         ],
         // Bookend: ink-filled accent (--hf-accent = --hf-fg-1 in both themes)
-        // bg-hf-fg-1 / text-hf-bg — both registered in @theme inline.
+        // bg-hf-fg-1 / text-hf-bg are both registered in @theme inline.
         isBookend && ["bg-hf-fg-1 border-hf-fg-1 text-hf-bg"],
       )}
     >
@@ -255,7 +254,7 @@ function TimelineItem({ entry }: { entry: TimelineEntry }) {
       <div className="self-start">
         <GlassSurface tier="raised" className="w-full">
           <div className="px-6 py-4">
-            {/* Step label — sans, weight 600, letter-spaced, no mono */}
+            {/* Step label: sans, weight 600, letter-spaced, no mono */}
             <p className="text-hf-fg-3 text-[11px] font-semibold tracking-[0.16em] uppercase">
               {entry.label}
             </p>
@@ -266,7 +265,7 @@ function TimelineItem({ entry }: { entry: TimelineEntry }) {
             {/* Description */}
             <p className="text-hf-fg-2 max-w-[52ch] text-sm leading-[1.55]">{entry.description}</p>
 
-            {/* Source attribution — only when spec provides one */}
+            {/* Source attribution, only when this row has an external source tag. */}
             {entry.source !== null && (
               <p className="text-hf-fg-3 mt-[7px] text-xs">{entry.source}</p>
             )}

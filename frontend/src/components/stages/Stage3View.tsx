@@ -299,7 +299,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       id: "uniprot",
       accessorFn: (row) => row.uniprot_accession ?? "",
       header: "UniProt",
-      meta: { className: "font-mono", filterable: true },
+      meta: { className: "font-mono" },
       cell: ({ row }) => {
         const acc = row.original.uniprot_accession;
         if (!acc) return <span className="text-hf-fg-3">—</span>;
@@ -315,7 +315,6 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       id: "gene_symbol",
       accessorFn: (row) => row.gene_symbol ?? "",
       header: "Gene symbol",
-      meta: { filterable: true },
       cell: ({ row }) => {
         const sym = row.original.gene_symbol;
         if (!sym) return <span className="text-hf-fg-3">—</span>;

@@ -103,6 +103,23 @@ if (typeof globalThis.ResizeObserver === "undefined") {
   };
 }
 
+// jsdom does not implement IntersectionObserver. Motion's whileInView feature
+// registers one when mounted, so provide a no-op observer for reveal tests.
+if (typeof globalThis.IntersectionObserver === "undefined") {
+  globalThis.IntersectionObserver = class IntersectionObserver {
+    root = null;
+    rootMargin = "";
+    thresholds = [];
+
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  };
+}
+
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());

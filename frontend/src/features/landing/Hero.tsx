@@ -7,7 +7,8 @@ export function Hero({ className }: { className?: string }) {
   return (
     <section className={cn("flex flex-col items-center py-28 text-center", className)}>
       <h1 className="font-display text-hf-fg-1 mx-auto mb-6 text-[clamp(3.2rem,8vw,6.5rem)] leading-[0.95] tracking-[-0.025em]">
-        End-to-end <em className="font-display italic">network pharmacology.</em>
+        End-to-end <br />
+        <em className="font-display italic">network pharmacology.</em>
       </h1>
 
       <p className="text-hf-fg-2 mx-auto mb-10 max-w-[56ch] text-[17px] leading-relaxed">

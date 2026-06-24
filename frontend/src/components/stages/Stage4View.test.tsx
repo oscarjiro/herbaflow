@@ -228,6 +228,37 @@ describe("Stage4View — single editable table", () => {
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P37231/entry");
   });
 
+  it("does not render UniProt or gene symbol column filters", () => {
+    const data = {
+      ...base,
+      stage_state: { "4": "computed" },
+      stage_results: {
+        "4": {
+          targets: [
+            {
+              target_id: "t1",
+              canonical_name: "PPARG",
+              gene_symbol: "PPARG",
+              uniprot_accession: "P37231",
+              opentargets_score: 0.75,
+              source_url: null,
+              tag: "computed",
+            },
+          ],
+          count: 1,
+          min_score_applied: 0.3,
+          state: "computed",
+        },
+      },
+    } as unknown as AnalysisRead;
+
+    const { container } = wrap(<Stage4View data={data} />);
+    const table = diseaseTargetsTable(container);
+
+    expect(table.queryByRole("textbox", { name: /filter uniprot/i })).not.toBeInTheDocument();
+    expect(table.queryByRole("textbox", { name: /filter gene symbol/i })).not.toBeInTheDocument();
+  });
+
   it("renders the UniProt accession in the monospace data font", () => {
     const data = {
       ...base,

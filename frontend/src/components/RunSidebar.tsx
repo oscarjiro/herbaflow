@@ -18,7 +18,7 @@ function useActiveStage(): StageSlug | undefined {
 const cancelTrigger = (
   <button type="button" className="icon-btn danger" style={{ flex: 1 }}>
     <Trash2 aria-hidden="true" style={{ width: 15, height: 15 }} />
-    Cancel run
+    Exit run
   </button>
 );
 
@@ -51,7 +51,7 @@ export function RunSidebar({
         <StepperRail data={data} analysisId={analysisId} activeSlug={activeSlug} />
       </div>
 
-      {/* Sidebar footer: theme toggle + cancel run */}
+      {/* Sidebar footer: theme toggle + exit run */}
       <div className="side-foot">
         <div className="foot-row">
           <ThemeToggle />

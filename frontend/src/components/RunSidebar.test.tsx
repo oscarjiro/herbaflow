@@ -15,7 +15,7 @@ const DATA = {
 afterEach(() => cleanup());
 
 describe("RunSidebar", () => {
-  it("renders the brand, the stepper rail, theme toggle, and cancel button", () => {
+  it("renders the brand, the stepper rail, theme toggle, and exit button", () => {
     renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={() => {}} />, {
       withTheme: true,
     });
@@ -24,8 +24,7 @@ describe("RunSidebar", () => {
     expect(brandLink.querySelector(".hf-logo")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: /pipeline steps/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /theme:/i })).toBeInTheDocument();
-    // Cancel run button (danger trigger for ExitRunDialog)
-    expect(screen.getByRole("button", { name: /cancel run/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /exit run/i })).toBeInTheDocument();
   });
 
   it("renders the run-identity card with Untitled analysis fallback", () => {
@@ -42,11 +41,11 @@ describe("RunSidebar", () => {
     expect(screen.getByText("Active run")).toBeInTheDocument();
   });
 
-  it("opens the confirm dialog from Cancel run", () => {
+  it("opens the confirm dialog from Exit run", () => {
     renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={vi.fn()} />, {
       withTheme: true,
     });
-    fireEvent.click(screen.getByRole("button", { name: /cancel run/i }));
+    fireEvent.click(screen.getByRole("button", { name: /exit run/i }));
     expect(screen.getByText(/permanently deleted/i)).toBeInTheDocument();
   });
 

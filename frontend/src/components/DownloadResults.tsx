@@ -51,7 +51,7 @@ export function DownloadResults({
     ...(runHasCtp(run)
       ? ([
           {
-            label: "Cytoscape network (.zip)",
+            label: "Compound–target–pathway network (.zip)",
             href: exportNetworkBundleUrl(analysisId),
             icon: Network,
             variant: "outline",
@@ -96,7 +96,7 @@ function DownloadResultsPanel({ links }: { links: DownloadLink[] }) {
             key={href}
             variant={variant}
             size="sm"
-            className="justify-start"
+            className="h-auto min-h-8 justify-start text-left whitespace-normal"
             disabled={download.isPending}
             onClick={() => download.mutate({ url: href, label })}
           >

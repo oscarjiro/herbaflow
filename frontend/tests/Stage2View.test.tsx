@@ -89,6 +89,11 @@ describe("Stage2View", () => {
     expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
   });
 
+  it("does not render a Name column filter", () => {
+    wrap(<Stage2View data={makeRun()} />);
+    expect(screen.queryByRole("textbox", { name: /filter name/i })).not.toBeInTheDocument();
+  });
+
   it("renders compound name as plain text when no source URL is present", () => {
     const data = makeRun({
       stage_results: {
