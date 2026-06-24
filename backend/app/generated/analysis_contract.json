@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://herbaflow.local/contracts/analysis.json",
+  "title": "Herbaflow analysis contract",
+  "description": "Single upstream source for analysis-domain vocabularies and pipeline-parameter bounds. Read by both stacks. The DB run-status column stays free text (composite 'stage_{N}_{phase}'); only the vocabulary is codified here.",
+  "type": "object",
+  "$defs": {
+    "mode": {
+      "description": "Allowed values for analysis_runs.mode.",
+      "type": "string",
+      "enum": ["auto", "guided"],
+      "default": "guided"
+    },
+    "stage_state": {
+      "description": "Per-stage entry-point state.",
+      "type": "string",
+      "enum": ["computed", "user_provided", "not_applicable"]
+    },
+    "plant_input_mode": {
+      "description": "How the plant/compound side of the run is supplied.",
+      "type": "string",
+      "enum": ["selection", "manual_compounds", "manual_targets"],
+      "default": "selection"
+    },
+    "disease_input_mode": {
+      "description": "How the disease side of the run is supplied.",
+      "type": "string",
+      "enum": ["selection", "manual_disease_targets"],
+      "default": "selection"
+    },
+    "run_status_flat": {
+      "description": "Non-composite analysis_runs.status values.",
+      "type": "string",
+      "enum": ["pending", "complete", "failed"]
+    },
+    "stage_phase": {
+      "description": "Phase suffix in the composite status 'stage_{N}_{phase}'.",
+      "type": "string",
+      "enum": ["starting", "running", "awaiting_approval", "complete"]
+    },
+    "stage_source_object": {
+      "description": "A single data source entry: display name + canonical URL (null for pseudo-sources with no public page).",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": ["string", "null"] }
+      },
+      "required": ["name", "url"]
+    },
+    "stage_sources": {
+      "description": "Per-stage data-source objects. 'computed' = the sources used in a normal run; 'user_provided' = only the manual-resolution source that runs when an entity stage is supplied by the user. Read by the backend report and the FE StageDataSources. Each entry is {name, url} where url is null for pseudo-sources.",
+      "type": "object",
+      "properties": {
+        "computed": {
+          "type": "object",
+          "properties": {
+            "1": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "KNApSAcK (plant-compound)", "url": "http://www.knapsackfamily.com/" },
+              { "name": "PubChem", "url": "https://pubchem.ncbi.nlm.nih.gov/" }
+            ]},
+            "2": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "RDKit (MW/logP/HBD/HBA/TPSA/RotB/NP-score/PAINS)", "url": "https://www.rdkit.org/" }
+            ]},
+            "3": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "ChEMBL", "url": "https://www.ebi.ac.uk/chembl/" },
+              { "name": "PubChem BioAssay", "url": "https://pubchem.ncbi.nlm.nih.gov/#query=bioassay" },
+              { "name": "UniProt", "url": "https://www.uniprot.org/" }
+            ]},
+            "4": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "Open Targets (disease-target associations)", "url": "https://platform.opentargets.org/" },
+              { "name": "UniProt", "url": "https://www.uniprot.org/" }
+            ]},
+            "5": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "Set intersection of Stage 3 ∩ Stage 4 (on target_id)", "url": null }
+            ]},
+            "6": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "STRING (protein-protein interactions)", "url": "https://string-db.org/" },
+              { "name": "Human only (species 9606); functional or physical", "url": null }
+            ]},
+            "7": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "NetworkX (centrality analysis)", "url": "https://networkx.org/" },
+              { "name": "STRING PPI network (undirected)", "url": null }
+            ]},
+            "8": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "g:Profiler", "url": "https://biit.cs.ut.ee/gprofiler/" }
+            ]}
+          }
+        },
+        "user_provided": {
+          "type": "object",
+          "properties": {
+            "1": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "PubChem (manual compound resolution)", "url": "https://pubchem.ncbi.nlm.nih.gov/" }
+            ]},
+            "3": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "UniProt (manual target resolution)", "url": "https://www.uniprot.org/" }
+            ]},
+            "4": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
+              { "name": "UniProt (manual target resolution)", "url": "https://www.uniprot.org/" }
+            ]}
+          }
+        }
+      }
+    },
+    "pipeline_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adme": {
+          "type": "object",
+          "properties": {
+            "max_mw": { "type": "number", "exclusiveMinimum": 0, "maximum": 2000, "default": 500,
+              "recommended_min": 350, "recommended_max": 600, "unit": "Da",
+              "description": "Molecular weight ceiling (Da). Molecular size: larger molecules permeate membranes more poorly." },
+            "max_logp": { "type": "number", "minimum": -10, "maximum": 20, "default": 5,
+              "recommended_min": 3, "recommended_max": 5.6,
+              "description": "Lipophilicity ceiling (logP, octanol-water partition). Balances solubility against membrane permeation." },
+            "max_hbd": { "type": "integer", "minimum": 0, "maximum": 50, "default": 5,
+              "recommended_min": 3, "recommended_max": 5,
+              "description": "Hydrogen-bond donor ceiling (Σ N-H, O-H). Each donor adds a desolvation penalty crossing membranes." },
+            "max_hba": { "type": "integer", "minimum": 0, "maximum": 50, "default": 10,
+              "recommended_min": 8, "recommended_max": 10,
+              "description": "Hydrogen-bond acceptor ceiling (Σ N, O atoms). Adds a desolvation penalty." },
+            "max_tpsa": { "type": "number", "minimum": 0, "maximum": 500, "default": 140,
+              "recommended_min": 90, "recommended_max": 140, "unit": "Å²",
+              "description": "Topological polar surface area ceiling (Å²). Polarity: high TPSA lowers absorption (Veber)." },
+            "max_rotatable_bonds": { "type": "integer", "minimum": 0, "maximum": 50, "default": 10,
+              "recommended_min": 7, "recommended_max": 10,
+              "description": "Rotatable-bond ceiling. Molecular flexibility: too flexible lowers oral bioavailability (Veber)." },
+            "apply_veber": { "type": "boolean", "default": true,
+              "description": "Apply Veber's rules (rotatable bonds + TPSA) on top of Lipinski's four." },
+            "np_exception_threshold": { "type": "number", "minimum": -5, "maximum": 5, "default": 0.5,
+              "recommended_min": -1, "recommended_max": 2,
+              "description": "Natural-product-likeness score (Ertl, approx [-5,+5]) at or above which a compound bypasses the rules, protecting genuine plant compounds." },
+            "apply_np_exception": { "type": "boolean", "default": true,
+              "description": "Allow the natural-product-likeness exception to rescue rule-breaking compounds. Off = strict (no NP rescue)." },
+            "max_violations": { "type": "integer", "minimum": 0, "maximum": 4, "default": 1,
+              "recommended_min": 0, "recommended_max": 2,
+              "description": "Number of the four Lipinski rules a compound may break and still pass (RO5 leniency). Veber is evaluated separately, not in this budget." },
+            "skip_adme": { "type": "boolean", "default": false,
+              "description": "Bypass ADME screening entirely: every compound passes, flagged not screened." }
+          }
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "min_pchembl": { "type": "number", "minimum": 0, "maximum": 14, "default": 5.0,
+              "recommended_min": 5.0, "recommended_max": 7.0,
+              "description": "Minimum pChEMBL (−log10 molar potency) for a measured compound-target edge. 5 ≈ active at ≤10 µM (standard cutoff); 6 = 1 µM; 7 = 100 nM (stricter)." },
+            "min_assay_confidence": { "type": "integer", "minimum": 0, "maximum": 9, "default": 7,
+              "recommended_min": 5, "recommended_max": 9,
+              "description": "Minimum ChEMBL target-confidence score (0-9). 9 = direct single protein; ≥7 high-confidence molecular target; <4 cellular." }
+          }
+        },
+        "disease_targets": {
+          "type": "object",
+          "properties": {
+            "min_score": {
+              "type": "number",
+              "description": "Open Targets overall disease-target association score floor.",
+              "default": 0.3,
+              "minimum": 0,
+              "maximum": 1,
+              "recommended_min": 0.1,
+              "recommended_max": 0.5
+            }
+          }
+        },
+        "ppi": {
+          "type": "object",
+          "properties": {
+            "min_confidence": {
+              "description": "STRING edge-confidence floor (0-1; tiers 0.15/0.4/0.7/0.9). Default 0.4 = medium.",
+              "type": "number", "enum": [0.15, 0.4, 0.7, 0.9], "default": 0.4
+            },
+            "max_proteins": {
+              "description": "Self-imposed STRING ceiling; overlaps above this require allow_top_n_cap.",
+              "type": "integer", "default": 2000,
+              "minimum": 50, "maximum": 2000, "recommended_min": 200, "recommended_max": 2000
+            },
+            "allow_top_n_cap": {
+              "description": "If the overlap exceeds max_proteins, proceed on the top-N by disease-association score.",
+              "type": "boolean", "default": false
+            },
+            "network_type": {
+              "description": "STRING network: functional (all association evidence) or physical (binding only).",
+              "type": "string", "enum": ["functional", "physical"], "default": "functional"
+            }
+          }
+        },
+        "hub_genes": {
+          "type": "object",
+          "properties": {
+            "top_n": {
+              "description": "Number of top-ranked hub genes reported (a descriptive cut, not a significance test).",
+              "type": "integer", "default": 20,
+              "minimum": 1, "maximum": 200, "recommended_min": 5, "recommended_max": 50
+            }
+          }
+        },
+        "enrichment": {
+          "type": "object",
+          "properties": {
+            "significance_threshold": {
+              "description": "Corrected-p significance cutoff for enriched terms (applies to whichever correction method is selected).",
+              "type": "number", "default": 0.05,
+              "exclusiveMinimum": 0, "maximum": 1, "recommended_min": 0.01, "recommended_max": 0.10
+            },
+            "sources": {
+              "description": "Annotation vocabularies to query. GO branches + KEGG are the default; Reactome (REAC) and WikiPathways (WP) are additionally selectable.",
+              "type": "array",
+              "items": {"type": "string", "enum": ["GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC", "WP"]},
+              "minItems": 1,
+              "default": ["GO:BP", "GO:MF", "GO:CC", "KEGG"]
+            },
+            "correction": {
+              "description": "Multiple-testing correction: BH-FDR (default), g:SCS (GO-aware), or Bonferroni.",
+              "type": "string", "enum": ["fdr", "g_SCS", "bonferroni"], "default": "fdr"
+            },
+            "min_term_size": {
+              "description": "Drop terms smaller than this (avoids tiny, unstable annotations).",
+              "type": "integer", "default": 5,
+              "minimum": 1, "recommended_min": 3, "recommended_max": 10
+            },
+            "no_iea": {
+              "description": "Exclude GO terms supported only by electronic (IEA) annotation, keeping curated evidence.",
+              "type": "boolean", "default": false
+            }
+          }
+        }
+      }
+    },
+    "limits": {
+      "description": "App-level input bounds shared by both stacks.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_plants": {
+          "description": "Maximum plants selectable for one analysis run.",
+          "type": "integer",
+          "const": 20
+        },
+        "max_compounds": {
+          "description": "Maximum compounds in one analysis run.",
+          "type": "integer",
+          "const": 2000
+        },
+        "max_targets": {
+          "description": "Maximum targets in one analysis run.",
+          "type": "integer",
+          "const": 5000
+        }
+      }
+    }
+  }
+}

@@ -13,11 +13,15 @@ from typing import Any, cast
 
 
 def _resolve_contract_path(module_path: Path) -> Path:
-    for parent in module_path.resolve().parents:
+    resolved_module = module_path.resolve()
+    for parent in resolved_module.parents:
         candidate = parent / "shared" / "contracts" / "analysis.json"
         if candidate.exists():
             return candidate
-    return module_path.resolve().parents[2] / "shared" / "contracts" / "analysis.json"
+    packaged = resolved_module.parent / "generated" / "analysis_contract.json"
+    if packaged.exists():
+        return packaged
+    return resolved_module.parents[2] / "shared" / "contracts" / "analysis.json"
 
 
 _CONTRACT_PATH = _resolve_contract_path(Path(__file__))
