@@ -14,6 +14,7 @@ dependencies = [
     "matplotlib>=3.9",
     "matplotlib-venn>=1.1",
     "slowapi>=0.1.10",
+    "httpx>=0.28",
 ]
 
 [dependency-groups]
@@ -24,7 +25,6 @@ dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.25",
     "pytest-httpx>=0.35",
-    "httpx>=0.28",
     "jsonschema>=4.26.0",
     "testcontainers[postgresql]>=4.8",
     "psycopg2-binary>=2.9",
