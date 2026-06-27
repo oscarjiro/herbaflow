@@ -84,7 +84,6 @@ test("/about renders the scope note and the roadmap items", async () => {
   expect(await screen.findByText(/research and education tool/i)).toBeInTheDocument();
   expect(screen.getByText(/more sources/i)).toBeInTheDocument();
   expect(screen.getByText(/more plants/i)).toBeInTheDocument();
-  expect(screen.getByText(/validation workflows/i)).toBeInTheDocument();
 });
 
 test("/about omits the roadmap planned-status label", async () => {

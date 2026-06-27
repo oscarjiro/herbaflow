@@ -94,7 +94,7 @@ const S5_CSV_HEADER = "gene_symbol,uniprot_accession,opentargets_score,source_ur
 function buildS5CsvRows(rows: OverlapRow[]): unknown[][] {
   return rows.map((r) => {
     const acc = r.uniprot_accession;
-    const sourceUrl = acc ? `https://www.uniprot.org/uniprotkb/${acc}/entry` : null;
+    const sourceUrl = acc ? uniprotUrl(acc) : null;
     return [r.gene_symbol, acc, r.opentargets_score, sourceUrl];
   });
 }

@@ -93,13 +93,14 @@ def test_apply_adme_to_manual_is_removed() -> None:
 def test_adme_params_carry_description_bounds_and_recommendation() -> None:
     from app import contracts
 
-    meta = contracts.adme_param_meta()
-    assert all(m["description"] for m in meta.values())
-    assert (meta["max_mw"]["min"], meta["max_mw"]["max"]) == (0, 2000)
-    assert (meta["max_mw"]["recommended_min"], meta["max_mw"]["recommended_max"]) == (350, 600)
-    assert (meta["max_violations"]["min"], meta["max_violations"]["max"]) == (0, 4)
-    assert (meta["np_exception_threshold"]["min"], meta["np_exception_threshold"]["max"]) == (-5, 5)
-    assert meta["skip_adme"]["min"] is None and meta["skip_adme"]["max"] is None
+    b = contracts.pipeline_param_bounds("adme")
+    assert all(spec.get("description") for spec in b.values())
+    assert (b["max_mw"]["exclusiveMinimum"], b["max_mw"]["maximum"]) == (0, 2000)
+    assert (b["max_mw"]["recommended_min"], b["max_mw"]["recommended_max"]) == (350, 600)
+    assert (b["max_violations"]["minimum"], b["max_violations"]["maximum"]) == (0, 4)
+    npt = b["np_exception_threshold"]
+    assert (npt["minimum"], npt["maximum"]) == (-5, 5)
+    assert "minimum" not in b["skip_adme"] and "maximum" not in b["skip_adme"]
 
 
 def test_stage_sources_computed():
@@ -148,5 +149,4 @@ def test_stage_sources_user_provided_unchanged_shape():
 
 
 def test_adme_param_has_unit():
-    p = contracts.adme_param_meta()["max_mw"]
-    assert p.get("unit") == "Da"
+    assert contracts.pipeline_param_bounds("adme")["max_mw"].get("unit") == "Da"

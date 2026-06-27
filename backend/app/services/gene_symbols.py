@@ -14,7 +14,6 @@ from __future__ import annotations
 import gzip
 import json
 import logging
-from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -68,7 +67,3 @@ def normalize(raw: str) -> SymbolResult:
         return SymbolResult(input=stripped, canonical=key, status="unrecognized")
     status: Status = _KIND_TO_STATUS.get(entry.get("kind", "approved"), "alias_resolved")  # type: ignore[assignment]
     return SymbolResult(input=stripped, canonical=entry["symbol"], status=status)
-
-
-def normalize_many(raws: Iterable[str]) -> list[SymbolResult]:
-    return [normalize(r) for r in raws]

@@ -44,21 +44,21 @@ def test_target_defaults_match_contract():
     d = contracts.target_defaults()
     assert d == {"min_pchembl": 5.0, "min_assay_confidence": 7}
     assert "human_only" not in d
-    meta = contracts.target_param_meta()
-    assert meta["min_pchembl"]["recommended_max"] == 7.0
-    assert meta["min_assay_confidence"]["max"] == 9
+    b = contracts.pipeline_param_bounds("target")
+    assert b["min_pchembl"]["recommended_max"] == 7.0
+    assert b["min_assay_confidence"]["maximum"] == 9
 
 
 def test_disease_targets_defaults_match_contract():
     d = contracts.disease_targets_defaults()
     assert d == {"min_score": 0.3}
-    meta = contracts.disease_targets_param_meta()
-    assert meta["min_score"]["min"] == 0
-    assert meta["min_score"]["max"] == 1
-    assert meta["min_score"]["recommended_min"] == 0.1
-    assert meta["min_score"]["recommended_max"] == 0.5
-    assert meta["min_score"]["default"] == 0.3
-    assert meta["min_score"]["description"]
+    ms = contracts.pipeline_param_bounds("disease_targets")["min_score"]
+    assert ms["minimum"] == 0
+    assert ms["maximum"] == 1
+    assert ms["recommended_min"] == 0.1
+    assert ms["recommended_max"] == 0.5
+    assert ms["default"] == 0.3
+    assert ms["description"]
 
 
 def test_ppi_defaults_match_contract():
@@ -72,20 +72,20 @@ def test_ppi_defaults_match_contract():
     assert "community_resolution" not in contracts.pipeline_param_bounds("ppi")
 
 
-def test_ppi_param_meta_matches_contract():
-    meta = contracts.ppi_param_meta()
-    assert meta["min_confidence"]["default"] == 0.4
-    assert meta["min_confidence"]["enum"] == [0.15, 0.4, 0.7, 0.9]
-    assert meta["min_confidence"]["description"]
-    assert meta["max_proteins"]["default"] == 2000
-    assert meta["max_proteins"]["min"] == 50
-    assert meta["max_proteins"]["max"] == 2000
-    assert meta["max_proteins"]["recommended_min"] == 200
-    assert meta["max_proteins"]["recommended_max"] == 2000
-    assert meta["allow_top_n_cap"]["default"] is False
-    assert meta["network_type"]["default"] == "functional"
-    assert meta["network_type"]["enum"] == ["functional", "physical"]
-    assert meta["network_type"]["description"]
+def test_ppi_param_bounds_match_contract():
+    b = contracts.pipeline_param_bounds("ppi")
+    assert b["min_confidence"]["default"] == 0.4
+    assert b["min_confidence"]["enum"] == [0.15, 0.4, 0.7, 0.9]
+    assert b["min_confidence"]["description"]
+    assert b["max_proteins"]["default"] == 2000
+    assert b["max_proteins"]["minimum"] == 50
+    assert b["max_proteins"]["maximum"] == 2000
+    assert b["max_proteins"]["recommended_min"] == 200
+    assert b["max_proteins"]["recommended_max"] == 2000
+    assert b["allow_top_n_cap"]["default"] is False
+    assert b["network_type"]["default"] == "functional"
+    assert b["network_type"]["enum"] == ["functional", "physical"]
+    assert b["network_type"]["description"]
 
 
 def test_hub_genes_defaults_match_contract():
@@ -93,11 +93,11 @@ def test_hub_genes_defaults_match_contract():
     assert d == {"top_n": 20}
     assert "use_hub_bottleneck" not in d
     assert "composite_weight" not in d
-    meta = contracts.hub_genes_param_meta()
-    assert set(meta.keys()) == {"top_n"}
-    assert meta["top_n"]["min"] == 1
-    assert meta["top_n"]["max"] == 200
-    assert meta["top_n"]["default"] == 20
+    b = contracts.pipeline_param_bounds("hub_genes")
+    assert set(b.keys()) == {"top_n"}
+    assert b["top_n"]["minimum"] == 1
+    assert b["top_n"]["maximum"] == 200
+    assert b["top_n"]["default"] == 20
 
 
 def test_plant_input_modes_match_contract() -> None:
@@ -123,12 +123,11 @@ def test_enrichment_defaults_match_contract():
         "min_term_size": 5,
         "no_iea": False,
     }
-    meta = contracts.enrichment_param_meta()
-    assert meta["significance_threshold"]["default"] == 0.05
-    assert meta["correction"]["enum"] == ["fdr", "g_SCS", "bonferroni"]
-    assert meta["min_term_size"]["min"] == 1
-    assert meta["sources"]["default"] == ["GO:BP", "GO:MF", "GO:CC", "KEGG"]
-    assert meta["no_iea"]["default"] is False
-    # The allowed-values enum is nested inside sources.items (array schema) — read via raw bounds.
-    sources_spec = contracts.pipeline_param_bounds("enrichment")["sources"]
-    assert sources_spec["items"]["enum"] == ["GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC", "WP"]
+    b = contracts.pipeline_param_bounds("enrichment")
+    assert b["significance_threshold"]["default"] == 0.05
+    assert b["correction"]["enum"] == ["fdr", "g_SCS", "bonferroni"]
+    assert b["min_term_size"]["minimum"] == 1
+    assert b["sources"]["default"] == ["GO:BP", "GO:MF", "GO:CC", "KEGG"]
+    assert b["no_iea"]["default"] is False
+    # The allowed-values enum is nested inside sources.items (array schema).
+    assert b["sources"]["items"]["enum"] == ["GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC", "WP"]

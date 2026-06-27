@@ -22,8 +22,8 @@ def test_enrichment_correction_enum_is_api_verbatim():
     assert bounds["correction"]["enum"] == ["fdr", "g_SCS", "bonferroni"]
 
 
-def test_hub_genes_param_meta_bounds():
-    meta = contracts.hub_genes_param_meta()
-    assert meta["top_n"]["min"] == 1 and meta["top_n"]["max"] == 200
-    assert set(meta.keys()) == {"top_n"}
-    assert meta["top_n"]["default"] == 20
+def test_hub_genes_param_bounds():
+    b = contracts.pipeline_param_bounds("hub_genes")
+    assert b["top_n"]["minimum"] == 1 and b["top_n"]["maximum"] == 200
+    assert set(b.keys()) == {"top_n"}
+    assert b["top_n"]["default"] == 20

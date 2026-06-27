@@ -160,13 +160,6 @@ function AboutPage() {
                 <div className="ab-tl-label">More plants</div>
                 <p>Broader coverage of Indonesian medicinal plant data.</p>
               </div>
-              <div className="ab-tl-item">
-                <div className="ab-tl-label">Validation workflows</div>
-                <p>
-                  Clearer handoffs from network results to downstream experiments run in specialist
-                  tools.
-                </p>
-              </div>
             </div>
           </GlassSurface>
         </Reveal>

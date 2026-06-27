@@ -491,8 +491,9 @@ One row per pipeline execution. PKs are UUID v4.
 **Run-input storage:** All run inputs (plant list, manual compounds, manual targets, disease
 scope, validation options) are stored in `parameters` jsonb. The only relational link to an
 entity table is `disease_id` FK. There are no separate run-input junction tables — they were
-dropped and stay dropped. This means cascading deletes of the disease row would orphan runs;
-guard accordingly.
+dropped and stay dropped. The `analysis_runs.disease_id` FK is `ON DELETE NO ACTION`, so a
+disease that still has runs cannot be deleted (the delete is blocked by the FK, never cascaded),
+and runs are never orphaned.
 
 #### `parameters` jsonb shape
 

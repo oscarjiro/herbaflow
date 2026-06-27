@@ -106,31 +106,12 @@ def pipeline_param_bounds(group: str) -> dict[str, Any]:
     """The JSON-Schema property map for a param group (param_key -> {description, unit?, ...}).
 
     The single generic accessor over ``pipeline_parameters[group].properties`` — backs both
-    override-bounds validation and report param metadata; the typed per-group accessors
-    (``adme_param_meta`` etc.) are specialisations of this read.
+    override-bounds validation (``pipeline.engine.validate_overrides``) and report param metadata
+    (``pipeline.report``). Each property carries the raw contract keys: ``default``, ``minimum``/
+    ``exclusiveMinimum``/``maximum`` (hard bounds), the advisory ``recommended_min``/
+    ``recommended_max``, ``enum``, ``unit``, and ``description``.
     """
     return cast(dict[str, Any], pipeline_parameters()[group]["properties"])
-
-
-def adme_param_meta() -> dict[str, Any]:
-    """Per-param UI metadata: default + hard bounds + advisory recommended range + description.
-
-    The contract is the single lock-cited source. ``min``/``max`` are the HARD validation bounds
-    (``exclusiveMinimum`` is surfaced as ``min`` too); ``recommended_*`` are the advisory lock
-    range.
-    """
-    out: dict[str, Any] = {}
-    for name, spec in pipeline_parameters()["adme"]["properties"].items():
-        out[name] = {
-            "default": spec.get("default"),
-            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
-            "max": spec.get("maximum"),
-            "recommended_min": spec.get("recommended_min"),
-            "recommended_max": spec.get("recommended_max"),
-            "unit": spec.get("unit"),
-            "description": spec.get("description"),
-        }
-    return out
 
 
 def target_defaults() -> dict[str, Any]:
@@ -139,40 +120,10 @@ def target_defaults() -> dict[str, Any]:
     return {name: spec["default"] for name, spec in props.items()}
 
 
-def target_param_meta() -> dict[str, Any]:
-    """Per-param UI metadata for the target group (bounds, advisory range, description)."""
-    out: dict[str, Any] = {}
-    for name, spec in pipeline_parameters()["target"]["properties"].items():
-        out[name] = {
-            "default": spec.get("default"),
-            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
-            "max": spec.get("maximum"),
-            "recommended_min": spec.get("recommended_min"),
-            "recommended_max": spec.get("recommended_max"),
-            "description": spec.get("description"),
-        }
-    return out
-
-
 def disease_targets_defaults() -> dict[str, Any]:
     """The frozen-at-create defaults for the disease_targets param group (from the contract)."""
     props = pipeline_parameters()["disease_targets"]["properties"]
     return {name: spec["default"] for name, spec in props.items()}
-
-
-def disease_targets_param_meta() -> dict[str, Any]:
-    """Per-param UI metadata for the disease_targets group (bounds, advisory range, description)."""
-    out: dict[str, Any] = {}
-    for name, spec in pipeline_parameters()["disease_targets"]["properties"].items():
-        out[name] = {
-            "default": spec.get("default"),
-            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
-            "max": spec.get("maximum"),
-            "recommended_min": spec.get("recommended_min"),
-            "recommended_max": spec.get("recommended_max"),
-            "description": spec.get("description"),
-        }
-    return out
 
 
 def ppi_defaults() -> dict[str, Any]:
@@ -181,63 +132,16 @@ def ppi_defaults() -> dict[str, Any]:
     return {name: spec["default"] for name, spec in props.items()}
 
 
-def ppi_param_meta() -> dict[str, Any]:
-    """Per-param UI metadata for the ppi group (bounds, advisory range, enum, description)."""
-    out: dict[str, Any] = {}
-    for name, spec in pipeline_parameters()["ppi"]["properties"].items():
-        out[name] = {
-            "default": spec.get("default"),
-            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
-            "max": spec.get("maximum"),
-            "recommended_min": spec.get("recommended_min"),
-            "recommended_max": spec.get("recommended_max"),
-            "enum": spec.get("enum"),
-            "description": spec.get("description"),
-        }
-    return out
-
-
 def hub_genes_defaults() -> dict[str, Any]:
     """The frozen-at-create defaults for the hub_genes param group (from the contract)."""
     props = pipeline_parameters()["hub_genes"]["properties"]
     return {name: spec["default"] for name, spec in props.items()}
 
 
-def hub_genes_param_meta() -> dict[str, Any]:
-    """Per-param UI metadata for the hub_genes group (bounds, advisory range, description)."""
-    out: dict[str, Any] = {}
-    for name, spec in pipeline_parameters()["hub_genes"]["properties"].items():
-        out[name] = {
-            "default": spec.get("default"),
-            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
-            "max": spec.get("maximum"),
-            "recommended_min": spec.get("recommended_min"),
-            "recommended_max": spec.get("recommended_max"),
-            "description": spec.get("description"),
-        }
-    return out
-
-
 def enrichment_defaults() -> dict[str, Any]:
     """The frozen-at-create defaults for the enrichment param group (from the contract)."""
     props = pipeline_parameters()["enrichment"]["properties"]
     return {name: spec["default"] for name, spec in props.items()}
-
-
-def enrichment_param_meta() -> dict[str, Any]:
-    """Per-param UI metadata for the enrichment group (bounds, enum, advisory range)."""
-    out: dict[str, Any] = {}
-    for name, spec in pipeline_parameters()["enrichment"]["properties"].items():
-        out[name] = {
-            "default": spec.get("default"),
-            "min": spec.get("minimum", spec.get("exclusiveMinimum")),
-            "max": spec.get("maximum"),
-            "recommended_min": spec.get("recommended_min"),
-            "recommended_max": spec.get("recommended_max"),
-            "enum": spec.get("enum"),
-            "description": spec.get("description"),
-        }
-    return out
 
 
 def stage_sources(stage: int, *, user_provided: bool = False) -> list[dict[str, str | None]]:

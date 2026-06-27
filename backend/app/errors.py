@@ -60,7 +60,14 @@ class ServiceUnavailableError(ProblemException):
         super().__init__(503, "Service Unavailable", detail, **extra)
 
 
-def _problem(status: int, title: str, detail: str | None, type_: str, **extra: Any) -> JSONResponse:
+def problem_json(
+    status: int, title: str, detail: str | None = None, *, type_: str = "about:blank", **extra: Any
+) -> JSONResponse:
+    """The single RFC 9457 problem+json builder (one shape for all errors).
+
+    ``type_`` defaults to ``about:blank`` (the RFC's generic type) for middleware and framework
+    errors; the ``ProblemException`` handler passes the exception's own type URI.
+    """
     body: dict[str, Any] = {"type": type_, "title": title, "status": status}
     if detail is not None:
         body["detail"] = detail
@@ -68,13 +75,8 @@ def _problem(status: int, title: str, detail: str | None, type_: str, **extra: A
     return JSONResponse(status_code=status, content=body, media_type=PROBLEM_MEDIA_TYPE)
 
 
-def problem_json(status: int, title: str, detail: str | None = None, **extra: Any) -> JSONResponse:
-    """Public RFC 9457 problem+json builder for middleware (one shape for all errors)."""
-    return _problem(status, title, detail, "about:blank", **extra)
-
-
 async def _problem_handler(request: Request, exc: ProblemException) -> JSONResponse:
-    return _problem(exc.status, exc.title, exc.detail, exc.type_, **exc.extra)
+    return problem_json(exc.status, exc.title, exc.detail, type_=exc.type_, **exc.extra)
 
 
 def _sanitize_validation_errors(errors: Any) -> list[Any]:
@@ -94,27 +96,25 @@ def _sanitize_validation_errors(errors: Any) -> list[Any]:
 
 
 async def _validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-    return _problem(
+    return problem_json(
         422,
         "Unprocessable Entity",
         "Request validation failed.",
-        "about:blank",
         errors=_sanitize_validation_errors(exc.errors()),
     )
 
 
 async def _unhandled_handler(request: Request, exc: Exception) -> JSONResponse:
     logger.exception("unhandled error on %s %s", request.method, request.url.path)
-    return _problem(500, "Internal Server Error", "An internal error occurred.", "about:blank")
+    return problem_json(500, "Internal Server Error", "An internal error occurred.")
 
 
 async def _db_unavailable_handler(request: Request, exc: Exception) -> JSONResponse:
     logger.error("database unavailable on %s %s: %s", request.method, request.url.path, exc)
-    return _problem(
+    return problem_json(
         503,
         "Service Unavailable",
         "The service is temporarily unavailable. Please try again later.",
-        "about:blank",
     )
 
 

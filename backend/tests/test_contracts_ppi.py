@@ -16,7 +16,7 @@ def test_ppi_dropped_community_resolution():
 
 
 def test_ppi_min_confidence_enum_and_meta():
-    meta = contracts.ppi_param_meta()
-    assert meta["min_confidence"]["default"] == 0.4
-    assert contracts.pipeline_param_bounds("ppi")["min_confidence"]["enum"] == [0.15, 0.4, 0.7, 0.9]
-    assert meta["network_type"]["default"] == "functional"
+    b = contracts.pipeline_param_bounds("ppi")
+    assert b["min_confidence"]["default"] == 0.4
+    assert b["min_confidence"]["enum"] == [0.15, 0.4, 0.7, 0.9]
+    assert b["network_type"]["default"] == "functional"

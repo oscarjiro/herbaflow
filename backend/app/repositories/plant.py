@@ -73,9 +73,9 @@ class PlantRepository:
     async def compound_counts(self, plant_ids: Sequence[uuid.UUID]) -> dict[uuid.UUID, int]:
         """Distinct compound count per plant for the given ids (catalog display).
 
-        COUNT(DISTINCT compound_id) defends the ``plant_compounds`` composite-uniqueness
-        gap (Software Lock §6.2-E). Plants with no compounds are absent from the result;
-        callers default to 0.
+        ``plant_compounds`` enforces uniqueness on the ``(plant_id, compound_id)`` pair, so
+        COUNT(DISTINCT compound_id) is a harmless extra guard rather than a fix for a real
+        uniqueness gap. Plants with no compounds are absent from the result; callers default to 0.
         """
         if not plant_ids:
             return {}

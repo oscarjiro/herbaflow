@@ -95,7 +95,7 @@ const VALUES: Record<string, string> = {
   functional: "Functional",
   physical: "Physical",
   g_SCS: "g:SCS",
-  fdr: "FDR",
+  fdr: "Benjamini-Hochberg FDR",
   bonferroni: "Bonferroni",
   REAC: "Reactome",
   WP: "WikiPathways",

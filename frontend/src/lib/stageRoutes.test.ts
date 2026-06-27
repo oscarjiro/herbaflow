@@ -2,7 +2,6 @@ import type { AnalysisRead } from "@/api/types.gen";
 import {
   STAGE_SLUGS,
   slugToStage,
-  stageToSlug,
   isValidStageSlug,
   isSlugApplicable,
   isSlugReached,
@@ -24,7 +23,6 @@ test("slug map is bijective over the 8 pipeline stages", () => {
   expect(slugToStage("enrichment")).toBe(8);
   expect(slugToStage("inputs")).toBeNull();
   expect(slugToStage("final")).toBeNull();
-  expect(stageToSlug(4)).toBe("disease-targets");
   expect(STAGE_SLUGS[0]).toBe("inputs");
   expect(STAGE_SLUGS[STAGE_SLUGS.length - 1]).toBe("final");
 });

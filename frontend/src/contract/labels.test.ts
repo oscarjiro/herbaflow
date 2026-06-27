@@ -69,7 +69,7 @@ test("humanizes enum values", () => {
   expect(humanizeValue("functional")).toBe("Functional");
   expect(humanizeValue("physical")).toBe("Physical");
   expect(humanizeValue("g_SCS")).toBe("g:SCS");
-  expect(humanizeValue("fdr")).toBe("FDR");
+  expect(humanizeValue("fdr")).toBe("Benjamini-Hochberg FDR");
   expect(humanizeValue("bonferroni")).toBe("Bonferroni");
   expect(humanizeValue("REAC")).toBe("Reactome");
   expect(humanizeValue("WP")).toBe("WikiPathways");

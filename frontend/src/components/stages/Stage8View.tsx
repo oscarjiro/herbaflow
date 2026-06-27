@@ -26,6 +26,7 @@ import {
   ENRICHMENT_SELECT_PARAMS,
 } from "../../contract";
 import { enrichmentTermUrl } from "../../lib/externalUrls";
+import { humanizeValue } from "../../contract/labels";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
@@ -199,9 +200,9 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           muted
         />
         <StageSummaryCard
-          value={stage8.correction}
+          value={humanizeValue(stage8.correction)}
           label="correction"
-          ariaLabel={`correction ${stage8.correction}`}
+          ariaLabel={`correction ${humanizeValue(stage8.correction)}`}
           muted
         />
       </div>

@@ -49,11 +49,6 @@ export function slugToStage(slug: StageSlug): number | null {
   return SLUG_TO_STAGE[slug];
 }
 
-export function stageToSlug(n: number): StageSlug | null {
-  const found = (Object.keys(SLUG_TO_STAGE) as StageSlug[]).find((s) => SLUG_TO_STAGE[s] === n);
-  return found ?? null;
-}
-
 export function isValidStageSlug(slug: string): slug is StageSlug {
   return Object.prototype.hasOwnProperty.call(SLUG_TO_STAGE, slug);
 }
