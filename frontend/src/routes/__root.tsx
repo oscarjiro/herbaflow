@@ -1,14 +1,25 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { LazyMotion, domAnimation } from "motion/react";
+import { createRootRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { LazyMotion, domAnimation, useReducedMotion } from "motion/react";
+import { ReactLenis } from "lenis/react";
 import { ThemeProvider } from "@/lib/theme";
 import { BackgroundFX } from "@/components/ui/BackgroundFX";
 import { Nav } from "@/components/ui/Nav";
 import { Footer } from "@/components/ui/Footer";
 import { Toaster } from "@/components/ui/sonner";
+import { PageTransition } from "@/components/motion/PageTransition";
+import { SMOOTH_SCROLL_OPTIONS, shouldSmoothScroll } from "@/lib/smoothScroll";
 
-export const Route = createRootRoute({
-  component: () => (
+function RootLayout() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const reduceMotion = useReducedMotion();
+  // Inertial scroll only on the presentational routes, and never under reduced
+  // motion. Mounting/unmounting ReactLenis as the route changes restores native
+  // scrolling on the analysis pages. See src/lib/smoothScroll.ts.
+  const smoothScroll = shouldSmoothScroll(pathname, Boolean(reduceMotion));
+
+  return (
     <ThemeProvider>
+      {smoothScroll && <ReactLenis root options={SMOOTH_SCROLL_OPTIONS} />}
       <LazyMotion features={domAnimation}>
         {/*
         #hf-liquid SVG filter — mounted once here so every GlassSurface
@@ -56,14 +67,20 @@ export const Route = createRootRoute({
           <BackgroundFX glow="blobs" />
           <Nav />
           <main className="flex-1">
-            <Outlet />
+            <PageTransition>
+              <Outlet />
+            </PageTransition>
           </main>
           <Footer />
           <Toaster position="bottom-right" />
         </div>
       </LazyMotion>
     </ThemeProvider>
-  ),
+  );
+}
+
+export const Route = createRootRoute({
+  component: RootLayout,
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-prose p-8">
       <p className="text-hf-fg-2">{error.message}</p>

@@ -13,6 +13,7 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/cn";
+import { GRAIN_ENABLED } from "@/lib/grain";
 
 // ---------------------------------------------------------------------------
 // Fragment shader ported verbatim from landing.html mockup (proven tuning).
@@ -356,6 +357,9 @@ export function BackgroundFX({ glow = "blobs" }: BackgroundFXProps) {
 
       {/* Flow WebGL container */}
       {glow === "flow" && <div ref={flowRef} data-bg-layer="flow" className="hf-bg__flow" />}
+
+      {/* Subtle film-grain overlay — topmost bg layer (static; code-toggled). */}
+      {GRAIN_ENABLED && <div data-bg-layer="grain" className="hf-bg__grain" />}
     </div>
   );
 }

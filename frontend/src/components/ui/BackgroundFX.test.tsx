@@ -1,6 +1,7 @@
 import { render, act } from "@testing-library/react";
 import { vi } from "vitest";
 import { BackgroundFX, parseCssColor, flowPaletteFromTokens } from "./BackgroundFX";
+import { GRAIN_ENABLED } from "@/lib/grain";
 
 // ---------------------------------------------------------------------------
 // matchMedia stub — jsdom has none. Set reduced-motion per test.
@@ -306,5 +307,25 @@ describe("BackgroundFX — theme switch observer", () => {
     expect(disconnectSpy).toHaveBeenCalled();
     disconnectSpy.mockRestore();
     act(() => unmount());
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 10. Grain layer — subtle film-grain overlay, gated by the code toggle
+// ---------------------------------------------------------------------------
+describe("BackgroundFX — grain layer", () => {
+  it("renders the grain layer in blobs mode iff grain is enabled", () => {
+    const { container } = render(<BackgroundFX glow="blobs" />);
+    expect(!!container.querySelector("[data-bg-layer='grain']")).toBe(GRAIN_ENABLED);
+  });
+
+  it("renders the grain layer in flow mode iff grain is enabled", () => {
+    const { container } = render(<BackgroundFX glow="flow" />);
+    expect(!!container.querySelector("[data-bg-layer='grain']")).toBe(GRAIN_ENABLED);
+  });
+
+  it("never renders the grain layer when glow=off", () => {
+    const { container } = render(<BackgroundFX glow="off" />);
+    expect(container.querySelector("[data-bg-layer='grain']")).toBeNull();
   });
 });
