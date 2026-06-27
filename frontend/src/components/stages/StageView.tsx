@@ -88,7 +88,7 @@ export function StageView({
           </p>
           {onEdit && (
             <div>
-              <Button variant="outline" size="sm" onClick={onEdit}>
+              <Button variant="secondary" size="sm" onClick={onEdit}>
                 Edit / add
               </Button>
             </div>
@@ -102,7 +102,7 @@ export function StageView({
           )}
           <div className="flex items-center gap-3">
             {onEdit && (
-              <Button variant="outline" size="sm" onClick={onEdit}>
+              <Button variant="secondary" size="sm" onClick={onEdit}>
                 Edit / add
               </Button>
             )}

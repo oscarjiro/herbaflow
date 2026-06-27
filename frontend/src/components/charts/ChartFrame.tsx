@@ -67,7 +67,7 @@ export function ChartFrame({
         <CardTitle>{title}</CardTitle>
         <CardAction className="flex flex-wrap items-center gap-2">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             disabled={isExporting}
             onClick={() => void handleDownload()}

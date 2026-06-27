@@ -14,7 +14,7 @@ export function CsvDownloadButton({
 }) {
   const url = useCsvBlobUrl(header, rows);
   return (
-    <Button asChild variant="outline" size="sm">
+    <Button asChild variant="secondary" size="sm">
       <a href={url} download={filename}>
         {label}
       </a>

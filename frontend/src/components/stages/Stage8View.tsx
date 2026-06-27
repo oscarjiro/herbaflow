@@ -204,6 +204,9 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           label="correction"
           ariaLabel={`correction ${humanizeValue(stage8.correction)}`}
           muted
+          // The correction name (e.g. "Benjamini-Hochberg FDR") is a long phrase,
+          // not a count — render it smaller so it doesn't dwarf the card.
+          valueClassName="text-base leading-tight"
         />
       </div>
 

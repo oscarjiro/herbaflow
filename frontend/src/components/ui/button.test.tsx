@@ -42,6 +42,26 @@ describe("Button variants", () => {
     }
   });
 
+  it("danger variant keeps destructive (red) semantics — red label, not the neutral fg", () => {
+    const { container } = render(<Button variant="danger">Delete</Button>, { wrapper: Wrapper });
+    const label = container.querySelector(".hf-glass__content")!;
+    expect(label).not.toBeNull();
+    // The destructive button reads red even as glass: the label uses the danger
+    // token, not the neutral foreground every other glass variant uses.
+    expect(label.className).toMatch(/text-hf-danger/);
+    expect(label.className).not.toMatch(/text-hf-fg-1/);
+  });
+
+  it("warning variant keeps the amber warning semantics — amber label, glass surface", () => {
+    const { container } = render(<Button variant="warning">Re-run</Button>, { wrapper: Wrapper });
+    const root = container.querySelector("[data-slot='button']")!;
+    expect(root.className).toMatch(/hf-glass/);
+    expect(root.className).toMatch(/hf-btn--warning/);
+    const label = container.querySelector(".hf-glass__content")!;
+    expect(label.className).toMatch(/text-hf-warning/);
+    expect(label.className).not.toMatch(/text-hf-fg-1/);
+  });
+
   it("glass-action variant renders glass pill wrapper", () => {
     render(<Button variant="glass-action">Glass action</Button>, { wrapper: Wrapper });
     // The glass-action variant wraps in a .hf-glass container; look for the button label text

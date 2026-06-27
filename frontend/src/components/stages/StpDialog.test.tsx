@@ -274,7 +274,8 @@ test("renders icon-backed STP utility actions with command labels", async () => 
 
   expect(copyButton.querySelector("svg")).not.toBeNull();
   expect(openLink.querySelector("svg")).not.toBeNull();
-  expect(openLink).not.toHaveClass("hf-glass");
+  // The external link is now a glass Button (asChild) like every other action.
+  expect(openLink).toHaveClass("hf-glass");
 });
 
 test("uses cleaned import result summary", async () => {
@@ -451,16 +452,17 @@ test("uses the shared stateful button for STP import progress", async () => {
   });
 
   const importButton = screen.getByRole("button", { name: "Import" });
-  expect(importButton).toHaveAttribute("data-variant", "default");
-  expect(importButton).not.toHaveClass("hf-glass");
+  // Import is a primary dialog action — glass primary, like the main Run button.
+  expect(importButton).toHaveAttribute("data-variant", "primary");
+  expect(importButton).toHaveClass("hf-glass");
 
   fireEvent.click(importButton);
 
   await waitFor(() => expect(requestStarted).toHaveBeenCalledTimes(1));
   const workingButton = await screen.findByRole("button", { name: /working/i });
   expect(workingButton).toHaveAttribute("aria-busy", "true");
-  expect(workingButton).toHaveAttribute("data-variant", "default");
-  expect(workingButton).not.toHaveClass("hf-glass");
+  expect(workingButton).toHaveAttribute("data-variant", "primary");
+  expect(workingButton).toHaveClass("hf-glass");
   resolveRequest();
   expect(await screen.findByText("Done")).toBeInTheDocument();
 });

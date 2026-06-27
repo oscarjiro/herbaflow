@@ -34,6 +34,21 @@ describe("ExitRunDialog", () => {
     expect(getActiveRunId()).toBeNull();
   });
 
+  it("renders the delete button as a red glass danger button (not a solid destructive fill)", async () => {
+    setActiveRunId("run-1");
+    wrap(<ExitRunDialog analysisId="run-1" onExited={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /exit analysis/i }));
+    const del = await screen.findByRole("button", { name: /delete and exit/i });
+    // Glass layered recipe with the danger tint hook — not the old solid fill.
+    expect(del.className).toMatch(/hf-glass/);
+    expect(del.className).toMatch(/hf-btn--danger/);
+    expect(del.className).not.toMatch(/bg-destructive/);
+    // Destructive color semantics kept: the label still reads red.
+    const label = del.querySelector(".hf-glass__content");
+    expect(label).not.toBeNull();
+    expect(label!.className).toMatch(/text-hf-danger/);
+  });
+
   it("keeps the run when delete fails", async () => {
     server.use(
       http.delete("http://localhost:8000/analyses/run-1", () =>

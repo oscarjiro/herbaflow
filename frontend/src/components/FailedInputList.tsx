@@ -46,8 +46,11 @@ export function FailedInputList({
       </button>
       {failedExpanded && (
         <ul id={controlsId} aria-label="Failed inputs" className="flex flex-col gap-1">
-          {failed.map((f) => (
-            <li key={f.value} className="list-none text-xs [color:var(--hf-fg-3)]">
+          {failed.map((f, i) => (
+            <li
+              key={`${f.line ?? "?"}-${f.value}-${i}`}
+              className="list-none text-xs [color:var(--hf-fg-3)]"
+            >
               <button
                 type="button"
                 className="contents"

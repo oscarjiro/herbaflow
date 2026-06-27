@@ -1,8 +1,33 @@
-/* Google Fonts must precede the Tailwind import: Tailwind v4 inlines its own
-   @import into the compiled CSS, and the spec requires every @import to come
-   before any other rule, so a font @import placed after it is dropped. */
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Caudex:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap");
+/* Fonts are self-hosted via @fontsource and imported in src/fonts.ts (the one
+   font-loading home) — no Google Fonts CDN request. The metric-matched fallback
+   faces below are generated from the real font metrics (size-adjust + ascent/
+   descent overrides) so the swap from the system fallback to the web font causes
+   no layout shift; they are referenced in the --font-* stacks under @theme. */
 @import "tailwindcss";
+
+/* Metric-matched fallbacks (no CLS on font swap). Generated from the actual
+   font files against the named system fallback via `fontaine` (devDependency:
+   readMetrics + generateFontFace). Re-run that generator if the fonts change. */
+@font-face {
+  font-family: "Be Vietnam Pro Fallback";
+  src: local("Arial");
+  size-adjust: 110.3632%;
+  ascent-override: 90.6099%;
+  descent-override: 24.0116%;
+  line-gap-override: 0%;
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Instrument Serif Fallback";
+  src: local("Times New Roman");
+  size-adjust: 83.9385%;
+  ascent-override: 117.9435%;
+  descent-override: 36.9318%;
+  line-gap-override: 0%;
+  font-weight: 400;
+  font-style: normal;
+}
 
 /* Class-based dark variant (Tailwind v4 form — matches the .dark element AND its descendants). */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -11,7 +36,6 @@
   /* Neutrals — warm, paper-tinted */
   --hf-neutral-50: #f7f5f2;
   --hf-neutral-100: #efebe4;
-  --hf-neutral-200: #e5e0d8;
   --hf-neutral-300: #d4cec4;
   --hf-neutral-500: #9a958c;
   --hf-neutral-600: #6e6a62;
@@ -32,7 +56,6 @@
   --hf-surface-2: var(--hf-neutral-100);
   --hf-border: rgba(26, 26, 26, 0.08);
   --hf-border-strong: rgba(26, 26, 26, 0.18);
-  --hf-border-focus: var(--hf-fg-1);
 
   /* Foreground */
   --hf-fg-1: var(--hf-neutral-900);
@@ -145,10 +168,10 @@
 
 /* Static scales → utilities */
 @theme {
-  --font-display:
-    "Instrument Serif", "Caudex", "Playfair Display", "Times New Roman", Georgia, serif;
+  --font-display: "Instrument Serif", "Instrument Serif Fallback", Georgia, serif;
   --font-sans:
-    "Be Vietnam Pro", "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Be Vietnam Pro", "Be Vietnam Pro Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   --font-mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   --text-xs: 0.75rem;
@@ -319,13 +342,11 @@
   }
 
   code,
-  pre,
-  .hf-mono {
+  pre {
     font-family: var(--font-mono);
   }
   em,
-  i,
-  .hf-italic {
+  i {
     font-style: italic;
   }
 
@@ -633,14 +654,31 @@
   .hf-btn--ghost:hover .hf-glass__tint {
     background: var(--hf-glass-tint);
   }
-  /* danger: terracotta-leaning tint + rim */
+  /* danger: destructive-red tint + rim (keeps the solid destructive button's
+   red semantics in glass form; the label is red via text-hf-danger). */
   .hf-btn--danger .hf-glass__tint {
-    background: color-mix(in srgb, var(--hf-terracotta), transparent 80%);
+    background: color-mix(in srgb, var(--hf-danger), transparent 72%);
+  }
+  .hf-btn--danger:hover .hf-glass__tint {
+    background: color-mix(in srgb, var(--hf-danger), transparent 58%);
   }
   .hf-btn--danger .hf-glass__shine {
     box-shadow:
       inset 1.5px 1.5px 1px -1px var(--hf-glass-shine),
-      inset 0 0 0 1px color-mix(in srgb, var(--hf-terracotta), transparent 50%);
+      inset 0 0 0 1px color-mix(in srgb, var(--hf-danger), transparent 45%);
+  }
+  /* warning: amber tint + rim (out-of-date / re-run actions; the label is amber
+   via text-hf-warning). Mirrors the danger recipe. */
+  .hf-btn--warning .hf-glass__tint {
+    background: color-mix(in srgb, var(--hf-warning), transparent 74%);
+  }
+  .hf-btn--warning:hover .hf-glass__tint {
+    background: color-mix(in srgb, var(--hf-warning), transparent 60%);
+  }
+  .hf-btn--warning .hf-glass__shine {
+    box-shadow:
+      inset 1.5px 1.5px 1px -1px var(--hf-glass-shine),
+      inset 0 0 0 1px color-mix(in srgb, var(--hf-warning), transparent 48%);
   }
 
   /* --- Refraction opt-in (Chromium only) ------------------------------- */

@@ -45,7 +45,7 @@ export function ExitRunDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button variant="outline" size="sm" className="w-full">
+          <Button variant="secondary" size="sm" className="w-full">
             Exit analysis
           </Button>
         )}
@@ -61,7 +61,7 @@ export function ExitRunDialog({
           <DialogClose asChild>
             <Button variant="ghost">Cancel</Button>
           </DialogClose>
-          <Button variant="destructive" disabled={del.isPending} onClick={() => del.mutate()}>
+          <Button variant="danger" disabled={del.isPending} onClick={() => del.mutate()}>
             {del.isPending ? "Deleting…" : "Delete and exit"}
           </Button>
         </DialogFooter>

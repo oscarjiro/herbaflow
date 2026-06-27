@@ -50,6 +50,10 @@ const buttonVariants = cva(
         /** Danger text + optional soft fill on hover. */
         danger:
           "bg-transparent text-hf-danger rounded-[var(--radius-md)] border border-[color-mix(in_srgb,var(--hf-danger),transparent_60%)] hover:bg-hf-danger-soft active:translate-y-px",
+
+        /** Warning text + optional soft fill on hover (out-of-date / re-run). */
+        warning:
+          "bg-transparent text-hf-warning rounded-[var(--radius-md)] border border-[color-mix(in_srgb,var(--hf-warning),transparent_60%)] hover:bg-hf-warning-soft active:translate-y-px",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -137,6 +141,15 @@ function glassLabelClass(variant: string, size: ButtonSize | null | undefined): 
   return GLASS_PILL_BY_SIZE.default;
 }
 
+// Glass label ink. Every glass variant uses the neutral foreground EXCEPT
+// danger, which keeps destructive (red) color semantics even as a glass pill —
+// the translucent tint alone is too subtle to read as "this deletes things".
+function glassTextClass(variant: string): string {
+  if (variant === "danger") return "text-hf-danger";
+  if (variant === "warning") return "text-hf-warning";
+  return "text-hf-fg-1";
+}
+
 interface ButtonProps
   extends Omit<React.ComponentProps<"button">, "ref">, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
@@ -155,7 +168,14 @@ function Button({
   // the CTA hierarchy is primary > secondary > ghost > danger. glass-action is
   // the bare overlay pill (no per-variant tint). The shadcn-original variants
   // (default/destructive/outline/link) stay on the non-glass cva path.
-  const HF_GLASS_VARIANTS = ["primary", "secondary", "ghost", "danger", "glass-action"] as const;
+  const HF_GLASS_VARIANTS = [
+    "primary",
+    "secondary",
+    "ghost",
+    "danger",
+    "warning",
+    "glass-action",
+  ] as const;
   // `variant` may be null per VariantProps; the destructure default only covers
   // undefined, so coalesce before the membership/tint checks.
   const resolvedVariant = variant ?? "default";
@@ -187,7 +207,8 @@ function Button({
               <GlassLayers />
               <span
                 className={cn(
-                  "hf-glass__content text-hf-fg-1",
+                  "hf-glass__content",
+                  glassTextClass(resolvedVariant),
                   glassLabelClass(resolvedVariant, size),
                 )}
               >
@@ -240,7 +261,8 @@ function Button({
         {/* Layer 3: content slot — uses .hf-glass__content for z-index:3 */}
         <span
           className={cn(
-            "hf-glass__content text-hf-fg-1",
+            "hf-glass__content",
+            glassTextClass(resolvedVariant),
             isIcon ? "grid size-full place-items-center" : glassLabelClass(resolvedVariant, size),
           )}
         >

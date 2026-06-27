@@ -19,7 +19,7 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
   }
 
   return (
-    <Button type="button" size="sm" variant="outline" onClick={onCopy}>
+    <Button type="button" size="sm" variant="secondary" onClick={onCopy}>
       {copied ? (
         <Check className="size-4" aria-hidden="true" />
       ) : (

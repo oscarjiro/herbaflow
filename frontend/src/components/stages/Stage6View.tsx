@@ -433,7 +433,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
                   elements={network.elements}
                   stylesheet={stylesheet}
                   actions={
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="secondary" size="sm" asChild>
                       <a
                         href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
                         download="stage6_ppi_network.png"

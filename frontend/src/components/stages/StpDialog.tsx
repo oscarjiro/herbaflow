@@ -159,7 +159,7 @@ export function StpDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
+        <Button type="button" variant="secondary" size="sm">
           Add SwissTargetPrediction targets
         </Button>
       </DialogTrigger>
@@ -291,7 +291,7 @@ export function StpDialog({
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 disabled={!selectedCompoundId}
                 onClick={handleCopySmiles}
@@ -299,15 +299,12 @@ export function StpDialog({
                 <Copy aria-hidden="true" className="size-4" />
                 Copy SMILES
               </Button>
-              <a
-                href={STP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border-hf-border-strong bg-hf-bg text-hf-fg-1 hover:bg-hf-surface-2 focus-visible:ring-ring/50 inline-flex h-8 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-medium transition-colors focus-visible:ring-[3px] focus-visible:outline-none"
-              >
-                <ExternalLink aria-hidden="true" className="size-4" />
-                Open SwissTargetPrediction
-              </a>
+              <Button asChild variant="secondary" size="sm">
+                <a href={STP_URL} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink aria-hidden="true" className="size-4" />
+                  Open SwissTargetPrediction
+                </a>
+              </Button>
             </div>
             {copyNote && <p className="text-xs [color:var(--hf-fg-3)]">{copyNote}</p>}
           </fieldset>
@@ -360,7 +357,6 @@ export function StpDialog({
 
             <div className="flex items-center gap-3">
               <StatefulButton
-                variant="default"
                 disabled={!canImport}
                 onClickAsync={async () => {
                   await importMut.mutateAsync().catch(() => undefined);

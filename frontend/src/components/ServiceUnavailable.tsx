@@ -14,7 +14,7 @@ export function ServiceUnavailable({ onRetry }: { onRetry: () => void }) {
       </p>
       <div className="flex items-center gap-3">
         <Button onClick={onRetry}>Retry</Button>
-        <Button variant="outline" asChild>
+        <Button variant="secondary" asChild>
           <Link to="/">Back to landing</Link>
         </Button>
       </div>

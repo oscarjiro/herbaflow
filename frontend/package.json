@@ -12,6 +12,9 @@
     "gen:api": "openapi-ts"
   },
   "dependencies": {
+    "@fontsource/be-vietnam-pro": "^5.2.8",
+    "@fontsource/instrument-serif": "^5.2.8",
+    "@fontsource/space-mono": "^5.2.9",
     "@hey-api/client-fetch": "^0.13.1",
     "@hookform/resolvers": "^5.4.0",
     "@tailwindcss/vite": "^4.3.1",
@@ -57,6 +60,7 @@
     "@types/three": "^0.184.1",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.17.0",
+    "fontaine": "^0.8.0",
     "jsdom": "^25.0.1",
     "msw": "^2.14.6",
     "prettier": "^3.4.2",
