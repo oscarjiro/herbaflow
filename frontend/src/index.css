@@ -77,11 +77,11 @@
   --hf-info-soft: #d2dde5;
 
   /* Glass — liquid-glass tier tokens (tint/shine/shadow per mockup) */
-  --hf-bg-raised: #fffdfa;
-  --hf-glass-tint: rgba(255, 255, 255, 0.18);
-  --hf-glass-tint-strong: rgba(255, 255, 255, 0.34);
-  --hf-glass-shine: rgba(255, 255, 255, 0.7);
-  --hf-glass-shine-2: rgba(255, 255, 255, 0.55);
+  --hf-bg-raised: #fffdfa6b;
+  --hf-glass-tint: rgba(255, 255, 255, 0.1);
+  --hf-glass-tint-strong: rgba(255, 255, 255, 0.2);
+  --hf-glass-shine: rgba(255, 255, 255, 1);
+  --hf-glass-shine-2: rgba(255, 255, 255, 1);
   --hf-glass-shadow: 0 16px 40px -18px rgba(26, 26, 26, 0.3), 0 2px 6px rgba(26, 26, 26, 0.08);
 
   /* Switch toggle — track off-state (no existing neutral covers this value) */
@@ -636,7 +636,7 @@
   /* --- hf button tint hierarchy (all buttons are glass) ------------------ */
   /* primary: strongest tint + ink-leaning rim so the CTA dominates */
   .hf-btn--primary .hf-glass__tint {
-    background: color-mix(in srgb, var(--hf-fg-1), transparent 86%);
+    background: color-mix(in srgb, var(--hf-fg-1), transparent 12%);
   }
   .hf-btn--primary .hf-glass__shine {
     box-shadow:
@@ -959,9 +959,10 @@
     border-style: dashed;
   }
 
-  /* active */
+  /* active — a soft ink wash so the current step reads on the glass sidebar in
+     both modes (the old --hf-surface-2 was near-invisible in light). */
   .trail-item.is-active {
-    background: var(--hf-surface-2);
+    background: color-mix(in srgb, var(--hf-fg-1), transparent 88%);
   }
   .trail-item.is-active .node {
     box-shadow: 0 0 0 3px var(--hf-sage-soft);
@@ -1491,9 +1492,9 @@
   --hf-accent: var(--hf-fg-1);
 
   /* Glass — liquid-glass tier tokens (dark) */
-  --hf-bg-raised: #1d1b16;
-  --hf-glass-tint: rgba(247, 245, 242, 0.06);
-  --hf-glass-tint-strong: rgba(247, 245, 242, 0.12);
+  --hf-bg-raised: #1d1b16a6;
+  --hf-glass-tint: rgba(247, 245, 242, 0.02);
+  --hf-glass-tint-strong: rgba(247, 245, 242, 0.05);
   --hf-glass-shine: rgba(247, 245, 242, 0.35);
   --hf-glass-shine-2: rgba(247, 245, 242, 0.2);
   --hf-glass-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.75), 0 2px 6px rgba(0, 0, 0, 0.4);

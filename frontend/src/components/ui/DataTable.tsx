@@ -68,7 +68,7 @@ export function DataTable<T>({
   return (
     <div
       data-slot="datatable"
-      className="border-hf-border bg-hf-surface w-full overflow-hidden rounded-[var(--radius-lg)] border"
+      className="border-hf-border w-full overflow-hidden rounded-[var(--radius-lg)] border"
     >
       <div className="scroll w-full overflow-x-auto max-md:[&_table]:block max-md:[&_tbody_tr]:mb-3 max-md:[&_tbody_tr]:block">
         <Table className="tabular-nums">

@@ -444,6 +444,7 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
             {!hideRedo && (
               <Button
                 type="button"
+                variant="secondary"
                 disabled={!redoEnabled}
                 onClick={handleRedo}
                 aria-label="Redo from this stage with changed parameters"

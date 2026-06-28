@@ -6,17 +6,21 @@ import { GlassSurface } from "./GlassSurface";
 type CardVariant = "solid" | "glass-raised";
 
 interface CardProps extends React.ComponentProps<"div"> {
-  /** Visual mode: solid (default, content-dense) or glass-raised (hero/feature cards). */
+  /** Visual mode: glass-raised (default — the liquid-glass surface) or solid
+   *  (opaque fallback for content that should not read through the glass). */
   variant?: CardVariant;
 }
 
-function Card({ className, variant = "solid", children, ...props }: CardProps) {
+function Card({ className, variant = "glass-raised", children, ...props }: CardProps) {
   if (variant === "glass-raised") {
     return (
       <GlassSurface
         tier="raised"
         data-slot="card"
-        className={cn("rounded-[var(--radius-lg)]", className)}
+        // py-6 on the glass box + the card's flex/gap on the content slot so the
+        // glass card reproduces the solid card's box model (header/content spacing).
+        className={cn("rounded-[var(--radius-lg)] py-6", className)}
+        contentClassName="flex flex-col gap-6"
         {...props}
       >
         {children}

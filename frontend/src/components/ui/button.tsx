@@ -147,6 +147,9 @@ function glassLabelClass(variant: string, size: ButtonSize | null | undefined): 
 function glassTextClass(variant: string): string {
   if (variant === "danger") return "text-hf-danger";
   if (variant === "warning") return "text-hf-warning";
+  // Primary is a near-solid ink fill (see .hf-btn--primary tint) — paper text for
+  // a high-contrast CTA. Auto-flips in dark mode (fg/bg tokens swap).
+  if (variant === "primary") return "text-hf-bg";
   return "text-hf-fg-1";
 }
 

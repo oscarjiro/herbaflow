@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { StatNumber } from "@/components/ui/editorial";
+import { GlassSurface } from "@/components/ui/GlassSurface";
 
 type StageSummaryCardProps = {
   label: string;
@@ -20,20 +21,19 @@ export function StageSummaryCard({
   valueClassName,
 }: StageSummaryCardProps) {
   return (
-    <div
-      className="bg-card flex min-w-[96px] flex-col items-center rounded-lg border px-4 py-3 shadow-sm"
-      aria-label={ariaLabel}
-    >
-      <StatNumber
-        className={cn(
-          "font-display text-2xl font-semibold",
-          muted && "text-muted-foreground",
-          valueClassName,
-        )}
-      >
-        {value}
-      </StatNumber>
-      <span className="text-muted-foreground text-xs">{label}</span>
-    </div>
+    <GlassSurface tier="raised" className="min-w-[96px] rounded-lg" aria-label={ariaLabel}>
+      <div className="flex flex-col items-center px-4 py-3">
+        <StatNumber
+          className={cn(
+            "font-display text-2xl font-semibold",
+            muted && "text-muted-foreground",
+            valueClassName,
+          )}
+        >
+          {value}
+        </StatNumber>
+        <span className="text-muted-foreground text-xs">{label}</span>
+      </div>
+    </GlassSurface>
   );
 }

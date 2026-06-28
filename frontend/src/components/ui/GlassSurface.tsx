@@ -10,6 +10,10 @@ interface GlassSurfaceProps extends HTMLAttributes<HTMLDivElement> {
    *  raised  = stat cards, timeline cards (standard tint + hover lift)
    *  Default: overlay */
   tier?: GlassTier;
+  /** Extra classes for the inner content slot — use when the children need their
+   *  own layout (flex/gap/padding) applied to the actual content, not the outer
+   *  glass box (whose className lands on the .hf-glass wrapper). */
+  contentClassName?: string;
   children?: ReactNode;
 }
 
@@ -17,6 +21,7 @@ export function GlassSurface({
   tier = "overlay",
   children,
   className,
+  contentClassName,
   ...props
 }: GlassSurfaceProps) {
   return (
@@ -30,7 +35,7 @@ export function GlassSurface({
       {/* Layer 2: rim-light / shine — inset box-shadow highlights */}
       <div className="hf-glass__shine" aria-hidden="true" />
       {/* Layer 3: content slot */}
-      <div className="hf-glass__content">{children}</div>
+      <div className={cn("hf-glass__content", contentClassName)}>{children}</div>
     </div>
   );
 }

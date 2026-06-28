@@ -2,22 +2,22 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Card, CardContent, CardTitle } from "./card";
 
-describe("Card — solid (default)", () => {
+describe("Card — solid (opt-in variant)", () => {
   it("renders data-slot=card", () => {
-    render(<Card>content</Card>);
+    render(<Card variant="solid">content</Card>);
     const card = document.querySelector("[data-slot='card']");
     expect(card).not.toBeNull();
   });
 
-  it("does not render hf-glass class by default", () => {
-    render(<Card>solid</Card>);
+  it("does not render hf-glass class when variant=solid", () => {
+    render(<Card variant="solid">solid</Card>);
     const card = document.querySelector("[data-slot='card']");
     expect(card?.className).not.toContain("hf-glass");
   });
 
   it("renders children in solid mode", () => {
     render(
-      <Card>
+      <Card variant="solid">
         <CardTitle>My card</CardTitle>
       </Card>,
     );
@@ -25,7 +25,14 @@ describe("Card — solid (default)", () => {
   });
 });
 
-describe("Card — glass raised", () => {
+describe("Card — glass raised (default)", () => {
+  it("renders glass by default (no variant prop)", () => {
+    render(<Card>glass by default</Card>);
+    const glassEl = document.querySelector(".hf-glass");
+    expect(glassEl).not.toBeNull();
+    expect(glassEl?.className).toContain("hf-glass--raised");
+  });
+
   it("renders hf-glass and hf-glass--raised classes when variant=glass-raised", () => {
     render(<Card variant="glass-raised">glass content</Card>);
     const glassEl = document.querySelector(".hf-glass");
