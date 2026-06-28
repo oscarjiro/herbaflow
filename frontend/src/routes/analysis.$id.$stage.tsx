@@ -13,7 +13,17 @@ export const Route = createFileRoute("/analysis/$id/$stage")({
   component: function RunStage() {
     const { id, stage } = Route.useParams();
     const { data } = useAnalysisStatus(id);
-    if (!data) return <Skeleton className="h-7 w-64" />;
+    if (!data)
+      return (
+        <div className="flex flex-col gap-5" aria-busy="true" aria-label="Loading step">
+          <Skeleton className="h-9 w-72" />
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-5/6" />
+            <Skeleton className="h-6 w-2/3" />
+          </div>
+        </div>
+      );
     if (!isValidStageSlug(stage) || !isSlugApplicable(stage, data) || !isSlugReached(stage, data)) {
       return (
         <Navigate

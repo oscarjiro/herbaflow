@@ -149,14 +149,14 @@ afterEach(() => {
 describe("Stage3View — UniProt accession column", () => {
   it("renders accession as an ExternalLink to the UniProt entry page", () => {
     wrap(<Stage3View data={makeRun("computed", STAGE3_COMPUTED)} />);
-    const link = screen.getByRole("link", { name: "P00533" });
+    const link = screen.getByRole("link", { name: /P00533/ });
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P00533/entry");
     expect(link).toHaveAttribute("target", "_blank");
   });
 
   it("renders UniProt accession for a user_provided row (row-first, no edges)", () => {
     wrap(<Stage3View data={makeRun("user_provided", STAGE3_USER_PROVIDED)} />);
-    const link = screen.getByRole("link", { name: "P04637" });
+    const link = screen.getByRole("link", { name: /P04637/ });
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637/entry");
   });
 });

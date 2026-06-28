@@ -226,7 +226,7 @@ describe("Stage7View", () => {
 
   it("links the gene symbol cell to the persisted canonical UniProt URL", () => {
     wrap(<Stage7View data={makeData(makeComputedResult())} />);
-    const link = screen.getByRole("link", { name: "TNF" });
+    const link = screen.getByRole("link", { name: /TNF/ });
     expect(link).toHaveAttribute("href", uniprotUrl("P01375"));
     expect(link).not.toHaveAttribute("href", expect.stringContaining("query=gene:"));
   });

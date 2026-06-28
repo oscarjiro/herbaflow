@@ -20,7 +20,7 @@ function ExternalLink({ href, children, label, className }: ExternalLinkProps) {
       href={href}
       target="_blank"
       rel="noreferrer"
-      aria-label={label}
+      aria-label={label ? `${label} (opens in new tab)` : undefined}
       className={cn(
         "text-hf-fg-1 inline-flex items-center gap-[3px]",
         "decoration-hf-border-strong underline underline-offset-[3px]",
@@ -35,6 +35,7 @@ function ExternalLink({ href, children, label, className }: ExternalLinkProps) {
         className="text-hf-fg-3 shrink-0"
         aria-hidden="true"
       />
+      {!label && <span className="sr-only"> (opens in new tab)</span>}
     </a>
   );
 }

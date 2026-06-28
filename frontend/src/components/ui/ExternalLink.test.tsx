@@ -32,7 +32,7 @@ describe("ExternalLink", () => {
         Open Targets
       </ExternalLink>,
     );
-    const link = screen.getByRole("link", { name: "Open Targets database" });
+    const link = screen.getByRole("link", { name: "Open Targets database (opens in new tab)" });
     expect(link).toBeInTheDocument();
   });
 

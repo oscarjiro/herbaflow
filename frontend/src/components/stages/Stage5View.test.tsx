@@ -201,9 +201,9 @@ describe("Stage5View — overlap view", () => {
   it("renders UniProt accessions as links to the UniProt entry page", () => {
     wrap(<Stage5View data={makeData()} />);
     // Both accessions must appear as links pointing to UniProt.
-    const egfrLink = screen.getByRole("link", { name: "P00533" });
+    const egfrLink = screen.getByRole("link", { name: /P00533/ });
     expect(egfrLink).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P00533/entry");
-    const tp53Link = screen.getByRole("link", { name: "P04637" });
+    const tp53Link = screen.getByRole("link", { name: /P04637/ });
     expect(tp53Link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637/entry");
   });
 

@@ -150,13 +150,13 @@ describe("Stage3View", () => {
 
   it("renders the UniProt accession as a link to its UniProt entry page", () => {
     wrap(<Stage3View data={makeRun()} />);
-    const link = screen.getByRole("link", { name: "P04637" });
+    const link = screen.getByRole("link", { name: /P04637/ });
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P04637/entry");
   });
 
   it("renders the UniProt accession in the monospace data font", () => {
     wrap(<Stage3View data={makeRun()} />);
-    expect(screen.getByRole("link", { name: "P04637" }).className).toMatch(/font-mono/);
+    expect(screen.getByRole("link", { name: /P04637/ }).className).toMatch(/font-mono/);
   });
 
   it("does not render UniProt or gene symbol column filters", () => {
@@ -411,7 +411,7 @@ describe("Stage3View — UniProt accession from the target row (B2)", () => {
 
   it("renders the linked accession from the row when there are no compound edges", () => {
     const { container } = wrap(<Stage3View data={makeUserProvidedData()} />);
-    const link = screen.getByRole("link", { name: "P31749" });
+    const link = screen.getByRole("link", { name: /P31749/ });
     expect(link).toHaveAttribute("href", "https://www.uniprot.org/uniprotkb/P31749/entry");
     const table = targetsTable(container);
     expect(table.queryByText("user-added")).not.toBeInTheDocument();
