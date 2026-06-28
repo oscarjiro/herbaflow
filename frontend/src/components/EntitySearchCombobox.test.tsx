@@ -1,4 +1,4 @@
-import { act, render, renderHook, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, renderHook, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
@@ -39,11 +39,36 @@ afterEach(() => {
 
 /**
  * Type into the combobox input to trigger the results dropdown.
- * The new design is a direct-type input — no click-to-open trigger.
+ * The design is a direct-type input — no click-to-open trigger.
  */
 async function typeInCombobox(ariaLabel: string, text: string) {
   await userEvent.type(screen.getByRole("combobox", { name: ariaLabel }), text);
 }
+
+// ---------------------------------------------------------------------------
+// Local-filter core behaviour (Step-1 TDD assertion)
+// ---------------------------------------------------------------------------
+
+it("filters the cached options locally, no callback", () => {
+  const OPTIONS: ComboOption[] = [
+    { value: "p1", label: "Curcuma longa", kind: "plant" },
+    { value: "p2", label: "Zingiber officinale", kind: "plant" },
+  ];
+  render(
+    <EntitySearchCombobox
+      mode="multiple"
+      selected={[]}
+      onChange={vi.fn()}
+      options={OPTIONS}
+      ariaLabel="plants"
+    />,
+  );
+  const input = screen.getByRole("combobox", { name: "plants" });
+  fireEvent.focus(input);
+  fireEvent.change(input, { target: { value: "zingiber" } });
+  expect(screen.getByText("Zingiber officinale")).toBeInTheDocument();
+  expect(screen.queryByText("Curcuma longa")).not.toBeInTheDocument();
+});
 
 // ---------------------------------------------------------------------------
 // Debounce: exactly one search call per settled term
@@ -108,62 +133,60 @@ describe("EntitySearchCombobox — debounce (hook-level)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Type-to-search behaviour: dropdown only when typing, not on bare focus
+// Type-to-filter behaviour: dropdown only when typing, not on bare focus
 // ---------------------------------------------------------------------------
 
-describe("EntitySearchCombobox — type-to-search", () => {
+describe("EntitySearchCombobox — type-to-filter", () => {
   it("does NOT show results on focus alone with an empty query", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_A]);
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_A]}
         ariaLabel="Search plants"
       />,
     );
     // Focus the input without typing anything
     await userEvent.click(screen.getByRole("combobox", { name: "Search plants" }));
-    // Dropdown should not be open and search should not have been called with results visible
+    // Dropdown should not be open — query is blank so results list is empty
     expect(screen.queryByText("Alpha Plant")).not.toBeInTheDocument();
   });
 
-  it("calls search with the typed query and shows results", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_A, OPT_B]);
+  it("shows results matching the typed query", async () => {
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search plants"
       />,
     );
     await typeInCombobox("Search plants", "alp");
     expect(await screen.findByText("Alpha Plant")).toBeInTheDocument();
-    expect(search).toHaveBeenCalled();
   });
 
-  it("continues searching after the focused input is cleared with Backspace and reused", async () => {
-    const search = vi.fn(async (q: string) => (q.includes("b") ? [OPT_B] : [OPT_A]));
+  it("continues filtering after the focused input is cleared with Backspace and reused", async () => {
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search plants"
       />,
     );
 
     const input = screen.getByRole("combobox", { name: "Search plants" });
     await userEvent.type(input, "a");
+    // Both "Alpha Plant" and "Beta Plant" contain "a" — Alpha Plant must appear
     expect(await screen.findByText("Alpha Plant")).toBeInTheDocument();
 
     await userEvent.keyboard("{Backspace}");
     expect(input).toHaveFocus();
 
+    // "b" matches "Beta Plant" but not "Alpha Plant"
     await userEvent.type(input, "b");
     expect(await screen.findByText("Beta Plant")).toBeInTheDocument();
   });
@@ -175,30 +198,28 @@ describe("EntitySearchCombobox — type-to-search", () => {
 
 describe("EntitySearchCombobox — results rendering", () => {
   it("renders canonical label in results", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_A, OPT_B]);
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search plants"
       />,
     );
-    await typeInCombobox("Search plants", "zin");
-    // Wait for results
+    // "plant" matches both "Alpha Plant" and "Beta Plant"
+    await typeInCombobox("Search plants", "plant");
     expect(await screen.findByText("Alpha Plant")).toBeInTheDocument();
     expect(await screen.findByText("Beta Plant")).toBeInTheDocument();
   });
 
   it("renders matched-alias hint when hint is set", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_B]);
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_B]}
         ariaLabel="Search plants"
       />,
     );
@@ -207,13 +228,12 @@ describe("EntitySearchCombobox — results rendering", () => {
   });
 
   it("does NOT render a hint row when hint is null", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_A]);
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_A]}
         ariaLabel="Search plants"
       />,
     );
@@ -222,14 +242,13 @@ describe("EntitySearchCombobox — results rendering", () => {
     expect(screen.queryByText(/matched:/i)).not.toBeInTheDocument();
   });
 
-  it("shows empty state when search returns no results", async () => {
-    const search = vi.fn().mockResolvedValue([]);
+  it("shows empty state when no options match the query", async () => {
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_A]}
         ariaLabel="Search plants"
       />,
     );
@@ -244,14 +263,13 @@ describe("EntitySearchCombobox — results rendering", () => {
 
 describe("EntitySearchCombobox — single mode", () => {
   it("selecting an option calls onChange with that option and closes the popover", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_A, OPT_B]);
     const onChange = vi.fn();
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={onChange}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search disease"
       />,
     );
@@ -264,13 +282,12 @@ describe("EntitySearchCombobox — single mode", () => {
   });
 
   it("input is always visible and accessible by role", () => {
-    const search = vi.fn().mockResolvedValue([]);
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[OPT_A]}
         onChange={() => {}}
-        search={search}
+        options={[]}
         ariaLabel="Search disease"
       />,
     );
@@ -279,14 +296,13 @@ describe("EntitySearchCombobox — single mode", () => {
   });
 
   it("shows a remove chip for the selected value", async () => {
-    const search = vi.fn().mockResolvedValue([]);
     const onChange = vi.fn();
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[OPT_A]}
         onChange={onChange}
-        search={search}
+        options={[]}
         ariaLabel="Search disease"
       />,
     );
@@ -306,19 +322,19 @@ describe("EntitySearchCombobox — single mode", () => {
 
 describe("EntitySearchCombobox — multiple mode", () => {
   it("selecting an option adds it to selected and keeps the popover open", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_A, OPT_B]);
     const onChange = vi.fn();
     const { rerender } = render(
       <EntitySearchCombobox
         mode="multiple"
         selected={[]}
         onChange={onChange}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search plants"
         max={10}
       />,
     );
-    await typeInCombobox("Search plants", "zin");
+    // "plant" matches both Alpha Plant and Beta Plant
+    await typeInCombobox("Search plants", "plant");
     // Click the cmdk option item for Alpha Plant
     const cmdItems = await screen.findAllByRole("option");
     const alphaItem = cmdItems.find((el) => el.textContent?.includes("Alpha Plant"));
@@ -331,25 +347,24 @@ describe("EntitySearchCombobox — multiple mode", () => {
         mode="multiple"
         selected={[OPT_A]}
         onChange={onChange}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search plants"
         max={10}
       />,
     );
 
-    // Popover is still open (can still see the other option in the list)
+    // Popover is still open (query still "plant" → Beta Plant still in results)
     expect(await screen.findByText("Beta Plant")).toBeInTheDocument();
   });
 
   it("selecting an already-selected option toggles it off", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_A, OPT_B]);
     const onChange = vi.fn();
     render(
       <EntitySearchCombobox
         mode="multiple"
         selected={[OPT_A]}
         onChange={onChange}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search plants"
         max={10}
       />,
@@ -363,7 +378,6 @@ describe("EntitySearchCombobox — multiple mode", () => {
   });
 
   it("blocks adding past max and does not call onChange for the blocked click", async () => {
-    const search = vi.fn().mockResolvedValue([OPT_A, OPT_B, OPT_C]);
     const onChange = vi.fn();
     // selected = [OPT_A, OPT_B], max = 2 → at cap
     render(
@@ -371,7 +385,7 @@ describe("EntitySearchCombobox — multiple mode", () => {
         mode="multiple"
         selected={[OPT_A, OPT_B]}
         onChange={onChange}
-        search={search}
+        options={[OPT_A, OPT_B, OPT_C]}
         ariaLabel="Search plants"
         max={2}
       />,
@@ -386,14 +400,13 @@ describe("EntitySearchCombobox — multiple mode", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it("shows all selected options as chips even when not in current search results", async () => {
-    const search = vi.fn().mockResolvedValue([]); // results are empty
+  it("shows all selected options as chips even when the query is blank", async () => {
     render(
       <EntitySearchCombobox
         mode="multiple"
         selected={[OPT_A, OPT_B]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search plants"
         max={10}
       />,
@@ -404,13 +417,12 @@ describe("EntitySearchCombobox — multiple mode", () => {
   });
 
   it("combobox input is always visible and accessible", () => {
-    const search = vi.fn().mockResolvedValue([]);
     render(
       <EntitySearchCombobox
         mode="multiple"
         selected={[OPT_A, OPT_B]}
         onChange={() => {}}
-        search={search}
+        options={[OPT_A, OPT_B]}
         ariaLabel="Search plants"
         max={10}
       />,
@@ -420,14 +432,13 @@ describe("EntitySearchCombobox — multiple mode", () => {
   });
 
   it("removing a chip calls onChange without that option", async () => {
-    const search = vi.fn().mockResolvedValue([]);
     const onChange = vi.fn();
     render(
       <EntitySearchCombobox
         mode="multiple"
         selected={[OPT_A, OPT_B]}
         onChange={onChange}
-        search={search}
+        options={[]}
         ariaLabel="Search plants"
         max={10}
       />,
@@ -443,13 +454,12 @@ describe("EntitySearchCombobox — multiple mode", () => {
 
 describe("EntitySearchCombobox — rich result rows (.sres)", () => {
   it("renders plant binomial name, family, and compound count badge", async () => {
-    const search = vi.fn().mockResolvedValue([PLANT_RICH]);
     render(
       <EntitySearchCombobox
         mode="multiple"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[PLANT_RICH]}
         ariaLabel="Search plants"
         max={10}
       />,
@@ -461,13 +471,12 @@ describe("EntitySearchCombobox — rich result rows (.sres)", () => {
   });
 
   it("renders disease name and target count badge without family", async () => {
-    const search = vi.fn().mockResolvedValue([DISEASE_RICH]);
     render(
       <EntitySearchCombobox
         mode="single"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[DISEASE_RICH]}
         ariaLabel="Search disease"
       />,
     );
@@ -478,13 +487,12 @@ describe("EntitySearchCombobox — rich result rows (.sres)", () => {
   });
 
   it("formats large counts with thousands separators", async () => {
-    const search = vi.fn().mockResolvedValue([{ ...PLANT_RICH, count: 10000 }]);
     render(
       <EntitySearchCombobox
         mode="multiple"
         selected={[]}
         onChange={() => {}}
-        search={search}
+        options={[{ ...PLANT_RICH, count: 10000 }]}
         ariaLabel="Search plants"
         max={10}
       />,
@@ -506,7 +514,7 @@ describe("EntitySearchCombobox — selected entity cards (.sel-card)", () => {
         mode="multiple"
         selected={[PLANT_RICH]}
         onChange={onChange}
-        search={vi.fn().mockResolvedValue([])}
+        options={[]}
         ariaLabel="Search plants"
         max={10}
       />,
@@ -527,7 +535,7 @@ describe("EntitySearchCombobox — selected entity cards (.sel-card)", () => {
         mode="single"
         selected={[DISEASE_RICH]}
         onChange={onChange}
-        search={vi.fn().mockResolvedValue([])}
+        options={[]}
         ariaLabel="Search disease"
       />,
     );
@@ -547,7 +555,7 @@ describe("EntitySearchCombobox — selected entity cards (.sel-card)", () => {
         mode="multiple"
         selected={[PLANT_RICH]}
         onChange={onChange}
-        search={vi.fn().mockResolvedValue([])}
+        options={[]}
         ariaLabel="Search plants"
         max={10}
       />,

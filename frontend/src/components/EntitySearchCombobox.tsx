@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { SearchIcon, XIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./ui/command";
 import { Popover, PopoverAnchor, PopoverContent } from "./ui/popover";
-import { useDebouncedValue } from "../hooks/useDebouncedValue";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -22,7 +21,7 @@ type Props = {
   mode: "single" | "multiple";
   selected: ComboOption[];
   onChange: (next: ComboOption[]) => void;
-  search: (q: string) => Promise<ComboOption[]>;
+  options: ComboOption[];
   max?: number;
   placeholder?: string;
   ariaLabel: string;
@@ -192,35 +191,21 @@ export function EntitySearchCombobox({
   mode,
   selected,
   onChange,
-  search,
+  options,
   max,
   placeholder = "Search…",
   ariaLabel,
 }: Props) {
   const [focused, setFocused] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ComboOption[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  const debouncedQuery = useDebouncedValue(query, 300);
-
-  // Fire search only while the input is focused and the debounced query settles,
-  // so a pre-rendered combobox does not hit the server on mount before the user types.
-  useEffect(() => {
-    if (!focused) return;
-    let cancelled = false;
-    setLoading(true);
-    search(debouncedQuery)
-      .then((rows) => {
-        if (!cancelled) setResults(rows);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [focused, debouncedQuery, search]);
+  // Filter the session-cached catalog locally by canonical name.
+  // Returns an empty list when the query is blank so the dropdown stays closed on focus.
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return options.filter((o) => o.label.toLowerCase().includes(q));
+  }, [query, options]);
 
   const atCap = mode === "multiple" && max !== undefined && selected.length >= max;
 
@@ -287,13 +272,8 @@ export function EntitySearchCombobox({
         >
           <Command shouldFilter={false}>
             <CommandList className="scroll max-h-72">
-              {loading && (
-                <CommandGroup>
-                  <CommandItem disabled>Searching…</CommandItem>
-                </CommandGroup>
-              )}
-              {!loading && results.length === 0 && <CommandEmpty>No matches.</CommandEmpty>}
-              {!loading && results.length > 0 && (
+              {results.length === 0 && <CommandEmpty>No matches.</CommandEmpty>}
+              {results.length > 0 && (
                 <CommandGroup className="p-0">
                   {results.map((opt) => {
                     const sel = isSelected(opt.value);

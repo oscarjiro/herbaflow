@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { listDiseases, listPlants, createAnalysis } from "../api/sdk.gen";
+import { createAnalysis } from "../api/sdk.gen";
 import type { Problem } from "../lib/problem";
 import { notifyError } from "../lib/toast";
 import type { AnalysisRead, ResolvedCompound, ResolvedTarget } from "../api/types.gen";
@@ -40,6 +40,7 @@ import { RemovableChipList } from "./RemovableChipList";
 import { ParamPanel, type ParamMeta } from "./stages/ParamPanel";
 import { CompoundValidateBox } from "./CompoundValidateBox";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
+import { useEntityCatalog } from "../hooks/useEntityCatalog";
 import { TargetValidateBox } from "./TargetValidateBox";
 import { StatefulButton } from "./ui/StatefulButton";
 import { Eyebrow } from "./ui/editorial";
@@ -272,29 +273,8 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
     [setValue, getValues],
   );
 
-  // ------- search functions for comboboxes -------
-  const searchPlants = useCallback(async (q: string): Promise<ComboOption[]> => {
-    const { data } = await listPlants({ query: { q: q || undefined, limit: 50 } });
-    return (data ?? []).map((p) => ({
-      value: p.plant_id,
-      label: p.canonical_scientific_name ?? p.plant_id,
-      hint: p.matched_alias ?? null,
-      familyName: p.family_name ?? null,
-      count: p.compound_count ?? 0,
-      kind: "plant" as const,
-    }));
-  }, []);
-
-  const searchDiseases = useCallback(async (q: string): Promise<ComboOption[]> => {
-    const { data } = await listDiseases({ query: { q: q || undefined, limit: 50 } });
-    return (data ?? []).map((d) => ({
-      value: d.disease_id,
-      label: d.disease_name ?? d.disease_id,
-      hint: d.matched_alias ?? null,
-      count: d.target_count ?? 0,
-      kind: "disease" as const,
-    }));
-  }, []);
+  // ------- session-cached entity catalog for the pickers -------
+  const { plants: plantOptions, diseases: diseaseOptions } = useEntityCatalog();
 
   // Build the parameters payload: only include groups with at least one changed value.
   const buildParametersPayload = useCallback((): Record<string, GroupChange> | undefined => {
@@ -428,7 +408,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     mode="multiple"
                     selected={selectedPlants}
                     onChange={(next) => setValue("selectedPlants", next)}
-                    search={searchPlants}
+                    options={plantOptions}
                     max={MAX_PLANTS}
                     placeholder="Search plants…"
                     ariaLabel="Search plants"
@@ -549,7 +529,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     mode="single"
                     selected={selectedDisease}
                     onChange={(next) => setValue("selectedDisease", next)}
-                    search={searchDiseases}
+                    options={diseaseOptions}
                     placeholder="Search disease…"
                     ariaLabel="Search disease"
                   />
