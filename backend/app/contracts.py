@@ -144,6 +144,18 @@ def enrichment_defaults() -> dict[str, Any]:
     return {name: spec["default"] for name, spec in props.items()}
 
 
+@lru_cache(maxsize=1)
+def pipeline_stages() -> tuple[int, ...]:
+    """Stage numbers present in the pipeline, derived from the contract stage_sources.
+
+    Returns a sorted tuple of ints (e.g. (1, 2, 3, 4, 5, 6, 7, 8)).  Using the contract
+    as the single source keeps this in sync with the stage_sources vocabulary without
+    hardcoding the range in application code.
+    """
+    computed = _defs()["stage_sources"]["properties"]["computed"]["properties"]
+    return tuple(sorted(int(k) for k in computed))
+
+
 def stage_sources(stage: int, *, user_provided: bool = False) -> list[dict[str, str | None]]:
     """Per-stage data-source objects (contract-driven; one shared home with the FE).
 

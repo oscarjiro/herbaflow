@@ -6,11 +6,12 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clock import now_utc
 from app.models.analysis_run import AnalysisRun
+from app.pipeline import state
 
 
 def expires_after(completed_at: datetime) -> datetime:
@@ -141,3 +142,18 @@ class AnalysisRepository:
         run.error_message = message
         run.updated_at = now_utc()
         await self.session.flush()
+
+    async def fail_stranded(self, *, message: str) -> int:
+        """Bulk-fail every run whose status indicates it was in-flight when the server died.
+
+        Sets status='failed', error_message=message, and updated_at=now on all runs whose
+        status is in stranded_statuses() (pending or stage_N_running for any N).  Returns
+        the number of rows updated.  Safe to call on startup because a fresh process has
+        no in-flight background tasks, so no legitimate run can be in a running state.
+        """
+        result = await self.session.execute(
+            update(AnalysisRun)
+            .where(AnalysisRun.status.in_(state.stranded_statuses()))
+            .values(status="failed", error_message=message, updated_at=now_utc())
+        )
+        return int(result.rowcount)  # type: ignore[attr-defined]

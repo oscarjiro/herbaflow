@@ -1,3 +1,4 @@
+from app import contracts
 from app.pipeline import state
 
 
@@ -19,3 +20,24 @@ def test_is_settled_running_is_not_settled() -> None:
 
 def test_is_settled_none() -> None:
     assert state.is_settled(None) is False
+
+
+def test_stranded_statuses_set() -> None:
+    """stranded_statuses returns pending + stage_N_running for every pipeline stage;
+    never includes awaiting_approval, complete, or failed."""
+    statuses = state.stranded_statuses()
+
+    # pending is always stranded
+    assert "pending" in statuses
+
+    # every pipeline stage contributes a stage_N_running entry
+    for n in contracts.pipeline_stages():
+        assert f"stage_{n}_running" in statuses, f"stage_{n}_running missing from stranded_statuses"
+
+    # awaiting_approval, complete, failed are settled — never stranded
+    for s in statuses:
+        assert not s.endswith(
+            "_awaiting_approval"
+        ), f"unexpected _awaiting_approval in stranded: {s}"
+    assert "complete" not in statuses
+    assert "failed" not in statuses

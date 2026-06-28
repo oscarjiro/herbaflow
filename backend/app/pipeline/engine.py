@@ -98,7 +98,7 @@ STAGE_PARAM_GROUP: dict[int, str] = {
     7: "hub_genes",
     8: "enrichment",
 }
-RUNNABLE_STAGES: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7, 8)  # extended as stages land
+RUNNABLE_STAGES: tuple[int, ...] = contracts.pipeline_stages()  # contract-derived stage set
 NEEDS_APPROVAL: frozenset[int] = frozenset({1, 2, 3, 4, 5, 6, 7, 8})  # guided checkpoints
 
 # Entity stages carry a user-editable entity set (compounds/targets). Their stored result is

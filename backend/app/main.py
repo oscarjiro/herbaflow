@@ -17,6 +17,7 @@ from app.config import settings
 from app.db import check_db
 from app.errors import ServiceUnavailableError, register_error_handlers
 from app.logging_config import configure_logging
+from app.repositories.analysis import AnalysisRepository
 from app.routers import analyses, compounds, diseases, export, plants, targets
 from app.security import (
     PayloadSizeLimitMiddleware,
@@ -26,6 +27,29 @@ from app.security import (
 )
 
 logger = logging.getLogger("herbaflow.app")
+
+_REAPER_MESSAGE = "The server restarted while this analysis was running. Please run it again."
+
+
+async def _run_startup_reaper() -> None:
+    """Fail any runs that were in-flight when the server process last died.
+
+    Safe on startup because a fresh process has no in-flight background tasks.
+    Any run still in a running or pending state at startup was stranded by a crash
+    or forceful restart and can never resume.  A failure here is logged as a warning
+    and does not block startup.
+    """
+    try:
+        async with db.session_scope() as session:
+            n = await AnalysisRepository(session).fail_stranded(message=_REAPER_MESSAGE)
+            await session.commit()
+        logger.info("startup reaper: failed %d stranded run(s)", n)
+    except Exception:
+        logger.warning(
+            "startup reaper could not mark stranded runs failed; they remain in their"
+            " current status and must be resolved manually",
+            exc_info=True,
+        )
 
 
 def _operation_id(route: APIRoute) -> str:
@@ -43,6 +67,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     if settings.async_database_url:
         db.init_engine()
         logger.info("database engine initialized")
+        await _run_startup_reaper()
     else:
         logger.warning("DATABASE_URL not set — database routes will fail until it is configured")
     try:
