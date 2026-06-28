@@ -137,7 +137,7 @@ describe("EntitySearchCombobox — debounce (hook-level)", () => {
 // ---------------------------------------------------------------------------
 
 describe("EntitySearchCombobox — type-to-filter", () => {
-  it("does NOT show results on focus alone with an empty query", async () => {
+  it("shows the full catalogue on focus with an empty query", async () => {
     render(
       <EntitySearchCombobox
         mode="single"
@@ -147,10 +147,25 @@ describe("EntitySearchCombobox — type-to-filter", () => {
         ariaLabel="Search plants"
       />,
     );
-    // Focus the input without typing anything
+    // Focusing the input (no typing) lists every catalogue option to browse.
     await userEvent.click(screen.getByRole("combobox", { name: "Search plants" }));
-    // Dropdown should not be open — query is blank so results list is empty
-    expect(screen.queryByText("Alpha Plant")).not.toBeInTheDocument();
+    expect(await screen.findByText("Alpha Plant")).toBeInTheDocument();
+  });
+
+  it("shows a loading row instead of 'No matches' while the catalogue loads", async () => {
+    render(
+      <EntitySearchCombobox
+        mode="single"
+        selected={[]}
+        onChange={() => {}}
+        options={[]}
+        loading
+        ariaLabel="Search plants"
+      />,
+    );
+    await userEvent.click(screen.getByRole("combobox", { name: "Search plants" }));
+    expect(await screen.findByText(/loading catalogue/i)).toBeInTheDocument();
+    expect(screen.queryByText(/no matches/i)).not.toBeInTheDocument();
   });
 
   it("shows results matching the typed query", async () => {

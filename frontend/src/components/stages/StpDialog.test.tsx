@@ -114,10 +114,11 @@ test("uses a single compound selection and copies only that compound's SMILES", 
   expect(curcumin).toBeChecked();
 
   await userEvent.click(quercetin);
+  const notifySuccessSpy = vi.spyOn(toastLib, "notifySuccess").mockImplementation(() => {});
   await userEvent.click(screen.getByRole("button", { name: /copy smiles/i }));
 
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith("OC1=CC=CC=C1");
-  expect(await screen.findByText("Copied SMILES for Quercetin.")).toBeInTheDocument();
+  await waitFor(() => expect(notifySuccessSpy).toHaveBeenCalledWith("SMILES for Quercetin copied"));
   expect(screen.queryByText(/skipped — no SMILES/)).not.toBeInTheDocument();
 });
 
@@ -499,7 +500,7 @@ describe("StpDialog — D10: disabled Import reason hint", () => {
 describe("StpDialog — D-4 toast wiring", () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it("fires notifySuccess with the added count on import success", async () => {
+  it("shows the added count inline and raises no duplicate toast on import success", async () => {
     server.use(
       http.post("http://localhost:8000/targets/validate", () =>
         HttpResponse.json({
@@ -537,7 +538,10 @@ describe("StpDialog — D-4 toast wiring", () => {
     });
     await userEvent.click(screen.getByRole("button", { name: "Import" }));
 
-    await waitFor(() => expect(notifySuccessSpy).toHaveBeenCalledWith("Imported 1 targets"));
+    // The committed "Added N" toast is owned by the Stage-3 edit mutation (onAddTargets), not
+    // StpDialog — StpDialog only shows the inline summary and must not raise its own toast.
+    await waitFor(() => expect(screen.getByText(/Added 1 target\b/)).toBeInTheDocument());
+    expect(notifySuccessSpy).not.toHaveBeenCalled();
   });
 
   it("fires notifyError (not ad-hoc toast) when import fails", async () => {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { SearchIcon, XIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./ui/command";
@@ -22,6 +22,8 @@ type Props = {
   selected: ComboOption[];
   onChange: (next: ComboOption[]) => void;
   options: ComboOption[];
+  /** True while the session catalog is still being fetched — shows a loading row instead of "No matches". */
+  loading?: boolean;
   max?: number;
   placeholder?: string;
   ariaLabel: string;
@@ -192,18 +194,20 @@ export function EntitySearchCombobox({
   selected,
   onChange,
   options,
+  loading = false,
   max,
   placeholder = "Search…",
   ariaLabel,
 }: Props) {
   const [focused, setFocused] = useState(false);
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Filter the session-cached catalog locally by canonical name.
-  // Returns an empty list when the query is blank so the dropdown stays closed on focus.
+  // Filter the session-cached catalog locally by canonical name. A blank query returns the full
+  // catalogue so focusing the input shows every plant/disease to browse; typing narrows it.
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return [];
+    if (!q) return options;
     return options.filter((o) => o.label.toLowerCase().includes(q));
   }, [query, options]);
 
@@ -233,15 +237,18 @@ export function EntitySearchCombobox({
     onChange(selected.filter((o) => o.value !== value));
   }
 
-  // Dropdown appears only while the input is focused AND the user has typed something.
-  const dropdownOpen = focused && query.trim().length > 0;
+  // Dropdown appears whenever the input is focused: blank query lists the whole catalogue, typing filters it.
+  const dropdownOpen = focused;
 
   return (
     <div className="space-y-2">
       <Popover
         open={dropdownOpen}
         onOpenChange={(o) => {
-          if (!o) setFocused(false);
+          // Close only when focus has truly left the input. Radix fires a transient close while the
+          // user edits the focused input (e.g. backspacing to an empty query); ignoring those keeps
+          // the catalogue dropdown open so the next keystroke can re-filter instead of being stuck shut.
+          if (!o && document.activeElement !== inputRef.current) setFocused(false);
         }}
       >
         <PopoverAnchor asChild>
@@ -251,6 +258,7 @@ export function EntitySearchCombobox({
               aria-hidden="true"
             />
             <input
+              ref={inputRef}
               type="text"
               role="combobox"
               aria-expanded={dropdownOpen}
@@ -272,8 +280,9 @@ export function EntitySearchCombobox({
         >
           <Command shouldFilter={false}>
             <CommandList className="scroll max-h-72">
-              {results.length === 0 && <CommandEmpty>No matches.</CommandEmpty>}
-              {results.length > 0 && (
+              {loading && <CommandEmpty>Loading catalogue…</CommandEmpty>}
+              {!loading && results.length === 0 && <CommandEmpty>No matches.</CommandEmpty>}
+              {!loading && results.length > 0 && (
                 <CommandGroup className="p-0">
                   {results.map((opt) => {
                     const sel = isSelected(opt.value);
@@ -285,7 +294,7 @@ export function EntitySearchCombobox({
                         disabled={disabled}
                         onSelect={() => toggle(opt)}
                         className={cn(
-                          "hover:bg-hf-surface-2 rounded-none border-b border-[var(--hf-border)] px-0 py-0 last:border-b-0",
+                          "hover:bg-hf-surface-2 cursor-pointer rounded-none border-b border-[var(--hf-border)] px-0 py-0 last:border-b-0",
                           sel && "bg-hf-surface-2",
                         )}
                       >

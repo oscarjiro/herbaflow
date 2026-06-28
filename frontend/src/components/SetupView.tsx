@@ -274,7 +274,11 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
   );
 
   // ------- session-cached entity catalog for the pickers -------
-  const { plants: plantOptions, diseases: diseaseOptions } = useEntityCatalog();
+  const {
+    plants: plantOptions,
+    diseases: diseaseOptions,
+    isLoading: catalogLoading,
+  } = useEntityCatalog();
 
   // Build the parameters payload: only include groups with at least one changed value.
   const buildParametersPayload = useCallback((): Record<string, GroupChange> | undefined => {
@@ -409,6 +413,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     selected={selectedPlants}
                     onChange={(next) => setValue("selectedPlants", next)}
                     options={plantOptions}
+                    loading={catalogLoading}
                     max={MAX_PLANTS}
                     placeholder="Search plants…"
                     ariaLabel="Search plants"
@@ -530,6 +535,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     selected={selectedDisease}
                     onChange={(next) => setValue("selectedDisease", next)}
                     options={diseaseOptions}
+                    loading={catalogLoading}
                     placeholder="Search disease…"
                     ariaLabel="Search disease"
                   />
@@ -657,7 +663,8 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
           onClickAsync={async () => {
             await create.mutateAsync();
           }}
-          className="rounded-[var(--radius-pill)]"
+          wrapperClassName="w-full"
+          className="w-full rounded-[var(--radius-pill)]"
         >
           Start analysis
         </StatefulButton>

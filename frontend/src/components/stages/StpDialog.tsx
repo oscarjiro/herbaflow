@@ -74,7 +74,6 @@ export function StpDialog({
   const [compoundQuery, setCompoundQuery] = useState("");
   const [threshold, setThreshold] = useState(0.6);
   const [pasteText, setPasteText] = useState("");
-  const [copyNote, setCopyNote] = useState<string | null>(null);
 
   // Least-covered first (0-coverage on top), tie-break on name for stability.
   const sorted = useMemo(() => {
@@ -128,25 +127,26 @@ export function StpDialog({
         failed: failed.length,
       };
     },
-    onSuccess: (summary) => {
+    onSuccess: () => {
+      // The committed "Added N targets" toast is fired once by the Stage-3 edit mutation
+      // (useStageEntityEdit) via onAddTargets — do not raise a second "Imported" toast here.
       setSelectedCompoundId(null);
       setPasteText("");
-      notifySuccess(`Imported ${summary.added} targets`);
     },
     onError: (error) => notifyError(error as Problem),
   });
 
   async function handleCopySmiles() {
     if (!selectedCompound?.smiles) {
-      setCopyNote("Selected compound has no SMILES to copy.");
+      notifyError({ detail: "Selected compound has no SMILES to copy." });
       return;
     }
     const label = selectedCompound.canonical_name ?? selectedCompound.compound_id;
     try {
       await navigator.clipboard.writeText(selectedCompound.smiles);
-      setCopyNote(`Copied SMILES for ${label}.`);
+      notifySuccess(`SMILES for ${label} copied`);
     } catch {
-      setCopyNote("Copy failed. Your browser blocked clipboard access.");
+      notifyError({ detail: "Copy failed. Your browser blocked clipboard access." });
     }
   }
 
@@ -306,7 +306,6 @@ export function StpDialog({
                 </a>
               </Button>
             </div>
-            {copyNote && <p className="text-xs [color:var(--hf-fg-3)]">{copyNote}</p>}
           </fieldset>
 
           <div className="flex min-w-0 flex-col gap-3">
