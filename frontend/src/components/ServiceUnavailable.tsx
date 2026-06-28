@@ -13,7 +13,9 @@ export function ServiceUnavailable({ onRetry }: { onRetry: () => void }) {
         when the hosted database is temporarily over its usage limit. Please try again in a moment.
       </p>
       <div className="flex items-center gap-3">
-        <Button onClick={onRetry}>Retry</Button>
+        <Button variant="primary" onClick={onRetry}>
+          Retry
+        </Button>
         <Button variant="secondary" asChild>
           <Link to="/">Back to landing</Link>
         </Button>

@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { useAnalysisStatus } from "@/hooks/useAnalysisStatus";
 import { clearActiveRunId, getActiveRunId, setActiveRunId } from "@/lib/activeRun";
 import { RunSidebar } from "@/components/RunSidebar";
-import { ServiceUnavailable } from "@/components/ServiceUnavailable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { humanizeProblem, isHardDown, type Problem } from "@/lib/problem";
 
@@ -15,19 +14,26 @@ export const Route = createFileRoute("/analysis/$id")({
 function RunShell() {
   const { id } = useParams({ from: "/analysis/$id" });
   const navigate = useNavigate();
-  const { data, isError, error, refetch } = useAnalysisStatus(id);
+  const { data, isError, error } = useAnalysisStatus(id);
 
-  // Self-heal an unusable cached run: a 404 means the run was deleted or expired;
-  // a 422 means the id is malformed (e.g. a stale "null"), which would otherwise
-  // retry every second forever. The poll throws the RFC 9457 problem body, which
-  // carries the HTTP status. Hard-down errors (transport failure / 402 / 503) are
-  // NOT self-healed here — they surface the service-unavailable screen below so the
-  // run can resume once the backend is reachable again.
+  // Leave the run shell whenever the 1s poll can't yield a usable run. Both cases
+  // bail to /analysis so this page never sits on a dead/unreachable backend looping
+  // its outage screen against the loading state:
+  //  - 404 (run deleted/expired) or 422 (malformed id, e.g. a stale "null"): the run
+  //    is gone, so clear the cached active-run id and return to setup with a notice.
+  //  - hard-down (transport failure / 402 / 503): the backend is unreachable. The
+  //    health-gated /analysis entry owns the single service-unavailable screen, so
+  //    hand off to it instead of flickering one here. Keep the active-run id so the
+  //    run resumes here once the backend is reachable again.
+  // The poll throws the RFC 9457 problem body, which carries the HTTP status.
   useEffect(() => {
+    if (!isError) return;
     const status = (error as Problem)?.status;
-    if (isError && (status === 404 || status === 422)) {
+    if (status === 404 || status === 422) {
       clearActiveRunId();
       toast.error("That analysis is no longer available.");
+      navigate({ to: "/analysis" });
+    } else if (isHardDown(error as Problem)) {
       navigate({ to: "/analysis" });
     }
   }, [isError, error, navigate]);
@@ -40,19 +46,22 @@ function RunShell() {
   }, [data, id]);
 
   if (!data) {
-    if (isError && isHardDown(error as Problem)) {
-      return <ServiceUnavailable onRetry={() => void refetch()} />;
-    }
-    if (isError) {
-      return (
-        <div
-          role="alert"
-          className="border-hf-danger/30 bg-hf-danger-soft/20 mx-auto max-w-lg rounded-[var(--radius-3)] border p-6 text-sm"
-        >
-          <p className="text-hf-fg-1 font-medium">Could not load analysis status</p>
-          <p className="text-hf-fg-2 mt-1">{humanizeProblem(error as Problem)} Retrying...</p>
-        </div>
-      );
+    // A genuine transient error (e.g. a 500) keeps retrying inline. Hard-down and the
+    // self-heal statuses (404/422) are handled by the redirect effect above, so they
+    // fall through to the neutral skeleton for the frame before it navigates away.
+    if (isError && !isHardDown(error as Problem)) {
+      const status = (error as Problem)?.status;
+      if (status !== 404 && status !== 422) {
+        return (
+          <div
+            role="alert"
+            className="border-hf-danger/30 bg-hf-danger-soft/20 mx-auto max-w-lg rounded-[var(--radius-3)] border p-6 text-sm"
+          >
+            <p className="text-hf-fg-1 font-medium">Could not load analysis status</p>
+            <p className="text-hf-fg-2 mt-1">{humanizeProblem(error as Problem)} Retrying...</p>
+          </div>
+        );
+      }
     }
     return (
       <div className="flex flex-col gap-3 p-6">

@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter, createMemoryHistory } from "@tanstack/react-router";
 import { render, screen, waitFor } from "@testing-library/react";
+import { http, HttpResponse } from "msw";
 import { afterEach, vi } from "vitest";
 import { routeTree } from "./routeTree.gen";
+import { server } from "../tests/handlers";
 import * as useAnalysisStatusModule from "@/hooks/useAnalysisStatus";
 import "./lib/api";
 
@@ -116,15 +118,17 @@ test("/analysis/$id/<unreached> redirects to the furthest reached stage", async 
   await waitFor(() => expect(router.state.location.pathname).toBe("/analysis/a1/targets"));
 });
 
-test("/analysis/$id surfaces the service-unavailable screen when the backend is unreachable", async () => {
-  // A poll that never reaches the backend rejects with a transport error carrying
-  // no HTTP status. The run shell must show ServiceUnavailable (Retry), not poll
-  // the status endpoint forever behind an inline "Retrying..." note.
+test("/analysis/$id redirects to the health-gated /analysis when the backend is unreachable", async () => {
+  // Backend fully down: the run poll rejects with a transport error carrying no HTTP
+  // status, AND /health is unreachable too. The run shell must NOT host its own outage
+  // screen here — that would flicker against the 1s poll. It bails to /analysis, the
+  // single health-gated owner of the service-unavailable screen, and keeps the cached
+  // active-run id so the run resumes once the backend is back.
+  server.use(http.get("http://localhost:8000/health", () => HttpResponse.error()));
   vi.spyOn(useAnalysisStatusModule, "useAnalysisStatus").mockReturnValue({
     data: undefined,
     isError: true,
     error: new TypeError("Failed to fetch"),
-    refetch: vi.fn(),
   } as unknown as ReturnType<typeof useAnalysisStatusModule.useAnalysisStatus>);
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createRouter({
@@ -136,5 +140,7 @@ test("/analysis/$id surfaces the service-unavailable screen when the backend is 
       <RouterProvider router={router} />
     </QueryClientProvider>,
   );
+  // Redirected off the run shell to the gate, which renders the one outage screen.
   expect(await screen.findByRole("heading", { name: /service unavailable/i })).toBeInTheDocument();
+  expect(router.state.location.pathname).toBe("/analysis");
 });
