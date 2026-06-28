@@ -147,11 +147,8 @@ test("shows the shared busy button and progress bar while targets validate", asy
   expect(button).toHaveAttribute("data-variant", "secondary");
   expect(button).toHaveClass("w-full");
   expect(button.parentElement).toHaveClass("w-full");
-  expect(screen.getByText("Validating... 0/3")).toBeInTheDocument();
-  expect(screen.getByRole("progressbar", { name: /validating 3 target entries/i })).toHaveAttribute(
-    "aria-valuenow",
-    "0",
-  );
+  expect(screen.getByText(/Validating 3 target entries/)).toBeInTheDocument();
+  expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
 });
 
 test("requires adding the validated target batch before validating again", async () => {

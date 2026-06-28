@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { LineNumberedTextarea } from "@/components/ui/line-numbered-textarea";
 import { ManualValidateProgress } from "@/components/ui/ManualValidateProgress";
 import { ManualEntrySummary, nonEmptyLineCount } from "@/components/ui/ManualEntrySummary";
+import { distinctInputs } from "@/lib/validateInputs";
 import { StatefulButton } from "@/components/ui/StatefulButton";
 import { MAX_TARGETS } from "@/contract";
 
@@ -68,13 +69,12 @@ export function TargetValidateBox({
     return dup;
   })();
 
+  // Distinct entry count: used for the progress label and as the actual inputs to the API.
+  const distinctCount = inputCount - duplicateCount;
+
   const validate = useMutation({
     mutationFn: async () => {
-      const inputs = text
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((value) => ({ value }));
+      const inputs = distinctInputs(text.split("\n").map((l) => ({ value: l })));
       const res = await validateTargets({ body: { inputs } });
       return res.data as unknown as ValidateTargetsResponse;
     },
@@ -128,7 +128,7 @@ export function TargetValidateBox({
           Validate
         </StatefulButton>
 
-        {validate.isPending && <ManualValidateProgress kind="target" entryCount={inputCount} />}
+        {validate.isPending && <ManualValidateProgress kind="target" entryCount={distinctCount} />}
 
         <RemovableChipList
           overflowKind="targets"

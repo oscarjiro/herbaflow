@@ -26,6 +26,7 @@ import type { ResolvedTarget, ValidateTargetsResponse } from "../../api/types.ge
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifySuccess } from "../../lib/toast";
 import { parseStpCsv, type StpRow } from "../../lib/stp";
+import { distinctInputs } from "../../lib/validateInputs";
 import { Button } from "@/components/ui/button";
 import { SourceIconLink } from "@/components/ui/SourceIconLink";
 import { StatefulButton } from "@/components/ui/StatefulButton";
@@ -107,7 +108,9 @@ export function StpDialog({
       // Resolve the pasted accessions through the SAME path as a manual target add.
       const res = await validateTargets({
         body: {
-          inputs: parsedRows.map((r) => ({ type: "uniprot" as const, value: r.uniprot })),
+          inputs: distinctInputs(
+            parsedRows.map((r) => ({ type: "uniprot" as const, value: r.uniprot })),
+          ),
         },
       });
       const data = res.data as unknown as ValidateTargetsResponse;
