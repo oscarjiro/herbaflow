@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from dataclasses import dataclass, field
 from typing import Any
@@ -270,3 +271,154 @@ async def test_resolve_compounds_records_line_on_failure() -> None:
     assert resolved == []
     assert len(failed) == 1
     assert failed[0].line == 2
+
+
+# ---------------------------------------------------------------------------
+# Dedup by identity + phased batch-resolve: identical inputs resolve once,
+# two SMILES collapsing to the same InChIKey are treated as one compound, and
+# repeated invalid tokens still generate one FailedInput per original line.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_dedup_identical_smiles_one_pubchem_call(monkeypatch) -> None:
+    """50 identical SMILES trigger one RDKit identity call, one PubChem lookup, one upsert."""
+    from app.services import structure as structure_mod
+
+    call_count: dict[str, int] = {"n": 0}
+    orig = structure_mod.identity_from_smiles
+
+    def spy(smiles: str):
+        call_count["n"] += 1
+        return orig(smiles)
+
+    monkeypatch.setattr(structure_mod, "identity_from_smiles", spy)
+
+    repo = FakeRepo()
+    pubchem = FakePubChem(record=_pubchem_record())
+
+    resolved, failed = await resolve_compounds(
+        [CompoundInput(type="smiles", value=ETHANOL_SMILES) for _ in range(50)],
+        repo,
+        pubchem,
+    )
+
+    assert not failed
+    assert len(resolved) == 1
+    assert call_count["n"] == 1  # one RDKit call per distinct raw token, not per input line
+    assert len(pubchem.calls) == 1
+    assert pubchem.calls[0] == ETHANOL_INCHIKEY
+    assert len(repo.upserted) == 1
+
+
+@pytest.mark.asyncio
+async def test_two_smiles_same_inchikey_collapse() -> None:
+    """Two different SMILES strings that map to the same InChIKey produce one resolved compound."""
+    # "OCC" is an alternative input traversal of ethanol; RDKit canonicalises it to the same
+    # InChIKey as "CCO", so the two inputs must collapse to a single work item.
+    ETHANOL_ALT = "OCC"
+    repo = FakeRepo()
+    pubchem = FakePubChem(record=_pubchem_record())
+
+    resolved, failed = await resolve_compounds(
+        [
+            CompoundInput(type="smiles", value=ETHANOL_SMILES),
+            CompoundInput(type="smiles", value=ETHANOL_ALT),
+        ],
+        repo,
+        pubchem,
+    )
+
+    assert not failed
+    assert len(resolved) == 1
+    assert resolved[0].canonical_key == ETHANOL_KEY
+    assert len(pubchem.calls) == 1
+    assert len(repo.upserted) == 1
+
+
+@pytest.mark.asyncio
+async def test_failed_compound_lines_preserved_under_dedup() -> None:
+    """Repeated identical invalid SMILES each produce their own FailedInput with the right line."""
+    BAD = "not-a-molecule!!"
+    repo = FakeRepo()
+    pubchem = FakePubChem(record=None)
+
+    inputs = [
+        CompoundInput(type="smiles", value=BAD),  # line 1
+        CompoundInput(type="smiles", value=BAD),  # line 2
+        CompoundInput(type="smiles", value=BAD),  # line 3
+    ]
+    resolved, failed = await resolve_compounds(inputs, repo, pubchem)
+
+    assert resolved == []
+    assert len(failed) == 3
+    assert [f.line for f in failed] == [1, 2, 3]
+    assert all(f.reason == "invalid structure" for f in failed)
+    assert len(pubchem.calls) == 0
+
+
+class _ConcurrencySpyPubChem:
+    """Tracks peak concurrent in-flight PubChem calls to prove the network fan-out."""
+
+    def __init__(self, record) -> None:
+        self.record = record
+        self.calls: list[str] = []
+        self._in_flight = 0
+        self.max_in_flight = 0
+
+    async def fetch_by_inchikey(self, inchikey: str):
+        self.calls.append(inchikey)
+        self._in_flight += 1
+        self.max_in_flight = max(self.max_in_flight, self._in_flight)
+        await asyncio.sleep(0)  # yield so siblings can overlap if launched concurrently
+        self._in_flight -= 1
+        return self.record
+
+
+class _ConcurrencySpyRepo:
+    """Tracks peak concurrent DB ops to prove the single session stays serial."""
+
+    def __init__(self) -> None:
+        self._existing: dict = {}
+        self.upserted: list = []
+        self._in_flight = 0
+        self.max_db_in_flight = 0
+
+    async def _touch(self) -> None:
+        self._in_flight += 1
+        self.max_db_in_flight = max(self.max_db_in_flight, self._in_flight)
+        await asyncio.sleep(0)
+        self._in_flight -= 1
+
+    async def get_by_key(self, key: str):
+        await self._touch()
+        return self._existing.get(key)
+
+    async def upsert(self, row: dict) -> None:
+        await self._touch()
+        self._existing[row["canonical_key"]] = row
+        self.upserted.append(row)
+
+    async def manual_source_id(self):
+        await self._touch()
+        return MANUAL_SOURCE_ID
+
+
+@pytest.mark.asyncio
+async def test_compound_misses_resolved_concurrently() -> None:
+    """N distinct DB-miss compounds: PubChem calls fan out concurrently; DB stays serial."""
+    pubchem = _ConcurrencySpyPubChem(record=_pubchem_record())
+    repo = _ConcurrencySpyRepo()
+
+    # Three distinct SMILES -> three distinct canonical keys -> three PubChem misses.
+    inputs = [
+        CompoundInput(type="smiles", value="CCO"),  # ethanol
+        CompoundInput(type="smiles", value="C"),  # methane
+        CompoundInput(type="smiles", value="CC"),  # ethane
+    ]
+    resolved, failed = await resolve_compounds(inputs, repo, pubchem)
+
+    assert not failed
+    assert len(resolved) == 3
+    assert pubchem.max_in_flight > 1  # PubChem fetches overlapped (proves asyncio.gather)
+    assert repo.max_db_in_flight == 1  # DB ops stayed serial on the one session

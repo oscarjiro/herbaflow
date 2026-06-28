@@ -44,64 +44,133 @@ _ACCESSION_FAIL_MSG = {
 }
 
 
+@dataclass
+class _CompoundWork:
+    """One distinct, format-valid identity to resolve (phased batch-resolve dedup unit)."""
+
+    value: str  # original input value of the first occurrence (for FailedInput.value)
+    line: int  # 1-based line of the first occurrence (for FailedInput.line)
+    inchikey: str
+    smiles: str | None  # canonical SMILES for SMILES-derived inputs; None for bare InChIKey
+
+
 async def resolve_compounds(
     inputs: list[CompoundInput], repo: Any, pubchem: Any
 ) -> tuple[list[ResolvedCompound], list[FailedInput]]:
+    """Resolve manual compounds: classify -> dedup -> DB-first -> PubChem -> persist.
+
+    Phased so identical inputs resolve once and only the pure-network calls run concurrently —
+    a single ``AsyncSession`` cannot run concurrent statements, so all DB reads/writes stay
+    serial; only ``pubchem.fetch_by_inchikey`` fans out via ``asyncio.gather`` (bounded by
+    PubChem's own throttle/semaphore):
+
+    0. classify + dedup: SMILES inputs are grouped by raw token so ``identity_from_smiles``
+       runs once per distinct token (via ``asyncio.to_thread``, all gathered in parallel);
+       invalid tokens fail per original line immediately; results then dedup by ``canonical_key``
+       (two SMILES that map to the same InChIKey collapse to one work item; InChIKey inputs share
+       the same key-space);
+    1. DB-first (serial): ``get_by_key`` for each distinct canonical_key;
+    2. enrich (parallel): ``pubchem.fetch_by_inchikey`` fan-out over DB misses via
+       ``asyncio.gather``;
+    3. persist (serial): upsert each miss; ``manual_source_id()`` only on the structure-only
+       path (one call site — do not add a second);
+    4. emit: ``resolved`` (distinct, keyed on canonical_key) + ``failed`` (per original line for
+       invalids; one entry per unresolvable distinct identity). No silent drops.
+    """
     logger.info("validating %d compound input(s)", len(inputs))
     resolved: dict[str, ResolvedCompound] = {}
     failed: list[FailedInput] = []
+
+    # Phase 0a: classify inputs into SMILES groups (raw token -> [(line, value), ...]) and
+    # InChIKey inputs. Grouping SMILES by raw token avoids redundant identity_from_smiles calls.
+    smiles_groups: dict[str, list[tuple[int, str]]] = {}
+    inchikey_lines: list[tuple[int, CompoundInput]] = []
 
     for idx, item in enumerate(inputs, start=1):
         token = item.value.strip()
         if not token:
             continue
         is_key = item.type == "inchikey" or (item.type is None and structure.is_inchikey(token))
-
-        # 1. Identity
         if is_key:
-            if not structure.is_inchikey(token):
-                logger.info("  rejected %r: invalid InChIKey format", item.value)
-                failed.append(
-                    FailedInput(value=item.value, reason="invalid InChIKey format", line=idx)
-                )
-                continue
-            inchikey, smiles = token.upper(), None
+            inchikey_lines.append((idx, item))
         else:
-            ident = await asyncio.to_thread(structure.identity_from_smiles, token)
-            if ident is None:
-                logger.info("  rejected %r: invalid structure", item.value)
-                failed.append(FailedInput(value=item.value, reason="invalid structure", line=idx))
-                continue
-            inchikey, smiles = ident.inchikey, ident.canonical_smiles
+            if token not in smiles_groups:
+                smiles_groups[token] = []
+            smiles_groups[token].append((idx, item.value))
 
-        canonical_key = canonical.compound_canonical_key({"inchi_key": inchikey})
-        cid = uuid.UUID(canonical.compound_id_from_key(canonical_key))
-        if canonical_key in resolved:  # input-level dedupe
+    # Phase 0b: compute identity once per distinct SMILES raw token (non-blocking, in parallel).
+    distinct_smiles = list(smiles_groups.keys())
+    smiles_idents = (
+        await asyncio.gather(
+            *(asyncio.to_thread(structure.identity_from_smiles, s) for s in distinct_smiles)
+        )
+        if distinct_smiles
+        else []
+    )
+
+    # Phase 0c: build work dict from SMILES identity results; invalid tokens fail per original
+    # line (preserving the per-line failure count even when the same bad SMILES is repeated).
+    work: dict[str, _CompoundWork] = {}
+    for raw, ident in zip(distinct_smiles, smiles_idents, strict=True):
+        occurrences = smiles_groups[raw]
+        if ident is None:
+            for line, value in occurrences:
+                logger.info("  rejected %r: invalid structure", value)
+                failed.append(FailedInput(value=value, reason="invalid structure", line=line))
             continue
+        key = canonical.compound_canonical_key({"inchi_key": ident.inchikey})
+        if key not in work:
+            first_line, first_value = occurrences[0]
+            work[key] = _CompoundWork(
+                value=first_value,
+                line=first_line,
+                inchikey=ident.inchikey,
+                smiles=ident.canonical_smiles,
+            )
 
-        # 2. DB-first
-        existing = await repo.get_by_key(canonical_key)
+    # Phase 0d: InChIKey inputs — validate format per line; add to the shared work dict (dedup).
+    for idx, item in inchikey_lines:
+        token = item.value.strip()
+        if not structure.is_inchikey(token):
+            logger.info("  rejected %r: invalid InChIKey format", item.value)
+            failed.append(FailedInput(value=item.value, reason="invalid InChIKey format", line=idx))
+            continue
+        inchikey = token.upper()
+        key = canonical.compound_canonical_key({"inchi_key": inchikey})
+        if key not in work:
+            work[key] = _CompoundWork(value=item.value, line=idx, inchikey=inchikey, smiles=None)
+
+    # Phase 1: DB-first (serial on the single session).
+    db_hits: dict[str, Any] = {}
+    misses: list[str] = []
+    for key in work:
+        existing = await repo.get_by_key(key)
         if existing is not None:
             logger.info("  reuse (db hit): %s", existing.canonical_name or existing.canonical_key)
-            resolved[canonical_key] = ResolvedCompound(
-                compound_id=existing.compound_id,
-                canonical_key=existing.canonical_key,
-                canonical_name=existing.canonical_name,
-                pubchem_cid=getattr(existing, "pubchem_cid", None),
-                validation_status=existing.validation_status,
-            )
-            continue
+            db_hits[key] = existing
+        else:
+            misses.append(key)
 
-        # 3. Enrich from PubChem
-        rec = await pubchem.fetch_by_inchikey(inchikey)
+    # Phase 2: enrich (parallel) — PubChem fan-out over DB misses only.
+    miss_works = [work[k] for k in misses]
+    pubchem_results: list[Any] = (
+        await asyncio.gather(*(pubchem.fetch_by_inchikey(w.inchikey) for w in miss_works))
+        if miss_works
+        else []
+    )
+
+    # Phase 3: persist (serial on the single session). manual_source_id() is called only on the
+    # structure-only path (single call site; do not call it elsewhere).
+    for key, w, rec in zip(misses, miss_works, pubchem_results, strict=True):
+        cid = uuid.UUID(canonical.compound_id_from_key(key))
         if rec is not None:
             logger.info("  enriched via PubChem: %s (CID %s)", rec.name, rec.pubchem_cid)
             row: dict[str, Any] = {
                 "compound_id": cid,
-                "canonical_key": canonical_key,
+                "canonical_key": key,
                 "canonical_name": rec.name,
-                "inchi_key": inchikey,
-                "smiles": rec.smiles or smiles,
+                "inchi_key": w.inchikey,
+                "smiles": rec.smiles or w.smiles,
                 "pubchem_cid": rec.pubchem_cid,
                 "molecular_formula": rec.molecular_formula,
                 "molecular_weight": rec.molecular_weight,
@@ -114,38 +183,47 @@ async def resolve_compounds(
                 "retrieved_at": now_utc(),
             }
             status = "externally_validated"
-        elif smiles is not None:  # structure-only (SMILES with no PubChem row)
-            logger.info("  persisted structure-only: %s", inchikey)
+        elif w.smiles is not None:  # structure-only: SMILES input with no PubChem record
+            logger.info("  persisted structure-only: %s", w.inchikey)
             row = {
                 "compound_id": cid,
-                "canonical_key": canonical_key,
-                "canonical_name": inchikey,
-                "inchi_key": inchikey,
-                "smiles": smiles,
+                "canonical_key": key,
+                "canonical_name": w.inchikey,
+                "inchi_key": w.inchikey,
+                "smiles": w.smiles,
                 "validation_status": "structure_only",
                 "source_id": await repo.manual_source_id(),
                 "retrieved_at": now_utc(),
             }
             status = "structure_only"
-        else:  # bare InChIKey, nowhere found -> dead end
-            logger.info("  rejected %s: not found in the database or PubChem", inchikey)
+        else:  # bare InChIKey, not in DB and not in PubChem -> dead end
+            logger.info("  rejected %s: not found in the database or PubChem", w.inchikey)
             failed.append(
                 FailedInput(
-                    value=item.value,
+                    value=w.value,
                     reason="not found in the database or PubChem. "
                     "If it is a real compound, paste its SMILES (structure) instead.",
-                    line=idx,
+                    line=w.line,
                 )
             )
             continue
-
         await repo.upsert(row)
-        resolved[canonical_key] = ResolvedCompound(
+        resolved[key] = ResolvedCompound(
             compound_id=cid,
-            canonical_key=canonical_key,
+            canonical_key=key,
             canonical_name=row["canonical_name"],
             pubchem_cid=row.get("pubchem_cid"),
             validation_status=status,
+        )
+
+    # Phase 4: emit DB hits (merged into resolved; canonical_key dedup ensures no duplicates).
+    for key, existing in db_hits.items():
+        resolved[key] = ResolvedCompound(
+            compound_id=existing.compound_id,
+            canonical_key=existing.canonical_key,
+            canonical_name=existing.canonical_name,
+            pubchem_cid=getattr(existing, "pubchem_cid", None),
+            validation_status=existing.validation_status,
         )
 
     logger.info("resolution complete: %d resolved, %d failed", len(resolved), len(failed))
