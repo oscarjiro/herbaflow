@@ -12,14 +12,6 @@ export function uniprotUrl(accession: string): string {
 }
 
 /**
- * Returns the PubChem compound entry page for a persisted compound CID.
- * Canonical form: https://pubchem.ncbi.nlm.nih.gov/compound/<cid>
- */
-export function pubchemCompoundUrl(cid: string): string {
-  return `https://pubchem.ncbi.nlm.nih.gov/compound/${encodeURIComponent(cid)}`;
-}
-
-/**
  * Derives the public term page URL for a g:Profiler enrichment term.
  *
  * Mirrors the backend `_term_url` in `app/pipeline/results_handoff.py`.

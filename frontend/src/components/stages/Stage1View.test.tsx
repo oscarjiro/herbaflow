@@ -405,7 +405,10 @@ describe("Stage1View — column spec", () => {
     expect(link).not.toHaveAttribute("href", expect.stringContaining("#query"));
   });
 
-  it("links compound names through the persisted PubChem CID when present", () => {
+  it("renders the compound name as plain text even when a PubChem CID is present", () => {
+    // The name column is never a link; the InChIKey column carries the only
+    // outbound link per row. A persisted pubchem_cid must NOT turn the name into
+    // a second link.
     wrap(
       <Stage1View
         data={makeRun({
@@ -428,8 +431,8 @@ describe("Stage1View — column spec", () => {
       />,
     );
 
-    const link = screen.getByRole("link", { name: /^Curcumin$/i });
-    expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
+    expect(screen.queryByRole("link", { name: /^Curcumin$/i })).not.toBeInTheDocument();
+    expect(screen.getByText("Curcumin")).toBeInTheDocument();
   });
 
   it("renders compound names as text when PubChem CID is absent", () => {

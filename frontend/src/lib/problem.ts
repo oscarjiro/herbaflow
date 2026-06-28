@@ -16,11 +16,24 @@ export function humanizeProblem(p: Problem | undefined | null): string {
 
 // Statuses that mean the backend is reachable but its data store is not: a brief
 // database outage (mapped from a raw connect error to 503) or the hosted database
-// being temporarily over its usage limit (402). The UI shows the full
-// "service unavailable" screen for these rather than retrying inline.
-const SERVICE_OUTAGE_STATUS = new Set([402, 503]);
+// being temporarily over its usage limit (402).
+const STORE_DOWN_STATUS = new Set([402, 503]);
 
-export function isServiceOutage(err: Problem | undefined | null): boolean {
-  const status = err?.status;
-  return status != null && SERVICE_OUTAGE_STATUS.has(status);
+/**
+ * True when a poll/health error means the backend cannot currently be reached, so
+ * the UI should show the full "service unavailable" screen (Retry) instead of
+ * retrying inline forever:
+ *  - a transport failure — the thrown error carries no HTTP `status` because no
+ *    response ever arrived (the backend process is down, connection refused, DNS
+ *    failure, etc.);
+ *  - a store-down status (402 / 503) — the backend answered but its database is not.
+ *
+ * Self-healable statuses (404 gone, 422 malformed id) are NOT hard-down: the caller
+ * clears those back to setup. A nullish error (no error at all) is not down.
+ */
+export function isHardDown(err: Problem | undefined | null): boolean {
+  if (err == null) return false;
+  const status = err.status;
+  if (status == null) return true; // transport failure: no HTTP response arrived
+  return STORE_DOWN_STATUS.has(status);
 }

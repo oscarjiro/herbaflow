@@ -6,7 +6,7 @@ import { clearActiveRunId, getActiveRunId, setActiveRunId } from "@/lib/activeRu
 import { RunSidebar } from "@/components/RunSidebar";
 import { ServiceUnavailable } from "@/components/ServiceUnavailable";
 import { Skeleton } from "@/components/ui/skeleton";
-import { humanizeProblem, isServiceOutage, type Problem } from "@/lib/problem";
+import { humanizeProblem, isHardDown, type Problem } from "@/lib/problem";
 
 export const Route = createFileRoute("/analysis/$id")({
   component: RunShell,
@@ -20,8 +20,9 @@ function RunShell() {
   // Self-heal an unusable cached run: a 404 means the run was deleted or expired;
   // a 422 means the id is malformed (e.g. a stale "null"), which would otherwise
   // retry every second forever. The poll throws the RFC 9457 problem body, which
-  // carries the HTTP status. Outage statuses (402/503) are NOT self-healed here —
-  // they surface the service-unavailable screen below so the run can resume.
+  // carries the HTTP status. Hard-down errors (transport failure / 402 / 503) are
+  // NOT self-healed here — they surface the service-unavailable screen below so the
+  // run can resume once the backend is reachable again.
   useEffect(() => {
     const status = (error as Problem)?.status;
     if (isError && (status === 404 || status === 422)) {
@@ -39,7 +40,7 @@ function RunShell() {
   }, [data, id]);
 
   if (!data) {
-    if (isError && isServiceOutage(error as Problem)) {
+    if (isError && isHardDown(error as Problem)) {
       return <ServiceUnavailable onRetry={() => void refetch()} />;
     }
     if (isError) {

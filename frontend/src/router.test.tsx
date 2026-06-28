@@ -115,3 +115,26 @@ test("/analysis/$id/<unreached> redirects to the furthest reached stage", async 
   );
   await waitFor(() => expect(router.state.location.pathname).toBe("/analysis/a1/targets"));
 });
+
+test("/analysis/$id surfaces the service-unavailable screen when the backend is unreachable", async () => {
+  // A poll that never reaches the backend rejects with a transport error carrying
+  // no HTTP status. The run shell must show ServiceUnavailable (Retry), not poll
+  // the status endpoint forever behind an inline "Retrying..." note.
+  vi.spyOn(useAnalysisStatusModule, "useAnalysisStatus").mockReturnValue({
+    data: undefined,
+    isError: true,
+    error: new TypeError("Failed to fetch"),
+    refetch: vi.fn(),
+  } as unknown as ReturnType<typeof useAnalysisStatusModule.useAnalysisStatus>);
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const router = createRouter({
+    routeTree,
+    history: createMemoryHistory({ initialEntries: ["/analysis/a1/compounds"] }),
+  });
+  render(
+    <QueryClientProvider client={qc}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  );
+  expect(await screen.findByRole("heading", { name: /service unavailable/i })).toBeInTheDocument();
+});

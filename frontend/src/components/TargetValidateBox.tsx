@@ -54,6 +54,7 @@ export function TargetValidateBox({
 
   // Repeated non-empty input lines, for the at-a-glance summary roll-up.
   const inputCount = nonEmptyLineCount(text);
+  const hasInput = text.trim().length > 0;
   const mustAddValidatedBatch = showAddButton === true && resolved.length > 0;
   const duplicateCount = (() => {
     const seen = new Set<string>();
@@ -118,7 +119,7 @@ export function TargetValidateBox({
           successDuration={0}
           className="w-full"
           wrapperClassName="w-full"
-          disabled={validate.isPending || disabled || mustAddValidatedBatch}
+          disabled={validate.isPending || disabled || mustAddValidatedBatch || !hasInput}
           title={
             mustAddValidatedBatch ? "Add the validated batch before validating again." : undefined
           }
@@ -147,7 +148,7 @@ export function TargetValidateBox({
           controlsId={`${textareaId}-failed`}
         />
 
-        {(resolved.length > 0 || failed.length > 0 || text.trim().length > 0) && (
+        {(resolved.length > 0 || failed.length > 0 || hasInput) && (
           <ManualEntrySummary
             validCount={resolved.length}
             invalidCount={failed.length}

@@ -1,9 +1,22 @@
 import "@testing-library/jest-dom/vitest";
 import { configure } from "@testing-library/react";
-import { afterAll, afterEach, beforeAll } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import { server } from "./handlers";
 // Configure the generated API client to point at localhost:8000 (where MSW intercepts).
-import "../src/lib/api";
+import { API_BASE_URL } from "../src/lib/api";
+import { client } from "../src/api/client.gen";
+
+// Re-assert the generated client's base URL before every test. The base is set
+// once when lib/api is first imported, but the client is a single shared module
+// instance: a sibling test in the same worker that resets modules or mutates the
+// shared config can leave the base empty. When that happens the SDK builds a
+// RELATIVE request URL (e.g. "/targets/validate"), which undici rejects with
+// "Failed to parse URL" — the intermittent, load-ordering-dependent failure that
+// only ever showed under full-suite parallelism. Re-applying the base per test
+// makes that failure mode structurally impossible.
+beforeEach(() => {
+  client.setConfig({ baseUrl: API_BASE_URL });
+});
 
 // Raise the async utility timeout so that findBy* queries survive the slower
 // module-transform pass that heavier dependencies (e.g. recharts) introduce.

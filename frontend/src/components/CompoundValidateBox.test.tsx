@@ -170,7 +170,26 @@ test("requires adding the validated compound batch before validating again", asy
   const validateButton = screen.getByRole("button", { name: /validate/i });
   expect(validateButton).toBeDisabled();
 
+  // Add clears the editor; an empty box keeps Validate disabled until new input.
   await userEvent.click(screen.getByRole("button", { name: /^add$/i }));
+  expect(validateButton).toBeDisabled();
+  await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO");
+  expect(validateButton).not.toBeDisabled();
+});
+
+test("disables Validate until the editor has non-whitespace input", async () => {
+  render(wrap(<CompoundValidateBox onResolved={vi.fn()} />));
+  const validateButton = screen.getByRole("button", { name: /validate/i });
+
+  // Empty box: nothing to validate.
+  expect(validateButton).toBeDisabled();
+
+  // Whitespace-only is still empty.
+  await userEvent.type(screen.getByLabelText("Manual compounds"), "   ");
+  expect(validateButton).toBeDisabled();
+
+  // Real content enables it.
+  await userEvent.type(screen.getByLabelText("Manual compounds"), "CCO");
   expect(validateButton).not.toBeDisabled();
 });
 

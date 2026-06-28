@@ -7,7 +7,6 @@ import { MAX_COMPOUNDS } from "../../contract";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
-import { pubchemCompoundUrl } from "../../lib/externalUrls";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,6 @@ type Stage1Compound = {
   canonical_name?: string | null;
   inchikey?: string | null;
   smiles?: string | null;
-  pubchem_cid?: string | null;
   source_url?: string | null;
   tag?: string;
 };
@@ -54,7 +52,6 @@ type Stage1Row = {
   label: string;
   inchikey: string | null;
   smiles: string | null;
-  pubchem_cid: string | null;
   source_url: string | null;
   plantNames: string[];
   tag?: string;
@@ -166,7 +163,6 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
             label: c.canonical_name ?? c.compound_id,
             inchikey: c.inchikey ?? null,
             smiles: c.smiles ?? null,
-            pubchem_cid: c.pubchem_cid ?? null,
             source_url: c.source_url ?? null,
             plantNames: plantIds.map((pid) => plantNamesById.get(pid) ?? pid),
             tag: c.tag,
@@ -216,14 +212,10 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
     {
       id: "name",
       header: "Name",
-      cell: ({ row }) =>
-        row.original.pubchem_cid ? (
-          <ExternalLink href={pubchemCompoundUrl(row.original.pubchem_cid)}>
-            {row.original.label}
-          </ExternalLink>
-        ) : (
-          <span>{row.original.label}</span>
-        ),
+      // The compound name is plain text; the InChIKey column carries the only
+      // outbound link (its persisted source_url). Avoids a redundant second link
+      // per row.
+      cell: ({ row }) => <span>{row.original.label}</span>,
     },
     {
       id: "smiles",
