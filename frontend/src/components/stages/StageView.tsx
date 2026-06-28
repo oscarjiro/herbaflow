@@ -16,6 +16,7 @@ export function StageView({
   onApprove,
   approvePending,
   onEdit,
+  canAddWhenEmpty = false,
   children,
 }: {
   data: AnalysisRead;
@@ -25,12 +26,14 @@ export function StageView({
   onApprove: () => Promise<void>;
   approvePending: boolean;
   onEdit?: () => void;
+  canAddWhenEmpty?: boolean;
   children: React.ReactNode;
 }) {
   const { anyStale, rerunFrom } = useStaleState(data);
   const result = data.stage_results?.[String(stage)] as StageResult;
   const isRunning = data.status === `stage_${stage}_running` && !result;
   const isEmpty = Boolean(result) && (result?.count ?? 0) === 0;
+  const isDeadEnd = isEmpty && !canAddWhenEmpty;
 
   return (
     <section className="flex flex-col gap-5">
@@ -76,7 +79,7 @@ export function StageView({
           )}
           <StageRunningSkeleton stage={stage} />
         </>
-      ) : isEmpty ? (
+      ) : isDeadEnd ? (
         <div
           role="status"
           className="border-hf-border bg-hf-surface flex flex-col gap-3 rounded-[var(--radius-lg)] border p-6"
@@ -96,6 +99,14 @@ export function StageView({
         </div>
       ) : (
         <>
+          {isEmpty && (
+            <div
+              role="status"
+              className="border-hf-border bg-hf-surface text-hf-fg-2 rounded-[var(--radius-lg)] border p-4 text-sm"
+            >
+              This step produced no results yet. Add an item below to continue.
+            </div>
+          )}
           {children}
           {rerunFrom === stage && (
             <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
@@ -112,9 +123,7 @@ export function StageView({
               currentStage={data.current_stage}
               disabled={(result?.count ?? 0) === 0 || anyStale}
               disabledReason={
-                anyStale
-                  ? "Run the updated step before continuing."
-                  : "No results to continue with."
+                anyStale ? "Run the updated step before continuing." : "Add an item to continue."
               }
               pending={approvePending}
               onApprove={onApprove}

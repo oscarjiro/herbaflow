@@ -165,3 +165,57 @@ test("the shell owns the heading; the wrapped child renders no own Step heading"
   expect(screen.getByRole("heading", { level: 1, name: "Shared targets" })).toBeInTheDocument();
   expect(screen.queryByText("Step 5: Target Overlap")).toBeNull();
 });
+
+// ── UX-15: empty-but-addable entity stages ──────────────────────────────────
+
+function baseRun(count: number): AnalysisRead {
+  return {
+    analysis_id: "a1",
+    status: "stage_3_awaiting_approval",
+    current_stage: 3,
+    stage_results: { "3": { count } },
+    stage_state: {},
+    parameters: { input_modes: { plant: "selection", disease: "selection" } },
+  } as unknown as AnalysisRead;
+}
+
+const noop = async () => {};
+
+describe("StageView empty-but-addable", () => {
+  it("renders children + notice (not the dead-end) when empty and addable", () => {
+    wrap(
+      <StageView
+        data={baseRun(0)}
+        stage={3}
+        title="Targets"
+        kicker="03"
+        onApprove={noop}
+        approvePending={false}
+        canAddWhenEmpty
+      >
+        <div>STAGE BODY</div>
+      </StageView>,
+    );
+    expect(screen.getByText("STAGE BODY")).toBeInTheDocument();
+    expect(screen.queryByText("No results at this step.")).not.toBeInTheDocument();
+    expect(screen.getByText(/no results yet/i)).toBeInTheDocument();
+  });
+
+  it("renders the dead-end when empty and NOT addable", () => {
+    wrap(
+      <StageView
+        data={baseRun(0)}
+        stage={3}
+        title="Targets"
+        kicker="03"
+        onApprove={noop}
+        approvePending={false}
+        canAddWhenEmpty={false}
+      >
+        <div>STAGE BODY</div>
+      </StageView>,
+    );
+    expect(screen.getByText("No results at this step.")).toBeInTheDocument();
+    expect(screen.queryByText("STAGE BODY")).not.toBeInTheDocument();
+  });
+});

@@ -5,6 +5,7 @@ import { notifyError } from "@/lib/toast";
 import type { Problem } from "@/lib/problem";
 import { stageLabel } from "@/contract/labels";
 import { slugToStage, type StageSlug } from "@/lib/stageRoutes";
+import { canAddWhenEmpty } from "@/lib/stageAddability";
 import { StageView } from "@/components/stages/StageView";
 import { Stage1View } from "@/components/stages/Stage1View";
 import { Stage2View } from "@/components/stages/Stage2View";
@@ -58,6 +59,7 @@ export function RunStageContent({ analysisId, slug }: { analysisId: string; slug
         await advance.mutateAsync();
       }}
       approvePending={advance.isPending}
+      canAddWhenEmpty={canAddWhenEmpty(n, data)}
     >
       <View data={data} />
     </StageView>
