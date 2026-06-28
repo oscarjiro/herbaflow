@@ -41,6 +41,17 @@ describe("RunSidebar", () => {
     expect(screen.getByText("Active run")).toBeInTheDocument();
   });
 
+  it("renders the exit-run trigger as a glass danger button", () => {
+    renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={() => {}} />, {
+      withTheme: true,
+    });
+    const exit = screen.getByRole("button", { name: /exit run/i });
+    // Every button is glass (UX-9); the trigger carries the layered .hf-glass recipe...
+    expect(exit.className).toContain("hf-glass");
+    // ...and keeps destructive red semantics through the colored label.
+    expect(exit.querySelector(".text-hf-danger")).not.toBeNull();
+  });
+
   it("opens the confirm dialog from Exit run", () => {
     renderWithRouter(<RunSidebar data={DATA} analysisId="run-1" onExit={vi.fn()} />, {
       withTheme: true,

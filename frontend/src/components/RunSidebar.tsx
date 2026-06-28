@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import type { AnalysisRead } from "@/api/types.gen";
+import { Button } from "@/components/ui/button";
 import { StepperRail } from "@/components/ui/StepperRail";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ExitRunDialog } from "@/components/stages/ExitRunDialog";
@@ -15,11 +16,13 @@ function useActiveStage(): StageSlug | undefined {
   return candidate && isValidStageSlug(candidate) ? candidate : undefined;
 }
 
+// Glass danger trigger (UX-9: every button is glass). flex-1 fills the row beside
+// the theme toggle; the foot-row's default align-items:stretch matches its height.
 const cancelTrigger = (
-  <button type="button" className="icon-btn danger" style={{ flex: 1 }}>
-    <Trash2 aria-hidden="true" style={{ width: 15, height: 15 }} />
+  <Button variant="danger" size="sm" className="flex-1 justify-center">
+    <Trash2 aria-hidden="true" className="size-[15px]" />
     Exit run
-  </button>
+  </Button>
 );
 
 export function RunSidebar({

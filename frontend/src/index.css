@@ -999,38 +999,6 @@
     display: flex;
     gap: 8px;
   }
-  .icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    padding: 8px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--hf-border);
-    background: none;
-    color: var(--hf-fg-3);
-    font-family: var(--font-sans);
-    font-size: 0.74rem;
-    cursor: pointer;
-    transition:
-      color 0.16s var(--ease-out),
-      border-color 0.16s var(--ease-out);
-  }
-  .icon-btn:hover {
-    color: var(--hf-fg-1);
-    border-color: var(--hf-border-strong);
-  }
-  .icon-btn.danger:hover {
-    color: var(--hf-terracotta);
-    border-color: var(--hf-terracotta);
-  }
-  .icon-btn svg {
-    width: 15px;
-    height: 15px;
-    stroke: currentColor;
-    stroke-width: 1.6;
-    fill: none;
-  }
   /* =====================================================================
      ParamPanel controls — .ms multi-select rows.
      Mirrors primitives.html .ms / .ms__row spec exactly.
