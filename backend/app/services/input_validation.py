@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from app.clock import now_utc
-from app.integrations.uniprot import UniProtReason, UniProtResolution
+from app.integrations.uniprot import UniProtReason, UniProtRecord, UniProtResolution
 from app.schemas.compound import CompoundInput, FailedInput, ResolvedCompound
 from app.schemas.target import ResolvedTarget, TargetInput
 from app.services import canonical, gene_symbols, structure
@@ -152,6 +152,53 @@ async def resolve_compounds(
     return list(resolved.values()), failed
 
 
+async def _lookup_accession(accession: str, repo: Any) -> Any:
+    """DB-first lookup of a stored target by one accession's canonical key (serial; no network).
+
+    Returns the stored target row, or ``None`` on a miss. Kept as the single DB-read step so the
+    phased ``resolve_targets`` batch and the serial ``resolve_target_accession`` share one home.
+    """
+    return await repo.get_by_key(canonical.target_canonical_key(uniprot=accession))
+
+
+async def _fetch_accession(accession: str, uniprot: Any) -> UniProtResolution:
+    """Pure-network resolve of one accession to its human (9606) record (parallel-safe).
+
+    Holds no DB session, so many of these can run concurrently under ``asyncio.gather`` (already
+    bounded by the UniProt client's ``_SEM(10)``). This is the only liftable, parallel step.
+    """
+    result: UniProtResolution = await uniprot.resolve(accession)
+    return result
+
+
+async def _persist_accession(
+    rec: UniProtRecord, repo: Any, source_id: uuid.UUID | None
+) -> ResolvedTarget:
+    """Upsert a fetched record canonicalized on its **primary** accession (serial; one upsert)."""
+    primary = rec.uniprot_accession
+    key = canonical.target_canonical_key(uniprot=primary)
+    tid = uuid.UUID(canonical.target_id_from_key(key))
+    await repo.upsert(
+        {
+            "target_id": tid,
+            "canonical_key": key,
+            "gene_symbol": rec.gene_symbol,
+            "protein_name": rec.protein_name,
+            "uniprot_accession": primary,
+            "source_id": source_id,
+            "source_url": f"https://www.uniprot.org/uniprotkb/{primary}/entry",
+            "retrieved_at": now_utc(),
+        }
+    )
+    return ResolvedTarget(
+        target_id=tid,
+        canonical_key=key,
+        gene_symbol=rec.gene_symbol,
+        uniprot_accession=primary,
+        validation_status="externally_validated",
+    )
+
+
 async def resolve_target_accession(
     accession: str,
     repo: Any,
@@ -171,7 +218,9 @@ async def resolve_target_accession(
 
     This is the single home for accession→target resolution: both manual/STP resolution
     (``resolve_targets``) and Stage 3 (``stage3.run``) call it instead of duplicating the
-    resolve+canonicalize+persist logic.
+    resolve+canonicalize+persist logic. It composes the three serial/network steps
+    (``_lookup_accession`` -> ``_fetch_accession`` -> ``_persist_accession``); ``resolve_targets``
+    reuses the same steps batched, but the external behavior here is unchanged.
     """
     acc = accession.strip().upper()
 
@@ -186,22 +235,17 @@ async def resolve_target_accession(
         return AccessionResolution(None, UniProtReason.INVALID_ID)
 
     # Fast path: a target already stored under this exact accession's key — no network call.
-    input_key = canonical.target_canonical_key(uniprot=acc)
-    existing = await repo.get_by_key(input_key)
+    existing = await _lookup_accession(acc, repo)
     if existing is not None:
         return AccessionResolution(_db_hit(existing), None)
 
-    rec_res: UniProtResolution = await uniprot.resolve(acc)
+    rec_res = await _fetch_accession(acc, uniprot)
     if rec_res.record is None:
         return AccessionResolution(None, rec_res.reason)  # non-human / non-UniProt -> skip
 
     # Canonicalize on the PRIMARY accession so aliases of one entry converge to one id.
     rec = rec_res.record
-    primary = rec.uniprot_accession
-    key = canonical.target_canonical_key(uniprot=primary)
-    tid = uuid.UUID(canonical.target_id_from_key(key))
-
-    existing = await repo.get_by_key(key)
+    existing = await _lookup_accession(rec.uniprot_accession, repo)
     if existing is not None:
         return AccessionResolution(_db_hit(existing), None)
 
@@ -210,28 +254,7 @@ async def resolve_target_accession(
         if uniprot_source_id is not None
         else await repo.source_id_by_name("UniProt")
     )
-    await repo.upsert(
-        {
-            "target_id": tid,
-            "canonical_key": key,
-            "gene_symbol": rec.gene_symbol,
-            "protein_name": rec.protein_name,
-            "uniprot_accession": primary,
-            "source_id": source_id,
-            "source_url": f"https://www.uniprot.org/uniprotkb/{primary}/entry",
-            "retrieved_at": now_utc(),
-        }
-    )
-    return AccessionResolution(
-        ResolvedTarget(
-            target_id=tid,
-            canonical_key=key,
-            gene_symbol=rec.gene_symbol,
-            uniprot_accession=primary,
-            validation_status="externally_validated",
-        ),
-        None,
-    )
+    return AccessionResolution(await _persist_accession(rec, repo, source_id), None)
 
 
 def _db_hit(existing: Any) -> ResolvedTarget:
@@ -244,6 +267,15 @@ def _db_hit(existing: Any) -> ResolvedTarget:
     )
 
 
+@dataclass
+class _TargetWork:
+    """One distinct, format-valid identity to resolve (a UniProt accession or a gene symbol)."""
+
+    value: str  # original input value (for FailedInput.value)
+    line: int  # 1-based line of its FIRST occurrence (for failure reporting)
+    kind: str  # "accession" | "symbol"
+
+
 async def resolve_targets(
     inputs: Sequence[TargetInput | dict[str, Any]],
     repo: Any,
@@ -251,11 +283,26 @@ async def resolve_targets(
     *,
     gene_to_acc: dict[str, str] | None = None,
 ) -> tuple[list[ResolvedTarget], list[FailedInput]]:
-    """Resolve manual targets: classify -> HGNC -> dedupe -> DB-first -> UniProt 9606 -> persist.
+    """Resolve manual targets: classify -> dedup -> DB-first -> UniProt 9606 -> persist.
 
-    ``gene_to_acc`` is an optional symbol->accession map (test seam / cache); when a symbol
-    is not present, the UniProt client resolves it via resolve_symbol. ``line`` (1-based)
-    is recorded on failures.
+    Phased so identical inputs resolve once and only the pure-network calls run concurrently —
+    a single ``AsyncSession`` cannot run concurrent statements, so all DB reads/writes stay serial
+    and only ``resolve_symbol`` / ``_fetch_accession`` fan out via ``asyncio.gather`` (bounded by
+    the UniProt client's ``_SEM(10)``):
+
+    0. classify + dedup by normalized identity (accession ``.upper()`` or
+       ``gene_symbols.normalize(...).canonical``); invalid-format / InChIKey inputs fail
+       immediately per line, the rest collapse to a distinct work-list (first line wins);
+    1. symbols -> accessions: DB-first (``get_by_gene_symbol``, serial), misses fan out to
+       ``resolve_symbol``;
+    2. accessions (direct ∪ symbol-derived): ``_lookup_accession`` (serial), misses fan out to
+       ``_fetch_accession``;
+    3. persist (serial), canonicalized on the primary accession, dedup-by-primary so aliases
+       collapse to one ``target_id`` with no second upsert;
+    4. emit one resolved target per distinct identity and one failure per unresolved identity.
+
+    ``gene_to_acc`` is an optional symbol->accession cache/seam. ``line`` (1-based, first
+    occurrence) is recorded on failures. No silent drops.
     """
     logger.info("validating %d target input(s)", len(inputs))
     resolved: dict[str, ResolvedTarget] = {}
@@ -263,16 +310,17 @@ async def resolve_targets(
     gene_to_acc = gene_to_acc or {}
     uniprot_source_id = await repo.source_id_by_name("UniProt")
 
+    # Phase 0: classify + dedup. Invalid-format / InChIKey inputs fail immediately per line; the
+    # rest collapse to a distinct work-list keyed on normalized identity (first line wins).
+    work: dict[str, _TargetWork] = {}
     for idx, raw in enumerate(inputs, start=1):
         item = raw if isinstance(raw, TargetInput) else TargetInput(**raw)
         token = item.value.strip()
         if not token:
             continue
-
         is_accession = item.type == "uniprot" or (
             item.type is None and _ACCESSION_RE.match(token.upper()) is not None
         )
-
         if is_accession:
             acc = token.upper()
             if not _ACCESSION_RE.match(acc):
@@ -282,6 +330,7 @@ async def resolve_targets(
                     )
                 )
                 continue
+            work.setdefault(acc, _TargetWork(value=item.value, line=idx, kind="accession"))
         else:
             if structure.is_inchikey(token):
                 # A compound InChIKey pasted into a target box is neither a gene symbol nor a
@@ -296,41 +345,103 @@ async def resolve_targets(
                 )
                 continue
             sym = gene_symbols.normalize(token).canonical
-            acc = gene_to_acc.get(sym, "")
-            if not acc:
-                cached = await repo.get_by_gene_symbol(sym)  # DB-first: skip UniProt if known
-                if cached is not None and cached.uniprot_accession:
-                    acc = cached.uniprot_accession
-                    gene_to_acc[sym] = acc
-            if not acc:
-                sym_res = (
-                    await uniprot.resolve_symbol(sym)
-                    if hasattr(uniprot, "resolve_symbol")
-                    else UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
-                )
-                acc = sym_res.record.uniprot_accession if sym_res.record else ""
+            work.setdefault(sym, _TargetWork(value=item.value, line=idx, kind="symbol"))
+
+    # Phase 1: distinct symbols -> accessions. DB-first (serial); UniProt misses fan out.
+    sym_acc: dict[str, str] = {}
+    sym_misses: list[str] = []
+    for sym, wi in work.items():
+        if wi.kind != "symbol":
+            continue
+        acc = gene_to_acc.get(sym, "")
+        if not acc:
+            cached = await repo.get_by_gene_symbol(sym)  # DB-first: skip UniProt if known
+            if cached is not None and cached.uniprot_accession:
+                acc = cached.uniprot_accession
+                gene_to_acc[sym] = acc
+        if acc:
+            sym_acc[sym] = acc
+        else:
+            sym_misses.append(sym)
+    if sym_misses and hasattr(uniprot, "resolve_symbol"):
+        sym_results = await asyncio.gather(*(uniprot.resolve_symbol(s) for s in sym_misses))
+        for sym, res in zip(sym_misses, sym_results, strict=True):
+            if res.record is not None and res.record.uniprot_accession:
+                sym_acc[sym] = res.record.uniprot_accession
+
+    # Phase 2: distinct accessions (direct ∪ symbol-derived). DB-first (serial); misses fan out.
+    acc_order: list[str] = []
+    acc_seen: set[str] = set()
+    for key, wi in work.items():
+        acc = key if wi.kind == "accession" else sym_acc.get(key, "")
+        if acc and acc not in acc_seen:
+            acc_seen.add(acc)
+            acc_order.append(acc)
+
+    acc_target: dict[str, ResolvedTarget] = {}
+    persisted: dict[str, ResolvedTarget] = {}  # primary canonical_key -> target (dedup-by-primary)
+    acc_misses: list[str] = []
+    for acc in acc_order:
+        existing = await _lookup_accession(acc, repo)
+        if existing is not None:
+            target = _db_hit(existing)
+            persisted[target.canonical_key] = target  # DB hit short-circuits into persisted
+            acc_target[acc] = target
+        else:
+            acc_misses.append(acc)
+    fetched = (
+        await asyncio.gather(*(_fetch_accession(acc, uniprot) for acc in acc_misses))
+        if acc_misses
+        else []
+    )
+
+    # Phase 3: persist (serial), canonicalized on the primary accession. Skip a primary already
+    # persisted this batch so aliases collapse to one target_id with no second upsert.
+    acc_fail: dict[str, UniProtReason | None] = {}
+    for acc, res in zip(acc_misses, fetched, strict=True):
+        if res.record is None:
+            acc_fail[acc] = res.reason
+            continue
+        rec = res.record
+        primary_key = canonical.target_canonical_key(uniprot=rec.uniprot_accession)
+        if primary_key in persisted:
+            acc_target[acc] = persisted[primary_key]
+            continue
+        existing = await _lookup_accession(rec.uniprot_accession, repo)
+        if existing is not None:
+            target = _db_hit(existing)
+        else:
+            target = await _persist_accession(rec, repo, uniprot_source_id)
+        persisted[primary_key] = target
+        acc_target[acc] = target
+
+    # Phase 4: emit one resolved target per distinct identity (deduped on canonical_key) and one
+    # failure per unresolved identity, carrying its first source line. No silent drops.
+    for key, wi in work.items():
+        if wi.kind == "symbol":
+            acc = sym_acc.get(key, "")
             if not acc:
                 failed.append(
                     FailedInput(
-                        value=item.value,
+                        value=wi.value,
                         reason="not a recognized human (9606) gene symbol or UniProt accession",
-                        line=idx,
+                        line=wi.line,
                     )
                 )
                 continue
-
-        acc_res = await resolve_target_accession(
-            acc, repo, uniprot, uniprot_source_id=uniprot_source_id
-        )
-        if acc_res.target is None:
+        else:
+            acc = key
+        hit = acc_target.get(acc)
+        if hit is None:
+            reason_enum = acc_fail.get(acc)
             reason = (
-                _ACCESSION_FAIL_MSG.get(acc_res.reason, "not a human (9606) UniProt accession")
-                if acc_res.reason is not None
+                _ACCESSION_FAIL_MSG.get(reason_enum, "not a human (9606) UniProt accession")
+                if reason_enum is not None
                 else "not a human (9606) UniProt accession"
             )
-            failed.append(FailedInput(value=item.value, reason=reason, line=idx))
+            failed.append(FailedInput(value=wi.value, reason=reason, line=wi.line))
             continue
-        resolved[acc_res.target.canonical_key] = acc_res.target  # dedup on primary key
+        resolved[hit.canonical_key] = hit  # dedup on primary key
 
     logger.info("target resolution complete: %d resolved, %d failed", len(resolved), len(failed))
     return list(resolved.values()), failed

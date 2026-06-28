@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 
 import pytest
@@ -11,6 +12,7 @@ class FakeTargetRepo:
     def __init__(self, by_key=None, by_symbol=None):
         self._by_key = by_key or {}
         self._by_symbol = by_symbol or {}
+        self.upserted = []  # every row handed to upsert(), in order
 
     async def get_by_key(self, key):
         return self._by_key.get(key)
@@ -20,6 +22,7 @@ class FakeTargetRepo:
 
     async def upsert(self, row):
         self._by_key[row["canonical_key"]] = type("T", (), row)
+        self.upserted.append(row)
 
     async def source_id_by_name(self, name):
         return None
@@ -28,14 +31,18 @@ class FakeTargetRepo:
 class FakeUniProt:
     def __init__(self, table):
         self._table = table
+        self.resolve_calls = 0
+        self.resolve_symbol_calls = 0
 
     async def resolve(self, acc):
+        self.resolve_calls += 1
         rec = self._table.get(acc.upper())
         if rec is not None:
             return UniProtResolution(record=rec, reason=None)
         return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
 
     async def resolve_symbol(self, sym):
+        self.resolve_symbol_calls += 1
         # map symbol -> accession via a reverse lookup over the table's gene_symbols
         for rec in self._table.values():
             if rec.gene_symbol == sym:
@@ -320,3 +327,173 @@ async def test_known_symbol_db_first_skips_uniprot():
     assert resolved[0].gene_symbol == "TP53"
     assert up.resolve_calls == 0
     assert up.symbol_calls == 0
+
+
+# ---------------------------------------------------------------------------
+# Dedup by resolved identity + phased batch-resolve: identical inputs resolve
+# once, only the pure network calls fan out, and aliases collapse to one upsert.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_dedup_identical_symbols_one_network_call():
+    # 50 copies of one (DB-absent) gene symbol must resolve once: one resolve_symbol call,
+    # one accession fetch, one upsert — not 50 of each.
+    up = FakeUniProt({"P31749": UniProtRecord("P31749", "AKT1", "RAC-alpha kinase")})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets(
+        [{"type": "symbol", "value": "AKT1"} for _ in range(50)], repo, up
+    )
+    assert not failed
+    assert len(resolved) == 1
+    assert resolved[0].gene_symbol == "AKT1"
+    assert up.resolve_symbol_calls == 1
+    assert up.resolve_calls == 1
+    assert len(repo.upserted) == 1
+
+
+@pytest.mark.asyncio
+async def test_dedup_identical_accessions_one_call():
+    # 50 copies of one accession collapse to a single UniProt fetch and a single upsert.
+    up = FakeUniProt({"P31749": UniProtRecord("P31749", "AKT1", "RAC-alpha kinase")})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets(
+        [{"type": "uniprot", "value": "P31749"} for _ in range(50)], repo, up
+    )
+    assert not failed
+    assert len(resolved) == 1
+    assert up.resolve_calls == 1
+    assert len(repo.upserted) == 1
+
+
+@pytest.mark.asyncio
+async def test_alias_and_primary_collapse_no_double_upsert():
+    # A secondary accession + its primary in ONE batch resolve to one target with one upsert;
+    # the alias must not trigger a second upsert (no duplicate row / IntegrityError).
+    egfr = UniProtRecord("P00533", "EGFR", "Epidermal growth factor receptor")
+    up = FakeUniProt({"P00533": egfr, "Q14225": egfr})  # alias + primary -> same entry
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets(
+        [{"type": "uniprot", "value": "Q14225"}, {"type": "uniprot", "value": "P00533"}],
+        repo,
+        up,
+    )
+    assert not failed
+    assert len(resolved) == 1
+    assert len(repo.upserted) == 1  # the secondary did not trigger a second upsert
+    assert resolved[0].uniprot_accession == "P00533"
+    # both input identities collapse to ONE canonical target_id (keyed on the primary)
+    primary_key = canonical.target_canonical_key(uniprot="P00533")
+    assert resolved[0].target_id == uuid.UUID(canonical.target_id_from_key(primary_key))
+
+
+@pytest.mark.asyncio
+async def test_failed_lines_preserved_under_dedup():
+    # A valid symbol plus the SAME unresolvable symbol on lines 2/5/9: the valid resolves once,
+    # the bad symbol fails once (deduped) carrying its first source line.
+    up = FakeUniProt({"P04637": UniProtRecord("P04637", "TP53", "p53")})
+    repo = FakeTargetRepo()
+    inputs = [
+        {"type": "symbol", "value": "tp53"},  # line 1 - resolves
+        {"type": "symbol", "value": "NOTAGENE"},  # line 2 - first bad occurrence
+        {"type": "symbol", "value": "tp53"},  # line 3
+        {"type": "symbol", "value": "tp53"},  # line 4
+        {"type": "symbol", "value": "NOTAGENE"},  # line 5 - dup bad
+        {"type": "symbol", "value": "tp53"},  # line 6
+        {"type": "symbol", "value": "tp53"},  # line 7
+        {"type": "symbol", "value": "tp53"},  # line 8
+        {"type": "symbol", "value": "NOTAGENE"},  # line 9 - dup bad
+    ]
+    resolved, failed = await resolve_targets(inputs, repo, up)
+    assert len(resolved) == 1
+    assert resolved[0].gene_symbol == "TP53"
+    assert len(failed) == 1  # the 3 bad occurrences collapse to ONE failure
+    assert failed[0].reason == "not a recognized human (9606) gene symbol or UniProt accession"
+    assert failed[0].line == 2  # the FIRST occurrence of the bad symbol
+    assert up.resolve_symbol_calls == 2  # one per distinct symbol, not per line
+
+
+class _ConcurrencySpyUniProt:
+    """Records peak concurrent in-flight resolve() calls to prove the network fan-out."""
+
+    def __init__(self, table):
+        self._table = table
+        self.resolve_calls = 0
+        self.resolve_symbol_calls = 0
+        self._in_flight = 0
+        self.max_in_flight = 0
+
+    async def resolve(self, acc):
+        self.resolve_calls += 1
+        self._in_flight += 1
+        self.max_in_flight = max(self.max_in_flight, self._in_flight)
+        await asyncio.sleep(0)  # yield so siblings can overlap if launched concurrently
+        self._in_flight -= 1
+        rec = self._table.get(acc.upper())
+        if rec is not None:
+            return UniProtResolution(record=rec, reason=None)
+        return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
+
+    async def resolve_symbol(self, sym):
+        self.resolve_symbol_calls += 1
+        for rec in self._table.values():
+            if rec.gene_symbol == sym:
+                return UniProtResolution(record=rec, reason=None)
+        return UniProtResolution(None, UniProtReason.NO_HUMAN_RECORD)
+
+
+class _ConcurrencySpyRepo:
+    """Records peak concurrent in-flight DB ops to prove the single session stays serial."""
+
+    def __init__(self):
+        self._by_key = {}
+        self._by_symbol = {}
+        self.upserted = []
+        self._in_flight = 0
+        self.max_db_in_flight = 0
+
+    async def _touch(self):
+        self._in_flight += 1
+        self.max_db_in_flight = max(self.max_db_in_flight, self._in_flight)
+        await asyncio.sleep(0)
+        self._in_flight -= 1
+
+    async def get_by_key(self, key):
+        await self._touch()
+        return self._by_key.get(key)
+
+    async def get_by_gene_symbol(self, gene_symbol):
+        await self._touch()
+        return self._by_symbol.get(gene_symbol)
+
+    async def upsert(self, row):
+        await self._touch()
+        self._by_key[row["canonical_key"]] = type("T", (), row)
+        self.upserted.append(row)
+
+    async def source_id_by_name(self, name):
+        await self._touch()
+        return None
+
+
+@pytest.mark.asyncio
+async def test_misses_resolved_concurrently():
+    # With N distinct DB-miss accessions, the pure network fetches run under asyncio.gather
+    # (peak in-flight > 1) while DB ops on the single session never overlap (peak == 1).
+    table = {
+        "P31749": UniProtRecord("P31749", "AKT1", "RAC-alpha kinase"),
+        "P00533": UniProtRecord("P00533", "EGFR", "Epidermal growth factor receptor"),
+        "P04637": UniProtRecord("P04637", "TP53", "p53"),
+    }
+    up = _ConcurrencySpyUniProt(table)
+    repo = _ConcurrencySpyRepo()
+    inputs = [
+        {"type": "uniprot", "value": "P31749"},
+        {"type": "uniprot", "value": "P00533"},
+        {"type": "uniprot", "value": "P04637"},
+    ]
+    resolved, failed = await resolve_targets(inputs, repo, up)
+    assert not failed
+    assert len(resolved) == 3
+    assert up.max_in_flight > 1  # network fetches overlapped (proves asyncio.gather)
+    assert repo.max_db_in_flight == 1  # DB ops stayed serial on the one session
