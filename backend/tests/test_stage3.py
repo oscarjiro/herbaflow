@@ -1,8 +1,10 @@
+import logging
 import uuid
 
 import pytest
 
 from app.pipeline.stages import stage3
+from app.pipeline.stages.stage3 import _reuse_edges
 from app.services import canonical
 
 
@@ -202,3 +204,18 @@ def test_refetch_when_no_cached_edges():
 def test_refetch_when_legacy_null_params():
     cached = [_edge(mp=None, mc=None)]
     assert stage3._reuse_edges(cached, min_pchembl=5.0, min_confidence=7) is None
+
+
+def test_reuse_edges_logs_legacy_null_param_refetch(caplog):
+    cached = [
+        {
+            "target_id": "t1",
+            "prediction_method": "chembl_bioactivity",
+            "min_assay_confidence": 8,
+            "min_pchembl": None,  # legacy null-param edge
+        }
+    ]
+    with caplog.at_level(logging.DEBUG, logger="herbaflow.pipeline"):
+        result = _reuse_edges(cached, min_pchembl=6.0, min_confidence=8)
+    assert result is None
+    assert any("legacy null-param" in r.message for r in caplog.records)

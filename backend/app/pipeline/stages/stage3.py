@@ -162,7 +162,13 @@ def _reuse_edges(
         if e.get("min_assay_confidence") != min_confidence:
             return None
         dp = e.get("min_pchembl")
-        if dp is None or dp > min_pchembl:
+        if dp is None:
+            logger.debug(
+                "stage 3 reuse miss: legacy null-param edge, refetching (target=%s)",
+                e.get("target_id"),
+            )
+            return None
+        if dp > min_pchembl:
             return None
     kept: list[dict[str, Any]] = []
     for e in cached:
