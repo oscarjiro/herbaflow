@@ -88,7 +88,9 @@ describe("TableRow — hf hover, not bg-muted", () => {
     const rows = container.querySelectorAll('[data-slot="table-row"]');
     // The body row carries the hover styling.
     const bodyRow = Array.from(rows).find((r) => r.textContent === "MAPK1")!;
-    expect(bodyRow.className).toContain("hover:bg-hf-surface-2");
+    expect(bodyRow.className).toContain(
+      "hover:bg-[color-mix(in_srgb,var(--hf-ink),transparent_94%)]",
+    );
     expect(bodyRow.className).not.toContain("bg-muted/50");
   });
 });

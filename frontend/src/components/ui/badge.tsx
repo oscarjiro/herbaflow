@@ -18,11 +18,11 @@ const badgeVariants = cva(
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
         // Status variants — soft token backgrounds per the design spec
-        success: "bg-hf-success-soft text-hf-success",
-        warning: "bg-hf-warning-soft text-hf-warning",
-        danger: "bg-hf-danger-soft text-hf-danger",
-        info: "bg-hf-info-soft text-hf-info",
-        neutral: "border-hf-border bg-hf-surface-2 text-hf-fg-3",
+        success: "bg-hf-success-soft/70 text-hf-success",
+        warning: "bg-hf-warning-soft/70 text-hf-warning",
+        danger: "bg-hf-danger-soft/70 text-hf-danger",
+        info: "bg-hf-info-soft/70 text-hf-info",
+        neutral: "border-hf-border bg-hf-surface-2/70 text-hf-fg-3",
       },
     },
     defaultVariants: {
