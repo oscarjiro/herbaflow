@@ -808,6 +808,52 @@ async def test_reset_from_5_set_edit_reruns_full_downstream(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_reset_from_resumes_a_failed_run_from_the_stage_it_died_on(monkeypatch):
+    # A run the reaper (or a stage crash) left `failed` at stage 6 has NO stage-6 result (it
+    # died mid-execution). Resuming must re-run the failed stage AND every later runnable stage
+    # (6, 7, 8) so the run can reach completion — NOT 422 "has not been computed yet", and NOT
+    # the edit closure {7} (stage 8 depends on stage 5, so a closure would skip it and the run
+    # could never finish).
+    monkeypatch.setattr(engine, "RUNNABLE_STAGES", (1, 2, 3, 4, 5, 6, 7, 8))
+    monkeypatch.setattr(engine, "NEEDS_APPROVAL", frozenset())
+    run = SimpleNamespace(
+        id=uuid.uuid4(),
+        mode="auto",
+        status="failed",
+        current_stage=6,
+        error_message="The server restarted while this analysis was running.",
+        parameters={},
+        # only stages 1..5 completed; 6 (the failed stage), 7, 8 have no result
+        stage_results={str(i): {"count": 1, "state": "computed"} for i in range(1, 6)},
+    )
+    repo = FakeRepo(run)
+    run_set = await engine.reset_from(
+        repo, run.id, 6, _recording_runners([]), param_overrides=None, defer=True
+    )
+    assert run_set == frozenset({6, 7, 8})  # the failed stage + everything after, not just {7}
+    assert run.status == "stage_6_running"  # *_running committed at min(run_set)
+    assert run.current_stage == 6
+
+
+@pytest.mark.asyncio
+async def test_reset_from_uncomputed_stage_on_non_failed_run_still_422(monkeypatch):
+    # The resume relaxation is scoped to FAILED runs: a settled (non-failed) run still cannot
+    # reset from a stage that was never computed.
+    monkeypatch.setattr(engine, "RUNNABLE_STAGES", (1, 2, 3, 4, 5, 6, 7, 8))
+    run = SimpleNamespace(
+        id=uuid.uuid4(),
+        mode="auto",
+        status="complete",
+        current_stage=8,
+        parameters={},
+        stage_results={str(i): {"count": 1, "state": "computed"} for i in range(1, 6)},
+    )
+    repo = FakeRepo(run)
+    with pytest.raises(ValidationProblem):
+        await engine.reset_from(repo, run.id, 6, _recording_runners([]), param_overrides=None)
+
+
+@pytest.mark.asyncio
 async def test_reset_from_defer_returns_run_set(monkeypatch):
     monkeypatch.setattr(engine, "RUNNABLE_STAGES", (1, 2, 3, 4, 5, 6, 7, 8))
     monkeypatch.setattr(engine, "NEEDS_APPROVAL", frozenset())

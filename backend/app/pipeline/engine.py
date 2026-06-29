@@ -407,10 +407,15 @@ async def reset_from(
             detail="Run is still running; wait for it to settle before re-running."
         )
 
+    # A failed run may RESUME from the stage it died on, even though that stage never persisted a
+    # result (it crashed mid-execution) — re-running it IS the recovery. This is the only case
+    # where the target stage legitimately has no stored result.
+    failed_resume = run.status == state.FAILED and stage == (run.current_stage or 0)
+
     # Validate the target stage.
     if stage not in RUNNABLE_STAGES:
         raise ValidationProblem(detail=f"Stage {stage} is not runnable.")
-    if str(stage) not in run.stage_results:
+    if str(stage) not in run.stage_results and not failed_resume:
         raise ValidationProblem(detail=f"Stage {stage} has not been computed yet.")
     if stage > (run.current_stage or 0):
         raise ValidationProblem(detail=f"Stage {stage} is beyond the run's progress.")
@@ -439,6 +444,12 @@ async def reset_from(
         run.parameters = new_params
         await repo.set_parameters(run)
         invalidate = {stage} | downstream_closure(stage)
+    elif failed_resume:
+        # Resume the forward run: re-run the failed stage AND every later runnable stage so the
+        # run can reach completion. The edit-style downstream closure is wrong here — stages that
+        # depend on an EARLIER stage (e.g. Stage 8 reads Stage 5, not Stage 6) are not in the
+        # closure of the failed stage yet never ran, so a closure would strand the run unfinished.
+        invalidate = {s for s in RUNNABLE_STAGES if s >= stage}
     else:
         invalidate = downstream_closure(stage)
 
