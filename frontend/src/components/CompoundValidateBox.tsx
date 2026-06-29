@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { validateCompounds } from "../api/sdk.gen";
 import type { FailedInput, ResolvedCompound, ValidateResponse } from "../api/types.gen";
 import type { Problem } from "../lib/problem";
@@ -12,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { LineNumberedTextarea } from "@/components/ui/line-numbered-textarea";
 import { ManualValidateProgress } from "@/components/ui/ManualValidateProgress";
 import { ManualEntrySummary, nonEmptyLineCount } from "@/components/ui/ManualEntrySummary";
-import { distinctInputs } from "@/lib/validateInputs";
+import { useChunkedValidate } from "@/hooks/useChunkedValidate";
 import { StatefulButton } from "@/components/ui/StatefulButton";
 import { MAX_COMPOUNDS } from "@/contract";
 
@@ -72,18 +71,17 @@ export function CompoundValidateBox({
   // Distinct entry count: used for the progress label and as the actual inputs to the API.
   const distinctCount = inputCount - duplicateCount;
 
-  const validate = useMutation({
-    mutationFn: async () => {
-      const inputs = distinctInputs(text.split("\n").map((l) => ({ value: l })));
+  const { mutation: validate, progress } = useChunkedValidate<{ value: string }, ResolvedCompound>({
+    validateChunk: async (inputs) => {
       const res = await validateCompounds({ body: { inputs } });
-      return res.data as unknown as ValidateResponse;
+      const data = res.data as unknown as ValidateResponse;
+      return { resolved: data?.resolved ?? [], failed: data?.failed ?? [] };
     },
     onSuccess: (data) => {
-      const resolvedList = data?.resolved ?? [];
-      setResolved(resolvedList);
-      setFailed(data?.failed ?? []);
-      if (!showAddButton && resolvedList.length > 0) {
-        onResolved(resolvedList);
+      setResolved(data.resolved);
+      setFailed(data.failed);
+      if (!showAddButton && data.resolved.length > 0) {
+        onResolved(data.resolved);
       }
     },
     onError: (error) => {
@@ -123,13 +121,15 @@ export function CompoundValidateBox({
           title={
             mustAddValidatedBatch ? "Add the validated batch before validating again." : undefined
           }
-          onClickAsync={() => validate.mutateAsync().then(() => undefined)}
+          onClickAsync={() =>
+            validate.mutateAsync(text.split("\n").map((l) => ({ value: l }))).then(() => undefined)
+          }
         >
           Validate
         </StatefulButton>
 
         {validate.isPending && (
-          <ManualValidateProgress kind="compound" entryCount={distinctCount} />
+          <ManualValidateProgress kind="compound" entryCount={distinctCount} progress={progress} />
         )}
 
         <RemovableChipList

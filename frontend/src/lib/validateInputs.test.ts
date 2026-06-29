@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { distinctInputs } from "./validateInputs";
+import { distinctInputs, distinctInputsWithOrigin } from "./validateInputs";
 
 describe("distinctInputs", () => {
   test("deduplicates identical values, preserving first-seen order", () => {
@@ -39,5 +39,28 @@ describe("distinctInputs", () => {
   test("all-whitespace-only list returns empty array", () => {
     const result = distinctInputs([{ value: "  " }, { value: "\t" }, { value: "" }]);
     expect(result).toEqual([]);
+  });
+});
+
+describe("distinctInputsWithOrigin", () => {
+  test("records the 1-based original line of each distinct entry's first occurrence", () => {
+    // Lines:      1     2(blank) 3       4(dup)   5
+    const { items, lines } = distinctInputsWithOrigin([
+      { value: "EGFR" },
+      { value: "" },
+      { value: "BADGENE" },
+      { value: "EGFR" },
+      { value: "OTHER" },
+    ]);
+    expect(items).toEqual([{ value: "EGFR" }, { value: "BADGENE" }, { value: "OTHER" }]);
+    // EGFR first on line 1, BADGENE on line 3, OTHER on line 5 — blank/dup do not shift them.
+    expect(lines).toEqual([1, 3, 5]);
+  });
+
+  test("items match distinctInputs and lines are aligned by index", () => {
+    const inputs = [{ value: "a" }, { value: "a" }, { value: "b" }];
+    const { items, lines } = distinctInputsWithOrigin(inputs);
+    expect(items).toEqual(distinctInputs(inputs));
+    expect(lines).toEqual([1, 3]);
   });
 });

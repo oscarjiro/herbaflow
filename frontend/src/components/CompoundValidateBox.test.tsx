@@ -146,8 +146,9 @@ test("shows the shared busy button and progress bar while compounds validate", a
   expect(button).toHaveAttribute("data-variant", "secondary");
   expect(button).toHaveClass("w-full");
   expect(button.parentElement).toHaveClass("w-full");
-  expect(screen.getByText(/Validating 3 compound entries/)).toBeInTheDocument();
-  expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  expect(screen.getByText(/Validating 0 of 3 compound entries/)).toBeInTheDocument();
+  const bar = screen.getByRole("progressbar");
+  expect(bar).toHaveAttribute("aria-valuemax", "3");
 });
 
 test("requires adding the validated compound batch before validating again", async () => {

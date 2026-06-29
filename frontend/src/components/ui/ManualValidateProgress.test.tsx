@@ -29,7 +29,26 @@ test("does not show a slash-separated fraction", () => {
   expect(screen.getByRole("status")).not.toHaveTextContent(/\d+\/\d+/);
 });
 
-test("does not render a progressbar role", () => {
+test("does not render a progressbar role in the indeterminate state", () => {
   render(<ManualValidateProgress kind="target" entryCount={2} />);
   expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+});
+
+test("renders a determinate progressbar with X of N when progress is supplied", () => {
+  render(
+    <ManualValidateProgress kind="target" entryCount={10} progress={{ done: 4, total: 10 }} />,
+  );
+  expect(screen.getByRole("status")).toHaveTextContent(/Validating 4 of 10 target entries/i);
+  const bar = screen.getByRole("progressbar");
+  expect(bar).toHaveAttribute("aria-valuenow", "4");
+  expect(bar).toHaveAttribute("aria-valuemax", "10");
+  expect(bar).toHaveStyle({ width: "40%" });
+});
+
+test("determinate label uses singular 'entry' when total is 1", () => {
+  render(
+    <ManualValidateProgress kind="compound" entryCount={1} progress={{ done: 0, total: 1 }} />,
+  );
+  expect(screen.getByRole("status")).toHaveTextContent(/Validating 0 of 1 compound entry/i);
+  expect(screen.getByRole("status")).not.toHaveTextContent(/entries/i);
 });
