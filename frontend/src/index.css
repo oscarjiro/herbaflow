@@ -84,6 +84,11 @@
   --hf-glass-shine-2: rgba(255, 255, 255, 1);
   --hf-glass-shadow: 0 16px 40px -18px rgba(26, 26, 26, 0.3), 0 2px 6px rgba(26, 26, 26, 0.08);
 
+  /* Clear-glass tint (Chromium lens path) — lower than the frosted-default tint
+     so the surface reads see-through, not milky. */
+  --hf-glass-tint-clear: rgba(255, 255, 255, 0.07);
+  --hf-glass-tint-clear-strong: rgba(255, 255, 255, 0.1);
+
   /* Switch toggle — track off-state (no existing neutral covers this value) */
   --hf-switch-track-off: var(--hf-neutral-300);
 
@@ -697,14 +702,25 @@
    Chromium engine (the attribute below). CSS @supports cannot detect this
    (Safari/Firefox false-positive on `filter: url()`), so it is runtime-gated.
    :where() keeps specificity at zero so the solid @media blocks still win. */
+  /* Clear Apple lens (Chromium only). blur 0 = no frost; the #hf-liquid lens
+     provides the refraction. Tint drops to the clear tokens and the specular
+     rim strengthens. :where() keeps specificity 0 so the solid fallbacks win. */
   :where(html[data-glass-refract="on"]) .hf-glass__refract {
-    backdrop-filter: blur(2px) saturate(135%);
-    -webkit-backdrop-filter: blur(2px) saturate(135%);
+    backdrop-filter: blur(0) saturate(120%);
+    -webkit-backdrop-filter: blur(0) saturate(120%);
     filter: url(#hf-liquid);
   }
-  :where(html[data-glass-refract="on"] .hf-glass--chrome) .hf-glass__refract {
-    backdrop-filter: blur(2px) saturate(140%);
-    -webkit-backdrop-filter: blur(2px) saturate(140%);
+  :where(html[data-glass-refract="on"]) .hf-glass__tint {
+    background: var(--hf-glass-tint-clear-strong);
+  }
+  :where(html[data-glass-refract="on"]) .hf-glass--chrome .hf-glass__tint {
+    background: var(--hf-glass-tint-clear);
+  }
+  :where(html[data-glass-refract="on"]) .hf-glass__shine {
+    box-shadow:
+      inset 1.4px 1.4px 0.7px -0.5px var(--hf-glass-shine),
+      inset -1.4px -1.4px 1.4px -0.5px var(--hf-glass-shine-2),
+      inset 0 0 0 1px var(--hf-border);
   }
 
   /* --- Solid fallback (no backdrop-filter / reduced transparency / contrast) */
@@ -1518,6 +1534,8 @@
   --hf-glass-shine: rgba(247, 245, 242, 0.35);
   --hf-glass-shine-2: rgba(247, 245, 242, 0.2);
   --hf-glass-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.75), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --hf-glass-tint-clear: rgba(247, 245, 242, 0.04);
+  --hf-glass-tint-clear-strong: rgba(247, 245, 242, 0.06);
 
   /* Dotted-glow background (dark) */
   --hf-dot: rgba(247, 245, 242, 0.06);

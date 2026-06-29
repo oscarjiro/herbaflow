@@ -35,6 +35,8 @@ const GLASS_TOKENS = [
   "--hf-bg-raised",
   "--hf-glass-tint",
   "--hf-glass-tint-strong",
+  "--hf-glass-tint-clear",
+  "--hf-glass-tint-clear-strong",
   "--hf-glass-shine",
   "--hf-glass-shine-2",
   "--hf-glass-shadow",
