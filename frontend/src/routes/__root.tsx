@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { createRootRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { LazyMotion, domAnimation, useReducedMotion } from "motion/react";
 import { ReactLenis } from "lenis/react";
+import { buildLensDataUrl, GLASS_LENS_BEZEL } from "@/lib/glassLens";
 import { ThemeProvider } from "@/lib/theme";
 import { BackgroundFX } from "@/components/ui/BackgroundFX";
 import { Nav } from "@/components/ui/Nav";
@@ -17,17 +19,22 @@ function RootLayout() {
   // scrolling on the analysis pages. See src/lib/smoothScroll.ts.
   const smoothScroll = shouldSmoothScroll(pathname, Boolean(reduceMotion));
 
+  // Lens displacement map for the #hf-liquid refraction filter. Generated once
+  // on the client; "" under SSR/jsdom (clear glass, no refraction — harmless).
+  const lensHref = useMemo(() => buildLensDataUrl(GLASS_LENS_BEZEL), []);
+
   return (
     <ThemeProvider>
       {smoothScroll && <ReactLenis root options={SMOOTH_SCROLL_OPTIONS} />}
       <LazyMotion features={domAnimation}>
         {/*
-        #hf-liquid SVG filter — mounted once here so every GlassSurface
-        anywhere in the tree can reference it via filter: url(#hf-liquid).
-        Visually hidden via position:absolute + 0×0 size (NOT display:none,
-        which disables SVG filters in some browser engines).
-        feTurbulence → feGaussianBlur → feDisplacementMap = lens refraction.
-      */}
+          #hf-liquid SVG filter — mounted once here so every GlassSurface can
+          reference it via filter: url(#hf-liquid). Visually hidden via
+          position:absolute + 0×0 size (NOT display:none, which disables SVG
+          filters in some engines). Apple-style clear lens: one feImage lens map
+          (lib/glassLens.ts) displaces R/G/B at slightly different scales for
+          chromatic dispersion at the rim, recombined via screen blend.
+        */}
         <svg
           aria-hidden="true"
           width="0"
@@ -42,22 +49,53 @@ function RootLayout() {
               width="100%"
               height="100%"
               filterUnits="objectBoundingBox"
+              colorInterpolationFilters="sRGB"
             >
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.008 0.008"
-                numOctaves={2}
-                seed={7}
-                result="noise"
-              />
-              <feGaussianBlur in="noise" stdDeviation={2.2} result="soft" />
+              <feImage href={lensHref} result="lens" preserveAspectRatio="none" />
               <feDisplacementMap
                 in="SourceGraphic"
-                in2="soft"
+                in2="lens"
+                scale={90}
+                xChannelSelector="R"
+                yChannelSelector="G"
+                result="red"
+              />
+              <feColorMatrix
+                in="red"
+                type="matrix"
+                values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"
+                result="red-only"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="lens"
                 scale={78}
                 xChannelSelector="R"
                 yChannelSelector="G"
+                result="green"
               />
+              <feColorMatrix
+                in="green"
+                type="matrix"
+                values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0"
+                result="green-only"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="lens"
+                scale={66}
+                xChannelSelector="R"
+                yChannelSelector="G"
+                result="blue"
+              />
+              <feColorMatrix
+                in="blue"
+                type="matrix"
+                values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0"
+                result="blue-only"
+              />
+              <feBlend in="red-only" in2="green-only" mode="screen" result="rg" />
+              <feBlend in="rg" in2="blue-only" mode="screen" />
             </filter>
           </defs>
         </svg>
