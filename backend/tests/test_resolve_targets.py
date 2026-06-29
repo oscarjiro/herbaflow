@@ -476,6 +476,99 @@ class _ConcurrencySpyRepo:
         return None
 
 
+# ---------------------------------------------------------------------------
+# Gene symbols that collide with the UniProt accession grammar (P2RY12), isoform
+# accessions, and honest non-coding-gene messaging.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_symbol_shaped_like_accession_falls_back_to_symbol():
+    # P2RY12 (the clopidogrel target, UniProt Q9H244) has a gene symbol that is grammatically
+    # identical to a UniProt accession (P + digit + 3 alnum + digit). A typeless input must try
+    # the accession lookup, miss, then fall back to gene-symbol resolution rather than be dropped.
+    rec = UniProtRecord("Q9H244", "P2RY12", "P2Y purinoceptor 12")
+    up = FakeUniProt({"Q9H244": rec})  # resolve("P2RY12") misses; resolve_symbol("P2RY12") hits
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"value": "P2RY12"}], repo, up)
+    assert not failed
+    assert resolved and resolved[0].uniprot_accession == "Q9H244"
+    assert resolved[0].gene_symbol == "P2RY12"
+    assert up.resolve_symbol_calls == 1  # the fallback fired
+
+
+@pytest.mark.asyncio
+async def test_explicit_accession_miss_does_not_fall_back_to_symbol():
+    # An EXPLICIT type=uniprot that misses must NOT be retried as a gene symbol — the user asserted
+    # it is an accession, so the honest accession-style message stands and no symbol call is made.
+    up = FakeUniProt({})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"type": "uniprot", "value": "Q99999"}], repo, up)
+    assert not resolved
+    assert failed[0].reason == "no human (9606) UniProt record"
+    assert up.resolve_symbol_calls == 0
+
+
+@pytest.mark.asyncio
+async def test_accession_shaped_unknown_falls_back_then_fails_as_symbol():
+    # A typeless accession-shaped token that is neither a real accession nor a gene symbol fails
+    # only AFTER trying both, with the symbol-style message (a symbol attempt was made).
+    up = FakeUniProt({})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"value": "P9Z9Z9"}], repo, up)
+    assert not resolved
+    assert up.resolve_symbol_calls == 1  # fallback attempted
+    assert failed[0].reason == "not a recognized human (9606) gene symbol or UniProt accession"
+
+
+@pytest.mark.asyncio
+async def test_dedup_grammar_collision_symbol_resolves_once():
+    # 50 copies of an accession-shaped gene symbol resolve once: one accession miss, one symbol
+    # fallback, one upsert — the dedup survives the fallback path.
+    rec = UniProtRecord("Q9H244", "P2RY12", "P2Y purinoceptor 12")
+    up = FakeUniProt({"Q9H244": rec})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"value": "P2RY12"} for _ in range(50)], repo, up)
+    assert not failed
+    assert len(resolved) == 1
+    assert up.resolve_calls == 1  # one accession miss, not 50
+    assert up.resolve_symbol_calls == 1  # one symbol fallback, not 50
+    assert len(repo.upserted) == 1
+
+
+@pytest.mark.asyncio
+async def test_isoform_accession_resolves_to_base_entry():
+    # A UniProt isoform identifier (P00533-2) carries no separate entry; it must resolve via its
+    # base accession's entry rather than being dropped.
+    egfr = UniProtRecord("P00533", "EGFR", "Epidermal growth factor receptor")
+    up = FakeUniProt({"P00533": egfr})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"value": "P00533-2"}], repo, up)
+    assert not failed
+    assert resolved and resolved[0].uniprot_accession == "P00533"
+
+
+@pytest.mark.asyncio
+async def test_noncoding_recognized_gene_reports_honest_message():
+    # A recognized HGNC gene with no human protein in UniProt (a microRNA gene such as MIR339) is
+    # reported honestly as a non-coding gene, not as an unrecognized identifier.
+    up = FakeUniProt({})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"value": "MIR339"}], repo, up)
+    assert not resolved
+    assert "non-coding" in failed[0].reason
+    assert failed[0].line == 1
+
+
+@pytest.mark.asyncio
+async def test_unrecognized_symbol_keeps_generic_message():
+    # A token unrecognized by HGNC keeps the generic message (not the non-coding wording).
+    up = FakeUniProt({})
+    repo = FakeTargetRepo()
+    resolved, failed = await resolve_targets([{"value": "ZZZNOTAGENE"}], repo, up)
+    assert failed[0].reason == "not a recognized human (9606) gene symbol or UniProt accession"
+
+
 @pytest.mark.asyncio
 async def test_misses_resolved_concurrently():
     # With N distinct DB-miss accessions, the pure network fetches run under asyncio.gather

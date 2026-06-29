@@ -36,6 +36,25 @@ _ACCESSION_RE = re.compile(
     r"^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})$"
 )
 
+# A UniProt isoform identifier is an entry's accession plus a "-<n>" suffix (e.g. P00533-2).
+# Identity canonicalizes on the entry's primary accession and there is no separate UniProt entry
+# for an isoform, so resolution strips the suffix and resolves the base accession's entry.
+_ISOFORM_RE = re.compile(r"^(.+)-[0-9]+$")
+
+
+def _accession_base(token: str) -> str:
+    """Return the base accession of a UniProt isoform id (P00533-2 -> P00533); else the token."""
+    m = _ISOFORM_RE.match(token)
+    if m and _ACCESSION_RE.match(m.group(1)):
+        return m.group(1)
+    return token
+
+
+def _is_accession_shaped(token: str) -> bool:
+    """True if a typeless token looks like a UniProt accession (allowing an isoform suffix)."""
+    return bool(_ACCESSION_RE.match(token) or _ACCESSION_RE.match(_accession_base(token)))
+
+
 # Honest accession-failure wording, distinguishing the two causes the UniProt client already
 # separates: a 400 (not a resolvable UniProt query at all) vs a valid query with no human hit.
 _ACCESSION_FAIL_MSG = {
@@ -345,6 +364,21 @@ def _db_hit(existing: Any) -> ResolvedTarget:
     )
 
 
+def _symbol_fail_reason(value: str) -> str:
+    """Honest reason for a gene-symbol miss.
+
+    Distinguish a recognized HGNC gene that simply has no protein in UniProt (a non-coding RNA
+    gene — microRNA / lncRNA / snoRNA — which has no protein target) from a genuinely unrecognized
+    identifier. Uses the offline HGNC status already available via ``gene_symbols.normalize``.
+    """
+    if gene_symbols.normalize(value).status != "unrecognized":
+        return (
+            "a recognized human gene with no protein in UniProt "
+            "(likely a non-coding RNA gene, which has no protein target)"
+        )
+    return "not a recognized human (9606) gene symbol or UniProt accession"
+
+
 @dataclass
 class _TargetWork:
     """One distinct, format-valid identity to resolve (a UniProt accession or a gene symbol)."""
@@ -352,6 +386,7 @@ class _TargetWork:
     value: str  # original input value (for FailedInput.value)
     line: int  # 1-based line of its FIRST occurrence (for failure reporting)
     kind: str  # "accession" | "symbol"
+    from_grammar: bool = False  # accession kind GUESSED from a typeless token (may be a symbol)
 
 
 async def resolve_targets(
@@ -397,10 +432,10 @@ async def resolve_targets(
         if not token:
             continue
         is_accession = item.type == "uniprot" or (
-            item.type is None and _ACCESSION_RE.match(token.upper()) is not None
+            item.type is None and _is_accession_shaped(token.upper())
         )
         if is_accession:
-            acc = token.upper()
+            acc = _accession_base(token.upper())  # P00533-2 (isoform) -> P00533
             if not _ACCESSION_RE.match(acc):
                 failed.append(
                     FailedInput(
@@ -408,7 +443,12 @@ async def resolve_targets(
                     )
                 )
                 continue
-            work.setdefault(acc, _TargetWork(value=item.value, line=idx, kind="accession"))
+            work.setdefault(
+                acc,
+                _TargetWork(
+                    value=item.value, line=idx, kind="accession", from_grammar=item.type is None
+                ),
+            )
         else:
             if structure.is_inchikey(token):
                 # A compound InChIKey pasted into a target box is neither a gene symbol nor a
@@ -493,6 +533,35 @@ async def resolve_targets(
         persisted[primary_key] = target
         acc_target[acc] = target
 
+    # Phase 3.5: symbol fallback for grammar-guessed accessions. A TYPELESS token shaped like a
+    # UniProt accession but absent from UniProt may actually be a gene symbol that collides with
+    # the accession grammar (e.g. P2RY12 is both a real gene symbol AND accession-shaped: P + digit
+    # + 3 alnum + digit). Retry those (and only those) as gene symbols before failing. An EXPLICIT
+    # type=uniprot input is never retried (the user asserted it is an accession).
+    fallback = [
+        (acc, work[acc]) for acc in acc_misses if acc in acc_fail and work[acc].from_grammar
+    ]
+    if fallback and hasattr(uniprot, "resolve_symbol"):
+        fb_syms = [gene_symbols.normalize(wi.value.strip()).canonical for _, wi in fallback]
+        fb_res = await asyncio.gather(*(uniprot.resolve_symbol(s) for s in fb_syms))
+        for (acc, _wi), res in zip(fallback, fb_res, strict=True):
+            rec = res.record
+            if rec is None or not rec.uniprot_accession:
+                continue  # genuinely neither a human accession nor a gene symbol -> stays failed
+            primary_key = canonical.target_canonical_key(uniprot=rec.uniprot_accession)
+            if primary_key in persisted:
+                target = persisted[primary_key]
+            else:
+                existing = await _lookup_accession(rec.uniprot_accession, repo)
+                target = (
+                    _db_hit(existing)
+                    if existing is not None
+                    else await _persist_accession(rec, repo, uniprot_source_id)
+                )
+                persisted[primary_key] = target
+            acc_target[acc] = target
+            acc_fail.pop(acc, None)  # resolved via fallback; clear the accession failure
+
     # Phase 4: emit one resolved target per distinct identity (deduped on canonical_key) and one
     # failure per unresolved identity, carrying its first source line. No silent drops.
     for key, wi in work.items():
@@ -500,23 +569,23 @@ async def resolve_targets(
             acc = sym_acc.get(key, "")
             if not acc:
                 failed.append(
-                    FailedInput(
-                        value=wi.value,
-                        reason="not a recognized human (9606) gene symbol or UniProt accession",
-                        line=wi.line,
-                    )
+                    FailedInput(value=wi.value, reason=_symbol_fail_reason(wi.value), line=wi.line)
                 )
                 continue
         else:
             acc = key
         hit = acc_target.get(acc)
         if hit is None:
-            reason_enum = acc_fail.get(acc)
-            reason = (
-                _ACCESSION_FAIL_MSG.get(reason_enum, "not a human (9606) UniProt accession")
-                if reason_enum is not None
-                else "not a human (9606) UniProt accession"
-            )
+            if wi.from_grammar:
+                # We tried BOTH an accession lookup and a gene-symbol fallback: it is neither.
+                reason = _symbol_fail_reason(wi.value)
+            else:
+                reason_enum = acc_fail.get(acc)
+                reason = (
+                    _ACCESSION_FAIL_MSG.get(reason_enum, "not a human (9606) UniProt accession")
+                    if reason_enum is not None
+                    else "not a human (9606) UniProt accession"
+                )
             failed.append(FailedInput(value=wi.value, reason=reason, line=wi.line))
             continue
         resolved[hit.canonical_key] = hit  # dedup on primary key

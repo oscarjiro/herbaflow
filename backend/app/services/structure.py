@@ -19,7 +19,9 @@ class StructureIdentity:
 
 
 def is_inchikey(token: str) -> bool:
-    return bool(_INCHIKEY.match(token.strip()))
+    # Case-insensitive: an InChIKey is conventionally uppercase, but a pasted lowercase key must
+    # still be recognized as a key (not misrouted to the SMILES parser, where it fails to parse).
+    return bool(_INCHIKEY.match(token.strip().upper()))
 
 
 def identity_from_smiles(smiles: str) -> StructureIdentity | None:

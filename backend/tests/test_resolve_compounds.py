@@ -70,6 +70,20 @@ def _pubchem_record() -> PubChemRecord:
 
 
 @pytest.mark.asyncio
+async def test_lowercase_inchikey_is_detected_not_treated_as_smiles() -> None:
+    # A lowercase InChIKey must be recognized as an InChIKey (case-insensitive), not misrouted to
+    # the SMILES parser and rejected as 'invalid structure'. It resolves under its uppercased key.
+    repo = FakeRepo()
+    pubchem = FakePubChem(record=_pubchem_record())
+    resolved, failed = await resolve_compounds(
+        [CompoundInput(value=ETHANOL_INCHIKEY.lower())], repo, pubchem
+    )
+    assert not failed
+    assert resolved and resolved[0].canonical_key == ETHANOL_KEY
+    assert pubchem.calls == [ETHANOL_INCHIKEY]  # uppercased before the lookup
+
+
+@pytest.mark.asyncio
 async def test_smiles_already_in_db_reused_no_pubchem() -> None:
     """Scenario 1: SMILES already in DB -> reused, PubChem not called, nothing upserted."""
     db_row = FakeCompound(
