@@ -28,6 +28,7 @@ describe("StaleNotice", () => {
     expect(spy).toHaveBeenCalledWith({
       path: { analysis_id: "a1", stage: 1 },
       body: {},
+      throwOnError: true,
     });
   });
 

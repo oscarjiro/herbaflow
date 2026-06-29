@@ -89,11 +89,14 @@ function slugLabel(slug: StageSlug): string {
   return n != null ? stageLabel(n) : slug;
 }
 
-type NodeState = "done" | "running" | "active" | "locked" | "not_applicable" | "blocked";
+type NodeState = "done" | "running" | "active" | "locked" | "not_applicable" | "blocked" | "failed";
 
 function nodeState(slug: StageSlug, data: AnalysisRead, activeSlug?: StageSlug): NodeState {
   if (!isSlugApplicable(slug, data)) return "not_applicable";
   const n = slugToStage(slug);
+  // A failed run marks the stage it died on (current_stage) as failed — never a
+  // green "done" check, which would hide that the run stopped here.
+  if (data.status === "failed" && n != null && data.current_stage === n) return "failed";
   const runningMatch = /^stage_(\d+)_running$/.exec(data.status ?? "");
   if (n != null && runningMatch && Number(runningMatch[1]) === n) return "running";
   // active can co-exist with done per the mockup spec — check done first so we can
@@ -119,6 +122,7 @@ function nodeState(slug: StageSlug, data: AnalysisRead, activeSlug?: StageSlug):
  */
 function nodeSub(slug: StageSlug, state: NodeState, isDone: boolean, data: AnalysisRead): string {
   const n = slugToStage(slug);
+  if (state === "failed") return "Failed";
   if (state === "running" && n != null) return runningSub(n, data);
   if (state === "locked") return "Locked";
   if (state === "not_applicable") return "N/A";
@@ -151,8 +155,13 @@ export function StepperRail({
           const isRunning = state === "running";
           const isLocked = state === "locked";
           const isNA = state === "not_applicable";
+          const isFailed = state === "failed";
           const navigable =
-            state === "done" || state === "active" || state === "running" || state === "blocked";
+            state === "done" ||
+            state === "active" ||
+            state === "running" ||
+            state === "blocked" ||
+            state === "failed";
           const isFinal = slug === "final";
           const label = slugLabel(slug);
           const sub = nodeSub(slug, state, isDone, data);
@@ -163,6 +172,7 @@ export function StepperRail({
             isRunning && "is-running",
             isActive && "is-active",
             isLocked && "is-locked",
+            isFailed && "is-failed",
             isFinal && "bookend-final",
           );
 

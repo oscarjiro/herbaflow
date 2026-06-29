@@ -114,6 +114,30 @@ test("running node (no progress data) shows running verb without count", () => {
   expect(screen.getByText("Resolving")).toBeInTheDocument();
 });
 
+test("failed run marks the failed stage data-state='failed' with a 'Failed' sub-label", () => {
+  const failed = {
+    analysis_id: "a1",
+    status: "failed",
+    current_stage: 6,
+    error_message: "The server restarted while this analysis was running. Please run it again.",
+    stage_results: {
+      "1": { count: 1 },
+      "2": { count: 1 },
+      "3": { count: 1 },
+      "4": { count: 1 },
+      "5": { count: 1 },
+    },
+    stage_state: {},
+  } as unknown as AnalysisRead;
+  const { container } = renderTrail(<StepperRail data={failed} analysisId="a1" activeSlug="ppi" />);
+  // exactly one node is failed (the stage it died on, stage 6 == ppi)
+  const failedNodes = container.querySelectorAll("[data-state='failed']");
+  expect(failedNodes.length).toBe(1);
+  expect(screen.getByText("Failed")).toBeInTheDocument();
+  // it is NOT a done check
+  expect(container.querySelector(".trail-item.is-failed")).not.toBeNull();
+});
+
 test("inputs route still resolves — inputs slug is valid in stageRoutes", () => {
   // Confirms the routing guard is intact: the trail omits 'inputs' visually but
   // the slug remains valid so /analysis/$id/inputs still deep-links correctly.

@@ -3,6 +3,7 @@ import { Eyebrow } from "@/components/ui/editorial";
 import { Button } from "@/components/ui/button";
 import { ApprovalBar } from "@/components/stages/ApprovalBar";
 import { StaleNotice } from "@/components/stages/StaleNotice";
+import { RunFailedNotice } from "@/components/stages/RunFailedNotice";
 import { StageRunningSkeleton } from "@/components/stages/StageRunningSkeleton";
 import { useStaleState } from "@/hooks/useStaleState";
 
@@ -34,6 +35,11 @@ export function StageView({
   const isRunning = data.status === `stage_${stage}_running` && !result;
   const isEmpty = Boolean(result) && (result?.count ?? 0) === 0;
   const isDeadEnd = isEmpty && !canAddWhenEmpty;
+  // A failed run has no results for the stage it died on (or any later stage). Show
+  // the failure + re-run affordance instead of a blank stage body. reset-from points
+  // at the stage that actually failed (current_stage), not the stage being viewed.
+  const isFailedView = data.status === "failed" && !result;
+  const failedStage = data.current_stage ?? stage;
 
   return (
     <section className="flex flex-col gap-5">
@@ -79,6 +85,12 @@ export function StageView({
           )}
           <StageRunningSkeleton stage={stage} />
         </>
+      ) : isFailedView ? (
+        <RunFailedNotice
+          analysisId={data.analysis_id}
+          failedStage={failedStage}
+          message={data.error_message}
+        />
       ) : isDeadEnd ? (
         <div
           role="status"

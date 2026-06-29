@@ -950,6 +950,16 @@
     color: var(--hf-fg-1);
   }
 
+  /* failed — the stage the run died on; red node + label, never a done check */
+  .trail-item.is-failed .node {
+    border-color: var(--hf-danger);
+    color: var(--hf-danger);
+  }
+  .trail-item.is-failed .t-name,
+  .trail-item.is-failed .t-sub {
+    color: var(--hf-danger);
+  }
+
   /* locked */
   .trail-item.is-locked {
     opacity: 0.5;

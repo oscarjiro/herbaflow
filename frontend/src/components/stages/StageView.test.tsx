@@ -219,3 +219,63 @@ describe("StageView empty-but-addable", () => {
     expect(screen.queryByText("STAGE BODY")).not.toBeInTheDocument();
   });
 });
+
+// ── failed run (e.g. reaper-killed, or a stage crash) ───────────────────────
+
+const failedRun = {
+  analysis_id: "a1",
+  status: "failed",
+  current_stage: 6,
+  error_message: "The server restarted while this analysis was running. Please run it again.",
+  stage_results: {
+    "1": { count: 1 },
+    "2": { count: 1 },
+    "3": { count: 1 },
+    "4": { count: 1 },
+    "5": { count: 1 },
+  },
+  stage_state: {},
+} as unknown as AnalysisRead;
+
+describe("StageView — failed run", () => {
+  it("shows the failure notice + re-run on the failed stage, not a blank body", () => {
+    wrap(
+      <StageView
+        data={failedRun}
+        stage={6}
+        title="Protein interactions"
+        kicker="06"
+        onApprove={noop}
+        approvePending={false}
+      >
+        <div data-testid="ppi-body">PPI table</div>
+      </StageView>,
+    );
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.getByText(/step 6 failed/i)).toBeInTheDocument();
+    expect(screen.getByText(/server restarted/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /re-run from step 6/i })).toBeInTheDocument();
+    expect(screen.queryByTestId("ppi-body")).not.toBeInTheDocument();
+    // title still renders for context
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Protein interactions" }),
+    ).toBeInTheDocument();
+  });
+
+  it("still renders the body of a completed earlier stage of a failed run", () => {
+    wrap(
+      <StageView
+        data={failedRun}
+        stage={5}
+        title="Overlap"
+        kicker="05"
+        onApprove={noop}
+        approvePending={false}
+      >
+        <div data-testid="overlap-body">overlap table</div>
+      </StageView>,
+    );
+    expect(screen.getByTestId("overlap-body")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+});
