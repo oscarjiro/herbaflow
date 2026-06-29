@@ -145,8 +145,8 @@ function renderStage5Composition() {
     <StageView
       data={STAGE5_DATA}
       stage={5}
-      title="Shared targets"
-      kicker="05 · Shared targets"
+      title="Target overlap"
+      kicker="05 · Target overlap"
       onApprove={() => Promise.resolve()}
       approvePending={false}
     >
@@ -162,7 +162,7 @@ test("wrapping a stage view yields exactly one approval control (no child duplic
 
 test("the shell owns the heading; the wrapped child renders no own Step heading", () => {
   renderStage5Composition();
-  expect(screen.getByRole("heading", { level: 1, name: "Shared targets" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { level: 1, name: "Target overlap" })).toBeInTheDocument();
   expect(screen.queryByText("Step 5: Target Overlap")).toBeNull();
 });
 

@@ -32,14 +32,14 @@ describe("WorkflowTimeline", () => {
     }
   });
 
-  it("renders all step names", () => {
+  it("renders all step names from the canonical stage labels", () => {
     render(<WorkflowTimeline />);
-    expect(screen.getByText("Compound selection")).toBeInTheDocument();
-    expect(screen.getByText("Drug-likeness screening")).toBeInTheDocument();
-    expect(screen.getByText("Compound to targets")).toBeInTheDocument();
-    expect(screen.getByText("Disease to targets")).toBeInTheDocument();
+    expect(screen.getByText("Compounds")).toBeInTheDocument();
+    expect(screen.getByText("ADME screening")).toBeInTheDocument();
+    expect(screen.getByText("Compound targets")).toBeInTheDocument();
+    expect(screen.getByText("Disease targets")).toBeInTheDocument();
     expect(screen.getByText("Target overlap")).toBeInTheDocument();
-    expect(screen.getByText("Interaction network")).toBeInTheDocument();
+    expect(screen.getByText("PPI network")).toBeInTheDocument();
     expect(screen.getByText("Hub genes")).toBeInTheDocument();
     expect(screen.getByText("Functional enrichment")).toBeInTheDocument();
   });

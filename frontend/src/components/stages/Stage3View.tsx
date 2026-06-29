@@ -31,7 +31,8 @@ import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contract";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
-import { formatSig } from "../../lib/format";
+import { formatSig, formatCount } from "../../lib/format";
+import { stageLabel } from "../../contract/labels";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
@@ -263,7 +264,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
   if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 3: Target Identification</h2>
+        <h2>{stageLabel(3)}</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -391,7 +392,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     {
       id: "coverage",
       header: "Targets",
-      cell: ({ row }) => row.original.coverage,
+      cell: ({ row }) => formatCount(row.original.coverage),
     },
   ];
 
@@ -404,7 +405,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
         <StageSummaryCard
-          value={stage3.count}
+          value={formatCount(stage3.count)}
           label="targets"
           ariaLabel={`${stage3.count} targets`}
         />
@@ -416,13 +417,13 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
               ariaLabel={`${formatSig(stage3.coverage_pct)}% coverage`}
             />
             <StageSummaryCard
-              value={sourceCounts.chembl_bioactivity ?? 0}
+              value={formatCount(sourceCounts.chembl_bioactivity ?? 0)}
               label="ChEMBL"
               ariaLabel={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL target links`}
               muted
             />
             <StageSummaryCard
-              value={sourceCounts.pubchem_bioassay ?? 0}
+              value={formatCount(sourceCounts.pubchem_bioassay ?? 0)}
               label="PubChem BioAssay"
               ariaLabel={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay target links`}
               muted

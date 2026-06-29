@@ -297,7 +297,7 @@ describe("Stage3View — not_applicable state", () => {
   it("renders a greyed-out placeholder when stage_state is not_applicable", () => {
     const data = makeRun("not_applicable", STAGE3_COMPUTED);
     wrap(<Stage3View data={data} />);
-    expect(screen.getByRole("heading", { name: /Step 3/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /compound targets/i })).toBeInTheDocument();
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
   });
 });

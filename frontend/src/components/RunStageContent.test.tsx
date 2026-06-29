@@ -23,7 +23,7 @@ function mountSlug(data: AnalysisRead, slug: string) {
 }
 
 test("renders the StageView for a reached pipeline slug", () => {
-  // Stage 5 (overlap → "Shared targets") has a flat result shape that renders
+  // Stage 5 (overlap → "Target overlap") has a flat result shape that renders
   // from a minimal fixture, mirroring the proven RunView "result landed" case.
   mountSlug(
     {
@@ -45,5 +45,5 @@ test("renders the StageView for a reached pipeline slug", () => {
     } as unknown as AnalysisRead,
     "overlap",
   );
-  expect(screen.getByRole("heading", { level: 1, name: /shared targets/i })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { level: 1, name: /target overlap/i })).toBeInTheDocument();
 });

@@ -35,6 +35,7 @@ import {
   PPI_SELECT_PARAMS,
 } from "../../contract";
 import { uniprotUrl } from "../../lib/externalUrls";
+import { formatCount } from "../../lib/format";
 import { exportArtifactUrl } from "../../lib/exportUrl";
 import type cytoscape from "cytoscape";
 import { useChartColors } from "@/lib/chartTheme";
@@ -380,12 +381,12 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
             {/* Summary cards */}
             <div className="flex flex-wrap gap-3">
               <StageSummaryCard
-                value={computed.node_count}
+                value={formatCount(computed.node_count)}
                 label="nodes"
                 ariaLabel={`${computed.node_count} nodes`}
               />
               <StageSummaryCard
-                value={computed.edge_count}
+                value={formatCount(computed.edge_count)}
                 label="edges"
                 ariaLabel={`${computed.edge_count} edges`}
               />
@@ -402,7 +403,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
                 muted
               />
               <StageSummaryCard
-                value={computed.unmapped.length}
+                value={formatCount(computed.unmapped.length)}
                 label="unmapped"
                 ariaLabel={`${computed.unmapped.length} unmapped`}
                 muted
@@ -428,7 +429,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
             {computed.nodes.length > 0 && (
               <>
                 <NetworkGraph
-                  title="Interaction network"
+                  title="Protein-protein interaction network"
                   filename="ppi_network.png"
                   elements={network.elements}
                   stylesheet={stylesheet}

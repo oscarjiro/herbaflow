@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/cn";
+import { formatCount } from "@/lib/format";
 import {
   Select,
   SelectContent,
@@ -101,9 +102,9 @@ export function DataTablePager<T>({ table }: { table: Table<T> }) {
       className="border-hf-border text-hf-fg-3 flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-sm"
     >
       <span className="num tabular-nums">
-        Showing {firstRow}
+        Showing {formatCount(firstRow)}
         {"–"}
-        {lastRow} of {totalRows}
+        {formatCount(lastRow)} of {formatCount(totalRows)}
       </span>
 
       <div className="flex flex-wrap items-center gap-4">
@@ -167,7 +168,7 @@ export function DataTablePager<T>({ table }: { table: Table<T> }) {
               }}
               onBlur={commitJump}
             />
-            of {Math.max(pageCount, 1)}
+            of {formatCount(Math.max(pageCount, 1))}
           </span>
 
           <PagerButton

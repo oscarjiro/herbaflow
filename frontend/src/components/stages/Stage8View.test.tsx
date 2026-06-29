@@ -86,7 +86,7 @@ describe("Stage8View", () => {
     expect(stage8).not.toHaveTextContent("honest null");
     expect(stage8).not.toHaveTextContent("Pipeline complete");
     // Interactive chart replaces the six server-rendered PNGs.
-    expect(screen.getByText("Pathway enrichment")).toBeInTheDocument();
+    expect(screen.getByText("Functional enrichment")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
     expect(document.querySelector('img[src*="stage8_enrichment_"]')).not.toBeInTheDocument();
     // E1: the correction method is humanized on the summary card, not the raw "fdr" enum.
@@ -212,7 +212,7 @@ describe("Stage8View", () => {
 
     render(wrap(<Stage8View data={data} />));
 
-    expect(screen.getByText("Pathway enrichment")).toBeInTheDocument();
+    expect(screen.getByText("Functional enrichment")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
   });
 
@@ -240,7 +240,7 @@ describe("Stage8View", () => {
 
     render(wrap(<Stage8View data={data} />));
 
-    expect(screen.queryByText("Pathway enrichment")).toBeNull();
+    expect(screen.queryByText("Functional enrichment")).toBeNull();
     expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 
@@ -366,7 +366,7 @@ describe("Stage8View", () => {
 
   it("renders the enrichment chart before the terms table", () => {
     render(wrap(<Stage8View data={makeRealisticData(REALISTIC_TERMS)} />));
-    const chartTitle = screen.getByText("Pathway enrichment");
+    const chartTitle = screen.getByText("Functional enrichment");
     const csvLink = screen.getByRole("link", { name: /download csv/i });
 
     expect(

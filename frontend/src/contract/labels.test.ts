@@ -55,9 +55,12 @@ test("STAGE_LABELS has exactly 8 entries", () => {
 });
 
 test("stageLabel returns the correct label for valid stage numbers", () => {
-  expect(stageLabel(7)).toBe("Hub genes");
   expect(stageLabel(1)).toBe("Compounds");
-  expect(stageLabel(8)).toBe("Pathway enrichment");
+  expect(stageLabel(2)).toBe("ADME screening");
+  expect(stageLabel(5)).toBe("Target overlap");
+  expect(stageLabel(6)).toBe("PPI network");
+  expect(stageLabel(7)).toBe("Hub genes");
+  expect(stageLabel(8)).toBe("Functional enrichment");
 });
 
 test("stageLabel falls back to Step N for out-of-range stage", () => {

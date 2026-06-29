@@ -1,5 +1,5 @@
 import { describe, expect, it, test } from "vitest";
-import { formatSig } from "./format";
+import { formatSig, formatCount } from "./format";
 import { formatRelative } from "./format";
 
 describe("formatSig", () => {
@@ -15,6 +15,24 @@ describe("formatSig", () => {
   });
   it("keeps zero as 0", () => {
     expect(formatSig(0)).toBe("0");
+  });
+});
+
+describe("formatCount", () => {
+  it("groups thousands with separators", () => {
+    expect(formatCount(1240567)).toBe("1,240,567");
+    expect(formatCount(2000)).toBe("2,000");
+    expect(formatCount(12345)).toBe("12,345");
+  });
+  it("is a no-op below 1,000", () => {
+    expect(formatCount(999)).toBe("999");
+    expect(formatCount(42)).toBe("42");
+    expect(formatCount(0)).toBe("0");
+  });
+  it("renders an em dash for null/undefined/NaN", () => {
+    expect(formatCount(null)).toBe("—");
+    expect(formatCount(undefined)).toBe("—");
+    expect(formatCount(Number.NaN)).toBe("—");
   });
 });
 

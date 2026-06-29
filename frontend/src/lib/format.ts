@@ -9,6 +9,19 @@ export function formatSig(value: number | null | undefined, sig = 4): string {
   return String(Number(value.toPrecision(sig)));
 }
 
+const COUNT_FORMAT = new Intl.NumberFormat("en-US");
+
+/**
+ * Format an integer COUNT for on-screen display with thousands separators (e.g. 1240567 ->
+ * "1,240,567"). A no-op below 1,000, so it is safe to apply to any integer quantity. Returns "—"
+ * for null/undefined/NaN. Display-only: CSV exports keep raw values, so this is never used in the
+ * `lib/csv` row builders. Use `formatSig` (not this) for decimals, scores, and p-values.
+ */
+export function formatCount(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return "—";
+  return COUNT_FORMAT.format(value);
+}
+
 // Short relative time for the run-identity meta line. The single relative-time home.
 export function formatRelative(iso: string): string {
   const then = new Date(iso).getTime();

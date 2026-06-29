@@ -363,7 +363,7 @@ describe("Stage2View", () => {
       stage_state: { "2": "not_applicable" },
     });
     wrap(<Stage2View data={data} />);
-    expect(screen.getByRole("heading", { name: "Step 2: ADME Screening" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "ADME screening" })).toBeInTheDocument();
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
   });
 

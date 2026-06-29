@@ -17,13 +17,13 @@ export const ENRICHMENT_SOURCE_LABELS: Record<string, string> = {
 
 export const STAGE_LABELS = [
   "Compounds",
-  "Druglikeness",
+  "ADME screening",
   "Compound targets",
   "Disease targets",
-  "Shared targets",
-  "Interaction network",
+  "Target overlap",
+  "PPI network",
   "Hub genes",
-  "Pathway enrichment",
+  "Functional enrichment",
 ] as const;
 
 export function stageLabel(n: number): string {
@@ -59,7 +59,7 @@ export function stageLabel(n: number): string {
 //                        harmonic-sum heuristic bounded 0–1. Verified: Open
 //                        Targets docs (platform-docs.opentargets.org/associations).
 const LABELS: Record<string, string> = {
-  // Druglikeness (Stage 2)
+  // ADME screening (Stage 2)
   max_mw: "Max molecular weight (Da)",
   max_logp: "Max logP",
   max_hbd: "Max hydrogen-bond donors",
@@ -76,14 +76,14 @@ const LABELS: Record<string, string> = {
   min_assay_confidence: "Minimum assay confidence",
   // Disease targets (Stage 4)
   min_score: "Minimum score",
-  // Interaction network (Stage 6)
+  // PPI network (Stage 6)
   max_proteins: "Max proteins in network",
   allow_top_n_cap: "Cap network to top-ranked proteins",
   min_confidence: "Minimum confidence",
   network_type: "Network type",
   // Hub genes (Stage 7)
   top_n: "Top N",
-  // Pathway enrichment (Stage 8)
+  // Functional enrichment (Stage 8)
   min_term_size: "Minimum term size",
   significance_threshold: "Significance threshold (corrected p ≤)",
   correction: "Correction",

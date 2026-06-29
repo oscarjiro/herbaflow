@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { GlassSurface } from "@/components/ui/GlassSurface";
+import { stageLabel } from "@/contract/labels";
 
 /** Outline glyph for a timeline node. Strokes follow currentColor so the icon
  *  inverts correctly on the ink-filled bookend nodes. */
@@ -57,7 +58,7 @@ const ENTRIES: TimelineEntry[] = [
   },
   {
     label: "Step 01",
-    name: "Compound selection",
+    name: stageLabel(1),
     description: "Pull the bioactive compounds reported for your chosen plant.",
     source: "KNApSAcK WorldMap Indonesia",
     isBookend: false,
@@ -69,7 +70,7 @@ const ENTRIES: TimelineEntry[] = [
   },
   {
     label: "Step 02",
-    name: "Drug-likeness screening",
+    name: stageLabel(2),
     description:
       "Filter for orally plausible molecules with Lipinski's rule of five and Veber's rules, keeping a natural-product exception.",
     source: "Lipinski RO5 · Veber",
@@ -83,7 +84,7 @@ const ENTRIES: TimelineEntry[] = [
   },
   {
     label: "Step 03",
-    name: "Compound to targets",
+    name: stageLabel(3),
     description:
       "Find the human proteins each compound is measured to act on. Bioactivity is taken from experiment, not predicted, unless you add predictions yourself.",
     source: "ChEMBL · PubChem",
@@ -100,7 +101,7 @@ const ENTRIES: TimelineEntry[] = [
   },
   {
     label: "Step 04",
-    name: "Disease to targets",
+    name: stageLabel(4),
     description:
       "Collect the human proteins associated with your disease, scored by strength of evidence.",
     source: "Open Targets",
@@ -114,7 +115,7 @@ const ENTRIES: TimelineEntry[] = [
   },
   {
     label: "Step 05",
-    name: "Target overlap",
+    name: stageLabel(5),
     description:
       "The proteins where compound reach and disease biology meet, drawn as a Venn diagram.",
     // Target overlap is a set operation, so it has no external source tag.
@@ -129,7 +130,7 @@ const ENTRIES: TimelineEntry[] = [
   },
   {
     label: "Step 06",
-    name: "Interaction network",
+    name: stageLabel(6),
     description:
       "How those shared proteins interact, assembled from known associations at a confidence cutoff you choose.",
     source: "STRING",
@@ -147,7 +148,7 @@ const ENTRIES: TimelineEntry[] = [
   },
   {
     label: "Step 07",
-    name: "Hub genes",
+    name: stageLabel(7),
     description:
       "The most central proteins in the network, ranked by maximal clique centrality, with four classical centrality measures reported alongside.",
     source: "MCC (CytoHubba), NetworkX",
@@ -168,7 +169,7 @@ const ENTRIES: TimelineEntry[] = [
   },
   {
     label: "Step 08",
-    name: "Functional enrichment",
+    name: stageLabel(8),
     description:
       "The biological processes and pathways the network is built from, found with g:Profiler across GO and KEGG and corrected for multiple testing.",
     source: "g:Profiler",

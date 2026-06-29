@@ -232,7 +232,7 @@ describe("Stage6View — computed network", () => {
 describe("Stage6View — interactive network graph", () => {
   it("renders the interaction network frame with a Download PNG control", () => {
     wrap(<Stage6View data={makeCompleteNetworkData()} />);
-    expect(screen.getByText("Interaction network")).toBeInTheDocument();
+    expect(screen.getByText("Protein-protein interaction network")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
   });
 
@@ -252,7 +252,7 @@ describe("Stage6View — interactive network graph", () => {
   it("renders the graph once the step has nodes, even before the run completes", () => {
     // The computed result has nodes on an awaiting-approval (not yet complete) run.
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
-    expect(screen.getByText("Interaction network")).toBeInTheDocument();
+    expect(screen.getByText("Protein-protein interaction network")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
   });
 
@@ -269,7 +269,7 @@ describe("Stage6View — interactive network graph", () => {
         })}
       />,
     );
-    expect(screen.queryByText("Interaction network")).toBeNull();
+    expect(screen.queryByText("Protein-protein interaction network")).toBeNull();
     expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 
@@ -281,7 +281,7 @@ describe("Stage6View — interactive network graph", () => {
 
   it("renders the interaction graph before the edge-list table", () => {
     wrap(<Stage6View data={makeCompleteNetworkData()} />);
-    const chartTitle = screen.getByText("Interaction network");
+    const chartTitle = screen.getByText("Protein-protein interaction network");
     const csvLink = screen.getByRole("link", { name: /download csv/i });
 
     expect(

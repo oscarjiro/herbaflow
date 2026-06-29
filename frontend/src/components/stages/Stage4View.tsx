@@ -40,7 +40,8 @@ import {
   MAX_TARGETS,
 } from "../../contract";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
-import { formatSig } from "../../lib/format";
+import { formatSig, formatCount } from "../../lib/format";
+import { stageLabel } from "../../contract/labels";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
@@ -152,7 +153,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 4: Disease Targets</h2>
+        <h2>{stageLabel(4)}</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -232,7 +233,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
         <StageSummaryCard
-          value={stage4.count}
+          value={formatCount(stage4.count)}
           label="targets"
           ariaLabel={`${stage4.count} targets`}
         />

@@ -50,7 +50,7 @@ describe("Stage4View — single editable table", () => {
 
     wrap(<Stage4View data={data} />);
 
-    expect(screen.getByRole("heading", { name: "Step 4: Disease Targets" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Disease targets" })).toBeInTheDocument();
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
   });
 

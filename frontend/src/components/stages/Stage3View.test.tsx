@@ -271,9 +271,7 @@ describe("Stage3View", () => {
     const data = makeRun();
     (data as { stage_state?: Record<string, string> }).stage_state = { "3": "not_applicable" };
     wrap(<Stage3View data={data} />);
-    expect(
-      screen.getByRole("heading", { name: "Step 3: Target Identification" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Compound targets" })).toBeInTheDocument();
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
     // No targets table content.
     expect(screen.queryByText("TP53")).not.toBeInTheDocument();

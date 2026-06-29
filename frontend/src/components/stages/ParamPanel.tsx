@@ -27,7 +27,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChevronDown, Info } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { formatCount } from "@/lib/format";
 import { humanizeLabel, humanizeValue } from "../../contract/labels";
+
+/** Format a hint number: integer counts get thousands separators; floats and
+ *  thresholds (e.g. 0.05, 0.7) stay raw so tiny decimals are never mangled. */
+function formatHintNumber(value: number): string {
+  return Number.isInteger(value) ? formatCount(value) : String(value);
+}
 
 /**
  * Info trigger for a param. The full help text (long description + the
@@ -287,9 +294,11 @@ export function ParamPanel<TValue extends ParamValue = ScalarParamValue>({
               const label = humanizeLabel(key);
               const recHint =
                 m.recommended_min !== undefined && m.recommended_max !== undefined
-                  ? `, recommended ${m.recommended_min}–${m.recommended_max}`
+                  ? `, recommended ${formatHintNumber(m.recommended_min)}–${formatHintNumber(m.recommended_max)}`
                   : "";
-              const hint = `Default ${String(m.default)}${recHint}.`;
+              const defaultText =
+                typeof m.default === "number" ? formatHintNumber(m.default) : String(m.default);
+              const hint = `Default ${defaultText}${recHint}.`;
               return (
                 <div
                   key={key}

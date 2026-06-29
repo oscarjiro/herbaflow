@@ -13,7 +13,7 @@
 import { useMemo, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { formatSig } from "../../lib/format";
+import { formatSig, formatCount } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
@@ -159,13 +159,13 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
       id: "term_size",
       header: "Term size",
       meta: { className: "num" },
-      cell: ({ row }) => row.original.term_size,
+      cell: ({ row }) => formatCount(row.original.term_size),
     },
     {
       id: "overlap",
       header: "Overlap",
       meta: { className: "num" },
-      cell: ({ row }) => row.original.intersection_size,
+      cell: ({ row }) => formatCount(row.original.intersection_size),
     },
     {
       id: "genes",
@@ -183,18 +183,18 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
         <StageSummaryCard
-          value={stage8.count}
+          value={formatCount(stage8.count)}
           label="enriched terms"
           ariaLabel={`${stage8.count} terms`}
         />
         <StageSummaryCard
-          value={stage8.input_gene_count}
+          value={formatCount(stage8.input_gene_count)}
           label="query genes"
           ariaLabel={`${stage8.input_gene_count} query genes`}
           muted
         />
         <StageSummaryCard
-          value={stage8.background_gene_count}
+          value={formatCount(stage8.background_gene_count)}
           label="background genes"
           ariaLabel={`${stage8.background_gene_count} background genes`}
           muted
@@ -233,7 +233,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
       {/* Interactive enrichment bubble chart (shown once terms exist) */}
       {terms.length > 0 && (
         <ChartFrame
-          title="Pathway enrichment"
+          title="Functional enrichment"
           filename="pathway_enrichment.png"
           onExport={async () => {
             if (gdRef.current)

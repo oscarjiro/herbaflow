@@ -20,7 +20,8 @@ import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import { ADME_PARAMS } from "../../contract";
-import { formatSig } from "../../lib/format";
+import { formatSig, formatCount } from "../../lib/format";
+import { stageLabel } from "../../contract/labels";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { BoolMark } from "@/components/ui/BoolMark";
@@ -181,13 +182,13 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     id: "hbd",
     header: "HBD",
     meta: { className: "num" },
-    cell: ({ row }) => row.original.hbond_donors ?? "—",
+    cell: ({ row }) => formatCount(row.original.hbond_donors),
   },
   {
     id: "hba",
     header: "HBA",
     meta: { className: "num" },
-    cell: ({ row }) => row.original.hbond_acceptors ?? "—",
+    cell: ({ row }) => formatCount(row.original.hbond_acceptors),
   },
   {
     id: "tpsa",
@@ -199,7 +200,7 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     id: "rotb",
     header: "RotB",
     meta: { className: "num" },
-    cell: ({ row }) => row.original.rotatable_bonds ?? "—",
+    cell: ({ row }) => formatCount(row.original.rotatable_bonds),
   },
   {
     id: "np_score",
@@ -268,7 +269,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   if (isNA) {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 2: ADME Screening</h2>
+        <h2>{stageLabel(2)}</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -286,15 +287,19 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
 
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
-        <StageSummaryCard value={passedCount} label="passed" ariaLabel={`${passedCount} passed`} />
         <StageSummaryCard
-          value={filteredCount}
+          value={formatCount(passedCount)}
+          label="passed"
+          ariaLabel={`${passedCount} passed`}
+        />
+        <StageSummaryCard
+          value={formatCount(filteredCount)}
           label="filtered"
           ariaLabel={`${filteredCount} filtered`}
         />
         {unscreenedCount > 0 && (
           <StageSummaryCard
-            value={unscreenedCount}
+            value={formatCount(unscreenedCount)}
             label="unscreened"
             ariaLabel={`${unscreenedCount} unscreened`}
             muted

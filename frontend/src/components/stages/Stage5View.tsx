@@ -29,6 +29,7 @@ import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
 import { uniprotUrl } from "../../lib/externalUrls";
+import { formatCount } from "../../lib/format";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ChartFrame } from "@/components/charts/ChartFrame";
 import { OverlapVenn } from "@/components/charts/OverlapVenn";
@@ -193,18 +194,18 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
         <StageSummaryCard
-          value={stage5.count}
+          value={formatCount(stage5.count)}
           label="overlap targets"
           ariaLabel={`${stage5.count} overlap targets`}
         />
         <StageSummaryCard
-          value={stage5.compound_target_count}
+          value={formatCount(stage5.compound_target_count)}
           label="compound-side targets"
           ariaLabel={`${stage5.compound_target_count} compound-side targets`}
           muted
         />
         <StageSummaryCard
-          value={stage5.disease_target_count}
+          value={formatCount(stage5.disease_target_count)}
           label="disease-side targets"
           ariaLabel={`${stage5.disease_target_count} disease-side targets`}
           muted

@@ -4,9 +4,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { listPlantsOptions } from "../../api/@tanstack/react-query.gen";
 import type { AnalysisRead, PlantRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
+import { stageLabel } from "../../contract/labels";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
+import { formatCount } from "../../lib/format";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -180,7 +182,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
   if (stageState === "not_applicable") {
     return (
       <section className="stage-view stage-view--na" aria-disabled>
-        <h2>Step 1: Compounds</h2>
+        <h2>{stageLabel(1)}</h2>
         <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
       </section>
     );
@@ -271,12 +273,12 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
         <StageSummaryCard
-          value={current}
+          value={formatCount(current)}
           label="Total compounds"
           ariaLabel={`${current} total compounds`}
         />
         <StageSummaryCard
-          value={totalPlants}
+          value={formatCount(totalPlants)}
           label="Selected plants"
           ariaLabel={`${totalPlants} selected plants`}
           muted

@@ -12,7 +12,7 @@
 import { useMemo, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { formatSig } from "../../lib/format";
+import { formatSig, formatCount } from "../../lib/format";
 import type { AnalysisRead } from "../../api/types.gen";
 import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
@@ -123,7 +123,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       header: "Rank",
       enableSorting: true,
       meta: { className: "num" },
-      cell: ({ row }) => row.original.rank,
+      cell: ({ row }) => formatCount(row.original.rank),
     },
     {
       id: "gene",
@@ -141,7 +141,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       header: "MCC",
       enableSorting: true,
       meta: { className: "num" },
-      cell: ({ row }) => row.original.mcc,
+      cell: ({ row }) => formatCount(row.original.mcc),
     },
     {
       id: "degree",
@@ -192,12 +192,12 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">
         <StageSummaryCard
-          value={stage7.node_count}
+          value={formatCount(stage7.node_count)}
           label="network nodes"
           ariaLabel={`${stage7.node_count} nodes`}
         />
         <StageSummaryCard
-          value={hubs.length}
+          value={formatCount(hubs.length)}
           label="hubs reported"
           ariaLabel={`${hubs.length} hubs`}
         />
