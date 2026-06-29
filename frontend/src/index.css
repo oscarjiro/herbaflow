@@ -695,6 +695,16 @@
       inset 1.5px 1.5px 1px -1px var(--hf-glass-shine),
       inset 0 0 0 1px color-mix(in srgb, var(--hf-warning), transparent 48%);
   }
+  /* Frost EXCEPTION (clear path only): colored semantic buttons keep a light
+     frost so their tint + label read clearly over any backdrop. Neutral buttons
+     (primary solid-ink, secondary/ghost clear) are unaffected. Higher
+     specificity than the :where() clear-lens rule, so it wins. */
+  html[data-glass-refract="on"] .hf-btn--danger .hf-glass__refract,
+  html[data-glass-refract="on"] .hf-btn--warning .hf-glass__refract {
+    backdrop-filter: blur(7px) saturate(120%);
+    -webkit-backdrop-filter: blur(7px) saturate(120%);
+    filter: none;
+  }
 
   /* --- Refraction opt-in (Chromium only) ------------------------------- */
   /* Real lens refraction = the #hf-liquid feDisplacementMap on a lightly
