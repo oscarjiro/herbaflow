@@ -1269,7 +1269,7 @@
   position: absolute;
   border-radius: 999px;
   filter: blur(100px);
-  opacity: 0.16;
+  opacity: 0.26;
 }
 
 .hf-bg__glow--g1 {
@@ -1287,8 +1287,18 @@
   background: var(--hf-terracotta);
   top: 180px;
   right: 3%;
-  opacity: 0.12;
+  opacity: 0.2;
   animation: hf-drift2 36s var(--ease) infinite alternate;
+}
+
+.hf-bg__glow--g3 {
+  width: 520px;
+  height: 520px;
+  background: var(--hf-sage-deep);
+  bottom: -120px;
+  left: 40%;
+  opacity: 0.18;
+  animation: hf-drift1 34s var(--ease) infinite alternate;
 }
 
 @keyframes hf-drift1 {
@@ -1331,7 +1341,8 @@
 /* Honour prefers-reduced-motion for blob/flow animations too. */
 @media (prefers-reduced-motion: reduce) {
   .hf-bg__glow--g1,
-  .hf-bg__glow--g2 {
+  .hf-bg__glow--g2,
+  .hf-bg__glow--g3 {
     animation: none;
   }
   /* .hf-bg__dots is already handled via the --static modifier class. */

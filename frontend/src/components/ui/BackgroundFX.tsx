@@ -352,6 +352,7 @@ export function BackgroundFX({ glow = "blobs" }: BackgroundFXProps) {
         <div data-bg-layer="blobs" className="hf-bg__blobs">
           <div className="hf-bg__glow hf-bg__glow--g1" />
           <div className="hf-bg__glow hf-bg__glow--g2" />
+          <div className="hf-bg__glow hf-bg__glow--g3" />
         </div>
       )}
 
