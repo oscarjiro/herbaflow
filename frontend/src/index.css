@@ -561,6 +561,12 @@
     position: absolute;
     inset: 0;
     z-index: 0;
+    /* Inherit the host's rounding so the layer's own paint AND pointer hit-region
+       follow the pill/card shape. `overflow: hidden` on .hf-glass clips the
+       painted overflow but does NOT round a descendant's hit-testing — without
+       this, an inset:0 layer stays hit-testable in the rounded-off corners and a
+       pill button gets a rectangular clickable/hover area around it. */
+    border-radius: inherit;
     backdrop-filter: blur(12px) saturate(125%);
     -webkit-backdrop-filter: blur(12px) saturate(125%);
   }
@@ -570,6 +576,7 @@
     position: absolute;
     inset: 0;
     z-index: 1;
+    border-radius: inherit;
     background: var(--hf-glass-tint);
   }
 
@@ -590,6 +597,9 @@
   .hf-glass__content {
     position: relative;
     z-index: 3;
+    /* Round the content layer too: for icon buttons it fills the box (size-full),
+       so without this its square hit-region leaks into the rounded-off corners. */
+    border-radius: inherit;
   }
 
   /* --- Tier modifiers -------------------------------------------------- */
