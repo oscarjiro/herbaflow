@@ -706,6 +706,15 @@
     filter: none;
   }
 
+  /* Icon glass buttons (theme toggle, icon actions) drop the lens on the clear
+     path. The lens is sized for large surfaces; on a ~40px control the squircle
+     edge-bend fills the whole button and smears the backdrop into a grey blob.
+     Keeping the clear-path backdrop blur but dropping the displacement leaves a
+     crisp, legible icon control. Same spirit as the colored-button exception. */
+  html[data-glass-refract="on"] .hf-glass--icon .hf-glass__refract {
+    filter: none;
+  }
+
   /* --- Refraction opt-in (Chromium only) ------------------------------- */
   /* Real lens refraction = the #hf-liquid feDisplacementMap on a lightly
    blurred backdrop. Enabled ONLY when lib/glassSupport.ts has confirmed a
@@ -716,8 +725,8 @@
      provides the refraction. Tint drops to the clear tokens and the specular
      rim strengthens. :where() keeps specificity 0 so the solid fallbacks win. */
   :where(html[data-glass-refract="on"]) .hf-glass__refract {
-    backdrop-filter: blur(0) saturate(120%);
-    -webkit-backdrop-filter: blur(0) saturate(120%);
+    backdrop-filter: blur(3px) saturate(120%);
+    -webkit-backdrop-filter: blur(3px) saturate(120%);
     filter: url(#hf-liquid);
   }
   :where(html[data-glass-refract="on"]) .hf-glass__tint {

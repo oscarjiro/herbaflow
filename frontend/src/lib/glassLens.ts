@@ -48,7 +48,10 @@ export function computeLensRGBA(w: number, h: number, bezelFrac: number): Uint8C
         nx = gx / gl;
         ny = gy / gl;
         const t = (d + band) / band; // 0 at the inner edge of the band, 1 at the rim
-        mag = t * t; // concentrate the bend at the rim
+        // Bend peaks mid-band and fades to 0 at BOTH the inner edge and the rim,
+        // so the displacement never smears the razor-sharp clear-path backdrop
+        // into a hard caustic line at the surface edge (the "star" artifact).
+        mag = Math.sin(t * Math.PI);
       }
       const i = (y * w + x) * 4;
       // Uint8ClampedArray rounds + clamps to [0,255] on assignment.

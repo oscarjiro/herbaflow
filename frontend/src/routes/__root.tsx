@@ -44,10 +44,10 @@ function RootLayout() {
           <defs>
             <filter
               id="hf-liquid"
-              x="0%"
+              x="-10%"
               y="0%"
-              width="100%"
-              height="100%"
+              width="130%"
+              height="130%"
               filterUnits="objectBoundingBox"
               colorInterpolationFilters="sRGB"
             >

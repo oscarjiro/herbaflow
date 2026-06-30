@@ -257,7 +257,13 @@ function Button({
         data-slot="button"
         data-variant={variant}
         data-size={size}
-        className={cn(GLASS_PILL_BASE, tintClass, iconSizeClass, className)}
+        className={cn(
+          GLASS_PILL_BASE,
+          tintClass,
+          iconSizeClass,
+          isIcon && "hf-glass--icon",
+          className,
+        )}
         {...props}
       >
         <GlassLayers />
