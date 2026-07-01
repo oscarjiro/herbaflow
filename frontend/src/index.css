@@ -545,7 +545,14 @@
       never falls into the broken thin-blur state.
    3. Solid: @supports not (backdrop-filter), prefers-reduced-transparency,
       or prefers-contrast:more → opaque surface, no blur, no filter.
-   ===================================================================== */
+
+   NEVER hand-write -webkit-backdrop-filter here. Tailwind v4's Lightning CSS
+   auto-prefixes on build (Safari 16.4 target). Writing the -webkit- form
+   next to the standard property makes Lightning's minifier collapse the pair
+   to -webkit-ONLY, deleting the standard backdrop-filter from the prod bundle
+   (dev is unminified so it hides the bug) — which flattens the glass on any
+   engine that honors only the standard property. Write the standard property
+   alone; the build emits both. */
 
 /* Wrapped in @layer components so Tailwind's `utilities` layer (which comes
    after `components`) wins: utilities passed to GlassSurface — rounded-*,
@@ -578,7 +585,6 @@
        pill button gets a rectangular clickable/hover area around it. */
     border-radius: inherit;
     backdrop-filter: blur(12px) saturate(125%);
-    -webkit-backdrop-filter: blur(12px) saturate(125%);
   }
 
   /* Layer 1 — tint wash */
@@ -626,7 +632,6 @@
   }
   :where(.hf-glass--chrome) .hf-glass__refract {
     backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
   }
 
   /* overlay: dialogs, popovers, menus — stronger tint */
@@ -648,7 +653,6 @@
   .hf-glass-panel {
     background: var(--hf-glass-tint-strong);
     backdrop-filter: blur(12px) saturate(125%);
-    -webkit-backdrop-filter: blur(12px) saturate(125%);
     border: 1px solid var(--hf-border);
     box-shadow: var(--hf-glass-shadow);
   }
@@ -707,7 +711,6 @@
   html[data-glass-refract="on"] .hf-btn--danger .hf-glass__refract,
   html[data-glass-refract="on"] .hf-btn--warning .hf-glass__refract {
     backdrop-filter: blur(7px) saturate(120%);
-    -webkit-backdrop-filter: blur(7px) saturate(120%);
     filter: none;
   }
 
@@ -731,7 +734,6 @@
      rim strengthens. :where() keeps specificity 0 so the solid fallbacks win. */
   :where(html[data-glass-refract="on"]) .hf-glass__refract {
     backdrop-filter: blur(3px) saturate(120%);
-    -webkit-backdrop-filter: blur(3px) saturate(120%);
     filter: url(#hf-liquid);
   }
   :where(html[data-glass-refract="on"]) .hf-glass__tint {
@@ -810,7 +812,6 @@
     width: 264px;
     background: var(--hf-glass-tint-strong);
     backdrop-filter: blur(16px) saturate(1.4);
-    -webkit-backdrop-filter: blur(16px) saturate(1.4);
     border-right: 1px solid var(--hf-border);
     overflow: hidden;
     flex-shrink: 0;
