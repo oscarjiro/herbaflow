@@ -22,6 +22,7 @@ import {
   HUB_GENES_NUMERIC_PARAMS,
   HUB_GENES_PARAMS,
 } from "../../contract";
+import { humanizeValue } from "../../contract/labels";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
@@ -140,7 +141,10 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       id: "mcc",
       header: "MCC",
       enableSorting: true,
-      meta: { className: "num" },
+      meta: {
+        className: "num",
+        info: "Maximal Clique Centrality (Chin 2014): ranks hub proteins by membership in dense, fully connected subnetworks.",
+      },
       cell: ({ row }) => formatCount(row.original.mcc),
     },
     {
@@ -202,9 +206,9 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
           ariaLabel={`${hubs.length} hubs`}
         />
         <StageSummaryCard
-          value={stage7.ranking_metric}
+          value={humanizeValue(stage7.ranking_metric)}
           label="ranking metric"
-          ariaLabel={`metric ${stage7.ranking_metric}`}
+          ariaLabel={`metric ${humanizeValue(stage7.ranking_metric)}`}
           muted
         />
       </div>

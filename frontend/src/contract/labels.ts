@@ -30,6 +30,24 @@ export function stageLabel(n: number): string {
   return STAGE_LABELS[n - 1] ?? `Step ${n}`;
 }
 
+// Short one-line subtitle shown under each stage view's title. Deliberately terse
+// (the landing WorkflowTimeline keeps its own fuller prose); this is the in-app
+// at-a-glance line that replaces the old number+title redundancy in the header.
+export const STAGE_DESCRIPTIONS = [
+  "Bioactive compounds reported for the selected plant",
+  "Druglikeness screening by Lipinski and Veber rules",
+  "Human proteins each compound is measured to act on",
+  "Human proteins associated with the disease, by evidence strength",
+  "Proteins where compound reach and disease biology overlap",
+  "How the shared proteins interact, drawn from STRING",
+  "The most central proteins, ranked by maximal clique centrality",
+  "Biological processes and pathways the network reflects",
+] as const;
+
+export function stageDescription(n: number): string {
+  return STAGE_DESCRIPTIONS[n - 1] ?? "";
+}
+
 // Human-readable param labels. The long help text shown in each param's info
 // tooltip is contract-owned (shared/contracts/analysis.json `description`); the
 // notes below record the external-API source each description was verified
@@ -92,8 +110,9 @@ const LABELS: Record<string, string> = {
 };
 
 const VALUES: Record<string, string> = {
-  functional: "Functional",
-  physical: "Physical",
+  mcc: "MCC",
+  functional: "Functional association",
+  physical: "Physical interaction",
   g_SCS: "g:SCS",
   fdr: "Benjamini-Hochberg FDR",
   bonferroni: "Bonferroni",
@@ -107,4 +126,14 @@ export function humanizeLabel(key: string): string {
 
 export function humanizeValue(value: string): string {
   return VALUES[value] ?? value;
+}
+
+// Compact forms for narrow stat-card display where the full humanized phrase
+// would wrap awkwardly in a tile (the full name stays available via tooltip).
+const VALUE_SHORT: Record<string, string> = {
+  fdr: "BH-FDR",
+};
+
+export function humanizeValueShort(value: string): string {
+  return VALUE_SHORT[value] ?? humanizeValue(value);
 }

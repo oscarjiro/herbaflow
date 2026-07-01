@@ -14,6 +14,7 @@ export function StageView({
   stage,
   title,
   kicker,
+  description,
   onApprove,
   approvePending,
   onEdit,
@@ -24,6 +25,7 @@ export function StageView({
   stage: number;
   title: string;
   kicker: string;
+  description?: string;
   onApprove: () => Promise<void>;
   approvePending: boolean;
   onEdit?: () => void;
@@ -46,6 +48,7 @@ export function StageView({
       <header className="flex flex-col gap-1">
         <Eyebrow>{kicker}</Eyebrow>
         <h1 className="font-display text-hf-fg-1 text-3xl tracking-tight">{title}</h1>
+        {description && <p className="text-hf-fg-3 text-sm">{description}</p>}
       </header>
 
       {isRunning ? (

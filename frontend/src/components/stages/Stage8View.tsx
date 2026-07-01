@@ -26,7 +26,7 @@ import {
   ENRICHMENT_SELECT_PARAMS,
 } from "../../contract";
 import { enrichmentTermUrl } from "../../lib/externalUrls";
-import { humanizeValue } from "../../contract/labels";
+import { humanizeValue, humanizeValueShort } from "../../contract/labels";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
@@ -200,13 +200,14 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           muted
         />
         <StageSummaryCard
-          value={humanizeValue(stage8.correction)}
+          value={
+            <span title={humanizeValue(stage8.correction)}>
+              {humanizeValueShort(stage8.correction)}
+            </span>
+          }
           label="correction"
           ariaLabel={`correction ${humanizeValue(stage8.correction)}`}
           muted
-          // The correction name (e.g. "Benjamini-Hochberg FDR") is a long phrase,
-          // not a count — render it smaller so it doesn't dwarf the card.
-          valueClassName="text-base leading-tight"
         />
       </div>
 

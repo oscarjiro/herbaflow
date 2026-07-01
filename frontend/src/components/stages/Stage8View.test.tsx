@@ -89,8 +89,10 @@ describe("Stage8View", () => {
     expect(screen.getByText("Functional enrichment")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download png/i })).toBeInTheDocument();
     expect(document.querySelector('img[src*="stage8_enrichment_"]')).not.toBeInTheDocument();
-    // E1: the correction method is humanized on the summary card, not the raw "fdr" enum.
-    expect(screen.getByText("Benjamini-Hochberg FDR")).toBeInTheDocument();
+    // E1: the correction method is humanized on the summary card as a compact form
+    // (not the raw "fdr" enum), with the full name available via the title tooltip.
+    expect(screen.getByText("BH-FDR")).toBeInTheDocument();
+    expect(screen.getByTitle("Benjamini-Hochberg FDR")).toBeInTheDocument();
   });
 
   it("renders the enrichment param panel with no_iea control", async () => {

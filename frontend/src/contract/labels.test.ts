@@ -1,5 +1,12 @@
 import { expect, test } from "vitest";
-import { humanizeLabel, humanizeValue, STAGE_LABELS, stageLabel } from "./labels";
+import {
+  humanizeLabel,
+  humanizeValue,
+  STAGE_DESCRIPTIONS,
+  STAGE_LABELS,
+  stageDescription,
+  stageLabel,
+} from "./labels";
 import {
   ADME_NUMERIC_PARAMS,
   ADME_BOOLEAN_PARAMS,
@@ -68,9 +75,19 @@ test("stageLabel falls back to Step N for out-of-range stage", () => {
   expect(stageLabel(0)).toBe("Step 0");
 });
 
+test("provides a short subtitle for each of the 8 stages", () => {
+  expect(STAGE_DESCRIPTIONS).toHaveLength(8);
+  expect(stageDescription(1)).toBe(STAGE_DESCRIPTIONS[0]);
+  expect(stageDescription(8)).toBe(STAGE_DESCRIPTIONS[7]);
+  expect(stageDescription(1).length).toBeGreaterThan(0);
+  // out-of-range degrades to empty (no crash, no subtitle rendered)
+  expect(stageDescription(9)).toBe("");
+});
+
 test("humanizes enum values", () => {
-  expect(humanizeValue("functional")).toBe("Functional");
-  expect(humanizeValue("physical")).toBe("Physical");
+  expect(humanizeValue("mcc")).toBe("MCC");
+  expect(humanizeValue("functional")).toBe("Functional association");
+  expect(humanizeValue("physical")).toBe("Physical interaction");
   expect(humanizeValue("g_SCS")).toBe("g:SCS");
   expect(humanizeValue("fdr")).toBe("Benjamini-Hochberg FDR");
   expect(humanizeValue("bonferroni")).toBe("Bonferroni");

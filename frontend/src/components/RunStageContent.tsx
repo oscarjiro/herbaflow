@@ -3,7 +3,7 @@ import { advanceAnalysis } from "@/api/sdk.gen";
 import { useAnalysisStatus } from "@/hooks/useAnalysisStatus";
 import { notifyError } from "@/lib/toast";
 import type { Problem } from "@/lib/problem";
-import { stageLabel } from "@/contract/labels";
+import { stageLabel, stageDescription } from "@/contract/labels";
 import { slugToStage, type StageSlug } from "@/lib/stageRoutes";
 import { canAddWhenEmpty } from "@/lib/stageAddability";
 import { StageView } from "@/components/stages/StageView";
@@ -54,7 +54,8 @@ export function RunStageContent({ analysisId, slug }: { analysisId: string; slug
       data={data}
       stage={n}
       title={title}
-      kicker={`${kickerNum} · ${title}`}
+      kicker={`Step ${kickerNum}`}
+      description={stageDescription(n)}
       onApprove={async () => {
         await advance.mutateAsync();
       }}
