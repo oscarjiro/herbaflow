@@ -21,7 +21,7 @@ type DownloadLink = {
   label: string;
   href: string;
   icon: ElementType;
-  variant: "default" | "outline";
+  variant: "primary" | "secondary";
 };
 
 /** Download panel — shown only once the run is complete. Artifacts are fetched
@@ -46,7 +46,7 @@ export function DownloadResults({
       label: "Report (.md)",
       href: exportReportUrl(analysisId),
       icon: FileText,
-      variant: "default",
+      variant: "primary",
     },
     ...(runHasCtp(run)
       ? ([
@@ -54,7 +54,7 @@ export function DownloadResults({
             label: "Compound–target–pathway network (.zip)",
             href: exportNetworkBundleUrl(analysisId),
             icon: Network,
-            variant: "outline",
+            variant: "secondary",
           },
         ] satisfies DownloadLink[])
       : []),
@@ -62,13 +62,13 @@ export function DownloadResults({
       label: "All stages (.zip)",
       href: exportStagesBundleUrl(analysisId),
       icon: FolderArchive,
-      variant: "outline",
+      variant: "secondary",
     },
     {
       label: "All results (.zip)",
       href: exportAllResultsUrl(analysisId),
       icon: Download,
-      variant: "outline",
+      variant: "secondary",
     },
   ];
 

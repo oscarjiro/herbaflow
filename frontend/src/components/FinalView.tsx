@@ -9,6 +9,7 @@ import { useEntitySubjects } from "@/hooks/useEntitySubjects";
 import { NetworkGraph } from "@/components/charts/NetworkGraph";
 import { DownloadResults } from "@/components/DownloadResults";
 import { Eyebrow, StatNumber } from "@/components/ui/editorial";
+import { GlassSurface } from "@/components/ui/GlassSurface";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function FinalView({ analysisId, data }: { analysisId: string; data: AnalysisRead }) {
@@ -45,15 +46,17 @@ export function FinalView({ analysisId, data }: { analysisId: string; data: Anal
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {summary.map((s) => (
-          <div
+          <GlassSurface
             key={s.label}
-            className="border-hf-border bg-hf-surface rounded-[var(--radius-lg)] border p-4"
+            tier="raised"
+            className="rounded-[var(--radius-lg)]"
+            contentClassName="p-4"
           >
             <p className="text-hf-fg-4 font-mono text-xs tracking-wide uppercase">{s.label}</p>
             <p className="font-display text-hf-fg-1 mt-1 text-2xl">
               {typeof s.value === "number" ? <StatNumber>{s.value}</StatNumber> : s.value}
             </p>
-          </div>
+          </GlassSurface>
         ))}
       </div>
 

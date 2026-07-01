@@ -93,7 +93,7 @@
   --hf-switch-track-off: var(--hf-neutral-300);
 
   /* Dotted-glow background */
-  --hf-dot: rgba(26, 26, 26, 0.05);
+  --hf-dot: rgba(26, 26, 26, 0.08);
 
   /* Landing hero — ASCII-DNA presentation (theme-independent tuning) */
   --dna-opacity: 0.23;
@@ -137,6 +137,11 @@
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Default easing for every Tailwind transition utility (transition / transition-colors /
+     transition-transform …). Tailwind v4 reads this var; pointing it at --ease-out makes
+     buttons, links, cards and toggles decelerate smoothly instead of the stock ease-in-out.
+     Keyframe @keyframes animations set their own easing and are unaffected. */
+  --default-transition-timing-function: var(--ease-out);
   --duration-1: 120ms;
   --duration-2: 220ms;
   --duration-3: 380ms;
@@ -1355,6 +1360,22 @@
     animation: none;
   }
   /* .hf-bg__dots is already handled via the --static modifier class. */
+}
+
+/* Light mode: the ambient backdrop reads faint on near-white paper, so the blob
+   glows and grain are dialled up here for presence. Dark mode keeps its subtler
+   mix (the brighter --hf-dot in :root already lifts the dot grid in light only). */
+html:not(.dark) .hf-bg__glow--g1 {
+  opacity: 0.36;
+}
+html:not(.dark) .hf-bg__glow--g2 {
+  opacity: 0.3;
+}
+html:not(.dark) .hf-bg__glow--g3 {
+  opacity: 0.28;
+}
+html:not(.dark) .hf-bg__grain {
+  opacity: 0.18;
 }
 
 /* =====================================================================

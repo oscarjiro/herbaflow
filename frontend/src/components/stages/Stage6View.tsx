@@ -34,6 +34,7 @@ import {
   PPI_PARAMS,
   PPI_SELECT_PARAMS,
 } from "../../contract";
+import { humanizeValue } from "../../contract/labels";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { formatCount } from "../../lib/format";
 import { exportArtifactUrl } from "../../lib/exportUrl";
@@ -111,7 +112,6 @@ export function buildS6CsvRows(edges: Stage6Edge[]): unknown[][] {
 type NetworkElements = {
   elements: cytoscape.ElementDefinition[];
   isolated: string[];
-  maxMcc: number;
   maxDegree: number;
 };
 
@@ -161,7 +161,6 @@ export function buildNetworkElements(
     degreeById.set(target, (degreeById.get(target) ?? 0) + 1);
   });
 
-  let maxMcc = 0;
   let maxDegree = 0;
   const isolated: string[] = [];
   for (const n of nodes) {
@@ -172,7 +171,6 @@ export function buildNetworkElements(
     }
     const mcc =
       mccByKey.get(n.gene_symbol) ?? (n.target_id ? mccByKey.get(n.target_id) : undefined) ?? 0;
-    if (mcc > maxMcc) maxMcc = mcc;
     const degree = degreeById.get(id) ?? 0;
     if (degree > maxDegree) maxDegree = degree;
     elements.push({
@@ -186,23 +184,18 @@ export function buildNetworkElements(
     });
   }
 
-  return { elements, isolated, maxMcc, maxDegree };
+  return { elements, isolated, maxDegree };
 }
 
 /** Build the Cytoscape stylesheet from resolved hf-* color strings. */
 function buildNetworkStylesheet(
   colors: ReturnType<typeof useChartColors>,
   minConfidence: number,
-  maxMcc: number,
   maxDegree: number,
 ): cytoscape.StylesheetJson {
-  const sizeStyle =
-    maxMcc > 0
-      ? {
-          width: `mapData(mcc, 0, ${maxMcc}, 16, 52)`,
-          height: `mapData(mcc, 0, ${maxMcc}, 16, 52)`,
-        }
-      : { width: 24, height: 24 };
+  // Uniform node size — connectivity is conveyed by the degree colour ramp, not by
+  // node area (per-node MCC sizing read as noisy and uneven on a flat backdrop).
+  const sizeStyle = { width: 28, height: 28 };
 
   // Degree-ramp color: faint (low connectivity) → deep (high connectivity).
   // When maxDegree === 0 (no edges) fall back to a flat mid-tone to avoid a
@@ -285,14 +278,8 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     return map;
   }, [computed]);
   const stylesheet = useMemo(
-    () =>
-      buildNetworkStylesheet(
-        colors,
-        computed?.min_confidence ?? 0,
-        network.maxMcc,
-        network.maxDegree,
-      ),
-    [colors, computed, network.maxMcc, network.maxDegree],
+    () => buildNetworkStylesheet(colors, computed?.min_confidence ?? 0, network.maxDegree),
+    [colors, computed, network.maxDegree],
   );
 
   if (!stage6) return null;
@@ -397,9 +384,9 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
                 muted
               />
               <StageSummaryCard
-                value={computed.network_type}
+                value={humanizeValue(computed.network_type)}
                 label="network type"
-                ariaLabel={`network type ${computed.network_type}`}
+                ariaLabel={`network type ${humanizeValue(computed.network_type)}`}
                 muted
               />
               <StageSummaryCard
