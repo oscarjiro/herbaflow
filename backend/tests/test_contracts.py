@@ -111,15 +111,15 @@ def test_stage_sources_computed():
 
 def test_stage_source_labels_use_public_tool_names():
     assert [s["name"] for s in contracts.stage_sources(1)] == [
-        "KNApSAcK (plant-compound)",
+        "KNApSAcK",
         "PubChem",
+        "ChEMBL",
     ]
     assert [s["name"] for s in contracts.stage_sources(2)] == [
         "RDKit (MW/logP/HBD/HBA/TPSA/RotB/NP-score/PAINS)"
     ]
     assert [s["name"] for s in contracts.stage_sources(7)] == [
-        "NetworkX (centrality analysis)",
-        "STRING PPI network (undirected)",
+        "NetworkX",
     ]
     assert [s["name"] for s in contracts.stage_sources(8)] == ["g:Profiler"]
 

@@ -55,31 +55,28 @@
           "type": "object",
           "properties": {
             "1": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "KNApSAcK (plant-compound)", "url": "http://www.knapsackfamily.com/" },
-              { "name": "PubChem", "url": "https://pubchem.ncbi.nlm.nih.gov/" }
+              { "name": "KNApSAcK", "url": "http://www.knapsackfamily.com/" },
+              { "name": "PubChem", "url": "https://pubchem.ncbi.nlm.nih.gov/" },
+              { "name": "ChEMBL", "url": "https://www.ebi.ac.uk/chembl/" }
             ]},
             "2": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
               { "name": "RDKit (MW/logP/HBD/HBA/TPSA/RotB/NP-score/PAINS)", "url": "https://www.rdkit.org/" }
             ]},
             "3": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
               { "name": "ChEMBL", "url": "https://www.ebi.ac.uk/chembl/" },
-              { "name": "PubChem BioAssay", "url": "https://pubchem.ncbi.nlm.nih.gov/#query=bioassay" },
+              { "name": "PubChem BioAssay", "url": "https://pubchem.ncbi.nlm.nih.gov/bioassay" },
               { "name": "UniProt", "url": "https://www.uniprot.org/" }
             ]},
             "4": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "Open Targets (disease-target associations)", "url": "https://platform.opentargets.org/" },
+              { "name": "Open Targets", "url": "https://platform.opentargets.org/" },
               { "name": "UniProt", "url": "https://www.uniprot.org/" }
             ]},
-            "5": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "Set intersection of Stage 3 ∩ Stage 4 (on target_id)", "url": null }
-            ]},
+            "5": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": []},
             "6": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "STRING (protein-protein interactions)", "url": "https://string-db.org/" },
-              { "name": "Human only (species 9606); functional or physical", "url": null }
+              { "name": "STRING", "url": "https://string-db.org/" }
             ]},
             "7": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
-              { "name": "NetworkX (centrality analysis)", "url": "https://networkx.org/" },
-              { "name": "STRING PPI network (undirected)", "url": null }
+              { "name": "NetworkX", "url": "https://networkx.org/" }
             ]},
             "8": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
               { "name": "g:Profiler", "url": "https://biit.cs.ut.ee/gprofiler/" }

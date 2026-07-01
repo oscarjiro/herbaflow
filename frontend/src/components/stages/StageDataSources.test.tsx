@@ -27,7 +27,7 @@ it("renders exact source labels from the shared contract", () => {
   ).toBeInTheDocument();
 
   rerender(<StageDataSources stage={7} />);
-  expect(screen.getByRole("link", { name: "NetworkX (centrality analysis)" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "NetworkX" })).toBeInTheDocument();
 
   rerender(<StageDataSources stage={8} />);
   expect(screen.getByRole("link", { name: "g:Profiler" })).toBeInTheDocument();
@@ -65,7 +65,7 @@ it("renders a linked source name when url present", () => {
   expect(link).toHaveAttribute("href", "https://www.ebi.ac.uk/chembl/");
 });
 
-it("renders a plain name when url is null", () => {
-  render(<StageDataSources stage={5} userProvided={false} />);
-  expect(screen.getByText(/Set intersection/)).toBeInTheDocument();
+it("renders nothing for Stage 5 (overlap has no external data sources)", () => {
+  const { container } = render(<StageDataSources stage={5} userProvided={false} />);
+  expect(container).toBeEmptyDOMElement();
 });

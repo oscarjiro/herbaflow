@@ -12,7 +12,7 @@ export function StageDataSources({
     userProvided && USER_PROVIDED_SOURCES[stage]
       ? USER_PROVIDED_SOURCES[stage]
       : STAGE_SOURCES[stage];
-  if (!sources) return null;
+  if (!sources || sources.length === 0) return null;
   return (
     <div
       className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm [color:var(--hf-fg-3)]"
