@@ -6,14 +6,11 @@ Tests:
      and load_dotenv patched out (simulates CI with no .env file).
   2. test_conflict_do_nothing — _conflict with upsert=False returns DO NOTHING clause.
   3. test_conflict_do_update — _conflict with upsert=True returns DO UPDATE SET clause.
-  4. test_resolve_src_unknown_raises — resolve_src raises ValueError for unknown source_name.
 """
 import importlib.util
 import os
 from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 _LOAD_PY = Path(__file__).resolve().parents[1] / "load" / "load.py"
 
@@ -52,16 +49,8 @@ def test_conflict_do_nothing():
 
 def test_conflict_do_update():
     mod = _load_module()
-    result = mod._conflict("plant_id", ["canonical_key", "source_id"], upsert=True)
+    result = mod._conflict("plant_id", ["gbif_key", "source_url"], upsert=True)
     assert result == (
         "on conflict (plant_id) do update set "
-        "canonical_key = excluded.canonical_key, source_id = excluded.source_id"
+        "gbif_key = excluded.gbif_key, source_url = excluded.source_url"
     )
-
-
-def test_resolve_src_unknown_raises():
-    mod = _load_module()
-    row = {"source_name": "NonExistentSource"}
-    source_map = {"KNApSAcK": "uuid-123"}
-    with pytest.raises(ValueError, match="Unknown source_name"):
-        mod.resolve_src(row, source_map)

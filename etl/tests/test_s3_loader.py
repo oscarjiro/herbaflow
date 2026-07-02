@@ -10,12 +10,6 @@ def _func_src(name: str) -> str:
     return SRC[start:] if nxt == -1 else SRC[start:nxt]
 
 
-def test_resolve_src_raises_on_unknown_source():
-    body = _func_src("resolve_src")
-    assert "raise" in body, "resolve_src must fail-fast on unknown source_name"
-    assert "return None" not in body, "resolve_src must not silently return None"
-
-
 def test_no_import_batches_or_create_batch():
     assert "create_batch" not in SRC, "create_batch wiring must be removed"
     assert "import_batches" not in SRC, "import_batches must not be referenced by the loader"
@@ -32,8 +26,8 @@ def test_link_loaders_insert_source_url():
     assert "source_url" in dt, "disease_targets insert must include source_url"
 
 
-def test_entity_loaders_keep_source_url_and_source_id():
+def test_entity_loaders_keep_source_url_and_drop_source_id():
     for fn in ("load_plants", "load_compounds", "load_diseases", "load_targets"):
         body = _func_src(fn)
-        assert "source_url" in body
-        assert "resolve_src" in body  # per-row source_id retained
+        assert "source_url" in body  # provenance is source_url
+        assert "source_id" not in body  # source_id column dropped in the schema trim

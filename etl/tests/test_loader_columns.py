@@ -1,30 +1,15 @@
 """Guard: loader INSERT statements must not reference dropped columns.
 
 Dropped columns:
-- 4 alias loaders (plant, compound, disease, target): source_id, source_url
 - load_targets: organism_tax_id
 - load_compounds: lipinski_source
 - load_plants: authorship, taxonomic_status, rank, gbif_*_key
+(The alias loaders themselves were removed in the schema trim, so there is no alias
+insert left to guard.)
 """
 from pathlib import Path
 
 SRC = (Path(__file__).resolve().parents[1] / "load" / "load.py").read_text(encoding="utf-8")
-
-# Use lowercase markers — actual SQL in load.py uses lowercase "insert into ..."
-ALIAS_MARKERS = (
-    "into plant_aliases (",
-    "into compound_aliases (",
-    "into disease_aliases (",
-    "into target_aliases (",
-)
-
-
-def test_alias_inserts_drop_source_columns():
-    for marker in ALIAS_MARKERS:
-        start = SRC.index(marker)
-        block = SRC[start : start + 400]
-        assert "source_id" not in block, f"{marker!r} block still inserts source_id"
-        assert "source_url" not in block, f"{marker!r} block still inserts source_url"
 
 
 def test_targets_insert_drops_organism_tax_id():

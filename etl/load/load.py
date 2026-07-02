@@ -2,11 +2,13 @@
 ETL CSV -> Supabase loader.
 
 Load order (respects FK deps):
-  source_systems (already seeded) ->
-  plants -> plant_aliases ->
-  compounds -> compound_aliases -> plant_compounds ->
-  diseases -> disease_aliases ->
-  targets -> target_aliases -> disease_targets
+  plants -> compounds -> plant_compounds -> diseases -> targets -> disease_targets
+
+Loads the trimmed target schema: no canonical_key / source_id / alias tables /
+source_systems. Plant identity is carried by gbif_key (derived from the export's
+canonical_key 'gbif:{key}' prefix). Empty inchi_key / uniprot_accession are written as
+NULL, never '' (the columns are UNIQUE, and '' would collide across the id-less
+biologic/non-coding rows).
 """
 
 import argparse
@@ -25,14 +27,10 @@ load_dotenv()
 ETL_ROOT = Path(__file__).parent.parent
 
 PLANTS_CSV           = ETL_ROOT / "plants/06_export/out/plants.csv"
-PLANT_ALIASES_CSV    = ETL_ROOT / "plants/06_export/out/plant_aliases.csv"
 COMPOUNDS_CSV        = ETL_ROOT / "compounds/07_export/out/compounds.csv"
-COMPOUND_ALIASES_CSV = ETL_ROOT / "compounds/07_export/out/compound_aliases.csv"
 PLANT_COMPOUNDS_CSV  = ETL_ROOT / "compounds/07_export/out/plant_compounds.csv"
 DISEASES_CSV         = ETL_ROOT / "diseases/05_export/out/diseases.csv"
-DISEASE_ALIASES_CSV  = ETL_ROOT / "diseases/05_export/out/disease_aliases.csv"
 TARGETS_CSV          = ETL_ROOT / "disease_targets/05_export/out/targets.csv"
-TARGET_ALIASES_CSV   = ETL_ROOT / "disease_targets/05_export/out/target_aliases.csv"
 DISEASE_TARGETS_CSV  = ETL_ROOT / "disease_targets/05_export/out/disease_targets.csv"
 
 
@@ -46,21 +44,6 @@ def _conflict(pk: str, update_cols: list[str], upsert: bool) -> str:
         return f"on conflict ({pk}) do nothing"
     sets = ", ".join(f"{c} = excluded.{c}" for c in update_cols)
     return f"on conflict ({pk}) do update set {sets}"
-
-
-def load_source_map(cur) -> dict:
-    cur.execute("select source_name, source_id from source_systems")
-    return {row[0]: str(row[1]) for row in cur.fetchall()}
-
-
-def resolve_src(row: dict, source_map: dict) -> str:
-    val = row.get("source_name", "")
-    if not val or val not in source_map:
-        raise ValueError(
-            f"Unknown source_name {val!r} not in source_systems catalog "
-            f"(keys: {sorted(source_map)}). Seed the source before loading."
-        )
-    return source_map[val]
 
 
 def read_csv(path: Path) -> list[dict]:
@@ -88,253 +71,173 @@ def _ts(val) -> str | None:
     return v if v else None
 
 
-def load_plants(cur, source_map, upsert=False):
+def _blank_to_none(val) -> str | None:
+    """Empty/whitespace natural key -> NULL (the column is UNIQUE; '' would collide)."""
+    v = val.strip() if isinstance(val, str) else val
+    return v if v else None
+
+
+def _gbif_key(canonical_key: str | None) -> str | None:
+    """Derive gbif_key from the export's canonical_key ('gbif:{key}' -> '{key}')."""
+    ck = (canonical_key or "").strip()
+    return ck[5:] if ck.startswith("gbif:") else None
+
+
+def load_plants(cur, upsert=False):
     print("Loading plants...", end=" ", flush=True)
     rows = read_csv(PLANTS_CSV)
     conflict = _conflict("plant_id", [
-        "canonical_key", "canonical_scientific_name", "family_name",
-        "source_id", "source_url", "retrieved_at",
+        "gbif_key", "canonical_scientific_name", "family_name",
+        "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into plants (
-            plant_id, canonical_key, canonical_scientific_name, family_name,
-            source_id, source_url, retrieved_at
+            plant_id, gbif_key, canonical_scientific_name, family_name,
+            source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
-        r["plant_id"], r["canonical_key"], r.get("canonical_scientific_name"),
-        r.get("family_name"),
-        resolve_src(r, source_map), r.get("source_url"),
-        _ts(r.get("retrieved_at")),
+        r["plant_id"], _gbif_key(r.get("canonical_key")), r.get("canonical_scientific_name"),
+        r.get("family_name"), r.get("source_url"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
 
 
-def load_plant_aliases(cur, source_map, upsert=False):
-    print("Loading plant_aliases...", end=" ", flush=True)
-    rows = read_csv(PLANT_ALIASES_CSV)
-    conflict = _conflict("alias_id", [
-        "plant_id", "alias_name", "alias_key", "alias_type", "retrieved_at",
-    ], upsert)
-    sql = f"""
-        insert into plant_aliases (
-            alias_id, plant_id, alias_name, alias_key, alias_type, retrieved_at
-        ) values %s {conflict}
-    """
-    data = [(
-        r["alias_id"], r["plant_id"], r.get("alias_name"), r.get("alias_key"),
-        r.get("alias_type"), _ts(r.get("retrieved_at")),
-    ) for r in rows]
-    psycopg2.extras.execute_values(cur, sql, data, page_size=500)
-    print(len(data))
-
-
-def load_compounds(cur, source_map, upsert=False):
+def load_compounds(cur, upsert=False):
     print("Loading compounds...", end=" ", flush=True)
     rows = read_csv(COMPOUNDS_CSV)
     conflict = _conflict("compound_id", [
-        "canonical_key", "canonical_name", "inchi_key", "smiles",
+        "canonical_name", "inchi_key", "smiles",
         "cas_id", "pubchem_cid", "chembl_id", "molecular_formula", "molecular_weight",
         "tpsa", "logp", "hbond_donors", "hbond_acceptors",
-        "rotatable_bonds", "qed_score", "np_likeness_score", "num_ro5_violations",
+        "rotatable_bonds", "np_likeness_score", "num_ro5_violations",
         "is_pains_positive",
-        "source_id", "source_url", "retrieved_at",
+        "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into compounds (
-            compound_id, canonical_key, canonical_name, inchi_key, smiles,
+            compound_id, canonical_name, inchi_key, smiles,
             cas_id, pubchem_cid, chembl_id, molecular_formula, molecular_weight,
             tpsa, logp, hbond_donors, hbond_acceptors,
-            rotatable_bonds, qed_score, np_likeness_score, num_ro5_violations,
+            rotatable_bonds, np_likeness_score, num_ro5_violations,
             is_pains_positive,
-            source_id, source_url, retrieved_at
+            source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
-        r["compound_id"], r["canonical_key"], r.get("canonical_name"),
-        r.get("inchi_key"), r.get("smiles"), r.get("cas_id"),
+        r["compound_id"], r.get("canonical_name"),
+        _blank_to_none(r.get("inchi_key")), r.get("smiles"), r.get("cas_id"),
         r.get("pubchem_cid"), r.get("chembl_id"), r.get("molecular_formula"),
         _f(r.get("molecular_weight")),
         _f(r.get("tpsa")), _f(r.get("logp")),
         _i(r.get("hbond_donors")), _i(r.get("hbond_acceptors")),
-        _i(r.get("rotatable_bonds")), _f(r.get("qed_score")),
+        _i(r.get("rotatable_bonds")),
         _f(r.get("np_likeness_score")), _i(r.get("num_ro5_violations")),
         str(r.get("is_pains_positive", "")).lower() == "true",
-        resolve_src(r, source_map), r.get("source_url"),
-        _ts(r.get("retrieved_at")),
+        r.get("source_url"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
 
 
-def load_compound_aliases(cur, source_map, upsert=False):
-    print("Loading compound_aliases...", end=" ", flush=True)
-    rows = read_csv(COMPOUND_ALIASES_CSV)
-    conflict = _conflict("compound_alias_id", [
-        "compound_id", "alias_name", "alias_key", "alias_type", "retrieved_at",
-    ], upsert)
-    sql = f"""
-        insert into compound_aliases (
-            compound_alias_id, compound_id, alias_name, alias_key, alias_type,
-            retrieved_at
-        ) values %s {conflict}
-    """
-    data = [(
-        r["compound_alias_id"], r["compound_id"], r.get("alias_name"), r.get("alias_key"),
-        r.get("alias_type"), _ts(r.get("retrieved_at")),
-    ) for r in rows]
-    psycopg2.extras.execute_values(cur, sql, data, page_size=500)
-    print(len(data))
-
-
-def load_plant_compounds(cur, source_map, upsert=False):
+def load_plant_compounds(cur, upsert=False):
     print("Loading plant_compounds...", end=" ", flush=True)
     rows = read_csv(PLANT_COMPOUNDS_CSV)
     conflict = _conflict("plant_compound_id", [
-        "plant_id", "compound_id",
-        "source_id", "source_url", "retrieved_at",
+        "plant_id", "compound_id", "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into plant_compounds (
-            plant_compound_id, plant_id, compound_id,
-            source_id, source_url, retrieved_at
+            plant_compound_id, plant_id, compound_id, source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["plant_compound_id"], r["plant_id"], r["compound_id"],
-        resolve_src(r, source_map), r.get("source_url"), _ts(r.get("retrieved_at")),
+        r.get("source_url"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
 
 
-def load_diseases(cur, source_map, upsert=False):
+def load_diseases(cur, upsert=False):
     print("Loading diseases...", end=" ", flush=True)
     rows = read_csv(DISEASES_CSV)
     conflict = _conflict("disease_id", [
-        "canonical_key", "disease_name", "ontology_id", "ontology_source",
-        "source_id", "source_url", "retrieved_at",
+        "disease_name", "ontology_id", "ontology_source",
+        "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into diseases (
-            disease_id, canonical_key, disease_name, ontology_id, ontology_source,
-            source_id, source_url, retrieved_at
+            disease_id, disease_name, ontology_id, ontology_source,
+            source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
-        r["disease_id"], r.get("canonical_key"), r.get("disease_name"),
+        r["disease_id"], r.get("disease_name"),
         r.get("ontology_id"), r.get("ontology_source"),
-        resolve_src(r, source_map), r.get("source_url"),
-        _ts(r.get("retrieved_at")),
+        r.get("source_url"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
 
 
-def load_disease_aliases(cur, source_map, upsert=False):
-    print("Loading disease_aliases...", end=" ", flush=True)
-    rows = read_csv(DISEASE_ALIASES_CSV)
-    conflict = _conflict("disease_alias_id", [
-        "disease_id", "alias_name", "alias_key", "alias_type", "retrieved_at",
-    ], upsert)
-    sql = f"""
-        insert into disease_aliases (
-            disease_alias_id, disease_id, alias_name, alias_key, alias_type,
-            retrieved_at
-        ) values %s {conflict}
-    """
-    data = [(
-        r.get("disease_alias_id") or r.get("alias_id"),
-        r["disease_id"], r.get("alias_name"), r.get("alias_key"), r.get("alias_type"),
-        _ts(r.get("retrieved_at")),
-    ) for r in rows]
-    psycopg2.extras.execute_values(cur, sql, data, page_size=500)
-    print(len(data))
-
-
-def load_targets(cur, source_map, upsert=False):
+def load_targets(cur, upsert=False):
     print("Loading targets...", end=" ", flush=True)
     rows = read_csv(TARGETS_CSV)
     conflict = _conflict("target_id", [
-        "canonical_key", "gene_symbol", "protein_name",
-        "uniprot_accession",
-        "source_id", "source_url", "retrieved_at",
+        "gene_symbol", "protein_name", "uniprot_accession",
+        "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into targets (
-            target_id, canonical_key, gene_symbol, protein_name,
-            uniprot_accession,
-            source_id, source_url, retrieved_at
+            target_id, gene_symbol, protein_name, uniprot_accession,
+            source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
-        r["target_id"], r.get("canonical_key"), r.get("gene_symbol"), r.get("protein_name"),
-        r.get("uniprot_accession"),
-        resolve_src(r, source_map), r.get("source_url"),
-        _ts(r.get("retrieved_at")),
+        r["target_id"], r.get("gene_symbol"), r.get("protein_name"),
+        _blank_to_none(r.get("uniprot_accession")),
+        r.get("source_url"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
 
 
-def load_target_aliases(cur, source_map, upsert=False):
-    print("Loading target_aliases...", end=" ", flush=True)
-    rows = read_csv(TARGET_ALIASES_CSV)
-    conflict = _conflict("target_alias_id", [
-        "target_id", "alias_name", "alias_key", "alias_type", "retrieved_at",
-    ], upsert)
-    sql = f"""
-        insert into target_aliases (
-            target_alias_id, target_id, alias_name, alias_key, alias_type,
-            retrieved_at
-        ) values %s {conflict}
-    """
-    data = [(
-        r["target_alias_id"], r["target_id"], r.get("alias_name"), r.get("alias_key"),
-        r.get("alias_type"), _ts(r.get("retrieved_at")),
-    ) for r in rows]
-    psycopg2.extras.execute_values(cur, sql, data, page_size=500)
-    print(len(data))
-
-
-def load_disease_targets(cur, source_map, upsert=False):
+def load_disease_targets(cur, upsert=False):
     print("Loading disease_targets...", end=" ", flush=True)
     rows = read_csv(DISEASE_TARGETS_CSV)
     conflict = _conflict("disease_target_id", [
-        "disease_id", "target_id", "source_id", "association_type", "score",
+        "disease_id", "target_id", "association_type", "opentargets_score",
         "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into disease_targets (
-            disease_target_id, disease_id, target_id, source_id, association_type, score,
+            disease_target_id, disease_id, target_id, association_type, opentargets_score,
             source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["disease_target_id"], r["disease_id"], r["target_id"],
-        resolve_src(r, source_map), r.get("association_type"),
-        _f(r.get("score")), r.get("source_url"), _ts(r.get("retrieved_at")),
+        r.get("association_type"), _f(r.get("score")),
+        r.get("source_url"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))
 
 
 ALL_TABLES = [
-    "plants", "plant_aliases",
-    "compounds", "compound_aliases", "plant_compounds",
-    "diseases", "disease_aliases",
-    "targets", "target_aliases", "disease_targets",
+    "plants", "compounds", "plant_compounds",
+    "diseases", "targets", "disease_targets",
 ]
 
 # All ETL-managed tables to wipe on --reset (reverse FK dependency order).
-# Excludes source_systems (pre-seeded reference data, never wiped).
 RESET_TABLES = [
     "analysis_runs",
-    "disease_targets", "target_aliases", "targets",
-    "disease_aliases", "diseases",
-    "plant_compounds", "compound_aliases", "compounds",
-    "plant_aliases", "plants",
+    "disease_targets", "targets",
+    "diseases",
+    "plant_compounds", "compounds",
+    "plants",
 ]
 
 
@@ -363,7 +266,7 @@ def main():
         help=(
             "Wipe all ETL-managed tables (TRUNCATE CASCADE) then re-seed from "
             "current CSVs. Ignores --tables and --upsert — always loads all "
-            "tables fresh. Preserves source_systems."
+            "tables fresh."
         ),
     )
     args = parser.parse_args()
@@ -379,22 +282,15 @@ def main():
     conn.autocommit = False
     cur = conn.cursor()
     try:
-        source_map = load_source_map(cur)
-        print(f"source_systems: {len(source_map)} entries")
-
         if args.reset:
             reset_all_tables(cur)
 
-        if "plants"           in tables: load_plants(cur, source_map, upsert)
-        if "plant_aliases"    in tables: load_plant_aliases(cur, source_map, upsert)
-        if "compounds"        in tables: load_compounds(cur, source_map, upsert)
-        if "compound_aliases" in tables: load_compound_aliases(cur, source_map, upsert)
-        if "plant_compounds"  in tables: load_plant_compounds(cur, source_map, upsert)
-        if "diseases"         in tables: load_diseases(cur, source_map, upsert)
-        if "disease_aliases"  in tables: load_disease_aliases(cur, source_map, upsert)
-        if "targets"          in tables: load_targets(cur, source_map, upsert)
-        if "target_aliases"   in tables: load_target_aliases(cur, source_map, upsert)
-        if "disease_targets"  in tables: load_disease_targets(cur, source_map, upsert)
+        if "plants"           in tables: load_plants(cur, upsert)
+        if "compounds"        in tables: load_compounds(cur, upsert)
+        if "plant_compounds"  in tables: load_plant_compounds(cur, upsert)
+        if "diseases"         in tables: load_diseases(cur, upsert)
+        if "targets"          in tables: load_targets(cur, upsert)
+        if "disease_targets"  in tables: load_disease_targets(cur, upsert)
 
         conn.commit()
         print("\nDone.")
