@@ -1594,3 +1594,161 @@ html:not(.dark) .hf-bg__grain {
 
   color-scheme: dark;
 }
+
+@layer components {
+  .hf-burger {
+    transition: rotate 800ms 100ms;
+  }
+  .hf-burger[data-state="open"] {
+    rotate: 1turn;
+  }
+  .hf-burger[data-state="closed"] :is(.hf-burger__top, .hf-burger__bottom) {
+    animation: hf-burger-open 1s forwards;
+  }
+  .hf-burger[data-state="open"] :is(.hf-burger__top, .hf-burger__bottom) {
+    animation: hf-burger-close 1s forwards;
+  }
+  .hf-burger__top {
+    --rotation: -45deg;
+    transform-origin: 65px 45px;
+  }
+  .hf-burger__bottom {
+    --rotation: 45deg;
+    transform-origin: 60px 55px;
+  }
+}
+
+@keyframes hf-burger-close {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  40% {
+    stroke-dashoffset: 79.9;
+  }
+  60% {
+    stroke-dashoffset: 79.9;
+    rotate: calc(var(--rotation));
+  }
+  100% {
+    stroke-dashoffset: 0;
+    rotate: var(--rotation);
+  }
+}
+@keyframes hf-burger-open {
+  0% {
+    stroke-dashoffset: 0;
+    rotate: var(--rotation);
+  }
+  40% {
+    stroke-dashoffset: 79.9;
+    rotate: var(--rotation);
+  }
+  60% {
+    stroke-dashoffset: 79.9;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hf-burger,
+  .hf-burger[data-state="open"] {
+    transition: none;
+    rotate: 0;
+  }
+  .hf-burger[data-state] :is(.hf-burger__top, .hf-burger__bottom) {
+    animation: none;
+  }
+}
+
+@layer components {
+  /* Radix Dialog/Drawer enter + exit animations. `tailwindcss-animate` is NOT a
+     dependency, so shadcn's animate-in / fade-in-0 / slide-in-from-* utilities were
+     silent no-ops — there was no transition on open OR close. These real keyframes
+     replace them; Radix keeps the node mounted through the close animation, then
+     unmounts. Applied via the `.hf-anim-*` classes on the Overlay/Content. */
+  .hf-anim-fade[data-state="open"] {
+    animation: hf-fade-in 200ms var(--ease-out);
+  }
+  .hf-anim-fade[data-state="closed"] {
+    animation: hf-fade-out 150ms var(--ease-out);
+  }
+  .hf-anim-slide-left[data-state="open"] {
+    animation: hf-slide-in-left 260ms var(--ease-out);
+  }
+  .hf-anim-slide-left[data-state="closed"] {
+    animation: hf-slide-out-left 200ms var(--ease-out);
+  }
+  .hf-anim-slide-right[data-state="open"] {
+    animation: hf-slide-in-right 260ms var(--ease-out);
+  }
+  .hf-anim-slide-right[data-state="closed"] {
+    animation: hf-slide-out-right 200ms var(--ease-out);
+  }
+}
+
+@keyframes hf-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes hf-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes hf-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes hf-slide-out-left {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+@keyframes hf-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes hf-slide-out-right {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hf-anim-fade[data-state],
+  .hf-anim-slide-left[data-state],
+  .hf-anim-slide-right[data-state] {
+    animation: none;
+  }
+}
