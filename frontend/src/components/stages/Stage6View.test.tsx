@@ -273,6 +273,24 @@ describe("Stage6View — interactive network graph", () => {
     expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
   });
 
+  it("does not render a blank graph when retained nodes have no interactions", () => {
+    wrap(
+      <Stage6View
+        data={makeData({
+          ...makeComputedResult(),
+          edges: [],
+          edge_count: 0,
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /no interactions among the overlap targets/i,
+    );
+    expect(screen.queryByText("Protein-protein interaction network")).toBeNull();
+    expect(screen.queryByRole("button", { name: /download png/i })).toBeNull();
+  });
+
   it("still renders the edge-list table alongside the graph", () => {
     wrap(<Stage6View data={makeCompleteNetworkData()} />);
     expect(screen.getByRole("link", { name: /download csv/i })).toBeInTheDocument();

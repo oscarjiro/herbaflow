@@ -410,10 +410,10 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
               </p>
             )}
 
-            {/* Interactive PPI network (shown once this step has nodes; the deterministic
+            {/* Interactive PPI network (shown once this step has drawable elements; the deterministic
                 server PNG stays in the export bundle). Blocked / empty states have their own
                 UI above, so the graph simply does not render then. */}
-            {computed.nodes.length > 0 && (
+            {network.elements.length > 0 && (
               <>
                 <NetworkGraph
                   title="Protein-protein interaction network"
