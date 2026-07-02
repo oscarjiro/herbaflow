@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./DataTable";
@@ -230,4 +231,37 @@ test("meta.className is applied to body <td> cells", () => {
   const cell = screen.getByText("0.91").closest("td");
   expect(cell).toBeDefined();
   expect(cell!.className).toContain("num");
+});
+
+// ── responsive: plain horizontal scroll (sticky-first column reverted) ───────
+
+type ResponsiveRow = { gene: string; mcc: number };
+const responsiveColumns: ColumnDef<ResponsiveRow>[] = [
+  { accessorKey: "gene", header: "Gene" },
+  { accessorKey: "mcc", header: "MCC" },
+];
+const responsiveData: ResponsiveRow[] = [
+  { gene: "CA4", mcc: 2 },
+  { gene: "CA12", mcc: 1 },
+];
+
+describe("DataTable responsive", () => {
+  afterEach(() => cleanup());
+
+  it("scrolls horizontally on narrow screens without freezing a column", () => {
+    const { container } = render(<DataTable columns={responsiveColumns} data={responsiveData} />);
+    const scroll = container.querySelector("[data-slot='datatable'] .scroll")!;
+    expect(scroll.className).toMatch(/overflow-x-auto/);
+    // The sticky-first column + right-edge fade were reverted (unreadable on desktop).
+    expect(container.querySelector("table")).not.toHaveClass("hf-sticky-first");
+    expect(container.querySelector(".hf-scroll-fade")).not.toBeInTheDocument();
+  });
+
+  it("does not use the removed block-layout hack", () => {
+    const { container } = render(<DataTable columns={responsiveColumns} data={responsiveData} />);
+    const scroll = container.querySelector("[data-slot='datatable'] .scroll")!;
+    expect(scroll.className).not.toMatch(/\[&_table\]:block/);
+    // the real data still renders
+    expect(screen.getByText("CA4")).toBeInTheDocument();
+  });
 });

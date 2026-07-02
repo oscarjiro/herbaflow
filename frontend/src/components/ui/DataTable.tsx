@@ -70,7 +70,7 @@ export function DataTable<T>({
       data-slot="datatable"
       className="border-hf-border w-full overflow-hidden rounded-[var(--radius-lg)] border"
     >
-      <div className="scroll w-full overflow-x-auto max-md:[&_table]:block max-md:[&_tbody_tr]:mb-3 max-md:[&_tbody_tr]:block">
+      <div className="scroll w-full overflow-x-auto">
         <Table className="tabular-nums">
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
