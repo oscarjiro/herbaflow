@@ -39,9 +39,9 @@ from app.services.input_validation import resolve_target_accession
 
 logger = logging.getLogger("herbaflow.pipeline")
 
-# Resolve a UniProt accession to (target_id, gene_symbol, canonical_key), or None when
-# the accession is not a human (9606) target and must be skipped (human-only).
-TargetResolver = Callable[[str], Awaitable[tuple[uuid.UUID, str | None, str] | None]]
+# Resolve a UniProt accession to (target_id, gene_symbol), or None when the accession is
+# not a human (9606) target and must be skipped (human-only).
+TargetResolver = Callable[[str], Awaitable[tuple[uuid.UUID, str | None] | None]]
 
 
 async def compute(
@@ -95,7 +95,7 @@ async def compute(
                 resolved = await resolve_target(acc)
                 if resolved is None:
                     continue  # not a human UniProt target -> skip (human-only)
-                tid, gene, _key = resolved
+                tid, gene = resolved
                 tid_s = str(tid)
                 targets.setdefault(
                     tid_s,
@@ -208,10 +208,6 @@ async def run(
         }
         for r in rows
     ]
-    chembl_src = await target_repo.source_id_by_name("ChEMBL")
-    pubchem_src = await target_repo.source_id_by_name("PubChem BioAssay")
-    uniprot_src = await target_repo.source_id_by_name("UniProt")
-
     min_pchembl = float(params["min_pchembl"])
     min_confidence = int(params["min_assay_confidence"])
 
@@ -276,17 +272,15 @@ async def run(
     logger.info("stage 3: reuse %d compound(s), fetch %d", len(reused_per_compound), len(to_fetch))
 
     async def _go(chembl_c: Any, pubchem_c: Any, uniprot_c: Any) -> dict[str, Any]:
-        async def _resolve(accession: str) -> tuple[uuid.UUID, str | None, str] | None:
+        async def _resolve(accession: str) -> tuple[uuid.UUID, str | None] | None:
             # Shared canonical resolver: identity is keyed on the UniProt primary accession,
             # so a measured accession and a manually-added alias of the same protein map to
             # one target_id (no duplicate rows). See input_validation.resolve_target_accession.
-            acc_res = await resolve_target_accession(
-                accession, target_repo, uniprot_c, uniprot_source_id=uniprot_src
-            )
+            acc_res = await resolve_target_accession(accession, target_repo, uniprot_c)
             rt = acc_res.target
             if rt is None:
                 return None  # non-human / unresolvable -> skip
-            return rt.target_id, rt.gene_symbol, rt.canonical_key
+            return rt.target_id, rt.gene_symbol
 
         return await compute(
             to_fetch,
@@ -324,7 +318,6 @@ async def run(
     # Replace (not upsert) each fetched compound's edges: drop its stale set, write the fresh one
     # stamped with the discovery params. Replace-on-fetch keeps exactly one discovery-param pair per
     # compound and removes edges that fell below a now-stricter threshold.
-    src_by_method = {"chembl_bioactivity": chembl_src, "pubchem_bioassay": pubchem_src}
     fresh_by_compound: dict[str, list[dict[str, Any]]] = {
         str(c["compound_id"]): [] for c in to_fetch
     }
@@ -335,7 +328,6 @@ async def run(
                 "prediction_method": e["prediction_method"],
                 "pchembl_value": e.get("pchembl_value"),
                 "score": e.get("score"),
-                "source_id": src_by_method.get(e["prediction_method"]),
                 "source_url": e.get("source_url"),
                 "retrieved_at": now_utc(),
                 "min_pchembl": min_pchembl,

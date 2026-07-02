@@ -83,7 +83,6 @@ class CompoundTargetRepository:
                     prediction_method=row["prediction_method"],
                     score=row.get("score"),
                     pchembl_value=row.get("pchembl_value"),
-                    source_id=row.get("source_id"),
                     source_url=row.get("source_url"),
                     retrieved_at=row.get("retrieved_at"),
                     min_pchembl=row.get("min_pchembl"),

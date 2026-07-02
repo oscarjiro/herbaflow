@@ -16,8 +16,9 @@ async def test_progress_row_cascades_on_run_delete(engine) -> None:
     async with maker() as s:
         await s.execute(
             text(
-                "insert into analysis_runs(analysis_id, parameters, status, updated_at) "
-                "values (:r, '{}'::jsonb, 'stage_2_running', now())"
+                "insert into analysis_runs"
+                "(analysis_id, parameters, status, created_at, updated_at) "
+                "values (:r, '{}'::jsonb, 'stage_2_running', now(), now())"
             ),
             {"r": run_id},
         )
@@ -54,8 +55,9 @@ async def test_progress_repo_upserts_and_reads(engine) -> None:
     async with maker() as s:
         await s.execute(
             text(
-                "insert into analysis_runs(analysis_id, parameters, status, updated_at) "
-                "values (:r, '{}'::jsonb, 'stage_3_running', now())"
+                "insert into analysis_runs"
+                "(analysis_id, parameters, status, created_at, updated_at) "
+                "values (:r, '{}'::jsonb, 'stage_3_running', now(), now())"
             ),
             {"r": run_id},
         )

@@ -71,20 +71,17 @@ async def test_guided_run_reaches_stage3_and_param_redo_reruns_s3_only(
     monkeypatch.setattr(stage3, "PubChemBioAssayClient", lambda http: _FakePubchem())
     monkeypatch.setattr(stage3, "UniProtClient", lambda http: _FakeUniProt())
 
-    # Seed the source rows (the integration migrations do not apply them) and give the
-    # screened compounds a non-NULL InChIKey (compute() reports coverage 0 without one).
+    # Give the screened compounds a non-NULL InChIKey (compute() reports coverage 0 without one).
+    # inchi_key is UNIQUE (Wave 3 schema trim) -> distinct values per compound.
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
         await s.execute(
-            text(
-                "insert into source_systems(source_name, source_type) values "
-                "('ChEMBL', 'api'),('PubChem BioAssay', 'api'),('UniProt', 'api') "
-                "on conflict (source_name) do nothing"
-            )
+            text("update compounds set inchi_key = 'IKX1' where compound_id = :c1"),
+            {"c1": ids["c1"]},
         )
         await s.execute(
-            text("update compounds set inchi_key = 'IKX' where compound_id in (:c1, :c2)"),
-            {"c1": ids["c1"], "c2": ids["c2"]},
+            text("update compounds set inchi_key = 'IKX2' where compound_id = :c2"),
+            {"c2": ids["c2"]},
         )
         await s.commit()
 
@@ -129,7 +126,7 @@ async def test_guided_run_reaches_stage3_and_param_redo_reruns_s3_only(
     async with maker() as s:
         gene = (
             await s.execute(
-                text("select gene_symbol from targets where canonical_key = 'uniprot:P04637'")
+                text("select gene_symbol from targets where uniprot_accession = 'P04637'")
             )
         ).scalar_one()
         assert gene == "TP53"
@@ -230,32 +227,24 @@ async def test_stage3_reuses_cached_edges_and_refetches_on_param_change(engine, 
     external call; tightening assay confidence forces a refetch (D9)."""
     from app.pipeline.stages import stage3
     from app.repositories.compound_target import CompoundTargetRepository
-    from app.services import canonical
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     cid = str(seeded["c1"])
     acc = "P04637"
     tid = canonical_target_id_for(acc)
 
-    # Seed: a source row, a human target, and a cached edge discovered at (min_pchembl 5.0, conf 7).
+    # Seed: a human target and a cached edge discovered at (min_pchembl 5.0, conf 7).
     async with maker() as s:
-        await s.execute(
-            text(
-                "insert into source_systems(source_name, source_type) values "
-                "('ChEMBL', 'api'),('PubChem BioAssay', 'api'),('UniProt', 'api') "
-                "on conflict (source_name) do nothing"
-            )
-        )
         await s.execute(
             text("update compounds set inchi_key = 'IKX' where compound_id = :c"),
             {"c": seeded["c1"]},
         )
         await s.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession) "
-                "values (:t, :k, 'TP53', :a)"
+                "insert into targets(target_id, gene_symbol, uniprot_accession) "
+                "values (:t, 'TP53', :a)"
             ),
-            {"t": tid, "k": canonical.target_canonical_key(uniprot=acc), "a": acc},
+            {"t": tid, "a": acc},
         )
         repo = CompoundTargetRepository(s)
         await repo.replace_for_compound(

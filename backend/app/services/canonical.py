@@ -1,8 +1,9 @@
 """Backend canonical-identity twin of etl/shared/identity.py.
 
-The single backend home for UUID v5 entity/alias/bridge ids and canonical keys.
-Logic is identical to the ETL module by design; test_canonical_parity.py asserts
-byte-equality so the twin cannot drift. stdlib-only.
+The single backend home for UUID v5 entity/bridge ids and canonical keys.
+Logic matches the ETL module by design; test_canonical_parity.py asserts byte-equality on the
+shared functions so the twin cannot drift. Alias-id builders were retired with the alias tables
+(the ETL module keeps its copy, which parity no longer covers). stdlib-only.
 """
 
 from __future__ import annotations
@@ -16,10 +17,6 @@ PLANT_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.plants")
 COMPOUND_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.compounds")
 TARGET_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.targets")
 DISEASE_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.diseases")
-PLANT_ALIAS_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.plant_aliases")
-COMPOUND_ALIAS_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.compound_aliases")
-TARGET_ALIAS_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.target_aliases")
-DISEASE_ALIAS_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.disease_aliases")
 PLANT_COMPOUND_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.plant_compounds")
 COMPOUND_TARGET_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.compound_targets")
 DISEASE_TARGET_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.disease_targets")
@@ -143,49 +140,6 @@ def target_id_from_key(canonical_key: str) -> str:
 
 def disease_id(ontology_source: object, ontology_id: object, slug_source: object) -> str:
     return _v5(DISEASE_NS, disease_canonical_key(ontology_source, ontology_id, slug_source))
-
-
-# --- Aliases: key on (parent_id, alias_key-slug); alias_type is an attribute ---
-
-# Higher int = higher priority.
-ALIAS_PRIORITY = {
-    "canonical_name": 100,
-    "ontology_synonym": 90,
-    "ontology_label": 85,
-    "user_alias": 70,
-    "normalized_alias": 60,
-    "seed_name": 50,
-    "raw_name": 40,
-}
-
-
-def _alias_id(namespace: uuid.UUID, parent_id: str, alias_key: str) -> str:
-    return _v5(namespace, f"{parent_id}:{alias_key}")
-
-
-def plant_alias_id(parent_id: str, alias_key: str) -> str:
-    return _alias_id(PLANT_ALIAS_NS, parent_id, alias_key)
-
-
-def compound_alias_id(parent_id: str, alias_key: str) -> str:
-    return _alias_id(COMPOUND_ALIAS_NS, parent_id, alias_key)
-
-
-def target_alias_id(parent_id: str, alias_key: str) -> str:
-    return _alias_id(TARGET_ALIAS_NS, parent_id, alias_key)
-
-
-def disease_alias_id(parent_id: str, alias_key: str) -> str:
-    return _alias_id(DISEASE_ALIAS_NS, parent_id, alias_key)
-
-
-def pick_alias(current: dict[Any, Any] | None, candidate: dict[Any, Any]) -> dict[Any, Any]:
-    """Return whichever alias has the higher ALIAS_PRIORITY (candidate wins only if strictly >)."""
-    if current is None:
-        return candidate
-    cur_p = ALIAS_PRIORITY.get(current.get("alias_type", ""), 0)
-    cand_p = ALIAS_PRIORITY.get(candidate.get("alias_type", ""), 0)
-    return candidate if cand_p > cur_p else current
 
 
 # --- Bridges: pair grain; uuid5(NS, "{left_id}:{right_id}"); source NOT in identity ---

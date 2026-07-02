@@ -27,7 +27,7 @@ from tests.scientific.conftest import load_json
 from tests.scientific.replay import ReplayGprofiler, ReplayString, forbid_stage3_clients
 
 # Canonical CRC disease identity (the seed carries only disease_id; DOID 9256 = colorectal cancer).
-_CRC_CANONICAL_KEY = "doid:9256"
+_CRC_ONTOLOGY_ID = "doid:9256"
 _CRC_NAME = "Colorectal Cancer"
 
 
@@ -44,45 +44,28 @@ def gd1_gprofiler_client() -> ReplayGprofiler:
 async def seed_gd1(engine: AsyncEngine) -> dict[str, Any]:
     """Insert the captured GD-1 canonical data and return the seed dict.
 
-    Insert order respects the FK dependencies: source_systems (referenced by both edge tables) ->
-    compounds -> targets -> compound_targets -> diseases -> disease_targets. All SQL is
-    parameterized (``text()`` + bound params), mirroring the integration seed style.
+    Insert order respects the FK dependencies: compounds -> targets -> compound_targets ->
+    diseases -> disease_targets. All SQL is parameterized (``text()`` + bound params), mirroring
+    the integration seed style. ``source_systems``/``source_id`` were retired with the Wave 3
+    schema trim, so they are no longer seeded or written.
     """
     seed = load_json("gd1_seed.json")
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        # 1. source_systems — every distinct non-null source_id referenced by the edges must exist.
-        source_ids: set[str] = set()
-        for edge in seed["compound_targets"]:
-            if edge.get("source_id"):
-                source_ids.add(edge["source_id"])
-        for edge in seed["disease_targets"]:
-            if edge.get("source_id"):
-                source_ids.add(edge["source_id"])
-        for sid in source_ids:
-            await s.execute(
-                text(
-                    "insert into source_systems(source_id, source_name, source_type) "
-                    "values (:sid, :name, 'api') on conflict (source_id) do nothing"
-                ),
-                {"sid": sid, "name": f"gd1-source-{sid[:8]}"},
-            )
-
-        # 2. compounds — curcumin (BARE inchi_key; is_pains_positive + validation_status NOT NULL).
+        # 1. compounds — curcumin (BARE inchi_key; is_pains_positive + validation_status NOT NULL).
         comp = seed["compound"]
         await s.execute(
             text(
                 "insert into compounds("
-                "compound_id, canonical_key, canonical_name, inchi_key, molecular_weight, logp, "
+                "compound_id, canonical_name, inchi_key, molecular_weight, logp, "
                 "hbond_donors, hbond_acceptors, tpsa, rotatable_bonds, num_ro5_violations, "
                 "is_pains_positive, validation_status) values ("
-                ":compound_id, :canonical_key, :canonical_name, :inchi_key, :molecular_weight, "
+                ":compound_id, :canonical_name, :inchi_key, :molecular_weight, "
                 ":logp, :hbond_donors, :hbond_acceptors, :tpsa, :rotatable_bonds, "
                 ":num_ro5_violations, false, :validation_status)"
             ),
             {
                 "compound_id": comp["compound_id"],
-                "canonical_key": comp["canonical_key"],
                 "canonical_name": comp["canonical_name"],
                 "inchi_key": comp["inchi_key"],
                 "molecular_weight": comp["molecular_weight"],
@@ -96,17 +79,16 @@ async def seed_gd1(engine: AsyncEngine) -> dict[str, Any]:
             },
         )
 
-        # 3. targets — all 835 canonical human proteins (multi-row executemany).
+        # 2. targets — all 835 canonical human proteins (multi-row executemany).
         await s.execute(
             text(
                 "insert into targets("
-                "target_id, canonical_key, gene_symbol, uniprot_accession, source_url) values "
-                "(:target_id, :canonical_key, :gene_symbol, :uniprot_accession, :source_url)"
+                "target_id, gene_symbol, uniprot_accession, source_url) values "
+                "(:target_id, :gene_symbol, :uniprot_accession, :source_url)"
             ),
             [
                 {
                     "target_id": t["target_id"],
-                    "canonical_key": t["canonical_key"],
                     "gene_symbol": t.get("gene_symbol"),
                     "uniprot_accession": t.get("uniprot_accession"),
                     "source_url": t.get("source_url"),
@@ -115,13 +97,13 @@ async def seed_gd1(engine: AsyncEngine) -> dict[str, Any]:
             ],
         )
 
-        # 4. compound_targets — all 104 measured edges, with discovery params (D9 reuse keys).
+        # 3. compound_targets — all 104 measured edges, with discovery params (D9 reuse keys).
         await s.execute(
             text(
                 "insert into compound_targets("
-                "compound_target_id, compound_id, target_id, source_id, prediction_method, "
+                "compound_target_id, compound_id, target_id, prediction_method, "
                 "score, pchembl_value, source_url, min_pchembl, min_assay_confidence) values ("
-                ":compound_target_id, :compound_id, :target_id, :source_id, :prediction_method, "
+                ":compound_target_id, :compound_id, :target_id, :prediction_method, "
                 ":score, :pchembl_value, :source_url, :min_pchembl, :min_assay_confidence)"
             ),
             [
@@ -129,7 +111,6 @@ async def seed_gd1(engine: AsyncEngine) -> dict[str, Any]:
                     "compound_target_id": uuid.uuid4(),
                     "compound_id": e["compound_id"],
                     "target_id": e["target_id"],
-                    "source_id": e.get("source_id"),
                     "prediction_method": e["prediction_method"],
                     "score": e.get("score"),
                     "pchembl_value": e.get("pchembl_value"),
@@ -141,26 +122,26 @@ async def seed_gd1(engine: AsyncEngine) -> dict[str, Any]:
             ],
         )
 
-        # 5. diseases — the CRC row (canonical key DOID:9256, name from the canon).
+        # 4. diseases — the CRC row (ontology id DOID:9256, name from the canon).
         await s.execute(
             text(
-                "insert into diseases(disease_id, canonical_key, disease_name) "
-                "values (:disease_id, :canonical_key, :disease_name)"
+                "insert into diseases(disease_id, ontology_id, disease_name) "
+                "values (:disease_id, :ontology_id, :disease_name)"
             ),
             {
                 "disease_id": seed["disease_id"],
-                "canonical_key": _CRC_CANONICAL_KEY,
+                "ontology_id": _CRC_ONTOLOGY_ID,
                 "disease_name": _CRC_NAME,
             },
         )
 
-        # 6. disease_targets — all 746 ETL-seeded associations (Stage 4 reads these).
+        # 5. disease_targets — all 746 ETL-seeded associations (Stage 4 reads these).
         await s.execute(
             text(
                 "insert into disease_targets("
-                "disease_target_id, disease_id, target_id, source_id, association_type, "
+                "disease_target_id, disease_id, target_id, association_type, "
                 "opentargets_score, source_url) values ("
-                ":disease_target_id, :disease_id, :target_id, :source_id, :association_type, "
+                ":disease_target_id, :disease_id, :target_id, :association_type, "
                 ":opentargets_score, :source_url)"
             ),
             [
@@ -168,7 +149,6 @@ async def seed_gd1(engine: AsyncEngine) -> dict[str, Any]:
                     "disease_target_id": uuid.uuid4(),
                     "disease_id": e["disease_id"],
                     "target_id": e["target_id"],
-                    "source_id": e.get("source_id"),
                     "association_type": e.get("association_type"),
                     "opentargets_score": e.get("opentargets_score"),
                     "source_url": e.get("source_url"),

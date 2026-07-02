@@ -61,17 +61,17 @@ async def _seed_entities(maker) -> tuple[str, str]:
         await s.execute(
             text(
                 "insert into compounds"
-                "(compound_id, canonical_key, canonical_name, inchi_key, smiles, "
+                "(compound_id, canonical_name, inchi_key, smiles, "
                 " validation_status) "
-                "values (:c, 'inchikey:GRAPH', 'CURCUMIN', 'VFLDPWHFBUODDF-FCXRPNKRSA-N', "
+                "values (:c, 'CURCUMIN', 'VFLDPWHFBUODDF-FCXRPNKRSA-N', "
                 "'CC=O', 'externally_validated')"
             ),
             {"c": cid},
         )
         await s.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession) "
-                "values (:t, 'uniprot:P37231', 'PPARG', 'P37231')"
+                "insert into targets(target_id, gene_symbol, uniprot_accession) "
+                "values (:t, 'PPARG', 'P37231')"
             ),
             {"t": tid},
         )

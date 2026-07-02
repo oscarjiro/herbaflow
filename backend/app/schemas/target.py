@@ -25,7 +25,6 @@ class TargetInput(BaseModel):
 
 class ResolvedTarget(BaseModel):
     target_id: uuid.UUID
-    canonical_key: str
     gene_symbol: str | None
     uniprot_accession: str | None
     validation_status: str  # externally_validated | db_hit

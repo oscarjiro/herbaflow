@@ -69,7 +69,6 @@ def _compound_dict(
         "hbond_acceptors": _read(obj, "hbond_acceptors"),
         "tpsa": _read(obj, "tpsa"),
         "rotatable_bonds": _read(obj, "rotatable_bonds"),
-        "qed_score": _read(obj, "qed_score"),
         "np_likeness_score": _read(obj, "np_likeness_score"),
         "num_ro5_violations": _read(obj, "num_ro5_violations"),
         "is_pains_positive": _read(obj, "is_pains_positive") or False,
@@ -114,7 +113,6 @@ def _overlay_descriptors(row: dict[str, Any], d: MolDescriptors, descriptor_sour
     row["hbond_acceptors"] = d.hbond_acceptors
     row["tpsa"] = d.tpsa
     row["rotatable_bonds"] = d.rotatable_bonds
-    row["qed_score"] = d.qed_score
     row["np_likeness_score"] = d.np_likeness_score
     row["num_ro5_violations"] = d.num_ro5_violations
     row["is_pains_positive"] = d.is_pains_positive

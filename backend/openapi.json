@@ -174,24 +174,6 @@
         ],
         "summary": "Create Analysis",
         "operationId": "create_analysis",
-        "parameters": [
-          {
-            "name": "Idempotency-Key",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Idempotency-Key"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1520,10 +1502,6 @@
             "format": "uuid",
             "title": "Disease Id"
           },
-          "canonical_key": {
-            "type": "string",
-            "title": "Canonical Key"
-          },
           "disease_name": {
             "anyOf": [
               {
@@ -1600,7 +1578,6 @@
         "type": "object",
         "required": [
           "disease_id",
-          "canonical_key",
           "disease_name",
           "ontology_id",
           "ontology_source",
@@ -1675,10 +1652,6 @@
             "format": "uuid",
             "title": "Plant Id"
           },
-          "canonical_key": {
-            "type": "string",
-            "title": "Canonical Key"
-          },
           "canonical_scientific_name": {
             "anyOf": [
               {
@@ -1721,7 +1694,6 @@
         "type": "object",
         "required": [
           "plant_id",
-          "canonical_key",
           "canonical_scientific_name",
           "family_name"
         ],
@@ -1780,10 +1752,6 @@
             "format": "uuid",
             "title": "Compound Id"
           },
-          "canonical_key": {
-            "type": "string",
-            "title": "Canonical Key"
-          },
           "canonical_name": {
             "anyOf": [
               {
@@ -1814,7 +1782,6 @@
         "type": "object",
         "required": [
           "compound_id",
-          "canonical_key",
           "canonical_name",
           "validation_status"
         ],
@@ -1826,10 +1793,6 @@
             "type": "string",
             "format": "uuid",
             "title": "Target Id"
-          },
-          "canonical_key": {
-            "type": "string",
-            "title": "Canonical Key"
           },
           "gene_symbol": {
             "anyOf": [
@@ -1861,7 +1824,6 @@
         "type": "object",
         "required": [
           "target_id",
-          "canonical_key",
           "gene_symbol",
           "uniprot_accession",
           "validation_status"

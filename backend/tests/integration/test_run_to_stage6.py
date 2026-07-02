@@ -2,8 +2,9 @@
 
 STRING is mocked (class-monkeypatch on the stage module, mirroring the Stage-3 fakes); the
 overlap is REAL — Stage 3 resolves the mocked ChEMBL accessions to pre-seeded canonical targets
-(``resolve_target_accession`` DB-hits ``canonical_key='uniprot:<ACC>'``), and those same target_ids
-are the run's disease_targets, so Stage 5's ``target_id`` intersection is genuinely non-empty.
+(``resolve_target_accession`` DB-hits the target's derived ``target_id``), and those same
+target_ids are the run's disease_targets, so Stage 5's ``target_id`` intersection is genuinely
+non-empty.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from app.integrations.chembl import ChemblHit
 from app.integrations.string_db import StringEdge
 from app.integrations.uniprot import UniProtReason, UniProtRecord, UniProtResolution
 from app.pipeline.stages import stage3, stage6, stage8
+from app.services import canonical
 
 SETTLED = frozenset(
     {
@@ -91,31 +93,27 @@ def _patch_stage_clients(monkeypatch, string_fake, gprofiler_fake=None):
     monkeypatch.setattr(stage8, "GprofilerClient", lambda http: _gprofiler)
 
 
-async def _seed_source_systems(s, c1, c2):
+async def _seed_inchikeys(s, c1, c2):
+    # inchi_key is UNIQUE (Wave 3 schema trim) -> distinct values per compound.
     await s.execute(
-        text(
-            "insert into source_systems(source_name, source_type) values "
-            "('ChEMBL','api'),('PubChem BioAssay','api'),('UniProt','api') "
-            "on conflict (source_name) do nothing"
-        )
+        text("update compounds set inchi_key='IKX1' where compound_id = :c1"), {"c1": c1}
     )
     await s.execute(
-        text("update compounds set inchi_key='IKX' where compound_id in (:c1,:c2)"),
-        {"c1": c1, "c2": c2},
+        text("update compounds set inchi_key='IKX2' where compound_id = :c2"), {"c2": c2}
     )
 
 
 async def _insert_target(s, *, acc, gene):
-    """A canonical target keyed exactly as ``resolve_target_accession`` keys it (uniprot:<ACC>)."""
-    tid = uuid.uuid4()
+    """A canonical target keyed exactly as ``resolve_target_accession`` keys it (its derived id)."""
+    key = canonical.target_canonical_key(uniprot=acc)
+    tid = uuid.UUID(canonical.target_id_from_key(key))
     await s.execute(
         text(
-            "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession, "
-            "source_url) values (:t,:k,:g,:a,:u)"
+            "insert into targets(target_id, gene_symbol, uniprot_accession, "
+            "source_url) values (:t,:g,:a,:u)"
         ),
         {
             "t": tid,
-            "k": f"uniprot:{acc}",
             "g": gene,
             "a": acc,
             "u": f"https://www.uniprot.org/uniprotkb/{acc}/entry",
@@ -166,7 +164,7 @@ async def test_guided_run_reaches_stage5_then_stage6(client, engine, monkeypatch
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s, ids["c1"], ids["c2"])
+        await _seed_inchikeys(s, ids["c1"], ids["c2"])
         t_tp53 = await _insert_target(s, acc="P04637", gene="TP53")
         t_egfr = await _insert_target(s, acc="P00533", gene="EGFR")
         await _insert_disease_target(s, disease_id=ids["disease"], target_id=t_tp53, score=0.8)
@@ -234,7 +232,7 @@ async def test_zero_overlap_auto_fails(client, engine, monkeypatch):
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s, ids["c1"], ids["c2"])
+        await _seed_inchikeys(s, ids["c1"], ids["c2"])
         # Pre-seed TP53 so S3 resolves it, but DO NOT make it a disease_target.
         await _insert_target(s, acc="P04637", gene="TP53")
         # The disease's only target is a DIFFERENT, non-overlapping protein.
@@ -293,7 +291,7 @@ async def test_overlap_cap_blocks_then_recovers_on_redo(client, engine, monkeypa
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s, ids["c1"], ids["c2"])
+        await _seed_inchikeys(s, ids["c1"], ids["c2"])
         for i, (acc, gene) in enumerate(zip(accs, genes, strict=True)):
             tid = await _insert_target(s, acc=acc, gene=gene)
             # Descending score so the top-N cap is deterministic.
@@ -355,7 +353,7 @@ async def test_string_outage_fails_run(client, engine, monkeypatch):
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s, ids["c1"], ids["c2"])
+        await _seed_inchikeys(s, ids["c1"], ids["c2"])
         t_tp53 = await _insert_target(s, acc="P04637", gene="TP53")
         t_egfr = await _insert_target(s, acc="P00533", gene="EGFR")
         await _insert_disease_target(s, disease_id=ids["disease"], target_id=t_tp53, score=0.8)
@@ -415,7 +413,7 @@ async def test_stage4_edit_reaches_stage5_overlap(client, engine, monkeypatch):
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s, ids["c1"], ids["c2"])
+        await _seed_inchikeys(s, ids["c1"], ids["c2"])
         t_tp53 = await _insert_target(s, acc="P04637", gene="TP53")
         t_egfr = await _insert_target(s, acc="P00533", gene="EGFR")
         # AKT1 is a canonical target (so S3 resolves it) but NOT a disease_target.

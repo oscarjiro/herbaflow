@@ -12,7 +12,6 @@ class DiseaseRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     disease_id: uuid.UUID
-    canonical_key: str
     disease_name: str | None
     ontology_id: str | None
     ontology_source: str | None

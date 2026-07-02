@@ -11,7 +11,6 @@ class PlantRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     plant_id: uuid.UUID
-    canonical_key: str
     canonical_scientific_name: str | None
     family_name: str | None
     matched_alias: str | None = None

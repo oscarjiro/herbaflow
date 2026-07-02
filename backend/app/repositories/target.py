@@ -9,7 +9,6 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.source_system import SourceSystem
 from app.models.target import Target
 
 
@@ -17,8 +16,8 @@ class TargetRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_by_key(self, canonical_key: str) -> Target | None:
-        stmt = select(Target).where(Target.canonical_key == canonical_key)
+    async def get_by_id(self, target_id: uuid.UUID) -> Target | None:
+        stmt = select(Target).where(Target.target_id == target_id)
         return (await self.session.execute(stmt)).scalar_one_or_none()
 
     async def get_by_gene_symbol(self, gene_symbol: str) -> Target | None:
@@ -33,7 +32,7 @@ class TargetRepository:
         return rows[0] if len(rows) == 1 else None
 
     async def upsert(self, row: dict[str, Any]) -> None:
-        stmt = insert(Target).values(**row).on_conflict_do_nothing(index_elements=["canonical_key"])
+        stmt = insert(Target).values(**row).on_conflict_do_nothing(index_elements=["target_id"])
         await self.session.execute(stmt)
 
     async def existing_ids(self, ids: list[uuid.UUID]) -> set[uuid.UUID]:
@@ -47,10 +46,6 @@ class TargetRepository:
             return []
         stmt = select(Target).where(Target.target_id.in_(ids))
         return list((await self.session.execute(stmt)).scalars().all())
-
-    async def source_id_by_name(self, name: str) -> uuid.UUID | None:
-        stmt = select(SourceSystem.source_id).where(SourceSystem.source_name == name)
-        return (await self.session.execute(stmt)).scalar_one_or_none()
 
     async def count(self) -> int:
         return int((await self.session.execute(select(func.count(Target.target_id)))).scalar_one())

@@ -44,8 +44,8 @@ def test_create_returns_202_and_schedules(monkeypatch) -> None:
         def from_session(cls, session):
             return cls()
 
-        async def create(self, payload, *, idempotency_key=None):
-            return created, False
+        async def create(self, payload):
+            return created
 
     scheduled: list = []
     monkeypatch.setattr(analyses, "AnalysisService", FakeService)

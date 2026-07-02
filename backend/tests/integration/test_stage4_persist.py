@@ -13,7 +13,7 @@ from app.pipeline.stages import stage4
 async def _seed(session, did, rows):
     await session.execute(
         text(
-            "insert into diseases(disease_id, canonical_key, disease_name) "
+            "insert into diseases(disease_id, ontology_id, disease_name) "
             "values (:d,'doid:s4','S4 Disease') on conflict do nothing"
         ),
         {"d": did},
@@ -22,10 +22,10 @@ async def _seed(session, did, rows):
         tid = uuid.uuid4()
         await session.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession) "
-                "values (:t,:k,:g,:a)"
+                "insert into targets(target_id, gene_symbol, uniprot_accession) "
+                "values (:t,:g,:a)"
             ),
-            {"t": tid, "k": f"uniprot:{acc}", "g": gene, "a": acc},
+            {"t": tid, "g": gene, "a": acc},
         )
         await session.execute(
             text(

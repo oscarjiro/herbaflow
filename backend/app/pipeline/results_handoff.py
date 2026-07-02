@@ -330,7 +330,6 @@ _STAGE2_FIELDS = (
     "hbond_acceptors",
     "tpsa",
     "rotatable_bonds",
-    "qed_score",
     "np_likeness_score",
     "is_pains_positive",
     "source_url",
@@ -354,7 +353,6 @@ def _stage2_csv(sr: dict[str, Any], compounds_by_id: dict[str, Any], _t: dict[st
         "hbond_acceptors",
         "tpsa",
         "rotatable_bonds",
-        "qed_score",
         "np_likeness_score",
         "is_pains_positive",
         "source_url",
@@ -601,7 +599,6 @@ included; the `passed` column tells you which bucket each compound fell into.
 | `hbond_acceptors` | Number of hydrogen-bond acceptors. |
 | `tpsa` | Topological polar surface area (Å²). |
 | `rotatable_bonds` | Number of rotatable bonds (flexibility indicator). |
-| `qed_score` | Quantitative Estimate of Drug-likeness (0 to 1; higher = more drug-like). |
 | `np_likeness_score` | Natural-product likeness score. |
 | `is_pains_positive` | `True` if the compound triggered a PAINS (pan-assay interference) alert. |
 | `source_url` | PubChem compound page URL. |

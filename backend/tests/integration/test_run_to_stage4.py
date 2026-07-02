@@ -64,22 +64,20 @@ async def test_guided_run_reaches_stage4_with_scores(client, engine, monkeypatch
     maker = async_sessionmaker(engine, expire_on_commit=False)
     seeded_target_id = uuid.uuid4()
     async with maker() as s:
+        # inchi_key is UNIQUE (Wave 3 schema trim) -> distinct values per compound.
         await s.execute(
-            text(
-                "insert into source_systems(source_name, source_type) values "
-                "('ChEMBL','api'),('PubChem BioAssay','api'),('UniProt','api') "
-                "on conflict (source_name) do nothing"
-            )
+            text("update compounds set inchi_key='IKX1' where compound_id = :c1"),
+            {"c1": ids["c1"]},
         )
         await s.execute(
-            text("update compounds set inchi_key='IKX' where compound_id in (:c1,:c2)"),
-            {"c1": ids["c1"], "c2": ids["c2"]},
+            text("update compounds set inchi_key='IKX2' where compound_id = :c2"),
+            {"c2": ids["c2"]},
         )
         # Two seeded disease-targets for the run's disease (scores 0.8 and 0.2).
         await s.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession, "
-                "source_url) values (:t,'uniprot:P55555','GENEZ','P55555',"
+                "insert into targets(target_id, gene_symbol, uniprot_accession, "
+                "source_url) values (:t,'GENEZ','P55555',"
                 "'https://www.uniprot.org/uniprotkb/P55555/entry')"
             ),
             {"t": seeded_target_id},
@@ -94,8 +92,8 @@ async def test_guided_run_reaches_stage4_with_scores(client, engine, monkeypatch
         low_t = uuid.uuid4()
         await s.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession) "
-                "values (:t,'uniprot:P66666','GENElow','P66666')"
+                "insert into targets(target_id, gene_symbol, uniprot_accession) "
+                "values (:t,'GENElow','P66666')"
             ),
             {"t": low_t},
         )
@@ -159,8 +157,8 @@ async def test_guided_run_reaches_stage4_with_scores(client, engine, monkeypatch
     async with maker() as s:
         await s.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession) "
-                "values (:t,'uniprot:P77777','MANUALG','P77777')"
+                "insert into targets(target_id, gene_symbol, uniprot_accession) "
+                "values (:t,'MANUALG','P77777')"
             ),
             {"t": manual_t},
         )
@@ -182,10 +180,7 @@ async def test_guided_run_reaches_stage4_with_scores(client, engine, monkeypatch
     extra = uuid.uuid4()
     async with maker() as s:
         await s.execute(
-            text(
-                "insert into targets(target_id, canonical_key, gene_symbol) "
-                "values (:t,'uniprot:P88888','OVER')"
-            ),
+            text("insert into targets(target_id, gene_symbol) values (:t,'OVER')"),
             {"t": extra},
         )
         await s.commit()

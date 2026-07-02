@@ -28,7 +28,7 @@ class FakePubchem:
 
 async def _resolve_all(accession):
     key = canonical.target_canonical_key(uniprot=accession)
-    return uuid.UUID(canonical.target_id_from_key(key)), accession, key
+    return uuid.UUID(canonical.target_id_from_key(key)), accession
 
 
 @pytest.mark.asyncio
@@ -70,7 +70,7 @@ async def test_nonhuman_accession_skipped():
         if acc == "NONHUMAN":
             return None
         key = canonical.target_canonical_key(uniprot=acc)
-        return uuid.UUID(canonical.target_id_from_key(key)), acc, key
+        return uuid.UUID(canonical.target_id_from_key(key)), acc
 
     compounds = [
         {
@@ -102,7 +102,7 @@ async def test_coverage_counts_distinct_targets_not_accessions():
     async def _resolve_alias(acc):
         primary = "P04637" if acc in ("P04637", "Q14225") else acc
         key = canonical.target_canonical_key(uniprot=primary)
-        return uuid.UUID(canonical.target_id_from_key(key)), "TP53", key
+        return uuid.UUID(canonical.target_id_from_key(key)), "TP53"
 
     compounds = [
         {
@@ -135,7 +135,7 @@ async def test_targets_carry_gene_symbol_and_accession():
     async def _resolve(acc):
         if acc == "P00533":
             key = canonical.target_canonical_key(uniprot="P00533")
-            return uuid.UUID(canonical.target_id_from_key(key)), "EGFR", key
+            return uuid.UUID(canonical.target_id_from_key(key)), "EGFR"
         return None
 
     compounds = [

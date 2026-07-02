@@ -160,10 +160,7 @@ async def seed_target(engine):
     tid = uuid.uuid4()
     async with maker() as s:
         await s.execute(
-            text(
-                "insert into targets(target_id, gene_symbol) "
-                "values (:t, 'CTGENE')"
-            ),
+            text("insert into targets(target_id, gene_symbol) " "values (:t, 'CTGENE')"),
             {"t": tid},
         )
         await s.commit()

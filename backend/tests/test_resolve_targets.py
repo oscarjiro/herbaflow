@@ -9,23 +9,20 @@ from app.services.input_validation import resolve_target_accession, resolve_targ
 
 
 class FakeTargetRepo:
-    def __init__(self, by_key=None, by_symbol=None):
-        self._by_key = by_key or {}
+    def __init__(self, by_id=None, by_symbol=None):
+        self._by_id = by_id or {}
         self._by_symbol = by_symbol or {}
         self.upserted = []  # every row handed to upsert(), in order
 
-    async def get_by_key(self, key):
-        return self._by_key.get(key)
+    async def get_by_id(self, target_id):
+        return self._by_id.get(target_id)
 
     async def get_by_gene_symbol(self, gene_symbol):
         return self._by_symbol.get(gene_symbol)
 
     async def upsert(self, row):
-        self._by_key[row["canonical_key"]] = type("T", (), row)
+        self._by_id[row["target_id"]] = type("T", (), row)
         self.upserted.append(row)
-
-    async def source_id_by_name(self, name):
-        return None
 
 
 class FakeUniProt:
@@ -58,7 +55,6 @@ async def test_uniprot_accession_resolves_and_persists():
     assert not failed
     assert resolved[0].uniprot_accession == "P04637"
     assert resolved[0].gene_symbol == "TP53"
-    assert resolved[0].canonical_key  # set
 
 
 @pytest.mark.asyncio
@@ -161,13 +157,13 @@ async def test_resolve_target_accession_no_human_record_reports_reason():
 async def test_resolve_target_accession_db_fast_path_skips_uniprot():
     # A target already stored under its key is returned from the DB without a UniProt call.
     key = canonical.target_canonical_key(uniprot="P00533")
+    tid = uuid.UUID(canonical.target_id_from_key(key))
     row = {
-        "target_id": uuid.UUID(canonical.target_id_from_key(key)),
-        "canonical_key": key,
+        "target_id": tid,
         "gene_symbol": "EGFR",
         "uniprot_accession": "P00533",
     }
-    repo = FakeTargetRepo({key: type("T", (), row)})
+    repo = FakeTargetRepo({tid: type("T", (), row)})
 
     class BoomUniProt:
         async def resolve(self, acc):
@@ -227,10 +223,7 @@ class _CountingUniProt_d6:
 
 
 class _EmptyRepo_d6:
-    async def get_by_key(self, key):  # no DB hit
-        return None
-
-    async def source_id_by_name(self, name):
+    async def get_by_id(self, target_id):  # no DB hit
         return None
 
     async def upsert(self, row):  # pragma: no cover - not reached in this test
@@ -243,7 +236,7 @@ async def test_resolve_target_accession_skips_non_uniprot_without_network():
     # stored target (targets canonicalize on a UniProt primary) nor resolve via accession:/sec_acc:
     # (it 400s). It must be skipped with INVALID_ID and ZERO UniProt calls.
     up = _CountingUniProt_d6()
-    res = await resolve_target_accession("NP_001234", _EmptyRepo_d6(), up, uniprot_source_id=None)
+    res = await resolve_target_accession("NP_001234", _EmptyRepo_d6(), up)
     assert res.target is None
     assert res.reason is UniProtReason.INVALID_ID
     assert up.calls == 0
@@ -253,7 +246,7 @@ async def test_resolve_target_accession_skips_non_uniprot_without_network():
 async def test_resolve_target_accession_still_calls_uniprot_for_real_accession():
     # A UniProt-grammar accession is NOT skipped — it proceeds to resolve (DB-miss -> network).
     up = _CountingUniProt_d6()
-    res = await resolve_target_accession("P00533", _EmptyRepo_d6(), up, uniprot_source_id=None)
+    res = await resolve_target_accession("P00533", _EmptyRepo_d6(), up)
     assert up.calls == 1  # the guard does not block real accessions
     assert res.target is None  # _CountingUniProt_d6 returns no record, but the call was made
 
@@ -298,14 +291,14 @@ async def test_known_symbol_db_first_skips_uniprot():
     # A gene symbol whose target is already stored (any prior run) resolves to its accession
     # via the DB — the UniProt client's resolve_symbol/resolve must NOT be called (G-4).
     key = canonical.target_canonical_key(uniprot="P04637")
+    tid = uuid.UUID(canonical.target_id_from_key(key))
     row = {
-        "target_id": uuid.UUID(canonical.target_id_from_key(key)),
-        "canonical_key": key,
+        "target_id": tid,
         "gene_symbol": "TP53",
         "uniprot_accession": "P04637",
     }
     stored = type("T", (), row)
-    repo = FakeTargetRepo(by_key={key: stored}, by_symbol={"TP53": stored})
+    repo = FakeTargetRepo(by_id={tid: stored}, by_symbol={"TP53": stored})
 
     class CountingUniProt:
         def __init__(self):
@@ -446,7 +439,7 @@ class _ConcurrencySpyRepo:
     """Records peak concurrent in-flight DB ops to prove the single session stays serial."""
 
     def __init__(self):
-        self._by_key = {}
+        self._by_id = {}
         self._by_symbol = {}
         self.upserted = []
         self._in_flight = 0
@@ -458,9 +451,9 @@ class _ConcurrencySpyRepo:
         await asyncio.sleep(0)
         self._in_flight -= 1
 
-    async def get_by_key(self, key):
+    async def get_by_id(self, target_id):
         await self._touch()
-        return self._by_key.get(key)
+        return self._by_id.get(target_id)
 
     async def get_by_gene_symbol(self, gene_symbol):
         await self._touch()
@@ -468,12 +461,8 @@ class _ConcurrencySpyRepo:
 
     async def upsert(self, row):
         await self._touch()
-        self._by_key[row["canonical_key"]] = type("T", (), row)
+        self._by_id[row["target_id"]] = type("T", (), row)
         self.upserted.append(row)
-
-    async def source_id_by_name(self, name):
-        await self._touch()
-        return None
 
 
 # ---------------------------------------------------------------------------

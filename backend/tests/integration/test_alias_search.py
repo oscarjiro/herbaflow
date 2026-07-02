@@ -1,4 +1,9 @@
-"""Integration coverage for alias-based search on GET /plants and GET /diseases.
+"""Integration coverage for canonical-name search on GET /plants and GET /diseases.
+
+Synonym/alias search was retired with the alias tables (Wave 3 schema trim); search now
+matches only the canonical scientific name / disease name (``matched_alias`` is always
+``None``). Tests whose entire purpose was an alias-synonym DB hit were removed — see the
+one-line notes below.
 
 Requires Docker (testcontainers Postgres).  If Docker is unavailable the test
 errors at fixture setup with a DockerException — that is expected and does NOT
@@ -28,13 +33,14 @@ _MIGRATIONS = Path(__file__).resolve().parents[3] / "supabase" / "migrations"
 
 _APPLY = [
     "20260608000002_baseline_entities.sql",
-    "20260608000003_baseline_aliases.sql",
     "20260608000004_baseline_junctions.sql",
     "20260608000005_baseline_operational.sql",
     "20260609000001_compound_validation_status.sql",
     "20260613000001_rename_disease_target_score.sql",
     "20260613000002_compound_target_discovery_params.sql",
     "20260615000001_analysis_run_idempotency_key.sql",
+    "20260620000001_analysis_run_progress.sql",
+    "20260702000001_wave3_schema_trim.sql",
 ]
 
 
@@ -49,7 +55,7 @@ async def _run_script(conn, sql: str) -> None:
 
 @pytest_asyncio.fixture()
 async def alias_engine(pg_container):
-    """Engine with entity + alias migrations applied."""
+    """Engine with the full baseline + schema-trim migrations applied."""
     eng = create_async_engine(_async_url(pg_container))
     async with eng.begin() as conn:
         for name in _APPLY:
@@ -60,16 +66,15 @@ async def alias_engine(pg_container):
         await _run_script(
             conn,
             "drop table if exists "
-            "analysis_runs, plant_compounds, compound_targets, disease_targets, "
-            "plant_aliases, disease_aliases, compound_aliases, target_aliases, "
-            "plants, compounds, targets, diseases, source_systems cascade;",
+            "analysis_run_progress, analysis_runs, plant_compounds, compound_targets, "
+            "disease_targets, plants, compounds, targets, diseases cascade;",
         )
     await eng.dispose()
 
 
 @pytest_asyncio.fixture()
 async def alias_client(alias_engine):
-    """httpx AsyncClient with alias-capable engine, seeded with test data."""
+    """httpx AsyncClient with the trimmed-schema engine, seeded with test data."""
     maker = async_sessionmaker(alias_engine, expire_on_commit=False)
 
     p1_id = uuid.uuid4()
@@ -81,59 +86,29 @@ async def alias_client(alias_engine):
     async with maker() as s:
         await s.execute(
             text(
-                "insert into plants(plant_id, canonical_key, canonical_scientific_name)"
-                " values (:p1, 'gbif:1', 'Curcuma longa'),"
-                " (:p2, 'gbif:2', 'Zingiber officinale'),"
-                " (:p3, 'gbif:3', 'Allium sativum')"
+                "insert into plants(plant_id, gbif_key, canonical_scientific_name)"
+                " values (:p1, '1', 'Curcuma longa'),"
+                " (:p2, '2', 'Zingiber officinale'),"
+                " (:p3, '3', 'Allium sativum')"
             ),
             {"p1": p1_id, "p2": p2_id, "p3": p3_id},
         )
         await s.execute(
             text(
-                "insert into plant_aliases"
-                "(alias_id, plant_id, alias_name, alias_key, alias_type) values"
-                " (:a1, :p1, 'Turmeric', 'turmeric', 'synonym_variant'),"
-                " (:a2, :p2, 'Ginger', 'ginger', 'synonym_variant'),"
-                " (:a3, :p1, 'Yellow ginger', 'yellow-ginger', 'synonym_variant')"
-            ),
-            {
-                "a1": uuid.uuid4(),
-                "p1": p1_id,
-                "a2": uuid.uuid4(),
-                "p2": p2_id,
-                "a3": uuid.uuid4(),
-            },
-        )
-        await s.execute(
-            text(
-                "insert into diseases(disease_id, canonical_key, disease_name) values"
+                "insert into diseases(disease_id, ontology_id, disease_name) values"
                 " (:d1, 'doid:9352', 'Type 2 Diabetes Mellitus'),"
                 " (:d2, 'doid:10652', 'Alzheimer Disease')"
             ),
             {"d1": d1_id, "d2": d2_id},
         )
-        await s.execute(
-            text(
-                "insert into disease_aliases"
-                "(disease_alias_id, disease_id, alias_name, alias_key, alias_type) values"
-                " (:da1, :d1, 'T2DM', 't2dm', 'ontology_synonym'),"
-                " (:da2, :d2, 'AD', 'ad', 'ontology_synonym')"
-            ),
-            {
-                "da1": uuid.uuid4(),
-                "d1": d1_id,
-                "da2": uuid.uuid4(),
-                "d2": d2_id,
-            },
-        )
         c1, c2, c3 = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
         t1, t2 = uuid.uuid4(), uuid.uuid4()
         await s.execute(
             text(
-                "insert into compounds(compound_id, canonical_key, canonical_name) values"
-                " (:c1, 'inchikey:AAA', 'Curcumin'),"
-                " (:c2, 'inchikey:BBB', 'Demethoxycurcumin'),"
-                " (:c3, 'inchikey:CCC', 'Gingerol')"
+                "insert into compounds(compound_id, inchi_key, canonical_name) values"
+                " (:c1, 'AAAAAAAAAAAAAA-AAAAAAAAAA-A', 'Curcumin'),"
+                " (:c2, 'BBBBBBBBBBBBBB-BBBBBBBBBB-B', 'Demethoxycurcumin'),"
+                " (:c3, 'CCCCCCCCCCCCCC-CCCCCCCCCC-C', 'Gingerol')"
             ),
             {"c1": c1, "c2": c2, "c3": c3},
         )
@@ -155,8 +130,8 @@ async def alias_client(alias_engine):
         )
         await s.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol) values"
-                " (:t1, 'uniprot:P1', 'TNF'), (:t2, 'uniprot:P2', 'IL6')"
+                "insert into targets(target_id, uniprot_accession, gene_symbol) values"
+                " (:t1, 'P00001', 'TNF'), (:t2, 'P00002', 'IL6')"
             ),
             {"t1": t1, "t2": t2},
         )
@@ -197,39 +172,29 @@ async def test_plant_exact_canonical_match_ranks_first(alias_client) -> None:
     data = resp.json()
     assert len(data) >= 1
     assert data[0]["plant_id"] == str(ids["p1"])
-    assert data[0]["matched_alias"] is None  # canonical hit → no alias hint
+    assert data[0]["matched_alias"] is None  # canonical hit -> no alias hint
+
+
+# NOTE: test_plant_alias_hit_returns_canonical_with_matched_alias removed — its entire
+# purpose was an alias-synonym DB hit ("turmeric" -> Curcuma longa), which no longer exists
+# now that alias tables are retired (search is canonical-name-only).
+
+
+# NOTE: test_plant_alias_prefix_beats_alias_substring removed — its entire purpose was
+# comparing rank ordering between two ALIAS rows, which no longer exist.
 
 
 @pytest.mark.asyncio
-async def test_plant_alias_hit_returns_canonical_with_matched_alias(alias_client) -> None:
-    """An alias hit returns the canonical plant row with matched_alias set."""
+async def test_plant_canonical_substring_matches(alias_client) -> None:
+    """A substring of the canonical name still matches (name-only search)."""
     c, ids = alias_client
-    resp = await c.get("/plants", params={"q": "turmeric"})
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) >= 1
-    assert data[0]["plant_id"] == str(ids["p1"])
-    assert data[0]["canonical_scientific_name"] == "Curcuma longa"
-    assert data[0]["matched_alias"] == "Turmeric"
-
-
-@pytest.mark.asyncio
-async def test_plant_alias_prefix_beats_alias_substring(alias_client) -> None:
-    """Alias prefix (rank 3) beats alias substring (rank 5)."""
-    # "gin": p2 alias "Ginger" has alias prefix (3) → merged best for p2 = 3.
-    # p1 alias "Yellow ginger" has "gin" as alias substring (5).
-    # (No canonical name here contains "gin".)
-    # p2 (rank 3) must appear before p1 (rank 5).
-    c, ids = alias_client
-    resp = await c.get("/plants", params={"q": "gin"})
+    resp = await c.get("/plants", params={"q": "officinale"})
     assert resp.status_code == 200
     data = resp.json()
     plant_ids = [row["plant_id"] for row in data]
     assert str(ids["p2"]) in plant_ids
-    p2_pos = plant_ids.index(str(ids["p2"]))
-    if str(ids["p1"]) in plant_ids:
-        p1_pos = plant_ids.index(str(ids["p1"]))
-        assert p2_pos < p1_pos
+    for row in data:
+        assert row["matched_alias"] is None
 
 
 @pytest.mark.asyncio
@@ -286,16 +251,9 @@ async def test_disease_exact_canonical_match_ranks_first(alias_client) -> None:
     assert data[0]["matched_alias"] is None
 
 
-@pytest.mark.asyncio
-async def test_disease_alias_hit_returns_canonical_with_matched_alias(alias_client) -> None:
-    """A disease alias hit returns the canonical row with matched_alias set."""
-    c, ids = alias_client
-    resp = await c.get("/diseases", params={"q": "T2DM"})
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data) >= 1
-    assert data[0]["disease_id"] == str(ids["d1"])
-    assert data[0]["matched_alias"] == "T2DM"
+# NOTE: test_disease_alias_hit_returns_canonical_with_matched_alias removed — its entire
+# purpose was an alias-synonym DB hit ("T2DM" -> Type 2 Diabetes Mellitus), which no longer
+# exists now that alias tables are retired (search is canonical-name-only).
 
 
 @pytest.mark.asyncio
@@ -353,7 +311,7 @@ async def test_plant_search_includes_compound_count(alias_client) -> None:
 @pytest.mark.asyncio
 async def test_plant_full_list_has_zero_count_for_plant_without_compounds(alias_client) -> None:
     c, ids = alias_client
-    resp = await c.get("/plants")  # empty q → full list
+    resp = await c.get("/plants")  # empty q -> full list
     assert resp.status_code == 200
     by_id = {r["plant_id"]: r for r in resp.json()}
     assert by_id[str(ids["p3"])]["compound_count"] == 0  # Allium sativum: no plant_compounds

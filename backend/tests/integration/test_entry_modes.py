@@ -25,6 +25,7 @@ from app.integrations.gprofiler import EnrichedTerm
 from app.integrations.string_db import StringEdge
 from app.integrations.uniprot import UniProtReason, UniProtRecord, UniProtResolution
 from app.pipeline.stages import stage3, stage6, stage8
+from app.services import canonical
 
 SETTLED = frozenset(
     {
@@ -113,34 +114,27 @@ def _patch(monkeypatch, *, string_edges=None, terms=None):
 # ---------------------------------------------------------------------------
 # Seeding helpers
 # ---------------------------------------------------------------------------
-async def _seed_source_systems(s):
-    await s.execute(
-        text(
-            "insert into source_systems(source_name, source_type) values "
-            "('ChEMBL','api'),('PubChem BioAssay','api'),('UniProt','api') "
-            "on conflict (source_name) do nothing"
-        )
-    )
-
-
 async def _set_inchikeys(s, c1, c2):
+    # inchi_key is UNIQUE (Wave 3 schema trim) -> distinct values per compound.
     await s.execute(
-        text("update compounds set inchi_key='IKX' where compound_id in (:c1,:c2)"),
-        {"c1": c1, "c2": c2},
+        text("update compounds set inchi_key='IKX1' where compound_id = :c1"), {"c1": c1}
+    )
+    await s.execute(
+        text("update compounds set inchi_key='IKX2' where compound_id = :c2"), {"c2": c2}
     )
 
 
 async def _insert_target(s, *, acc, gene):
-    """A canonical target keyed exactly as ``resolve_target_accession`` keys it (uniprot:<ACC>)."""
-    tid = uuid.uuid4()
+    """A canonical target keyed exactly as ``resolve_target_accession`` keys it (its derived id)."""
+    key = canonical.target_canonical_key(uniprot=acc)
+    tid = uuid.UUID(canonical.target_id_from_key(key))
     await s.execute(
         text(
-            "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession, "
-            "source_url) values (:t,:k,:g,:a,:u)"
+            "insert into targets(target_id, gene_symbol, uniprot_accession, "
+            "source_url) values (:t,:g,:a,:u)"
         ),
         {
             "t": tid,
-            "k": f"uniprot:{acc}",
             "g": gene,
             "a": acc,
             "u": f"https://www.uniprot.org/uniprotkb/{acc}/entry",
@@ -181,7 +175,6 @@ async def test_manual_compounds_auto_runs_adme_then_completes(client, engine, mo
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s)
         await _set_inchikeys(s, ids["c1"], ids["c2"])
         t_tp53 = await _insert_target(s, acc="P04637", gene="TP53")
         t_egfr = await _insert_target(s, acc="P00533", gene="EGFR")
@@ -240,7 +233,6 @@ async def test_manual_targets_guided_first_checkpoint_is_stage4(client, engine, 
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s)
         t_tp53 = await _insert_target(s, acc="P04637", gene="TP53")
         t_egfr = await _insert_target(s, acc="P00533", gene="EGFR")
         # The disease's own targets overlap the manual S3 targets -> non-empty S5.
@@ -295,7 +287,6 @@ async def test_both_sides_manual_auto_computes_from_stage5(client, engine, monke
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s)
         t_tp53 = await _insert_target(s, acc="P04637", gene="TP53")
         t_egfr = await _insert_target(s, acc="P00533", gene="EGFR")
         await s.commit()
@@ -357,7 +348,6 @@ async def test_selection_plant_manual_disease_skips_stage4(client, engine, monke
 
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
-        await _seed_source_systems(s)
         await _set_inchikeys(s, ids["c1"], ids["c2"])
         # S3 resolves the plant's compounds to TP53/EGFR; the SAME two are the manual disease set.
         t_tp53 = await _insert_target(s, acc="P04637", gene="TP53")

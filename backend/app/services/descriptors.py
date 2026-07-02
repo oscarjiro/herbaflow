@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from rdkit import Chem, RDLogger
-from rdkit.Chem import QED, Crippen, FilterCatalog, Lipinski
+from rdkit.Chem import Crippen, FilterCatalog, Lipinski
 from rdkit.Chem import Descriptors as RDDescriptors
 
 RDLogger.DisableLog("rdApp.*")  # silence parse warnings; bad SMILES surface via a None return
@@ -71,7 +71,6 @@ class MolDescriptors:
     hbond_acceptors: int
     tpsa: float
     rotatable_bonds: int
-    qed_score: float
     np_likeness_score: float | None
     num_ro5_violations: int
     is_pains_positive: bool
@@ -113,7 +112,6 @@ def compute(smiles: str) -> MolDescriptors | None:
         hbond_acceptors=hba,
         tpsa=float(RDDescriptors.TPSA(mol)),
         rotatable_bonds=int(Lipinski.NumRotatableBonds(mol)),
-        qed_score=float(QED.qed(mol)),
         np_likeness_score=_np_score(mol),
         num_ro5_violations=_count_ro5_violations(mw, logp, hbd, hba),
         is_pains_positive=bool(_PAINS_CATALOG.HasMatch(mol)),

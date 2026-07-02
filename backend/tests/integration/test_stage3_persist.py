@@ -39,23 +39,15 @@ class FakeUniProt:
 
 @pytest.mark.asyncio
 async def test_stage3_persists_targets_and_measured_edges(session):
-    # Seed the source rows (not applied by the integration migrations).
-    await session.execute(
-        text(
-            "insert into source_systems(source_name, source_type) values "
-            "('ChEMBL', 'api'),('PubChem BioAssay', 'api'),('UniProt', 'api') "
-            "on conflict (source_name) do nothing"
-        )
-    )
     # Two compounds: one with a ChEMBL hit, one whose InChIKey yields nothing.
     c_hit = uuid.uuid4()
     c_none = uuid.uuid4()
     await session.execute(
         text(
             "insert into compounds"
-            "(compound_id, canonical_key, canonical_name, validation_status, inchi_key) values "
-            "(:h, 'inchikey:IKHIT', 'HitComp', 'externally_validated', 'IKHIT'),"
-            "(:n, 'inchikey:IKNONE', 'NoneComp', 'externally_validated', 'IKNONE')"
+            "(compound_id, canonical_name, validation_status, inchi_key) values "
+            "(:h, 'HitComp', 'externally_validated', 'IKHIT'),"
+            "(:n, 'NoneComp', 'externally_validated', 'IKNONE')"
         ),
         {"h": c_hit, "n": c_none},
     )
@@ -77,7 +69,7 @@ async def test_stage3_persists_targets_and_measured_edges(session):
 
     # Target P04637 persisted with the UniProt gene symbol.
     target_row = (
-        await session.execute(select(Target).where(Target.canonical_key == "uniprot:P04637"))
+        await session.execute(select(Target).where(Target.uniprot_accession == "P04637"))
     ).scalar_one()
     assert target_row.gene_symbol == "TP53"
 

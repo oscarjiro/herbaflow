@@ -21,6 +21,7 @@ from app.integrations.gprofiler import EnrichedTerm, GprofilerError
 from app.integrations.string_db import StringEdge
 from app.integrations.uniprot import UniProtReason, UniProtRecord, UniProtResolution
 from app.pipeline.stages import stage3, stage6, stage8
+from app.services import canonical
 
 SETTLED = frozenset(
     {
@@ -102,29 +103,25 @@ def _patch(monkeypatch, *, string_edges, gprofiler):
 
 
 async def _seed(s, ids):
-    """Seed source systems, inchi_key on compounds, canonical targets + disease links."""
+    """Seed inchi_key on compounds, canonical targets + disease links."""
+    # inchi_key is UNIQUE (Wave 3 schema trim) -> distinct values per compound.
     await s.execute(
-        text(
-            "insert into source_systems(source_name, source_type) values "
-            "('ChEMBL','api'),('PubChem BioAssay','api'),('UniProt','api') "
-            "on conflict (source_name) do nothing"
-        )
+        text("update compounds set inchi_key='IKX1' where compound_id = :c1"), {"c1": ids["c1"]}
     )
     await s.execute(
-        text("update compounds set inchi_key='IKX' where compound_id in (:c1,:c2)"),
-        {"c1": ids["c1"], "c2": ids["c2"]},
+        text("update compounds set inchi_key='IKX2' where compound_id = :c2"), {"c2": ids["c2"]}
     )
     tids = {}
     for acc, gene in (("P04637", "TP53"), ("P00533", "EGFR")):
-        tid = uuid.uuid4()
+        key = canonical.target_canonical_key(uniprot=acc)
+        tid = uuid.UUID(canonical.target_id_from_key(key))
         await s.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol, uniprot_accession, "
-                "source_url) values (:t,:k,:g,:a,:u)"
+                "insert into targets(target_id, gene_symbol, uniprot_accession, "
+                "source_url) values (:t,:g,:a,:u)"
             ),
             {
                 "t": tid,
-                "k": f"uniprot:{acc}",
                 "g": gene,
                 "a": acc,
                 "u": f"https://www.uniprot.org/uniprotkb/{acc}/entry",

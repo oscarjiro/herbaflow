@@ -23,6 +23,8 @@ _APPLY = [
     "20260613000001_rename_disease_target_score.sql",
     "20260613000002_compound_target_discovery_params.sql",
     "20260615000001_analysis_run_idempotency_key.sql",
+    "20260620000001_analysis_run_progress.sql",
+    "20260702000001_wave3_schema_trim.sql",
 ]
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -52,8 +54,8 @@ async def engine(pg_container):
     async with eng.begin() as conn:
         await _run_script(
             conn,
-            "drop table if exists analysis_runs, plant_compounds, compound_targets, "
-            "disease_targets, plants, compounds, targets, diseases, source_systems cascade;",
+            "drop table if exists analysis_run_progress, analysis_runs, plant_compounds, "
+            "compound_targets, disease_targets, plants, compounds, targets, diseases cascade;",
         )
     await eng.dispose()
 

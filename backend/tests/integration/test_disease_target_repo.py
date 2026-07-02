@@ -14,7 +14,7 @@ async def _seed(session, disease_id, rows):
     """rows: list of (gene_symbol, accession, score | None)."""
     await session.execute(
         text(
-            "insert into diseases(disease_id, canonical_key, disease_name) "
+            "insert into diseases(disease_id, ontology_id, disease_name) "
             "values (:d, 'doid:dt', 'DT Disease') on conflict do nothing"
         ),
         {"d": disease_id},
@@ -23,13 +23,12 @@ async def _seed(session, disease_id, rows):
         tid = uuid.uuid4()
         await session.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol, "
+                "insert into targets(target_id, gene_symbol, "
                 "uniprot_accession, source_url) "
-                "values (:t, :k, :g, :a, :u)"
+                "values (:t, :g, :a, :u)"
             ),
             {
                 "t": tid,
-                "k": f"uniprot:{acc}",
                 "g": gene,
                 "a": acc,
                 "u": f"https://www.uniprot.org/uniprotkb/{acc}/entry",

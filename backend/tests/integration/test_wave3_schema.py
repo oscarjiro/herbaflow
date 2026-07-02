@@ -1,4 +1,5 @@
-"""Wave 3: assert the migrated DB shape (runs against the testcontainer built from all migrations)."""
+"""Wave 3: assert the migrated DB shape (testcontainer built from all migrations)."""
+
 import pytest
 from sqlalchemy import text
 

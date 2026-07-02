@@ -6,7 +6,6 @@ import logging
 import uuid
 from typing import Any
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import contracts
@@ -70,9 +69,7 @@ class AnalysisService:
             progress_repo=AnalysisProgressRepository(session),
         )
 
-    async def create(
-        self, payload: AnalysisCreate, *, idempotency_key: str | None = None
-    ) -> tuple[AnalysisRead, bool]:
+    async def create(self, payload: AnalysisCreate) -> AnalysisRead:
         plant_mode = payload.plant_input_mode.value
         disease_mode = payload.disease_input_mode.value
         logger.info(
@@ -181,40 +178,18 @@ class AnalysisService:
         if labels:
             extra_parameters["labels"] = labels
 
-        # Idempotent replay: a key already mapped to a run returns that run, no new create.
-        if idempotency_key is not None:
-            existing = await self.analysis_repo.get_by_idempotency_key(idempotency_key)
-            if existing is not None:
-                logger.info("idempotent replay: key maps to run %s", str(existing.analysis_id)[:8])
-                return AnalysisRead.model_validate(existing), True
-
-        try:
-            run = await self.analysis_repo.create(
-                analysis_name=payload.analysis_name,
-                disease_id=payload.disease_id,
-                plant_ids=payload.plant_ids,
-                mode=payload.mode.value,
-                pipeline_parameters=pipeline_parameters,
-                extra_parameters=extra_parameters,
-                stage_edits=stage_edits,
-                stage_results=stage_results,
-                current_stage=current_stage,
-                idempotency_key=idempotency_key,
-            )
-        except IntegrityError:
-            # Concurrent same-key create won the unique index; return the committed run.
-            if idempotency_key is None:
-                raise
-            await self.analysis_repo.rollback()
-            existing = await self.analysis_repo.get_by_idempotency_key(idempotency_key)
-            if existing is None:
-                raise
-            logger.info(
-                "idempotent replay (race): key maps to run %s", str(existing.analysis_id)[:8]
-            )
-            return AnalysisRead.model_validate(existing), True
-
-        return AnalysisRead.model_validate(run), False
+        run = await self.analysis_repo.create(
+            analysis_name=payload.analysis_name,
+            disease_id=payload.disease_id,
+            plant_ids=payload.plant_ids,
+            mode=payload.mode.value,
+            pipeline_parameters=pipeline_parameters,
+            extra_parameters=extra_parameters,
+            stage_edits=stage_edits,
+            stage_results=stage_results,
+            current_stage=current_stage,
+        )
+        return AnalysisRead.model_validate(run)
 
     async def _verify_entities(self, entity: str, repo: Any, ids: list[uuid.UUID]) -> None:
         """Enforce the entity cap then existence for a manual-input id list (422 on failure)."""

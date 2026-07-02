@@ -24,7 +24,6 @@ def test_descriptors_for_known_smiles() -> None:
     assert abs(d.molecular_weight - 46.07) < 0.1
     assert d.hbond_donors == 1 and d.hbond_acceptors == 1
     assert d.is_pains_positive is False
-    assert d.qed_score is not None
     assert d.descriptor_source == "rdkit"
 
 

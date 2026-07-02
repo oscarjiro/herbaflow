@@ -286,7 +286,7 @@ def test_stage2_csv_columns_and_buckets():
     assert out.splitlines()[0] == (
         "inchikey,canonical_name,passed,descriptor_source,lipinski_violations,"
         "lipinski_pass,veber_pass,rule_evaluated,molecular_weight,logp,hbond_donors,"
-        "hbond_acceptors,tpsa,rotatable_bonds,qed_score,np_likeness_score,"
+        "hbond_acceptors,tpsa,rotatable_bonds,np_likeness_score,"
         "is_pains_positive,source_url,reason"
     )
     assert "compound_id" not in out.splitlines()[0]
@@ -350,7 +350,6 @@ _SR2 = {
                 "hbond_acceptors": 6,
                 "tpsa": 93.06,
                 "rotatable_bonds": 8,
-                "qed_score": 0.5,
                 "np_likeness_score": 1.1,
                 "num_ro5_violations": 0,
                 "is_pains_positive": True,
@@ -374,7 +373,6 @@ _SR2 = {
                 "hbond_acceptors": 4,
                 "tpsa": 63.6,
                 "rotatable_bonds": 3,
-                "qed_score": 0.55,
                 "np_likeness_score": -0.5,
                 "num_ro5_violations": 0,
                 "is_pains_positive": False,

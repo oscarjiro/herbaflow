@@ -11,42 +11,37 @@ import pytest
 
 from app.integrations.pubchem import PubChemRecord
 from app.schemas.compound import CompoundInput
+from app.services import canonical
 from app.services.input_validation import resolve_compounds
 
 # Ethanol: SMILES "CCO" -> InChIKey LFQSCWFLJHTTHZ-UHFFFAOYSA-N (RDKit, deterministic).
 ETHANOL_SMILES = "CCO"
 ETHANOL_INCHIKEY = "LFQSCWFLJHTTHZ-UHFFFAOYSA-N"
 ETHANOL_KEY = f"inchikey:{ETHANOL_INCHIKEY}"
-
-MANUAL_SOURCE_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
+ETHANOL_COMPOUND_ID = uuid.UUID(canonical.compound_id_from_key(ETHANOL_KEY))
 
 
 @dataclass
 class FakeCompound:
-    """Stand-in for the Compound ORM row returned by repo.get_by_key."""
+    """Stand-in for the Compound ORM row returned by repo.get_by_id."""
 
     compound_id: uuid.UUID
-    canonical_key: str
+    inchi_key: str
     canonical_name: str | None
     validation_status: str
     pubchem_cid: str | None = None
 
 
 class FakeRepo:
-    def __init__(self, existing: dict[str, FakeCompound] | None = None) -> None:
+    def __init__(self, existing: dict[uuid.UUID, FakeCompound] | None = None) -> None:
         self._existing = existing or {}
         self.upserted: list[dict[str, Any]] = []
-        self.manual_source_calls = 0
 
-    async def get_by_key(self, canonical_key: str) -> FakeCompound | None:
-        return self._existing.get(canonical_key)
+    async def get_by_id(self, compound_id: uuid.UUID) -> FakeCompound | None:
+        return self._existing.get(compound_id)
 
     async def upsert(self, row: dict[str, Any]) -> None:
         self.upserted.append(row)
-
-    async def manual_source_id(self) -> uuid.UUID | None:
-        self.manual_source_calls += 1
-        return MANUAL_SOURCE_ID
 
 
 @dataclass
@@ -79,7 +74,7 @@ async def test_lowercase_inchikey_is_detected_not_treated_as_smiles() -> None:
         [CompoundInput(value=ETHANOL_INCHIKEY.lower())], repo, pubchem
     )
     assert not failed
-    assert resolved and resolved[0].canonical_key == ETHANOL_KEY
+    assert resolved and resolved[0].compound_id == ETHANOL_COMPOUND_ID
     assert pubchem.calls == [ETHANOL_INCHIKEY]  # uppercased before the lookup
 
 
@@ -87,13 +82,13 @@ async def test_lowercase_inchikey_is_detected_not_treated_as_smiles() -> None:
 async def test_smiles_already_in_db_reused_no_pubchem() -> None:
     """Scenario 1: SMILES already in DB -> reused, PubChem not called, nothing upserted."""
     db_row = FakeCompound(
-        compound_id=uuid.uuid4(),
-        canonical_key=ETHANOL_KEY,
+        compound_id=ETHANOL_COMPOUND_ID,
+        inchi_key=ETHANOL_INCHIKEY,
         canonical_name="ethanol",
         validation_status="externally_validated",
         pubchem_cid="702",
     )
-    repo = FakeRepo({ETHANOL_KEY: db_row})
+    repo = FakeRepo({ETHANOL_COMPOUND_ID: db_row})
     pubchem = FakePubChem(record=_pubchem_record())
 
     resolved, failed = await resolve_compounds(
@@ -104,7 +99,6 @@ async def test_smiles_already_in_db_reused_no_pubchem() -> None:
     assert failed == []
     r = resolved[0]
     assert r.compound_id == db_row.compound_id
-    assert r.canonical_key == ETHANOL_KEY
     assert r.canonical_name == "ethanol"
     assert r.pubchem_cid == "702"
     assert r.validation_status == "externally_validated"
@@ -128,7 +122,7 @@ async def test_smiles_not_in_db_pubchem_hit_externally_validated() -> None:
     assert len(repo.upserted) == 1
     row = repo.upserted[0]
     assert row["validation_status"] == "externally_validated"
-    assert row["canonical_key"] == ETHANOL_KEY
+    assert row["compound_id"] == ETHANOL_COMPOUND_ID
     assert row["pubchem_cid"] == "702"
     assert row["smiles"] == "CCO"
     assert row["molecular_formula"] == "C2H6O"
@@ -138,13 +132,13 @@ async def test_smiles_not_in_db_pubchem_hit_externally_validated() -> None:
     r = resolved[0]
     assert r.validation_status == "externally_validated"
     assert r.canonical_name == "ethanol"
-    assert r.canonical_key == ETHANOL_KEY
+    assert r.compound_id == ETHANOL_COMPOUND_ID
     assert r.pubchem_cid == "702"
 
 
 @pytest.mark.asyncio
 async def test_smiles_not_in_db_pubchem_miss_structure_only() -> None:
-    """Scenario 3: not in DB + PubChem miss -> structure_only, manual source, null descriptors."""
+    """Scenario 3: not in DB + PubChem miss -> structure_only, null descriptors."""
     repo = FakeRepo()
     pubchem = FakePubChem(record=None)
 
@@ -161,12 +155,11 @@ async def test_smiles_not_in_db_pubchem_miss_structure_only() -> None:
     # smiles is the RDKit canonical SMILES for ethanol.
     assert row["smiles"] == "CCO"
     assert row["inchi_key"] == ETHANOL_INCHIKEY
-    assert row["source_id"] == MANUAL_SOURCE_ID
+    assert row["compound_id"] == ETHANOL_COMPOUND_ID
     # Descriptor / external fields must be absent or None.
     assert row.get("pubchem_cid") is None
     assert row.get("molecular_formula") is None
     assert row.get("molecular_weight") is None
-    assert repo.manual_source_calls == 1
     r = resolved[0]
     assert r.validation_status == "structure_only"
 
@@ -175,13 +168,13 @@ async def test_smiles_not_in_db_pubchem_miss_structure_only() -> None:
 async def test_inchikey_in_db_reused_no_pubchem() -> None:
     """Scenario 4: bare InChIKey present in DB -> reused, no PubChem, nothing upserted."""
     db_row = FakeCompound(
-        compound_id=uuid.uuid4(),
-        canonical_key=ETHANOL_KEY,
+        compound_id=ETHANOL_COMPOUND_ID,
+        inchi_key=ETHANOL_INCHIKEY,
         canonical_name="ethanol",
         validation_status="externally_validated",
         pubchem_cid="702",
     )
-    repo = FakeRepo({ETHANOL_KEY: db_row})
+    repo = FakeRepo({ETHANOL_COMPOUND_ID: db_row})
     pubchem = FakePubChem(record=_pubchem_record())
 
     resolved, failed = await resolve_compounds(
@@ -288,7 +281,7 @@ async def test_resolve_compounds_records_line_on_failure() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Dedup by identity + phased batch-resolve: identical inputs resolve once,
+# Dedup by identity + phased batch-resolve: identical inputs resolve once, and
 # two SMILES collapsing to the same InChIKey are treated as one compound, and
 # repeated invalid tokens still generate one FailedInput per original line.
 # ---------------------------------------------------------------------------
@@ -345,7 +338,7 @@ async def test_two_smiles_same_inchikey_collapse() -> None:
 
     assert not failed
     assert len(resolved) == 1
-    assert resolved[0].canonical_key == ETHANOL_KEY
+    assert resolved[0].compound_id == ETHANOL_COMPOUND_ID
     assert len(pubchem.calls) == 1
     assert len(repo.upserted) == 1
 
@@ -404,18 +397,14 @@ class _ConcurrencySpyRepo:
         await asyncio.sleep(0)
         self._in_flight -= 1
 
-    async def get_by_key(self, key: str):
+    async def get_by_id(self, compound_id: uuid.UUID):
         await self._touch()
-        return self._existing.get(key)
+        return self._existing.get(compound_id)
 
     async def upsert(self, row: dict) -> None:
         await self._touch()
-        self._existing[row["canonical_key"]] = row
+        self._existing[row["compound_id"]] = row
         self.upserted.append(row)
-
-    async def manual_source_id(self):
-        await self._touch()
-        return MANUAL_SOURCE_ID
 
 
 @pytest.mark.asyncio

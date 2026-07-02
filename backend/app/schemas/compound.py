@@ -15,7 +15,6 @@ class CompoundInput(BaseModel):
 
 class ResolvedCompound(BaseModel):
     compound_id: uuid.UUID
-    canonical_key: str
     canonical_name: str | None
     pubchem_cid: str | None = None
     validation_status: str  # externally_validated | structure_only

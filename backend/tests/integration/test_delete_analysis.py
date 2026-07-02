@@ -44,9 +44,7 @@ async def test_execute_run_refetch_stops_midway_on_real_db(session) -> None:
     from app.repositories.analysis import AnalysisRepository
 
     repo = AnalysisRepository(session)
-    run = await repo.create(
-        analysis_name=None, disease_id=None, plant_ids=[], mode="auto", idempotency_key=None
-    )
+    run = await repo.create(analysis_name=None, disease_id=None, plant_ids=[], mode="auto")
     await session.commit()
     rid = run.analysis_id
 

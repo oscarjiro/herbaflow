@@ -50,9 +50,7 @@ def test_entity_ids_match():
     assert be_disease == etl_disease
 
 
-def test_alias_and_bridge_ids_match():
-    pid = be.plant_id("3034234")
-    assert be.plant_alias_id(pid, "alias") == etl.plant_alias_id(pid, "alias")
+def test_bridge_ids_match():
     cid = be.compound_id(_COMPOUND)
     tid = be.target_id(uniprot="P04637")
     assert be.compound_target_id(cid, tid) == etl.compound_target_id(cid, tid)

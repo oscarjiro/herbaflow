@@ -7,7 +7,7 @@ manual entry modes, so Stages 1-4 do no work beyond loading the user-provided id
 - plant side ``manual_targets`` (``manual_target_ids``) and disease side ``manual_disease_targets``
   (``manual_disease_target_ids``, NO ``disease_id``). Create only VERIFIES the ids exist and loads
   them via ``get_many`` (no external call, no organism check), so seeding plain Target rows
-  (``target_id``/``canonical_key``/``gene_symbol``; accession null) is sufficient.
+  (``target_id``/``gene_symbol``; accession null) is sufficient.
 - Stage 5 overlaps the two id sets, Stage 6 calls STRING over the overlap gene set, Stage 7 ranks by
   MCC, Stage 8 calls g:Profiler over the overlap. Hito supplied no enrichment, so g:Profiler is
   replayed EMPTY (the run still completes; Stage 8 is honest-null).
@@ -59,19 +59,16 @@ async def seed_gd2(engine: AsyncEngine) -> dict[str, Any]:
     NO source_systems, NO compound_targets, NO disease_targets. The manual modes feed pre-resolved
     target ids and verify existence only. ``target_id`` is a deterministic ``uuid5`` of the gene
     symbol. All SQL is parameterized (multi-row insert), mirroring the integration seed style.
+    ``canonical_key`` was retired with the Wave 3 schema trim, so it is no longer written.
     """
     seed = load_json("gd2_seed.json")
     maker = async_sessionmaker(engine, expire_on_commit=False)
     async with maker() as s:
         await s.execute(
-            text(
-                "insert into targets(target_id, canonical_key, gene_symbol) "
-                "values (:target_id, :canonical_key, :gene_symbol)"
-            ),
+            text("insert into targets(target_id, gene_symbol) values (:target_id, :gene_symbol)"),
             [
                 {
                     "target_id": t["target_id"],
-                    "canonical_key": t["canonical_key"],
                     "gene_symbol": t.get("gene_symbol"),
                 }
                 for t in seed["targets"]
