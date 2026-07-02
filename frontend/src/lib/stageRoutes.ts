@@ -1,4 +1,5 @@
 import type { AnalysisRead } from "@/api/types.gen";
+import { stageLabel } from "@/contract/labels";
 
 export type StageSlug =
   | "inputs"
@@ -49,8 +50,21 @@ export function slugToStage(slug: StageSlug): number | null {
   return SLUG_TO_STAGE[slug];
 }
 
+export function stageSlugLabel(slug: StageSlug): string {
+  if (slug === "inputs") return "Inputs";
+  if (slug === "final") return "Final";
+  const n = slugToStage(slug);
+  return n != null ? stageLabel(n) : slug;
+}
+
 export function isValidStageSlug(slug: string): slug is StageSlug {
   return Object.prototype.hasOwnProperty.call(SLUG_TO_STAGE, slug);
+}
+
+export function activeStageSlugFromPath(pathname: string): StageSlug | undefined {
+  const segments = pathname.split("/").filter(Boolean);
+  const candidate = segments[0] === "analysis" && segments.length >= 3 ? segments[2] : undefined;
+  return candidate && isValidStageSlug(candidate) ? candidate : undefined;
 }
 
 export function isSlugApplicable(slug: StageSlug, run: AnalysisRead): boolean {

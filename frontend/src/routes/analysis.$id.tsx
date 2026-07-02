@@ -1,11 +1,18 @@
-import { createFileRoute, Outlet, useNavigate, useParams } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useParams,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
-import { toast } from "sonner";
-import { useAnalysisStatus } from "@/hooks/useAnalysisStatus";
-import { clearActiveRunId, getActiveRunId, setActiveRunId } from "@/lib/activeRun";
+import { RunMobileNavigation } from "@/components/RunMobileNavigation";
 import { RunSidebar } from "@/components/RunSidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAnalysisStatus } from "@/hooks/useAnalysisStatus";
+import { clearActiveRunId, getActiveRunId, setActiveRunId } from "@/lib/activeRun";
 import { humanizeProblem, isHardDown, type Problem } from "@/lib/problem";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/analysis/$id")({
   component: RunShell,
@@ -14,6 +21,7 @@ export const Route = createFileRoute("/analysis/$id")({
 function RunShell() {
   const { id } = useParams({ from: "/analysis/$id" });
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { data, isError, error } = useAnalysisStatus(id);
 
   // Leave the run shell whenever the 1s poll can't yield a usable run. Both cases
@@ -74,8 +82,14 @@ function RunShell() {
 
   return (
     <div className="lg:flex">
+      <RunMobileNavigation
+        data={data}
+        analysisId={id}
+        onExit={() => navigate({ to: "/analysis" })}
+        pathname={pathname}
+      />
       <RunSidebar data={data} analysisId={id} onExit={() => navigate({ to: "/analysis" })} />
-      <main className="mx-auto flex max-w-[920px] min-w-0 flex-col gap-6 p-6 lg:flex-1">
+      <main className="mx-auto flex w-full max-w-[920px] min-w-0 flex-col gap-5 px-4 py-5 sm:gap-6 sm:px-6 sm:py-6 lg:flex-1">
         <Outlet />
       </main>
     </div>
