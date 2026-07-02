@@ -11,7 +11,7 @@ export function Hero({ className }: { className?: string }) {
         <em className="font-display italic">network pharmacology.</em>
       </h1>
 
-      <p className="text-hf-fg-2 mx-auto mb-10 max-w-[56ch] text-[17px] leading-relaxed">
+      <p className="text-hf-fg-2 mx-auto mb-10 max-w-[38ch] text-[15px] leading-relaxed sm:max-w-[56ch] sm:text-[17px]">
         Herbaflow runs the full network-pharmacology workflow as one continuous, reviewable
         pipeline: from the bioactive compounds in a medicinal plant, to the human proteins they act
         on, to the diseases those proteins drive. Every parameter is yours to set. Every association
