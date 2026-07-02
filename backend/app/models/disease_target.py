@@ -18,7 +18,6 @@ class DiseaseTarget(Base):
     disease_target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     disease_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    source_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     association_type: Mapped[str | None] = mapped_column(String)
     opentargets_score: Mapped[float | None] = mapped_column(Float)
     source_url: Mapped[str | None] = mapped_column(String)

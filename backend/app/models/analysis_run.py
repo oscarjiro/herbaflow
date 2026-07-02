@@ -20,7 +20,6 @@ class AnalysisRun(Base):
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
     )
     analysis_name: Mapped[str | None] = mapped_column(String)
-    idempotency_key: Mapped[str | None] = mapped_column(String)
     disease_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     parameters: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     status: Mapped[str | None] = mapped_column(String)
@@ -28,7 +27,7 @@ class AnalysisRun(Base):
     stage_results: Mapped[dict[str, Any]] = mapped_column(
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
-    mode: Mapped[str] = mapped_column(String, nullable=False, server_default=text("'auto'"))
+    mode: Mapped[str] = mapped_column(String, nullable=False, server_default=text("'guided'"))
     created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

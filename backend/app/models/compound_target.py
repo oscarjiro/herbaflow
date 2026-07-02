@@ -18,7 +18,6 @@ class CompoundTarget(Base):
     compound_target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     compound_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    source_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     prediction_method: Mapped[str | None] = mapped_column(String)
     score: Mapped[float | None] = mapped_column(Float)
     pchembl_value: Mapped[float | None] = mapped_column(Float)
