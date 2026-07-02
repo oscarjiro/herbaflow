@@ -29,6 +29,7 @@ _APPLY = [
     "20260613000002_compound_target_discovery_params.sql",
     "20260615000001_analysis_run_idempotency_key.sql",
     "20260620000001_analysis_run_progress.sql",
+    "20260702000001_wave3_schema_trim.sql",
 ]
 
 
@@ -90,23 +91,23 @@ async def seeded(engine):
     async with maker() as session:
         await session.execute(
             text(
-                "insert into plants(plant_id, canonical_key, canonical_scientific_name) "
-                "values (:p1,'gbif:1','Aaa bbb'),(:p2,'gbif:2','Ccc ddd')"
+                "insert into plants(plant_id, gbif_key, canonical_scientific_name) "
+                "values (:p1,'1','Aaa bbb'),(:p2,'2','Ccc ddd')"
             ),
             {"p1": ids["plant_full"], "p2": ids["plant_empty"]},
         )
         await session.execute(
             text(
                 "insert into compounds("
-                "  compound_id, canonical_key, canonical_name,"
+                "  compound_id, canonical_name,"
                 "  molecular_weight, logp, hbond_donors, hbond_acceptors,"
                 "  tpsa, rotatable_bonds, num_ro5_violations,"
                 "  validation_status"
                 ") values ("
-                "  :c1,'inchikey:A','Alpha',"
+                "  :c1,'Alpha',"
                 "  46.07,-0.14,1,1,20.23,0,0,'externally_validated'"
                 "),("
-                "  :c2,'inchikey:B','Beta',"
+                "  :c2,'Beta',"
                 "  46.07,-0.14,1,1,20.23,0,0,'externally_validated'"
                 ")"
             ),
@@ -127,8 +128,8 @@ async def seeded(engine):
         )
         await session.execute(
             text(
-                "insert into diseases(disease_id, canonical_key, disease_name) "
-                "values (:d,'doid:1','Test Disease')"
+                "insert into diseases(disease_id, disease_name, ontology_id) "
+                "values (:d,'Test Disease','doid:1')"
             ),
             {"d": ids["disease"]},
         )
@@ -144,8 +145,8 @@ async def seed_compound(engine):
         await s.execute(
             text(
                 "insert into compounds"
-                "(compound_id, canonical_key, canonical_name, validation_status) "
-                "values (:c, 'inchikey:CT0', 'CTComp', 'externally_validated')"
+                "(compound_id, canonical_name, validation_status) "
+                "values (:c, 'CTComp', 'externally_validated')"
             ),
             {"c": cid},
         )
@@ -160,8 +161,8 @@ async def seed_target(engine):
     async with maker() as s:
         await s.execute(
             text(
-                "insert into targets(target_id, canonical_key, gene_symbol) "
-                "values (:t, 'uniprot:PCT0', 'CTGENE')"
+                "insert into targets(target_id, gene_symbol) "
+                "values (:t, 'CTGENE')"
             ),
             {"t": tid},
         )
