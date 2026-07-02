@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import {
   RouterContextProvider,
   createMemoryHistory,
@@ -6,6 +6,7 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { vi } from "vitest";
 import type { AnalysisRead } from "@/api/types.gen";
 import { isValidStageSlug } from "@/lib/stageRoutes";
 import { StepperRail } from "./StepperRail";
@@ -142,4 +143,13 @@ test("inputs route still resolves — inputs slug is valid in stageRoutes", () =
   // Confirms the routing guard is intact: the trail omits 'inputs' visually but
   // the slug remains valid so /analysis/$id/inputs still deep-links correctly.
   expect(isValidStageSlug("inputs")).toBe(true);
+});
+
+test("calls onNavigate when a navigable step is selected", () => {
+  const onNavigate = vi.fn();
+  renderTrail(
+    <StepperRail data={data} analysisId="a1" activeSlug="compounds" onNavigate={onNavigate} />,
+  );
+  fireEvent.click(screen.getByRole("link", { name: /compounds/i }));
+  expect(onNavigate).toHaveBeenCalledTimes(1);
 });
