@@ -137,7 +137,7 @@ export function CompoundValidateBox({
           items={resolved}
           getKey={(r) => r.compound_id}
           getLabel={(r) =>
-            `${r.canonical_name ?? r.canonical_key}${
+            `${r.canonical_name ?? r.compound_id}${
               r.validation_status === "structure_only" ? " (structure only)" : ""
             }`
           }

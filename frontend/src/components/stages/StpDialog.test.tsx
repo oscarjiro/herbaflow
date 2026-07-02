@@ -286,14 +286,12 @@ test("uses cleaned import result summary", async () => {
         resolved: [
           {
             target_id: "t1",
-            canonical_key: "uniprot:P04637",
             gene_symbol: "TP53",
             uniprot_accession: "P04637",
             validation_status: "externally_validated",
           },
           {
             target_id: "t2",
-            canonical_key: "uniprot:P00533",
             gene_symbol: "EGFR",
             uniprot_accession: "P00533",
             validation_status: "db_hit",
@@ -362,14 +360,12 @@ test("import resolves via /targets/validate and adds only fresh targets to the r
         resolved: [
           {
             target_id: "t1",
-            canonical_key: "uniprot:P04637",
             gene_symbol: "TP53",
             uniprot_accession: "P04637",
             validation_status: "externally_validated",
           },
           {
             target_id: "t2",
-            canonical_key: "uniprot:P00533",
             gene_symbol: "EGFR",
             uniprot_accession: "P00533",
             validation_status: "db_hit",
@@ -507,7 +503,6 @@ describe("StpDialog — D-4 toast wiring", () => {
           resolved: [
             {
               target_id: "t1",
-              canonical_key: "uniprot:P04637",
               gene_symbol: "TP53",
               uniprot_accession: "P04637",
               validation_status: "externally_validated",

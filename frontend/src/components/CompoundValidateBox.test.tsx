@@ -19,7 +19,6 @@ function wrap(ui: ReactNode) {
 
 const RESOLVED_COMPOUND = {
   compound_id: "c1",
-  canonical_key: "inchikey:LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
   canonical_name: "ethanol",
   validation_status: "externally_validated",
 };
@@ -34,7 +33,6 @@ const FAILED_COMPOUND = {
 function makeResolvedCompounds(count: number) {
   return Array.from({ length: count }, (_, index) => ({
     compound_id: `c${index}`,
-    canonical_key: `inchikey:COMPOUND${index}`,
     canonical_name: `Compound ${index}`,
     validation_status: "externally_validated",
   }));

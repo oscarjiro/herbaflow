@@ -222,8 +222,8 @@ describe("Stage1View — already-in-run deduplication", () => {
     vi.spyOn(sdk, "validateCompounds").mockResolvedValue({
       data: {
         resolved: [
-          { compound_id: "C1", canonical_name: "Quercetin", canonical_key: "quercetin" },
-          { compound_id: "C2", canonical_name: "Kaempferol", canonical_key: "kaempferol" },
+          { compound_id: "C1", canonical_name: "Quercetin" },
+          { compound_id: "C2", canonical_name: "Kaempferol" },
         ],
         failed: [],
       },
@@ -262,7 +262,7 @@ describe("Stage1View — already-in-run deduplication", () => {
 
     vi.spyOn(sdk, "validateCompounds").mockResolvedValue({
       data: {
-        resolved: [{ compound_id: "C3", canonical_name: "Rutin", canonical_key: "rutin" }],
+        resolved: [{ compound_id: "C3", canonical_name: "Rutin" }],
         failed: [],
       },
     } as never);
@@ -292,7 +292,7 @@ describe("Stage1View — already-in-run deduplication", () => {
 
     vi.spyOn(sdk, "validateCompounds").mockResolvedValue({
       data: {
-        resolved: [{ compound_id: "C1", canonical_name: "Quercetin", canonical_key: "quercetin" }],
+        resolved: [{ compound_id: "C1", canonical_name: "Quercetin" }],
         failed: [],
       },
     } as never);
@@ -317,7 +317,7 @@ describe("Stage1View — already-in-run deduplication", () => {
 
     vi.spyOn(sdk, "validateCompounds").mockResolvedValue({
       data: {
-        resolved: [{ compound_id: "C3", canonical_name: "Rutin", canonical_key: "rutin" }],
+        resolved: [{ compound_id: "C3", canonical_name: "Rutin" }],
         failed: [],
       },
     } as never);

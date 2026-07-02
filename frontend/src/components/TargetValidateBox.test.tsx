@@ -19,7 +19,6 @@ function wrap(ui: ReactNode) {
 
 const RESOLVED_TARGET = {
   target_id: "t1",
-  canonical_key: "uniprot:P04637",
   gene_symbol: "TP53",
   uniprot_accession: "P04637",
   validation_status: "externally_validated",
@@ -34,7 +33,6 @@ const FAILED_TARGET = {
 function makeResolvedTargets(count: number) {
   return Array.from({ length: count }, (_, index) => ({
     target_id: `t${index}`,
-    canonical_key: `uniprot:P${String(index).padStart(5, "0")}`,
     gene_symbol: `GENE${index}`,
     uniprot_accession: `P${String(index).padStart(5, "0")}`,
     validation_status: "externally_validated",

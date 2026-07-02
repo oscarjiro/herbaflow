@@ -445,7 +445,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     overflowKind="compounds"
                     items={resolved}
                     getKey={(r) => r.compound_id}
-                    getLabel={(r) => r.canonical_name ?? r.canonical_key ?? r.compound_id}
+                    getLabel={(r) => r.canonical_name ?? r.compound_id}
                     onRemove={(r) =>
                       setValue(
                         "resolved",
@@ -473,7 +473,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     overflowKind="targets"
                     items={manualTargets}
                     getKey={(t) => t.target_id}
-                    getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
+                    getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.target_id}
                     onRemove={(t) =>
                       setValue(
                         "manualTargets",
@@ -558,7 +558,7 @@ export function SetupView({ onCreated }: { onCreated: (id: string) => void }) {
                     overflowKind="targets"
                     items={manualDiseaseTargets}
                     getKey={(t) => t.target_id}
-                    getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.canonical_key}
+                    getLabel={(t) => t.gene_symbol ?? t.uniprot_accession ?? t.target_id}
                     onRemove={(t) =>
                       setValue(
                         "manualDiseaseTargets",

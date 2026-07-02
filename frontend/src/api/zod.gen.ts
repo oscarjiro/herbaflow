@@ -179,7 +179,6 @@ export const zDiseaseInputMode = z.enum([
 
 export const zDiseaseRead = z.object({
     disease_id: z.string().uuid(),
-    canonical_key: z.string(),
     disease_name: z.union([
         z.string(),
         z.null()
@@ -239,7 +238,6 @@ export const zPlantInputMode = z.enum([
 
 export const zPlantRead = z.object({
     plant_id: z.string().uuid(),
-    canonical_key: z.string(),
     canonical_scientific_name: z.union([
         z.string(),
         z.null()
@@ -270,7 +268,6 @@ export const zResetFromRequest = z.object({
 
 export const zResolvedCompound = z.object({
     compound_id: z.string().uuid(),
-    canonical_key: z.string(),
     canonical_name: z.union([
         z.string(),
         z.null()
@@ -284,7 +281,6 @@ export const zResolvedCompound = z.object({
 
 export const zResolvedTarget = z.object({
     target_id: z.string().uuid(),
-    canonical_key: z.string(),
     gene_symbol: z.union([
         z.string(),
         z.null()

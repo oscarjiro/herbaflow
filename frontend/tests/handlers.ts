@@ -35,7 +35,6 @@ export const SAMPLE_STAGE2_RESULTS = {
       hbond_acceptors: 6,
       tpsa: 93.1,
       rotatable_bonds: 8,
-      qed_score: 0.55,
       np_likeness_score: 1.8,
       num_ro5_violations: 0,
       is_pains_positive: true,
@@ -52,7 +51,6 @@ export const SAMPLE_STAGE2_RESULTS = {
       hbond_acceptors: 4,
       tpsa: 40.8,
       rotatable_bonds: 1,
-      qed_score: 0.49,
       np_likeness_score: 2.1,
       num_ro5_violations: 0,
       is_pains_positive: false,
@@ -71,7 +69,6 @@ export const SAMPLE_STAGE2_RESULTS = {
       hbond_acceptors: 8,
       tpsa: 120.0,
       rotatable_bonds: 12,
-      qed_score: 0.12,
       np_likeness_score: -1.0,
       num_ro5_violations: 3,
       is_pains_positive: false,
@@ -413,7 +410,6 @@ export const server = setupServer(
     HttpResponse.json([
       {
         disease_id: "d1",
-        canonical_key: "doid:1",
         disease_name: "Test Disease",
         ontology_id: null,
         ontology_source: null,
@@ -426,7 +422,6 @@ export const server = setupServer(
     HttpResponse.json([
       {
         plant_id: "p1",
-        canonical_key: "gbif:1",
         canonical_scientific_name: "Aaa bbb",
         family_name: null,
       },
@@ -455,7 +450,6 @@ export const server = setupServer(
       resolved: [
         {
           compound_id: "c1",
-          canonical_key: "inchikey:LFQSCWFLJHTTHZ-UHFFFAOYSA-N",
           canonical_name: "ethanol",
           validation_status: "externally_validated",
         },
@@ -474,7 +468,6 @@ export const server = setupServer(
       resolved: [
         {
           target_id: "t1",
-          canonical_key: "uniprot:P00533",
           gene_symbol: "EGFR",
           uniprot_accession: "P00533",
         },

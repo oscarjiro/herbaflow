@@ -449,7 +449,6 @@ describe("Stage4View — single editable table", () => {
             target_id: "t2",
             gene_symbol: "GENEB",
             uniprot_accession: "P22222",
-            canonical_key: "geneb",
           },
         ],
         failed: [],

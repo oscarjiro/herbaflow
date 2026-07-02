@@ -12,20 +12,17 @@ type TestResolvedCompound = ResolvedCompound & { source_url?: string | null };
 const mockCompounds: TestResolvedCompound[] = [
   {
     compound_id: "c1",
-    canonical_key: "RYYVLZVUVIJVGH-UHFFFAOYSA-N",
     canonical_name: "Curcumin",
     validation_status: "ok",
     source_url: "https://pubchem.ncbi.nlm.nih.gov/compound/969516",
   },
   {
     compound_id: "c2",
-    canonical_key: "AAABBBCCC-UHFFFAOYSA-N",
     canonical_name: "Quercetin",
     validation_status: "ok",
   },
   {
     compound_id: "c3",
-    canonical_key: "DDDEEEYYY-UHFFFAOYSA-N",
     canonical_name: null,
     validation_status: "ok",
   },
@@ -34,14 +31,12 @@ const mockCompounds: TestResolvedCompound[] = [
 const mockTargets: ResolvedTarget[] = [
   {
     target_id: "t1",
-    canonical_key: "Epidermal growth factor receptor",
     gene_symbol: "EGFR",
     uniprot_accession: "P00533",
     validation_status: "ok",
   },
   {
     target_id: "t2",
-    canonical_key: "Cellular tumor antigen p53",
     gene_symbol: "TP53",
     uniprot_accession: "P04637",
     validation_status: "ok",
@@ -70,7 +65,7 @@ describe("EntryOverflowDialog — compounds", () => {
     expect(screen.getByText("Quercetin")).toBeInTheDocument();
   });
 
-  it("links InChIKey through the persisted source_url when present", () => {
+  it("links the compound name through the persisted source_url when present", () => {
     render(
       <EntryOverflowDialog
         kind="compounds"
@@ -82,7 +77,7 @@ describe("EntryOverflowDialog — compounds", () => {
     );
 
     const link = screen.getByRole("link", {
-      name: /compound source for RYYVLZVUVIJVGH-UHFFFAOYSA-N/i,
+      name: /compound source for curcumin/i,
     });
     expect(link).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/969516");
     expect(link).not.toHaveAttribute("href", expect.stringContaining("#query"));
@@ -232,7 +227,6 @@ describe("EntryOverflowDialog — targets", () => {
         items={[
           {
             target_id: "t3",
-            canonical_key: "uniprot:P04637",
             gene_symbol: "TP53",
             uniprot_accession: "P04637",
             validation_status: "ok",
@@ -267,7 +261,7 @@ describe("EntryOverflowDialog — targets", () => {
 // ---------------------------------------------------------------------------
 
 describe("EntryOverflowDialog — compound columns", () => {
-  it("renders InChIKey, Name columns and delete button", () => {
+  it("renders the Name column and delete button", () => {
     render(
       <EntryOverflowDialog
         kind="compounds"
@@ -278,8 +272,7 @@ describe("EntryOverflowDialog — compound columns", () => {
       />,
     );
 
-    // Column headers
-    expect(screen.getByText("InChIKey")).toBeInTheDocument();
+    // Column header
     expect(screen.getByText("Name")).toBeInTheDocument();
 
     // Delete button present

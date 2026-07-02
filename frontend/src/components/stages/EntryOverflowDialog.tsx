@@ -49,28 +49,22 @@ type EntryOverflowDialogProps = CompoundsProps | TargetsProps;
 function buildCompoundColumns(onRemove: (id: string) => void): ColumnDef<CompoundWithSourceUrl>[] {
   return [
     {
-      accessorKey: "canonical_key",
-      header: "InChIKey",
-      meta: { filterable: true },
-      cell: ({ row }) => {
-        const key = row.original.canonical_key;
-        const sourceUrl = row.original.source_url;
-        if (sourceUrl) {
-          return (
-            <ExternalLink href={sourceUrl} label={`Compound source for ${key}`}>
-              <span className="font-mono text-xs">{key}</span>
-            </ExternalLink>
-          );
-        }
-        return <span className="font-mono text-xs">{key}</span>;
-      },
-    },
-    {
       accessorKey: "canonical_name",
       header: "Name",
       meta: { filterable: true },
-      cell: ({ row }) =>
-        row.original.canonical_name ?? <span className="text-hf-fg-4 italic">—</span>,
+      cell: ({ row }) => {
+        const name = row.original.canonical_name;
+        const sourceUrl = row.original.source_url;
+        if (!name) return <span className="text-hf-fg-4 italic">—</span>;
+        if (sourceUrl) {
+          return (
+            <ExternalLink href={sourceUrl} label={`Compound source for ${name}`}>
+              <span>{name}</span>
+            </ExternalLink>
+          );
+        }
+        return <span>{name}</span>;
+      },
     },
     {
       id: "delete",
@@ -78,7 +72,7 @@ function buildCompoundColumns(onRemove: (id: string) => void): ColumnDef<Compoun
       meta: { className: "w-10" },
       cell: ({ row }) => {
         const id = row.original.compound_id;
-        const label = row.original.canonical_name ?? row.original.canonical_key;
+        const label = row.original.canonical_name ?? row.original.compound_id;
         return (
           <button
             type="button"
@@ -127,7 +121,7 @@ function buildTargetColumns(onRemove: (id: string) => void): ColumnDef<ResolvedT
       cell: ({ row }) => {
         const id = row.original.target_id;
         const label =
-          row.original.gene_symbol ?? row.original.uniprot_accession ?? row.original.canonical_key;
+          row.original.gene_symbol ?? row.original.uniprot_accession ?? row.original.target_id;
         return (
           <button
             type="button"

@@ -16,13 +16,11 @@ const BASE = "http://localhost:8000";
 const PLANTS: PlantRead[] = [
   {
     plant_id: "p1",
-    canonical_key: "gbif:1",
     canonical_scientific_name: "Curcuma longa",
     family_name: null,
   },
   {
     plant_id: "p2",
-    canonical_key: "gbif:2",
     canonical_scientific_name: "Zingiber officinale",
     family_name: null,
   },
@@ -31,7 +29,6 @@ const PLANTS: PlantRead[] = [
 const DISEASES: DiseaseRead[] = [
   {
     disease_id: "d1",
-    canonical_key: "doid:1",
     disease_name: "Type 2 Diabetes",
     ontology_id: null,
     ontology_source: null,
@@ -232,7 +229,6 @@ describe("useEntitySubjects — full catalog resolution", () => {
     // whole catalog rather than the backend's default of 50.
     const target: PlantRead = {
       plant_id: "p-deep",
-      canonical_key: "gbif:deep",
       canonical_scientific_name: "Curcuma longa",
       family_name: null,
     };
@@ -242,7 +238,6 @@ describe("useEntitySubjects — full catalog resolution", () => {
         const all: PlantRead[] = [
           ...Array.from({ length: 99 }, (_, i) => ({
             plant_id: `p${i}`,
-            canonical_key: `gbif:${i}`,
             canonical_scientific_name: `Plant ${i}`,
             family_name: null,
           })),

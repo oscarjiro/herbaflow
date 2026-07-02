@@ -38,7 +38,6 @@ test("renders hf-token chips and removes on click", async () => {
 function makeCompounds(n: number): ResolvedCompound[] {
   return Array.from({ length: n }, (_, i) => ({
     compound_id: `c${i}`,
-    canonical_key: `INCHIKEY${i}-UHFFFAOYSA-N`,
     canonical_name: `Compound ${i}`,
     validation_status: "ok",
   }));
@@ -47,7 +46,6 @@ function makeCompounds(n: number): ResolvedCompound[] {
 function makeTargets(n: number): ResolvedTarget[] {
   return Array.from({ length: n }, (_, i) => ({
     target_id: `t${i}`,
-    canonical_key: `Protein ${i}`,
     gene_symbol: `GENE${i}`,
     uniprot_accession: `P0000${i}`,
     validation_status: "ok",

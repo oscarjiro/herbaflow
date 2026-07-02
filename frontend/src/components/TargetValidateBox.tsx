@@ -136,7 +136,7 @@ export function TargetValidateBox({
           overflowKind="targets"
           items={resolved}
           getKey={(r) => r.target_id}
-          getLabel={(r) => r.gene_symbol ?? r.uniprot_accession ?? r.canonical_key}
+          getLabel={(r) => r.gene_symbol ?? r.uniprot_accession ?? r.target_id}
           onRemove={(r) =>
             setResolved((current) => current.filter((x) => x.target_id !== r.target_id))
           }

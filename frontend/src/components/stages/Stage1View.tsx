@@ -304,9 +304,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
           <EntityAddControl current={current} cap={MAX_COMPOUNDS}>
             <CompoundValidateBox label="Add compounds" onResolved={handleAdd} showAddButton />
           </EntityAddControl>
-          <AlreadyInRunNote
-            labels={alreadyInRun.map((c) => c.canonical_name ?? c.canonical_key ?? c.compound_id)}
-          />
+          <AlreadyInRunNote labels={alreadyInRun.map((c) => c.canonical_name ?? c.compound_id)} />
         </CardContent>
       </Card>
     </section>

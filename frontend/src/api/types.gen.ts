@@ -106,7 +106,6 @@ export type DiseaseInputMode = 'selection' | 'manual_disease_targets';
 
 export type DiseaseRead = {
     disease_id: string;
-    canonical_key: string;
     disease_name: string | null;
     ontology_id: string | null;
     ontology_source: string | null;
@@ -132,7 +131,6 @@ export type PlantInputMode = 'selection' | 'manual_compounds' | 'manual_targets'
 
 export type PlantRead = {
     plant_id: string;
-    canonical_key: string;
     canonical_scientific_name: string | null;
     family_name: string | null;
     matched_alias?: string | null;
@@ -165,7 +163,6 @@ export type ResetFromRequest = {
 
 export type ResolvedCompound = {
     compound_id: string;
-    canonical_key: string;
     canonical_name: string | null;
     pubchem_cid?: string | null;
     validation_status: string;
@@ -173,7 +170,6 @@ export type ResolvedCompound = {
 
 export type ResolvedTarget = {
     target_id: string;
-    canonical_key: string;
     gene_symbol: string | null;
     uniprot_accession: string | null;
     validation_status: string;
@@ -328,9 +324,6 @@ export type ListAnalysesResponse = ListAnalysesResponses[keyof ListAnalysesRespo
 
 export type CreateAnalysisData = {
     body: AnalysisCreate;
-    headers?: {
-        'Idempotency-Key'?: string | null;
-    };
     path?: never;
     query?: never;
     url: '/analyses';

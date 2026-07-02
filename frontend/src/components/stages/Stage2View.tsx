@@ -49,7 +49,6 @@ type CompoundRow = {
   hbond_acceptors: number | null;
   tpsa: number | null;
   rotatable_bonds: number | null;
-  qed_score: number | null;
   np_likeness_score: number | null;
   num_ro5_violations?: number | null;
   lipinski_violations: number | null;
