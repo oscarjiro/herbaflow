@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { SearchIcon, XIcon } from "lucide-react";
+import { CheckIcon, SearchIcon, XIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./ui/command";
 import { Popover, PopoverAnchor, PopoverContent } from "./ui/popover";
@@ -71,7 +71,7 @@ function DiseaseGlyph({ className }: { className?: string }) {
 // Rich result row (.sres)
 // ---------------------------------------------------------------------------
 
-function SresRow({ opt }: { opt: ComboOption }) {
+function SresRow({ opt, selected = false }: { opt: ComboOption; selected?: boolean }) {
   const isPlant = opt.kind === "plant";
   const countStr = opt.count !== undefined ? opt.count.toLocaleString() : null;
   const countLabel = countStr
@@ -104,10 +104,17 @@ function SresRow({ opt }: { opt: ComboOption }) {
         )}
       </span>
 
-      {/* Count badge */}
-      {countLabel && (
-        <span className="text-hf-fg-3 ml-auto shrink-0 font-mono text-[12px]">{countLabel}</span>
-      )}
+      {/* Right side: count badge + selected check */}
+      <span className="ml-auto flex shrink-0 items-center gap-2">
+        {countLabel && <span className="text-hf-fg-3 font-mono text-[12px]">{countLabel}</span>}
+        {selected && (
+          <CheckIcon
+            aria-label="Selected"
+            className="text-hf-fg-1 size-[18px] shrink-0"
+            strokeWidth={3}
+          />
+        )}
+      </span>
     </span>
   );
 }
@@ -294,12 +301,15 @@ export function EntitySearchCombobox({
                         disabled={disabled}
                         onSelect={() => toggle(opt)}
                         className={cn(
-                          "hover:bg-hf-surface-2 cursor-pointer rounded-none border-b border-[var(--hf-border)] px-0 py-0 last:border-b-0",
-                          sel && "bg-hf-surface-2",
+                          "cursor-pointer rounded-none border-b border-[var(--hf-border)] px-0 py-0 last:border-b-0",
+                          // Selected rows carry only the check badge (no persistent
+                          // tint); their hover is terracotta to cue "click removes",
+                          // distinct from the neutral hover on unselected rows.
+                          sel ? "hover:bg-hf-terracotta-soft" : "hover:bg-hf-surface-2",
                         )}
                       >
                         <div className="flex w-full items-center gap-3 px-[14px] py-[11px]">
-                          <SresRow opt={opt} />
+                          <SresRow opt={opt} selected={sel} />
                         </div>
                       </CommandItem>
                     );
