@@ -37,6 +37,7 @@ import { ChartFrame } from "@/components/charts/ChartFrame";
 import { EnrichmentDotChart } from "@/components/charts/EnrichmentDotChart";
 import { exportPlotlyAsPng } from "@/lib/chartExport";
 import { ParamPanel } from "./ParamPanel";
+import { isRunBusy } from "@/lib/runStatus";
 import { StageDataSources } from "./StageDataSources";
 import { StageSummaryCard } from "./StageSummaryCard";
 
@@ -281,7 +282,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           selectKeys={ENRICHMENT_SELECT_PARAMS}
           arrayKeys={ENRICHMENT_ARRAY_PARAMS}
           title="Enrichment parameters"
-          disabled={redo.isPending}
+          disabled={redo.isPending || isRunBusy(data.status)}
           onRedo={(changed) => redo.mutate(changed)}
         />
       )}

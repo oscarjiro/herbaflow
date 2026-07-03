@@ -9,7 +9,16 @@ import { Card, CardContent } from "@/components/ui/card";
  *
  * resetFrom requires both `path` and `body` (body.parameters is optional).
  */
-export function StaleNotice({ analysisId, fromStage }: { analysisId: string; fromStage: number }) {
+export function StaleNotice({
+  analysisId,
+  fromStage,
+  disabled = false,
+}: {
+  analysisId: string;
+  fromStage: number;
+  /** Disabled while the run is busy computing a stage (no redo/re-run mid-run). */
+  disabled?: boolean;
+}) {
   const rerun = useResetFrom(analysisId, fromStage);
   return (
     <Card className="border-hf-warning/40 bg-hf-warning-soft/20 w-full" role="status">
@@ -19,7 +28,7 @@ export function StaleNotice({ analysisId, fromStage }: { analysisId: string; fro
           variant="warning"
           className="shrink-0"
           onClick={() => rerun.mutate()}
-          disabled={rerun.isPending}
+          disabled={rerun.isPending || disabled}
         >
           Re-run from Step {fromStage}
         </Button>

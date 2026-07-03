@@ -107,6 +107,35 @@ test("stage-1 running with no per-item progress renders shimmer skeleton (not an
   expect(screen.queryByTestId("slot")).toBeNull();
 });
 
+test("pre-result state (status not yet stage_N_running) shows the skeleton, not an empty body", () => {
+  // The leak: a fresh run passes through statuses like "created" before the poll flips
+  // to stage_1_running. With no result yet the stage must show the loading skeleton, never
+  // briefly render the content slot with zero items.
+  wrap(
+    <StageView
+      data={
+        {
+          analysis_id: "a",
+          status: "created",
+          current_stage: 1,
+          stage_results: {},
+          stage_state: {},
+          progress: null,
+        } as unknown as AnalysisRead
+      }
+      stage={1}
+      title="Compounds"
+      kicker="01 · Compounds"
+      onApprove={() => Promise.resolve()}
+      approvePending={false}
+    >
+      <div data-testid="slot">table goes here</div>
+    </StageView>,
+  );
+  expect(document.querySelectorAll(".sk").length).toBeGreaterThan(0);
+  expect(screen.queryByTestId("slot")).toBeNull();
+});
+
 test("blocked/empty state shows a no-results message and recovery", () => {
   renderStage(base({ stage_results: { "3": { count: 0 } } }));
   expect(screen.getByText(/no results/i)).toBeInTheDocument();

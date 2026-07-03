@@ -6,6 +6,7 @@ import { StaleNotice } from "@/components/stages/StaleNotice";
 import { RunFailedNotice } from "@/components/stages/RunFailedNotice";
 import { StageRunningSkeleton } from "@/components/stages/StageRunningSkeleton";
 import { useStaleState } from "@/hooks/useStaleState";
+import { isRunBusy } from "@/lib/runStatus";
 
 type StageResult = { count?: number } | undefined;
 
@@ -34,13 +35,18 @@ export function StageView({
 }) {
   const { anyStale, rerunFrom } = useStaleState(data);
   const result = data.stage_results?.[String(stage)] as StageResult;
-  const isRunning = data.status === `stage_${stage}_running` && !result;
-  const isEmpty = Boolean(result) && (result?.count ?? 0) === 0;
+  const hasResult = result != null;
+  const isEmpty = hasResult && (result?.count ?? 0) === 0;
   const isDeadEnd = isEmpty && !canAddWhenEmpty;
   // A failed run has no results for the stage it died on (or any later stage). Show
   // the failure + re-run affordance instead of a blank stage body. reset-from points
   // at the stage that actually failed (current_stage), not the stage being viewed.
-  const isFailedView = data.status === "failed" && !result;
+  const isFailedView = data.status === "failed" && !hasResult;
+  // A reached stage with no result yet is still computing. Drive the skeleton off
+  // "no result" rather than an exact `stage_N_running` status match: a fresh run
+  // passes through pre-result states (created, or the tick before the poll flips to
+  // running) where the old check briefly rendered an empty 0-item stage body.
+  const isRunning = !hasResult && !isFailedView;
   const failedStage = data.current_stage ?? stage;
 
   return (
@@ -124,7 +130,11 @@ export function StageView({
           )}
           {children}
           {rerunFrom === stage && (
-            <StaleNotice analysisId={data.analysis_id} fromStage={rerunFrom} />
+            <StaleNotice
+              analysisId={data.analysis_id}
+              fromStage={rerunFrom}
+              disabled={isRunBusy(data.status)}
+            />
           )}
           <div className="flex items-center gap-3">
             {onEdit && (

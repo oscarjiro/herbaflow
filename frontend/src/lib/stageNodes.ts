@@ -1,5 +1,6 @@
 import type { AnalysisRead } from "@/api/types.gen";
 import { isSlugApplicable, isSlugReached, slugToStage, type StageSlug } from "@/lib/stageRoutes";
+import { runningStage } from "@/lib/runStatus";
 import { doneSub, runningSub } from "@/lib/stageSummary";
 
 export type NodeState =
@@ -17,8 +18,7 @@ export function nodeState(slug: StageSlug, data: AnalysisRead, activeSlug?: Stag
   // A failed run marks the stage it died on (current_stage) as failed — never a
   // green "done" check, which would hide that the run stopped here.
   if (data.status === "failed" && n != null && data.current_stage === n) return "failed";
-  const runningMatch = /^stage_(\d+)_running$/.exec(data.status ?? "");
-  if (n != null && runningMatch && Number(runningMatch[1]) === n) return "running";
+  if (n != null && runningStage(data.status) === n) return "running";
   const reached = isSlugReached(slug, data);
   if (reached) {
     const result =

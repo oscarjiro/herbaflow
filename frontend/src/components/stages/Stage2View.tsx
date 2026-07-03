@@ -30,6 +30,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ExternalLink } from "@/components/ui/ExternalLink";
 import { ParamPanel } from "./ParamPanel";
+import { isRunBusy } from "@/lib/runStatus";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
 import { StageSummaryCard } from "./StageSummaryCard";
@@ -333,7 +334,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
         <ParamPanel
           params={admeParams}
           meta={ADME_PARAMS}
-          disabled={redo.isPending}
+          disabled={redo.isPending || isRunBusy(data.status)}
           onRedo={(changed) => redo.mutate(changed)}
         />
       )}

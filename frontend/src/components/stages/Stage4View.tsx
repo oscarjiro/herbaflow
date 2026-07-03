@@ -55,6 +55,7 @@ import { ExternalLink } from "@/components/ui/ExternalLink";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
+import { isRunBusy } from "@/lib/runStatus";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
 import { StageSummaryCard } from "./StageSummaryCard";
@@ -299,7 +300,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
           numericKeys={DISEASE_TARGETS_NUMERIC_PARAMS}
           booleanKeys={[]}
           title="Disease-target parameters"
-          disabled={redo.isPending}
+          disabled={redo.isPending || isRunBusy(data.status)}
           onRedo={(changed) => redo.mutate(changed)}
         />
       )}

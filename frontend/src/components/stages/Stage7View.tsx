@@ -31,6 +31,7 @@ import { ChartFrame } from "@/components/charts/ChartFrame";
 import { HubBarChart } from "@/components/charts/HubBarChart";
 import { exportPlotlyAsPng } from "@/lib/chartExport";
 import { ParamPanel } from "./ParamPanel";
+import { isRunBusy } from "@/lib/runStatus";
 import { StageDataSources } from "./StageDataSources";
 import { StageSummaryCard } from "./StageSummaryCard";
 
@@ -269,7 +270,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
           booleanKeys={HUB_GENES_BOOLEAN_PARAMS}
           selectKeys={[]}
           title="Hub-ranking parameters"
-          disabled={redo.isPending}
+          disabled={redo.isPending || isRunBusy(data.status)}
           onRedo={(changed) => redo.mutate(changed)}
         />
       )}

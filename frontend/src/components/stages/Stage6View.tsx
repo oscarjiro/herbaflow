@@ -48,6 +48,7 @@ import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { ExternalLink } from "@/components/ui/ExternalLink";
 import { ParamPanel } from "./ParamPanel";
+import { isRunBusy } from "@/lib/runStatus";
 import { StageDataSources } from "./StageDataSources";
 import { StageSummaryCard } from "./StageSummaryCard";
 
@@ -324,7 +325,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
       booleanKeys={PPI_BOOLEAN_PARAMS}
       selectKeys={PPI_SELECT_PARAMS}
       title="PPI network parameters"
-      disabled={redo.isPending}
+      disabled={redo.isPending || isRunBusy(data.status)}
       onRedo={(changed) => redo.mutate(changed)}
     />
   ) : null;
@@ -353,7 +354,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
             <div>
               <Button
                 type="button"
-                disabled={redo.isPending}
+                disabled={redo.isPending || isRunBusy(data.status)}
                 onClick={() => redo.mutate({ allow_top_n_cap: true })}
                 aria-label="Enable top-N cap and Redo"
               >

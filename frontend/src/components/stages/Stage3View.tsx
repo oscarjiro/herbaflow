@@ -48,6 +48,7 @@ import { SourceIconLink } from "@/components/ui/SourceIconLink";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
+import { isRunBusy } from "@/lib/runStatus";
 import { StageDataSources } from "./StageDataSources";
 import { StageEntityContext } from "./StageEntityContext";
 import { StageSummaryCard } from "./StageSummaryCard";
@@ -499,7 +500,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
           numericKeys={TARGET_NUMERIC_PARAMS}
           booleanKeys={[]}
           title="Target parameters"
-          disabled={redo.isPending}
+          disabled={redo.isPending || isRunBusy(data.status)}
           onRedo={(changed) => redo.mutate(changed)}
         />
       )}
