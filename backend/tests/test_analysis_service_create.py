@@ -49,14 +49,38 @@ class _FakeAnalysisRepo:
         return _Run()
 
 
+# A fixed catalog the fakes resolve names against. A create that passes these exact ids in
+# selection mode should have the resolved display name(s) stored on the run's labels.
+_PLANT_ID = uuid.uuid4()
+_DISEASE_ID = uuid.uuid4()
+
+
+class _PlantRow:
+    def __init__(self, pid: uuid.UUID, name: str) -> None:
+        self.plant_id = pid
+        self.canonical_scientific_name = name
+
+
+class _DiseaseRow:
+    def __init__(self, did: uuid.UUID, name: str) -> None:
+        self.disease_id = did
+        self.disease_name = name
+
+
 class _FakePlantRepo:
     async def missing_ids(self, ids: list[uuid.UUID]) -> list[uuid.UUID]:
         return []
+
+    async def list_all(self) -> list[_PlantRow]:
+        return [_PlantRow(_PLANT_ID, "Curcuma longa L.")]
 
 
 class _FakeDiseaseRepo:
     async def exists(self, did: uuid.UUID) -> bool:
         return True
+
+    async def list_all(self) -> list[_DiseaseRow]:
+        return [_DiseaseRow(_DISEASE_ID, "Type 2 Diabetes Mellitus")]
 
 
 class _FakeCompoundRepo:
@@ -96,12 +120,28 @@ def _service(arepo: _FakeAnalysisRepo) -> AnalysisService:
 @pytest.mark.asyncio
 async def test_selection_create_no_prefill() -> None:
     arepo = _FakeAnalysisRepo()
-    await _service(arepo).create(AnalysisCreate(plant_ids=[uuid.uuid4()], disease_id=uuid.uuid4()))
+    await _service(arepo).create(AnalysisCreate(plant_ids=[_PLANT_ID], disease_id=_DISEASE_ID))
     c = arepo.created
     assert c is not None
     assert c["current_stage"] == 1
     assert c["stage_results"] in (None, {})
     assert c["extra_parameters"]["input_modes"] == {"plant": "selection", "disease": "selection"}
+    # Selection mode now resolves + stores the catalog display name(s) on the run at create,
+    # so the frontend reads the subject straight off the run (no second catalog fetch).
+    assert c["extra_parameters"]["labels"] == {
+        "plant": "Curcuma longa L.",
+        "disease": "Type 2 Diabetes Mellitus",
+    }
+
+
+@pytest.mark.asyncio
+async def test_selection_create_unknown_id_stores_no_stale_label() -> None:
+    # An id absent from the catalog resolves to None and is simply not stored (never a UUID
+    # masquerading as a display name); export's fallback still covers legacy runs.
+    arepo = _FakeAnalysisRepo()
+    await _service(arepo).create(AnalysisCreate(plant_ids=[uuid.uuid4()], disease_id=uuid.uuid4()))
+    c = arepo.created
+    assert c is not None
     assert "labels" not in c["extra_parameters"]
 
 

@@ -22,6 +22,7 @@ from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
 from app.repositories.target import TargetRepository
 from app.schemas.analysis import AnalysisCreate, AnalysisListItem, AnalysisRead, ProgressRead
+from app.services.labels import resolve_entity_labels
 
 logger = logging.getLogger("herbaflow.analysis")
 
@@ -175,6 +176,21 @@ class AnalysisService:
             labels["plant"] = payload.plant_label
         if payload.disease_label is not None:
             labels["disease"] = payload.disease_label
+        # Selection mode carries no free-text label — resolve the catalog display name(s)
+        # now and store them on the run, so the frontend reads the subject straight off the
+        # run instead of fetching the whole catalog to map ids→names (symmetric with manual
+        # mode, which already stores labels). Display-only (B4).
+        if plant_mode == "selection" or disease_mode == "selection":
+            resolved = await resolve_entity_labels(
+                self.plant_repo,
+                self.disease_repo,
+                payload.plant_ids if plant_mode == "selection" else None,
+                payload.disease_id if disease_mode == "selection" else None,
+            )
+            if plant_mode == "selection" and resolved["plant"] is not None:
+                labels["plant"] = resolved["plant"]
+            if disease_mode == "selection" and resolved["disease"] is not None:
+                labels["disease"] = resolved["disease"]
         if labels:
             extra_parameters["labels"] = labels
 

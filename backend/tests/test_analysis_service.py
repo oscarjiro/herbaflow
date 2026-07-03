@@ -15,6 +15,10 @@ class FakePlantRepo:
     async def missing_ids(self, plant_ids):
         return self._missing
 
+    async def list_all(self):
+        # Empty catalog: selection-mode label resolution finds no name and stores none.
+        return []
+
 
 class FakeDiseaseRepo:
     def __init__(self, exists):
@@ -22,6 +26,9 @@ class FakeDiseaseRepo:
 
     async def exists(self, disease_id):
         return self._exists
+
+    async def list_all(self):
+        return []
 
 
 class FakeAnalysisRepo:

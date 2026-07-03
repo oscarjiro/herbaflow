@@ -23,6 +23,10 @@ export function deriveSubjects(
 
   const plant: string = (() => {
     if (!inputModes || inputModes.plant === "selection") {
+      // New runs store the resolved catalog name(s) at create time — read them straight
+      // off the run. The catalog lookup below is only a fallback for legacy runs that
+      // predate create-time label storage.
+      if (labels?.plant) return labels.plant;
       if (!plantIds || plantIds.length === 0) return "—";
       if (plants === undefined) return "—";
       const byId = new Map((plants ?? []).map((p) => [p.plant_id, p]));
@@ -36,6 +40,7 @@ export function deriveSubjects(
 
   const disease: string = (() => {
     if (!inputModes || inputModes.disease === "selection") {
+      if (labels?.disease) return labels.disease;
       if (!diseaseId) return "—";
       if (diseases === undefined) return "—";
       const byId = new Map((diseases ?? []).map((d) => [d.disease_id, d]));
@@ -61,15 +66,26 @@ export function useEntitySubjects(data: AnalysisRead | undefined): {
   plant: string;
   disease: string;
 } {
-  const { data: plantsData } = useQuery(listPlantsOptions({ query: { limit: CATALOG_LIMIT } }));
-  const { data: diseasesData } = useQuery(listDiseasesOptions({ query: { limit: CATALOG_LIMIT } }));
+  const params = data?.parameters as Record<string, unknown> | undefined;
+  const inputModes = params?.input_modes as { plant?: string; disease?: string } | undefined;
+  const labels = params?.labels as { plant?: string; disease?: string } | undefined;
+
+  // Only fetch the catalog for a selection-mode side whose display name wasn't stored on the
+  // run (legacy runs predating create-time label storage). New runs read straight off
+  // `labels`, so the run header/context never waits on a second catalog round-trip.
+  const needPlants = (!inputModes || inputModes.plant === "selection") && !labels?.plant;
+  const needDiseases = (!inputModes || inputModes.disease === "selection") && !labels?.disease;
+
+  const { data: plantsData } = useQuery({
+    ...listPlantsOptions({ query: { limit: CATALOG_LIMIT } }),
+    enabled: needPlants,
+  });
+  const { data: diseasesData } = useQuery({
+    ...listDiseasesOptions({ query: { limit: CATALOG_LIMIT } }),
+    enabled: needDiseases,
+  });
 
   if (!data) return { plant: "—", disease: "—" };
 
-  return deriveSubjects(
-    data.parameters as Record<string, unknown> | undefined,
-    data.disease_id,
-    plantsData,
-    diseasesData,
-  );
+  return deriveSubjects(params, data.disease_id, plantsData, diseasesData);
 }

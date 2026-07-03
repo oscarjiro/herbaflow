@@ -19,6 +19,7 @@ from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
+from app.services.labels import resolve_entity_labels
 from app.repositories.target import TargetRepository
 from app.schemas.graph import CtpGraph
 
@@ -118,33 +119,27 @@ def _uuids(ids: set[str]) -> list[uuid.UUID]:
 
 
 async def _resolve_labels(session: AsyncSession, run: Any) -> dict[str, Any]:
-    """B4 opaque display labels (may be N/A). Prefer the run's stored ``labels`` (manual entry);
-    otherwise resolve the selected plant(s)/disease name from the catalog. Never assume an id
-    exists — labels may legitimately be ``None`` so the report prints N/A."""
+    """B4 opaque display labels (may be N/A). Prefer the run's stored ``labels`` (all new
+    runs store them at create; manual entry has always stored them); otherwise resolve the
+    selected plant(s)/disease name from the catalog via the shared id→name home. Never assume
+    an id exists — labels may legitimately be ``None`` so the report prints N/A."""
     params: dict[str, Any] = run.parameters or {}
     stored = params.get("labels") or {}
     plant = stored.get("plant")
     disease = stored.get("disease")
 
-    if plant is None:
-        plant_ids = {str(p) for p in (params.get("plant_ids") or [])}
-        if plant_ids:
-            plants = await PlantRepository(session).list_all()
-            names = [
-                p.canonical_scientific_name
-                for p in plants
-                if str(p.plant_id) in plant_ids and p.canonical_scientific_name
-            ]
-            plant = ", ".join(names) if names else None
-
-    if disease is None and getattr(run, "disease_id", None):
-        diseases = await DiseaseRepository(session).list_all()
-        disease = next(
-            (d.disease_name for d in diseases if d.disease_id == run.disease_id),
-            None,
-        )
-
-    return {"plant": plant, "disease": disease}
+    # Only hit the catalog for a side the run didn't already store (legacy runs predating
+    # create-time label storage). resolve_entity_labels skips a side passed as None.
+    resolved = await resolve_entity_labels(
+        PlantRepository(session),
+        DiseaseRepository(session),
+        params.get("plant_ids") if plant is None else None,
+        run.disease_id if (disease is None and getattr(run, "disease_id", None)) else None,
+    )
+    return {
+        "plant": plant if plant is not None else resolved["plant"],
+        "disease": disease if disease is not None else resolved["disease"],
+    }
 
 
 async def _load_ctp_lookups(
