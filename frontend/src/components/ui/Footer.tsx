@@ -1,4 +1,6 @@
 import { useMatchRoute } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { toggleGlassPerfFallback } from "@/lib/glassSupport";
 
 export function Footer() {
   const matchRoute = useMatchRoute();
@@ -20,7 +22,21 @@ export function Footer() {
           to researchers and students alike.
         </p>
         <div className="text-hf-fg-4 text-xs tracking-[0.04em]">
-          © 2026 · Herbaflow · Oscar Jiro
+          © 2026 · Herbaflow ·{" "}
+          {/* Hidden perf affordance: clicking the author name toggles the heavy
+              Chromium-only liquid-glass refraction to the cheaper frosted
+              fallback and back (persisted). Styled as plain text so it reads as
+              a credit, not a control. */}
+          <button
+            type="button"
+            onClick={() => {
+              const fallback = toggleGlassPerfFallback();
+              toast(fallback ? "Performance mode: liquid glass off" : "Liquid glass on");
+            }}
+            className="cursor-default appearance-none bg-transparent p-0 tracking-[inherit] text-inherit"
+          >
+            Oscar Jiro
+          </button>
         </div>
       </div>
     </footer>

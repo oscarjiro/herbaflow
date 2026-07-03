@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GLASS_REFRACT_ATTR, applyGlassSupport, detectRefractionSupport } from "./glassSupport";
+import {
+  GLASS_PERF_KEY,
+  GLASS_REFRACT_ATTR,
+  applyGlassSupport,
+  detectRefractionSupport,
+  isPerfFallbackForced,
+  toggleGlassPerfFallback,
+} from "./glassSupport";
 
 // glassSupport gates the Chromium-only refraction path. The SAFE DEFAULT is
 // frosted: detection must only opt IN to refraction when it can positively
@@ -113,5 +120,46 @@ describe("applyGlassSupport", () => {
     delete globalThis.document;
     expect(() => applyGlassSupport()).not.toThrow();
     globalThis.document = realDoc;
+  });
+});
+
+describe("toggleGlassPerfFallback (manual perf override)", () => {
+  beforeEach(() => {
+    localStorage.removeItem(GLASS_PERF_KEY);
+    document.documentElement.removeAttribute(GLASS_REFRACT_ATTR);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.removeItem(GLASS_PERF_KEY);
+    document.documentElement.removeAttribute(GLASS_REFRACT_ATTR);
+  });
+
+  it("flips the persisted override on and back off, returning the new state", () => {
+    expect(isPerfFallbackForced()).toBe(false);
+
+    expect(toggleGlassPerfFallback()).toBe(true);
+    expect(localStorage.getItem(GLASS_PERF_KEY)).toBe("1");
+    expect(isPerfFallbackForced()).toBe(true);
+
+    expect(toggleGlassPerfFallback()).toBe(false);
+    expect(localStorage.getItem(GLASS_PERF_KEY)).toBe(null);
+    expect(isPerfFallbackForced()).toBe(false);
+  });
+
+  it("forces the frosted fallback even on a refraction-capable Chromium engine", () => {
+    stubEnv({ nav: { userAgent: CHROME_UA }, cssSupports: () => true });
+
+    // Baseline: Chromium opts in to refraction.
+    applyGlassSupport();
+    expect(document.documentElement.getAttribute(GLASS_REFRACT_ATTR)).toBe("on");
+
+    // Override on → refraction attribute is dropped despite Chromium.
+    expect(toggleGlassPerfFallback()).toBe(true);
+    expect(document.documentElement.hasAttribute(GLASS_REFRACT_ATTR)).toBe(false);
+
+    // Override off → refraction returns.
+    expect(toggleGlassPerfFallback()).toBe(false);
+    expect(document.documentElement.getAttribute(GLASS_REFRACT_ATTR)).toBe("on");
   });
 });

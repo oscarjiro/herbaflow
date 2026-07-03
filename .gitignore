@@ -118,6 +118,11 @@ frontend/playwright-report/
 frontend/.tanstack/
 
 # =========================
+# TS INCREMENTAL BUILD CACHE
+# =========================
+*.tsbuildinfo
+
+# =========================
 # TOOLING
 # =========================
 .superpowers/

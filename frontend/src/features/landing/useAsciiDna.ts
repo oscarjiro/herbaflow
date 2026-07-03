@@ -19,6 +19,18 @@
 
 import { useEffect, useState } from "react";
 
+// Master code toggle for the live 3D ASCII-DNA hero (no UI). Flip to false to
+// force the static fallback everywhere without touching the wiring — mirrors
+// SMOOTH_SCROLL_ENABLED in lib/smoothScroll.ts. Reduced-motion / no-WebGL still
+// fall back regardless.
+export const ASCII_DNA_ENABLED = true;
+
+// Toggle the ASCII-art filter (no UI). true = the signature ASCII grid (WebGL
+// canvas stays offscreen, a monospace sink shows the character render). false =
+// mount the raw three.js WebGL canvas directly (the un-filtered 3D DNA). Only
+// meaningful when ASCII_DNA_ENABLED is true and the hero actually renders.
+export const ASCII_FILTER_ENABLED = true;
+
 // Luminance ramp ported verbatim from landing.html (proven tuning).
 const RAMP = " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 
@@ -69,7 +81,7 @@ export function useAsciiDna(containerRef: React.RefObject<HTMLDivElement | null>
     typeof window !== "undefined"
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
       : false;
-  const canRender = !reducedMotion && webglSupported();
+  const canRender = ASCII_DNA_ENABLED && !reducedMotion && webglSupported();
 
   const [status, setStatus] = useState<AsciiDnaStatus>(canRender ? "loading" : "fallback");
 
@@ -211,9 +223,17 @@ export function useAsciiDna(containerRef: React.RefObject<HTMLDivElement | null>
 
         timer = new THREE.Timer();
 
-        // Mount the ASCII sink (the canvas itself stays offscreen).
-        sizeAscii(w, h);
-        container.appendChild(asciiDom);
+        if (ASCII_FILTER_ENABLED) {
+          // ASCII path: the WebGL canvas stays offscreen; the <pre> sink shows.
+          sizeAscii(w, h);
+          container.appendChild(asciiDom);
+        } else {
+          // Raw 3D path: mount the WebGL canvas directly, no ASCII conversion.
+          renderer.domElement.style.width = "100%";
+          renderer.domElement.style.height = "100%";
+          renderer.domElement.style.display = "block";
+          container.appendChild(renderer.domElement);
+        }
 
         // GLTF + DRACO. Decoder is vendored under /draco/ (see note below).
         const [{ GLTFLoader }, { DRACOLoader }] = await Promise.all([
@@ -284,7 +304,7 @@ export function useAsciiDna(containerRef: React.RefObject<HTMLDivElement | null>
             camera.lookAt(0, 0, 0);
           }
           renderer.render(scene, camera);
-          drawAscii();
+          if (ASCII_FILTER_ENABLED) drawAscii();
           rafId = requestAnimationFrame(loop);
         }
         rafId = requestAnimationFrame(loop);

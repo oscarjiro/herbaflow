@@ -15,10 +15,10 @@
 import type { LenisOptions } from "lenis";
 
 /** Master code toggle for inertial smooth scrolling. */
-export const SMOOTH_SCROLL_ENABLED = true;
+export const SMOOTH_SCROLL_ENABLED = false;
 
 /** Routes that get inertial smoothing. Everything else stays native. */
-const SMOOTH_SCROLL_ROUTES = ["/", "/about"];
+const SMOOTH_SCROLL_ROUTES = ["/about", "/analysis"];
 
 /** Subtle inertial feel; touch scrolling stays native (best on mobile). */
 export const SMOOTH_SCROLL_OPTIONS: LenisOptions = {

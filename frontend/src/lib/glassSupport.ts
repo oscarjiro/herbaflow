@@ -18,6 +18,26 @@
 /** Attribute set on `document.documentElement` when refraction is confirmed. */
 export const GLASS_REFRACT_ATTR = "data-glass-refract";
 
+/**
+ * localStorage key for the user's manual perf override. When set to "1", the
+ * refraction path is force-disabled regardless of engine detection, so a
+ * Chromium user who finds the liquid-glass lens too heavy (the `#hf-liquid`
+ * SVG displacement recomputes per scroll frame) can fall back to the cheaper
+ * frosted look Safari already uses. Toggled by the hidden Footer affordance
+ * (clicking the author credit).
+ */
+export const GLASS_PERF_KEY = "hf-glass-perf-fallback";
+
+/** True when the user has manually forced the frosted (no-refraction) fallback. */
+export function isPerfFallbackForced(): boolean {
+  if (typeof localStorage === "undefined") return false;
+  try {
+    return localStorage.getItem(GLASS_PERF_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 type UABrand = { brand: string; version: string };
 type NavigatorWithUAData = Navigator & {
   userAgentData?: { brands?: UABrand[] };
@@ -66,9 +86,30 @@ export function detectRefractionSupport(): boolean {
 export function applyGlassSupport(): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  if (detectRefractionSupport()) {
+  // A manual perf override always wins: force the frosted fallback even on a
+  // refraction-capable engine.
+  if (!isPerfFallbackForced() && detectRefractionSupport()) {
     root.setAttribute(GLASS_REFRACT_ATTR, "on");
   } else {
     root.removeAttribute(GLASS_REFRACT_ATTR);
   }
+}
+
+/**
+ * Flip the manual perf override (persist + re-apply) and return the new state:
+ * `true` = frosted fallback forced (refraction off), `false` = auto-detect.
+ * No-op-safe under SSR / when localStorage is unavailable.
+ */
+export function toggleGlassPerfFallback(): boolean {
+  const next = !isPerfFallbackForced();
+  try {
+    if (typeof localStorage !== "undefined") {
+      if (next) localStorage.setItem(GLASS_PERF_KEY, "1");
+      else localStorage.removeItem(GLASS_PERF_KEY);
+    }
+  } catch {
+    // ignore storage failures; still apply for the current session below
+  }
+  applyGlassSupport();
+  return next;
 }

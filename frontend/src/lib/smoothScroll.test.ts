@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 import { SMOOTH_SCROLL_ENABLED, isSmoothScrollRoute, shouldSmoothScroll } from "./smoothScroll";
 
 describe("isSmoothScrollRoute", () => {
-  test("enables inertial scroll on the Landing route", () => {
-    expect(isSmoothScrollRoute("/")).toBe(true);
+  test("keeps native scroll on the Landing route", () => {
+    expect(isSmoothScrollRoute("/")).toBe(false);
   });
 
   test("enables inertial scroll on the About route", () => {
@@ -14,11 +14,11 @@ describe("isSmoothScrollRoute", () => {
     expect(isSmoothScrollRoute("/about/")).toBe(true);
   });
 
-  test("keeps native scroll on the analysis entry route", () => {
-    expect(isSmoothScrollRoute("/analysis")).toBe(false);
+  test("enables inertial scroll on the analysis entry route", () => {
+    expect(isSmoothScrollRoute("/analysis")).toBe(true);
   });
 
-  test("keeps native scroll on a run route", () => {
+  test("keeps native scroll on a run route (exact-match only, not fuzzy)", () => {
     expect(isSmoothScrollRoute("/analysis/abc123")).toBe(false);
   });
 
@@ -33,12 +33,12 @@ describe("isSmoothScrollRoute", () => {
 
 describe("shouldSmoothScroll", () => {
   test("follows the code toggle on a marketing route without reduced motion", () => {
-    expect(shouldSmoothScroll("/", false)).toBe(SMOOTH_SCROLL_ENABLED);
+    expect(shouldSmoothScroll("/about", false)).toBe(SMOOTH_SCROLL_ENABLED);
   });
 
   test("never smooth-scrolls when the user prefers reduced motion", () => {
-    expect(shouldSmoothScroll("/", true)).toBe(false);
     expect(shouldSmoothScroll("/about", true)).toBe(false);
+    expect(shouldSmoothScroll("/analysis", true)).toBe(false);
   });
 
   test("never smooth-scrolls on analysis routes regardless of preference", () => {

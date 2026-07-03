@@ -1,21 +1,38 @@
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { renderWithRouter } from "../../../tests/renderWithRouter";
+import { GLASS_PERF_KEY } from "@/lib/glassSupport";
 import { Footer } from "./Footer";
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  localStorage.removeItem(GLASS_PERF_KEY);
+});
 
 describe("Footer", () => {
   it("renders the blurb and the copyright line, with no link columns", () => {
     renderWithRouter(<Footer />, { initialEntries: ["/"], withTheme: true });
     expect(screen.getByText(/A solo thesis project in computational biology/i)).toBeInTheDocument();
-    expect(screen.getByText(/© 2026 · Herbaflow · Oscar Jiro/)).toBeInTheDocument();
+    expect(screen.getByText(/© 2026 · Herbaflow ·/)).toBeInTheDocument();
+    expect(screen.getByText("Oscar Jiro")).toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("shows on the setup route (setup lives in the global layout)", () => {
     renderWithRouter(<Footer />, { initialEntries: ["/analysis"], withTheme: true });
-    expect(screen.getByText(/© 2026 · Herbaflow · Oscar Jiro/)).toBeInTheDocument();
+    expect(screen.getByText(/© 2026 · Herbaflow ·/)).toBeInTheDocument();
+    expect(screen.getByText("Oscar Jiro")).toBeInTheDocument();
+  });
+
+  it("toggles the persisted liquid-glass perf override when the author credit is clicked", () => {
+    renderWithRouter(<Footer />, { initialEntries: ["/"], withTheme: true });
+    expect(localStorage.getItem(GLASS_PERF_KEY)).toBe(null);
+
+    fireEvent.click(screen.getByText("Oscar Jiro"));
+    expect(localStorage.getItem(GLASS_PERF_KEY)).toBe("1");
+
+    fireEvent.click(screen.getByText("Oscar Jiro"));
+    expect(localStorage.getItem(GLASS_PERF_KEY)).toBe(null);
   });
 
   it("hides on the run page", () => {
