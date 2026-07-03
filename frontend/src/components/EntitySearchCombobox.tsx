@@ -149,9 +149,9 @@ function SelCardList({
 
         return (
           <li key={opt.value}>
-            <div className="bg-hf-bg border-hf-border flex items-center gap-[11px] rounded-[var(--radius-md)] border px-[11px] py-[9px]">
+            <div className="bg-hf-surface border-hf-border border-l-hf-sage flex items-center gap-[11px] rounded-[var(--radius-md)] border border-l-[3px] px-[11px] py-[9px]">
               {/* Glyph circle */}
-              <span className="bg-hf-sage-soft text-hf-fg-1 flex size-[30px] shrink-0 items-center justify-center rounded-full">
+              <span className="bg-hf-sage-soft text-hf-sage-deep flex size-[30px] shrink-0 items-center justify-center rounded-full">
                 {isPlant ? <PlantGlyph className="size-4" /> : <DiseaseGlyph className="size-4" />}
               </span>
 
@@ -180,7 +180,7 @@ function SelCardList({
                 type="button"
                 aria-label={`Remove ${opt.label}`}
                 onClick={() => onRemove(opt.value)}
-                className="text-hf-fg-4 hover:text-hf-terracotta hover:bg-hf-surface-2 grid size-6 shrink-0 cursor-pointer place-items-center rounded-full border-0 bg-transparent transition-colors"
+                className="text-hf-fg-3 hover:text-hf-terracotta hover:bg-hf-terracotta-soft hover:border-hf-terracotta/40 border-hf-border grid size-6 shrink-0 cursor-pointer place-items-center rounded-full border bg-transparent transition-colors"
               >
                 <XIcon className="size-3.5" aria-hidden="true" />
               </button>
