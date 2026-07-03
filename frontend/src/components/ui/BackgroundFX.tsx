@@ -338,7 +338,7 @@ export function BackgroundFX({ glow = "blobs" }: BackgroundFXProps) {
     <div
       aria-hidden="true"
       style={{ pointerEvents: "none" }}
-      className="fixed inset-0 z-0 overflow-hidden"
+      className="hf-bg__root fixed inset-0 z-0 overflow-hidden"
     >
       {/* Dots layer — always present (disabled/static under reduced motion) */}
       <div

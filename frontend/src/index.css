@@ -1252,6 +1252,17 @@
      .hf-bg__grain         — subtle static film-grain overlay (code-toggled)
    ===================================================================== */
 
+/* Promote the fixed background wrapper to its own compositor layer. Without
+   this the non-promoted fixed layer is re-rasterized on every (laggy) scroll
+   frame on mobile Chrome, leaving an unpainted dark/white block as the page
+   scrolls (UX-21). translateZ(0) + backface-visibility force a stable GPU
+   layer that the compositor keeps pinned during scroll; no churny will-change
+   hint needed since the wrapper is always present. */
+.hf-bg__root {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 .hf-bg__dots {
   position: absolute;
   /* Overshoot by the dot-grid step (22px) so the seam stays off-screen
