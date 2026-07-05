@@ -137,7 +137,8 @@ export function StatefulButton({
 // Internal micro-components
 // ---------------------------------------------------------------------------
 
-/** Animated spinner ring — tuned for the glass surface (fg-1 color, not bg). */
+/** Animated spinner ring — inherits the button's per-variant label color (currentColor),
+ *  so it stays visible on every variant (matching CheckIcon's stroke). */
 function Spinner() {
   const shouldReduceMotion = useReducedMotion();
   return (
@@ -145,7 +146,7 @@ function Spinner() {
       aria-hidden="true"
       className={cn(
         "block size-[15px] rounded-full",
-        "border-t-hf-fg-1 border-2 border-[color-mix(in_srgb,var(--hf-fg-1),transparent_65%)]",
+        "border-2 border-[color-mix(in_srgb,currentColor,transparent_65%)] border-t-current",
         !shouldReduceMotion && "animate-spin",
       )}
       style={
