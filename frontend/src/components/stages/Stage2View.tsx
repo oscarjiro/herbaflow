@@ -134,11 +134,24 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     id: "status",
     header: "Status",
     cell: ({ row }) => {
-      const kind = row.original._kind;
+      const r = row.original;
+      const passed = r._kind === "passed";
+      const npBypassed = passed && (r.badges?.includes("np_bypass") ?? false);
       return (
-        <Badge variant={kind === "passed" ? "default" : "destructive"} className="text-[10px]">
-          {kind === "passed" ? "Passed" : "Filtered"}
-        </Badge>
+        <span className="inline-flex items-center gap-1.5">
+          <Badge variant={passed ? "default" : "destructive"} className="text-[10px]">
+            {passed ? "Passed" : "Filtered"}
+          </Badge>
+          {npBypassed && (
+            <Badge
+              variant="secondary"
+              className="text-[10px]"
+              title="Passed via the natural-product exception; drug-likeness rules were not applied."
+            >
+              NP exception
+            </Badge>
+          )}
+        </span>
       );
     },
   },

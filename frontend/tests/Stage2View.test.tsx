@@ -197,6 +197,81 @@ describe("Stage2View", () => {
     expect(screen.getByRole("columnheader", { name: /NP-bypass/i })).toBeInTheDocument();
   });
 
+  it("Status column shows an NP exception badge alongside Passed for an NP-bypass row", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              canonical_name: "NpBypassCompound",
+              lipinski_pass: null,
+              veber_pass: null,
+              rule_evaluated: false,
+              badges: ["np_bypass"],
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    const row = screen.getByText("NpBypassCompound").closest("tr");
+    if (!row) throw new Error("expected row for NpBypassCompound");
+    expect(within(row).getByText("Passed")).toBeInTheDocument();
+    expect(within(row).getByText("NP exception")).toBeInTheDocument();
+  });
+
+  it("Status column shows only Passed (no NP exception badge) for a normal passed row", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              canonical_name: "NormalPassCompound",
+              lipinski_pass: true,
+              veber_pass: true,
+              rule_evaluated: true,
+              badges: [],
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    const row = screen.getByText("NormalPassCompound").closest("tr");
+    if (!row) throw new Error("expected row for NormalPassCompound");
+    expect(within(row).getByText("Passed")).toBeInTheDocument();
+    expect(within(row).queryByText("NP exception")).not.toBeInTheDocument();
+  });
+
+  it("Status column shows only Filtered (no NP exception badge) for a filtered row", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [],
+          filtered: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.filtered[0],
+              canonical_name: "FilteredCompound",
+              badges: ["np_bypass"],
+            },
+          ],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    const row = screen.getByText("FilteredCompound").closest("tr");
+    if (!row) throw new Error("expected row for FilteredCompound");
+    expect(within(row).getByText("Filtered")).toBeInTheDocument();
+    expect(within(row).queryByText("NP exception")).not.toBeInTheDocument();
+  });
+
   it("PAINS column renders BoolMark checkmark for a clean compound", () => {
     const data = makeRun({
       stage_results: {
