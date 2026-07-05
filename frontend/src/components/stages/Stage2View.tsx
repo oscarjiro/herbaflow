@@ -343,8 +343,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       {/* Footer */}
       <p className="text-muted-foreground text-sm">
         Filters: Lipinski RO5 and Veber (TPSA plus rotatable bonds). Natural-product-like compounds
-        can bypass these filters as an exception. PAINS is reported as a structural alert, not used
-        to filter.
+        can bypass these filters as an exception.
       </p>
     </section>
   );
