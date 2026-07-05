@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://herbaflow-oscarjiro.vercel.app/sitemap.xml
