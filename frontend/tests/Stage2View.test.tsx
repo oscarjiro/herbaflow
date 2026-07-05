@@ -472,6 +472,54 @@ describe("Stage2View", () => {
     // source_url column last: PubChem source url or null
     expect(csv).not.toContain("compound_id");
   });
+
+  it("CSV blanks PAINS for unscreened rows and reports it for screened rows", async () => {
+    let capturedBlob: Blob | null = null;
+    vi.spyOn(URL, "createObjectURL").mockImplementation((blob: Blob | MediaSource) => {
+      capturedBlob = blob as Blob;
+      return "blob:mock";
+    });
+
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              canonical_name: "UnscreenedCsv",
+              pains_evaluated: false,
+              is_pains_positive: true,
+            },
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[1],
+              canonical_name: "ScreenedCsv",
+              pains_evaluated: true,
+              is_pains_positive: true,
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+
+    wrap(<Stage2View data={data} />);
+    await waitFor(() => expect(capturedBlob).not.toBeNull());
+    if (capturedBlob == null) throw new Error("expected CSV blob to be created");
+
+    const csv = await blobToText(capturedBlob);
+    const lines = csv.split("\n");
+    const painsColumn = (name: string): string => {
+      const line = lines.find((l) => l.startsWith(`${name},`));
+      if (!line) throw new Error(`expected CSV row for ${name}`);
+      return line.split(",")[12] ?? "";
+    };
+
+    // Never PAINS-screened: cell is blank, not a raw (misleading) boolean.
+    expect(painsColumn("UnscreenedCsv")).toBe("");
+    // Actually screened: cell reports the real boolean.
+    expect(painsColumn("ScreenedCsv")).toBe("true");
+  });
 });
 
 describe("ParamPanel double-box regression", () => {

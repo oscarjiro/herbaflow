@@ -109,7 +109,7 @@ function buildCsvRows(rows: DisplayRow[]): unknown[][] {
     r.tpsa ?? null,
     r.rotatable_bonds ?? null,
     r.np_likeness_score ?? null,
-    r.is_pains_positive,
+    r.pains_evaluated ? r.is_pains_positive : null,
     r.source_url ?? null,
   ]);
 }
