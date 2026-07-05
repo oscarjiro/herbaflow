@@ -10,7 +10,9 @@ import { RunMobileNavigation } from "@/components/RunMobileNavigation";
 import { RunSidebar } from "@/components/RunSidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalysisStatus } from "@/hooks/useAnalysisStatus";
+import { useEntitySubjects } from "@/hooks/useEntitySubjects";
 import { clearActiveRunId, getActiveRunId, setActiveRunId } from "@/lib/activeRun";
+import { runPageTitle, useDocumentTitle } from "@/lib/pageMeta";
 import { humanizeProblem, isHardDown, type Problem } from "@/lib/problem";
 import { toast } from "sonner";
 
@@ -23,6 +25,8 @@ function RunShell() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { data, isError, error } = useAnalysisStatus(id);
+  const subjects = useEntitySubjects(data);
+  useDocumentTitle(runPageTitle(subjects, data?.current_stage ?? null));
 
   // Leave the run shell whenever the 1s poll can't yield a usable run. Both cases
   // bail to /analysis so this page never sits on a dead/unreachable backend looping

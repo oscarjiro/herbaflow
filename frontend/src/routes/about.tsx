@@ -5,6 +5,7 @@ import { CopyButton } from "@/components/ui/CopyButton";
 import { GlassSurface } from "@/components/ui/GlassSurface";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Eyebrow } from "@/components/ui/editorial";
+import { pageTitle, useDocumentTitle } from "@/lib/pageMeta";
 import "./about.css";
 
 export const Route = createFileRoute("/about")({
@@ -16,6 +17,7 @@ const CITATION_TEXT =
   "Studi Kasus Tumbuhan Obat Indonesia. Unpublished thesis project.";
 
 function AboutPage() {
+  useDocumentTitle(pageTitle(["About"]));
   // The app shell (__root) provides <main>, <Nav>, <Footer>, and the BackgroundFX
   // dotted-glow layer. This route renders page content only.
   return (

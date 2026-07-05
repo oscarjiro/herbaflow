@@ -4,12 +4,14 @@ import { Hero } from "@/features/landing/Hero";
 import { StatCards } from "@/features/landing/StatCards";
 import { WorkflowTimeline } from "@/features/landing/WorkflowTimeline";
 import { DataSources } from "@/features/landing/DataSources";
+import { useDocumentTitle } from "@/lib/pageMeta";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
 function LandingPage() {
+  useDocumentTitle("Herbaflow - Network pharmacology for Indonesian medicinal plants");
   // The app shell (__root) provides <main>, <Nav>, <Footer>, and the BackgroundFX
   // dotted-glow layer. This route renders only the page sections — no nested <main>,
   // no background (inherited from the root layout).
