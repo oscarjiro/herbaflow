@@ -72,9 +72,18 @@ def _compound_dict(
         "np_likeness_score": _read(obj, "np_likeness_score"),
         "num_ro5_violations": _read(obj, "num_ro5_violations"),
         "is_pains_positive": _read(obj, "is_pains_positive") or False,
+        # Honesty flag: True only where PAINS was actually screened (NP-bypass +
+        # rule-gate branches). Defaults False so skip_adme / could-not-screen rows,
+        # whose is_pains_positive is meaningless, render "-" in the UI.
+        "pains_evaluated": False,
         "source_url": _read(obj, "source_url"),
         "badges": badges,
     }
+
+
+def _mark_pains_evaluated(row: dict[str, Any]) -> None:
+    """Record that this row's PAINS value was actually computed (screened)."""
+    row["pains_evaluated"] = True
 
 
 def _blank_rule_outcome(row: dict[str, Any]) -> None:
@@ -259,6 +268,7 @@ async def screen(
             if computed_here and computed_d is not None:
                 _overlay_descriptors(row, computed_d, descriptor_source)
             _blank_rule_outcome(row)
+            _mark_pains_evaluated(row)
             passed.append(row)
             continue
 
@@ -302,6 +312,7 @@ async def screen(
                 lipinski_pass=lipinski_ok,
                 veber_pass=veber_ok if apply_veber else None,
             )
+            _mark_pains_evaluated(pass_row)
             passed.append(pass_row)
         else:
             if not lipinski_ok:
@@ -317,6 +328,7 @@ async def screen(
                 lipinski_pass=lipinski_ok,
                 veber_pass=veber_ok if apply_veber else None,
             )
+            _mark_pains_evaluated(fail_row)
             filtered.append(fail_row)
 
     return {

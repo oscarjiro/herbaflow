@@ -538,6 +538,73 @@ async def test_seeded_incomplete_descriptors_could_not_screen() -> None:
     assert result["filtered"][0]["descriptor_source"] == "etl"
 
 
+# ---------------------------------------------------------------------------
+# PAINS honesty flag: pains_evaluated is True ONLY where PAINS was computed
+# (NP-bypass branch + rule-gate branch), False where it was not (skip_adme +
+# could-not-screen). The frontend gates the PAINS cell on this flag.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_np_bypass_row_marks_pains_evaluated() -> None:
+    """NP-bypass row: rule not evaluated, but PAINS WAS computed → pains_evaluated True."""
+    c = _seeded(
+        molecular_weight=800.0,
+        logp=8.0,
+        hbond_donors=8,
+        hbond_acceptors=15,
+        tpsa=200.0,
+        rotatable_bonds=20,
+        np_likeness_score=1.5,
+        num_ro5_violations=4,
+    )
+    result = await stage2.screen(
+        [c],
+        _params(apply_np_exception=True, np_exception_threshold=1.0),
+        compute=_fake_compute_none,
+    )
+
+    row = result["passed"][0]
+    assert row["rule_evaluated"] is False
+    assert row["pains_evaluated"] is True
+
+
+@pytest.mark.asyncio
+async def test_rule_gate_rows_mark_pains_evaluated() -> None:
+    """Both a passed and a filtered rule-gate row have pains_evaluated True."""
+    passed_c = _seeded()
+    passed_result = await stage2.screen([passed_c], _params(), compute=_fake_compute_none)
+    assert passed_result["passed"][0]["pains_evaluated"] is True
+
+    filtered_c = _seeded(
+        molecular_weight=550.0,
+        logp=6.0,
+        hbond_donors=1,
+        hbond_acceptors=2,
+        tpsa=60.0,
+        rotatable_bonds=3,
+        num_ro5_violations=2,
+    )
+    filtered_result = await stage2.screen(
+        [filtered_c], _params(max_violations=1), compute=_fake_compute_none
+    )
+    assert filtered_result["filtered"][0]["pains_evaluated"] is True
+
+
+@pytest.mark.asyncio
+async def test_skip_adme_row_marks_pains_not_evaluated() -> None:
+    """skip_adme run: PAINS never computed → pains_evaluated False."""
+    result = await stage2.screen([_seeded()], _params(skip_adme=True), compute=_fake_compute_none)
+    assert result["passed"][0]["pains_evaluated"] is False
+
+
+@pytest.mark.asyncio
+async def test_could_not_screen_row_marks_pains_not_evaluated() -> None:
+    """could-not-screen row (seeded, missing Lipinski descriptor): pains_evaluated False."""
+    result = await stage2.screen([_seeded(logp=None)], _params(), compute=_fake_compute_none)
+    assert result["filtered"][0]["pains_evaluated"] is False
+
+
 @pytest.mark.asyncio
 async def test_seeded_missing_veber_descriptor_only_required_when_veber_on() -> None:
     """tpsa=None, rotatable_bonds=None with valid Lipinski descriptors:

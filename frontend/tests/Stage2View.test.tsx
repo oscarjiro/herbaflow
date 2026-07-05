@@ -209,6 +209,7 @@ describe("Stage2View", () => {
               lipinski_pass: true,
               veber_pass: true,
               rule_evaluated: true,
+              pains_evaluated: true,
               is_pains_positive: false,
             },
           ],
@@ -233,6 +234,7 @@ describe("Stage2View", () => {
               lipinski_pass: true,
               veber_pass: true,
               rule_evaluated: true,
+              pains_evaluated: true,
               is_pains_positive: true,
             },
           ],
@@ -242,6 +244,31 @@ describe("Stage2View", () => {
     });
     wrap(<Stage2View data={data} />);
     expect(within(painsCellFor("AlertCompound")).getByLabelText("No")).toBeInTheDocument();
+  });
+
+  it("PAINS column shows the real mark for an NP-bypass row (rule not evaluated)", () => {
+    const data = makeRun({
+      stage_results: {
+        "2": {
+          ...SAMPLE_STAGE2_RESULTS,
+          passed: [
+            {
+              ...SAMPLE_STAGE2_RESULTS.passed[0],
+              canonical_name: "BypassCompound",
+              lipinski_pass: null,
+              veber_pass: null,
+              rule_evaluated: false,
+              pains_evaluated: true,
+              is_pains_positive: false,
+              badges: ["np_bypass"],
+            },
+          ],
+          filtered: [],
+        },
+      } as AnalysisRead["stage_results"],
+    });
+    wrap(<Stage2View data={data} />);
+    expect(within(painsCellFor("BypassCompound")).getByLabelText("Yes")).toBeInTheDocument();
   });
 
   it("PAINS column renders BoolMark dash when PAINS was not evaluated", () => {

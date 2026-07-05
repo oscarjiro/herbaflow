@@ -57,6 +57,7 @@ type CompoundRow = {
   veber_pass: boolean | null;
   rule_evaluated: boolean | null;
   is_pains_positive: boolean;
+  pains_evaluated?: boolean;
   source_url: string | null;
   badges?: string[];
   reason?: string;
@@ -214,7 +215,7 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
     meta: { info: "Checkmark means no PAINS alert. Cross means a PAINS alert was detected." },
     cell: ({ row }) => {
       const r = row.original;
-      if (!r.rule_evaluated) return <BoolMark value={null} />;
+      if (!r.pains_evaluated) return <BoolMark value={null} />;
       return <BoolMark value={!r.is_pains_positive} />;
     },
   },
@@ -341,8 +342,9 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
 
       {/* Footer */}
       <p className="text-muted-foreground text-sm">
-        Filters: Lipinski RO5, Veber (TPSA + rotatable bonds), Ertl NP-likeness, Baell &amp;
-        Holloway PAINS.
+        Filters: Lipinski RO5 and Veber (TPSA plus rotatable bonds). Natural-product-like compounds
+        can bypass these filters as an exception. PAINS is reported as a structural alert, not used
+        to filter.
       </p>
     </section>
   );
