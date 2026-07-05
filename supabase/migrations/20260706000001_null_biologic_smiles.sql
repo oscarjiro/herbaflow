@@ -1,0 +1,29 @@
+-- Null the wrong name-matched SMILES on the 7 InChIKey-less biologics / metal complexes.
+--
+-- These 7 compounds are biologics or coordination complexes with no InChIKey. During an
+-- earlier structure backfill they were name-matched to unrelated PubChem small molecules,
+-- so the stored SMILES describes the wrong molecule. A wrong structure is worse than none
+-- (it can mislead downstream structure use), so we clear it. The InChIKey stays null (these
+-- have no valid small-molecule identity); their SMILES column reads as missing, which is
+-- the honest state.
+--
+-- Scope: `inchi_key is null` selects exactly these 7 rows (verified against the live DB;
+-- nothing else in `compounds` has a null InChIKey). No schema change.
+--
+-- Rollback (restore a value only if a genuine structure is ever found for that compound):
+--   9d35421e-80e4-524d-bd68-052bbbaa5dd3  AUROTHIOGLUCOSE
+--     O=P(O)(O)C(O)(Cc1cccc(-c2cccc(-c3ccccc3)c2)c1)P(=O)(O)O
+--   1691b3f3-5ff3-522f-9c6a-94c48a4e2ac3  cis[Pt(NH3)2(N1-methyl isonicotinate)Cl]Cl
+--     C[C@@H]1O[C@@H](O[C@H]2[C@H](OC(=O)[C@]34CCC(C)(C)C[C@H]3C3=CC[C@@H]5[C@@]6(C)CC[C@H](O[C@@H]7O[C@H](C(=O)O)[C@@H](O)[C@H](O[C@@H]8OC[C@@H](O)[C@H](O)[C@H]8O)[C@H]7O[C@@H]7O[C@H](CO)[C@H](O)[C@H](O)[C@H]7O[C@@H]7O[C@H](CO)[C@H](O)[C@H](O)[C@H]7O)[C@@](C)(C=O)[C@@H]6CC[C@@]5(C)[C@]3(C)CC4)O[C@H](C)[C@@H](O)[C@@H]2O)[C@H](O)[C@H](O[C@@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@H]2O)[C@H]1O[C@@H]1OC[C@@H](O)[C@H](O[C@@H]2OC[C@@H](O)[C@H](O)[C@H]2O)[C@H]1O
+--   90b8a3ac-5423-5d6f-ab4f-6149dfe409ea  EMOCTAKIN
+--     COC(=O)[C@@]12Oc3cc4c(c(O)c3C(=O)C1=C(O)CC[C@@H]2O)[C@@H]1C=C[C@@]2(C4)C(=O)c3cc(C)cc(O)c3C(O)=C2C1=O
+--   78e6024f-6327-5573-ad41-917f19601d33  GALSULFASE
+--     COc1ccc(CCNCCCC(C#N)(c2ccc(OC)c(OC)c2)C(C)C)cc1OC
+--   b47380e4-c7ab-5cfa-bc5c-b02691ec5542  IRON SUCROSE
+--     OC[C@H]1O[C@@](CO)(O[C@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@H]2O)[C@@H](O)[C@@H]1O
+--   b65c3a72-0c2e-5527-845a-71c56bf73c91  NARNATUMAB
+--     NCCC[C@H](NC(=O)[C@@H]1CCCN1C(=O)[C@@H]1CSSC[C@H](N)C(=O)N[C@@H](Cc2ccc(O)cc2)C(=O)N[C@@H](Cc2ccccc2)C(=O)N[C@@H](CCC(N)=O)C(=O)N[C@@H](CC(N)=O)C(=O)N1)C(=O)NCC(N)=O
+--   eef2920e-3654-5bf1-8b07-a79cf09cbbaa  TRYPSIN, CRYSTALLIZED
+--     CC(=O)c1ccc(N2CCOCC2)cc1O
+
+update compounds set smiles = null where inchi_key is null;
