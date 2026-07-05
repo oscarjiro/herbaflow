@@ -19,9 +19,9 @@ from app.repositories.analysis import AnalysisRepository
 from app.repositories.compound import CompoundRepository
 from app.repositories.disease import DiseaseRepository
 from app.repositories.plant import PlantRepository
-from app.services.labels import resolve_entity_labels
 from app.repositories.target import TargetRepository
 from app.schemas.graph import CtpGraph
+from app.services.labels import resolve_entity_labels
 
 
 @dataclass(frozen=True)
