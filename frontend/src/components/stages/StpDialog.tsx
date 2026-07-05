@@ -178,9 +178,9 @@ export function StpDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-0 flex-col gap-4">
+        <div className="scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
           {/* Compound picker: lowest coverage first (copy-SMILES convenience only). */}
-          <fieldset aria-label="Compounds to screen" className="flex min-h-0 flex-col gap-3">
+          <fieldset aria-label="Compounds to screen" className="flex shrink-0 flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <legend className="text-sm font-medium">Compounds to screen</legend>
               <span className="text-xs [color:var(--hf-fg-3)] tabular-nums">
