@@ -338,7 +338,9 @@ export function StpDialog({
                 onChange={(e) => setPasteText(e.target.value)}
                 placeholder={"Target,Common name,Uniprot ID,...,Probability*,...\n..."}
                 rows={6}
-                className="[field-sizing:fixed] h-32 resize-none overflow-y-auto"
+                // Distinct surface from the opaque dialog panel (which is bg-hf-surface):
+                // bg-hf-bg matches the readable compound-list box above so the field reads.
+                className="bg-hf-bg [field-sizing:fixed] h-32 resize-none overflow-y-auto"
               />
             </div>
 
