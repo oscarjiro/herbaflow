@@ -325,6 +325,12 @@ One row per pipeline execution. PKs are UUID v4.
 | `error_message` | text | YES | |
 | `updated_at` | timestamptz | NO | Last write timestamp |
 
+**Known ORM/DB nullability drift:** the wave3 trim migration sets `status` and `created_at` to
+`NOT NULL` at the database level, but the SQLAlchemy model still types both as `Optional`
+(`Mapped[str | None]` / `Mapped[datetime | None]`). The columns are always populated in practice, so
+this is a type-annotation lag rather than a behavioral issue. The Nullable column above reflects the
+ORM annotation; the live database enforces NOT NULL.
+
 **Run-input storage:** All run inputs (plant list, manual compounds, manual targets, disease
 scope, validation options) are stored in `parameters` jsonb. The only relational link to an
 entity table is `disease_id` FK. There are no separate run-input junction tables — they were
@@ -574,17 +580,16 @@ Computed result:
 }
 ```
 
-Blocked result (overlap exceeds `max_proteins` with `allow_top_n_cap` off):
-
-```jsonc
-{"blocked": true, "reason": "overlap_too_large", "overlap_count": <int>, "max_proteins": <int>}
-```
-
-The blocked marker drives the AD-6 mechanism: a **guided** run parks at the Stage-6 checkpoint (the
-UI prompts to enable the top-N cap or narrow the inputs); an **auto** run hard-fails. Recover by
-Redoing Stage 6 with `allow_top_n_cap: true` (proceeds on the top-N overlap targets ranked by
-`opentargets_score`) or by raising `max_proteins`. Community/module detection is deferred
-(future work) — Stage 6 delivers the PPI-source network only.
+**Self-imposed protein cap (disabled, reversible).** The `max_proteins` ceiling and the
+overlap-too-large blocked-overflow marker are currently off. Stage 6 builds the network on every
+distinct mappable overlap gene symbol and never emits a `blocked` result, so `capped.applied` is
+always `false`. The `max_proteins` / `allow_top_n_cap` parameters stay defined in the contract but
+are inert. The former behavior (kept commented in `stage6.py` and the engine for reversibility) was:
+a run whose overlap exceeded `max_proteins` with `allow_top_n_cap` off produced a
+`{"blocked": true, "reason": "overlap_too_large", ...}` marker; a guided run parked at the Stage-6
+checkpoint and an auto run hard-failed, recoverable by redoing with `allow_top_n_cap: true` or a
+higher `max_proteins`. Community/module detection is deferred (future work). Stage 6 delivers the
+PPI-source network only.
 
 **Hub-genes stage** (Stage 7 — `parameters.hub_genes`).
 
@@ -710,8 +715,8 @@ and render as selects in the UI:
 | Parameter | Type | Default | Bounds / enum | Notes |
 |---|---|---|---|---|
 | `min_confidence` | number | 0.4 | enum {0.15, 0.4, 0.7, 0.9} | STRING edge-confidence floor → `required_score = round(× 1000)` |
-| `max_proteins` | integer | 2000 | ≥50, ≤2000 (rec. 200–2000) | Self-imposed STRING ceiling; over it requires `allow_top_n_cap` |
-| `allow_top_n_cap` | boolean | false | — | Proceed on the top-N overlap targets (by disease score) when over the ceiling |
+| `max_proteins` | integer | 2000 | ≥50, ≤2000 (rec. 200–2000) | Self-imposed STRING ceiling. Currently inert: the cap is disabled, so Stage 6 uses every mappable overlap protein regardless of this value |
+| `allow_top_n_cap` | boolean | false | — | Opt-in to proceed on the top-N overlap targets (by disease score) when over the ceiling. Inert while the cap is disabled |
 | `network_type` | string | functional | enum {functional, physical} | STRING network: all association evidence vs binding-only |
 
 `min_confidence` carries no hard `minimum`/`maximum` (the UI restricts it to the tiers; the backend
@@ -1083,10 +1088,14 @@ Later migrations (applied on top of the baseline):
 ```
 20260609000001_compound_validation_status.sql      compounds.validation_status + Manual Entry source + guided default
 20260610000001_seed_target_sources.sql             PubChem BioAssay + SwissTargetPrediction source rows
+20260613000001_rename_disease_target_score.sql     renames disease_targets.score to opentargets_score
+20260613000002_compound_target_discovery_params.sql adds compound_targets.min_pchembl + min_assay_confidence
+20260615000001_analysis_run_idempotency_key.sql    adds analysis_runs.idempotency_key (later dropped by the wave3 trim)
 20260620000001_analysis_run_progress.sql           analysis_run_progress side table
 20260702000001_wave3_schema_trim.sql               drops canonical_key/qed_score/source_id/idempotency_key,
                                                      the four *_aliases tables, and source_systems;
                                                      adds plants.gbif_key; hardens the natural keys
+20260706000001_null_biologic_smiles.sql            nulls the placeholder SMILES on the 7 InChIKey-less biologic compounds
 ```
 
 Tables are created first and all foreign keys added last, so the set replays in order on a
@@ -1117,7 +1126,7 @@ uses it to let a user re-open a run whose `analysis_id` was lost from local stat
 |---|---|---|---|
 | `analysis_id` | uuid | no | Run identifier |
 | `analysis_name` | string | yes | User-supplied name |
-| `status` | string | yes | `pending` / `running` / `complete` / `failed` / `stage_N_awaiting_approval` |
+| `status` | string | yes | `pending` / `complete` / `failed` / `stage_{N}_running` / `stage_{N}_awaiting_approval` / `stage_{N}_starting` (same dynamic vocabulary as `analysis_runs.status`; there is no bare `running` value) |
 | `current_stage` | integer | yes | Last stage reached |
 | `created_at` | timestamptz | yes | Creation time; list is ordered by this descending |
 | `completed_at` | timestamptz | yes | Set when the run reaches `complete` |

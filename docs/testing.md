@@ -6,10 +6,17 @@
 |---|---|---|---|
 | Unit (backend) | pytest | `backend/tests/unit/` | ≥80% business logic |
 | Integration (backend) | pytest | `backend/tests/integration/` | All API endpoints |
-| Unit (frontend) | Vitest | `frontend/tests/unit/` | ≥80% components/hooks |
-| Integration (frontend) | Vitest + MSW | `frontend/tests/integration/` | Pipeline flows |
-| E2E | Playwright | `frontend/tests/e2e/` | Critical user journeys |
+| Component / unit (frontend) | Vitest | Colocated `frontend/src/**/*.test.tsx` next to each component/hook | ≥80% components/hooks |
+| Integration (frontend) | Vitest + MSW | Flat `frontend/tests/` (view-level flows, contract, static SEO) | Pipeline flows |
 | Scientific acceptance | pytest | `backend/tests/scientific/` | Full pipeline with reference data |
+
+The frontend has no separate `unit/`, `integration/`, or `e2e/` subfolders. Most tests are
+colocated with their component under `frontend/src/`, and `frontend/tests/` is a flat folder of
+view-level integration tests (`SetupView`, `Stage2View`, `Stage3View`, `contract`, `staticSeo`,
+`indexHtml`, `lint-danger`) plus the shared MSW handlers (`handlers.ts`), the router test helper
+(`renderWithRouter.tsx`), and the Vitest setup (`setup.ts`). All frontend tests run under a single
+Vitest command. End-to-end coverage against a running stack is exercised manually, not by a
+committed frontend E2E suite.
 
 ## Running Tests
 
@@ -23,29 +30,24 @@ cd backend && uv run pytest tests/unit/ -v
 cd backend && uv run pytest --cov=analysis --cov=app --cov=integrations --cov-report=term-missing -q
 ```
 
-### Frontend unit tests
+### Frontend tests (colocated + integration)
 ```bash
-cd frontend && pnpm test:run
+cd frontend && pnpm test
 ```
 
-### Frontend with coverage
-```bash
-cd frontend && pnpm test:coverage
-```
+This runs `vitest run` across both the colocated `src/**/*.test.tsx` tests and the flat
+`frontend/tests/` integration tests. Add `--coverage` for a coverage report.
 
-### E2E (requires running stack)
+### End-to-end proof (manual, requires running stack)
+
+There is no committed frontend E2E suite. End-to-end behavior is verified by driving the real UI
+against a running backend and database:
 ```bash
 # Start backend (separate terminal):
 cd backend && uv run uvicorn app.main:app --reload
 
 # Start frontend dev server (separate terminal):
 cd frontend && pnpm dev
-
-# Run E2E tests:
-cd frontend && pnpm test:e2e
-
-# For fixture-based tests, set the completed analysis ID:
-COMPLETED_ANALYSIS_ID=<uuid> pnpm test:e2e tests/e2e/stage-results-visible.spec.ts
 ```
 
 ## Scientific Acceptance Testing
@@ -72,7 +74,7 @@ Reference: Mangul S, et al. Systematic benchmarking of omics computational tools
 
 ### Frontend mocking strategy
 
-- **API layer**: use MSW v2 (`frontend/src/mocks/handlers.ts`) for integration tests. Use `vi.mock` for unit tests that don't need the full HTTP stack.
+- **API layer**: use MSW v2 (`frontend/tests/handlers.ts`) for integration tests. Use `vi.mock` for unit tests that don't need the full HTTP stack.
 - **Cytoscape** (Stage 6, Stage 7 PPI graph): mock `react-cytoscapejs` in unit tests — jsdom has no canvas.
 - **Router**: wrap components in `MemoryRouter` from `react-router-dom` for unit tests.
 - **localStorage**: use `vi.stubGlobal('localStorage', ...)` or real localStorage with `afterEach(() => localStorage.clear())`.
@@ -99,8 +101,8 @@ New features and bug fixes follow Red-Green-Refactor:
 
 ## Known Limitations
 
-- **Stage 6 / Stage 7 Cytoscape rendering**: canvas not available in jsdom. Unit tests mock the Cytoscape component. Visual rendering is only verified in E2E.
-- **E2E tests without live stack**: `full-pipeline.spec.ts` and `stage-results-visible.spec.ts` require a running backend + database. They are not run in unit CI.
+- **Stage 6 / Stage 7 Cytoscape rendering**: canvas not available in jsdom. Unit tests mock the Cytoscape component. Visual rendering is only verified by the manual end-to-end proof against a running stack.
+- **End-to-end flows**: full pipeline runs and stage-result rendering require a running backend + database and are verified manually, not by an automated frontend test in CI.
 - **Scientific tests**: require live external APIs (PubChem, STRING, UniProt) and a fully seeded database. Run manually before major releases.
 
 ### Stage 3 — Target Identification
