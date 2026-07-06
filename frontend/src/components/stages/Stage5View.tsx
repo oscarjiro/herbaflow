@@ -37,6 +37,7 @@ import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { DataTable } from "@/components/ui/DataTable";
 import { ExpandableListCell } from "@/components/ui/ExpandableListCell";
 import { ExternalLink } from "@/components/ui/ExternalLink";
+import { METRIC_INFO } from "@/lib/metricInfo";
 import { StageDataSources } from "./StageDataSources";
 import { StageSummaryCard } from "./StageSummaryCard";
 
@@ -159,16 +160,22 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
     {
       id: "uniprot",
       header: "UniProt",
+      meta: { info: METRIC_INFO.common.uniprot },
       cell: ({ row }) => {
         const acc = row.original.uniprot_accession;
         if (!acc) return <span className="text-hf-fg-3">—</span>;
-        return <ExternalLink href={uniprotUrl(acc)}>{acc}</ExternalLink>;
+        return (
+          <ExternalLink href={uniprotUrl(acc)} className="font-mono">
+            {acc}
+          </ExternalLink>
+        );
       },
     },
     // 2. Gene symbol.
     {
       id: "gene_symbol",
       header: "Gene symbol",
+      meta: { info: METRIC_INFO.common.geneSymbol },
       cell: ({ row }) => row.original.gene_symbol ?? <span className="text-hf-fg-3">—</span>,
     },
     // 3. Compound source(s) — HIDDEN for manual-target runs (no compound edges exist).
@@ -197,18 +204,21 @@ export function Stage5View({ data }: { data: AnalysisRead }) {
           value={formatCount(stage5.count)}
           label="overlap targets"
           ariaLabel={`${stage5.count} overlap targets`}
+          info={METRIC_INFO.s5.overlapTargets}
         />
         <StageSummaryCard
           value={formatCount(stage5.compound_target_count)}
           label="compound-side targets"
           ariaLabel={`${stage5.compound_target_count} compound-side targets`}
           muted
+          info={METRIC_INFO.s5.compoundSideTargets}
         />
         <StageSummaryCard
           value={formatCount(stage5.disease_target_count)}
           label="disease-side targets"
           ariaLabel={`${stage5.disease_target_count} disease-side targets`}
           muted
+          info={METRIC_INFO.s5.diseaseSideTargets}
         />
       </div>
 
