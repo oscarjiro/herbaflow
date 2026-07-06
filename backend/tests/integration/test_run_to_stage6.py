@@ -259,13 +259,12 @@ async def test_zero_overlap_auto_fails(client, engine, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_overlap_cap_blocks_then_recovers_on_redo(client, engine, monkeypatch):
-    """Auto: a >cap overlap with opt-in off BLOCKS (auto fail); enabling top-N recovers.
+async def test_large_overlap_is_never_capped_or_blocked(client, engine, monkeypatch):
+    """STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible.
 
-    NOTE on the cap value: the ppi contract hard floor is ``max_proteins >= 50`` (the engine's
-    ``validate_overrides`` 422s anything below it), so ``max_proteins=1`` from the task sketch is
-    not a legal override. The block is forced with a REAL 60-target overlap and ``max_proteins=50``
-    instead — still a genuine overflow (60 > 50), not a stubbed one.
+    A real 60-target overlap builds the full STRING network in auto mode (no blocked marker), and a
+    Redo with a small ``max_proteins`` param is inert (the self-imposed cap is disabled): the stage
+    still computes all 60 nodes. Previously this overlap blocked at ``max_proteins=50``.
     """
     c, ids = client
     n = 60
@@ -318,31 +317,21 @@ async def test_overlap_cap_blocks_then_recovers_on_redo(client, engine, monkeypa
     assert state["stage_results"]["6"]["state"] == "computed"
     assert state["stage_results"]["6"]["node_count"] == n
 
-    # Redo S6 with a cap of 50 and opt-in OFF: 60 > 50 -> blocked -> AUTO fail.
+    # STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible. Redo S6 with
+    # a small max_proteins (50) — the cap is disabled, so 60 > 50 does NOT block: the stage
+    # recomputes the full 60-node network, never a blocked/overflow marker.
     reset = await c.post(
         f"/analyses/{run_id}/reset-from/6",
         json={"parameters": {"6": {"max_proteins": 50}}},
     )
     assert reset.status_code == 202
     state = await _poll(c, run_id)
-    assert state["status"] == "failed"
-    msg = (state.get("error_message") or "").lower()
-    assert "exceeds" in msg or "ceiling" in msg
-    assert state["stage_results"]["6"]["blocked"] is True
-    assert state["stage_results"]["6"]["overlap_count"] == n
-
-    # Redo S6 enabling the top-N cap (max_proteins stays 50 from the merged group) -> top-50.
-    reset = await c.post(
-        f"/analyses/{run_id}/reset-from/6",
-        json={"parameters": {"6": {"allow_top_n_cap": True}}},
-    )
-    assert reset.status_code == 202
-    state = await _poll(c, run_id)
     assert state["status"] == "complete"
     s6 = state["stage_results"]["6"]
+    assert "blocked" not in s6
     assert s6["state"] == "computed"
-    assert s6["node_count"] == 50
-    assert s6["capped"]["applied"] is True
+    assert s6["node_count"] == n
+    assert s6["capped"]["applied"] is False
 
 
 @pytest.mark.asyncio

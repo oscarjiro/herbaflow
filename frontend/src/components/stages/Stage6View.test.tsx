@@ -43,14 +43,16 @@ function makeComputedResult() {
   };
 }
 
-function makeBlockedResult() {
-  return {
-    blocked: true,
-    reason: "overlap_too_large",
-    overlap_count: 60,
-    max_proteins: 50,
-  };
-}
+// STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
+// re-enable. Stage 6 no longer emits a blocked marker, so the blocked fixture + its tests are gone.
+// function makeBlockedResult() {
+//   return {
+//     blocked: true,
+//     reason: "overlap_too_large",
+//     overlap_count: 60,
+//     max_proteins: 50,
+//   };
+// }
 
 const PPI_PARAM_VALUES = {
   min_confidence: 0.4,
@@ -211,9 +213,11 @@ describe("Stage6View — computed network", () => {
   it("renders the ppi param panel including the network_type select and a Redo button", async () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
     await openPpiPanel();
-    // numeric + boolean + both enum selects are present
-    expect(screen.getByLabelText("Max proteins in network")).toBeInTheDocument();
-    expect(screen.getByLabelText("Cap network to top-ranked proteins")).toBeInTheDocument();
+    // Only the two enum selects (min_confidence + network_type) are present.
+    // STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
+    // re-enable. The max_proteins + allow_top_n_cap controls are hidden, so assert their absence.
+    expect(screen.queryByLabelText("Max proteins in network")).toBeNull();
+    expect(screen.queryByLabelText("Cap network to top-ranked proteins")).toBeNull();
     expect(screen.getByLabelText("Minimum confidence")).toBeInTheDocument();
     expect(screen.getByLabelText("Network type")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /redo/i })).toBeInTheDocument();
@@ -344,36 +348,39 @@ describe("Stage6View — interactive network graph", () => {
 // ---------------------------------------------------------------------------
 // Tests — blocked (overlap too large)
 // ---------------------------------------------------------------------------
-
-describe("Stage6View — overlap too large (blocked)", () => {
-  it("renders the overlap-too-large prompt with the counts", () => {
-    wrap(<Stage6View data={makeData(makeBlockedResult())} />);
-    // the badge text (the ApprovalBar reason also contains the phrase, so match exactly)
-    expect(screen.getByText("Overlap too large")).toBeInTheDocument();
-    // the prompt mentions the overlap count and the ceiling
-    expect(screen.getByText(/60 proteins/i)).toBeInTheDocument();
-  });
-
-  it("renders the Enable top-N & Redo affordance", () => {
-    wrap(<Stage6View data={makeData(makeBlockedResult())} />);
-    expect(screen.getByRole("button", { name: /enable top-n cap and redo/i })).toBeInTheDocument();
-  });
-
-  it("does NOT render the edge table when blocked", () => {
-    wrap(<Stage6View data={makeData(makeBlockedResult())} />);
-    // no edge-table headers
-    expect(screen.queryByText("Source")).toBeNull();
-    expect(screen.queryByText("Target")).toBeNull();
-    expect(screen.queryByRole("link", { name: /download csv/i })).toBeNull();
-  });
-
-  it("still renders the ppi param panel when blocked", async () => {
-    wrap(<Stage6View data={makeData(makeBlockedResult())} />);
-    await openPpiPanel();
-    expect(screen.getByLabelText("Max proteins in network")).toBeInTheDocument();
-    expect(screen.getByLabelText("Network type")).toBeInTheDocument();
-  });
-});
+// STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
+// re-enable. Stage 6 no longer emits a blocked marker, so these blocked-state tests are removed.
+// Restore them (and makeBlockedResult above) to re-enable the cap.
+//
+// describe("Stage6View — overlap too large (blocked)", () => {
+//   it("renders the overlap-too-large prompt with the counts", () => {
+//     wrap(<Stage6View data={makeData(makeBlockedResult())} />);
+//     // the badge text (the ApprovalBar reason also contains the phrase, so match exactly)
+//     expect(screen.getByText("Overlap too large")).toBeInTheDocument();
+//     // the prompt mentions the overlap count and the ceiling
+//     expect(screen.getByText(/60 proteins/i)).toBeInTheDocument();
+//   });
+//
+//   it("renders the Enable top-N & Redo affordance", () => {
+//     wrap(<Stage6View data={makeData(makeBlockedResult())} />);
+//     expect(screen.getByRole("button", { name: /enable top-n cap and redo/i })).toBeInTheDocument();
+//   });
+//
+//   it("does NOT render the edge table when blocked", () => {
+//     wrap(<Stage6View data={makeData(makeBlockedResult())} />);
+//     // no edge-table headers
+//     expect(screen.queryByText("Source")).toBeNull();
+//     expect(screen.queryByText("Target")).toBeNull();
+//     expect(screen.queryByRole("link", { name: /download csv/i })).toBeNull();
+//   });
+//
+//   it("still renders the ppi param panel when blocked", async () => {
+//     wrap(<Stage6View data={makeData(makeBlockedResult())} />);
+//     await openPpiPanel();
+//     expect(screen.getByLabelText("Max proteins in network")).toBeInTheDocument();
+//     expect(screen.getByLabelText("Network type")).toBeInTheDocument();
+//   });
+// });
 
 // ---------------------------------------------------------------------------
 // Tests — CSV builder (gene symbols only, no link columns)

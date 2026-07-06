@@ -295,19 +295,23 @@ def _runners_with_empty_stage6(stage1_count=2, stage2_count=2, stage3_count=1, s
     return {**base, 6: stage6_empty}
 
 
-def _runners_with_blocked_stage6(stage1_count=2, stage2_count=2, stage3_count=1, stage4_count=1):
-    """Like _runners() but Stage 6 returns the blocked-overflow marker."""
-    base = _runners(stage1_count, stage2_count, stage3_count, stage4_count)
-
-    async def stage6_blocked(r):
-        return {
-            "blocked": True,
-            "reason": "overlap_too_large",
-            "overlap_count": 600,
-            "max_proteins": 400,
-        }
-
-    return {**base, 6: stage6_blocked}
+# STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
+# re-enable. Stage 6 no longer emits a blocked-overflow marker and the engine's AD-6 blocked branch
+# is commented out, so this helper + its two regression tests are disabled. Restore to re-enable.
+#
+# def _runners_with_blocked_stage6(stage1_count=2, stage2_count=2, stage3_count=1, stage4_count=1):
+#     """Like _runners() but Stage 6 returns the blocked-overflow marker."""
+#     base = _runners(stage1_count, stage2_count, stage3_count, stage4_count)
+#
+#     async def stage6_blocked(r):
+#         return {
+#             "blocked": True,
+#             "reason": "overlap_too_large",
+#             "overlap_count": 600,
+#             "max_proteins": 400,
+#         }
+#
+#     return {**base, 6: stage6_blocked}
 
 
 @pytest.mark.asyncio
@@ -404,31 +408,35 @@ async def test_regression_stage5_zero_overlap_still_fails_guided() -> None:
     assert "overlap" in run.error_message.lower() or "network" in run.error_message.lower()
 
 
-@pytest.mark.asyncio
-async def test_regression_stage6_blocked_overflow_auto_fails() -> None:
-    """Regression: Stage-6 blocked (overflow) in auto mode still hard-fails."""
-    run = _run("auto")
-    repo = FakeRepo(run)
-
-    await engine.execute_run(repo, run.analysis_id, _runners_with_blocked_stage6())
-
-    assert run.status == "failed"
-    assert run.stage_results["6"].get("blocked") is True
-
-
-@pytest.mark.asyncio
-async def test_regression_stage6_blocked_overflow_guided_parks() -> None:
-    """Regression: Stage-6 blocked (overflow) in guided mode parks at S6 (not an error)."""
-    run = _run("guided")
-    repo = FakeRepo(run)
-    runners = _runners_with_blocked_stage6()
-
-    await engine.execute_run(repo, run.analysis_id, runners)  # park S1
-    await engine.advance_run(repo, run.analysis_id, runners)  # park S2
-    await engine.advance_run(repo, run.analysis_id, runners)  # park S3
-    await engine.advance_run(repo, run.analysis_id, runners)  # park S4
-    await engine.advance_run(repo, run.analysis_id, runners)  # park S5
-    await engine.advance_run(repo, run.analysis_id, runners)  # run S6 => blocked => park S6
-
-    assert run.status == "stage_6_awaiting_approval"
-    assert run.stage_results["6"].get("blocked") is True
+# STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
+# re-enable. The Stage-6 blocked-overflow regressions (auto fail / guided park) are disabled because
+# the stage no longer emits a blocked marker and the engine's AD-6 branch is commented out.
+#
+# @pytest.mark.asyncio
+# async def test_regression_stage6_blocked_overflow_auto_fails() -> None:
+#     """Regression: Stage-6 blocked (overflow) in auto mode still hard-fails."""
+#     run = _run("auto")
+#     repo = FakeRepo(run)
+#
+#     await engine.execute_run(repo, run.analysis_id, _runners_with_blocked_stage6())
+#
+#     assert run.status == "failed"
+#     assert run.stage_results["6"].get("blocked") is True
+#
+#
+# @pytest.mark.asyncio
+# async def test_regression_stage6_blocked_overflow_guided_parks() -> None:
+#     """Regression: Stage-6 blocked (overflow) in guided mode parks at S6 (not an error)."""
+#     run = _run("guided")
+#     repo = FakeRepo(run)
+#     runners = _runners_with_blocked_stage6()
+#
+#     await engine.execute_run(repo, run.analysis_id, runners)  # park S1
+#     await engine.advance_run(repo, run.analysis_id, runners)  # park S2
+#     await engine.advance_run(repo, run.analysis_id, runners)  # park S3
+#     await engine.advance_run(repo, run.analysis_id, runners)  # park S4
+#     await engine.advance_run(repo, run.analysis_id, runners)  # park S5
+#     await engine.advance_run(repo, run.analysis_id, runners)  # run S6 => blocked => park S6
+#
+#     assert run.status == "stage_6_awaiting_approval"
+#     assert run.stage_results["6"].get("blocked") is True

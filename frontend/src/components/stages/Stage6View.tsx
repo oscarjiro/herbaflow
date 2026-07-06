@@ -41,7 +41,9 @@ import { exportArtifactUrl } from "../../lib/exportUrl";
 import type cytoscape from "cytoscape";
 import { useChartColors } from "@/lib/chartTheme";
 import { NetworkGraph } from "@/components/charts/NetworkGraph";
-import { Badge } from "@/components/ui/badge";
+// STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
+// re-enable. Badge was only used by the "overlap too large" blocked prompt (removed below).
+// import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
@@ -285,7 +287,9 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
 
   if (!stage6) return null;
 
-  const blocked = isBlocked(stage6) ? stage6 : undefined;
+  // STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
+  // re-enable. Stage 6 no longer emits a blocked marker, so the blocked binding + prompt are gone.
+  // const blocked = isBlocked(stage6) ? stage6 : undefined;
 
   function renderGeneLink(gene: string) {
     const accession = accessionByNodeKey.get(gene);
@@ -334,155 +338,158 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     <section className="flex flex-col gap-6">
       <StageDataSources stage={6} />
 
-      {blocked ? (
-        // ----- Overlap-too-large prompt -----
-        <Card role="status">
-          <CardContent className="flex flex-col gap-4 pt-6">
-            <div className="flex items-center gap-2">
-              <Badge variant="destructive">Overlap too large</Badge>
-            </div>
-            <p className="text-sm">
-              The overlap of {blocked.overlap_count} proteins exceeds the STRING ceiling of{" "}
-              {blocked.max_proteins}. Building a network this large is unreliable, so it was not
-              queried.
-            </p>
-            <p className="text-muted-foreground text-sm">
-              Either enable the top-N cap to proceed on the {blocked.max_proteins} highest-ranked
-              proteins, or narrow the inputs upstream (raise the Stage 3 / Stage 4 thresholds, or
-              tighten the overlap) and re-run.
-            </p>
-            <div>
-              <Button
-                type="button"
-                disabled={redo.isPending || isRunBusy(data.status)}
-                onClick={() => redo.mutate({ allow_top_n_cap: true })}
-                aria-label="Enable top-N cap and Redo"
-              >
-                Enable top-N &amp; Redo
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        computed && (
-          <>
-            {/* Summary cards */}
-            <div className="flex flex-wrap gap-3">
-              <StageSummaryCard
-                value={formatCount(computed.node_count)}
-                label="nodes"
-                ariaLabel={`${computed.node_count} nodes`}
-              />
-              <StageSummaryCard
-                value={formatCount(computed.edge_count)}
-                label="edges"
-                ariaLabel={`${computed.edge_count} edges`}
-              />
-              <StageSummaryCard
-                value={computed.min_confidence}
-                label="min confidence"
-                ariaLabel={`min confidence ${computed.min_confidence}`}
-                muted
-              />
-              <StageSummaryCard
-                value={humanizeValue(computed.network_type)}
-                label="network type"
-                ariaLabel={`network type ${humanizeValue(computed.network_type)}`}
-                muted
-              />
-              <StageSummaryCard
-                value={formatCount(computed.unmapped.length)}
-                label="unmapped"
-                ariaLabel={`${computed.unmapped.length} unmapped`}
-                muted
-              />
-            </div>
+      {/* STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore
+          to re-enable. The "overlap too large" blocked prompt can no longer occur (Stage 6 never
+          emits a blocked marker), so the branch is removed. Restore the block below — and the
+          `blocked` binding + Badge import above — to re-enable the cap.
 
-            {computed.capped.applied && (
-              <p className="text-muted-foreground text-sm" role="status">
-                Capped to the top {computed.capped.max_proteins} proteins by{" "}
-                {computed.capped.ranked_by}.
+        {blocked ? (
+          // ----- Overlap-too-large prompt -----
+          <Card role="status">
+            <CardContent className="flex flex-col gap-4 pt-6">
+              <div className="flex items-center gap-2">
+                <Badge variant="destructive">Overlap too large</Badge>
+              </div>
+              <p className="text-sm">
+                The overlap of {blocked.overlap_count} proteins exceeds the STRING ceiling of{" "}
+                {blocked.max_proteins}. Building a network this large is unreliable, so it was not
+                queried.
               </p>
-            )}
-
-            {computed.edge_count === 0 && (
-              <p className="text-muted-foreground text-sm" role="status">
-                No interactions among the overlap targets at this confidence floor.
+              <p className="text-muted-foreground text-sm">
+                Either enable the top-N cap to proceed on the {blocked.max_proteins} highest-ranked
+                proteins, or narrow the inputs upstream (raise the Stage 3 / Stage 4 thresholds, or
+                tighten the overlap) and re-run.
               </p>
-            )}
+              <div>
+                <Button
+                  type="button"
+                  disabled={redo.isPending || isRunBusy(data.status)}
+                  onClick={() => redo.mutate({ allow_top_n_cap: true })}
+                  aria-label="Enable top-N cap and Redo"
+                >
+                  Enable top-N &amp; Redo
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+      */}
+      {computed && (
+        <>
+          {/* Summary cards */}
+          <div className="flex flex-wrap gap-3">
+            <StageSummaryCard
+              value={formatCount(computed.node_count)}
+              label="nodes"
+              ariaLabel={`${computed.node_count} nodes`}
+            />
+            <StageSummaryCard
+              value={formatCount(computed.edge_count)}
+              label="edges"
+              ariaLabel={`${computed.edge_count} edges`}
+            />
+            <StageSummaryCard
+              value={computed.min_confidence}
+              label="min confidence"
+              ariaLabel={`min confidence ${computed.min_confidence}`}
+              muted
+            />
+            <StageSummaryCard
+              value={humanizeValue(computed.network_type)}
+              label="network type"
+              ariaLabel={`network type ${humanizeValue(computed.network_type)}`}
+              muted
+            />
+            <StageSummaryCard
+              value={formatCount(computed.unmapped.length)}
+              label="unmapped"
+              ariaLabel={`${computed.unmapped.length} unmapped`}
+              muted
+            />
+          </div>
 
-            {/* Interactive PPI network (shown once this step has drawable elements; the deterministic
+          {computed.capped.applied && (
+            <p className="text-muted-foreground text-sm" role="status">
+              Capped to the top {computed.capped.max_proteins} proteins by{" "}
+              {computed.capped.ranked_by}.
+            </p>
+          )}
+
+          {computed.edge_count === 0 && (
+            <p className="text-muted-foreground text-sm" role="status">
+              No interactions among the overlap targets at this confidence floor.
+            </p>
+          )}
+
+          {/* Interactive PPI network (shown once this step has drawable elements; the deterministic
                 server PNG stays in the export bundle). Blocked / empty states have their own
                 UI above, so the graph simply does not render then. */}
-            {network.elements.length > 0 && (
-              <>
-                <NetworkGraph
-                  title="Protein-protein interaction network"
-                  filename="ppi_network.png"
-                  elements={network.elements}
-                  stylesheet={stylesheet}
-                  actions={
-                    <Button variant="secondary" size="sm" asChild>
-                      <a
-                        href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
-                        download="stage6_ppi_network.png"
-                        aria-label="Download STRING image"
+          {network.elements.length > 0 && (
+            <>
+              <NetworkGraph
+                title="Protein-protein interaction network"
+                filename="ppi_network.png"
+                elements={network.elements}
+                stylesheet={stylesheet}
+                actions={
+                  <Button variant="secondary" size="sm" asChild>
+                    <a
+                      href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
+                      download="stage6_ppi_network.png"
+                      aria-label="Download STRING image"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                       >
-                        <svg
-                          aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                          <polyline points="7 10 12 15 17 10" />
-                          <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                        Download STRING image
-                      </a>
-                    </Button>
-                  }
-                  nodeTooltip={(d) =>
-                    `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`
-                  }
-                  tray={
-                    network.isolated.length > 0 ? (
-                      <p className="text-muted-foreground mt-3 text-sm">
-                        Not connected at this confidence: {network.isolated.join(", ")}
-                      </p>
-                    ) : undefined
-                  }
-                />
-              </>
-            )}
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                      Download STRING image
+                    </a>
+                  </Button>
+                }
+                nodeTooltip={(d) => `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`}
+                tray={
+                  network.isolated.length > 0 ? (
+                    <p className="text-muted-foreground mt-3 text-sm">
+                      Not connected at this confidence: {network.isolated.join(", ")}
+                    </p>
+                  ) : undefined
+                }
+              />
+            </>
+          )}
 
-            {/* Edge-list table card */}
-            <Card>
-              <CardHeader>
-                <div className="flex flex-wrap items-center gap-3">
-                  <CsvDownloadButton
-                    header={S6_CSV_HEADER}
-                    rows={csvRows}
-                    filename="ppi.csv"
-                    label="Download CSV"
-                  />
-                </div>
-              </CardHeader>
-              <CardContent className="px-0">
-                <DataTable columns={columns} data={edges} />
-              </CardContent>
-            </Card>
-          </>
-        )
+          {/* Edge-list table card */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-center gap-3">
+                <CsvDownloadButton
+                  header={S6_CSV_HEADER}
+                  rows={csvRows}
+                  filename="ppi.csv"
+                  label="Download CSV"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="px-0">
+              <DataTable columns={columns} data={edges} />
+            </CardContent>
+          </Card>
+        </>
       )}
 
-      {/* PPI param panel — always shown (raise the cap / change settings + Redo) */}
+      {/* PPI param panel — always shown (change settings + Redo) */}
       {paramPanel}
     </section>
   );

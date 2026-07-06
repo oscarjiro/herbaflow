@@ -216,8 +216,13 @@ export const PPI_PARAMS = {
   network_type: ppiEntry("network_type"),
 } satisfies Record<string, AdmeParamMeta>;
 
-export const PPI_NUMERIC_PARAMS = ["max_proteins"] as const;
-export const PPI_BOOLEAN_PARAMS = ["allow_top_n_cap"] as const;
+// STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
+// re-enable. The max_proteins + allow_top_n_cap controls are hidden from the Stage 6 param panel
+// (the params stay defined in the contract but are inert). Restore the original arrays to re-enable.
+// export const PPI_NUMERIC_PARAMS = ["max_proteins"] as const;
+// export const PPI_BOOLEAN_PARAMS = ["allow_top_n_cap"] as const;
+export const PPI_NUMERIC_PARAMS = [] as const;
+export const PPI_BOOLEAN_PARAMS = [] as const;
 export const PPI_SELECT_PARAMS = ["min_confidence", "network_type"] as const;
 
 // ---------------------------------------------------------------------------

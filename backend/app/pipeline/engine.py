@@ -203,22 +203,25 @@ async def execute_run(
             )
             return
 
-        # Stage 6 blocked (overlap > cap, opt-in off): AD-6 mechanism — guided parks at the
-        # S6 checkpoint (FE prompts narrow/enable-top-N); auto hard-fails.
-        if stage == 6 and result.get("blocked"):
-            await repo.set_stage_result(run, stage, result)
-            if run.mode == "guided":
-                logger.info("run %s: stage 6 blocked (overlap too large) — parking", rid)
-                await repo.set_status(run, state.stage_status(stage, "awaiting_approval"))
-                return
-            logger.warning("run %s: stage 6 blocked (overlap too large) — failing (auto)", rid)
-            await repo.fail(
-                run,
-                f"The overlap ({result['overlap_count']} proteins) exceeds the STRING "
-                f"ceiling ({result['max_proteins']}); narrow the inputs or enable the "
-                "top-N cap, then re-run from Step 6.",
-            )
-            return
+        # STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore
+        # to re-enable. Stage 6 no longer emits a blocked-overflow marker, so the AD-6 branch below
+        # (guided park / auto fail on "overlap too large") is dead; restore it to re-enable the cap.
+        # # Stage 6 blocked (overlap > cap, opt-in off): AD-6 mechanism — guided parks at the
+        # # S6 checkpoint (FE prompts narrow/enable-top-N); auto hard-fails.
+        # if stage == 6 and result.get("blocked"):
+        #     await repo.set_stage_result(run, stage, result)
+        #     if run.mode == "guided":
+        #         logger.info("run %s: stage 6 blocked (overlap too large) — parking", rid)
+        #         await repo.set_status(run, state.stage_status(stage, "awaiting_approval"))
+        #         return
+        #     logger.warning("run %s: stage 6 blocked (overlap too large) — failing (auto)", rid)
+        #     await repo.fail(
+        #         run,
+        #         f"The overlap ({result['overlap_count']} proteins) exceeds the STRING "
+        #         f"ceiling ({result['max_proteins']}); narrow the inputs or enable the "
+        #         "top-N cap, then re-run from Step 6.",
+        #     )
+        #     return
 
         await repo.set_stage_result(run, stage, result)
 
