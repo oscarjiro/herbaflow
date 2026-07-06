@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ExternalLinkIcon, InfoIcon } from "lucide-react";
+import { ExternalLinkIcon } from "lucide-react";
 
 import { cn } from "@/lib/cn";
 
@@ -112,37 +112,6 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
 }
 
 /**
- * InfoHint — reusable per-column info (i) affordance.
- *
- * A small, accessible icon button that surfaces a short explanation of a
- * column. The shell ships the styled building block; columns wire it in a
- * later spec. The `label` is exposed both as the accessible name and the
- * native title tooltip.
- */
-function InfoHint({
-  label,
-  className,
-  ...props
-}: { label: string } & Omit<React.ComponentProps<"button">, "aria-label">) {
-  return (
-    <button
-      type="button"
-      data-slot="table-info-hint"
-      aria-label={label}
-      title={label}
-      className={cn(
-        "text-hf-fg-3 hover:text-hf-fg-1 inline-flex size-4 shrink-0 items-center justify-center rounded-[var(--radius-sm)] align-middle transition-colors",
-        "outline-none focus-visible:ring-[2px] focus-visible:ring-[color-mix(in_srgb,var(--hf-fg-1),transparent_55%)]",
-        className,
-      )}
-      {...props}
-    >
-      <InfoIcon className="size-[14px]" aria-hidden="true" />
-    </button>
-  );
-}
-
-/**
  * ExternalLinkCell — reusable styled external link for accession cells.
  *
  * Renders an underline-on-hover ink link with a trailing external-link icon,
@@ -182,6 +151,5 @@ export {
   TableHead,
   TableCell,
   TableCaption,
-  InfoHint,
   ExternalLinkCell,
 };

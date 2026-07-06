@@ -7,7 +7,7 @@
  *   (NOT shadcn `text-foreground` / `bg-muted`)
  * - rows hover on an hf surface token (NOT `bg-muted/50`)
  * - all data-slot attributes are preserved (DataTable depends on them)
- * - InfoHint and ExternalLinkCell affordance hooks render with hf tokens + icons
+ * - ExternalLinkCell affordance hook renders with hf tokens + icon
  */
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
@@ -20,7 +20,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  InfoHint,
   ExternalLinkCell,
 } from "./table";
 
@@ -108,16 +107,6 @@ describe("TableCell — numeric alignment hook", () => {
     );
     const cell = container.querySelector('[data-slot="table-cell"]')!;
     expect(cell.className).toContain("tabular-nums");
-  });
-});
-
-describe("InfoHint affordance", () => {
-  it("renders an accessible info button with a tooltip label", () => {
-    render(<InfoHint label="Maximum clique centrality" />);
-    const btn = screen.getByRole("button", { name: /maximum clique centrality/i });
-    expect(btn).toBeInTheDocument();
-    expect(btn.querySelector("svg")).not.toBeNull();
-    expect(btn.className).toMatch(/text-hf-fg-/);
   });
 });
 
