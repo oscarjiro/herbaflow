@@ -218,13 +218,35 @@ async def test_guided_pauses_for_approval() -> None:
 
 
 @pytest.mark.asyncio
-async def test_zero_compounds_fails() -> None:
+async def test_auto_fails_on_empty_stage1() -> None:
+    """Auto: an empty Stage 1 stores its count-0 result, then fails with the honesty note
+    (the same addable-empty branch S2/S3/S4 use), so the user can add a compound and re-run."""
     run = _run("auto")
     repo = FakeRepo(run)
 
     await engine.execute_run(repo, run.analysis_id, _runners(0, 0))
     assert run.status == "failed"
+    assert run.stage_results["1"]["count"] == 0
+    assert "step 1" in run.error_message.lower()
     assert "compound" in run.error_message.lower()
+
+
+@pytest.mark.asyncio
+async def test_guided_parks_empty_stage1_then_refuses_advance() -> None:
+    """Guided: an empty Stage 1 parks at its checkpoint with a stored count-0 result (not
+    failed), so the frontend renders the add-a-compound shell; advance is refused."""
+    run = _run("guided")
+    repo = FakeRepo(run)
+    runners = _runners(0, 0)
+
+    await engine.execute_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_1_awaiting_approval"
+    assert run.stage_results["1"]["count"] == 0
+
+    # Approving an empty stage is refused (no results to carry forward).
+    with pytest.raises(ConflictProblem):
+        await engine.advance_run(repo, run.analysis_id, runners)
+    assert run.status == "stage_1_awaiting_approval"  # unchanged
 
 
 @pytest.mark.asyncio

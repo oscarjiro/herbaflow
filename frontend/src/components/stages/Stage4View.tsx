@@ -248,13 +248,6 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
         )}
       </div>
 
-      {stage4.count === 0 && (
-        <p className={cn("text-sm", "[color:var(--hf-fg-3)]")} role="status">
-          No disease targets match this score. Lower the minimum score, run this step again, or add
-          targets manually.
-        </p>
-      )}
-
       {/* Disease-targets table card */}
       {isUserProvided && (
         <div>

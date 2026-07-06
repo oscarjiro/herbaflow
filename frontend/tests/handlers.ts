@@ -515,7 +515,8 @@ export const server = setupServer(
       created_at: null,
       completed_at: null,
       expires_at: null,
-      error_message: "No compounds found for the selected plants.",
+      error_message:
+        "No compounds were found for the selected plants; add a compound, then re-run from Step 1.",
     }),
   ),
   http.get(`${BASE}/analyses/r-na-s1`, () => HttpResponse.json(ANALYSIS_MANUAL_TARGETS)),

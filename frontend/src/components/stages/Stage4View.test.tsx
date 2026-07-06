@@ -54,7 +54,7 @@ describe("Stage4View — single editable table", () => {
     expect(screen.getByText(/not applicable/i)).toBeInTheDocument();
   });
 
-  it("uses cleaned empty-result copy", () => {
+  it("delegates the empty-result message to the shared stage shell", () => {
     const data = {
       ...base,
       stage_state: { "4": "computed" },
@@ -74,11 +74,9 @@ describe("Stage4View — single editable table", () => {
 
     wrap(<Stage4View data={data} />);
 
-    expect(
-      screen.getByText(
-        "No disease targets match this score. Lower the minimum score, run this step again, or add targets manually.",
-      ),
-    ).toBeInTheDocument();
+    // The empty-result banner now lives once in the shared StageView shell, so Stage4View
+    // itself renders no bespoke empty paragraph (S4 matches S3; no duplicate message).
+    expect(screen.queryByText(/No disease targets match this score/)).not.toBeInTheDocument();
     expect(screen.queryByText(/No disease targets —/)).not.toBeInTheDocument();
   });
 

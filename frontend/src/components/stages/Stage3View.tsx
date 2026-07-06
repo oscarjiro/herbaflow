@@ -453,7 +453,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
         <CardContent className="px-0">
           {/* Targets table */}
           <div className="table-wrapper">
-            <DataTable columns={targetColumns} data={targetRows} />
+            <DataTable columns={targetColumns} data={targetRows} emptyMessage="No targets yet." />
           </div>
         </CardContent>
       </Card>

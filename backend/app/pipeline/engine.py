@@ -26,6 +26,11 @@ StageRunner = Callable[[Any], Awaitable[dict[str, Any]]]
 
 def _empty_stage_message(stage: int, run: Any) -> str:
     """Auto-mode hard-stop message for an entity/gate stage that produced 0 results."""
+    if stage == 1:
+        return (
+            "No compounds were found for the selected plants; add a compound, "
+            "then re-run from Step 1."
+        )
     if stage == 2:
         n_in = run.stage_results.get("1", {}).get("count", 0)
         return (
@@ -185,12 +190,6 @@ async def execute_run(
                 ),
             }
 
-        # Stage 1 truly-empty: unconditional hard-stop (effective forward set is empty).
-        if stage == 1 and result["count"] == 0:
-            logger.warning("run %s: stage 1 found 0 compounds — failing", rid)
-            await repo.fail(run, "No compounds found for the selected plants.")
-            return
-
         # Stage 5 0-overlap is the terminal scientific hard-stop (OV-4 / ledger B6):
         # unconditional fail in BOTH modes — NOT the generic guided-park empty branch.
         if stage == 5 and result.get("count", 0) == 0:
@@ -225,8 +224,11 @@ async def execute_run(
 
         await repo.set_stage_result(run, stage, result)
 
-        # Empty downstream entity/gate stage (S2/S3/S4; S1 hard-failed above):
+        # Empty entity/gate stage (S1/S2/S3/S4): store the count-0 result, then
         # guided -> blocking checkpoint (advance is refused); auto -> hard-stop.
+        # An empty S1 is recoverable like S3/S4 — the user adds a compound and re-runs
+        # from Step 1 (edit_stage + reset-from), so it parks/fails with an honesty note
+        # instead of an unconditional dead-end.
         # The terminal computed leaves S6/S7/S8 are EXEMPT: a 0-edge PPI network,
         # 0-hub, or 0-term result is a valid honest-null completion, not an empty-gate stop.
         if stage not in (6, 7, 8) and result["count"] == 0:
