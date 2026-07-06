@@ -12,6 +12,7 @@ import { LineNumberedTextarea } from "@/components/ui/line-numbered-textarea";
 import { ManualValidateProgress } from "@/components/ui/ManualValidateProgress";
 import { ManualEntrySummary, nonEmptyLineCount } from "@/components/ui/ManualEntrySummary";
 import { useChunkedValidate } from "@/hooks/useChunkedValidate";
+import { distinctInputsWithOrigin } from "@/lib/validateInputs";
 import { StatefulButton } from "@/components/ui/StatefulButton";
 import { MAX_COMPOUNDS } from "@/contract";
 
@@ -56,20 +57,11 @@ export function CompoundValidateBox({
   const inputCount = nonEmptyLineCount(text);
   const hasInput = text.trim().length > 0;
   const mustAddValidatedBatch = showAddButton === true && resolved.length > 0;
-  const duplicateCount = (() => {
-    const seen = new Set<string>();
-    let dup = 0;
-    for (const raw of text.split("\n")) {
-      const v = raw.trim();
-      if (!v) continue;
-      if (seen.has(v)) dup += 1;
-      else seen.add(v);
-    }
-    return dup;
-  })();
-
-  // Distinct entry count: used for the progress label and as the actual inputs to the API.
-  const distinctCount = inputCount - duplicateCount;
+  // Distinct entry count via the one canonical dedup home (first-seen, trimmed, non-empty);
+  // duplicates are the non-empty lines beyond that distinct set. Used for the progress label.
+  const distinctCount = distinctInputsWithOrigin(text.split("\n").map((value) => ({ value }))).items
+    .length;
+  const duplicateCount = inputCount - distinctCount;
 
   const { mutation: validate, progress } = useChunkedValidate<{ value: string }, ResolvedCompound>({
     validateChunk: async (inputs) => {

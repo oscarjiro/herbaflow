@@ -28,12 +28,9 @@
  */
 
 import { useMemo } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead, ResolvedTarget } from "../../api/types.gen";
-import { resetFrom } from "../../api/sdk.gen";
-import type { Problem } from "../../lib/problem";
-import { notifyError, notifyInfo } from "../../lib/toast";
+import { useParamRedo } from "@/hooks/useParamRedo";
 import {
   DISEASE_TARGETS_NUMERIC_PARAMS,
   DISEASE_TARGETS_PARAMS,
@@ -42,12 +39,11 @@ import {
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig, formatCount } from "../../lib/format";
 import { METRIC_INFO } from "../../lib/metricInfo";
-import { stageLabel } from "../../contract/labels";
+import { StageNotApplicable } from "./StageNotApplicable";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
-import { cn } from "@/lib/cn";
-import { Badge } from "@/components/ui/badge";
+import { ProvidedByYouBadge } from "./ProvidedByYouBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
@@ -121,19 +117,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
     | Record<string, number | boolean>
     | undefined;
 
-  const qc = useQueryClient();
-  const redo = useMutation({
-    mutationFn: (changed: Record<string, number | boolean | string>) =>
-      resetFrom({
-        path: { analysis_id: data.analysis_id, stage: 4 },
-        body: { parameters: { "4": changed } },
-      }),
-    onSuccess: () => {
-      void qc.invalidateQueries();
-      notifyInfo("Re-running from step 4");
-    },
-    onError: (error) => notifyError(error as Problem),
-  });
+  const redo = useParamRedo<Record<string, number | boolean | string>>(data.analysis_id, 4);
   const edit = useStageEntityEdit({
     analysisId: data.analysis_id,
     stage: 4,
@@ -153,12 +137,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
   if (!stage4) return null;
 
   if (stageState === "not_applicable") {
-    return (
-      <section className="stage-view stage-view--na" aria-disabled>
-        <h2>{stageLabel(4)}</h2>
-        <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
-      </section>
-    );
+    return <StageNotApplicable stage={4} />;
   }
 
   const effectiveCount = stage4.targets.filter((t) => t.tag !== "user-removed").length;
@@ -253,11 +232,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       </div>
 
       {/* Disease-targets table card */}
-      {isUserProvided && (
-        <div>
-          <Badge variant="secondary">Provided by you</Badge>
-        </div>
-      )}
+      <ProvidedByYouBadge show={isUserProvided} />
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">

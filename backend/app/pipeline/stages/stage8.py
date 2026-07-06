@@ -110,29 +110,24 @@ async def run(
     stage5 = run.stage_results["5"]
     stage3 = run.stage_results["3"]
     params = run.parameters["enrichment"]
-    if client is not None:
-        result = await compute(
+
+    async def _go(enrichment_client: Any) -> dict[str, Any]:
+        return await compute(
             stage5,
             stage3,
-            client=client,
+            client=enrichment_client,
             significance_threshold=float(params["significance_threshold"]),
             sources=list(params["sources"]),
             correction=str(params["correction"]),
             min_term_size=int(params["min_term_size"]),
             no_iea=bool(params.get("no_iea", False)),
         )
+
+    if client is not None:
+        result = await _go(client)
     else:
         async with httpx.AsyncClient() as http:
-            result = await compute(
-                stage5,
-                stage3,
-                client=GprofilerClient(http),
-                significance_threshold=float(params["significance_threshold"]),
-                sources=list(params["sources"]),
-                correction=str(params["correction"]),
-                min_term_size=int(params["min_term_size"]),
-                no_iea=bool(params.get("no_iea", False)),
-            )
+            result = await _go(GprofilerClient(http))
     logger.info(
         "stage 8: %d term(s) for %d query / %d background genes (degraded=%s)",
         result["count"],

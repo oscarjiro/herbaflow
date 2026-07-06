@@ -18,6 +18,7 @@ import zipfile
 from typing import Any
 
 from app.pipeline import report
+from app.pipeline.genes import target_display_name
 
 
 def _slug_part(text: str | None) -> str:
@@ -37,7 +38,9 @@ def bundle_slug(labels: dict[str, Any], completed_at: Any) -> str:
 # UniProt accession, then the raw target_id). Used by BOTH the node and the edge builder so the
 # C-T edge endpoints reference the same id the node table declares.
 def _target_node_id(row: dict[str, Any]) -> str:
-    return str(row.get("gene_symbol") or row.get("uniprot_accession") or row["target_id"])
+    return str(
+        target_display_name(row.get("gene_symbol"), row.get("uniprot_accession"), row["target_id"])
+    )
 
 
 def _csv(rows: list[tuple[Any, ...]]) -> str:
@@ -126,7 +129,7 @@ def build_ctp_graph(
         nodes.append(
             {
                 "id": _target_node_id(o),
-                "label": o.get("gene_symbol") or o.get("uniprot_accession") or o["target_id"],
+                "label": _target_node_id(o),
                 "type": "target",
                 "inchikey": "",
                 "smiles": "",

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { listDiseasesOptions, listPlantsOptions } from "../api/@tanstack/react-query.gen";
 import type { AnalysisRead, DiseaseRead, PlantRead } from "../api/types.gen";
+import { CATALOG_LIMIT } from "./useEntityCatalog";
 
 /**
  * Pure derivation core — no hooks, no side-effects.
@@ -55,7 +56,7 @@ export function deriveSubjects(
 // Pull the entire catalog so any selected id resolves to a name. The backend defaults to 50
 // rows; with 478 plants that silently dropped most names to their raw UUID. There is no
 // get-by-id endpoint, so we fetch the full list once (cached + deduped by TanStack Query).
-const CATALOG_LIMIT = 1000;
+// CATALOG_LIMIT (the cap) has one home in useEntityCatalog.
 
 /**
  * The single home for resolving a run's plant + disease display strings. Used by the run header

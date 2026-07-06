@@ -32,6 +32,7 @@ from app.clock import now_utc
 from app.integrations.chembl import ChemblClient
 from app.integrations.pubchem_bioassay import PubChemBioAssayClient
 from app.integrations.uniprot import UniProtClient
+from app.pipeline.genes import target_display_name
 from app.repositories.compound import CompoundRepository
 from app.repositories.compound_target import CompoundTargetRepository
 from app.repositories.target import TargetRepository
@@ -101,7 +102,7 @@ async def compute(
                     tid_s,
                     {
                         "target_id": tid_s,
-                        "canonical_name": gene or acc,
+                        "canonical_name": target_display_name(gene, acc),
                         "gene_symbol": gene,
                         "uniprot_accession": acc,
                     },
@@ -253,7 +254,7 @@ async def run(
                 tid,
                 {
                     "target_id": tid,
-                    "canonical_name": gene or acc or tid,
+                    "canonical_name": target_display_name(gene, acc, tid),
                     "gene_symbol": gene,
                     "uniprot_accession": acc,
                 },

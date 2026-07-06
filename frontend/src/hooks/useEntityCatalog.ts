@@ -4,8 +4,9 @@ import type { ComboOption } from "@/components/EntitySearchCombobox";
 
 // Fetches the full catalog in one request. The endpoints have no upper cap on
 // `limit`, so 1000 is large enough to cover the full catalog (478 plants / ~10
-// diseases at time of writing) without pagination.
-const CATALOG_LIMIT = 1000;
+// diseases at time of writing) without pagination. The one home for this cap; the
+// subject-derivation hook and the Stage-1 plant-column fetch import it.
+export const CATALOG_LIMIT = 1000;
 
 export function useEntityCatalog(): {
   plants: ComboOption[];

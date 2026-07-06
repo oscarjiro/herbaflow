@@ -29,6 +29,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.pipeline.genes import target_display_name
 from app.repositories.disease_target import DiseaseTargetRepository
 
 logger = logging.getLogger("herbaflow.pipeline")
@@ -44,7 +45,9 @@ def compute(rows: list[dict[str, Any]], min_score: float) -> dict[str, Any]:
     targets = [
         {
             "target_id": r["target_id"],
-            "canonical_name": r["gene_symbol"] or r["uniprot_accession"] or r["target_id"],
+            "canonical_name": target_display_name(
+                r["gene_symbol"], r["uniprot_accession"], r["target_id"]
+            ),
             "gene_symbol": r["gene_symbol"],
             "uniprot_accession": r["uniprot_accession"],
             "opentargets_score": r["opentargets_score"],

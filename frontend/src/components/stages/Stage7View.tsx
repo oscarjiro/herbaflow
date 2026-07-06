@@ -10,14 +10,11 @@
  */
 
 import { useMemo, useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig, formatCount } from "../../lib/format";
 import { METRIC_INFO } from "../../lib/metricInfo";
 import type { AnalysisRead } from "../../api/types.gen";
-import { resetFrom } from "../../api/sdk.gen";
-import type { Problem } from "../../lib/problem";
-import { notifyError, notifyInfo } from "../../lib/toast";
+import { useParamRedo } from "@/hooks/useParamRedo";
 import {
   HUB_GENES_BOOLEAN_PARAMS,
   HUB_GENES_NUMERIC_PARAMS,
@@ -95,19 +92,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
     | HubParams
     | undefined;
 
-  const qc = useQueryClient();
-  const redo = useMutation({
-    mutationFn: (changed: HubParams) =>
-      resetFrom({
-        path: { analysis_id: data.analysis_id, stage: 7 },
-        body: { parameters: { "7": changed } },
-      }),
-    onSuccess: () => {
-      void qc.invalidateQueries();
-      notifyInfo("Re-running from step 7");
-    },
-    onError: (error) => notifyError(error as Problem),
-  });
+  const redo = useParamRedo<HubParams>(data.analysis_id, 7);
 
   const gdRef = useRef<HTMLElement | null>(null);
 

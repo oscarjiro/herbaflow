@@ -4,13 +4,13 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { listPlantsOptions } from "../../api/@tanstack/react-query.gen";
 import type { AnalysisRead, PlantRead, ResolvedCompound } from "../../api/types.gen";
 import { MAX_COMPOUNDS } from "../../contract";
-import { stageLabel } from "../../contract/labels";
+import { StageNotApplicable } from "./StageNotApplicable";
+import { CATALOG_LIMIT } from "../../hooks/useEntityCatalog";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatCount } from "../../lib/format";
-import { cn } from "@/lib/cn";
-import { Badge } from "@/components/ui/badge";
+import { ProvidedByYouBadge } from "./ProvidedByYouBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/DataTable";
@@ -76,10 +76,8 @@ function buildCsvRows(rows: Stage1Row[], showPlantSources: boolean): unknown[][]
 }
 
 // ---------------------------------------------------------------------------
-// Plant-catalog resolution helpers (limit mirrors useEntitySubjects)
+// Plant-catalog resolution helpers (CATALOG_LIMIT has one home in useEntityCatalog)
 // ---------------------------------------------------------------------------
-
-const CATALOG_LIMIT = 1000;
 
 /**
  * Invert the stage-1 per_plant map to a per-compound lookup.
@@ -180,12 +178,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
   }
 
   if (stageState === "not_applicable") {
-    return (
-      <section className="stage-view stage-view--na" aria-disabled>
-        <h2>{stageLabel(1)}</h2>
-        <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
-      </section>
-    );
+    return <StageNotApplicable stage={1} />;
   }
 
   const isUserProvided = stageState === "user_provided";
@@ -264,11 +257,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
       <StageEntityContext data={data} side="plant" />
       <StageDataSources stage={1} userProvided={isUserProvided} />
 
-      {isUserProvided && (
-        <div>
-          <Badge variant="secondary">Provided by you</Badge>
-        </div>
-      )}
+      <ProvidedByYouBadge show={isUserProvided} />
 
       {/* Summary cards */}
       <div className="flex flex-wrap gap-3">

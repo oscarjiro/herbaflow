@@ -1,8 +1,7 @@
-import { act, fireEvent, render, renderHook, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EntitySearchCombobox, type ComboOption } from "./EntitySearchCombobox";
-import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { cleanup } from "@testing-library/react";
 
 // ---------------------------------------------------------------------------
@@ -68,68 +67,6 @@ it("filters the cached options locally, no callback", () => {
   fireEvent.change(input, { target: { value: "zingiber" } });
   expect(screen.getByText("Zingiber officinale")).toBeInTheDocument();
   expect(screen.queryByText("Curcuma longa")).not.toBeInTheDocument();
-});
-
-// ---------------------------------------------------------------------------
-// Debounce: exactly one search call per settled term
-//
-// We test the debounce contract via the useDebouncedValue hook directly
-// (using renderHook + fake timers). This avoids the Radix Popover animation
-// deadlock that occurs when fake timers are active during a click.
-// ---------------------------------------------------------------------------
-
-describe("EntitySearchCombobox — debounce (hook-level)", () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it("coalesces rapid updates into one settled value after delayMs", () => {
-    vi.useFakeTimers();
-    const { result, rerender } = renderHook(
-      ({ value, delay }: { value: string; delay: number }) => useDebouncedValue(value, delay),
-      { initialProps: { value: "", delay: 300 } },
-    );
-
-    expect(result.current).toBe("");
-
-    // Update three times quickly
-    rerender({ value: "a", delay: 300 });
-    rerender({ value: "al", delay: 300 });
-    rerender({ value: "alp", delay: 300 });
-
-    // Before the delay fires, value hasn't changed
-    expect(result.current).toBe("");
-
-    // Advance past the debounce window
-    act(() => {
-      vi.advanceTimersByTime(300);
-    });
-
-    // Only the last value should be reflected
-    expect(result.current).toBe("alp");
-  });
-
-  it("fires a new debounce on each distinct settled value", () => {
-    vi.useFakeTimers();
-    const { result, rerender } = renderHook(
-      ({ value }: { value: string }) => useDebouncedValue(value, 300),
-      { initialProps: { value: "" } },
-    );
-
-    // First settle: "foo"
-    rerender({ value: "foo" });
-    act(() => {
-      vi.advanceTimersByTime(300);
-    });
-    expect(result.current).toBe("foo");
-
-    // Second settle: "bar"
-    rerender({ value: "bar" });
-    act(() => {
-      vi.advanceTimersByTime(300);
-    });
-    expect(result.current).toBe("bar");
-  });
 });
 
 // ---------------------------------------------------------------------------

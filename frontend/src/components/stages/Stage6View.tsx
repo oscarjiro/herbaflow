@@ -22,12 +22,9 @@
  */
 
 import { useMemo } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
-import { resetFrom } from "../../api/sdk.gen";
-import type { Problem } from "../../lib/problem";
-import { notifyError, notifyInfo } from "../../lib/toast";
+import { useParamRedo } from "@/hooks/useParamRedo";
 import {
   PPI_BOOLEAN_PARAMS,
   PPI_NUMERIC_PARAMS,
@@ -251,19 +248,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     | PpiParams
     | undefined;
 
-  const qc = useQueryClient();
-  const redo = useMutation({
-    mutationFn: (changed: PpiParams) =>
-      resetFrom({
-        path: { analysis_id: data.analysis_id, stage: 6 },
-        body: { parameters: { "6": changed } },
-      }),
-    onSuccess: () => {
-      void qc.invalidateQueries();
-      notifyInfo("Re-running from step 6");
-    },
-    onError: (error) => notifyError(error as Problem),
-  });
+  const redo = useParamRedo<PpiParams>(data.analysis_id, 6);
 
   const computed = stage6 && !isBlocked(stage6) ? stage6 : undefined;
   const edges = useMemo(() => computed?.edges ?? [], [computed]);

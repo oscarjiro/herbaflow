@@ -13,6 +13,7 @@ from app.clock import now_utc
 from app.errors import ConflictProblem, GoneProblem, NotFoundProblem, ValidationProblem
 from app.pipeline import edits, engine, entry_modes, state
 from app.pipeline.engine import validate_overrides
+from app.pipeline.genes import target_display_name
 from app.pipeline.limits import EntityCapExceeded, check_entity_cap
 from app.repositories.analysis import AnalysisRepository
 from app.repositories.analysis_progress import AnalysisProgressRepository
@@ -320,7 +321,9 @@ class AnalysisService:
         """
         return {
             "target_id": str(t.target_id),
-            "canonical_name": t.gene_symbol or t.protein_name or t.uniprot_accession,
+            "canonical_name": target_display_name(
+                t.gene_symbol, t.uniprot_accession, protein_name=t.protein_name
+            ),
             "gene_symbol": t.gene_symbol,
             "uniprot_accession": t.uniprot_accession,
             "source_url": (

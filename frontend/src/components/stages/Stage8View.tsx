@@ -11,14 +11,11 @@
  */
 
 import { useMemo, useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig, formatCount } from "../../lib/format";
 import { METRIC_INFO } from "../../lib/metricInfo";
 import type { AnalysisRead } from "../../api/types.gen";
-import { resetFrom } from "../../api/sdk.gen";
-import type { Problem } from "../../lib/problem";
-import { notifyError, notifyInfo } from "../../lib/toast";
+import { useParamRedo } from "@/hooks/useParamRedo";
 import {
   ENRICHMENT_ARRAY_PARAMS,
   ENRICHMENT_BOOLEAN_PARAMS,
@@ -106,19 +103,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     | EnrichmentParams
     | undefined;
 
-  const qc = useQueryClient();
-  const redo = useMutation({
-    mutationFn: (changed: EnrichmentParams) =>
-      resetFrom({
-        path: { analysis_id: data.analysis_id, stage: 8 },
-        body: { parameters: { "8": changed } },
-      }),
-    onSuccess: () => {
-      void qc.invalidateQueries();
-      notifyInfo("Re-running from step 8");
-    },
-    onError: (error) => notifyError(error as Problem),
-  });
+  const redo = useParamRedo<EnrichmentParams>(data.analysis_id, 8);
 
   const gdRef = useRef<HTMLElement | null>(null);
 

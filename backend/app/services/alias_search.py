@@ -14,7 +14,7 @@ Rank scale (lower wins):
 
 from __future__ import annotations
 
-from collections.abc import Hashable
+from collections.abc import Callable, Hashable
 
 # --------------------------------------------------------------------------- #
 # Public API                                                                   #
@@ -106,3 +106,48 @@ def merge_candidates(
     merged = [(k, r, a) for k, (r, a) in best.items()]
     merged.sort(key=lambda row: row[1])
     return merged
+
+
+def rank_and_page_search[E](
+    rows: list[tuple[E, str | None]],
+    term: str,
+    *,
+    name_of: Callable[[E], str | None],
+    id_of: Callable[[E], Hashable],
+    limit: int,
+    offset: int,
+) -> list[tuple[E, str | None]]:
+    """Rank alias-search candidate rows and return the paged ``(entity, matched_alias)`` list.
+
+    The single home for the plant/disease catalog search body: given ``rows`` (``(entity, alias)``
+    tuples from a repository ``search_candidates`` read) and the already stripped+lowercased
+    ``term``, rank canonical then alias matches, dedupe per entity keeping the best rank, sort by
+    (rank, canonical name), and page. An empty ``term`` returns the entities in their incoming
+    order (the repo already name-sorts them), one per entity, ``matched_alias`` ``None``. Callers
+    supply ``name_of``/``id_of`` accessors and build their own Read DTO + count map around the
+    result, so this stays pure (no DB, no DTO, no I/O).
+    """
+    if not term:
+        return [(entity, None) for entity, _ in rows[offset : offset + limit]]
+
+    candidates: list[tuple[Hashable, int, str | None]] = []
+    for entity, alias in rows:
+        r = rank_match(term, canonical=name_of(entity))
+        if r is not None:
+            candidates.append((id_of(entity), r, None))
+            continue
+        r = rank_match(term, alias=alias)
+        if r is not None:
+            candidates.append((id_of(entity), r, alias))
+
+    merged = merge_candidates(candidates)
+    entity_by_id: dict[Hashable, E] = {id_of(entity): entity for entity, _ in rows}
+
+    def sort_key(row: tuple[Hashable, int, str | None]) -> tuple[int, str]:
+        key, rank, _alias = row
+        name = (name_of(entity_by_id[key]) or "").lower()
+        return (rank, name)
+
+    merged.sort(key=sort_key)
+    page = merged[offset : offset + limit]
+    return [(entity_by_id[key], matched_alias) for key, _rank, matched_alias in page]

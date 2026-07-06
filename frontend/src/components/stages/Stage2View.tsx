@@ -13,17 +13,14 @@
  */
 
 import { useMemo } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AnalysisRead } from "../../api/types.gen";
-import { resetFrom } from "../../api/sdk.gen";
-import type { Problem } from "../../lib/problem";
-import { notifyError, notifyInfo } from "../../lib/toast";
+import { useParamRedo } from "@/hooks/useParamRedo";
 import { ADME_PARAMS } from "../../contract";
 import { formatSig, formatCount } from "../../lib/format";
 import { METRIC_INFO } from "../../lib/metricInfo";
-import { stageLabel } from "../../contract/labels";
-import { cn } from "@/lib/cn";
+import { StageNotApplicable } from "./StageNotApplicable";
+import { ProvidedByYouBadge } from "./ProvidedByYouBadge";
 import { Badge } from "@/components/ui/badge";
 import { BoolMark } from "@/components/ui/BoolMark";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -247,20 +244,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
     | Record<string, number | boolean>
     | undefined;
 
-  const qc = useQueryClient();
-
-  const redo = useMutation({
-    mutationFn: (changed: Record<string, number | boolean | string>) =>
-      resetFrom({
-        path: { analysis_id: data.analysis_id, stage: 2 },
-        body: { parameters: { "2": changed } },
-      }),
-    onSuccess: () => {
-      void qc.invalidateQueries();
-      notifyInfo("Re-running from step 2");
-    },
-    onError: (error) => notifyError(error as Problem),
-  });
+  const redo = useParamRedo<Record<string, number | boolean | string>>(data.analysis_id, 2);
 
   // Read the single canonical entry-mode source (stage_state), like Stages 1/3/4.
   // S2 is always computed, so stage_state["2"] is normally "computed" — but never key UI off
@@ -284,12 +268,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
   if (!stage2) return null;
 
   if (isNA) {
-    return (
-      <section className="stage-view stage-view--na" aria-disabled>
-        <h2>{stageLabel(2)}</h2>
-        <p className={cn("text-sm", "[color:var(--hf-fg-3)]")}>Not applicable for this run.</p>
-      </section>
-    );
+    return <StageNotApplicable stage={2} />;
   }
 
   const passedCount = stage2.passed.length;
@@ -328,11 +307,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
       </div>
 
       {/* Table + controls */}
-      {isUserProvided && (
-        <div>
-          <Badge variant="secondary">Provided by you</Badge>
-        </div>
-      )}
+      <ProvidedByYouBadge show={isUserProvided} />
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
