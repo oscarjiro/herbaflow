@@ -117,7 +117,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       id: "gene",
       header: "Gene",
       enableSorting: true,
-      meta: { info: METRIC_INFO.s7.gene },
+      meta: { info: METRIC_INFO.common.geneSymbol },
       cell: ({ row }) =>
         row.original.source_url ? (
           <ExternalLink href={row.original.source_url}>{row.original.gene_symbol}</ExternalLink>

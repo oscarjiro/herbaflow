@@ -51,8 +51,7 @@ export const METRIC_INFO = {
   s3: {
     coverage:
       "Share of the compounds that returned at least one protein target from the bioactivity databases.",
-    chembl:
-      "Number of compounds that returned target data from the ChEMBL bioactivity database.",
+    chembl: "Number of compounds that returned target data from the ChEMBL bioactivity database.",
     pubchemBioassay:
       "Number of compounds that returned target data from the PubChem BioAssay database.",
   },

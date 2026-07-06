@@ -21,7 +21,7 @@ describe("StageSummaryCard", () => {
         value={42}
         label="targets"
         ariaLabel="42 targets"
-        info={METRIC_INFO.s4.targets}
+        info={METRIC_INFO.s4.minScore}
       />,
     );
     // Reuses the same ColumnInfo primitive as the data-table headers.

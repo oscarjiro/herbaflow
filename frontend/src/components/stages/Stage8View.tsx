@@ -129,7 +129,6 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     {
       id: "name",
       header: "Name",
-      meta: { info: METRIC_INFO.s8.name },
       cell: ({ row }) => {
         const url = enrichmentTermUrl(row.original.source, row.original.term_id);
         return url ? (
