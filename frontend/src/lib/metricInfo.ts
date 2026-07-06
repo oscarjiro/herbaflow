@@ -8,10 +8,21 @@
  *
  * Copy rules: plain language, scientifically accurate, no em dashes, and no
  * internal project vocabulary. Keys are namespaced by the stage they belong to
- * (s2 = drug-likeness screen, s4 = disease targets, s6 = interaction network,
- * s7 = hub ranking, s8 = functional enrichment).
+ * (s2 = drug-likeness screen, s3 = compound-target lookup, s4 = disease targets,
+ * s5 = shared-target overlap, s6 = interaction network, s7 = hub ranking,
+ * s8 = functional enrichment). `common` holds definitions shared across stages.
  */
 export const METRIC_INFO = {
+  // --- Shared across stages (identifiers) ---
+  common: {
+    uniprot: "UniProt accession, the standard database identifier for a protein.",
+    geneSymbol: "The human gene that codes for this protein.",
+    inchikey:
+      "A fixed-length code that uniquely identifies a chemical structure. Two molecules with the same structure always share the same InChIKey.",
+    smiles:
+      "A compact text notation that spells out a molecule's atoms and bonds as a single line of characters.",
+  },
+
   // --- Drug-likeness screening (ADME) ---
   s2: {
     status:
@@ -32,23 +43,36 @@ export const METRIC_INFO = {
       "Natural-product likeness score. Higher means the structure more closely resembles known natural products. This is the value the natural-product exception is judged against.",
     pains:
       "A check means no pan-assay interference alert. A cross means the structure matches a pattern known to give misleading assay results. This only flags the compound and never filters it out.",
-    passed:
-      "Number of compounds that cleared the drug-likeness screen, including any let through by the natural-product exception or left unscreened.",
-    filtered:
-      "Number of compounds excluded, either for failing the drug-likeness rules or because their properties could not be calculated.",
     unscreened:
       "Number of compounds that skipped the drug-likeness screen because screening was turned off for this run. They are counted as passed.",
   },
 
+  // --- Compound-target bioactivity lookup ---
+  s3: {
+    coverage:
+      "Share of the compounds that returned at least one protein target from the bioactivity databases.",
+    chembl:
+      "Number of compounds that returned target data from the ChEMBL bioactivity database.",
+    pubchemBioassay:
+      "Number of compounds that returned target data from the PubChem BioAssay database.",
+  },
+
   // --- Disease target collection ---
   s4: {
-    uniprot: "UniProt accession, the standard database identifier for the target protein.",
-    geneSymbol: "The human gene that codes for this target protein.",
     openTargetsScore:
       "Open Targets association score linking this protein to the disease. Higher means stronger published evidence.",
-    targets: "Number of disease-associated protein targets kept at the current minimum score.",
     minScore:
       "The lowest Open Targets association score a protein needed to be included. Proteins scoring below it were left out.",
+  },
+
+  // --- Shared-target overlap ---
+  s5: {
+    overlapTargets:
+      "Proteins targeted by the compounds that are also linked to the disease. These shared targets are what the rest of the analysis builds on.",
+    compoundSideTargets:
+      "All proteins the compounds are predicted to act on, before intersecting with the disease.",
+    diseaseSideTargets:
+      "All proteins linked to the disease, before intersecting with the compound targets.",
   },
 
   // --- Protein interaction network (STRING) ---
@@ -69,7 +93,6 @@ export const METRIC_INFO = {
   // --- Hub gene ranking ---
   s7: {
     rank: "Position in the hub ranking, where 1 is the most central protein. Ties are broken by clique score, then by number of connections.",
-    gene: "The gene symbol of this protein, linked to its UniProt entry.",
     mcc: "Maximal Clique Centrality (Chin 2014). Scores a protein by how often it sits inside tightly interconnected clusters. This is the score the ranking uses.",
     degree:
       "Degree centrality: the share of all other proteins in the network that this one directly interacts with, scaled from 0 to 1.",
@@ -90,7 +113,6 @@ export const METRIC_INFO = {
     category:
       "Which database this term comes from: biological process, molecular function, cellular component, or KEGG pathway.",
     term: "The term's own identifier in its source database.",
-    name: "The readable name of the biological process or pathway, linked to its source page.",
     correctedP:
       "Statistical significance after correcting for testing many terms at once. Lower means the overlap is less likely to be chance.",
     termSize: "Total number of genes assigned to this term across the whole background gene set.",

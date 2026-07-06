@@ -10,10 +10,34 @@ describe("METRIC_INFO", () => {
   it("exposes representative definitions used across the stage views", () => {
     // A few plumbing spot checks: one column def and one card def per family.
     expect(METRIC_INFO.s2.lipinski).toMatch(/Lipinski/);
-    expect(METRIC_INFO.s2.passed).toMatch(/cleared the drug-likeness screen/);
+    expect(METRIC_INFO.s2.status).toMatch(/cleared the drug-likeness screen/);
     expect(METRIC_INFO.s4.openTargetsScore).toMatch(/Open Targets/);
     expect(METRIC_INFO.s6.confidence).toMatch(/from 0 to 1/);
     expect(METRIC_INFO.s8.backgroundGenes).toMatch(/comparison set/);
+  });
+
+  it("exposes the shared common namespace", () => {
+    for (const key of ["uniprot", "geneSymbol", "inchikey", "smiles"] as const) {
+      expect(METRIC_INFO.common[key]).toBeTruthy();
+      expect(METRIC_INFO.common[key]).not.toContain("—");
+    }
+  });
+
+  it("adds the new Stage 3 and Stage 5 card keys", () => {
+    expect(METRIC_INFO.s3.coverage).toBeTruthy();
+    expect(METRIC_INFO.s3.chembl).toBeTruthy();
+    expect(METRIC_INFO.s3.pubchemBioassay).toBeTruthy();
+    expect(METRIC_INFO.s5.overlapTargets).toBeTruthy();
+    expect(METRIC_INFO.s5.compoundSideTargets).toBeTruthy();
+    expect(METRIC_INFO.s5.diseaseSideTargets).toBeTruthy();
+  });
+
+  it("drops the keys whose affordance was removed or unified", () => {
+    expect((METRIC_INFO.s2 as Record<string, unknown>).passed).toBeUndefined();
+    expect((METRIC_INFO.s2 as Record<string, unknown>).filtered).toBeUndefined();
+    expect((METRIC_INFO.s4 as Record<string, unknown>).targets).toBeUndefined();
+    expect((METRIC_INFO.s4 as Record<string, unknown>).uniprot).toBeUndefined();
+    expect((METRIC_INFO.s8 as Record<string, unknown>).name).toBeUndefined();
   });
 
   it("describes Degree as a normalized centrality, not a raw partner count", () => {
