@@ -29,6 +29,7 @@ import { useParamRedo } from "@/hooks/useParamRedo";
 import { MAX_TARGETS, TARGET_NUMERIC_PARAMS, TARGET_PARAMS } from "../../contract";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig, formatCount } from "../../lib/format";
+import { METRIC_INFO } from "../../lib/metricInfo";
 import { StageNotApplicable } from "./StageNotApplicable";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
@@ -280,7 +281,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       id: "uniprot",
       accessorFn: (row) => row.uniprot_accession ?? "",
       header: "UniProt",
-      meta: { className: "font-mono" },
+      meta: { info: METRIC_INFO.common.uniprot },
       cell: ({ row }) => {
         const acc = row.original.uniprot_accession;
         if (!acc) return <span className="text-hf-fg-3">—</span>;
@@ -296,6 +297,7 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
       id: "gene_symbol",
       accessorFn: (row) => row.gene_symbol ?? "",
       header: "Gene symbol",
+      meta: { info: METRIC_INFO.common.geneSymbol },
       cell: ({ row }) => {
         const sym = row.original.gene_symbol;
         if (!sym) return <span className="text-hf-fg-3">—</span>;
@@ -395,18 +397,21 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
               value={`${formatSig(stage3.coverage_pct)}%`}
               label="coverage"
               ariaLabel={`${formatSig(stage3.coverage_pct)}% coverage`}
+              info={METRIC_INFO.s3.coverage}
             />
             <StageSummaryCard
               value={formatCount(sourceCounts.chembl_bioactivity ?? 0)}
               label="ChEMBL"
               ariaLabel={`${sourceCounts.chembl_bioactivity ?? 0} ChEMBL target links`}
               muted
+              info={METRIC_INFO.s3.chembl}
             />
             <StageSummaryCard
               value={formatCount(sourceCounts.pubchem_bioassay ?? 0)}
               label="PubChem BioAssay"
               ariaLabel={`${sourceCounts.pubchem_bioassay ?? 0} PubChem BioAssay target links`}
               muted
+              info={METRIC_INFO.s3.pubchemBioassay}
             />
           </>
         )}
