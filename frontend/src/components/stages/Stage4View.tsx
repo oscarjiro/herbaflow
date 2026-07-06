@@ -151,7 +151,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       id: "uniprot",
       accessorFn: (row) => row.uniprot_accession ?? "",
       header: "UniProt",
-      meta: { className: "font-mono", info: METRIC_INFO.s4.uniprot },
+      meta: { info: METRIC_INFO.common.uniprot },
       cell: ({ row }) => {
         const acc = row.original.uniprot_accession;
         if (!acc) return <span className="text-hf-fg-3">—</span>;
@@ -167,7 +167,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       id: "gene_symbol",
       accessorFn: (row) => row.gene_symbol ?? "",
       header: "Gene symbol",
-      meta: { info: METRIC_INFO.s4.geneSymbol },
+      meta: { info: METRIC_INFO.common.geneSymbol },
       cell: ({ row }) => row.original.gene_symbol,
     },
     // 3. Open Targets score — HIDDEN when stage_state === "user_provided" (manual runs have no score).
@@ -218,7 +218,6 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
           value={formatCount(stage4.count)}
           label="targets"
           ariaLabel={`${stage4.count} targets`}
-          info={METRIC_INFO.s4.targets}
         />
         {!isUserProvided && (
           <StageSummaryCard
