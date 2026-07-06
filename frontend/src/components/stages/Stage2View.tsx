@@ -287,13 +287,11 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
           value={formatCount(passedCount)}
           label="passed"
           ariaLabel={`${passedCount} passed`}
-          info={METRIC_INFO.s2.passed}
         />
         <StageSummaryCard
           value={formatCount(filteredCount)}
           label="filtered"
           ariaLabel={`${filteredCount} filtered`}
-          info={METRIC_INFO.s2.filtered}
         />
         {unscreenedCount > 0 && (
           <StageSummaryCard
