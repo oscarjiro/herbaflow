@@ -14,6 +14,7 @@ import { useMemo, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig, formatCount } from "../../lib/format";
+import { METRIC_INFO } from "../../lib/metricInfo";
 import type { AnalysisRead } from "../../api/types.gen";
 import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
@@ -131,16 +132,19 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     {
       id: "source",
       header: "Category",
+      meta: { info: METRIC_INFO.s8.category },
       cell: ({ row }) => row.original.source,
     },
     {
       id: "term",
       header: "Term",
+      meta: { info: METRIC_INFO.s8.term },
       cell: ({ row }) => row.original.term_id,
     },
     {
       id: "name",
       header: "Name",
+      meta: { info: METRIC_INFO.s8.name },
       cell: ({ row }) => {
         const url = enrichmentTermUrl(row.original.source, row.original.term_id);
         return url ? (
@@ -153,24 +157,25 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
     {
       id: "corrected_p",
       header: "Corrected p",
-      meta: { className: "num" },
+      meta: { className: "num", info: METRIC_INFO.s8.correctedP },
       cell: ({ row }) => formatSig(row.original.p_value),
     },
     {
       id: "term_size",
       header: "Term size",
-      meta: { className: "num" },
+      meta: { className: "num", info: METRIC_INFO.s8.termSize },
       cell: ({ row }) => formatCount(row.original.term_size),
     },
     {
       id: "overlap",
       header: "Overlap",
-      meta: { className: "num" },
+      meta: { className: "num", info: METRIC_INFO.s8.overlap },
       cell: ({ row }) => formatCount(row.original.intersection_size),
     },
     {
       id: "genes",
       header: "Genes in term",
+      meta: { info: METRIC_INFO.s8.genes },
       cell: ({ row }) => (
         <ExpandableListCell items={row.original.intersection ?? []} collapsedCount={0} />
       ),
@@ -187,18 +192,21 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           value={formatCount(stage8.count)}
           label="enriched terms"
           ariaLabel={`${stage8.count} terms`}
+          info={METRIC_INFO.s8.enrichedTerms}
         />
         <StageSummaryCard
           value={formatCount(stage8.input_gene_count)}
           label="query genes"
           ariaLabel={`${stage8.input_gene_count} query genes`}
           muted
+          info={METRIC_INFO.s8.queryGenes}
         />
         <StageSummaryCard
           value={formatCount(stage8.background_gene_count)}
           label="background genes"
           ariaLabel={`${stage8.background_gene_count} background genes`}
           muted
+          info={METRIC_INFO.s8.backgroundGenes}
         />
         <StageSummaryCard
           value={
@@ -209,6 +217,7 @@ export function Stage8View({ data }: { data: AnalysisRead }) {
           label="correction"
           ariaLabel={`correction ${humanizeValue(stage8.correction)}`}
           muted
+          info={METRIC_INFO.s8.correction}
         />
       </div>
 

@@ -41,6 +41,7 @@ import {
 } from "../../contract";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatSig, formatCount } from "../../lib/format";
+import { METRIC_INFO } from "../../lib/metricInfo";
 import { stageLabel } from "../../contract/labels";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { useAddWithDedup } from "../../hooks/useAddWithDedup";
@@ -171,7 +172,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       id: "uniprot",
       accessorFn: (row) => row.uniprot_accession ?? "",
       header: "UniProt",
-      meta: { className: "font-mono" },
+      meta: { className: "font-mono", info: METRIC_INFO.s4.uniprot },
       cell: ({ row }) => {
         const acc = row.original.uniprot_accession;
         if (!acc) return <span className="text-hf-fg-3">—</span>;
@@ -187,6 +188,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
       id: "gene_symbol",
       accessorFn: (row) => row.gene_symbol ?? "",
       header: "Gene symbol",
+      meta: { info: METRIC_INFO.s4.geneSymbol },
       cell: ({ row }) => row.original.gene_symbol,
     },
     // 3. Open Targets score — HIDDEN when stage_state === "user_provided" (manual runs have no score).
@@ -196,7 +198,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
           {
             id: "opentargets_score",
             header: "Open Targets score",
-            meta: { className: "num" },
+            meta: { className: "num", info: METRIC_INFO.s4.openTargetsScore },
             cell: ({ row }: { row: { original: Row } }) =>
               formatSig(row.original.opentargets_score),
           },
@@ -237,6 +239,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
           value={formatCount(stage4.count)}
           label="targets"
           ariaLabel={`${stage4.count} targets`}
+          info={METRIC_INFO.s4.targets}
         />
         {!isUserProvided && (
           <StageSummaryCard
@@ -244,6 +247,7 @@ export function Stage4View({ data }: { data: AnalysisRead }) {
             label="min score"
             ariaLabel={`min score ${stage4.min_score_applied}`}
             muted
+            info={METRIC_INFO.s4.minScore}
           />
         )}
       </div>

@@ -362,7 +362,9 @@ describe("Stage8View", () => {
   it("labels the enrichment source column as Category", () => {
     render(wrap(<Stage8View data={makeRealisticData(REALISTIC_TERMS)} />));
 
-    expect(screen.getByRole("columnheader", { name: "Category" })).toBeInTheDocument();
+    // The Category header now carries an info tooltip, so its accessible name includes the
+    // circle-i affordance; match the label rather than the exact string.
+    expect(screen.getByRole("columnheader", { name: /Category/i })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "Source" })).not.toBeInTheDocument();
   });
 

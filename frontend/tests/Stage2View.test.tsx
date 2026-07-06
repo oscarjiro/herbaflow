@@ -375,15 +375,19 @@ describe("Stage2View", () => {
     const user = userEvent.setup();
     wrap(<Stage2View data={makeRun()} />);
     await user.hover(screen.getByRole("button", { name: /about PAINS/i }));
-    expect((await screen.findAllByText(/checkmark means no PAINS alert/i)).length).toBeGreaterThan(
+    expect((await screen.findAllByText(/no pan-assay interference alert/i)).length).toBeGreaterThan(
       0,
     );
   });
 
   it("numeric descriptor columns all present with num className", () => {
     wrap(<Stage2View data={makeRun()} />);
+    // Each numeric column now carries an info tooltip, so the header's accessible name
+    // includes the circle-i affordance; match the label rather than the exact string.
     for (const header of ["MW", "logP", "HBD", "HBA", "TPSA", "RotB", "NP-score"]) {
-      expect(screen.getByRole("columnheader", { name: header })).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: new RegExp(header, "i") }),
+      ).toBeInTheDocument();
     }
   });
 

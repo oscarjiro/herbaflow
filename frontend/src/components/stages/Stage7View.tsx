@@ -13,6 +13,7 @@ import { useMemo, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatSig, formatCount } from "../../lib/format";
+import { METRIC_INFO } from "../../lib/metricInfo";
 import type { AnalysisRead } from "../../api/types.gen";
 import { resetFrom } from "../../api/sdk.gen";
 import type { Problem } from "../../lib/problem";
@@ -124,13 +125,14 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       id: "rank",
       header: "Rank",
       enableSorting: true,
-      meta: { className: "num" },
+      meta: { className: "num", info: METRIC_INFO.s7.rank },
       cell: ({ row }) => formatCount(row.original.rank),
     },
     {
       id: "gene",
       header: "Gene",
       enableSorting: true,
+      meta: { info: METRIC_INFO.s7.gene },
       cell: ({ row }) =>
         row.original.source_url ? (
           <ExternalLink href={row.original.source_url}>{row.original.gene_symbol}</ExternalLink>
@@ -144,7 +146,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       enableSorting: true,
       meta: {
         className: "num",
-        info: "Maximal Clique Centrality (Chin 2014): ranks hub proteins by membership in dense, fully connected subnetworks.",
+        info: METRIC_INFO.s7.mcc,
       },
       cell: ({ row }) => formatCount(row.original.mcc),
     },
@@ -154,7 +156,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       enableSorting: true,
       meta: {
         className: "num",
-        info: "Number of direct interaction partners in the network (degree centrality).",
+        info: METRIC_INFO.s7.degree,
       },
       cell: ({ row }) => formatSig(row.original.degree),
     },
@@ -164,7 +166,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       enableSorting: true,
       meta: {
         className: "num",
-        info: "Fraction of shortest paths passing through this node (betweenness centrality).",
+        info: METRIC_INFO.s7.betweenness,
       },
       cell: ({ row }) => formatSig(row.original.betweenness),
     },
@@ -174,7 +176,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       enableSorting: true,
       meta: {
         className: "num",
-        info: "Inverse of the average shortest-path distance from this node to all others (closeness centrality).",
+        info: METRIC_INFO.s7.closeness,
       },
       cell: ({ row }) => formatSig(row.original.closeness),
     },
@@ -184,7 +186,7 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
       enableSorting: true,
       meta: {
         className: "num",
-        info: "Influence score weighting connections by neighbour importance (eigenvector centrality).",
+        info: METRIC_INFO.s7.eigenvector,
       },
       cell: ({ row }) => formatSig(row.original.eigenvector),
     },
@@ -200,17 +202,20 @@ export function Stage7View({ data }: { data: AnalysisRead }) {
           value={formatCount(stage7.node_count)}
           label="network nodes"
           ariaLabel={`${stage7.node_count} nodes`}
+          info={METRIC_INFO.s7.networkNodes}
         />
         <StageSummaryCard
           value={formatCount(hubs.length)}
           label="hubs reported"
           ariaLabel={`${hubs.length} hubs`}
+          info={METRIC_INFO.s7.hubsReported}
         />
         <StageSummaryCard
           value={humanizeValue(stage7.ranking_metric)}
           label="ranking metric"
           ariaLabel={`metric ${humanizeValue(stage7.ranking_metric)}`}
           muted
+          info={METRIC_INFO.s7.rankingMetric}
         />
       </div>
 

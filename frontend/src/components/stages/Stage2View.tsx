@@ -21,6 +21,7 @@ import type { Problem } from "../../lib/problem";
 import { notifyError, notifyInfo } from "../../lib/toast";
 import { ADME_PARAMS } from "../../contract";
 import { formatSig, formatCount } from "../../lib/format";
+import { METRIC_INFO } from "../../lib/metricInfo";
 import { stageLabel } from "../../contract/labels";
 import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
@@ -133,6 +134,7 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
   {
     id: "status",
     header: "Status",
+    meta: { info: METRIC_INFO.s2.status },
     cell: ({ row }) => {
       const r = row.original;
       const passed = r._kind === "passed";
@@ -158,7 +160,7 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
   {
     id: "lipinski",
     header: "Lipinski",
-    meta: { info: "Passes Lipinski's rule of five" },
+    meta: { info: METRIC_INFO.s2.lipinski },
     cell: ({ row }) => {
       const r = row.original;
       if (!r.rule_evaluated) return <BoolMark value={null} />;
@@ -168,6 +170,7 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
   {
     id: "veber",
     header: "Veber",
+    meta: { info: METRIC_INFO.s2.veber },
     cell: ({ row }) => {
       const r = row.original;
       if (!r.rule_evaluated) return <BoolMark value={null} />;
@@ -177,55 +180,55 @@ const COLUMNS: ColumnDef<DisplayRow>[] = [
   {
     id: "np_bypass",
     header: "NP-bypass",
-    meta: { info: "Natural-product likeness bypasses the rule filters" },
+    meta: { info: METRIC_INFO.s2.npBypass },
     cell: ({ row }) => <BoolMark value={npBypass(row.original)} />,
   },
   {
     id: "mw",
     header: "MW",
-    meta: { className: "num" },
+    meta: { className: "num", info: METRIC_INFO.s2.mw },
     cell: ({ row }) => formatSig(row.original.molecular_weight),
   },
   {
     id: "logp",
     header: "logP",
-    meta: { className: "num" },
+    meta: { className: "num", info: METRIC_INFO.s2.logp },
     cell: ({ row }) => formatSig(row.original.logp),
   },
   {
     id: "hbd",
     header: "HBD",
-    meta: { className: "num" },
+    meta: { className: "num", info: METRIC_INFO.s2.hbd },
     cell: ({ row }) => formatCount(row.original.hbond_donors),
   },
   {
     id: "hba",
     header: "HBA",
-    meta: { className: "num" },
+    meta: { className: "num", info: METRIC_INFO.s2.hba },
     cell: ({ row }) => formatCount(row.original.hbond_acceptors),
   },
   {
     id: "tpsa",
     header: "TPSA",
-    meta: { className: "num" },
+    meta: { className: "num", info: METRIC_INFO.s2.tpsa },
     cell: ({ row }) => formatSig(row.original.tpsa),
   },
   {
     id: "rotb",
     header: "RotB",
-    meta: { className: "num" },
+    meta: { className: "num", info: METRIC_INFO.s2.rotb },
     cell: ({ row }) => formatCount(row.original.rotatable_bonds),
   },
   {
     id: "np_score",
     header: "NP-score",
-    meta: { className: "num" },
+    meta: { className: "num", info: METRIC_INFO.s2.npScore },
     cell: ({ row }) => formatSig(row.original.np_likeness_score),
   },
   {
     id: "pains",
     header: "PAINS",
-    meta: { info: "Checkmark means no PAINS alert. Cross means a PAINS alert was detected." },
+    meta: { info: METRIC_INFO.s2.pains },
     cell: ({ row }) => {
       const r = row.original;
       if (!r.pains_evaluated) return <BoolMark value={null} />;
@@ -305,11 +308,13 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
           value={formatCount(passedCount)}
           label="passed"
           ariaLabel={`${passedCount} passed`}
+          info={METRIC_INFO.s2.passed}
         />
         <StageSummaryCard
           value={formatCount(filteredCount)}
           label="filtered"
           ariaLabel={`${filteredCount} filtered`}
+          info={METRIC_INFO.s2.filtered}
         />
         {unscreenedCount > 0 && (
           <StageSummaryCard
@@ -317,6 +322,7 @@ export function Stage2View({ data }: { data: AnalysisRead }) {
             label="unscreened"
             ariaLabel={`${unscreenedCount} unscreened`}
             muted
+            info={METRIC_INFO.s2.unscreened}
           />
         )}
       </div>

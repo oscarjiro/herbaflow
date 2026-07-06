@@ -37,6 +37,7 @@ import {
 import { humanizeValue } from "../../contract/labels";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { formatCount } from "../../lib/format";
+import { METRIC_INFO } from "../../lib/metricInfo";
 import { exportArtifactUrl } from "../../lib/exportUrl";
 import type cytoscape from "cytoscape";
 import { useChartColors } from "@/lib/chartTheme";
@@ -240,6 +241,12 @@ function buildNetworkStylesheet(
 
 export function Stage6View({ data }: { data: AnalysisRead }) {
   const stage6 = data.stage_results?.["6"] as Stage6Result | undefined;
+  // The interaction network is built from the overlap's mappable gene symbols. Overlap targets with
+  // no gene symbol are dropped upstream (they cannot be looked up in STRING), and their count is the
+  // one computed on the overlap step — the Stage-6 `unmapped` field is inert (always empty). Read the
+  // real count so the "unmapped" card and its tooltip describe an accurate, varying number.
+  const overlapUnmapped =
+    (data.stage_results?.["5"] as { unmapped_count?: number } | undefined)?.unmapped_count ?? 0;
   const ppiParams = (data.parameters as Record<string, unknown> | undefined)?.ppi as
     | PpiParams
     | undefined;
@@ -304,19 +311,21 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
       id: "source",
       header: "Source",
       enableSorting: true,
+      meta: { info: METRIC_INFO.s6.source },
       cell: ({ row }) => renderGeneLink(row.original.source),
     },
     {
       id: "target",
       header: "Target",
       enableSorting: true,
+      meta: { info: METRIC_INFO.s6.target },
       cell: ({ row }) => renderGeneLink(row.original.target),
     },
     {
       id: "confidence",
       header: "Confidence",
       enableSorting: true,
-      meta: { className: "num" },
+      meta: { className: "num", info: METRIC_INFO.s6.confidence },
       cell: ({ row }) => row.original.confidence,
     },
   ];
@@ -382,29 +391,34 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
               value={formatCount(computed.node_count)}
               label="nodes"
               ariaLabel={`${computed.node_count} nodes`}
+              info={METRIC_INFO.s6.nodes}
             />
             <StageSummaryCard
               value={formatCount(computed.edge_count)}
               label="edges"
               ariaLabel={`${computed.edge_count} edges`}
+              info={METRIC_INFO.s6.edges}
             />
             <StageSummaryCard
               value={computed.min_confidence}
               label="min confidence"
               ariaLabel={`min confidence ${computed.min_confidence}`}
               muted
+              info={METRIC_INFO.s6.minConfidence}
             />
             <StageSummaryCard
               value={humanizeValue(computed.network_type)}
               label="network type"
               ariaLabel={`network type ${humanizeValue(computed.network_type)}`}
               muted
+              info={METRIC_INFO.s6.networkType}
             />
             <StageSummaryCard
-              value={formatCount(computed.unmapped.length)}
+              value={formatCount(overlapUnmapped)}
               label="unmapped"
-              ariaLabel={`${computed.unmapped.length} unmapped`}
+              ariaLabel={`${overlapUnmapped} unmapped`}
               muted
+              info={METRIC_INFO.s6.unmapped}
             />
           </div>
 
