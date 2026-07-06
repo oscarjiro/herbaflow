@@ -10,6 +10,7 @@ import { useAddWithDedup } from "../../hooks/useAddWithDedup";
 import { useStageEntityEdit } from "../../hooks/useStageEntityEdit";
 import { atMinEntities, isUserRemoved } from "../../lib/entities";
 import { formatCount } from "../../lib/format";
+import { METRIC_INFO } from "../../lib/metricInfo";
 import { ProvidedByYouBadge } from "./ProvidedByYouBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -191,6 +192,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
     {
       id: "inchikey",
       header: "InChIKey",
+      meta: { info: METRIC_INFO.common.inchikey },
       cell: ({ row }) => {
         const r = row.original;
         if (!r.inchikey) return <span className="text-hf-fg-3">—</span>;
@@ -215,6 +217,7 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
     {
       id: "smiles",
       header: "SMILES",
+      meta: { info: METRIC_INFO.common.smiles },
       cell: ({ row }) => {
         const s = row.original.smiles;
         if (!s) return <span className="text-hf-fg-3">—</span>;
