@@ -10,7 +10,10 @@ Gate logic is LOCKED (Methodology Lock §2.5a). Precedence order is strict; do n
 3. Descriptors unavailable? -> EXCLUDE, reason "could not screen"
 4. apply_np_exception AND np_likeness_score is not None
    AND np_likeness_score >= np_exception_threshold
-       -> PASS, badge "np_bypass" (overrides BOTH Lipinski and Veber)
+       -> PASS, badge "np_bypass". The exception overrides the Lipinski/Veber verdict,
+          but the rules are still COMPUTED and reported (rule_evaluated=True) so the row
+          shows real pass/fail instead of blanks. Blanks (rule_evaluated=False) remain
+          only for skip_adme and could-not-screen rows, which have no rules to report.
 5. Rule gate:
        lipinski_violations = count(MW>max_mw, logP>max_logp, HBD>max_hbd, HBA>max_hba)
        lipinski_ok = lipinski_violations <= max_violations
@@ -104,6 +107,50 @@ def _set_rule_outcome(
     row["lipinski_pass"] = lipinski_pass
     row["veber_pass"] = veber_pass
     row["rule_evaluated"] = True
+
+
+def _evaluate_rules(
+    *,
+    d_mw: float,
+    d_logp: float,
+    d_hbd: int,
+    d_hba: int,
+    d_rb: int,
+    d_tpsa: float,
+    apply_veber: bool,
+    max_mw: float,
+    max_logp: float,
+    max_hbd: int,
+    max_hba: int,
+    max_tpsa: float,
+    max_rb: int,
+    max_violations: int,
+) -> tuple[int, bool, bool, list[str]]:
+    """Compute the Lipinski/Veber outcome for a compound with known descriptors.
+
+    Returns ``(lipinski_violations, lipinski_ok, veber_ok, veber_fail_reasons)``. Pure;
+    no side effects. Shared by the NP-bypass branch (which reports the outcome but does
+    not act on it) and the rule gate (which does), so the rule math lives in ONE home.
+    """
+    lipinski_violations = sum(
+        [
+            d_mw > max_mw,
+            d_logp > max_logp,
+            d_hbd > max_hbd,
+            d_hba > max_hba,
+        ]
+    )
+    lipinski_ok = lipinski_violations <= max_violations
+
+    veber_fail_reasons: list[str] = []
+    if apply_veber:
+        if d_rb > max_rb:
+            veber_fail_reasons.append("fails Veber: rotatable bonds")
+        if d_tpsa > max_tpsa:
+            veber_fail_reasons.append("fails Veber: TPSA")
+    veber_ok = len(veber_fail_reasons) == 0
+
+    return lipinski_violations, lipinski_ok, veber_ok, veber_fail_reasons
 
 
 def _filtered_dict(obj: Any, *, descriptor_source: str, reason: str) -> dict[str, Any]:
@@ -267,7 +314,31 @@ async def screen(
             row = _compound_dict(compound, descriptor_source=descriptor_source, badges=badges)
             if computed_here and computed_d is not None:
                 _overlay_descriptors(row, computed_d, descriptor_source)
-            _blank_rule_outcome(row)
+            # The exception passes the compound regardless of the rule verdict, but the
+            # descriptors are present, so compute and report Lipinski/Veber (the row shows
+            # real pass/fail rather than blanks — the verdict is overridden, not skipped).
+            bypass_violations, bypass_lipinski_ok, bypass_veber_ok, _ = _evaluate_rules(
+                d_mw=d_mw,
+                d_logp=d_logp,
+                d_hbd=d_hbd,
+                d_hba=d_hba,
+                d_rb=d_rb,
+                d_tpsa=d_tpsa,
+                apply_veber=apply_veber,
+                max_mw=max_mw,
+                max_logp=max_logp,
+                max_hbd=max_hbd,
+                max_hba=max_hba,
+                max_tpsa=max_tpsa,
+                max_rb=max_rb,
+                max_violations=max_violations,
+            )
+            _set_rule_outcome(
+                row,
+                lipinski_violations=bypass_violations,
+                lipinski_pass=bypass_lipinski_ok,
+                veber_pass=bypass_veber_ok if apply_veber else None,
+            )
             _mark_pains_evaluated(row)
             passed.append(row)
             continue
@@ -275,23 +346,22 @@ async def screen(
         # ------------------------------------------------------------------
         # Branch 5: Rule gate (Lipinski + Veber)
         # ------------------------------------------------------------------
-        lipo_violations = sum(
-            [
-                d_mw > max_mw,
-                d_logp > max_logp,
-                d_hbd > max_hbd,
-                d_hba > max_hba,
-            ]
+        lipo_violations, lipinski_ok, veber_ok, veber_fail_reasons = _evaluate_rules(
+            d_mw=d_mw,
+            d_logp=d_logp,
+            d_hbd=d_hbd,
+            d_hba=d_hba,
+            d_rb=d_rb,
+            d_tpsa=d_tpsa,
+            apply_veber=apply_veber,
+            max_mw=max_mw,
+            max_logp=max_logp,
+            max_hbd=max_hbd,
+            max_hba=max_hba,
+            max_tpsa=max_tpsa,
+            max_rb=max_rb,
+            max_violations=max_violations,
         )
-        lipinski_ok = lipo_violations <= max_violations
-
-        veber_fail_reasons: list[str] = []
-        if apply_veber:
-            if d_rb > max_rb:
-                veber_fail_reasons.append("fails Veber: rotatable bonds")
-            if d_tpsa > max_tpsa:
-                veber_fail_reasons.append("fails Veber: TPSA")
-        veber_ok = len(veber_fail_reasons) == 0
 
         # Branch 6: PAINS annotation (every screened compound, regardless of pass/fail)
         if d_pains:

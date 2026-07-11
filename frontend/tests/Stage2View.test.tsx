@@ -193,8 +193,18 @@ describe("Stage2View", () => {
 
   it("NP-bypass column renders BoolMark checkmark for a compound with np_bypass badge", () => {
     wrap(<Stage2View data={makeRun()} />);
-    // Berberine has badges: ["np_bypass"] in the fixture
     expect(screen.getByRole("columnheader", { name: /NP-bypass/i })).toBeInTheDocument();
+    // Berberine has badges: ["np_bypass"] + rule_evaluated true → NP-bypass cell is a checkmark.
+    const bypassCell = (name: string): HTMLElement => {
+      const row = screen.getByText(name).closest("tr");
+      if (!row) throw new Error(`expected row for ${name}`);
+      const cell = row.querySelectorAll("td")[4]; // name,status,lipinski,veber,np_bypass
+      if (!cell) throw new Error(`expected NP-bypass cell for ${name}`);
+      return cell as HTMLElement;
+    };
+    expect(within(bypassCell("Berberine")).getByLabelText("Yes")).toBeInTheDocument();
+    // A normally-screened compound (no bypass) shows a cross, not a dash.
+    expect(within(bypassCell("Curcumin")).getByLabelText("No")).toBeInTheDocument();
   });
 
   it("Status column shows an NP exception badge alongside Passed for an NP-bypass row", () => {
@@ -206,9 +216,9 @@ describe("Stage2View", () => {
             {
               ...SAMPLE_STAGE2_RESULTS.passed[0],
               canonical_name: "NpBypassCompound",
-              lipinski_pass: null,
-              veber_pass: null,
-              rule_evaluated: false,
+              lipinski_pass: false,
+              veber_pass: false,
+              rule_evaluated: true,
               badges: ["np_bypass"],
             },
           ],
@@ -321,7 +331,7 @@ describe("Stage2View", () => {
     expect(within(painsCellFor("AlertCompound")).getByLabelText("No")).toBeInTheDocument();
   });
 
-  it("PAINS column shows the real mark for an NP-bypass row (rule not evaluated)", () => {
+  it("PAINS column shows the real mark for an NP-bypass row", () => {
     const data = makeRun({
       stage_results: {
         "2": {
@@ -330,9 +340,9 @@ describe("Stage2View", () => {
             {
               ...SAMPLE_STAGE2_RESULTS.passed[0],
               canonical_name: "BypassCompound",
-              lipinski_pass: null,
-              veber_pass: null,
-              rule_evaluated: false,
+              lipinski_pass: false,
+              veber_pass: false,
+              rule_evaluated: true,
               pains_evaluated: true,
               is_pains_positive: false,
               badges: ["np_bypass"],
@@ -358,6 +368,7 @@ describe("Stage2View", () => {
               lipinski_pass: null,
               veber_pass: null,
               rule_evaluated: false,
+              pains_evaluated: false,
               is_pains_positive: false,
             },
           ],

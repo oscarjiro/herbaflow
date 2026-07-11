@@ -595,7 +595,7 @@ included; the `passed` column tells you which bucket each compound fell into.
 | `lipinski_violations` | Number of Lipinski criteria violated, blank when not evaluated. |
 | `lipinski_pass` | `true` if Lipinski passed, `false` if it failed, blank when not evaluated. |
 | `veber_pass` | `true` if Veber passed, `false` if it failed, blank when disabled or skipped. |
-| `rule_evaluated` | `true` when Lipinski/Veber rules ran; `false` for bypass or no-data rows. |
+| `rule_evaluated` | `true` when Lipinski/Veber ran (bypass included); `false` for no-data rows. |
 | `molecular_weight` | Molecular weight in Da. |
 | `logp` | Calculated partition coefficient (lipophilicity). |
 | `hbond_donors` | Number of hydrogen-bond donors. |

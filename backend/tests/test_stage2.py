@@ -178,14 +178,17 @@ async def test_screened_rows_carry_adme_outcome_fields() -> None:
 
 
 @pytest.mark.asyncio
-async def test_bypass_and_unscreened_rows_mark_rule_not_evaluated() -> None:
+async def test_bypass_rows_report_rules_unscreened_rows_do_not() -> None:
+    # A bypassed compound still has descriptors, so the rules ARE computed and reported
+    # (rule_evaluated=True); the exception overrides the verdict, it does not blank it.
+    # This compound violates all four Lipinski criteria and both Veber criteria.
     np_bypass = _seeded(
-        molecular_weight=800.0,
-        logp=8.0,
-        hbond_donors=8,
-        hbond_acceptors=15,
-        tpsa=200.0,
-        rotatable_bonds=20,
+        molecular_weight=800.0,  # > 500
+        logp=8.0,  # > 5
+        hbond_donors=8,  # > 5
+        hbond_acceptors=15,  # > 10
+        tpsa=200.0,  # > 140 (Veber)
+        rotatable_bonds=20,  # > 10 (Veber)
         np_likeness_score=1.5,
     )
     bypass_result = await stage2.screen(
@@ -194,11 +197,12 @@ async def test_bypass_and_unscreened_rows_mark_rule_not_evaluated() -> None:
         compute=_fake_compute_none,
     )
     bypass_row = bypass_result["passed"][0]
-    assert bypass_row["rule_evaluated"] is False
-    assert bypass_row["lipinski_violations"] is None
-    assert bypass_row["lipinski_pass"] is None
-    assert bypass_row["veber_pass"] is None
+    assert bypass_row["rule_evaluated"] is True
+    assert bypass_row["lipinski_violations"] == 4
+    assert bypass_row["lipinski_pass"] is False
+    assert bypass_row["veber_pass"] is False
 
+    # An unscreened (skip_adme) row has no rules to report → blanks stay.
     unscreened_result = await stage2.screen(
         [_seeded()],
         _params(skip_adme=True),
@@ -547,7 +551,7 @@ async def test_seeded_incomplete_descriptors_could_not_screen() -> None:
 
 @pytest.mark.asyncio
 async def test_np_bypass_row_marks_pains_evaluated() -> None:
-    """NP-bypass row: rule not evaluated, but PAINS WAS computed → pains_evaluated True."""
+    """NP-bypass row: rules ARE computed/reported, and PAINS WAS computed → both flags True."""
     c = _seeded(
         molecular_weight=800.0,
         logp=8.0,
@@ -565,7 +569,7 @@ async def test_np_bypass_row_marks_pains_evaluated() -> None:
     )
 
     row = result["passed"][0]
-    assert row["rule_evaluated"] is False
+    assert row["rule_evaluated"] is True
     assert row["pains_evaluated"] is True
 
 
