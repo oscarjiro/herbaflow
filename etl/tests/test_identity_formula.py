@@ -44,6 +44,9 @@ def test_malformed_still_rejected():
     assert hill_formula("") == ""
     assert hill_formula("lowercasejunk") == ""
     assert formula_matches("C6H12O6,", "C6H12O6") is False
+    assert hill_formula("C6H12O6+X2") == ""  # stray non-trailing '+' must not be healed
+    assert hill_formula("C6+H12O6") == ""  # internal '+' is malformed, not a charge
+    assert formula_matches("C6H12O6+X2", "C6H12O6") is False
 
 
 def test_empty_never_matches():

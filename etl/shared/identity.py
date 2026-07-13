@@ -150,7 +150,7 @@ def hill_formula(formula: object) -> str:
     best_counts: Dict[str, int] | None = None
     best_rank = (-1, -1)
     for raw_part in _SALT_SPLIT_RE.split(text):
-        part = _TRAILING_CHARGE_RE.sub("", raw_part).replace("+", "").replace("-", "")
+        part = _TRAILING_CHARGE_RE.sub("", raw_part)
         if not part or not _FORMULA_ALLOWED_RE.match(part):
             continue
         counts = _parse_formula(part)
