@@ -11,6 +11,7 @@ paths:
   plants_file: plants.csv
   plants_compounds_file: plants_compounds.csv
   failed_pages_log: failed_pages.txt
+  failed_structure_pages: failed_structure_pages.txt
   scraper_log: scraper.log
   knapsack_pages_dir: knapsack/out/pages
 

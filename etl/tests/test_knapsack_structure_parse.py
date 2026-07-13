@@ -1,5 +1,6 @@
 # etl/tests/test_knapsack_structure_parse.py
 import importlib.util
+import logging
 import sys
 from pathlib import Path
 
@@ -37,3 +38,37 @@ def test_inchikey_not_confused_with_inchicode():
     # InChICode row must not leak into the InChIKey field.
     got = knapsack_main.parse_structure_page(_PAGE)
     assert "InChI=1S" not in got["knapsack_inchikey"]
+
+
+def test_fetch_structures_records_fetch_failure(tmp_path, monkeypatch):
+    """A c_id whose fetch_page_html returns "" (a real fetch failure) must
+    land in the failed-structure-pages file, distinct from a c_id that
+    fetched fine but had no structure to parse."""
+    monkeypatch.setattr(knapsack_main, "PAGES_DIR", tmp_path / "pages")
+    monkeypatch.setattr(knapsack_main, "STRUCTURE_WORKERS", 2)
+    monkeypatch.setattr(knapsack_main, "log", logging.getLogger("test-knapsack"))
+    monkeypatch.setattr(knapsack_main, "HEADERS", {"User-Agent": "test-agent"})
+    monkeypatch.setattr(knapsack_main, "MAX_RETRIES", 0)
+    failed_log = tmp_path / "failed_structure_pages.txt"
+    monkeypatch.setattr(knapsack_main, "FAILED_STRUCTURE_PAGES_LOG", failed_log)
+
+    def fake_fetch_page_html(session, cid):
+        if cid == "C000002":  # simulate a network failure for this one c_id
+            return ""
+        return _PAGE  # fetched fine (has structure)
+
+    monkeypatch.setattr(knapsack_main, "fetch_page_html", fake_fetch_page_html)
+
+    results = knapsack_main.fetch_structures(["C000001", "C000002", "C000003"])
+
+    assert set(results.keys()) == {"C000001", "C000002", "C000003"}
+    # The failed cid still yields blank structure columns, not an error.
+    assert results["C000002"] == {
+        "knapsack_inchikey": "",
+        "knapsack_smiles": "",
+        "knapsack_formula": "",
+    }
+    assert results["C000001"]["knapsack_formula"] == "C19H24O6"
+
+    assert failed_log.exists()
+    assert failed_log.read_text(encoding="utf-8").splitlines() == ["C000002"]

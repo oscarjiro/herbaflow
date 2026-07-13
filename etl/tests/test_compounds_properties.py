@@ -15,7 +15,7 @@ spec.loader.exec_module(props)
 def test_rdkit_descriptors_for_aspirin():
     d = props.rdkit_descriptors("CC(=O)Oc1ccccc1C(=O)O")  # aspirin
     assert d is not None
-    assert float(d["molecular_weight"]) == round(180.159, 1) or float(d["molecular_weight"]) > 179
+    assert 179.0 < float(d["molecular_weight"]) < 181.0
     assert int(d["hbond_donors"]) == 1
     assert int(d["hbond_acceptors"]) == 3
 

@@ -32,6 +32,7 @@ OUTPUT_DIR = None
 PLANTS_CSV = None
 COMPOUNDS_CSV = None
 FAILED_PAGES_LOG = None
+FAILED_STRUCTURE_PAGES_LOG = None
 PAGES_DIR = None
 log = None
 REQUEST_DELAY = None
@@ -45,7 +46,8 @@ def init_runtime():
     """Build paths, logger, and scraper settings, populating the module-level
     runtime globals. Called from main() — NOT at import — so importing this
     module performs no config read, directory creation, or logging setup."""
-    global _cfg, OUTPUT_DIR, PLANTS_CSV, COMPOUNDS_CSV, FAILED_PAGES_LOG, PAGES_DIR
+    global _cfg, OUTPUT_DIR, PLANTS_CSV, COMPOUNDS_CSV, FAILED_PAGES_LOG
+    global FAILED_STRUCTURE_PAGES_LOG, PAGES_DIR
     global log, REQUEST_DELAY, TIMEOUT, MAX_RETRIES, HEADERS, STRUCTURE_WORKERS
 
     _cfg = load_settings("knapsack")
@@ -53,6 +55,7 @@ def init_runtime():
     PLANTS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_file"]
     COMPOUNDS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_compounds_file"]
     FAILED_PAGES_LOG = OUTPUT_DIR / _cfg["paths"]["failed_pages_log"]
+    FAILED_STRUCTURE_PAGES_LOG = OUTPUT_DIR / _cfg["paths"]["failed_structure_pages"]
     PAGES_DIR = ETL_ROOT / _cfg["paths"]["knapsack_pages_dir"]
 
     ensure_dir(OUTPUT_DIR)
@@ -441,7 +444,14 @@ def parse_structure_page(html: str) -> dict:
 
 
 def fetch_page_html(session: requests.Session, cid: str) -> str:
-    """Return metabolite-page HTML, from the on-disk cache when present."""
+    """Return metabolite-page HTML, from the on-disk cache when present.
+
+    Cache hits return immediately with no delay, so a cached re-run stays
+    fast. Every real network request is paced by REQUEST_DELAY (win or lose)
+    so the STRUCTURE_WORKERS concurrent workers don't burst the server: each
+    worker sleeps REQUEST_DELAY between its own requests, so aggregate
+    throughput is ~STRUCTURE_WORKERS/REQUEST_DELAY requests/sec.
+    """
     cache_path = PAGES_DIR / f"{cid}.html"
     if cache_path.exists() and cache_path.stat().st_size > 200:
         return cache_path.read_text(encoding="utf-8", errors="replace")
@@ -458,22 +468,42 @@ def fetch_page_html(session: requests.Session, cid: str) -> str:
     except Exception as e:  # noqa: BLE001
         log.error("Structure fetch failed for %s: %s", cid, e)
         return ""
+    finally:
+        time.sleep(REQUEST_DELAY)
 
 
 def fetch_structures(c_ids: list[str]) -> dict[str, dict]:
-    """Concurrently fetch + parse structure for each unique c_id (cache-backed)."""
+    """Concurrently fetch + parse structure for each unique c_id (cache-backed).
+
+    A c_id whose fetch_page_html returns "" is a genuine fetch failure
+    (network exception or empty body), distinct from a page that loaded fine
+    but had no structure fields (a legitimate blank parse). Failures are
+    written to FAILED_STRUCTURE_PAGES_LOG for a targeted retry pass.
+    """
     PAGES_DIR.mkdir(parents=True, exist_ok=True)
     results: dict[str, dict] = {}
+    failed_cids: list[str] = []
 
-    def _one(cid: str) -> tuple[str, dict]:
+    def _one(cid: str) -> tuple[str, dict, bool]:
         session = make_session()  # requests.Session is not thread-safe; one per task
-        return cid, parse_structure_page(fetch_page_html(session, cid))
+        html = fetch_page_html(session, cid)
+        return cid, parse_structure_page(html), bool(html)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=STRUCTURE_WORKERS) as ex:
-        for i, (cid, struct) in enumerate(ex.map(_one, c_ids), start=1):
+        for i, (cid, struct, fetched_ok) in enumerate(ex.map(_one, c_ids), start=1):
             results[cid] = struct
+            if not fetched_ok:
+                failed_cids.append(cid)
             if i % 200 == 0:
                 log.info("structure %d/%d", i, len(c_ids))
+
+    log.info(
+        "Phase 2: %d/%d structure fetches failed", len(failed_cids), len(c_ids)
+    )
+    with open(FAILED_STRUCTURE_PAGES_LOG, "w", encoding="utf-8") as f:
+        for cid in failed_cids:
+            f.write(cid + "\n")
+
     return results
 
 
