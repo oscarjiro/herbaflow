@@ -308,3 +308,47 @@ def compound_target_id(compound_id: str, target_id: str) -> str:
 
 def disease_target_id(disease_id: str, target_id: str) -> str:
     return _v5(DISEASE_TARGET_NS, f"{disease_id}:{target_id}")
+
+
+# --- CAS registry number normalization + checksum (single canonical home) ---
+#
+# The CAS check digit is (sum of digit*position from the right, positions from
+# 1) mod 10. One home so every module validates identically.
+
+_CAS_FULL_RE = re.compile(r"\d{1,7}-\d{2}-\d")
+
+
+def cas_checksum_valid(cas: object) -> bool:
+    """True iff ``cas`` is a well-formed CAS number with a valid check digit."""
+    text = str(cas or "").strip()
+    if not _CAS_FULL_RE.fullmatch(text):
+        return False
+    parts = text.split("-")
+    digits = "".join(parts[:-1])
+    checksum = int(parts[-1])
+    total = sum(int(ch) * i for i, ch in enumerate(reversed(digits), start=1))
+    return total % 10 == checksum
+
+
+def normalize_cas(cas: object) -> tuple[str, bool, str]:
+    """Normalize a single CAS number to hyphenated form and validate its checksum.
+
+    Returns ``(normalized, is_valid, reason)``. ``reason`` is ``"ok"`` when
+    valid, else ``"empty"`` / ``"non-numeric characters"`` / ``"too short"`` /
+    ``"checksum mismatch: expected N, got M"``.
+    """
+    text = re.sub(r"\s+", "", str(cas or ""))
+    if not text:
+        return "", False, "empty"
+    digits_only = text.replace("-", "")
+    if not digits_only.isdigit():
+        return text, False, "non-numeric characters"
+    if len(digits_only) < 3:
+        return text, False, "too short"
+    check_digit = int(digits_only[-1])
+    body = digits_only[:-1]
+    expected = sum(int(d) * i for i, d in enumerate(reversed(body), start=1)) % 10
+    normalized = f"{digits_only[:-3]}-{digits_only[-3:-1]}-{digits_only[-1]}"
+    if check_digit != expected:
+        return normalized, False, f"checksum mismatch: expected {expected}, got {check_digit}"
+    return normalized, True, "ok"

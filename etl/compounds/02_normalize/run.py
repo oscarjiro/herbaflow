@@ -4,13 +4,13 @@ Purpose
 -------
 This script is the second step of the compound ETL pipeline. It consumes the staged
 output from `01_extract`, normalizes text and identifier fields, prepares lookup keys
-for compound matching, and resolves raw plant references to canonical plant IDs using
-finished plant ETL outputs.
+for compound matching, and validates CAS numbers. It reads the canonical `plant_id`
+already attached in `01_extract` and classifies each row as mapped or unmapped; it
+does not perform a fresh plant lookup of its own.
 
 Inputs
 ------
-- Staged compound CSV produced by `01_extract`.
-- Finished plant ETL outputs file from `settings.yml`.
+- Staged compound CSV produced by `01_extract` (already carries `canonical_plant_id`).
 - Settings from `settings.yml`.
 
 Outputs
@@ -25,9 +25,10 @@ Behavior
 --------
 - Normalizes metabolite names, CAS IDs, formulas, weights, and lookup keys.
 - Preserves raw values alongside normalized values.
-- Resolves raw plant references to canonical `plant_id` values when possible.
-- Sends unresolved or low-confidence plant mappings to review instead of dropping
-  them.
+- Reads the canonical `plant_id` attached in `01_extract` and marks each row mapped or
+  unmapped (it does not perform a fresh plant lookup).
+- Sends rows with an unresolved plant mapping, an invalid CAS checksum, or a missing
+  metabolite name to review instead of dropping them.
 - Does not deduplicate compounds.
 - Does not query PubChem or ChEMBL.
 - Is idempotent and safe to rerun with the same inputs and settings.
@@ -49,9 +50,9 @@ import hashlib
 import json
 import logging
 import math
-import re
 from typing import Any, Dict, List, Optional, Tuple
 
+from shared.identity import normalize_cas as _normalize_cas_single
 from shared.utils import (
     ETL_ROOT,
     ensure_dir,
@@ -158,43 +159,17 @@ def normalize_name(value: Optional[str]) -> str:
 
 
 def normalize_cas(value: Optional[str]) -> Tuple[str, bool, str]:
-    """Normalize CAS IDs and validate the checksum where possible."""
+    """Normalize possibly-comma-separated CAS input; return first valid part."""
     if not value:
         return "", False, "missing"
-
-    text = normalize_whitespace(value)
-    if not text:
-        return "", False, "missing"
-
     raw_parts = [p.strip() for p in str(value).split(",")]
-    error_digits = raw_parts[0]
-    error_reason = "invalid_format"
-
+    first_norm, first_reason = raw_parts[0], "invalid_format"
     for part in raw_parts:
-        digits = part.replace(" ", "")
-        digits = digits.upper()
-        digits = re.sub(r"[^0-9X-]", "", digits)
-        if not re.fullmatch(r"\d{2,7}-\d{2}-\d", digits):
-            error_digits = digits
-            error_reason = "invalid_format"
-            continue
-
-        left, middle, check = digits.split("-")
-        cas_digits = f"{left}{middle}"
-        total = 0
-        weight = 1
-        for ch in reversed(cas_digits):
-            total += int(ch) * weight
-            weight += 1
-        expected = str(total % 10)
-        if expected != check:
-            error_digits = digits
-            error_reason = "checksum_failed"
-            continue
-
-        return digits, True, "ok"
-
-    return error_digits, False, error_reason
+        normalized, is_valid, reason = _normalize_cas_single(part)
+        if is_valid:
+            return normalized, True, "ok"
+        first_norm = first_norm or normalized
+    return first_norm, False, first_reason
 
 
 def ensure_columns(fieldnames: List[str]) -> None:

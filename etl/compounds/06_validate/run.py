@@ -68,7 +68,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from shared.identity import formula_matches, hill_formula
+from shared.identity import cas_checksum_valid, formula_matches, hill_formula, normalize_cas
 
 try:
     import yaml
@@ -237,7 +237,6 @@ GENERIC_ALIAS_KEYS = {
 }
 
 INCHIKEY_RE = re.compile(r"^[A-Z]{14}-[A-Z]{10}-[A-Z]$")
-CAS_RE = re.compile(r"^\d{2,7}-\d{2}-\d$")
 FORMULA_RE = re.compile(r"^[A-Z][A-Za-z0-9().·+\-]*$")
 
 
@@ -310,31 +309,6 @@ def normalize_key(value: Optional[str]) -> str:
     text = re.sub(r"[^a-z0-9]+", "_", text)
     text = re.sub(r"_+", "_", text).strip("_")
     return text
-
-
-def normalize_cas(value: Optional[str]) -> str:
-    text = normalize_whitespace(value)
-    if not text:
-        return ""
-    text = text.replace(" ", "")
-    m = re.fullmatch(r"(\d{1,7})-?(\d{2})-?(\d)", text)
-    if m:
-        return f"{int(m.group(1))}-{m.group(2)}-{m.group(3)}"
-    return text
-
-
-def cas_checksum_valid(cas: str) -> bool:
-    if not cas or not CAS_RE.fullmatch(cas):
-        return False
-    parts = cas.split("-")
-    digits = "".join(parts[:-1])
-    checksum = int(parts[-1])
-    weight = 1
-    total = 0
-    for ch in reversed(digits):
-        total += int(ch) * weight
-        weight += 1
-    return total % 10 == checksum
 
 
 def stable_run_id(settings: Settings) -> str:
@@ -642,8 +616,8 @@ def validate_compounds(
                 )
             inchi_index[inchi].append(compound_id)
         if cas_id:
-            cas_norm = normalize_cas(cas_id)
-            if not CAS_RE.fullmatch(cas_norm) or not cas_checksum_valid(cas_norm):
+            cas_norm = normalize_cas(cas_id)[0]
+            if not cas_checksum_valid(cas_norm):
                 add_issue(
                     issues,
                     "compounds.csv",

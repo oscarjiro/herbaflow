@@ -70,7 +70,7 @@ from compounds.utils import (
 from compounds.utils import (
     compound_id_from_key as make_compound_id,
 )
-from shared.identity import plant_compound_id
+from shared.identity import normalize_cas, plant_compound_id
 from shared.provenance import (
     chembl_compound_url,
     knapsack_metabolite_url,
@@ -371,15 +371,9 @@ def normalize_key(value: Optional[str]) -> str:
     return text
 
 
-def normalize_cas(value: Optional[str]) -> str:
-    text = normalize_whitespace(value)
-    if not text:
-        return ""
-    text = text.replace(" ", "")
-    m = re.fullmatch(r"(\d{1,7})-?(\d{2})-?(\d)", text)
-    if m:
-        return f"{int(m.group(1))}-{m.group(2)}-{m.group(3)}"
-    return text
+def _cas_format(value: Optional[str]) -> str:
+    """Normalized-string view of a CAS number (format only; no checksum gating)."""
+    return normalize_cas(value)[0]
 
 
 def parse_float(value: Optional[str]) -> Optional[float]:
@@ -667,7 +661,7 @@ def candidate_name(
 
 
 def candidate_cas(candidate: Dict[str, str], member_rows: List[Dict[str, Any]]) -> str:
-    best = normalize_cas(candidate.get("representative_cas_id", ""))
+    best = _cas_format(candidate.get("representative_cas_id", ""))
     if best:
         return best
     return most_common_nonempty(
@@ -1084,7 +1078,7 @@ def collect_alias_items(
 
     for idx, cas in enumerate(member_cas[:6], start=30):
         add(
-            normalize_cas(cas),
+            _cas_format(cas),
             "cas_id",
             best_entry["candidate"].get("source_name", source_url),
             source_url,
