@@ -78,11 +78,11 @@ def test_hill_formula_normalizes_and_orders():
     assert identity.hill_formula("(CH3)2CO") == "C3H6O"
 
 
-def test_formula_matches_rejects_salts_and_mismatches():
+def test_formula_matches_desalts_and_rejects_mismatches():
     assert identity.formula_matches("C9H8O4", "C9H8O4") is True
     assert identity.formula_matches("C9H8O4", "C9H9O4") is False  # one H off
-    # Salt/hydrate is deliberately NOT a match (desalting is separate).
-    assert identity.formula_matches("C9H8O4", "C9H8O4.HCl") is False
+    # Salt/hydrate desalts to the largest organic component, so it now matches.
+    assert identity.formula_matches("C9H8O4", "C9H8O4.HCl") is True
     assert identity.formula_matches("", "C9H8O4") is False
 
 

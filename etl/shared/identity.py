@@ -74,10 +74,6 @@ def _norm(value: object) -> str:
 
 _FORMULA_ELEMENT_RE = re.compile(r"([A-Z][a-z]?)(\d*)")
 _FORMULA_ALLOWED_RE = re.compile(r"^[A-Za-z0-9()]+$")
-# Any of these means a multi-component (salt/hydrate/mixture) or charged formula,
-# which is deliberately treated as non-comparable so it never matches a desalted
-# formula. Desalting is a separate concern.
-_FORMULA_REJECT_CHARS = (".", "·", "•", "+", "-", ",", "*", ";", "/")
 
 
 def _parse_formula(text: str) -> Dict[str, int]:
@@ -131,25 +127,42 @@ def _to_hill(counts: Dict[str, int]) -> str:
     return "".join(fmt(el) for el in order)
 
 
-def hill_formula(formula: object) -> str:
-    """Normalize a single-component molecular formula to Hill notation.
+# Salt/hydrate separators split a multi-component formula; we compare the
+# largest (carbon-preferring) component. A trailing +/- charge annotation is
+# stripped before parsing (charge changes no atom count). Both are applied to
+# the COMPARISON only; the stored structure is never altered.
+_SALT_SPLIT_RE = re.compile(r"[.·•]")
+_TRAILING_CHARGE_RE = re.compile(r"[+\-]\d*$")
 
-    Hill order is carbon first, hydrogen second, then remaining elements
-    alphabetically (e.g. ``C9H8O4``). Returns ``""`` for empty, multi-component
-    (salt/hydrate/mixture), charged, or unparseable input, so those never
-    compare equal to a plain neutral formula.
+
+def hill_formula(formula: object) -> str:
+    """Normalize a molecular formula to Hill notation for comparison.
+
+    Splits salts/hydrates on ``.``/``·``/``•`` and keeps the largest
+    carbon-containing component; strips a trailing ``+``/``-`` charge. Hill
+    order is carbon first, hydrogen second, then remaining elements
+    alphabetically (e.g. ``C9H8O4``). Returns ``""`` for empty or unparseable
+    input, so those never compare equal to a real formula.
     """
     text = re.sub(r"\s+", "", str(formula or ""))
     if not text:
         return ""
-    if any(sep in text for sep in _FORMULA_REJECT_CHARS):
+    best_counts: Dict[str, int] | None = None
+    best_rank = (-1, -1)
+    for raw_part in _SALT_SPLIT_RE.split(text):
+        part = _TRAILING_CHARGE_RE.sub("", raw_part).replace("+", "").replace("-", "")
+        if not part or not _FORMULA_ALLOWED_RE.match(part):
+            continue
+        counts = _parse_formula(part)
+        if not counts:
+            continue
+        heavy = sum(v for k, v in counts.items() if k != "H")
+        rank = (1 if "C" in counts else 0, heavy)
+        if rank > best_rank:
+            best_rank, best_counts = rank, counts
+    if best_counts is None:
         return ""
-    if not _FORMULA_ALLOWED_RE.match(text):
-        return ""
-    counts = _parse_formula(text)
-    if not counts:
-        return ""
-    return _to_hill(counts)
+    return _to_hill(best_counts)
 
 
 def formula_matches(a: object, b: object) -> bool:
