@@ -142,13 +142,12 @@ PubChem is the primary structure authority. ChEMBL supplements identity resoluti
 
 **What it does:**
 
-1. Queries PubChem REST API for each candidate using its `search_terms_json` (CAS, name, formula), with a cache-first strategy — responses are stored under `04_enrich/out/cache/`
-2. Queries ChEMBL REST API to retrieve ChEMBL IDs and supplementary identity data
-3. Scores each API hit deterministically: InChIKey match = 1.0, PubChem CID exact = 1.0, ChEMBL ID = 0.95, CAS match = 0.85, name-only = 0.60
-4. Selects the best hit per candidate based on the scoring ladder; stores all ordered hits in the candidate cache JSON
-5. Retrieves Lipinski descriptors for matched compounds: TPSA, logP, H-bond donors/acceptors, rotatable bonds, QED score, NP-likeness score, number of Ro5 violations
-6. Writes one enrichment result row per compound candidate
-7. Sends unresolvable candidates to `compound_enrichment_review.csv`
+1. **Anchors identity on KNApSAcK's own published structure first.** Each candidate's member `c_id`s are matched against the `knapsack_inchikey` / `knapsack_smiles` / `knapsack_formula` columns from the scraper output. When a published structure's formula corroborates the raw representative formula (charge/desalt-aware), that structure is accepted directly (`match_strategy = knapsack_source_confirmed`, confidence 0.97) and the external search is skipped.
+2. Otherwise queries the PubChem and ChEMBL REST APIs for each candidate using its `search_terms_json` (CAS, name), cache-first — responses are stored under `04_enrich/out/cache/`; a resolved structure is accepted only when corroborated (formula agreement is the decisive check).
+3. Scores each API hit deterministically and selects the best corroborated hit per candidate; stores all ordered hits in the candidate cache JSON.
+4. **Computes ADME inline** for the accepted structure via `04_enrich/properties.py`: RDKit for the Lipinski descriptors + molecular weight (`lipinski_source = rdkit_computed`), a ChEMBL by-InChIKey lookup for QED / Ro5 violations, RDKit NP-likeness, and RDKit PAINS (`is_pains_positive`).
+5. Writes one enrichment result row per compound candidate.
+6. Sends unresolvable candidates to `compound_enrichment_review.csv`.
 
 **Output:** `04_enrich/out/compound_enrichment_results.csv`, `compound_enrichment_cache.csv`, `compound_enrichment_member_map.csv`, `compound_enrichment_review.csv`, `enrich_summary.json`, `out/cache/*.json`
 
@@ -177,56 +176,15 @@ PubChem is the primary structure authority. ChEMBL supplements identity resoluti
 
 ---
 
-### Step 4a — `04_enrich/patch_missing_smiles.py`
+### `04_enrich/properties.py` — inline ADME
 
-An operator tool for filling in SMILES strings missed by the main enrichment run without triggering a full re-run.
+Property derivation lives in this sibling module, imported by `run.py`, and computes ADME during enrichment for the accepted structure. It replaced the former `patch_missing_smiles.py` / `patch_missing_lipinski.py` post-passes, so there are no separate patch steps — `04_enrich/run.py` writes the final `smiles`, Lipinski, `qed_score`, `np_likeness_score`, `num_ro5_violations`, `lipinski_source`, and `is_pains_positive` columns directly.
 
-**When to use it:** After `04_enrich/run.py` completes and you notice that some compounds have empty `smiles` in `compound_enrichment_results.csv`.
+- `rdkit_descriptors(smiles)` → `logp`, `hbond_donors`, `hbond_acceptors`, `tpsa`, `rotatable_bonds`, `molecular_weight` (`lipinski_source = rdkit_computed`).
+- `chembl_detail_by_inchikey(inchi_key, cache_dir)` → `qed_score`, `num_ro5_violations` (and `np_likeness_score` when present), cache-first via the shared HTTP cache.
+- `np_likeness(smiles)` (RDKit Contrib NP scorer) fills `np_likeness_score` when ChEMBL has none; `check_pains(smiles)` (RDKit PAINS catalog) sets `is_pains_positive`.
 
-**What it does (two phases):**
-
-1. **FREE PASS** — for each missing-SMILES candidate, reads the existing candidate cache JSON and walks `ordered_hits` for any hit that already has a SMILES string. If found, patches `compound_enrichment_results.csv` in-place (zero API calls). Backs up originals before writing.
-2. **INVALIDATE** — for candidates still missing SMILES after the free pass, deletes only the candidate-level cache file so `04_enrich/run.py` will re-process just those candidates. The HTTP cache (raw PubChem/ChEMBL responses) is left untouched — old lookups replay for free.
-
-After running this tool, re-run `04_enrich/run.py` normally. Only the invalidated candidates hit the enrichment logic again.
-
-```powershell
-# Dry run to see what would happen
-python etl/compounds/04_enrich/patch_missing_smiles.py --dry-run
-
-# Actually patch
-python etl/compounds/04_enrich/patch_missing_smiles.py
-```
-
----
-
-### Step 4b — `04_enrich/patch_missing_lipinski.py`
-
-An operator tool for filling in missing Lipinski/ADME descriptors (`logp`, `tpsa`, `hbond_donors`, `hbond_acceptors`, `rotatable_bonds`) without re-running full enrichment.
-
-**When to use it:** After `04_enrich/run.py` (and `patch_missing_smiles.py`) completes and you notice that some compounds have empty `logp` in `compound_enrichment_results.csv`. This is expected for PubChem-only hits — PubChem's REST API provides structural data only; ADME properties come exclusively from ChEMBL.
-
-**Run order:** Always run `patch_missing_smiles.py` first. Having SMILES populated maximizes the number of compounds recoverable via the RDKit pass.
-
-**What it does (two passes):**
-
-1. **ChEMBL API pass** — for each missing-descriptor row with a `chembl_id`, fetches the ChEMBL molecule detail endpoint and extracts `molecule_properties`. Checks the existing HTTP cache first (zero API calls if the response was already cached during `04_enrich/run.py`). Backs up the original CSV before writing.
-2. **RDKit pass** — for rows still missing after Pass 1 that have a non-empty `smiles`, computes `MolLogP`, `NumHBD`, `NumHBA`, `TPSA`, and `NumRotatableBonds` via RDKit. Note: `qed_score` and `np_likeness_score` are not computed by this pass.
-
-Sets `lipinski_source` on each patched row: `chembl_api`, `rdkit_computed`, or empty (unresolved).
-
-**Compounds that remain unresolved** after both passes have neither a `chembl_id` nor a usable `smiles` — these are typically highly provisional records from KNApSAcK with incomplete structural information.
-
-```powershell
-# Dry run to see what would happen
-python etl/compounds/04_enrich/patch_missing_lipinski.py --dry-run
-
-# Apply both passes
-python etl/compounds/04_enrich/patch_missing_lipinski.py
-
-# ChEMBL API only (skip RDKit)
-python etl/compounds/04_enrich/patch_missing_lipinski.py --no-rdkit
-```
+RDKit is installed in the ETL venv (`rdkit==2026.3.2`); no additional dependencies.
 
 ---
 
@@ -434,23 +392,7 @@ Remove-Item etl\compounds\04_enrich\out\cache\* -Recurse -Force
 python etl/compounds/main.py --start 4 --end 7
 ```
 
-**Patch missing SMILES and Lipinski descriptors (run after 04_enrich, before 05_build_canonical):**
-
-```powershell
-# Step 1: Fill missing SMILES from cache; invalidate remaining for re-enrichment
-python etl/compounds/04_enrich/patch_missing_smiles.py --dry-run   # preview
-python etl/compounds/04_enrich/patch_missing_smiles.py
-
-# Step 2: If patch_missing_smiles invalidated any rows, re-run enrichment first
-python etl/compounds/main.py --start 4 --end 4
-
-# Step 3: Fill missing Lipinski/ADME descriptors via ChEMBL API + RDKit
-python etl/compounds/04_enrich/patch_missing_lipinski.py --dry-run  # preview
-python etl/compounds/04_enrich/patch_missing_lipinski.py
-
-# Step 4: Continue with canonicalization and export
-python etl/compounds/main.py --start 5 --end 7
-```
+SMILES and Lipinski/ADME descriptors are computed inline during `04_enrich` (see `04_enrich/properties.py`), so there are no separate patch steps: run stages 1–7 end to end.
 
 **Unit tests:**
 

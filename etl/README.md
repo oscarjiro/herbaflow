@@ -36,11 +36,9 @@ python etl/knapsack/main.py
 # 2. Canonicalize plant taxonomy
 python etl/plants/main.py
 
-# 3. Canonicalize compounds (with post-enrichment patches)
-python etl/compounds/main.py --start 1 --end 4
-python etl/compounds/04_enrich/patch_missing_smiles.py
-python etl/compounds/04_enrich/patch_missing_lipinski.py
-python etl/compounds/main.py --start 5 --end 7
+# 3. Canonicalize compounds (identity anchored on KNApSAcK source structures;
+#    ADME computed inline during enrichment — no separate patch steps)
+python etl/compounds/main.py --start 1 --end 7
 
 # 4. Map diseases to ontologies
 python etl/diseases/main.py

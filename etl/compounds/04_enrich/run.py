@@ -77,9 +77,25 @@ from shared.identity import formula_matches
 from shared.utils import ETL_ROOT, ensure_dir, make_run_id, normalize_whitespace
 from shared.utils import load_settings as shared_load_settings
 
+# Sibling module (04_enrich/): inline ADME / property computation that replaced
+# the retired patch_missing_smiles.py / patch_missing_lipinski.py post-passes.
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # 04_enrich/
+from properties import (  # noqa: E402
+    chembl_detail_by_inchikey,
+    check_pains,
+    np_likeness,
+    rdkit_descriptors,
+)
+
 # Bump when the identity-acceptance logic changes so stale per-candidate caches
 # (out/cache/candidates/) are recomputed while the raw HTTP cache stays valid.
-ENRICH_LOGIC_VERSION = "2026-07-13-corroboration-gate"
+ENRICH_LOGIC_VERSION = "2026-07-13-knapsack-anchor"
+
+# KNApSAcK source structures, keyed by ``c_id`` -> (inchikey, smiles, formula).
+# Populated once in main() from the scraper output. Empty until the source-first
+# re-scrape writes the ``knapsack_*`` columns; while empty the anchor never fires
+# and every candidate falls through to the external PubChem/ChEMBL identity search.
+structure_by_cid: Dict[str, Tuple[str, str, str]] = {}
 
 CANDIDATE_COLUMNS = [
     "compound_candidate_id",
@@ -192,6 +208,8 @@ RESULT_COLUMNS = [
     "cache_hit",
     "cache_key",
     "review_reason",
+    "lipinski_source",
+    "is_pains_positive",
 ]
 
 CACHE_INDEX_COLUMNS = [
@@ -687,6 +705,32 @@ def load_candidate_inputs(
             review_by_candidate[cid] = row
 
     return candidate_rows, members_by_candidate, review_by_candidate
+
+
+def load_structure_by_cid(path: Path) -> Dict[str, Tuple[str, str, str]]:
+    """Map KNApSAcK ``c_id`` -> (inchikey, smiles, formula) from the scraper output.
+
+    Reads the three ``knapsack_*`` structure columns DEFENSIVELY: they are written
+    only by the source-first re-scrape, so a CSV that predates it yields an empty
+    map (never a KeyError). Only rows with a non-empty ``knapsack_inchikey`` are
+    kept, since a structure with no InChIKey cannot anchor identity. Structure
+    fields are stored AS PUBLISHED (no normalization) so the accepted identity is
+    exactly what KNApSAcK ships.
+    """
+    mapping: Dict[str, Tuple[str, str, str]] = {}
+    if not path.exists():
+        return mapping
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            cid = normalize_whitespace(row.get("c_id", ""))
+            inchikey = normalize_whitespace(row.get("knapsack_inchikey", ""))
+            if not cid or not inchikey:
+                continue
+            smiles = normalize_whitespace(row.get("knapsack_smiles", ""))
+            formula = normalize_whitespace(row.get("knapsack_formula", ""))
+            mapping[cid] = (inchikey, smiles, formula)
+    return mapping
 
 
 def collect_search_terms(
@@ -2051,6 +2095,253 @@ def build_member_map(
     return out
 
 
+def _read_http_cache(
+    cache_root: Path, source: str, url: str
+) -> Optional[Dict[str, Any]]:
+    """Return a cached HTTP record for ``url`` if present, else None. Never
+    fetches — cache-only introspection so the KNApSAcK anchor's safety probe stays
+    network-free."""
+    path = request_cache_path(cache_root, source, url)
+    if not path.exists():
+        return None
+    record = safe_load_json(path)
+    return record if isinstance(record, dict) else None
+
+
+def _cached_external_inchikeys(
+    candidate: Dict[str, str],
+    terms: List[SearchTerm],
+    settings: Settings,
+    logger: logging.Logger,
+) -> set[str]:
+    """Upper-cased InChIKeys already present in the raw HTTP cache for this
+    candidate's PubChem/ChEMBL search terms.
+
+    Cache-only: it reconstructs the same request URLs the search would use and
+    reads only existing cache files, never issuing a request (so the anchor path
+    performs no new fetch). Empty when nothing relevant is cached."""
+    keys: set[str] = set()
+    base_pc = settings.pubchem_cfg.get(
+        "base_url", "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
+    )
+    base_ch = settings.chembl_cfg.get(
+        "base_url", "https://www.ebi.ac.uk/chembl/api/data"
+    )
+    term_count = 0
+    for term in terms:
+        if term.kind not in ("cas", "name"):
+            continue
+        if term_count >= settings.max_terms_per_source:
+            break
+        term_count += 1
+        try:
+            rec = _read_http_cache(
+                settings.cache_root,
+                "pubchem",
+                pubchem_search_url(base_pc, term.text, term.kind),
+            )
+            if rec and rec.get("ok"):
+                cids = extract_pubchem_cids(rec.get("response_json") or {})
+                for cid in cids[: settings.max_pubchem_cids]:
+                    drec = _read_http_cache(
+                        settings.cache_root,
+                        "pubchem",
+                        pubchem_properties_url(base_pc, cid),
+                    )
+                    if drec and drec.get("ok"):
+                        for prop in extract_pubchem_properties(
+                            drec.get("response_json") or {}
+                        ):
+                            ik = normalize_whitespace(prop.get("InChIKey") or "")
+                            if ik:
+                                keys.add(ik.upper())
+            crec = _read_http_cache(
+                settings.cache_root, "chembl", chembl_search_url(base_ch, term.text)
+            )
+            if crec and crec.get("ok"):
+                for mol in extract_chembl_molecules(crec.get("response_json") or {}):
+                    hit = chembl_hit_from_detail(mol, query_count=0, source_url="")
+                    ik = normalize_whitespace(hit.inchi_key)
+                    if ik:
+                        keys.add(ik.upper())
+        except Exception as exc:  # noqa: BLE001 - probe must never break an accept
+            logger.debug("cached inchikey probe skipped for %r: %s", term.text, exc)
+    return keys
+
+
+def knapsack_structure_for_candidate(
+    candidate: Dict[str, str], members: List[Dict[str, str]]
+) -> Optional[Tuple[str, str, str, str]]:
+    """Return (c_id, inchikey, smiles, formula) of the first candidate member
+    whose KNApSAcK-published structure formula corroborates the raw representative
+    formula (charge/desalt-aware via ``formula_matches``), or None when no member
+    has a corroborating source structure."""
+    raw_formula = candidate.get("representative_formula", "")
+    for member in members:
+        cid = normalize_whitespace(member.get("c_id", ""))
+        if not cid:
+            continue
+        struct = structure_by_cid.get(cid)
+        if not struct:
+            continue
+        inchikey, smiles, formula = struct
+        if not normalize_whitespace(inchikey):
+            continue
+        if formula_matches(raw_formula, formula):
+            return cid, inchikey, smiles, formula
+    return None
+
+
+def build_knapsack_anchor_result(
+    candidate: Dict[str, str],
+    members: List[Dict[str, str]],
+    terms: List[SearchTerm],
+    search_payload: Dict[str, Any],
+    cache_key: str,
+    cache_file: Path,
+    matched_cid: str,
+    inchi_key: str,
+    smiles: str,
+    molecular_formula: str,
+    review_row: Optional[Dict[str, str]],
+    settings: Settings,
+    logger: logging.Logger,
+) -> Tuple[Dict[str, Any], List[Dict[str, Any]], Dict[str, Any]]:
+    """Assemble the accepted enrichment result for a KNApSAcK-source-confirmed
+    identity: structure fields AS PUBLISHED, ADME computed inline (RDKit for the
+    Lipinski descriptors + molecular weight, ChEMBL by InChIKey for QED / RO5, NP
+    from ChEMBL else the RDKit NP scorer, PAINS from RDKit), honest provenance, and
+    a written per-candidate cache. No external identity search is performed, and
+    KNApSAcK's structure is never overridden."""
+    run_id = stable_timestamp(settings.batch_id)
+    inchi_key = normalize_whitespace(inchi_key)
+    smiles = normalize_whitespace(smiles)
+    molecular_formula = normalize_whitespace(molecular_formula)
+
+    descriptors = rdkit_descriptors(smiles) if smiles else None
+    descriptors = descriptors or {}
+    chembl_cache_dir = settings.cache_root / "http" / "chembl"
+    chembl_props = (
+        chembl_detail_by_inchikey(inchi_key, chembl_cache_dir) if inchi_key else {}
+    )
+    np_score = chembl_props.get("np_likeness_score") or (
+        np_likeness(smiles) if smiles else ""
+    )
+    is_pains = check_pains(smiles) if smiles else False
+    lipinski_source = "rdkit_computed" if descriptors else ""
+
+    review_reason = normalize_whitespace(
+        (review_row or {}).get("review_reason", "")
+        or candidate.get("review_reason", "")
+    )
+
+    reasons = [f"knapsack_source_confirmed;c_id={matched_cid};formula_confirmed"]
+    external_keys = _cached_external_inchikeys(candidate, terms, settings, logger)
+    if external_keys and inchi_key.upper() not in external_keys:
+        reasons.append("knapsack_vs_external_disagreement")
+    if review_reason:
+        reasons.append(review_reason)
+    match_reason = ";".join([r for r in reasons if r])
+
+    result: Dict[str, Any] = {
+        "compound_candidate_id": candidate.get("compound_candidate_id", ""),
+        "candidate_key": candidate.get("candidate_key", ""),
+        "candidate_status": candidate.get("candidate_status", ""),
+        "search_priority": candidate.get("search_priority", ""),
+        "search_terms_json": json.dumps(
+            [t.to_dict() for t in terms], ensure_ascii=False
+        ),
+        "pubchem_cid": "",
+        "chembl_id": "",
+        "inchi_key": inchi_key,
+        "smiles": smiles,
+        "molecular_formula": molecular_formula,
+        "molecular_weight": descriptors.get("molecular_weight", ""),
+        "tpsa": descriptors.get("tpsa", ""),
+        "logp": descriptors.get("logp", ""),
+        "hbond_donors": descriptors.get("hbond_donors", ""),
+        "hbond_acceptors": descriptors.get("hbond_acceptors", ""),
+        "rotatable_bonds": descriptors.get("rotatable_bonds", ""),
+        "qed_score": chembl_props.get("qed_score", ""),
+        "np_likeness_score": np_score,
+        "num_ro5_violations": chembl_props.get("num_ro5_violations", ""),
+        "iupac_name": "",
+        "preferred_name": candidate.get("representative_name", ""),
+        "source_name": settings.source_name,
+        "source_url": candidate.get("source_url", "") or settings.source_url,
+        "source_batch_id": run_id,
+        "retrieved_at": run_id,
+        "enrichment_confidence": "0.9700",
+        "enrichment_status": "matched",
+        "match_strategy": "knapsack_source_confirmed",
+        "evidence_type": "knapsack+formula",
+        "match_reason": match_reason,
+        "match_rank": "1",
+        "match_count": "1",
+        "cache_hit": "false",
+        "cache_key": cache_key,
+        "review_reason": review_reason,
+        "lipinski_source": lipinski_source,
+        "is_pains_positive": str(is_pains).lower(),
+    }
+
+    confidence = 0.97
+    member_map = build_member_map(candidate, members, result, "matched", confidence)
+
+    created_at = datetime.now(timezone.utc).isoformat()
+    cache_payload = {
+        "cache_key": cache_key,
+        "candidate_id": candidate.get("compound_candidate_id", ""),
+        "candidate_key": candidate.get("candidate_key", ""),
+        "candidate_status": candidate.get("candidate_status", ""),
+        "search_payload": search_payload,
+        "search_terms": [t.to_dict() for t in terms],
+        "request_details": [],
+        "source_usage": {
+            "pubchem_requests": 0,
+            "chembl_requests": 0,
+            "pubchem_hits": 0,
+            "chembl_hits": 0,
+        },
+        "ordered_hits": [],
+        "result": result,
+        "status": result["enrichment_status"],
+        "review_reason": result.get("review_reason", ""),
+        "confidence": confidence,
+        "request_count": 0,
+        "request_cache_hits": 0,
+        "request_cache_misses": 0,
+        "created_at": created_at,
+    }
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+    with cache_file.open("w", encoding="utf-8") as f:
+        json.dump(cache_payload, f, ensure_ascii=False, indent=2, sort_keys=True)
+        f.write("\n")
+
+    cache_index = {
+        "cache_key": cache_key,
+        "compound_candidate_id": candidate.get("compound_candidate_id", ""),
+        "candidate_key": candidate.get("candidate_key", ""),
+        "candidate_status": candidate.get("candidate_status", ""),
+        "cache_hit": False,
+        "request_count": 0,
+        "request_cache_hits": 0,
+        "request_cache_misses": 0,
+        "selected_source_name": result.get("source_name", ""),
+        "selected_identifier": result.get("inchi_key", ""),
+        "selected_inchi_key": result.get("inchi_key", ""),
+        "selected_pubchem_cid": "",
+        "selected_chembl_id": "",
+        "enrichment_confidence": result.get("enrichment_confidence", "0.0000"),
+        "cache_file": str(cache_file),
+        "search_terms_json": json.dumps(
+            [t.to_dict() for t in terms], ensure_ascii=False
+        ),
+        "created_at": created_at,
+    }
+    return result, member_map, cache_index
+
+
 def enrich_candidate(
     candidate: Dict[str, str],
     members: List[Dict[str, str]],
@@ -2103,6 +2394,31 @@ def enrich_candidate(
                 ),
             }
             return result, member_map, cache_index, True
+
+    # KNApSAcK source-structure anchor (primary accept path). Before any external
+    # search: if a candidate member's KNApSAcK-published structure formula
+    # corroborates the raw representative formula, that published structure IS the
+    # compound's identity. Accept it directly, compute ADME inline, and skip the
+    # PubChem/ChEMBL identity search entirely.
+    anchor = knapsack_structure_for_candidate(candidate, members)
+    if anchor is not None:
+        matched_cid, ks_inchikey, ks_smiles, ks_formula = anchor
+        result, member_map, cache_index = build_knapsack_anchor_result(
+            candidate=candidate,
+            members=members,
+            terms=terms,
+            search_payload=search_payload,
+            cache_key=cache_key,
+            cache_file=cache_file,
+            matched_cid=matched_cid,
+            inchi_key=ks_inchikey,
+            smiles=ks_smiles,
+            molecular_formula=ks_formula,
+            review_row=review_row,
+            settings=settings,
+            logger=logger,
+        )
+        return result, member_map, cache_index, False
 
     cache_index_req_hits = 0
     cache_index_req_misses = 0
@@ -2351,6 +2667,15 @@ def main() -> int:
     logger.info("Candidate input: %s", settings.candidate_input_file)
     logger.info("Member input: %s", settings.member_input_file)
     logger.info("Review input: %s", settings.review_input_file)
+
+    global structure_by_cid
+    structure_by_cid = load_structure_by_cid(
+        ETL_ROOT / "knapsack" / "out" / "plants_compounds.csv"
+    )
+    logger.info(
+        "Loaded %d KNApSAcK source structures for the identity anchor",
+        len(structure_by_cid),
+    )
 
     candidate_rows, members_by_candidate, review_by_candidate = load_candidate_inputs(
         settings

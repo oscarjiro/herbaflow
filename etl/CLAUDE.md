@@ -14,7 +14,7 @@ knapsack/ → plants/ → compounds/ → diseases/ → disease_targets/
 |---|---|---|---|
 | `knapsack/` | 1 | Scrape KNApSAcK Indonesia | plants.csv, plants_compounds.csv |
 | `plants/` | 7 | Canonicalize plant taxonomy via GBIF | plants.csv, plant_aliases.csv |
-| `compounds/` | 7 | Canonicalize metabolites via PubChem/ChEMBL | compounds.csv, plant_compounds.csv |
+| `compounds/` | 7 | Canonicalize metabolites: identity anchored on KNApSAcK source structures (formula-corroborated), PubChem/ChEMBL fallback; ADME computed inline | compounds.csv, plant_compounds.csv |
 | `diseases/` | 5 | Map diseases to DO/MeSH ontologies | diseases.csv, disease_aliases.csv |
 | `disease_targets/` | 5 | Fetch protein targets via Open Targets API | targets.csv, target_aliases.csv, disease_targets.csv |
 

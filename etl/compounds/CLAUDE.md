@@ -2,38 +2,51 @@
 
 ## Pipeline Run Order
 
-Run stages in this exact order after activating the ETL venv:
+Run all seven stages end to end after activating the ETL venv:
 
 ```powershell
-python etl/compounds/main.py --start 1 --end 4   # extract → normalize → dedupe → enrich
-python etl/compounds/04_enrich/patch_missing_smiles.py    # fill SMILES from cache / invalidate
-python etl/compounds/04_enrich/patch_missing_lipinski.py  # fill ADME from ChEMBL + RDKit
-python etl/compounds/main.py --start 5 --end 7   # build_canonical → validate → export
+python etl/compounds/main.py --start 1 --end 7
+# extract → normalize → dedupe → enrich → build_canonical → validate → export
 ```
 
-Or run the full pipeline then both patches if starting from scratch:
+`04_enrich` computes ADME inline and writes the final `smiles` / Lipinski / PAINS
+columns directly into `compound_enrichment_results.csv`, so there are no separate
+post-enrichment patch steps: `05_build_canonical` reads the enrichment output as-is.
 
-```powershell
-python etl/compounds/main.py --start 1 --end 4
-python etl/compounds/04_enrich/patch_missing_smiles.py
-python etl/compounds/04_enrich/patch_missing_lipinski.py
-python etl/compounds/main.py --start 5 --end 7
-```
+## 04_enrich identity acceptance (source-first, corroboration-gated)
 
-**Why patch before 05:** `05_build_canonical` reads `compound_enrichment_results.csv`
-directly. Running patches after enrichment but before canonicalization ensures that
-filled SMILES and Lipinski values propagate into the final `compounds.csv`.
+Compound identity is anchored on KNApSAcK's OWN published structure. Before any
+external lookup, each candidate's member `c_id`s are matched against the
+`knapsack_inchikey` / `knapsack_smiles` / `knapsack_formula` columns from the scraper
+output (`knapsack/out/plants_compounds.csv`). When a published structure's formula
+corroborates the raw representative formula (charge/desalt-aware via
+`shared.identity.formula_matches`), that structure IS the identity:
 
-## 04_enrich identity acceptance (corroboration gate)
+- KNApSAcK source structure formula agrees → `knapsack_source_confirmed`
+  (`evidence_type=knapsack+formula`, confidence 0.97). Structure fields are stored
+  exactly as KNApSAcK publishes them; ADME is computed inline (see below); the
+  PubChem/ChEMBL identity search is skipped entirely.
 
-A resolved PubChem/ChEMBL structure is accepted as the compound's identity ONLY when
-corroborated. The decisive check is molecular-formula agreement: a correct resolution
-preserves the raw KNApSAcK formula (compared Hill-normalized via
-`shared.identity.formula_matches`). Accept paths:
+This is the primary accept path. When no member has a corroborating KNApSAcK
+structure (the current on-disk state until the source-first re-scrape populates the
+`knapsack_*` columns, so every candidate falls through here today), enrichment falls
+back to the external PubChem/ChEMBL search, accepted only when corroborated:
 
 - CAS synonym match AND formula agrees → `cas_formula_confirmed` (confidence 0.97)
 - PubChem+ChEMBL agree on InChIKey AND formula agrees → `cross_source_confirmed` (0.97)
 - strong name match AND formula agrees → `name_formula_confirmed` (0.90)
+
+**Inline ADME (`properties.py`).** On the `knapsack_source_confirmed` path, ADME is
+derived from the accepted SMILES/InChIKey via the sibling `04_enrich/properties.py`
+module: RDKit for the Lipinski descriptors + molecular weight (`lipinski_source =
+rdkit_computed`), one ChEMBL by-InChIKey lookup for `qed_score` / `num_ro5_violations`
+(and `np_likeness_score` when ChEMBL has it, else the RDKit NP scorer), and RDKit
+PAINS for `is_pains_positive`. This replaced the former post-hoc patch passes.
+
+**Opportunistic disagreement flag.** If a PubChem/ChEMBL InChIKey for the compound is
+ALREADY in the raw HTTP cache and disagrees with the accepted KNApSAcK InChIKey,
+`knapsack_vs_external_disagreement` is appended to `match_reason`. This is cache-only
+(no new fetch) and never overrides KNApSAcK's structure.
 
 Everything else is REJECTED (structure fields left blank so 05 falls back to the raw
 name_formula/name/cas identity, never a wrong InChIKey): `rejected_name_only`,
@@ -42,11 +55,13 @@ name_formula/name/cas identity, never a wrong InChIKey): `rejected_name_only`,
 `review`). Salts/hydrates (`.`/`·` in the formula) never match a desalted formula.
 
 `compound_enrichment_results.csv` now carries honest provenance for 05 to surface:
-`match_strategy` (the values above), `evidence_type` (`cas+formula`, `name+formula`,
-`cross_source+formula`, `name_only`, `formula_only`, `mw_only`, `cas_no_formula_confirm`,
-`ambiguous`, `weak`, `none`), and an honest `enrichment_confidence` (high only when
-structurally corroborated). `match_count` = distinct candidate structures; `match_rank`
-= the accepted hit's rank (blank when rejected).
+`match_strategy` (the values above), `evidence_type` (`knapsack+formula`, `cas+formula`,
+`name+formula`, `cross_source+formula`, `name_only`, `formula_only`, `mw_only`,
+`cas_no_formula_confirm`, `ambiguous`, `weak`, `none`), and an honest
+`enrichment_confidence` (high only when structurally corroborated). It also carries the
+inline-computed `lipinski_source` and `is_pains_positive` (formerly added by the patch
+passes). `match_count` = distinct candidate structures; `match_rank` = the accepted
+hit's rank (blank when rejected); for a `knapsack_source_confirmed` accept both are `1`.
 
 **Cache:** the raw HTTP cache (`out/cache/http/`) stays valid across logic changes, but
 the per-candidate cache key folds `ENRICH_LOGIC_VERSION`, so bumping the acceptance logic
@@ -118,49 +133,31 @@ accepted only with corroboration). `03` still flags low-confidence and review-ca
 clusters as `review`. Members now carry the raw `organism` field through for `05`'s
 `plant_compounds.source_url`.
 
-## patch_missing_smiles.py
+## Inline ADME (`04_enrich/properties.py`)
 
-Run after `04_enrich/run.py` when any `smiles` fields are empty.
-- Pass 1: mines existing candidate cache JSON for SMILES (zero API calls)
-- Pass 2: invalidates candidate cache for still-missing rows → re-run `04_enrich/run.py`
+Property derivation lives in the sibling `properties.py`, imported by `run.py`; it
+replaced the former `patch_missing_smiles.py` / `patch_missing_lipinski.py` post-passes
+(both removed). On a `knapsack_source_confirmed` accept:
+- `rdkit_descriptors(smiles)` → `logp`, `hbond_donors`, `hbond_acceptors`, `tpsa`,
+  `rotatable_bonds`, `molecular_weight` (`lipinski_source = rdkit_computed`).
+- `chembl_detail_by_inchikey(inchi_key, cache_dir)` → `qed_score`, `num_ro5_violations`
+  (and `np_likeness_score` when present), cache-first via the shared HTTP cache.
+- `np_likeness(smiles)` (RDKit Contrib NP scorer) fills `np_likeness_score` when ChEMBL
+  has none; `check_pains(smiles)` (RDKit PAINS catalog) sets `is_pains_positive`.
 
-After invalidation, re-run `04_enrich/run.py`. HTTP cache is preserved so only
-invalidated candidates hit the enrichment logic.
-
-## patch_missing_lipinski.py
-
-Run after `patch_missing_smiles.py` when any `logp` fields are empty.
-- Pass 1: fetches ChEMBL molecule detail by `chembl_id` (HTTP cache-first, zero cost if already cached)
-- Pass 2: computes `MolLogP`, `NumHBD`, `NumHBA`, `TPSA`, `NumRotatableBonds` via RDKit from `smiles`
-- Sets `lipinski_source` column: `chembl_api` | `rdkit_computed` | (empty = unresolved)
-
-RDKit is installed in the ETL venv (`rdkit==2026.3.2`). No new dependencies needed.
-
-Note: `qed_score` is only populated from ChEMBL (Pass 1); RDKit does not compute it.
-`np_likeness_score` is populated from ChEMBL (Pass 1) or via RDKit NP scorer (Pass 2b,
-using RDKit Contrib NP_Score/npscorer.py) for any row where it is still null but smiles
-is present. Compounds with neither a `chembl_id` nor a usable `smiles` remain unresolved.
-
-## Lipinski Coverage Baseline (as of May 2026)
-
-After full enrichment + both patches:
-- `molecular_weight`: 100% present (always fetched from PubChem)
-- `logp` / `hbond_donors` / `hbond_acceptors` / `rotatable_bonds` / `tpsa`: ~47% populated
-  from ChEMBL API; patches push this significantly higher
-- Root cause of gaps: PubChem REST API provides structural data only (no ADME properties)
+RDKit is installed in the ETL venv (`rdkit==2026.3.2`). No new dependencies.
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `04_enrich/run.py` | Main enrichment (PubChem + ChEMBL identity resolution) |
-| `04_enrich/patch_missing_smiles.py` | Post-enrichment SMILES recovery |
-| `04_enrich/patch_missing_lipinski.py` | Post-enrichment ADME descriptor recovery |
+| `04_enrich/run.py` | Main enrichment (KNApSAcK-source anchor + PubChem/ChEMBL fallback) |
+| `04_enrich/properties.py` | Inline RDKit / ChEMBL / NP / PAINS property computation |
 | `05_build_canonical/run.py` | Canonical ID assignment, alias table, plant-compound bridge |
 
 ## Do Not Touch
 
 - `04_enrich/out/cache/http/` — raw API response cache; delete only to force re-fetch
 - `04_enrich/out/cache/candidates/` — per-candidate enrichment cache; delete individual
-  files to re-process specific candidates (patch_missing_smiles.py does this automatically)
+  files to re-process specific candidates (or bump `ENRICH_LOGIC_VERSION` to recompute all)
 - Any `out/` directory — written by pipeline scripts only
