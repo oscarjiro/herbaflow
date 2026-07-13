@@ -159,16 +159,24 @@ def normalize_name(value: Optional[str]) -> str:
 
 
 def normalize_cas(value: Optional[str]) -> Tuple[str, bool, str]:
-    """Normalize possibly-comma-separated CAS input; return first valid part."""
+    """Normalize possibly-comma-separated CAS input; return first valid part.
+
+    On total failure, reports the first part's normalized form and maps the
+    shared validator's reason to the pipeline's two-bucket taxonomy
+    (``checksum_failed`` vs ``invalid_format``) that ``review_reasons`` and the
+    ``cas_validation_reason`` column expect.
+    """
     if not value:
         return "", False, "missing"
     raw_parts = [p.strip() for p in str(value).split(",")]
-    first_norm, first_reason = raw_parts[0], "invalid_format"
+    first_norm, first_reason = "", "invalid_format"
     for part in raw_parts:
         normalized, is_valid, reason = _normalize_cas_single(part)
         if is_valid:
             return normalized, True, "ok"
-        first_norm = first_norm or normalized
+        if not first_norm:
+            first_norm = normalized
+            first_reason = "checksum_failed" if reason.startswith("checksum") else "invalid_format"
     return first_norm, False, first_reason
 
 
