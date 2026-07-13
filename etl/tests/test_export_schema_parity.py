@@ -1,11 +1,15 @@
 """Every loaded final-export CSV must be free of the S3/S4 dead columns.
 
 Single consolidated guard tying the 10 loaded ETL outputs to the post-S3/S4
-trimmed DB schema (`source_batch_id`, `confidence`, `evidence_type`,
-`source_plant_raw_id`, `source_compound_raw_id` were all dropped). The
-constant-driven modules (plants, compounds, diseases) are checked by extracting
-their export column-list literals; disease_targets writes its row dicts
-directly, so it is checked by the absence of the dead dict keys.
+trimmed DB schema (`source_batch_id`, `confidence`, `source_plant_raw_id`,
+`source_compound_raw_id` were all dropped). The constant-driven modules (plants,
+compounds, diseases) are checked by extracting their export column-list literals;
+disease_targets writes its row dicts directly, so it is checked by the absence of
+the dead dict keys.
+
+Note: `evidence_type` is NOT dead — it is a first-class compound identity-evidence
+column surfaced on compounds.csv (which term corroborated the resolved structure),
+so it is intentionally absent from DEAD.
 """
 import pathlib
 import re
@@ -13,7 +17,6 @@ import re
 DEAD = {
     "source_batch_id",
     "confidence",
-    "evidence_type",
     "source_plant_raw_id",
     "source_compound_raw_id",
 }

@@ -6,7 +6,7 @@
       "warning": 6
     }
   },
-  "generated_at": "2026-06-02T16:45:53.296513+00:00",
+  "generated_at": "2026-07-12T20:10:42.918311+00:00",
   "output_files": {
     "report_csv": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\validation_report.csv",
     "report_json": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out\\validation_report.json",
@@ -18,9 +18,9 @@
     "plants": "C:\\code\\web\\herbaflow\\etl\\plants\\04_build_canonical\\out\\plants.csv"
   },
   "summary": {
-    "aliases_rows": 556,
+    "aliases_rows": 589,
     "critical_issues": 0,
-    "plants_rows": 478,
+    "plants_rows": 491,
     "status": "pass",
     "total_issues": 6,
     "warning_issues": 6

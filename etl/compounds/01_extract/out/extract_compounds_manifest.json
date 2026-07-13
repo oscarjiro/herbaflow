@@ -1,7 +1,7 @@
 {
   "module": "compounds",
   "step": "01_extract",
-  "run_id": "compounds_20260602_131153",
+  "run_id": "compounds_20260713_004158",
   "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
   "source_name": "KNApSAcK World",
   "source_url": "https://www.knapsackfamily.com/KNApSAcK_World/",
@@ -21,11 +21,11 @@
   "plant_mapping": {
     "mapping_file": "C:\\code\\web\\herbaflow\\etl\\plants\\06_export\\out\\plants.csv",
     "loaded": true,
-    "row_count": 478,
-    "mapped_rows": 478,
+    "row_count": 491,
+    "mapped_rows": 491,
     "raw_id_column": "raw_plant_id",
     "canonical_id_column": "plant_id"
   },
-  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\01_extract\\out\\logs\\extract_compounds_compounds_20260602_131153.log",
-  "generated_at": "2026-06-02T13:11:54+00:00"
+  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\01_extract\\out\\logs\\extract_compounds_compounds_20260713_004158.log",
+  "generated_at": "2026-07-13T00:41:58+00:00"
 }

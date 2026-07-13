@@ -38,6 +38,11 @@ paths:
         manually_accepted_review_file: manually_accepted_review_plants.csv
         report_file: build_canonical_report.txt
         log_file: build_canonical.log
+    resolve_manual_reviews:
+        script: plants/04_build_canonical/resolve_manual_reviews.py
+        decisions_file: plants/04_build_canonical/out/manual_review_decisions.csv
+        output_file: plants/04_build_canonical/out/manually_accepted_review_plants.csv
+        log_file: resolve_manual_reviews.log
     build_canonical_part2:
         script: plants/04_build_canonical/run_part2.py
         input: plants/04_build_canonical/out/accepted_plants.csv
@@ -88,6 +93,13 @@ gbif:
     base_url: https://api.gbif.org/v2
     match_endpoint: /species/match
     user_agent: indonesian-medicinal-plants-etl/1.0
+    # Constrain matching to the plant kingdom. GBIF's /species/match accepts a
+    # `kingdom` hint (confirmed live against api.gbif.org/v2/species/match): it
+    # biases scoring toward Plantae so cross-kingdom homonyms score lower. It is
+    # only a scoring hint, not a hard filter, so the accept gate in
+    # run_part1.py additionally rejects any match whose resolved kingdom key is
+    # not Plantae (see accept_rules.plantae_kingdom_key).
+    match_kingdom: Plantae
     cache_responses: true
     cache_ttl_days: 3650
     api:
@@ -102,6 +114,10 @@ gbif:
         review_min_confidence: 70
         reject_below_confidence: 70
         higherrank_review_min_confidence: 80
+        # GBIF taxon key for kingdom Plantae. Any accepted-candidate row whose
+        # resolved kingdom key is present and differs from this is rejected as a
+        # non-plant (keeps fungi/animals out of the plant table).
+        plantae_kingdom_key: "6"
 
 taxonomy:
     canonical_name_mode: accepted_name_without_authorship

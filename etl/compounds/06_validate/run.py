@@ -52,6 +52,11 @@ Behavior
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # etl/
+
 import argparse
 import csv
 import json
@@ -61,8 +66,9 @@ import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
+
+from shared.identity import formula_matches, hill_formula
 
 try:
     import yaml
@@ -96,6 +102,9 @@ COMPOUNDS_COLUMNS = [
     "canonical_status",
     "canonical_strategy",
     "canonical_reason",
+    "match_strategy",
+    "evidence_type",
+    "enrichment_confidence",
     "evidence_count",
     "plant_count",
 ]
@@ -764,6 +773,84 @@ def validate_compounds(
             }
         ),
     }
+
+
+def load_raw_formula_by_candidate(
+    dedupe_out_dir: Path, logger: logging.Logger
+) -> Dict[str, str]:
+    """Map compound_candidate_id -> raw KNApSAcK representative formula (03 output)."""
+    path = dedupe_out_dir / "compound_candidates.csv"
+    if not path.exists():
+        logger.warning(
+            "compound_candidates.csv not found; skipping formula-consistency check: %s",
+            path,
+        )
+        return {}
+    rows, fields = read_csv_rows(path)
+    if "compound_candidate_id" not in fields or "representative_formula" not in fields:
+        return {}
+    out: Dict[str, str] = {}
+    for r in rows:
+        cid = normalize_whitespace(r.get("compound_candidate_id", ""))
+        rf = normalize_whitespace(r.get("representative_formula", ""))
+        if cid and rf:
+            out[cid] = rf
+    return out
+
+
+def validate_formula_consistency(
+    compound_rows: List[Dict[str, str]],
+    candidate_map_rows: List[Dict[str, str]],
+    raw_formula_by_candidate: Dict[str, str],
+    source_file: str,
+    issues: List[Issue],
+) -> Dict[str, Any]:
+    """Correctness check: a resolved structure must preserve the raw source formula.
+
+    For every canonical compound that carries a resolved structure (an InChIKey), the
+    resolved ``molecular_formula`` must equal the raw KNApSAcK formula of its
+    contributing candidate(s), compared Hill-normalized via
+    ``shared.identity.formula_matches``. The corroboration gate in enrichment (04)
+    should make this hold for every accepted compound, so this is a regression guard.
+    Mismatches are reported as warnings (never a hard pipeline failure).
+    """
+    raw_by_compound: Dict[str, set[str]] = defaultdict(set)
+    for r in candidate_map_rows:
+        cid = normalize_whitespace(r.get("compound_id", ""))
+        cand = normalize_whitespace(r.get("compound_candidate_id", ""))
+        if not cid or not cand:
+            continue
+        rf = raw_formula_by_candidate.get(cand, "")
+        if rf:
+            raw_by_compound[cid].add(rf)
+
+    checked = 0
+    mismatches = 0
+    for row in compound_rows:
+        if not normalize_whitespace(row.get("inchi_key", "")):
+            continue  # only compounds with a resolved structure
+        resolved = normalize_whitespace(row.get("molecular_formula", ""))
+        if not hill_formula(resolved):
+            continue  # resolved formula not comparable (blank / salt / unparseable)
+        cid = normalize_whitespace(row.get("compound_id", ""))
+        raws = [f for f in raw_by_compound.get(cid, set()) if hill_formula(f)]
+        if not raws:
+            continue
+        checked += 1
+        if not any(formula_matches(resolved, rf) for rf in raws):
+            mismatches += 1
+            add_issue(
+                issues,
+                "compounds.csv",
+                cid or "row",
+                "formula_mismatch_resolved_vs_raw",
+                f"resolved molecular_formula={resolved!r} does not match raw source formula(s)={sorted(raws)!r}",
+                "warning",
+                source_file,
+                resolved_formula=resolved,
+                raw_formulas=sorted(raws),
+            )
+    return {"formula_checked": checked, "formula_mismatches": mismatches}
 
 
 def validate_aliases(
@@ -1663,6 +1750,21 @@ def main() -> int:
         compound_ids,
         compound_key_by_id,
         expected_candidate_rows=summary.get("candidate_rows"),
+    )
+    raw_formula_by_candidate = load_raw_formula_by_candidate(
+        settings.dedupe_out_dir, logger
+    )
+    formula_stats = validate_formula_consistency(
+        compound_rows,
+        candidate_map_rows,
+        raw_formula_by_candidate,
+        str(inputs["compounds.csv"]),
+        issues,
+    )
+    logger.info(
+        "Formula consistency: checked=%d mismatches=%d",
+        formula_stats["formula_checked"],
+        formula_stats["formula_mismatches"],
     )
     compound_review_stats = validate_compound_review(
         compound_review_rows, str(inputs["compound_review.csv"]), issues, compound_ids

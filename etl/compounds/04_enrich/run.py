@@ -63,18 +63,23 @@ import re
 import socket
 import threading
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from http.client import RemoteDisconnected
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from http.client import IncompleteRead, RemoteDisconnected
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
+from shared.identity import formula_matches
 from shared.utils import ETL_ROOT, ensure_dir, make_run_id, normalize_whitespace
 from shared.utils import load_settings as shared_load_settings
+
+# Bump when the identity-acceptance logic changes so stale per-candidate caches
+# (out/cache/candidates/) are recomputed while the raw HTTP cache stays valid.
+ENRICH_LOGIC_VERSION = "2026-07-13-corroboration-gate"
 
 CANDIDATE_COLUMNS = [
     "compound_candidate_id",
@@ -180,6 +185,7 @@ RESULT_COLUMNS = [
     "enrichment_confidence",
     "enrichment_status",
     "match_strategy",
+    "evidence_type",
     "match_reason",
     "match_rank",
     "match_count",
@@ -277,6 +283,10 @@ class Settings:
     max_pubchem_cids: int
     max_chembl_hits: int
     max_terms_per_source: int
+    max_requests_per_second: float
+    max_requests_per_minute: int
+    max_requests_per_candidate: int
+    enrich_limit: int
 
 
 @dataclass(frozen=True)
@@ -419,6 +429,63 @@ _CACHE_WRITE_LOCKS: dict[str, threading.Lock] = defaultdict(threading.Lock)
 _CACHE_LOCK_GUARD = threading.Lock()
 
 
+class RateLimiter:
+    """Process-wide, thread-safe limiter honoring both a per-second and a
+    per-minute cap. Used to keep live API traffic within PubChem's published
+    PUG-REST limits (<=5 requests/second, <=400 requests/minute per IP) across
+    the enrichment thread pool. Cache hits do not consume the budget.
+    """
+
+    def __init__(self, max_per_second: float, max_per_minute: int) -> None:
+        self._min_interval = 1.0 / max_per_second if max_per_second > 0 else 0.0
+        self._max_per_minute = max(0, int(max_per_minute))
+        self._lock = threading.Lock()
+        self._last_ts = 0.0
+        self._window: deque[float] = deque()
+
+    def acquire(self) -> None:
+        while True:
+            with self._lock:
+                now = time.monotonic()
+                # Per-minute window.
+                if self._max_per_minute > 0:
+                    while self._window and now - self._window[0] >= 60.0:
+                        self._window.popleft()
+                    if len(self._window) >= self._max_per_minute:
+                        sleep_for = 60.0 - (now - self._window[0])
+                        wait = max(0.0, sleep_for)
+                    else:
+                        wait = 0.0
+                else:
+                    wait = 0.0
+                # Per-second spacing (only if the minute window is not blocking).
+                if wait <= 0.0:
+                    gap = self._min_interval - (now - self._last_ts)
+                    if gap > 0:
+                        wait = gap
+                if wait <= 0.0:
+                    self._last_ts = now
+                    if self._max_per_minute > 0:
+                        self._window.append(now)
+                    return
+            time.sleep(wait)
+
+
+_RATE_LIMITERS: dict[str, RateLimiter] = {}
+_RATE_LIMITER_GUARD = threading.Lock()
+
+
+def get_rate_limiter(
+    source_name: str, max_per_second: float, max_per_minute: int
+) -> RateLimiter:
+    with _RATE_LIMITER_GUARD:
+        limiter = _RATE_LIMITERS.get(source_name)
+        if limiter is None:
+            limiter = RateLimiter(max_per_second, max_per_minute)
+            _RATE_LIMITERS[source_name] = limiter
+        return limiter
+
+
 def _lock_for_path(path: Path) -> threading.Lock:
     key = str(path.resolve())
     with _CACHE_LOCK_GUARD:
@@ -532,6 +599,20 @@ def load_settings_for_enrich() -> Settings:
         max_pubchem_cids=int(pubchem_cfg.get("max_cids", 10)),
         max_chembl_hits=int(chembl_cfg.get("max_hits", 10)),
         max_terms_per_source=int(enrichment_cfg.get("max_terms_per_source", 8)),
+        # PubChem PUG-REST usage policy: no more than 5 requests/second and
+        # 400 requests/minute per IP. ChEMBL is more permissive; the shared cap
+        # keeps us safe for both. Configurable but defaulted to the PubChem limit.
+        max_requests_per_second=float(pubchem_cfg.get("max_requests_per_second", 5.0)),
+        max_requests_per_minute=int(pubchem_cfg.get("max_requests_per_minute", 400)),
+        # Per-candidate request cap across PubChem+ChEMBL. Stops a non-corroborating
+        # candidate from exhausting every source/term before evaluate_identity
+        # rejects it anyway. Corroborated candidates early-exit well under this.
+        max_requests_per_candidate=int(
+            enrichment_cfg.get("max_requests_per_candidate", 8)
+        ),
+        # Smoke/sample cap: process only the first N candidates when > 0. Set via
+        # the ENRICH_LIMIT env var or the --limit CLI flag (flag wins).
+        enrich_limit=int(os.environ.get("ENRICH_LIMIT", "0") or "0"),
     )
 
 
@@ -729,6 +810,7 @@ def candidate_search_payload(
         "member_source_rows": member_hashes,
         "source_name": settings.source_name,
         "source_url": settings.source_url,
+        "logic_version": ENRICH_LOGIC_VERSION,
         "pubchem_base_url": settings.pubchem_cfg.get(
             "base_url", "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
         ),
@@ -757,6 +839,21 @@ def candidate_cache_path(cache_root: Path, cache_key: str) -> Path:
     return cache_root / "candidates" / f"{cache_key}.json"
 
 
+def _retry_after_seconds(exc: HTTPError, fallback: float) -> float:
+    """Honor a Retry-After response header (seconds form) when the server sends
+    one on a 429/503, bounded so a hostile header cannot stall the run."""
+    try:
+        header = exc.headers.get("Retry-After") if exc.headers else None
+    except Exception:
+        header = None
+    if header:
+        try:
+            return max(0.0, min(60.0, float(str(header).strip())))
+        except ValueError:
+            return fallback
+    return fallback
+
+
 def cached_get_json(
     url: str,
     cache_path: Path,
@@ -766,6 +863,8 @@ def cached_get_json(
     source_name: str,
     cache_enabled: bool,
     logger: logging.Logger,
+    rate_per_second: float = 5.0,
+    rate_per_minute: int = 400,
 ) -> Tuple[Dict[str, Any], bool]:
     if cache_enabled and cache_path.exists():
         cached = safe_load_json(cache_path, logger)
@@ -773,11 +872,15 @@ def cached_get_json(
             return cached, True
 
     cache_path.parent.mkdir(parents=True, exist_ok=True)
+    limiter = get_rate_limiter(source_name, rate_per_second, rate_per_minute)
     last_error: Optional[str] = None
     for attempt in range(retries + 1):
         if attempt > 0:
             sleep_for = delay_seconds * (2 ** (attempt - 1))
             time.sleep(sleep_for)
+        # Stay within the source's published request-rate budget for every live
+        # request (cache hits above never reach here).
+        limiter.acquire()
         try:
             req = Request(
                 url,
@@ -817,6 +920,10 @@ def cached_get_json(
                 "Request failed (%s) attempt=%d url=%s", last_error, attempt + 1, url
             )
             if exc.code in {429, 500, 502, 503, 504} and attempt < retries:
+                if exc.code in {429, 503}:
+                    # Server is throttling us: wait out Retry-After (or a backoff)
+                    # before the next attempt, on top of the exponential delay.
+                    time.sleep(_retry_after_seconds(exc, delay_seconds * (2**attempt)))
                 continue
             record = {
                 "ok": False,
@@ -833,8 +940,10 @@ def cached_get_json(
             return record, False
         except (
             RemoteDisconnected,
+            IncompleteRead,
             TimeoutError,
             socket.timeout,
+            ConnectionError,
             ConnectionResetError,
             URLError,
         ) as exc:
@@ -1229,12 +1338,38 @@ def chembl_hit_from_detail(
     )
 
 
+class RequestBudget:
+    """Per-candidate cap on PubChem+ChEMBL requests issued while searching for a
+    corroborated identity.
+
+    A candidate that never corroborates would otherwise exhaust every CAS/name
+    term across both sources (14-26 requests); once the budget is spent we stop
+    fishing and let ``evaluate_identity`` reject it on the hits gathered so far.
+    That is the same raw-identity fallback it reaches anyway, just sooner.
+    Corroborated candidates early-exit (via ``stop_check``) well under the budget
+    (~3-4 requests), so their accepted structure is never affected. One candidate
+    is processed by a single worker thread, so no locking is needed.
+    """
+
+    def __init__(self, max_requests: int) -> None:
+        self.max_requests = max(0, int(max_requests))
+        self.used = 0
+
+    def charge(self) -> None:
+        self.used += 1
+
+    def exhausted(self) -> bool:
+        return self.max_requests > 0 and self.used >= self.max_requests
+
+
 def search_pubchem(
     candidate: Dict[str, str],
     terms: List[SearchTerm],
     settings: Settings,
     logger: logging.Logger,
     request_cache_dir: Path,
+    stop_check: Optional[Callable[[List[SourceHit]], bool]] = None,
+    budget: Optional["RequestBudget"] = None,
 ) -> Tuple[List[SourceHit], Dict[str, Any]]:
     base_url = settings.pubchem_cfg.get(
         "base_url", "https://pubchem.ncbi.nlm.nih.gov/rest/pug"
@@ -1243,11 +1378,21 @@ def search_pubchem(
     request_meta: List[Dict[str, Any]] = []
     term_count = 0
 
-    # Prefer name/CAS/formula searches; MW is used as weak evidence, not a direct query.
+    # Only CAS and name terms are searched (reliable-first: collect_search_terms
+    # already orders CAS before name). Formula and molecular-weight searches are
+    # never issued: under the corroboration gate an identity can be accepted only
+    # via a CAS / name / cross-source signal WITH formula agreement, so a
+    # formula-search or MW hit can never be accepted. Fetching them is pure wasted
+    # latency. The full ``terms`` list is still used for scoring, so hit scores and
+    # ordering are unchanged.
     for term in terms:
-        if term.kind == "mw":
+        if term.kind not in ("cas", "name"):
             continue
         if term_count >= settings.max_terms_per_source:
+            break
+        # Stop fishing once the per-candidate request budget is spent (a
+        # non-corroborating candidate would otherwise exhaust every term).
+        if budget is not None and budget.exhausted():
             break
         term_count += 1
 
@@ -1263,6 +1408,8 @@ def search_pubchem(
             cache_enabled=settings.cache_responses,
             logger=logger,
         )
+        if budget is not None:
+            budget.charge()
         request_meta.append(
             {
                 "url": url,
@@ -1282,6 +1429,8 @@ def search_pubchem(
             continue
 
         for cid in cids[: settings.max_pubchem_cids]:
+            if budget is not None and budget.exhausted():
+                break
             detail_url = pubchem_properties_url(base_url, cid)
             detail_cache = request_cache_path(
                 settings.cache_root, "pubchem", detail_url
@@ -1295,7 +1444,11 @@ def search_pubchem(
                 source_name="PubChem",
                 cache_enabled=settings.cache_responses,
                 logger=logger,
+                rate_per_second=settings.max_requests_per_second,
+                rate_per_minute=settings.max_requests_per_minute,
             )
+            if budget is not None:
+                budget.charge()
             request_meta.append(
                 {
                     "url": detail_url,
@@ -1327,7 +1480,11 @@ def search_pubchem(
                 source_name="PubChem",
                 cache_enabled=settings.cache_responses,
                 logger=logger,
+                rate_per_second=settings.max_requests_per_second,
+                rate_per_minute=settings.max_requests_per_minute,
             )
+            if budget is not None:
+                budget.charge()
             request_meta.append(
                 {
                     "url": syn_url,
@@ -1356,6 +1513,12 @@ def search_pubchem(
             hit = score_hit(hit, terms, candidate)
             hits.append(hit)
 
+        # Early-exit: once a formula-corroborated CAS/name hit is in hand, stop
+        # issuing further term searches for this candidate (the accept decision is
+        # already settled; remaining fetches cannot change it).
+        if stop_check is not None and stop_check(hits):
+            break
+
     return hits, {"source": "PubChem", "requests": request_meta}
 
 
@@ -1365,6 +1528,8 @@ def search_chembl(
     settings: Settings,
     logger: logging.Logger,
     request_cache_dir: Path,
+    stop_check: Optional[Callable[[List[SourceHit]], bool]] = None,
+    budget: Optional["RequestBudget"] = None,
 ) -> Tuple[List[SourceHit], Dict[str, Any]]:
     base_url = settings.chembl_cfg.get(
         "base_url", "https://www.ebi.ac.uk/chembl/api/data"
@@ -1373,10 +1538,16 @@ def search_chembl(
     request_meta: List[Dict[str, Any]] = []
     term_count = 0
 
+    # Only CAS and name terms are searched (see search_pubchem for the rationale):
+    # a formula-search or MW hit can never clear the corroboration gate.
     for term in terms:
-        if term.kind == "mw":
+        if term.kind not in ("cas", "name"):
             continue
         if term_count >= settings.max_terms_per_source:
+            break
+        # Budget is shared with the PubChem pass, so ChEMBL only runs on the
+        # remainder left after PubChem failed to corroborate.
+        if budget is not None and budget.exhausted():
             break
         term_count += 1
 
@@ -1392,6 +1563,8 @@ def search_chembl(
             cache_enabled=settings.cache_responses,
             logger=logger,
         )
+        if budget is not None:
+            budget.charge()
         request_meta.append(
             {
                 "url": url,
@@ -1411,6 +1584,8 @@ def search_chembl(
             continue
 
         for mol in molecules[: settings.max_chembl_hits]:
+            if budget is not None and budget.exhausted():
+                break
             chembl_id = normalize_whitespace(
                 mol.get("molecule_chembl_id") or mol.get("chembl_id") or ""
             )
@@ -1427,7 +1602,11 @@ def search_chembl(
                 source_name="ChEMBL",
                 cache_enabled=settings.cache_responses,
                 logger=logger,
+                rate_per_second=settings.max_requests_per_second,
+                rate_per_minute=settings.max_requests_per_minute,
             )
+            if budget is not None:
+                budget.charge()
             request_meta.append(
                 {
                     "url": detail_url,
@@ -1453,6 +1632,10 @@ def search_chembl(
             )
             hit = score_hit(hit, terms, candidate)
             hits.append(hit)
+
+        # Early-exit once a formula-corroborated CAS/name hit is in hand.
+        if stop_check is not None and stop_check(hits):
+            break
 
     return hits, {"source": "ChEMBL", "requests": request_meta}
 
@@ -1500,40 +1683,194 @@ def choose_best_hit(
     return best, second, ordered
 
 
-def classify_enrichment_status(
-    best: Optional[SourceHit],
-    second: Optional[SourceHit],
+# --- Identity acceptance: gate on CORROBORATION, not on the guess's output ---
+#
+# A source hit is accepted as authoritative structural identity ONLY when the
+# evidence for it is corroborated. The single decisive new check is molecular
+# formula agreement: a correct resolution preserves the raw source formula, so
+# the hit's formula must equal the candidate's raw formula (Hill-normalized).
+#
+#   ACCEPT (reliable, structure emitted):
+#     - CAS term matches the hit AND the formula agrees          -> cas_formula_confirmed
+#     - PubChem+ChEMBL agree on InChIKey AND the formula agrees  -> cross_source_confirmed
+#     - a strong NAME match AND the formula agrees               -> name_formula_confirmed
+#   REJECT (structure dropped; falls back to raw name_formula/name/cas identity):
+#     - name-only (formula unavailable or disagrees)
+#     - formula-only (isomer-blind, no CAS/name/structure corroboration)
+#     - molecular-weight-only
+#     - an ambiguous tie between distinct structures with no corroboration
+#     - a CAS/name match whose formula disagrees (wrong molecule)
+#
+# KNApSAcK ships no InChIKey, so the raw-InChIKey path is not reachable here; it
+# is covered by the cross-source structural agreement check instead.
+
+_CAS_SIGNAL_MIN = 0.88  # any real CAS synonym/name match
+_NAME_SIGNAL_MIN = 0.88  # exact/iupac/synonym name match; excludes fuzzy 0.78
+_TIE_WINDOW = 0.03
+_CONF_STRUCTURAL = 0.97  # cas+formula or cross-source+formula
+_CONF_NAME_FORMULA = 0.90  # name+formula
+_CONF_REJECTED = 0.30  # honest low: no corroborated structural identity
+
+
+@dataclass(frozen=True)
+class IdentityDecision:
+    accepted: bool
+    hit: Optional[SourceHit]
+    strategy: str
+    evidence_type: str
+    confidence: float
+    status: str
+    reason: str
+    rank: str
+    count: str
+
+
+def _hit_signals(
+    candidate: Dict[str, str], terms: List[SearchTerm], hit: SourceHit
+) -> Tuple[bool, bool, bool]:
+    """Return (cas_signal, name_signal, formula_agrees) for a hit vs the raw
+    candidate. cas/name signals require a strong term match; formula_agrees
+    requires Hill-normalized equality of the raw and resolved formulas."""
+    formula_agrees = formula_matches(
+        candidate.get("representative_formula", ""), hit.molecular_formula
+    )
+    cas_signal = False
+    name_signal = False
+    for term in terms:
+        if term.kind == "cas":
+            score, _ = build_term_match_score(term, hit)
+            if score >= _CAS_SIGNAL_MIN:
+                cas_signal = True
+        elif term.kind == "name":
+            score, _ = build_term_match_score(term, hit)
+            if score >= _NAME_SIGNAL_MIN:
+                name_signal = True
+    return cas_signal, name_signal, formula_agrees
+
+
+def _hit_accept_ready(
+    candidate: Dict[str, str], terms: List[SearchTerm], hit: SourceHit
+) -> bool:
+    """True when this single hit already satisfies an accept path that needs only
+    one source: a strong CAS or name signal WITH molecular-formula agreement.
+
+    This is exactly the ``cas_signal``/``name_signal`` accept branches of
+    ``evaluate_identity`` (the cross-source branch needs both sources and is
+    intentionally excluded here). It lets the fetch loop stop the moment a
+    formula-corroborated hit is in hand, without re-deriving accept behavior."""
+    cas_signal, name_signal, formula_agrees = _hit_signals(candidate, terms, hit)
+    return formula_agrees and (cas_signal or name_signal)
+
+
+def evaluate_identity(
     candidate: Dict[str, str],
-    settings: Settings,
-    review_reason: str,
-) -> Tuple[str, str]:
-    if best is None:
-        return "unresolved", "no_hits"
-    if best.match_score >= settings.high_confidence_threshold:
-        if (
-            second
-            and abs(best.match_score - second.match_score) <= 0.03
-            and best.identifier != second.identifier
-        ):
-            return "conflict", "top_hits_too_close"
-        return "matched", ""
-    if best.match_score >= settings.medium_confidence_threshold:
-        if (
-            second
-            and abs(best.match_score - second.match_score) <= 0.03
-            and best.identifier != second.identifier
-        ):
-            return "ambiguous", "top_hits_too_close"
-        return "review", "below_high_confidence_threshold"
-    if (
-        second
-        and abs(best.match_score - second.match_score) <= 0.03
-        and best.identifier != second.identifier
-    ):
-        return "ambiguous", "low_confidence_tie"
-    if normalize_whitespace(review_reason):
-        return "review", "review_input_present"
-    return "unresolved", "low_confidence"
+    terms: List[SearchTerm],
+    ordered_hits: List[SourceHit],
+    cross_key: str,
+) -> IdentityDecision:
+    if not ordered_hits:
+        return IdentityDecision(
+            accepted=False,
+            hit=None,
+            strategy="",
+            evidence_type="none",
+            confidence=0.0,
+            status="unresolved",
+            reason="no_hits",
+            rank="",
+            count="0",
+        )
+
+    # Count distinct candidate structures (InChIKey, else source+identifier) so a
+    # genuine multi-structure tie can be detected and rejected.
+    seen_structs: set[str] = set()
+    for hit in ordered_hits:
+        seen_structs.add(hit.inchi_key or f"{hit.source_name}:{hit.identifier}")
+    distinct_count = len(seen_structs)
+
+    # Try the reliable path first: find every corroborated hit, keep the best.
+    corroborated: List[Tuple[SourceHit, str, str, float]] = []
+    for hit in ordered_hits:
+        cas_signal, name_signal, formula_agrees = _hit_signals(candidate, terms, hit)
+        if not formula_agrees:
+            continue
+        if cas_signal:
+            corroborated.append(
+                (hit, "cas_formula_confirmed", "cas+formula", _CONF_STRUCTURAL)
+            )
+        elif hit.inchi_key and cross_key and hit.inchi_key == cross_key:
+            corroborated.append(
+                (
+                    hit,
+                    "cross_source_confirmed",
+                    "cross_source+formula",
+                    _CONF_STRUCTURAL,
+                )
+            )
+        elif name_signal:
+            corroborated.append(
+                (hit, "name_formula_confirmed", "name+formula", _CONF_NAME_FORMULA)
+            )
+
+    if corroborated:
+        hit, strategy, evidence_type, confidence = max(
+            corroborated, key=lambda item: item[0].match_score
+        )
+        rank = str(ordered_hits.index(hit) + 1)
+        reason = ";".join(
+            [x for x in [hit.match_reason, f"corroborated_{evidence_type}"] if x]
+        )
+        return IdentityDecision(
+            accepted=True,
+            hit=hit,
+            strategy=strategy,
+            evidence_type=evidence_type,
+            confidence=confidence,
+            status="matched",
+            reason=reason,
+            rank=rank,
+            count=str(distinct_count),
+        )
+
+    # No corroborated identity -> reject and record WHY (honest provenance).
+    best = ordered_hits[0]
+    second = ordered_hits[1] if len(ordered_hits) > 1 else None
+    cas_signal, name_signal, formula_agrees = _hit_signals(candidate, terms, best)
+    tie = (
+        second is not None
+        and abs(best.match_score - second.match_score) <= _TIE_WINDOW
+        and (best.inchi_key or best.identifier)
+        != (second.inchi_key or second.identifier)
+    )
+
+    if tie and distinct_count >= 2:
+        strategy, evidence_type = "rejected_ambiguous_tie", "ambiguous"
+    elif formula_agrees and not (cas_signal or name_signal):
+        strategy, evidence_type = "rejected_formula_only", "formula_only"
+    elif name_signal and not formula_agrees:
+        strategy, evidence_type = "rejected_name_only", "name_only"
+    elif cas_signal and not formula_agrees:
+        strategy, evidence_type = "rejected_formula_mismatch", "cas_no_formula_confirm"
+    elif best.matched_term_kind == "mw":
+        strategy, evidence_type = "rejected_mw", "mw_only"
+    else:
+        strategy, evidence_type = "rejected_uncorroborated", "weak"
+
+    reason = (
+        f"{strategy};best={best.source_name}:{best.identifier};"
+        f"score={best.match_score:.2f}"
+    )
+    return IdentityDecision(
+        accepted=False,
+        hit=None,
+        strategy=strategy,
+        evidence_type=evidence_type,
+        confidence=_CONF_REJECTED,
+        status="review",
+        reason=reason,
+        rank="",
+        count=str(distinct_count),
+    )
 
 
 def candidate_result_from_hit(
@@ -1583,6 +1920,7 @@ def candidate_result_from_hit(
             "enrichment_confidence": "0.0000",
             "enrichment_status": status,
             "match_strategy": "",
+            "evidence_type": "none",
             "match_reason": reason,
             "match_rank": "",
             "match_count": str(total_matches),
@@ -1631,6 +1969,7 @@ def candidate_result_from_hit(
         "enrichment_status": status,
         "match_strategy": best.matched_term_kind
         and f"{best.source_name.lower()}_{best.matched_term_kind}",
+        "evidence_type": "",
         "match_reason": ";".join([x for x in [best.match_reason, reason] if x]),
         "match_rank": "1",
         "match_count": str(total_matches),
@@ -1728,6 +2067,7 @@ def enrich_candidate(
         cached = safe_load_json(cache_file, logger)
         if cached is not None:
             result = cached.get("result", {})
+            result.setdefault("evidence_type", "")
             review_reason = cached.get("review_reason", "")
             status = cached.get("status", result.get("enrichment_status", "review"))
             confidence = float(
@@ -1774,12 +2114,43 @@ def enrich_candidate(
     }
     request_details: List[Dict[str, Any]] = []
 
+    # Reliable-first fetch with early-exit. As soon as a source returns a hit that
+    # already satisfies a single-source accept path (CAS or name signal WITH
+    # formula agreement), stop: the accept decision is settled and further fetches
+    # cannot change which identity is accepted or its structure. PubChem is queried
+    # first; ChEMBL is only queried when PubChem did not already corroborate (which
+    # is also where the cross-source InChIKey accept path can still fire).
+    def _corroborated(hits: List[SourceHit]) -> bool:
+        return any(_hit_accept_ready(candidate, terms, h) for h in hits)
+
+    # One request budget spans both sources: a candidate that never corroborates
+    # stops after settings.max_requests_per_candidate PubChem+ChEMBL requests
+    # instead of exhausting every CAS/name term. Corroborated candidates hit the
+    # stop_check first (~3-4 requests), so the budget never touches them.
+    budget = RequestBudget(settings.max_requests_per_candidate)
+
     pubchem_hits, pubchem_meta = search_pubchem(
-        candidate, terms, settings, logger, settings.cache_root
+        candidate,
+        terms,
+        settings,
+        logger,
+        settings.cache_root,
+        stop_check=_corroborated,
+        budget=budget,
     )
-    chembl_hits, chembl_meta = search_chembl(
-        candidate, terms, settings, logger, settings.cache_root
-    )
+    if _corroborated(pubchem_hits):
+        chembl_hits: List[SourceHit] = []
+        chembl_meta = {"source": "ChEMBL", "requests": []}
+    else:
+        chembl_hits, chembl_meta = search_chembl(
+            candidate,
+            terms,
+            settings,
+            logger,
+            settings.cache_root,
+            stop_check=_corroborated,
+            budget=budget,
+        )
 
     request_details.extend(pubchem_meta.get("requests", []))
     request_details.extend(chembl_meta.get("requests", []))
@@ -1809,37 +2180,19 @@ def enrich_candidate(
         (review_row or {}).get("review_reason", "")
         or candidate.get("review_reason", "")
     )
-    status, status_reason = classify_enrichment_status(
-        best, second, candidate, settings, review_reason
-    )
 
-    # If we have a cross-source InChIKey agreement, choose the highest-scoring of that group.
-    if cross_key and all_hits:
-        cross_hits = [h for h in all_hits if h.inchi_key == cross_key]
-        if cross_hits:
-            cross_best = sorted(
-                cross_hits, key=lambda h: (-h.match_score, h.source_name, h.identifier)
-            )[0]
-            if best is None or cross_best.match_score >= best.match_score:
-                best = cross_best
-                second = (
-                    sorted(
-                        [h for h in all_hits if h.identifier != cross_best.identifier],
-                        key=lambda h: (-h.match_score, h.source_name, h.identifier),
-                    )[0]
-                    if len(all_hits) > 1
-                    else None
-                )
-
+    # Gate identity on corroboration (formula agreement is the decisive check).
+    # Accept only a corroborated hit; otherwise drop the structure and let 05
+    # fall back to the raw name_formula/name/cas identity.
+    decision = evaluate_identity(candidate, terms, ordered, cross_key)
     total_matches = len(all_hits)
 
-    # Build result row and preserve review handling.
     result = candidate_result_from_hit(
         candidate=candidate,
-        best=best,
+        best=decision.hit,
         second=second,
-        status=status,
-        reason=status_reason,
+        status=decision.status,
+        reason=decision.reason,
         search_terms=terms,
         cache_key=cache_key,
         cache_hit=False,
@@ -1849,16 +2202,22 @@ def enrich_candidate(
         total_matches=total_matches,
     )
 
-    # Normalize result status if the selected hit is highly confident.
-    if (
-        best is not None
-        and best.match_score >= settings.high_confidence_threshold
-        and status == "review"
-    ):
-        result["enrichment_status"] = "matched"
-    if best is not None and status in {"ambiguous", "conflict"}:
+    # Overwrite provenance with the corroboration verdict: an HONEST confidence
+    # (high only when structurally corroborated), the strategy, and the evidence
+    # type. This is what downstream (05) must consume instead of trusting that a
+    # returned InChIKey means the identity is verified.
+    result["match_strategy"] = decision.strategy
+    result["evidence_type"] = decision.evidence_type
+    result["enrichment_confidence"] = f"{decision.confidence:.4f}"
+    result["enrichment_status"] = decision.status
+    result["match_reason"] = ";".join(
+        [x for x in [decision.reason, review_reason] if x]
+    )
+    result["match_rank"] = decision.rank
+    result["match_count"] = decision.count
+    if not decision.accepted and review_reason:
         result["review_reason"] = ";".join(
-            [x for x in [review_reason, status_reason, best.match_reason] if x]
+            [x for x in [review_reason, decision.reason] if x]
         )
 
     confidence = float(result.get("enrichment_confidence", "0.0") or 0.0)
@@ -1969,6 +2328,16 @@ def main() -> int:
         default=str(Path(__file__).resolve().parents[1] / "settings.yml"),
         help="Path to the compound ETL settings.yml file.",
     )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help=(
+            "Smoke/sample mode: enrich only the first N candidates. Overrides "
+            "the ENRICH_LIMIT env var. Use for a small live-API check before the "
+            "full run."
+        ),
+    )
     args = parser.parse_args()
 
     settings = load_settings_for_enrich()
@@ -1986,6 +2355,15 @@ def main() -> int:
     candidate_rows, members_by_candidate, review_by_candidate = load_candidate_inputs(
         settings
     )
+
+    limit = args.limit if args.limit is not None else settings.enrich_limit
+    if limit and limit > 0 and limit < len(candidate_rows):
+        logger.info(
+            "Smoke/sample mode: enriching first %d of %d candidates",
+            limit,
+            len(candidate_rows),
+        )
+        candidate_rows = candidate_rows[:limit]
 
     max_workers = min(6, max(1, len(candidate_rows)))
     logger.info("Using %d worker threads", max_workers)

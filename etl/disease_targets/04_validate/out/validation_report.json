@@ -1,15 +1,15 @@
 {
-  "run_id": "validate_20260608_064148",
-  "validated_at": "2026-06-08T06:41:48+00:00",
+  "run_id": "validate_20260712_201016",
+  "validated_at": "2026-07-12T20:10:16+00:00",
   "summary": {
     "pass": 13,
     "warn": 0,
     "fail": 0
   },
   "counts": {
-    "targets": 8033,
-    "target_aliases": 24068,
-    "disease_targets": 15504,
+    "targets": 8389,
+    "target_aliases": 25139,
+    "disease_targets": 16726,
     "diseases_covered": 10
   },
   "checks": [
@@ -77,7 +77,7 @@
       "check": "uniprot_coverage",
       "status": "PASS",
       "detail": "99.1% (threshold: 60%)",
-      "uniprot_coverage": 0.9912
+      "uniprot_coverage": 0.9906
     }
   ]
 }

@@ -48,15 +48,17 @@ from shared.utils import ETL_ROOT, ensure_dir, load_settings
 from shared.utils import setup_logging as shared_setup_logging
 
 
-def _defaults() -> tuple[Path, Path, Path, str, float, int, float, float]:
+def _defaults() -> tuple[Path, Path, Path, str, str, float, int, float, float]:
     cfg = load_settings("plants")
     step = cfg["paths"]["match_gbif"]
-    api = cfg.get("gbif", {}).get("api", {})
+    gbif = cfg.get("gbif", {})
+    api = gbif.get("api", {})
     return (
         ETL_ROOT / step["input"],
         ETL_ROOT / step["cache_dir"],
         ETL_ROOT / step["output_dir"] / step["output_file"],
         step["log_file"],
+        str(gbif.get("match_kingdom", "Plantae")).strip(),
         float(api.get("timeout_seconds", 30)),
         int(api.get("max_retries", 5)),
         float(api.get("backoff_base_seconds", 1.5)),
@@ -92,6 +94,7 @@ def parse_args() -> argparse.Namespace:
         default_cache_dir,
         default_output,
         default_log_file,
+        default_kingdom,
         default_timeout,
         default_max_retries,
         default_backoff_base,
@@ -136,6 +139,16 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="",
         help="Optional GBIF checklistKey for matching against a specific taxonomy.",
+    )
+    parser.add_argument(
+        "--kingdom",
+        type=str,
+        default=default_kingdom,
+        help=(
+            "Optional GBIF kingdom hint sent with each match request to bias scoring "
+            f"toward the plant kingdom (default: '{default_kingdom}', from gbif.match_kingdom). "
+            "Pass an empty string to disable."
+        ),
     )
     parser.add_argument(
         "--timeout",
@@ -282,11 +295,16 @@ def gbif_request(
     session: requests.Session,
     scientific_name: str,
     checklist_key: str,
+    kingdom: str,
     timeout: float,
 ) -> requests.Response:
     params: Dict[str, str] = {"scientificName": scientific_name}
     if checklist_key:
         params["checklistKey"] = checklist_key
+    if kingdom:
+        # GBIF-recommended hint to avoid cross-kingdom homonym mismatches. Confirmed
+        # against the live v2 /species/match endpoint: it is honored as a scoring hint.
+        params["kingdom"] = kingdom
     return session.get(GBIF_MATCH_URL, params=params, timeout=timeout)
 
 
@@ -294,6 +312,7 @@ def request_with_retries(
     session: requests.Session,
     scientific_name: str,
     checklist_key: str,
+    kingdom: str,
     timeout: float,
     max_retries: int,
     backoff_base: float,
@@ -306,7 +325,9 @@ def request_with_retries(
 
     for attempt in range(max_retries + 1):
         try:
-            response = gbif_request(session, scientific_name, checklist_key, timeout)
+            response = gbif_request(
+                session, scientific_name, checklist_key, kingdom, timeout
+            )
             status = response.status_code
 
             if status == 200:
@@ -522,6 +543,7 @@ def query_gbif_matches(
     cache_dir: Path,
     user_agent: str,
     checklist_key: str,
+    kingdom: str,
     timeout: float,
     max_retries: int,
     backoff_base: float,
@@ -553,6 +575,7 @@ def query_gbif_matches(
             "endpoint": GBIF_MATCH_URL,
             "scientificName": input_name,
             "checklistKey": checklist_key or "",
+            "kingdom": kingdom or "",
         }
         cache_key = stable_cache_key(payload)
         cache_path = cache_path_for_key(cache_dir, cache_key)
@@ -574,6 +597,7 @@ def query_gbif_matches(
                 session=session,
                 scientific_name=input_name,
                 checklist_key=checklist_key,
+                kingdom=kingdom,
                 timeout=timeout,
                 max_retries=max_retries,
                 backoff_base=backoff_base,
@@ -690,6 +714,7 @@ def main() -> int:
             cache_dir=args.cache_dir,
             user_agent=args.user_agent,
             checklist_key=args.checklist_key,
+            kingdom=args.kingdom,
             timeout=args.timeout,
             max_retries=args.max_retries,
             backoff_base=args.backoff_base,

@@ -59,6 +59,12 @@ def _thresholds() -> tuple[float, float, float]:
         float(rules.get("higherrank_review_min_confidence", 80.0)),
     )
 
+
+def _plantae_kingdom_key() -> str:
+    cfg = load_settings("plants")
+    rules = cfg.get("gbif", {}).get("accept_rules", {})
+    return str(rules.get("plantae_kingdom_key", "6")).strip()
+
 GBIF_ID_FIELDS = [
     "gbif_usage_key",
     "gbif_accepted_usage_key",
@@ -88,6 +94,11 @@ REVIEW_MATCH_TYPES = {
 ACCEPTED_TAXONOMIC_STATUSES = {"ACCEPTED", "SYNONYM"}
 
 ACCEPT_CONFIDENCE_THRESHOLD, REVIEW_CONFIDENCE_THRESHOLD, HIGHERRANK_REVIEW_THRESHOLD = _thresholds()
+
+# GBIF taxon key for kingdom Plantae. A match whose resolved kingdom key is
+# present and differs from this is a non-plant (e.g. a fungus or animal) and is
+# rejected before it can reach the canonical plant table.
+PLANTAE_KINGDOM_KEY = _plantae_kingdom_key()
 
 WHITESPACE_RE = re.compile(r"\s+")
 
@@ -259,6 +270,21 @@ def determine_decision(row: pd.Series) -> Tuple[str, str]:
 
     if not matched_name and not accepted_name:
         return "rejected", "Rejected because GBIF returned no usable match."
+
+    # Taxonomic-domain guard: keep the plant table to the plant kingdom. GBIF can
+    # return a taxonomically correct but non-plant match for a bare name (e.g.
+    # the mushrooms Ganoderma lucidum / Volvariella volvacea resolve to kingdom
+    # Fungi, key 5). Reject any match whose resolved kingdom key is present and
+    # is not Plantae. An empty kingdom key means GBIF gave no kingdom node, so we
+    # do not penalize it here and let the normal match rules decide.
+    kingdom_key = normalize_text(row.get("gbif_kingdom_key", ""))
+    if kingdom_key and kingdom_key != PLANTAE_KINGDOM_KEY:
+        return (
+            "rejected",
+            f"Rejected because GBIF resolved this name to kingdom key '{kingdom_key}', "
+            f"which is not Plantae (expected '{PLANTAE_KINGDOM_KEY}'); non-plant taxa "
+            "are excluded from the plant table.",
+        )
 
     if (
         match_type in ACCEPTED_MATCH_TYPES
@@ -490,10 +516,36 @@ def build_canonical(
     logging.info("Writing rejected rows: %s", rejected_path)
     write_csv(rejected_df, rejected_path)
 
-    logging.info(
-        "Writing empty manually accepted review file: %s", manually_accepted_review_path
-    )
-    review_df.head(0).to_csv(manually_accepted_review_path, index=False)
+    # Seed the manual-review file WITHOUT destroying curator work. This file is
+    # populated by the resolve_manual_reviews stage (from manual_review_decisions.csv)
+    # and consumed by part 2. A blind overwrite here silently wiped 24 human-verified
+    # species on every rerun, so only write the empty header stub when no populated
+    # file already exists.
+    preserve_existing = False
+    if manually_accepted_review_path.exists():
+        try:
+            existing = pd.read_csv(
+                manually_accepted_review_path,
+                dtype=str,
+                keep_default_na=False,
+                na_filter=False,
+            )
+        except Exception:
+            existing = pd.DataFrame()
+        preserve_existing = not existing.empty
+
+    if preserve_existing:
+        logging.warning(
+            "Preserving existing populated manual-review file (%d rows), not overwriting: %s",
+            len(existing),
+            manually_accepted_review_path,
+        )
+    else:
+        logging.info(
+            "Writing empty manually accepted review file: %s",
+            manually_accepted_review_path,
+        )
+        review_df.head(0).to_csv(manually_accepted_review_path, index=False)
 
     result = BuildCanonicalResult(
         input_rows=len(classified_df),

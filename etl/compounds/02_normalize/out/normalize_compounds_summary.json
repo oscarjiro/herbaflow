@@ -1,19 +1,19 @@
 {
   "module": "compounds",
   "step": "02_normalize",
-  "run_id": "compounds_20260602_131155",
+  "run_id": "compounds_20260713_004158",
   "input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\01_extract\\out\\plants_compounds_staged.csv",
   "output_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\compounds_normalized.csv",
   "mapping_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\plant_mapping_resolution.csv",
   "review_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\compound_review.csv",
   "row_count": 21922,
-  "review_row_count": 944,
+  "review_row_count": 1302,
   "status_counts": {
-    "ready": 20978,
-    "review": 944
+    "ready": 20620,
+    "review": 1302
   },
   "cas_valid_count": 21757,
   "cas_invalid_count": 165,
-  "generated_at": "2026-06-02T13:11:57+00:00",
-  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\logs\\normalize_compounds_compounds_20260602_131155.log"
+  "generated_at": "2026-07-13T00:42:00+00:00",
+  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\logs\\normalize_compounds_compounds_20260713_004158.log"
 }

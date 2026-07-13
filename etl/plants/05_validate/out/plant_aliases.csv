@@ -1,557 +1,590 @@
 alias_id,plant_id,alias_name,alias_key,alias_type,retrieved_at
-a07d334a-ee31-56da-8b4c-7d8b3f4ebb1e,00b03b5a-621c-5e2d-8b32-64177d61e42c,Momordica cochinchinensis (Lour.) Spreng.,momordica_cochinchinensis_lour_spreng,normalized_variant,2026-06-02T16:45:51+00:00
-a96bafa9-938a-5db9-bde6-c2fc2c363ce0,0187160f-7aa7-596a-bb72-ae602e1dfc96,Garcinia dulcis (Roxb.) Kurz,garcinia_dulcis_roxb_kurz,normalized_variant,2026-06-02T16:45:51+00:00
-67d69254-22b7-5c7d-828e-511beefba721,01a5cbee-6a28-5eef-bcd5-ed97d8b74360,Cinnamomum verum J.Presl,cinnamomum_verum_j_presl,normalized_variant,2026-06-02T16:45:51+00:00
-8770ca28-c513-54fa-89a7-a13e3e72fa3c,01a5cbee-6a28-5eef-bcd5-ed97d8b74360,Cinnamomum zeylanicum Blume,cinnamomum_zeylanicum_blume,synonym_variant,2026-06-02T16:45:51+00:00
-001aa846-c62e-5308-879f-09683af9d846,01f6e126-03d2-5370-84d4-64f8fcf12f1d,Boesenbergia rotunda (L.) Mansf.,boesenbergia_rotunda_l_mansf,normalized_variant,2026-06-02T16:45:51+00:00
-dc30efb8-8daf-50e4-a95c-a4ec6ca659e5,01f6e126-03d2-5370-84d4-64f8fcf12f1d,Boesenbergia pandurata (Roxb.) Schltr.,boesenbergia_pandurata_roxb_schltr,synonym_variant,2026-06-02T16:45:51+00:00
-20330aa4-c52a-5aa5-9136-b57f42a4f4e2,021f486c-9a50-5cc2-ae22-bdb5f380427f,Nicotiana tabacum L.,nicotiana_tabacum_l,normalized_variant,2026-06-02T16:45:52+00:00
-30f0ad38-0af2-5d30-b946-6810aa1e732a,02cd7868-fe4e-5d13-b363-ac922c7b456d,Ficus septica Burm.fil.,ficus_septica_burm_fil,normalized_variant,2026-06-02T16:45:51+00:00
-9c8c821e-9e25-5c28-957f-545bc6828b4f,0347985e-e707-5b9a-90af-2fd1bef87b49,Volvariella volvacea (Bull.) Singer,volvariella_volvacea_bull_singer,normalized_variant,2026-06-02T16:45:52+00:00
-317e9839-b676-5307-93d9-5efd9c482d4e,03a91385-273b-50f6-aba7-43ad7c10f881,Pangium edule Reinw.,pangium_edule_reinw,normalized_variant,2026-06-02T16:45:52+00:00
-5ae21a8f-9a4c-5211-8316-cc9273a3089d,0403012d-3f06-52b1-9448-8cd2550103b7,Callicarpa candicans (Burm.f.) Hochr.,callicarpa_candicans_burm_f_hochr,normalized_variant,2026-06-02T16:45:51+00:00
-6633ab8f-40f1-55c9-a701-84ac78a7f8f9,04aaf9c0-d503-5693-b9d2-afdb9178d95f,Solanum torvum Sw.,solanum_torvum_sw,normalized_variant,2026-06-02T16:45:52+00:00
-2ef9d046-21a4-502f-b6a9-f36812292f32,05eb3d4c-41fd-573b-b118-1aebf42d6303,Artemisia vulgaris L.,artemisia_vulgaris_l,normalized_variant,2026-06-02T16:45:51+00:00
-8e95db1a-7935-5692-b5b4-8a88fcbf3607,06609fc6-66b3-5fe9-914f-90888f85a556,Alternanthera philoxeroides (Mart.) Griseb.,alternanthera_philoxeroides_mart_griseb,normalized_variant,2026-06-02T16:45:51+00:00
-58f2a953-28ea-5d0d-bfb0-1a0d3c07aed4,0763450f-c107-54d8-97c7-7208bf30e774,Rhinacanthus nasutus (L.) Kuntze,rhinacanthus_nasutus_l_kuntze,normalized_variant,2026-06-02T16:45:52+00:00
-9bc4a868-ea09-5c1a-8c87-4e9efd14a185,07bd77ec-8d26-5198-80b6-747f38900216,Achyranthes aspera L.,achyranthes_aspera_l,normalized_variant,2026-06-02T16:45:51+00:00
-5d041133-a548-578c-a87d-ba833311fc59,0833026e-d05d-51b3-8fbc-444d151b65ec,Persea americana Mill.,persea_americana_mill,normalized_variant,2026-06-02T16:45:52+00:00
-63a196d0-5d1d-59cf-84bb-a7f8e92b47b1,0833026e-d05d-51b3-8fbc-444d151b65ec,Persea gratissima C.F.Gaertn.,persea_gratissima_c_f_gaertn,synonym_variant,2026-06-02T16:45:52+00:00
-96d15ebd-6e90-521c-a1ad-b897bde54132,083318e1-aca9-5fb6-a100-0b626f2a3fbc,Sterculia foetida L.,sterculia_foetida_l,normalized_variant,2026-06-02T16:45:52+00:00
-aa43761d-753d-5781-9ea9-2fcef0e4fe4b,0854a2b6-6971-5c6e-bcbd-f3cecb691b95,Ocimum basilicum L.,ocimum_basilicum_l,normalized_variant,2026-06-02T16:45:52+00:00
-17602d14-5c81-5dd3-9695-df70f565db8b,086bc03b-81e5-5777-9c8d-c881b3b83e58,Scutellaria discolor Wall. ex Benth.,scutellaria_discolor_wall_ex_benth,normalized_variant,2026-06-02T16:45:52+00:00
-faedadce-9cc9-5d1e-8911-40ad41b4c487,08d4e2df-6381-5469-8311-e7ad2b60a0a7,Phyllanthus niruri L.,phyllanthus_niruri_l,normalized_variant,2026-06-02T16:45:52+00:00
-d85efa42-36f9-589d-952e-7df3e1c29540,08d62596-c5d1-5a2e-91ea-e210c5235e5a,Glycine max (L.) Merr.,glycine_max_l_merr,normalized_variant,2026-06-02T16:45:51+00:00
-72e22821-c255-595b-8e0f-3be2df6294cb,08f944e4-e577-5111-93c9-66049e72e970,Bauhinia purpurea L.,bauhinia_purpurea_l,normalized_variant,2026-06-02T16:45:51+00:00
-6a432c0e-ba69-5ac2-a30d-766463587a2e,09aafced-6936-5299-a535-62d23edad055,Echinacea purpurea (L.) Moench,echinacea_purpurea_l_moench,normalized_variant,2026-06-02T16:45:51+00:00
-8d8fb150-3f6a-510c-bf53-0e03c640277c,09c167fb-5cb9-50ec-8087-eee2f9ca2c18,Rivina humilis L.,rivina_humilis_l,normalized_variant,2026-06-02T16:45:52+00:00
-8eae155f-f9d5-5ec5-84dc-4db245f23f8e,0ab2659c-3ebf-550f-851f-291b95753a80,Aegle marmelos (L.) Corrêa,aegle_marmelos_l_corr_a,normalized_variant,2026-06-02T16:45:51+00:00
-62fa6101-d133-53b2-9566-2c86cb716617,0af385cb-6b6d-5aa9-a698-0125883e7279,Pandanus conoideus Lam.,pandanus_conoideus_lam,normalized_variant,2026-06-02T16:45:52+00:00
-caf12d15-77f6-5f73-8ec5-2084b4b19688,0b49e5e5-a40e-5f47-9641-b946c776811f,Paederia foetida L.,paederia_foetida_l,normalized_variant,2026-06-02T16:45:52+00:00
-a19c93da-06a8-5bca-8931-f7063e2c4eed,0b49e5e5-a40e-5f47-9641-b946c776811f,Paederia scandens (Lour.) Merr.,paederia_scandens_lour_merr,synonym_variant,2026-06-02T16:45:52+00:00
-a42478b4-bfa5-5144-ab06-246bdf02b662,0b821a53-15d0-51ac-ab9f-bbf033aba403,Vigna radiata (L.) R.Wilczek,vigna_radiata_l_r_wilczek,normalized_variant,2026-06-02T16:45:52+00:00
-610f907a-4004-5368-a8d7-610d05af99a6,0b96eb85-e853-5640-887c-a1eebeaee223,Senna sophera (L.) Roxb.,senna_sophera_l_roxb,normalized_variant,2026-06-02T16:45:52+00:00
-878f65b3-c6e6-5265-9c36-2b26428d850e,0d529a87-cc65-51fd-b1f3-d8634d747517,Glycine max subsp. soja (Siebold & Zucc.) H.Ohashi,glycine_max_subsp_soja_siebold_zucc_h_ohashi,normalized_variant,2026-06-02T16:45:51+00:00
-6f6fd71a-8a10-5450-9948-6e695eacbc30,0d529a87-cc65-51fd-b1f3-d8634d747517,Glycine soja Siebold & Zucc.,glycine_soja_siebold_zucc,synonym_variant,2026-06-02T16:45:51+00:00
-71a3c6cd-de72-5952-bc0c-90cfd9eecd2c,0d5f6e9d-7447-5837-a4f1-44e4eb507a22,Santalum album L.,santalum_album_l,normalized_variant,2026-06-02T16:45:52+00:00
-6f564e79-19df-5d1d-a439-cfdecfe8346e,0d6adc23-9d12-5626-bfa7-0f66658f0f35,Physalis peruviana L.,physalis_peruviana_l,normalized_variant,2026-06-02T16:45:52+00:00
-cd22d34e-e4d4-530f-9088-b153628174d7,0de0e5d0-e509-544b-b284-628244ac66dd,Curcuma heyneana Valeton & Zijp,curcuma_heyneana_valeton_zijp,normalized_variant,2026-06-02T16:45:51+00:00
-55ace97d-1817-59cd-8fa7-b6e9089c9e80,0deb1f2c-bbab-5e68-9908-855a3cf03ab0,Premna corymbosa Rottler,premna_corymbosa_rottler,normalized_variant,2026-06-02T16:45:52+00:00
-9487d670-f03c-580e-ac29-3ddbe84a7983,0e01015a-24e4-5ef5-a0f0-8fba3f9065ea,Leonurus sibiricus L.,leonurus_sibiricus_l,normalized_variant,2026-06-02T16:45:51+00:00
-069bde7c-38c2-5601-85f2-76733876e77a,0e748d0a-af8c-5fbb-9bd0-228b3e989f08,Malus sylvestris Mill.,malus_sylvestris_mill,normalized_variant,2026-06-02T16:45:51+00:00
-4b4df545-a1e9-5122-b85d-8ba401dfcecb,0e9b2ea8-ea18-5726-9710-30d9dc11e306,Euchresta horsfieldii (Lesch.) Benn.,euchresta_horsfieldii_lesch_benn,normalized_variant,2026-06-02T16:45:51+00:00
-562a89bb-ac44-5342-93b9-007f40913284,0fdd9619-aff6-5f46-9b47-f3cb8909fee3,Cerbera manghas L.,cerbera_manghas_l,normalized_variant,2026-06-02T16:45:51+00:00
-0dde08d1-d8ef-5a8e-b6c1-a281fc82d1eb,1024dd44-90dc-51ce-a131-07032689a3dc,Morinda citrifolia L.,morinda_citrifolia_l,normalized_variant,2026-06-02T16:45:52+00:00
-4dccbaa7-b72e-504f-bc46-d14776c0b504,1059063f-370b-514f-9fe0-798361a65895,Ficus pumila L.,ficus_pumila_l,normalized_variant,2026-06-02T16:45:51+00:00
-a3008233-c245-5010-9891-8d13845de13b,1062b492-225b-59c1-8d18-a9ce2be88d47,Trigastrotheca pentaphylla (L.) Thulin,trigastrotheca_pentaphylla_l_thulin,normalized_variant,2026-06-02T16:45:52+00:00
-86d988b5-220e-55eb-bcb7-64852cab497a,1062b492-225b-59c1-8d18-a9ce2be88d47,Mollugo pentaphylla L.,mollugo_pentaphylla_l,synonym_variant,2026-06-02T16:45:52+00:00
-ad581ef1-84eb-554d-af26-64f1db2e2c01,10e0f3db-b4c4-5905-8698-f70b0bc2a5a6,Litsea cubeba (Lour.) Pers.,litsea_cubeba_lour_pers,normalized_variant,2026-06-02T16:45:51+00:00
-13a6179c-bedb-541c-815e-ba39113e19a4,11397f99-feaa-557c-8b82-e7b07741a2fc,Pterocarpus indicus Willd.,pterocarpus_indicus_willd,normalized_variant,2026-06-02T16:45:52+00:00
-dc56f5e3-c595-560e-bf1a-9f5b831dd14d,1284cd35-3323-5d6c-a448-3164847fc7b5,Artemisia cina O.C.Berg & Schmidt,artemisia_cina_o_c_berg_schmidt,normalized_variant,2026-06-02T16:45:51+00:00
-5bd8f90b-54c1-5bcc-bf6a-9df3e780e1e9,12e10725-0fd3-505a-9fe2-75a96247a29c,Morus alba L.,morus_alba_l,normalized_variant,2026-06-02T16:45:52+00:00
-8a9c9028-e809-5777-9858-9841220ac333,12efbb3b-294b-590a-9a72-6b074dd9cf2e,Pontederia crassipes Mart.,pontederia_crassipes_mart,normalized_variant,2026-06-02T16:45:52+00:00
-1585be4e-45ea-5df3-8fed-2b3a6641e49b,12efbb3b-294b-590a-9a72-6b074dd9cf2e,Eichhornia crassipes (Mart.) Solms,eichhornia_crassipes_mart_solms,synonym_variant,2026-06-02T16:45:52+00:00
-d19f4052-fef5-504a-ba90-7d05dd304ab3,138e60b9-7feb-552a-9256-e60cbe794341,Ipomoea batatas (L.) Lam.,ipomoea_batatas_l_lam,normalized_variant,2026-06-02T16:45:51+00:00
-99cffb5b-1d56-56cc-8010-6b5afd30a007,13cbe641-e59d-5c2b-acd3-e781409ef45e,Melia azedarach L.,melia_azedarach_l,normalized_variant,2026-06-02T16:45:51+00:00
-b153923a-16be-5006-828c-113974495d4b,155a3638-b4de-5556-809a-4cc137946db6,Allium fistulosum L.,allium_fistulosum_l,normalized_variant,2026-06-02T16:45:51+00:00
-6c6324bf-2cc7-5b32-9408-c193b46728de,1650f96d-00e3-5d68-9e06-358134624a4d,Senna alata (L.) Roxb.,senna_alata_l_roxb,normalized_variant,2026-06-02T16:45:52+00:00
-c6ce59a9-979e-58b0-833f-a3e51857e8eb,1650f96d-00e3-5d68-9e06-358134624a4d,Cassia alata L.,cassia_alata_l,synonym_variant,2026-06-02T16:45:52+00:00
-7ac7505b-c83d-51e3-811a-300d8aa82863,1748e875-bf72-591b-b49e-8c73cecacafb,Strobilanthes crispa (L.) Blume,strobilanthes_crispa_l_blume,normalized_variant,2026-06-02T16:45:52+00:00
-b4fd9aa9-81b9-56cb-88e8-117370951190,17a85e11-bc48-5804-8ade-253f4ed45c96,Stephania venosa (Blume) Spreng.,stephania_venosa_blume_spreng,normalized_variant,2026-06-02T16:45:52+00:00
-73453394-5dd4-5d5b-af5c-203078e5ff15,19c8dda5-5f76-5531-90e5-9a444be5bed8,Rhodomyrtus tomentosa (Aiton) Hassk.,rhodomyrtus_tomentosa_aiton_hassk,normalized_variant,2026-06-02T16:45:52+00:00
-5b2dd22d-021b-5eb7-a24d-3158c644e6f8,1a2a2f3c-2693-533b-afe1-5b18300a0e89,Passiflora foetida L.,passiflora_foetida_l,normalized_variant,2026-06-02T16:45:52+00:00
-7b340654-07c4-5516-9958-61ac3b2d3bd8,1ae12ba1-d08e-5629-9c80-09f65b518712,Dioscorea hispida Dennst.,dioscorea_hispida_dennst,normalized_variant,2026-06-02T16:45:51+00:00
-839518bc-9491-5ccc-8654-fafb366e909e,1af125da-671a-5be8-90a7-62ed68844d69,Urena lobata L.,urena_lobata_l,normalized_variant,2026-06-02T16:45:52+00:00
-07dc1721-f337-5e1b-a946-6ea7adaad500,1b485499-c7c1-5c44-9b4a-6032715e827f,Gossypium herbaceum L.,gossypium_herbaceum_l,normalized_variant,2026-06-02T16:45:51+00:00
-eb4d65a6-116c-5132-8f2c-40d17b69aab8,1b5fd7ac-4941-56c4-af2f-d6735f37c9e6,Areca catechu L.,areca_catechu_l,normalized_variant,2026-06-02T16:45:51+00:00
-e3998fef-8e48-54f4-a6b2-bcac2a870731,1b772f2d-9216-5927-84d5-8b0cb86c71bd,Mesua ferrea L.,mesua_ferrea_l,normalized_variant,2026-06-02T16:45:51+00:00
-8a7bd093-ddd1-5827-a11b-4afae2a29fa5,1b81f96c-cdb9-5515-b718-acb4eeef7663,Madhuca longifolia var. latifolia (Roxb.) A.Chev.,madhuca_longifolia_var_latifolia_roxb_a_chev,normalized_variant,2026-06-02T16:45:51+00:00
-5fdf61f4-df5e-54f4-a46a-92d61fe4ca43,1b81f96c-cdb9-5515-b718-acb4eeef7663,Madhuca indica J.F.Gmel.,madhuca_indica_j_f_gmel,synonym_variant,2026-06-02T16:45:51+00:00
-191e5bc0-d096-554c-9cfb-97994a776bb3,1bcd3718-4829-5558-a1d2-12b0bc8061de,Helicteres isora L.,helicteres_isora_l,normalized_variant,2026-06-02T16:45:51+00:00
-ba9212d8-368e-5d89-9f8c-d4193bd5cb2a,1bcdf520-e8fa-59d3-8fca-e17d63ba226e,Arachis hypogaea L.,arachis_hypogaea_l,normalized_variant,2026-06-02T16:45:51+00:00
-d9d3ca73-d840-5515-a968-71d580d32f53,1c0845b4-f8f7-5635-8668-3cb4cb68d12d,Trigonella foenum-graecum L.,trigonella_foenum_graecum_l,normalized_variant,2026-06-02T16:45:52+00:00
-4a1dde76-7174-5cd3-813b-a9065a2e0102,1c9107e3-ade0-5135-a35a-7ec88f15668a,Thymus vulgaris L.,thymus_vulgaris_l,normalized_variant,2026-06-02T16:45:52+00:00
-73be9b11-e10f-5d70-9af6-33a1acee6b27,1ccee74c-af2c-5c42-8b0c-0e5bb9d8ac44,Taxus wallichiana Zucc.,taxus_wallichiana_zucc,normalized_variant,2026-06-02T16:45:52+00:00
-4559d448-404e-53bc-b4c9-08a78caddbd6,1ccee74c-af2c-5c42-8b0c-0e5bb9d8ac44,Taxus sumatrana (Miq.) de Laub.,taxus_sumatrana_miq_de_laub,synonym_variant,2026-06-02T16:45:52+00:00
-155d9ef4-4e43-509c-a605-9b79fcfd7291,1d20c0c6-2414-5066-9946-432679cbc06b,Hydrocotyle sibthorpioides Lam.,hydrocotyle_sibthorpioides_lam,normalized_variant,2026-06-02T16:45:51+00:00
-e95211ca-55df-5b47-af70-630426493605,1d3870dd-d01f-5067-a9f3-16e92df541c1,Lantana trifolia L.,lantana_trifolia_l,normalized_variant,2026-06-02T16:45:51+00:00
-f23e45f3-9889-5662-bc6e-e7ac1b808ced,1e1b00de-1138-50ee-bd98-d20ad26bcb0a,Coix lacryma-jobi L.,coix_lacryma_jobi_l,normalized_variant,2026-06-02T16:45:51+00:00
-b899d82d-6493-557b-98d9-5136c488d6a9,1ea07dd2-99fd-5ef6-b7c1-88e614a6f857,Brachypterum robustum (Roxb. ex DC.) Dalzell & A.Gibson,brachypterum_robustum_roxb_ex_dc_dalzell_a_gibson,normalized_variant,2026-06-02T16:45:51+00:00
-dce6066d-421b-5a94-be93-72576b50a644,1ea07dd2-99fd-5ef6-b7c1-88e614a6f857,Derris robusta (Roxb. ex DC.) Benth.,derris_robusta_roxb_ex_dc_benth,synonym_variant,2026-06-02T16:45:51+00:00
-577a6617-a5a1-5cb2-a59c-2f7380cd1c1e,1fb5f087-89eb-5ae7-97d2-06a0db481291,Colocasia esculenta (L.) Schott,colocasia_esculenta_l_schott,normalized_variant,2026-06-02T16:45:51+00:00
-02fc0104-e45f-5319-aadc-ca8a06d58cdc,210454fe-79b0-5771-b056-96a7bdcaeecb,Ayapana triplinervis (Vahl) R.M.King & H.Rob.,ayapana_triplinervis_vahl_r_m_king_h_rob,normalized_variant,2026-06-02T16:45:51+00:00
-631b735b-043e-5753-afae-0b14a6fd41ac,210454fe-79b0-5771-b056-96a7bdcaeecb,Eupatorium triplinerve Vahl,eupatorium_triplinerve_vahl,synonym_variant,2026-06-02T16:45:51+00:00
-7cda6547-d189-5079-b0b4-64c5c0e9e7dc,22873982-8873-5dc2-89b5-eea30788b71b,Cassia fistula L.,cassia_fistula_l,normalized_variant,2026-06-02T16:45:51+00:00
-4edb9f35-67ae-575e-ae9b-c8a9a73abcc7,23188d80-167e-54a9-853a-d9df68f52164,Manilkara zapota (L.) P.Royen,manilkara_zapota_l_p_royen,normalized_variant,2026-06-02T16:45:51+00:00
-bd24dc90-1bbb-5c67-9e3c-326d8486813a,235b9383-49fe-5229-83a5-8c3b6c086a74,Terminalia bellirica (Gaertn.) Roxb.,terminalia_bellirica_gaertn_roxb,normalized_variant,2026-06-02T16:45:52+00:00
-1623ce75-6f0c-5cba-8e11-567495a18d36,250e95f2-a8c5-53da-a24a-59f3a3c616d3,Cannabis sativa L.,cannabis_sativa_l,normalized_variant,2026-06-02T16:45:51+00:00
-1c46fc92-5b46-5675-a5b9-cdba81e105c2,26023f6b-046f-5f38-871b-4862f4a180ad,Ludwigia octovalvis (Jacq.) P.H.Raven,ludwigia_octovalvis_jacq_p_h_raven,normalized_variant,2026-06-02T16:45:51+00:00
-c41e2a80-be3a-5089-ac63-cf8c00c51fbe,2699fc0b-ba70-5421-87fb-e4f9698879d8,Turnera ulmifolia L.,turnera_ulmifolia_l,normalized_variant,2026-06-02T16:45:52+00:00
-847d89f4-9592-5aa6-bc73-849679552c33,26c2c50b-d350-5022-b5ca-80fa9a0a5093,Jatropha gossypiifolia L.,jatropha_gossypiifolia_l,normalized_variant,2026-06-02T16:45:51+00:00
-2e1ac580-1c7b-5aba-826c-d209711a9b42,26cff3ce-c413-5a62-9884-dcc59e0d3f8e,Pluchea indica (L.) Less.,pluchea_indica_l_less,normalized_variant,2026-06-02T16:45:52+00:00
-1c6b9026-ea6a-5deb-b8e2-33e2233a01b6,2772c6e1-69e9-5a24-9abc-33fd1944a2bf,Vitex trifolia L.,vitex_trifolia_l,normalized_variant,2026-06-02T16:45:52+00:00
-cb075ef0-8e7c-5a52-88e0-93c262146ef4,2878ff7d-24d4-53f0-b0bc-e1da962af77d,Abelmoschus moschatus (L.) Medik.,abelmoschus_moschatus_l_medik,normalized_variant,2026-06-02T16:45:51+00:00
-3ba2cb78-25c0-5402-a18d-3e6295c3907c,2a236817-2e70-5939-8218-889a20421369,Phaseolus mungo Wall.,phaseolus_mungo_wall,normalized_variant,2026-06-02T16:45:52+00:00
-a005e86a-19a0-5367-8e4e-f8ebfbfdf0ab,2a2bb525-2b32-5550-a721-51d0ea347405,Brassica oleracea L.,brassica_oleracea_l,normalized_variant,2026-06-02T16:45:51+00:00
-45d4f54c-c838-5fee-a33c-f5d96659ce6a,2c44d835-2866-547f-8a65-df652a779b8f,Eryngium foetidum L.,eryngium_foetidum_l,normalized_variant,2026-06-02T16:45:51+00:00
-dc5aadd1-84fc-54f8-9a2d-503d2accb285,2c8ed17e-222f-5997-bf2b-d540cfb59dd8,Nerium oleander L.,nerium_oleander_l,normalized_variant,2026-06-02T16:45:52+00:00
-f175ff5b-80f7-5c85-8628-34228731a474,2d8555e8-ced4-5bfa-b79d-fbc8d61eb517,Euphorbia antiquorum L.,euphorbia_antiquorum_l,normalized_variant,2026-06-02T16:45:51+00:00
-2ae99b03-8853-5802-acd5-8d8ab63a4cc1,2de7a6a7-1e52-50a0-9374-06507220488f,Jatropha curcas L.,jatropha_curcas_l,normalized_variant,2026-06-02T16:45:51+00:00
-8b6e0eb0-f3d0-5ef5-af23-7f5bbdc3b5b2,2dfd454c-52a5-521c-8bf4-9edda2dcbc03,Orthosiphon aristatus (Blume) Miq.,orthosiphon_aristatus_blume_miq,normalized_variant,2026-06-02T16:45:52+00:00
-97057c13-3ffe-5147-a406-46e739bdbe56,2e6c474a-aac5-5924-9a70-0491d31e0845,Derris trifoliata Lour.,derris_trifoliata_lour,normalized_variant,2026-06-02T16:45:51+00:00
-bf56672e-6f6e-5d81-9d72-d47798425e37,2e7b23b2-8822-5f8b-b469-fcc4ef6912b5,Mentha arvensis L.,mentha_arvensis_l,normalized_variant,2026-06-02T16:45:51+00:00
-f852dd41-cf61-5ccb-a363-119e41830c63,2f234e16-e122-5d0d-a323-251811aec856,Bidens pilosa L.,bidens_pilosa_l,normalized_variant,2026-06-02T16:45:51+00:00
-f356b045-0ccc-509e-8a3e-9897d36bd7db,2f8e7caa-b19a-5c2e-80c3-186717458772,Citrus medica L.,citrus_medica_l,normalized_variant,2026-06-02T16:45:51+00:00
-a4003b86-93b7-561a-8a8d-ee1cb62ec626,2fee1eb3-ad8b-5238-9643-b53bb462b835,Magnolia × alba (DC.) Figlar,magnolia_alba_dc_figlar,normalized_variant,2026-06-02T16:45:51+00:00
-1053f165-0d78-5081-9c63-2eda3ecd21c8,2fee1eb3-ad8b-5238-9643-b53bb462b835,Michelia × alba DC.,michelia_alba_dc,synonym_variant,2026-06-02T16:45:51+00:00
-528b570c-373d-5f20-85c7-2be41c43818a,30e55351-849a-53ad-b6f0-be441a42cd1d,Vanilla planifolia Andrews,vanilla_planifolia_andrews,normalized_variant,2026-06-02T16:45:52+00:00
-aa3b97f4-3656-509d-bf20-2d0d70594d68,31918c3a-d147-522b-bc26-c09505d4920e,Uncaria gambir (W.Hunter) Roxb.,uncaria_gambir_w_hunter_roxb,normalized_variant,2026-06-02T16:45:52+00:00
-717681cf-24ca-5fc2-901b-dd016782661a,31c70734-4d61-5fc1-b0ba-49f7e87cec76,Excoecaria agallocha L.,excoecaria_agallocha_l,normalized_variant,2026-06-02T16:45:51+00:00
-c256e1d6-e110-58f8-b034-e5063647f7fd,3201baaf-b192-5961-90f7-0fce9a80b844,Glycyrrhiza glabra L.,glycyrrhiza_glabra_l,normalized_variant,2026-06-02T16:45:51+00:00
-d3157222-1e60-54d3-bee6-e2c7a509bbac,32a1daf2-c2b2-52ba-8062-a83d1d95d4cd,Amaranthus tricolor L.,amaranthus_tricolor_l,normalized_variant,2026-06-02T16:45:51+00:00
-48eb3a1d-8ae5-513e-bcb7-b748db38ecef,32db5868-6422-5fc4-aadb-90479c36369d,Foeniculum vulgare Mill.,foeniculum_vulgare_mill,normalized_variant,2026-06-02T16:45:51+00:00
-871bd9fc-884a-5d05-a5d4-d473562d55e5,3304f9d4-5c15-5113-aab5-ce58dcbbdab4,Plumeria rubra L.,plumeria_rubra_l,normalized_variant,2026-06-02T16:45:52+00:00
-0ded0938-7323-5d8d-b4e2-d2ec8c15800b,3304f9d4-5c15-5113-aab5-ce58dcbbdab4,Plumeria acutifolia Poir.,plumeria_acutifolia_poir,synonym_variant,2026-06-02T16:45:52+00:00
-dbe2f093-f933-51f8-9459-052772969339,330ce16f-69c4-5527-9724-517e85fb5fa3,Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg.,hevea_brasiliensis_willd_ex_a_juss_m_ll_arg,normalized_variant,2026-06-02T16:45:51+00:00
-23960790-4de7-5551-b9a3-791d9625a5ee,3323e797-d9a6-5d8f-9ff3-b51aa13fb671,Angelica keiskei (Miq.) Koidz.,angelica_keiskei_miq_koidz,normalized_variant,2026-06-02T16:45:51+00:00
-93834954-9bf1-5466-b9c4-1bc08e335ea4,3361f727-f4d6-50fc-a01c-d4a812b9ccb0,Symphytum officinale L.,symphytum_officinale_l,normalized_variant,2026-06-02T16:45:52+00:00
-f384d0d8-c7ef-5297-ad16-0cdb78ac6c0e,33687568-e6d9-5ba7-9ad3-60fc052a5b54,Sapindus rarak DC.,sapindus_rarak_dc,normalized_variant,2026-06-02T16:45:52+00:00
-1a22190f-20a6-5ae5-9540-b344357dcbaa,33b527b3-6d04-503c-9f82-5ead3fd9421a,Selenicereus undatus (Haw.) D.R.Hunt,selenicereus_undatus_haw_d_r_hunt,normalized_variant,2026-06-02T16:45:52+00:00
-ff467ed4-ba8c-508d-a5ab-1eb544ab6791,33b527b3-6d04-503c-9f82-5ead3fd9421a,Hylocereus undatus (Haw.) Britton & Rose,hylocereus_undatus_haw_britton_rose,synonym_variant,2026-06-02T16:45:52+00:00
-018312af-baeb-5a23-b3cb-49ba3e7cf3ed,34b09199-8c78-5a37-8a5b-3cb788f67cfd,Cananga odorata (Lam.) Hook.f. & Thomson,cananga_odorata_lam_hook_f_thomson,normalized_variant,2026-06-02T16:45:51+00:00
-f8133d35-7f6e-5c7f-bbfd-69c35a09f43b,359a7bcf-85d3-5fb3-9ee7-d2c9f3fb6995,Rauvolfia verticillata (Lour.) Baill.,rauvolfia_verticillata_lour_baill,normalized_variant,2026-06-02T16:45:52+00:00
-699c7f09-baf9-5d88-b2d8-1d317dd70e09,35b7c4bb-1cc9-593f-b325-1a73b927e4e5,Cycas revoluta Thunb.,cycas_revoluta_thunb,normalized_variant,2026-06-02T16:45:51+00:00
-75d24a65-058f-586a-ad96-5a1403b1bb35,36977bfa-3568-57fa-8f9e-3bb7eb534b7a,Annona mucosa Jacq.,annona_mucosa_jacq,normalized_variant,2026-06-02T16:45:51+00:00
-258a29c9-6ee3-5b1b-ba36-9ad6c9ff289b,36977bfa-3568-57fa-8f9e-3bb7eb534b7a,Rollinia mucosa (Jacq.) Baill.,rollinia_mucosa_jacq_baill,synonym_variant,2026-06-02T16:45:51+00:00
-4e4e0cf7-7032-58db-9482-4913eec30378,374810f3-4865-56b1-ac16-96ceb109ffc1,Amaranthus spinosus L.,amaranthus_spinosus_l,normalized_variant,2026-06-02T16:45:51+00:00
-c9ceae4f-e618-5fae-aad9-95fcc0832418,37f8783d-72d2-5ce3-bca1-091d2c989bed,Crocus sativus L.,crocus_sativus_l,normalized_variant,2026-06-02T16:45:51+00:00
-906e5b35-31bb-5dce-a722-55402791037f,384a8fa5-2563-55d9-92d8-bf83d7683747,Oryza sativa L.,oryza_sativa_l,normalized_variant,2026-06-02T16:45:52+00:00
-35b03d59-e53c-5be4-9ec8-de3ba4a3820b,386644c3-5fe3-5bec-8bda-75381acb1968,Cyanthillium cinereum (L.) H.Rob.,cyanthillium_cinereum_l_h_rob,normalized_variant,2026-06-02T16:45:51+00:00
-783a76d9-9bfb-5b02-ac3a-58547e234ee6,386644c3-5fe3-5bec-8bda-75381acb1968,Vernonia cinerea (L.) Less.,vernonia_cinerea_l_less,synonym_variant,2026-06-02T16:45:51+00:00
-e9ac446b-7715-582c-96a6-5ee8420b97ed,38c13651-8c9c-5efd-b033-4c39ce9f8eb3,Styrax benzoin Dryand.,styrax_benzoin_dryand,normalized_variant,2026-06-02T16:45:52+00:00
-5b727837-8bd5-5817-8f6a-3d8ca96ce30a,39b0f416-813e-574b-9bba-b17700bedfc0,Vitex negundo L.,vitex_negundo_l,normalized_variant,2026-06-02T16:45:52+00:00
-3232aa6e-26e9-501a-80ee-0e95a77ff92a,3ad6c6b1-055a-5a9d-b6b5-186af5047d29,Cibotium barometz (L.) J.Sm.,cibotium_barometz_l_j_sm,normalized_variant,2026-06-02T16:45:51+00:00
-6001222e-d2cc-5674-9682-4d2cab99ff7c,3b2caea6-c831-588d-877f-aed509f9c5ea,Ixora chinensis Lam.,ixora_chinensis_lam,normalized_variant,2026-06-02T16:45:51+00:00
-d93fa9aa-7e54-59cb-bde0-3f8ede8b7b6e,3b466569-a754-56af-82cc-36c30a5176de,Mesosphaerum suaveolens (L.) Kuntze,mesosphaerum_suaveolens_l_kuntze,normalized_variant,2026-06-02T16:45:51+00:00
-97dc0b51-45f3-5871-afb4-51069af97c67,3b466569-a754-56af-82cc-36c30a5176de,Hyptis suaveolens (L.) Poit.,hyptis_suaveolens_l_poit,synonym_variant,2026-06-02T16:45:51+00:00
-7ed0a484-ca9b-5d57-8c91-b3e86b731ff2,3bab8320-ea92-5df7-b615-64c0ada00ffc,Antiaris toxicaria (Pers.) Lesch.,antiaris_toxicaria_pers_lesch,normalized_variant,2026-06-02T16:45:51+00:00
-bcadff26-451c-545f-9d3d-2c43e2481054,3bb4096c-5221-52e0-87d1-92eb1bddbf58,Rauvolfia reflexa Koord. & Valeton,rauvolfia_reflexa_koord_valeton,normalized_variant,2026-06-02T16:45:52+00:00
-97a222a3-03c7-50f2-ac9f-688d93ec89a6,3d1bc6a8-1345-590c-bbd6-4306c57beba8,Zingiber zerumbet (L.) Roscoe ex Sm.,zingiber_zerumbet_l_roscoe_ex_sm,normalized_variant,2026-06-02T16:45:52+00:00
-591ba80e-b239-56a1-b1af-f2933b6954aa,3d49d23c-a77d-5fd3-b332-ae97463c9d3f,Lantana camara L.,lantana_camara_l,normalized_variant,2026-06-02T16:45:51+00:00
-b4bcc6d8-56c8-5179-8eb8-1dda58fd27e7,3d51888b-eef3-525b-af81-afb633da55a5,Coleus amboinicus Lour.,coleus_amboinicus_lour,normalized_variant,2026-06-02T16:45:51+00:00
-6c0b6629-ce37-55e8-9a4c-3af1c1e0573f,3dc649e5-7589-5f91-af16-75dba017f3cc,Acaciella glauca (L.) L.Rico,acaciella_glauca_l_l_rico,normalized_variant,2026-06-02T16:45:51+00:00
-306a6f10-cb9b-5012-875e-703542d16fdc,3dc649e5-7589-5f91-af16-75dba017f3cc,Leucaena glauca (L.) Benth.,leucaena_glauca_l_benth,synonym_variant,2026-06-02T16:45:51+00:00
-eab4de5f-32a4-54dc-94c1-ebf36b81a4b6,3e52c52d-17a9-51ab-92bd-9f3ea0d5defe,Euphorbia milii Des Moul.,euphorbia_milii_des_moul,normalized_variant,2026-06-02T16:45:51+00:00
-f8a55747-d572-5723-9a9a-bc438f6cec3f,3f362466-dfe7-5b86-9cfc-49cf8e0b065b,Metroxylon sagu Rottb.,metroxylon_sagu_rottb,normalized_variant,2026-06-02T16:45:51+00:00
-eaef3108-21f4-50f4-9e1e-0fc1fb817fc3,409c5ae5-226b-5cb5-b859-1339e1ebac3e,Ophiopogon japonicus (Thunb.) Ker Gawl.,ophiopogon_japonicus_thunb_ker_gawl,normalized_variant,2026-06-02T16:45:52+00:00
-7825282b-e48b-5108-bfde-20e1b8968608,40c99cba-3dd7-5394-a0cb-7d64d74b3249,Erigeron sumatrensis Retz.,erigeron_sumatrensis_retz,normalized_variant,2026-06-02T16:45:51+00:00
-c2053af3-262d-59fa-a5ec-62993226bd5e,4120fdb7-c842-5c5c-a7bc-50a5e991e1b5,Hellenia speciosa (J.Koenig) S.R.Dutta,hellenia_speciosa_j_koenig_s_r_dutta,normalized_variant,2026-06-02T16:45:51+00:00
-337184f3-2a28-5300-8212-7465297ae47f,4120fdb7-c842-5c5c-a7bc-50a5e991e1b5,Costus speciosus (J.Koenig) Sm.,costus_speciosus_j_koenig_sm,synonym_variant,2026-06-02T16:45:51+00:00
-53458d88-f009-5e0c-a6ba-120339f187d5,41a118d6-4ccc-5bac-9050-58c4fdec73a0,Moringa oleifera Lam.,moringa_oleifera_lam,normalized_variant,2026-06-02T16:45:52+00:00
-cea6861b-6b3c-546a-a73a-9c48e36ae4de,41a118d6-4ccc-5bac-9050-58c4fdec73a0,Moringa pterygosperma Gaertn.,moringa_pterygosperma_gaertn,synonym_variant,2026-06-02T16:45:52+00:00
-17c476f9-a3ad-5ba3-a5c9-b52afa967e63,42ac1560-b9da-5db9-ae25-b8b1c210ee67,Averrhoa carambola L.,averrhoa_carambola_l,normalized_variant,2026-06-02T16:45:51+00:00
-bc082231-0cc6-5081-b260-2d7b0b05aa19,464a8b20-f93a-5478-82c7-3a67094c61b8,Elephantopus scaber L.,elephantopus_scaber_l,normalized_variant,2026-06-02T16:45:51+00:00
-529563c3-b940-5779-946f-b8ca3e058f09,47068472-28d1-594c-92b7-9bd7d8eddb2c,Brucea javanica (L.) Merr.,brucea_javanica_l_merr,normalized_variant,2026-06-02T16:45:51+00:00
-83281b96-affe-56fe-ba66-ea3d00b0ef5f,4817afd9-0ab7-5252-ad35-920771f21a52,Curcuma zanthorrhiza Roxb.,curcuma_zanthorrhiza_roxb,normalized_variant,2026-06-02T16:45:51+00:00
-8ef59b9e-c7a7-5c02-8b02-a13114c5dc15,487e4400-6e4b-50cb-ac7a-43765a7c817e,Hura crepitans L.,hura_crepitans_l,normalized_variant,2026-06-02T16:45:51+00:00
-75a1761b-1aeb-503a-98f9-6796725ef5a7,48be323a-ce4b-5e52-8b16-e44e37d5ea1f,"Equisetum debile Roxb. ex Wall., 1829",equisetum_debile_roxb_ex_wall_1829,normalized_variant,2026-06-02T16:45:51+00:00
-50b7c352-9061-502d-b348-394663185fc0,49061609-9ae6-568a-a985-cd7300ccd76b,Allium sativum L.,allium_sativum_l,normalized_variant,2026-06-02T16:45:51+00:00
-8049559a-c553-5aba-bc52-00644740962c,493a8c4b-3b61-511b-9d08-555347344dec,Solanum tuberosum L.,solanum_tuberosum_l,normalized_variant,2026-06-02T16:45:52+00:00
-59d4abcb-47d1-5629-8edb-074df71ac337,49867f51-dd80-51c0-98ed-db93c19f61ff,Cissampelos pareira L.,cissampelos_pareira_l,normalized_variant,2026-06-02T16:45:51+00:00
-ab769be4-f82e-5ece-968a-73e16ccc2b4b,49918304-230f-5233-bd85-90bf15b3ba90,Valeriana officinalis L.,valeriana_officinalis_l,normalized_variant,2026-06-02T16:45:52+00:00
-7ddb7cd1-342d-58bc-8692-242284a7c465,4ac4ff2c-f5ca-5521-9d94-9fa1af9c1600,Trema orientale (L.) Blume,trema_orientale_l_blume,normalized_variant,2026-06-02T16:45:52+00:00
-8962c876-b760-5da1-b855-d3628bd79bab,4ac4ff2c-f5ca-5521-9d94-9fa1af9c1600,Trema orientalis (L.) Blume,trema_orientalis_l_blume,synonym_variant,2026-06-02T16:45:52+00:00
-12facb0b-ea17-5f57-8542-c7ceeb21b887,4c6f2854-9619-511c-80ff-7cff5279ed3d,Gynandropsis gynandra (L.) Briq.,gynandropsis_gynandra_l_briq,normalized_variant,2026-06-02T16:45:51+00:00
-14f05051-8304-5cc4-8d4a-97f7aa40673e,4d0c97db-babe-5698-990e-272c77766616,Rosa × damascena Mill.,rosa_damascena_mill,normalized_variant,2026-06-02T16:45:52+00:00
-bb92b13e-a28c-5b58-85a4-0c3da30196a3,4e11acfe-b176-580d-973f-c9d1965471a7,Saccharum officinarum L.,saccharum_officinarum_l,normalized_variant,2026-06-02T16:45:52+00:00
-8bc5fcf7-b8e7-5c78-8720-6ce2db06916e,4e3afe00-209c-5830-a758-05993aeaa1db,Sechium edule (Jacq.) Sw.,sechium_edule_jacq_sw,normalized_variant,2026-06-02T16:45:52+00:00
-49cc04ce-1d8d-52bf-be0b-a25764097f7a,4e8f99ab-f088-5520-b1bb-41309509d188,Citrus × aurantiifolia (Christm.) Swingle,citrus_aurantiifolia_christm_swingle,normalized_variant,2026-06-02T16:45:51+00:00
-7ddfd36f-0421-5243-be89-723f4f21099e,4ed81395-0e1a-5cd3-93c1-c2966697151b,Atropa belladonna L.,atropa_belladonna_l,normalized_variant,2026-06-02T16:45:51+00:00
-845e0db4-ef89-58e2-b82f-44a7457ef33a,4f38415e-40f7-5caf-8b56-2f68ffc8759f,Senna occidentalis (L.) Link,senna_occidentalis_l_link,normalized_variant,2026-06-02T16:45:52+00:00
-f2b8620e-0403-507b-a4c7-f27a7839aea4,4f38415e-40f7-5caf-8b56-2f68ffc8759f,Cassia occidentalis L.,cassia_occidentalis_l,synonym_variant,2026-06-02T16:45:52+00:00
-b2167262-2855-5232-8c9f-2cf74e6491c3,519e2ff2-26db-549c-a1c7-52252728e7b3,Bixa orellana L.,bixa_orellana_l,normalized_variant,2026-06-02T16:45:51+00:00
-ffdf2172-9153-5c92-93e5-7cba2651ab52,51ce85c0-1fb6-5326-be73-5cec5c1deaf7,Alocasia macrorrhizos (L.) G.Don,alocasia_macrorrhizos_l_g_don,normalized_variant,2026-06-02T16:45:51+00:00
-c7f8062c-7f30-5917-b327-121ab87d9812,51ce85c0-1fb6-5326-be73-5cec5c1deaf7,Alocasia macrorrhiza (L.) Schott,alocasia_macrorrhiza_l_schott,synonym_variant,2026-06-02T16:45:51+00:00
-191f03b7-447f-5250-9932-f7295d8acf31,5225fa66-a924-501a-a8c1-769f715257c5,Smilax china L.,smilax_china_l,normalized_variant,2026-06-02T16:45:52+00:00
-6b885a26-57c4-5418-b15c-f92eb5c01473,5313be9b-a3c2-54f6-849f-079a6e2e8399,Albizia chinensis (Osbeck) Merr.,albizia_chinensis_osbeck_merr,normalized_variant,2026-06-02T16:45:51+00:00
-4c632867-39b3-5f99-b9de-63b3f0eb0e0a,5343796e-9023-5f92-8580-dc6b478d26db,Jasminum sambac (L.) Aiton,jasminum_sambac_l_aiton,normalized_variant,2026-06-02T16:45:51+00:00
-3c40cb1c-8388-58f9-a824-69c8ad054951,54746c5d-fb8c-5195-b443-14da8110e9b1,Piper nigrum L.,piper_nigrum_l,normalized_variant,2026-06-02T16:45:52+00:00
-45199617-ee7a-5014-b09f-c2790bffad75,54cc67d1-1c55-5c27-b4a9-4186a3674aa9,Clinacanthus nutans (Burm.fil.) Lindau,clinacanthus_nutans_burm_fil_lindau,normalized_variant,2026-06-02T16:45:51+00:00
-7ca2be4c-8637-5082-acb1-a5748b74cde9,55e70f6c-6df3-532b-adc0-d87815e57185,Salvia splendens Sellow ex Nees,salvia_splendens_sellow_ex_nees,normalized_variant,2026-06-02T16:45:52+00:00
-2f2f75ca-01b0-5ae5-a382-586df95447ca,55fc8aa4-40f3-5d50-9054-6e06a06472c2,Andrographis paniculata (Burm.fil.) Nees,andrographis_paniculata_burm_fil_nees,normalized_variant,2026-06-02T16:45:51+00:00
-db958114-e9dd-5529-8954-229f10f927bd,57107070-218d-5477-9a27-7721ad168b32,Melaleuca leucadendra (L.) L.,melaleuca_leucadendra_l_l,normalized_variant,2026-06-02T16:45:51+00:00
-afd89a7f-8418-53ed-bfa3-ef729dc8cfe1,579381b9-b5da-5774-b06f-e52561ae8eaf,Aglaia odorata Lour.,aglaia_odorata_lour,normalized_variant,2026-06-02T16:45:51+00:00
-91a2e665-afda-5c79-8dec-67453cdc4846,57d2d54f-84f3-59be-9ca9-69a67d0358ce,Jatropha multifida L.,jatropha_multifida_l,normalized_variant,2026-06-02T16:45:51+00:00
-0194cab7-8a42-5930-af37-def6b97ed5a6,5887dc73-2753-58a3-90d1-cfd0921ecfb6,Aleurites moluccanus (L.) Willd.,aleurites_moluccanus_l_willd,normalized_variant,2026-06-02T16:45:51+00:00
-fb735f48-d93a-56f2-9e23-4b1d33c4fe5b,58ab169b-6803-57eb-8600-8faca5d6c4f9,Embelia ribes Burm.fil.,embelia_ribes_burm_fil,normalized_variant,2026-06-02T16:45:51+00:00
-1f23c56a-93d3-5179-9a37-4cecaa5d9421,59015732-a77d-5cb8-9e12-fedf9538b23d,Curcuma longa L.,curcuma_longa_l,normalized_variant,2026-06-02T16:45:51+00:00
-f9507685-e66a-505b-a558-a3f6b960ccb1,59015732-a77d-5cb8-9e12-fedf9538b23d,Curcuma domestica Valeton,curcuma_domestica_valeton,synonym_variant,2026-06-02T16:45:51+00:00
-319c9843-1c2b-5e9d-b31d-518be15697b5,59015732-a77d-5cb8-9e12-fedf9538b23d,Curcuma soloensis Valeton,curcuma_soloensis_valeton,synonym_variant,2026-06-02T16:45:51+00:00
-4d4fd6e2-5320-5377-8c10-58ce5728e1d1,597cf274-1fec-5e5e-b246-f6dac07ff42c,Punica granatum L.,punica_granatum_l,normalized_variant,2026-06-02T16:45:52+00:00
-ba4c94f5-7344-5a1d-8a3a-3aa7cd48cfe8,598ec78f-d280-5fcc-b8bb-c2acc0957374,Allium cepa L.,allium_cepa_l,normalized_variant,2026-06-02T16:45:51+00:00
-d3862fa5-2f4e-51d6-aeba-177a88df31d7,5a3930a7-ae33-584f-af26-62dca7e0cbc4,Rauvolfia sumatrana Jack,rauvolfia_sumatrana_jack,normalized_variant,2026-06-02T16:45:52+00:00
-da3871f5-66cb-5392-86b1-4c5cd7d3fc29,5aa6f8c5-c5f3-5854-a460-9f5272cf71bf,Anacardium occidentale L.,anacardium_occidentale_l,normalized_variant,2026-06-02T16:45:51+00:00
-453bebf5-66af-5646-bc67-16293429050b,5c16f5bb-04f9-5b3f-86e7-d8ebc29a98f6,Curcuma xanthorrhiza D.Dietr.,curcuma_xanthorrhiza_d_dietr,normalized_variant,2026-06-02T16:45:51+00:00
-acb18f35-26af-5040-98b1-58b96e685f92,5c8a5aab-e1e3-5032-a898-c4fa1d924427,Rumex nepalensis Spreng.,rumex_nepalensis_spreng,normalized_variant,2026-06-02T16:45:52+00:00
-511de3ac-c6ac-57f2-ae09-f73167b0137b,5c9f1cc4-c8de-5a0f-8e07-5352e809cb44,Litsea glutinosa (Lour.) C.B.Rob.,litsea_glutinosa_lour_c_b_rob,normalized_variant,2026-06-02T16:45:51+00:00
-b6aa3307-9ba9-52b5-8480-136cc1350361,5d2b2b62-753a-541f-b4c1-5a326efe466b,Mikania micrantha Kunth,mikania_micrantha_kunth,normalized_variant,2026-06-02T16:45:51+00:00
-5794e8f9-4be2-5ac5-b12c-8b1d78a6c7fc,5d414b86-69c4-514b-8352-d224a773e57c,Strychnos lucida R.Br.,strychnos_lucida_r_br,normalized_variant,2026-06-02T16:45:52+00:00
-48df6fe7-f836-5a00-984c-503e3b2355fe,5d67c795-3425-54f6-8891-7a33c0cb7db5,Mallotus philippensis (Lam.) Müll.Arg.,mallotus_philippensis_lam_m_ll_arg,normalized_variant,2026-06-02T16:45:51+00:00
-0116724e-876d-525c-bec6-a68fc88a5038,5eb02004-fb3d-5f01-bf78-7973d0270dc3,Heliotropium indicum L.,heliotropium_indicum_l,normalized_variant,2026-06-02T16:45:51+00:00
-08a76a90-8603-5d59-9b5e-b3c832a41511,5f7a5eb0-dcad-5888-b76a-028366a7ef50,Basella alba L.,basella_alba_l,normalized_variant,2026-06-02T16:45:51+00:00
-542dceb0-e226-5d98-9eab-2a2789ea9aa5,5f7a5eb0-dcad-5888-b76a-028366a7ef50,Basella rubra L.,basella_rubra_l,synonym_variant,2026-06-02T16:45:51+00:00
-25188145-ce20-5903-a502-b8f866c13027,5fabf325-0264-5d5d-98e7-cc5e7da0aae3,Taraxacum officinale Weber ex F.H.Wigg.,taraxacum_officinale_weber_ex_f_h_wigg,normalized_variant,2026-06-02T16:45:52+00:00
-219521be-2f8f-597a-b9b8-5a11db49ce05,5fe22218-bb94-5a44-ab78-0c539e0db194,Elateriospermum tapos Blume,elateriospermum_tapos_blume,normalized_variant,2026-06-02T16:45:51+00:00
-42a2a1c2-69ec-5bb8-b676-8570241c74e6,605c6515-9636-5f72-91e7-51ae0bffb870,Eurycoma longifolia Jack,eurycoma_longifolia_jack,normalized_variant,2026-06-02T16:45:51+00:00
-ca7b8ad4-e8e3-5d5a-9ec8-846d49c2a82c,61951194-1031-5191-89f5-060538998d44,Peltophorum pterocarpum (DC.) Backer ex K.Heyne,peltophorum_pterocarpum_dc_backer_ex_k_heyne,normalized_variant,2026-06-02T16:45:52+00:00
-36c8fc88-5259-592d-ba13-9562da65a527,61a98913-6049-5212-8482-2dc81251b4dd,Allium chinense G.Don,allium_chinense_g_don,normalized_variant,2026-06-02T16:45:51+00:00
-8b5ed7af-1f7a-580e-82aa-66de13da6e07,61b44b71-407e-54b8-b729-fb3d55072a55,Plumbago indica L.,plumbago_indica_l,normalized_variant,2026-06-02T16:45:52+00:00
-c4307ec1-6026-5273-a90b-85742011ffb7,6430846a-210a-5559-ad72-673cc5b2c8a1,Citrus hystrix DC.,citrus_hystrix_dc,normalized_variant,2026-06-02T16:45:51+00:00
-a16481c0-3272-5eea-a751-5fbe41370882,6454f497-44e8-5eb0-a1c6-7c8d7bef9675,Scurrula fusca (Blume) G.Don,scurrula_fusca_blume_g_don,normalized_variant,2026-06-02T16:45:52+00:00
-b2e8f6b1-774d-5bce-b3b2-cd53f216da26,647a87a3-9ba6-534b-ae14-830baef2165b,Blumea lacera (Burm.fil.) DC.,blumea_lacera_burm_fil_dc,normalized_variant,2026-06-02T16:45:51+00:00
-1c795e07-7f9e-5b99-ac34-1664080ff46b,64b5a549-24de-577d-9328-9b6740919dae,Euphorbia prostrata Aiton,euphorbia_prostrata_aiton,normalized_variant,2026-06-02T16:45:51+00:00
-61712627-7acd-5c2c-967e-5370487ac824,64cfc45f-fbb2-5a5b-86fb-d615de3e8503,Phyllanthus emblica L.,phyllanthus_emblica_l,normalized_variant,2026-06-02T16:45:52+00:00
-603bd33e-9551-5af1-97cf-2e7473c35407,64e34a76-a01e-5d45-93f8-dee2689066da,Citrullus lanatus (Thunb.) Matsum. & Nakai,citrullus_lanatus_thunb_matsum_nakai,normalized_variant,2026-06-02T16:45:51+00:00
-51add4d5-4527-5c60-8bf3-a2883600175e,64e34a76-a01e-5d45-93f8-dee2689066da,Citrullus vulgaris Schrad.,citrullus_vulgaris_schrad,synonym_variant,2026-06-02T16:45:51+00:00
-a0002511-144e-55e9-95a0-d49c38e0ad68,65a5ff2b-a821-5ce0-bb10-b6b87d46b0bc,Sesamum indicum L.,sesamum_indicum_l,normalized_variant,2026-06-02T16:45:52+00:00
-91026ad4-9ce7-5238-b1db-3acf5a67655c,65b1e648-401f-546b-85a4-5442833dc81d,Triphasia trifolia (Burm.fil.) P.Wilson,triphasia_trifolia_burm_fil_p_wilson,normalized_variant,2026-06-02T16:45:52+00:00
-290fbb9c-3817-5644-af8f-b421e16380a1,6694cd48-83fb-5b92-8cf3-9c48441702b5,Oxalis corniculata L.,oxalis_corniculata_l,normalized_variant,2026-06-02T16:45:52+00:00
-c6e92125-1126-593e-8207-70ac6fa86d73,67c180dd-0ad4-5c37-a707-0a7cf8911681,Plantago major L.,plantago_major_l,normalized_variant,2026-06-02T16:45:52+00:00
-74a53f7b-5c90-5c7e-91e7-109e298b6cb1,68bc505a-dbef-5fd9-b3d6-720259fa5662,Luvunga sarmentosa (Blume) Kurz,luvunga_sarmentosa_blume_kurz,normalized_variant,2026-06-02T16:45:51+00:00
-cd9c547d-c0b1-5363-998d-b59ac8da342d,69684683-53c8-5f13-b185-c057f8a77459,Derris elliptica (Wall.) Benth.,derris_elliptica_wall_benth,normalized_variant,2026-06-02T16:45:51+00:00
-4e893dda-efe0-58ab-b2e6-91eb7bd19414,699f9cd1-c9d0-503a-9ec8-eeeb1fcc31a1,Scutellaria indica L.,scutellaria_indica_l,normalized_variant,2026-06-02T16:45:52+00:00
-58024334-0837-54aa-b4d4-9e78a1df6e50,69b1b6e9-e3f5-5cd1-a05d-a0167a49efb0,Urceola laevigata (Juss.) D.J.Middleton & Livsh.,urceola_laevigata_juss_d_j_middleton_livsh,normalized_variant,2026-06-02T16:45:52+00:00
-14662714-84c4-5fc4-87aa-706f0ca66aa6,69b1b6e9-e3f5-5cd1-a05d-a0167a49efb0,Parameria laevigata (Juss.) Moldenke,parameria_laevigata_juss_moldenke,synonym_variant,2026-06-02T16:45:52+00:00
-57e699ba-f8cb-5e9e-9658-3d5fe6682379,6a811452-0eb3-5bdf-8f21-fb79b6b73361,Zingiber officinale Roscoe,zingiber_officinale_roscoe,normalized_variant,2026-06-02T16:45:52+00:00
-7b3cf048-c236-5e0e-b7e9-6456a405a128,6ac5c230-db02-5815-824d-f9ade8f45627,Annona muricata L.,annona_muricata_l,normalized_variant,2026-06-02T16:45:51+00:00
-fb9ea546-8e7b-54ea-9d23-aebfe15accb4,6b7427f2-8c69-5cc5-a343-9008168c36be,Clitoria ternatea L.,clitoria_ternatea_l,normalized_variant,2026-06-02T16:45:51+00:00
-e0290b47-d74b-575c-852a-122d87da7a05,6ba5abd6-8df7-5851-a12a-24a1c6423478,Blumea balsamifera (L.) DC.,blumea_balsamifera_l_dc,normalized_variant,2026-06-02T16:45:51+00:00
-e96a61ae-474e-52b6-9e8c-67c2625b2598,6c6ccc77-d2e7-5843-b6ae-355e75208af6,Ipomoea aquatica Forssk.,ipomoea_aquatica_forssk,normalized_variant,2026-06-02T16:45:51+00:00
-e52801b2-7ac5-5ac1-ac2d-3efd61d39203,6c9ccae8-4a53-529c-a4b2-a4158bd84c35,Euphorbia tithymaloides L.,euphorbia_tithymaloides_l,normalized_variant,2026-06-02T16:45:51+00:00
-c17d58b1-d5ea-5211-953d-62a4e69e96ca,6c9ccae8-4a53-529c-a4b2-a4158bd84c35,Pedilanthus tithymaloides (L.) Poit.,pedilanthus_tithymaloides_l_poit,synonym_variant,2026-06-02T16:45:51+00:00
-d3281007-375a-5bda-b8e1-7b2d58a83b53,6ce361f3-5493-50d8-976f-54699df3da9c,Azadirachta indica A.Juss.,azadirachta_indica_a_juss,normalized_variant,2026-06-02T16:45:51+00:00
-cfdaf934-7783-56df-a90d-48916d5a3b85,6d1f4293-f882-5cac-a61d-4ea98eb5b46d,Bougainvillea glabra Choisy,bougainvillea_glabra_choisy,normalized_variant,2026-06-02T16:45:51+00:00
-512c3fde-511e-57b3-8ce2-c4fa26cd2dce,6e03fa79-16e8-5066-9e39-8ce174b861b3,Cyperus rotundus L.,cyperus_rotundus_l,normalized_variant,2026-06-02T16:45:51+00:00
-24fda78c-4f9e-541b-8d31-c68d69fd2ccc,6f4f9e7e-24cb-5095-9378-79f2a270e8c2,Guazuma ulmifolia Lam.,guazuma_ulmifolia_lam,normalized_variant,2026-06-02T16:45:51+00:00
-f816853a-bfb0-5e0d-8c58-04456f6edefd,6f8e4fe7-5fe6-5f20-a6b5-11d27f3bdb1b,Abelmoschus manihot (L.) Medik.,abelmoschus_manihot_l_medik,normalized_variant,2026-06-02T16:45:51+00:00
-d0b0a644-3a3a-5284-872e-a06b43018f1d,70582189-28a1-5b4f-bf99-2821bd13bf96,"Clerodendrum serratum Spreng., 1825",clerodendrum_serratum_spreng_1825,normalized_variant,2026-06-02T16:45:51+00:00
-52b6f10e-ec13-5dd1-986f-557429d03412,711ab4df-f760-5b91-9d28-87fc5c2896b4,Parkia speciosa Hassk.,parkia_speciosa_hassk,normalized_variant,2026-06-02T16:45:52+00:00
-61dc73ec-878f-5c4e-8ef5-b29a605a4484,71609b4d-5377-5741-843f-bff0537a8517,Syzygium cumini (L.) Skeels,syzygium_cumini_l_skeels,normalized_variant,2026-06-02T16:45:52+00:00
-aa36348d-5d31-5bd8-aef7-c1308a4dc787,72a69b6a-2a5a-57f6-8aed-609d5e8737b8,Pachyrhizus erosus (L.) Urb.,pachyrhizus_erosus_l_urb,normalized_variant,2026-06-02T16:45:52+00:00
-0c94f913-6141-5d7b-bcb8-915db2accd16,72a69b6a-2a5a-57f6-8aed-609d5e8737b8,Pachyrrhizus erosus (L.) Urb.,pachyrrhizus_erosus_l_urb,synonym_variant,2026-06-02T16:45:52+00:00
-976ea052-0e52-56d4-ad4f-be72fad45e4f,72b079c0-13e1-57e2-a299-7782302b5168,Phyllanthus reticulatus Poir.,phyllanthus_reticulatus_poir,normalized_variant,2026-06-02T16:45:52+00:00
-f2eba34e-38b0-5572-8899-c57b96f6d755,72eebe7d-5ce5-53a1-9ff5-cc2b5b9be20e,Barleria lupulina Lindl.,barleria_lupulina_lindl,normalized_variant,2026-06-02T16:45:51+00:00
-f17d72c0-6a20-5010-aab7-3d355c27923e,731dfbce-b15e-50d2-b73f-8e1081d094b4,Clausena excavata Burm.fil.,clausena_excavata_burm_fil,normalized_variant,2026-06-02T16:45:51+00:00
-1123ea42-1ab5-5398-8196-b493c81d2dd2,74cf8bf9-c5b5-53b6-8968-02edb671e993,Woodfordia fruticosa (L.) Kurz,woodfordia_fruticosa_l_kurz,normalized_variant,2026-06-02T16:45:52+00:00
-36b3b577-9725-5412-8914-0cb05831b1d7,74f37006-adf8-5307-8e65-834602250a2b,Lactuca indica L.,lactuca_indica_l,normalized_variant,2026-06-02T16:45:51+00:00
-48b804bb-1a7a-5516-b0dd-2469db333594,75a36dd4-e72a-5c23-83e3-9f6e9a874e12,Jatropha podagrica Hook.,jatropha_podagrica_hook,normalized_variant,2026-06-02T16:45:51+00:00
-4db92939-a950-54f7-9180-13eb915d1ab2,75d26f1b-3c84-5de4-879a-6e1c41c2b5e8,Baeckea frutescens L.,baeckea_frutescens_l,normalized_variant,2026-06-02T16:45:51+00:00
-711de2e4-0d5c-5383-bb42-601d72662663,7600935c-c8c6-5fb1-a6da-ffba4d239d7c,Talipariti tiliaceum (L.) Fryxell,talipariti_tiliaceum_l_fryxell,normalized_variant,2026-06-02T16:45:52+00:00
-669717a2-075c-5f8b-b501-a69584507175,7600935c-c8c6-5fb1-a6da-ffba4d239d7c,Hibiscus tiliaceus L.,hibiscus_tiliaceus_l,synonym_variant,2026-06-02T16:45:52+00:00
-e6147b5e-adc0-5be7-837d-ed7532290f01,7633d19c-d864-5ac9-9eaa-acde77f9419e,Tinospora glabra (Burm.fil.) Merr.,tinospora_glabra_burm_fil_merr,normalized_variant,2026-06-02T16:45:52+00:00
-3117df52-d791-5031-af61-239ab50543dc,76d675cb-5968-5870-ad50-5d7c01adfadb,Curcuma aeruginosa Roxb.,curcuma_aeruginosa_roxb,normalized_variant,2026-06-02T16:45:51+00:00
-e9fe34dd-1d41-55ff-b598-7ce1d4c2afb3,7711a112-0b0f-54fd-b1fb-5648b924022d,Biancaea sappan (L.) Tod.,biancaea_sappan_l_tod,normalized_variant,2026-06-02T16:45:51+00:00
-fa74605a-911e-53be-be7d-2da70725197b,7711a112-0b0f-54fd-b1fb-5648b924022d,Caesalpinia sappan L.,caesalpinia_sappan_l,synonym_variant,2026-06-02T16:45:51+00:00
-75d0e53c-9162-5bec-8517-d24befe3eeda,771fe3e7-05ef-5d92-b819-e057630d41ed,Ricinus communis L.,ricinus_communis_l,normalized_variant,2026-06-02T16:45:52+00:00
-967a0a96-74d3-5f18-909d-472c100ca0b8,7744bbdc-f810-5223-bd61-9bff46cc14b6,Strychnos nux-vomica L.,strychnos_nux_vomica_l,normalized_variant,2026-06-02T16:45:52+00:00
-9a01786f-62d0-5d2a-a02b-d7b3f6b3065b,781384f7-6a6e-5882-9779-912b8b2ff2e8,Euphorbia tirucalli L.,euphorbia_tirucalli_l,normalized_variant,2026-06-02T16:45:51+00:00
-e586a7e3-7cd0-505b-9e9c-201d8e69ea06,781883a9-0ea0-5cf4-a8af-bf097de258df,Oroxylum indicum (L.) Kurz,oroxylum_indicum_l_kurz,normalized_variant,2026-06-02T16:45:52+00:00
-a0a43bb7-f537-506d-ab36-4b090b812d16,7878f28d-f36f-5ec7-92c3-5dac16717f41,Ceiba pentandra (L.) Gaertn.,ceiba_pentandra_l_gaertn,normalized_variant,2026-06-02T16:45:51+00:00
-9823b413-9754-598b-974a-05273d3dea91,788f054d-0118-5597-b286-4b2e7545cc70,Dryobalanops aromatica C.F.Gaertn.,dryobalanops_aromatica_c_f_gaertn,normalized_variant,2026-06-02T16:45:51+00:00
-988e19b1-44f6-57b7-968a-11bba007b978,788f4b29-9c7d-593f-aaf6-ad890fc330d2,Averrhoa bilimbi L.,averrhoa_bilimbi_l,normalized_variant,2026-06-02T16:45:51+00:00
-489bcf48-c899-5b28-b255-26457a69d5f7,7a2474e0-42e9-5f23-8696-92e68750f96c,Tinospora crispa (L.) Miers ex Hook.fil. & Thomson,tinospora_crispa_l_miers_ex_hook_fil_thomson,normalized_variant,2026-06-02T16:45:52+00:00
-26ccc26d-f9ea-5604-8730-1871193c503f,7a2474e0-42e9-5f23-8696-92e68750f96c,Tinospora tuberculata (Lam.) Beumée ex K.Heyne,tinospora_tuberculata_lam_beum_e_ex_k_heyne,synonym_variant,2026-06-02T16:45:52+00:00
-7f067039-9b51-54ad-87b3-814fe23717d2,7a405d0a-78cf-5dd4-8ce9-267395c76a4b,Taraxacum mongolicum Hand.-Mazz.,taraxacum_mongolicum_hand_mazz,normalized_variant,2026-06-02T16:45:52+00:00
-51215835-92ae-59b8-b1ef-96841ee167a0,7ac2cebc-918e-51ad-b944-ce5654c6214f,Acalypha hispida Burm.f.,acalypha_hispida_burm_f,normalized_variant,2026-06-02T16:45:51+00:00
-a6626c0c-e0cf-5ee8-8be6-80b21490a88b,7be87475-a2e9-515c-a7dc-e445c191f31c,Rauvolfia serpentina (L.) Benth. ex Kurz,rauvolfia_serpentina_l_benth_ex_kurz,normalized_variant,2026-06-02T16:45:52+00:00
-dd09399b-6e8d-576a-9c27-5f65d575033a,7c03fa34-7db4-58f6-8198-9b1f52eeaa9d,Benincasa hispida (Thunb.) Cogn.,benincasa_hispida_thunb_cogn,normalized_variant,2026-06-02T16:45:51+00:00
-6b3c1e72-246f-56e8-bfec-ce88af9c4bfa,7cdd19c7-1dd8-59ef-a038-f1f1ff6f5e06,Zinnia elegans Jacq.,zinnia_elegans_jacq,normalized_variant,2026-06-02T16:45:52+00:00
-c8c154c3-3158-5748-8c97-89f09b536c93,7cdfdfc7-d2a7-5273-9acc-c946f0675d70,Gnetum gnemon L.,gnetum_gnemon_l,normalized_variant,2026-06-02T16:45:51+00:00
-4220bcd0-1bcc-5d12-8835-7469b27383a2,7cee7592-10e3-5324-b5ce-1318bc740be8,Raphanus sativus L.,raphanus_sativus_l,normalized_variant,2026-06-02T16:45:52+00:00
-7b56ff0e-a8f3-5551-9d99-d3cc0f5b2281,7d0a454f-bec7-586f-b48c-14615ac6719e,"Vetiveria zizanioides Stapf, 1906",vetiveria_zizanioides_stapf_1906,normalized_variant,2026-06-02T16:45:52+00:00
-91b20965-f9f0-5b49-88a6-674e4cb7f9cd,7d7ebb22-8f6f-5dae-9896-950f608446f0,Annona reticulata L.,annona_reticulata_l,normalized_variant,2026-06-02T16:45:51+00:00
-a00e6dc1-4f10-53cb-be6e-8feef18e87d3,7dfad6a0-2853-5338-8754-f6fd7988441c,Helianthus annuus L.,helianthus_annuus_l,normalized_variant,2026-06-02T16:45:51+00:00
-982ed1ae-1280-5a5e-9da2-affd0d655261,7e2ffc29-5568-5fb0-9f4f-f231cf105fc5,Sandoricum koetjape (Burm.fil.) Merr.,sandoricum_koetjape_burm_fil_merr,normalized_variant,2026-06-02T16:45:52+00:00
-e3019666-adbe-5fc3-ac49-830f6a8e5b40,7ee52f33-7a42-594b-b302-6547e6ec3605,Piper cubeba L.fil.,piper_cubeba_l_fil,normalized_variant,2026-06-02T16:45:52+00:00
-887aeba6-d2b9-5af0-b6d1-69b9c5eaf966,7f4c8e0a-c709-544e-9a77-0e56a65a59f1,"Spilanthes acmella A.Chev., 1920",spilanthes_acmella_a_chev_1920,normalized_variant,2026-06-02T16:45:52+00:00
-b5886292-a745-5594-b8a6-977d1d709c3e,7f57093a-346a-5265-aed1-fa50040d7337,Calophyllum inophyllum L.,calophyllum_inophyllum_l,normalized_variant,2026-06-02T16:45:51+00:00
-3eb59d84-063b-55c6-a86e-9e0ea5e05d69,7ffe905a-6be3-5a37-b786-240f09cde9ff,Ximenia americana L.,ximenia_americana_l,normalized_variant,2026-06-02T16:45:52+00:00
-10f7ed5f-6e93-5baf-906f-838ad55e1026,8101f5c7-5621-50fe-8fe9-6598bb83289b,Eupatorium riparium Sch.Bip. ex Schnittsp.,eupatorium_riparium_sch_bip_ex_schnittsp,normalized_variant,2026-06-02T16:45:51+00:00
-c9b5bb51-eb99-5f06-93b2-4a0bd66bfb87,811b405a-cfcb-53e5-9cde-8c12bfa8a430,Bidens bipinnata L.,bidens_bipinnata_l,normalized_variant,2026-06-02T16:45:51+00:00
-e1f54a7b-5a09-5c4f-9732-f48371faadc9,82633059-85b7-5cd5-a16a-442a54ac58fb,Catharanthus roseus (L.) G.Don,catharanthus_roseus_l_g_don,normalized_variant,2026-06-02T16:45:51+00:00
-a570dbe9-36da-5b2e-bd5c-3dec8c30ca96,82633059-85b7-5cd5-a16a-442a54ac58fb,Vinca rosea L.,vinca_rosea_l,synonym_variant,2026-06-02T16:45:51+00:00
-857cbe06-abc9-5f60-a8dc-b891f1e9d308,829e9934-423f-5671-aa41-a0eae1ca0edd,Leptospermum polygalifolium subsp. polygalifolium,leptospermum_polygalifolium_subsp_polygalifolium,normalized_variant,2026-06-02T16:45:51+00:00
-90090162-caab-5042-ba3a-90f2b8078e21,829e9934-423f-5671-aa41-a0eae1ca0edd,Leptospermum flavescens J.E.Sm.,leptospermum_flavescens_j_e_sm,synonym_variant,2026-06-02T16:45:51+00:00
-967f5998-73e3-5984-9c6a-7e9cc530fcb4,829f7361-4d8b-5b77-a66e-c7fbbdc882d1,Elaeocarpus grandiflorus Sm.,elaeocarpus_grandiflorus_sm,normalized_variant,2026-06-02T16:45:51+00:00
-ac9efa08-288c-5759-bbfc-1589a121d4f0,8325ae47-c6c7-5e7b-89b1-01cbafa627bd,Stachytarpheta jamaicensis (L.) Vahl,stachytarpheta_jamaicensis_l_vahl,normalized_variant,2026-06-02T16:45:52+00:00
-a2e80140-053a-5ed8-94f2-948397d6db24,838a29ec-5c90-5977-a20f-a83c06a3cd05,Mentha × piperita L.,mentha_piperita_l,normalized_variant,2026-06-02T16:45:51+00:00
-47b8b7eb-4a03-547b-a287-01054591b18a,83e99fa4-c3fe-58c3-acfc-3dc32e8a98ce,Capsicum frutescens L.,capsicum_frutescens_l,normalized_variant,2026-06-02T16:45:51+00:00
-c9065413-3fac-5b91-9d37-2119614889e7,83fe12fb-950c-57d4-915f-c88ba29ff609,Erythrina variegata L.,erythrina_variegata_l,normalized_variant,2026-06-02T16:45:51+00:00
-8f3f6a6e-f180-5bb4-88fe-db0fd0f75b1c,84e53409-96f3-539a-846e-608c8ece266d,Ananas comosus (L.) Merr.,ananas_comosus_l_merr,normalized_variant,2026-06-02T16:45:51+00:00
-52646783-356a-58df-a5f5-8ab8e1610bb6,851a20d6-2464-551e-a5f0-73043b151cea,Hippobroma longiflora (L.) G.Don,hippobroma_longiflora_l_g_don,normalized_variant,2026-06-02T16:45:51+00:00
-754f88b4-c1fc-50a0-a9ce-1dc9451ee94f,851a20d6-2464-551e-a5f0-73043b151cea,Isotoma longiflora (L.) C.Presl,isotoma_longiflora_l_c_presl,synonym_variant,2026-06-02T16:45:51+00:00
-f6137609-ee81-5e65-a555-5aa6585805a8,8619da7b-e7a2-581d-87f5-91a04ad2a5ea,Durio zibethinus Murray,durio_zibethinus_murray,normalized_variant,2026-06-02T16:45:51+00:00
-56602fa6-9140-592b-8c95-d77e6110fbcb,87759e97-b16c-5114-80ef-4de17173d5f1,Mussaenda pubescens Dryand.,mussaenda_pubescens_dryand,normalized_variant,2026-06-02T16:45:52+00:00
-836941cc-8973-50e3-9ccf-fa015a83bc95,87cd29ae-d99e-541c-a507-8da019a172c2,Borassus flabellifer L.,borassus_flabellifer_l,normalized_variant,2026-06-02T16:45:51+00:00
-071d3ae9-4103-53ef-9329-e21ba8dfca90,8825f002-dab2-5d23-98c8-1b20750fe904,Abrus precatorius L.,abrus_precatorius_l,normalized_variant,2026-06-02T16:45:51+00:00
-a427819a-bb7e-5d70-80ca-478295b9fe94,88bde05d-d188-5163-9a87-6504dc0b798a,Phyllanthus acidus (L.) Skeels,phyllanthus_acidus_l_skeels,normalized_variant,2026-06-02T16:45:52+00:00
-047d4e63-d05f-5f73-99ce-cc394cfc7a8a,89220866-d3ce-5b46-9121-9465f28032c3,Scaevola taccada (Gaertn.) Roxb.,scaevola_taccada_gaertn_roxb,normalized_variant,2026-06-02T16:45:52+00:00
-01e22829-dfec-5f56-b215-29d3a7582dd5,89220866-d3ce-5b46-9121-9465f28032c3,Scaevola frutescens K.Krause,scaevola_frutescens_k_krause,synonym_variant,2026-06-02T16:45:52+00:00
-dd20fe4c-fbbf-5c4e-b64c-5df0a9411bc5,8a0bed64-546e-57fd-94c4-b0197c56b630,Datura metel L.,datura_metel_l,normalized_variant,2026-06-02T16:45:51+00:00
-aafa314d-6b9e-5310-8217-b4ca322e191d,8a0f723a-c943-582a-bd4e-b1e4d513e515,Artemisia abrotanum L.,artemisia_abrotanum_l,normalized_variant,2026-06-02T16:45:51+00:00
-df342581-9022-5db6-8df7-bb315bd416b0,8a5d12ef-f854-592b-abd2-c211b33aa1b4,Solidago virgaurea L.,solidago_virgaurea_l,normalized_variant,2026-06-02T16:45:52+00:00
-a9133fa0-d5ba-57a0-be3c-56ee1bce6088,8bf9b08c-1def-591a-9bcc-ca4b6255e877,Sesbania sesban (L.) Merr.,sesbania_sesban_l_merr,normalized_variant,2026-06-02T16:45:52+00:00
-c49b0532-be34-5441-925c-b2692ae54149,8d6c4982-26c0-563e-a2ce-ff55e50ac988,Euphorbia heterophylla L.,euphorbia_heterophylla_l,normalized_variant,2026-06-02T16:45:51+00:00
-69b50455-5efb-58ed-9d82-abfe6ad5059f,8e2c89d3-8430-57e0-a9c8-81cde6a7533b,Ficus microcarpa L.fil.,ficus_microcarpa_l_fil,normalized_variant,2026-06-02T16:45:51+00:00
-234d7432-9896-5b22-ba8b-81edd6bb76c8,8e4e6851-0342-5695-a2e3-3ee680b9ef18,Cocos nucifera L.,cocos_nucifera_l,normalized_variant,2026-06-02T16:45:51+00:00
-24dd3067-5c43-564d-a752-57ce229e44d5,8f16e81c-7ebd-555f-8d79-d84936d26814,Lepidium sativum L.,lepidium_sativum_l,normalized_variant,2026-06-02T16:45:51+00:00
-8e437edc-ed07-540b-8a42-c7beaa3fdff9,8fea13cf-25bc-5755-a26d-71f02d38d627,Kaempferia galanga L.,kaempferia_galanga_l,normalized_variant,2026-06-02T16:45:51+00:00
-e9313554-74a8-5386-a78a-88f46ac2a058,9045151f-c55b-5859-b030-a23b9e4e07d3,Curcuma zedoaria (Christm.) Roscoe,curcuma_zedoaria_christm_roscoe,normalized_variant,2026-06-02T16:45:51+00:00
-bfbc9c41-be94-51ff-a570-6f8967b72d81,90a8d5d1-8291-559e-8452-3ee469ab365e,Croton tiglium L.,croton_tiglium_l,normalized_variant,2026-06-02T16:45:51+00:00
-a150e826-6b37-5a03-806b-3a4e0a9c0866,90bc8715-c8d3-5086-8b8b-d2266b129400,Acalypha indica L.,acalypha_indica_l,normalized_variant,2026-06-02T16:45:51+00:00
-49bb17bc-59a8-5c2b-8c38-80a05d939ac6,9115ff6d-2c26-5736-9485-983331b197e8,Swietenia mahagoni (L.) Jacq.,swietenia_mahagoni_l_jacq,normalized_variant,2026-06-02T16:45:52+00:00
-a9c9cdfb-059b-52b4-b06d-653ec234249f,91e50387-da73-5973-a338-1120dc8db1d2,Portulaca oleracea L.,portulaca_oleracea_l,normalized_variant,2026-06-02T16:45:52+00:00
-1b5c91f5-6ace-5f02-a7c3-8c8a0036622b,91ebe95b-6b76-5ffc-8817-2d010bf5f11a,Cajanus cajan (L.) Huth,cajanus_cajan_l_huth,normalized_variant,2026-06-02T16:45:51+00:00
-83101432-3237-5fb9-963d-dfee9368506a,930a2ff9-23f1-5624-8ded-c87b3da62f54,Nymphaea lotus L.,nymphaea_lotus_l,normalized_variant,2026-06-02T16:45:52+00:00
-81b17a63-5bc6-50e0-946e-4315425c8380,935d1b37-a8f3-5901-9b26-69c29cac395d,Datura stramonium L.,datura_stramonium_l,normalized_variant,2026-06-02T16:45:51+00:00
-ff0ca649-f635-516d-8c3e-8a0389fa5a8a,95a3e866-7522-5b42-96e2-d2bd01752c9f,Arcangelisia flava (L.) Merr.,arcangelisia_flava_l_merr,normalized_variant,2026-06-02T16:45:51+00:00
-9a565746-bf0b-5ded-bd0d-d7de488265ca,95d88163-75bb-500d-be47-1e702671e6e4,Lagerstroemia indica L.,lagerstroemia_indica_l,normalized_variant,2026-06-02T16:45:51+00:00
-6ea6afe6-1e98-5ea2-8edc-4c29f8cb79e3,964b15f4-d55b-59d7-ad36-610d622f6970,Hedychium coronarium J.Koenig,hedychium_coronarium_j_koenig,normalized_variant,2026-06-02T16:45:51+00:00
-f4ec04ca-0d4a-553a-8469-d4bdb1f25971,9674dd5e-2438-56d0-b94d-eeac8311aecc,Abutilon indicum (L.) Sweet,abutilon_indicum_l_sweet,normalized_variant,2026-06-02T16:45:51+00:00
-b06a09bf-3cb8-53eb-b401-3cfebbc983e4,96801dd1-e4f3-538e-84d6-092f1f2558f2,Artocarpus heterophyllus Lam.,artocarpus_heterophyllus_lam,normalized_variant,2026-06-02T16:45:51+00:00
-d5d2f41b-4459-5c28-aa2e-e184b397fa31,969303e7-289f-5d47-904f-940d1d4aec07,Gardenia jasminoides J.Ellis,gardenia_jasminoides_j_ellis,normalized_variant,2026-06-02T16:45:51+00:00
-79d934db-5109-5c81-825e-f22a1ed4115e,971c31b9-b4ea-5684-b3c4-d4ad4f0a1d89,Impatiens balsamina L.,impatiens_balsamina_l,normalized_variant,2026-06-02T16:45:51+00:00
-97737ce3-a157-58f1-8fae-4968e90c0923,994b9afb-da3a-5f8f-b70f-9594b0fc13b7,Erythrina subumbrans (Hassk.) Merr.,erythrina_subumbrans_hassk_merr,normalized_variant,2026-06-02T16:45:51+00:00
-859b8786-efca-5f62-bfaf-7efd41c19a8e,994b9afb-da3a-5f8f-b70f-9594b0fc13b7,Erythrina lithosperma Blume ex Miq.,erythrina_lithosperma_blume_ex_miq,synonym_variant,2026-06-02T16:45:51+00:00
-063a1269-05ad-5f11-8b9f-b32db9716f31,99607ef4-ad69-5040-8dd3-7161d4b593e4,Aucuba japonica Thunb.,aucuba_japonica_thunb,normalized_variant,2026-06-02T16:45:51+00:00
-a791ab2d-506b-5159-9d21-010a2ce49f57,9a824a48-25db-561a-9282-b60925c14356,Crinum asiaticum L.,crinum_asiaticum_l,normalized_variant,2026-06-02T16:45:51+00:00
-0f43d2bc-809b-5fa6-a0c0-7dda62c7077a,9ad40163-ef4f-50b8-8b5c-139a286a011a,Alternanthera sessilis (L.) R.Br. ex DC.,alternanthera_sessilis_l_r_br_ex_dc,normalized_variant,2026-06-02T16:45:51+00:00
-db6d104f-1600-5668-b206-ba554caecd1c,9b600c0d-c81c-5ef5-8513-a56c9b80a832,Pimpinella anisum L.,pimpinella_anisum_l,normalized_variant,2026-06-02T16:45:52+00:00
-70b39b10-9ede-5cfd-b267-55835e5e1593,9b87c084-8e97-5763-83ac-abc8eee074b3,Barleria prionitis L.,barleria_prionitis_l,normalized_variant,2026-06-02T16:45:51+00:00
-cd50c5e8-e6f5-54e8-af44-06adcc4c2f10,9c6c6d9c-c72a-5da6-b688-ece5e74c3643,Kalanchoe pinnata (Lam.) Pers.,kalanchoe_pinnata_lam_pers,normalized_variant,2026-06-02T16:45:51+00:00
-007677be-d315-5ced-8a8a-eefdd81f634a,9c6c6d9c-c72a-5da6-b688-ece5e74c3643,Bryophyllum pinnatum (Lam.) Oken,bryophyllum_pinnatum_lam_oken,synonym_variant,2026-06-02T16:45:51+00:00
-7ed2ae8e-b07f-52ff-926f-f50fdf025874,9d009ca4-cdb4-55f7-a4ca-c7d0d2d16c33,Asclepias curassavica L.,asclepias_curassavica_l,normalized_variant,2026-06-02T16:45:51+00:00
-b106c510-6713-5c81-846b-b9a64822fbc8,9e9a1f4f-c829-528a-96de-3acf3c32258e,Phaleria macrocarpa (Scheff.) Boerl.,phaleria_macrocarpa_scheff_boerl,normalized_variant,2026-06-02T16:45:52+00:00
-40538eda-d859-51df-a8e6-f8d4bfee1d6b,9f113392-c9da-5edd-af63-a1f323c112e5,Gloriosa superba L.,gloriosa_superba_l,normalized_variant,2026-06-02T16:45:51+00:00
-41f897ca-ca52-5f79-ad1f-976b8ee2d320,9f42f190-4be1-5d33-a0d2-e30e29beee87,Hydrangea macrophylla (Thunb.) Ser.,hydrangea_macrophylla_thunb_ser,normalized_variant,2026-06-02T16:45:51+00:00
-ab3137a3-3b9e-57a4-9862-5c9eefaec40e,a02fd890-c756-5c36-8d4f-67efa3fea396,Carica papaya L.,carica_papaya_l,normalized_variant,2026-06-02T16:45:51+00:00
-87911429-4eb8-5c49-bf1c-08b50f979169,a038eb28-ecbe-55b0-b796-8eb2e256b0c8,Cola acuminata (P.Beauv.) Schott & Endl.,cola_acuminata_p_beauv_schott_endl,normalized_variant,2026-06-02T16:45:51+00:00
-112bc6ac-b455-541a-b993-53e2af44eb64,a04c7a3f-65dd-56b6-bc49-46249c2d09c2,Abrus fruticulosus Wall. ex Wight & Arn.,abrus_fruticulosus_wall_ex_wight_arn,normalized_variant,2026-06-02T16:45:51+00:00
-9541b41d-f19d-5709-90fa-74671a717abf,a276ec76-a93d-5ff6-b99a-cca2b39a11a1,Papaver somniferum L.,papaver_somniferum_l,normalized_variant,2026-06-02T16:45:52+00:00
-9d6684f0-c98d-5863-8dce-0ea0b1741b42,a3293ad0-b880-5634-800e-f65c14f8b0c7,Cascabela thevetia (L.) Lippold,cascabela_thevetia_l_lippold,normalized_variant,2026-06-02T16:45:51+00:00
-e0ae419f-7d04-5889-8cf1-0790860ae469,a3293ad0-b880-5634-800e-f65c14f8b0c7,Thevetia peruviana (Pers.) K.Schum.,thevetia_peruviana_pers_k_schum,synonym_variant,2026-06-02T16:45:51+00:00
-47d3c798-f90d-5f5e-a661-01dde61b6a62,a33157d7-c480-539e-8eb6-454efef0afb0,Allamanda cathartica L.,allamanda_cathartica_l,normalized_variant,2026-06-02T16:45:51+00:00
-a0284151-ffdc-5d2e-b258-191a3966f9fe,a4e16489-9744-56f2-9699-ba98f75a9674,Cucurbita moschata (Duchesne) Duchesne ex Poir.,cucurbita_moschata_duchesne_duchesne_ex_poir,normalized_variant,2026-06-02T16:45:51+00:00
-705c377f-5143-518d-8b36-54120181dd43,a561d36a-7306-5e13-ba1f-4fb504a27db3,Grona styracifolia (Osbeck) H.Ohashi & K.Ohashi,grona_styracifolia_osbeck_h_ohashi_k_ohashi,normalized_variant,2026-06-02T16:45:51+00:00
-23033300-f3ab-524b-885d-22bc8b794a0f,a561d36a-7306-5e13-ba1f-4fb504a27db3,Desmodium styracifolium (Osbeck) Merr.,desmodium_styracifolium_osbeck_merr,synonym_variant,2026-06-02T16:45:51+00:00
-ef8934d7-96e1-54b8-bc51-91fdfbf0b554,a61ad6fb-bf3a-5493-9caa-a36e5cef7ba3,Senna tora (L.) Roxb.,senna_tora_l_roxb,normalized_variant,2026-06-02T16:45:52+00:00
-ffd702f5-284a-5d2b-a7bc-4b12392cb269,a61ad6fb-bf3a-5493-9caa-a36e5cef7ba3,Cassia tora L.,cassia_tora_l,synonym_variant,2026-06-02T16:45:52+00:00
-037a0157-7277-5824-9f28-edb33b29ff23,a628cf0c-a603-596e-8b61-a08c6b9751b4,Allium tuberosum Rottler ex Spreng.,allium_tuberosum_rottler_ex_spreng,normalized_variant,2026-06-02T16:45:51+00:00
-3952ffe0-5bf4-5057-a127-c20da3e208e7,a65d370e-3d44-5656-866f-1ae48465e869,Pueraria montana (Lour.) Merr.,pueraria_montana_lour_merr,normalized_variant,2026-06-02T16:45:52+00:00
-2dd7c48d-a2d5-5198-a2bf-5e0e936d5788,a75162a9-c39e-589f-8028-487e95132947,Talinum paniculatum (Jacq.) Gaertn.,talinum_paniculatum_jacq_gaertn,normalized_variant,2026-06-02T16:45:52+00:00
-e1c687bb-dfd2-594e-a563-529271ef1f6d,a75c93bd-bf17-5642-b2a7-8cefcad530a6,Senna siamea (Lam.) H.S.Irwin & Barneby,senna_siamea_lam_h_s_irwin_barneby,normalized_variant,2026-06-02T16:45:52+00:00
-4246d5cc-fea3-561e-b1b6-e4f648d01816,a75c93bd-bf17-5642-b2a7-8cefcad530a6,Cassia siamea Lam.,cassia_siamea_lam,synonym_variant,2026-06-02T16:45:52+00:00
-e832653f-9325-50fe-a5a8-b7663dafbd04,a7ca7808-93e2-5eb6-8399-d6e2bac310fb,Quassia amara L.,quassia_amara_l,normalized_variant,2026-06-02T16:45:52+00:00
-7fef0b10-127d-5ffb-9fb2-2dfeb500f1d7,a8f8e31e-bd14-538c-b537-9b743c9e28cf,Millingtonia hortensis L.fil.,millingtonia_hortensis_l_fil,normalized_variant,2026-06-02T16:45:51+00:00
-b5429073-f43e-5ef9-b780-3738d861282b,a92ff767-3d00-527f-97aa-c6d17c9dd1fb,Acorus calamus L.,acorus_calamus_l,normalized_variant,2026-06-02T16:45:51+00:00
-3b1ac12a-6d2c-5654-b362-774b8ee9a691,aa19c5ca-0e00-5de6-9341-d71848a7f4f1,Senna alexandrina Mill.,senna_alexandrina_mill,normalized_variant,2026-06-02T16:45:52+00:00
-8d2615b1-f9de-5082-930c-5bdf34b04810,aa19c5ca-0e00-5de6-9341-d71848a7f4f1,Cassia senna L.,cassia_senna_l,synonym_variant,2026-06-02T16:45:52+00:00
-dd43ae48-bfb8-5beb-a0b5-c51a4890ac2d,aa32cf2d-fa8f-5d3b-9765-2fa4c2faa075,Piper betle L.,piper_betle_l,normalized_variant,2026-06-02T16:45:52+00:00
-e6308bc5-bef1-5e85-ad25-efa518d4341c,ab1a582f-7122-5534-984a-eb378be4064d,Broussonetia papyrifera (L.) L'Hér. ex Vent.,broussonetia_papyrifera_l_l_h_r_ex_vent,normalized_variant,2026-06-02T16:45:51+00:00
-045f2440-79e6-598b-bb77-b34cfbeba2ca,ab1a582f-7122-5534-984a-eb378be4064d,Morus australis Poir.,morus_australis_poir,synonym_variant,2026-06-02T16:45:51+00:00
-be1afa3e-737e-5eac-ab43-b96f547d7377,ac804791-0638-5b18-aa76-e712c711b543,Psophocarpus tetragonolobus (L.) DC.,psophocarpus_tetragonolobus_l_dc,normalized_variant,2026-06-02T16:45:52+00:00
-2f90719c-3d16-58a6-a316-b13afbdf9bb5,acdb42a9-0e68-5041-8fd3-e292abf7654c,Melochia corchorifolia L.,melochia_corchorifolia_l,normalized_variant,2026-06-02T16:45:51+00:00
-ee6815b7-3bd4-5fba-aadc-8f146a3c85a9,ace8788d-0e5e-527f-bdfd-fd2b3354a299,Mimosa pudica L.,mimosa_pudica_l,normalized_variant,2026-06-02T16:45:51+00:00
-67993551-a2cf-5149-9622-c2f94dbce2d7,ad0d237e-aaf8-5065-8ab3-247ff6ff46f3,Smilax zeylanica L.,smilax_zeylanica_l,normalized_variant,2026-06-02T16:45:52+00:00
-8feba39d-659a-568a-9132-154a65f08883,af283b6d-64da-5b43-8832-6fe17728a4c7,Aloe vera (L.) Burm.f.,aloe_vera_l_burm_f,normalized_variant,2026-06-02T16:45:51+00:00
-54f8f5f7-a34b-5a63-949c-eb3d11acb691,af84e4bf-4bc0-5884-9ee7-8cac190e32cc,Physalis angulata L.,physalis_angulata_l,normalized_variant,2026-06-02T16:45:52+00:00
-a4c0b142-75de-5181-b7ac-56f3ceaa522f,af84e4bf-4bc0-5884-9ee7-8cac190e32cc,Physalis minima L.,physalis_minima_l,synonym_variant,2026-06-02T16:45:52+00:00
-2b678cd0-355e-533d-9427-5a6408d9f1dd,afc8d2f6-c66c-59e7-831c-adbebb9154c7,Tamarindus indica L.,tamarindus_indica_l,normalized_variant,2026-06-02T16:45:52+00:00
-43e2a916-4079-5c86-91b1-582b043e7414,b001be0a-cf2a-5c90-8458-8d2dda31cfee,Myristica fragrans Houtt.,myristica_fragrans_houtt,normalized_variant,2026-06-02T16:45:52+00:00
-ba76da2e-01c6-57be-8744-e4031dbf4702,b0a0c70f-340e-52bf-b3e5-69f51b35041a,Coffea arabica L.,coffea_arabica_l,normalized_variant,2026-06-02T16:45:51+00:00
-73a90cad-fe7d-500a-a756-8b7b7fccd58d,b124e8f3-a469-54ed-9c7f-56a3428efd5e,Eclipta alba (L.) Hassk.,eclipta_alba_l_hassk,normalized_variant,2026-06-02T16:45:51+00:00
-845d3847-725b-5c98-8cd9-36c555d786e7,b129d6bc-81bd-5af4-9355-122b4cc9158e,Gynura japonica (Thunb.) Juel,gynura_japonica_thunb_juel,normalized_variant,2026-06-02T16:45:51+00:00
-96ecf154-a9a8-5787-8cf5-e3022690a514,b129d6bc-81bd-5af4-9355-122b4cc9158e,Gynura segetum (Lour.) Merr.,gynura_segetum_lour_merr,synonym_variant,2026-06-02T16:45:51+00:00
-ee6b6c48-9240-5514-974b-394ed2ed0f04,b1af4455-a1f3-58ae-801d-d017fe5c8104,Gaultheria procumbens L.,gaultheria_procumbens_l,normalized_variant,2026-06-02T16:45:51+00:00
-e9702244-0fec-58d7-a706-5cf67bd8d9f6,b22d8f89-38be-5419-b05c-3f000999a611,Fabisporus sanguineus (L.) Zmitr.,fabisporus_sanguineus_l_zmitr,normalized_variant,2026-06-02T16:45:51+00:00
-dc241659-9416-5d7c-b84e-d6dee3297b15,b22d8f89-38be-5419-b05c-3f000999a611,Pycnoporus sanguineus (L.) Murrill,pycnoporus_sanguineus_l_murrill,synonym_variant,2026-06-02T16:45:51+00:00
-93920060-8b14-53e2-b1d7-0d634467d3de,b252fed9-4162-50ae-b814-b7993e23f234,Garcinia mangostana L.,garcinia_mangostana_l,normalized_variant,2026-06-02T16:45:51+00:00
-f30bf89e-5e80-5877-a299-141a59c377a0,b2a8b027-a1d7-5809-9821-2bd49821225c,Kalanchoe daigremontiana Raym.-Hamet & H.Perrier,kalanchoe_daigremontiana_raym_hamet_h_perrier,normalized_variant,2026-06-02T16:45:51+00:00
-ad56d11c-cfac-52b5-bb3d-4bfae1ec9ec1,b3ebb426-4906-5f75-bf37-67dcc7c397cb,Coffea canephora Pierre ex A.Froehner,coffea_canephora_pierre_ex_a_froehner,normalized_variant,2026-06-02T16:45:51+00:00
-09e2c6f4-84a8-552f-8b37-56e8cb008b99,b3ebb426-4906-5f75-bf37-67dcc7c397cb,Coffea robusta L.Linden,coffea_robusta_l_linden,synonym_variant,2026-06-02T16:45:51+00:00
-f0f22d33-1856-5ec7-b499-7d377c3f4d26,b471cdb7-ada5-5fcb-859a-108c931b97df,Nephelium lappaceum L.,nephelium_lappaceum_l,normalized_variant,2026-06-02T16:45:52+00:00
-d57b5051-d4cf-5541-9de7-59100ff068ff,b4f1aadb-7863-540b-9820-81c380e2afa7,Drymaria cordata (L.) Willd. ex Schult.,drymaria_cordata_l_willd_ex_schult,normalized_variant,2026-06-02T16:45:51+00:00
-3ec5d23a-fbad-54c8-b4a5-7fc3b4ea8fa9,b4f914bd-179e-5bf8-9553-0db2340c6449,Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.,tabernaemontana_divaricata_l_r_br_ex_roem_schult,normalized_variant,2026-06-02T16:45:52+00:00
-cc76e94c-2f09-5401-87cb-0c5b6402f499,b4f914bd-179e-5bf8-9553-0db2340c6449,Ervatamia divaricata (L.) Burkill,ervatamia_divaricata_l_burkill,synonym_variant,2026-06-02T16:45:52+00:00
-3ddfa2a2-bf7b-5570-82f7-c1fa14b3e22f,b5fa32ed-8242-5d7a-8f12-a410f41c6f22,Rosa chinensis Jacq.,rosa_chinensis_jacq,normalized_variant,2026-06-02T16:45:52+00:00
-0dfe2b19-0547-5809-82e4-870a3a204af6,b617fcd7-3563-571f-a0fb-5d3a4fb91e58,Lagerstroemia speciosa (L.) Pers.,lagerstroemia_speciosa_l_pers,normalized_variant,2026-06-02T16:45:51+00:00
-867cd46f-ed04-5220-a9ec-35ffcd0d7e30,b7960d0e-3148-54e8-aff0-a567bd9e6aba,Lawsonia inermis L.,lawsonia_inermis_l,normalized_variant,2026-06-02T16:45:51+00:00
-b5131062-5b76-5dcf-87ba-2464a3c80223,b7a31c34-5fd0-5114-8b4e-3a5f3d6c61ed,Leonurus japonicus Houtt.,leonurus_japonicus_houtt,normalized_variant,2026-06-02T16:45:51+00:00
-3667356d-7769-5ed9-a869-b3932cf2b189,b7a31c34-5fd0-5114-8b4e-3a5f3d6c61ed,Leonurus heterophyllus Sweet,leonurus_heterophyllus_sweet,synonym_variant,2026-06-02T16:45:51+00:00
-4145aacd-fcc1-58ce-9d62-c1eaf0dc716c,b7c3acc3-f7ce-593a-a0ff-309e34a3b4bd,Musa × paradisiaca L.,musa_paradisiaca_l,normalized_variant,2026-06-02T16:45:52+00:00
-6856c66a-0b2f-5161-8d1a-61ff3ce41190,b7c3acc3-f7ce-593a-a0ff-309e34a3b4bd,Musa × sapientum L.,musa_sapientum_l,synonym_variant,2026-06-02T16:45:52+00:00
-3089bc26-72f4-5eae-8e6b-8e45bf4375ee,b84d8af0-5c5a-5f21-954d-57b0f85c1ebb,Psidium guajava L.,psidium_guajava_l,normalized_variant,2026-06-02T16:45:52+00:00
-9b9f645b-e974-578c-a2a5-ea29e5201398,b84f723c-bf5d-53b2-810e-e058fb04d17a,Entada phaseoloides (L.) Merr.,entada_phaseoloides_l_merr,normalized_variant,2026-06-02T16:45:51+00:00
-28a5a330-8448-56cf-8884-02607bb1524a,b84f723c-bf5d-53b2-810e-e058fb04d17a,Entada scandens (L.) Benth.,entada_scandens_l_benth,synonym_variant,2026-06-02T16:45:51+00:00
-ef3c91e3-a74e-544a-ba93-bd0c68f593cc,b86d52ec-bc9f-5cc2-846d-93c37bcd3157,Coriandrum sativum L.,coriandrum_sativum_l,normalized_variant,2026-06-02T16:45:51+00:00
-aacb938b-6b76-5a31-94f7-ca77b3550830,b89b9db2-bd4f-597f-aed6-3b7accfe029a,Platycladus orientalis (L.) Franco,platycladus_orientalis_l_franco,normalized_variant,2026-06-02T16:45:52+00:00
-8b7e584e-9e14-5621-82e0-ab72353aa6d1,b8f9bf63-1cd0-5aa4-8301-d1e7cc6f12b6,Cinnamomum camphora (L.) J.Presl,cinnamomum_camphora_l_j_presl,normalized_variant,2026-06-02T16:45:51+00:00
-756ae71c-72ff-53b6-8e0b-304209f27b62,b9c139c7-7a56-5adc-8b88-a7b6f3aca3d1,Tabernaemontana corymbosa Roxb. ex Wall.,tabernaemontana_corymbosa_roxb_ex_wall,normalized_variant,2026-06-02T16:45:52+00:00
-488ab956-9479-5a7e-855a-10fc39550f8b,ba15f02b-7677-5c68-a4e0-e60c86c86885,Ruellia tuberosa L.,ruellia_tuberosa_l,normalized_variant,2026-06-02T16:45:52+00:00
-8cc53da2-f40d-5b2d-bac5-07e59b675f9e,ba321e5b-4b13-5b40-b65d-1b0a56d04401,Abelmoschus moschatus subsp. moschatus,abelmoschus_moschatus_subsp_moschatus,normalized_variant,2026-06-02T16:45:51+00:00
-527476c2-8f25-5967-952f-e5293c692abb,ba321e5b-4b13-5b40-b65d-1b0a56d04401,Hibiscus abelmoschus L.,hibiscus_abelmoschus_l,synonym_variant,2026-06-02T16:45:51+00:00
-9f27f633-4b06-5afb-be60-01f1614fcac4,ba372c6c-7637-50b2-9292-b386e3c357ad,Imperata cylindrica (L.) Raeusch.,imperata_cylindrica_l_raeusch,normalized_variant,2026-06-02T16:45:51+00:00
-45f9b946-d0f6-5fe1-91ba-e725080746dd,ba699fda-df4b-5c26-9542-d45cfe38b634,Stachytarpheta mutabilis (Jacq.) Vahl,stachytarpheta_mutabilis_jacq_vahl,normalized_variant,2026-06-02T16:45:52+00:00
-717e99a9-e58d-586f-a2c4-62f43deb6f7b,ba6f8bcf-da27-5ee3-a273-ca5732c909ee,Gomphrena globosa L.,gomphrena_globosa_l,normalized_variant,2026-06-02T16:45:51+00:00
-628042f7-9169-501a-a268-b9ebe4eacd02,bac11d3d-45c1-5f6b-93ee-b5b7d6658bc4,Cymbopogon citratus (DC.) Stapf,cymbopogon_citratus_dc_stapf,normalized_variant,2026-06-02T16:45:51+00:00
-69f7e814-796e-54cb-8b0a-db27a203cce0,bb82a777-82c9-583b-8645-739ddbc45870,Tabernaemontana sphaerocarpa Blume,tabernaemontana_sphaerocarpa_blume,normalized_variant,2026-06-02T16:45:52+00:00
-adde3558-10c2-561a-942e-f892b10ba9e9,bb8b2142-b2b1-5a7b-89d6-5c8d3583ae97,Viola odorata L.,viola_odorata_l,normalized_variant,2026-06-02T16:45:52+00:00
-1ca3b89c-4072-51e7-97cb-ba771d9d6b08,bce825c0-1611-5e87-b0eb-760dc1815b3e,Eucalyptus globulus Labill.,eucalyptus_globulus_labill,normalized_variant,2026-06-02T16:45:51+00:00
-c9fa742d-d195-54a4-b2ac-e419791f9b2e,bdde9185-f5f6-5777-863d-aaf59a3898a1,"Desmodium gangeticum Puri, 1951",desmodium_gangeticum_puri_1951,normalized_variant,2026-06-02T16:45:51+00:00
-9bd4544d-1643-5700-9711-2ba945094dd7,beeec76b-4163-5a33-9b6a-086fce655b15,Leucaena leucocephala (Lam.) de Wit,leucaena_leucocephala_lam_de_wit,normalized_variant,2026-06-02T16:45:51+00:00
-73664a30-57d4-5ada-85dd-f2ec87f59587,bf076fde-a7e0-5586-9966-87c36b88bdcd,Cuminum cyminum L.,cuminum_cyminum_l,normalized_variant,2026-06-02T16:45:51+00:00
-02b133d2-c750-595a-9e93-50e7de008d41,bf4b6a7d-ba5d-53fc-a018-9dd0771ef45f,"Eugenia aromatica Kuntze, 1891",eugenia_aromatica_kuntze_1891,normalized_variant,2026-06-02T16:45:51+00:00
-60d6f1ac-760e-5988-8a8e-1dd2aabbc876,c00d0164-dddc-5ed9-bc85-4b338009881f,Nyctanthes arbor-tristis L.,nyctanthes_arbor_tristis_l,normalized_variant,2026-06-02T16:45:52+00:00
-215f4198-2ca9-5c02-b421-ccad01b2d25c,c0c1e6e4-9495-5d5f-bcda-b643b048c5a2,Hibiscus mutabilis L.,hibiscus_mutabilis_l,normalized_variant,2026-06-02T16:45:51+00:00
-68cfc959-c5c1-5ad4-b49c-8271fdbc1ab0,c0cdcd8e-d792-5bcc-8007-2d34bf929138,Eclipta prostrata (L.) L.,eclipta_prostrata_l_l,normalized_variant,2026-06-02T16:45:51+00:00
-e39be79e-20d9-566e-8599-93dbaf2cf75b,c0f39a76-7f69-5795-bfc8-58f810afd725,Ipomoea pes-caprae (L.) R.Br.,ipomoea_pes_caprae_l_r_br,normalized_variant,2026-06-02T16:45:51+00:00
-4f48dddf-f4f0-5cdd-9de7-5055b233e4c1,c1304035-b586-5c1d-a353-4d5defbc4d29,Syzygium aromaticum (L.) Merr. & L.M.Perry,syzygium_aromaticum_l_merr_l_m_perry,normalized_variant,2026-06-02T16:45:52+00:00
-5e9d8742-3111-5975-b655-68bb470fc248,c1304035-b586-5c1d-a353-4d5defbc4d29,Eugenia caryophyllata Thunb.,eugenia_caryophyllata_thunb,synonym_variant,2026-06-02T16:45:52+00:00
-50fb9034-2877-5c09-be7c-62cacdcf3cf9,c313a183-c8a3-507e-97a2-9270ce035010,Celosia argentea f. cristata (L.) Schinz,celosia_argentea_f_cristata_l_schinz,normalized_variant,2026-06-02T16:45:51+00:00
-027b156a-4909-524c-94e2-481b6fc20ba9,c313a183-c8a3-507e-97a2-9270ce035010,Celosia cristata L.,celosia_cristata_l,synonym_variant,2026-06-02T16:45:51+00:00
-99581485-deeb-5d4a-9d0e-526eccc75519,c36925b7-9b60-52f2-a761-475471c5965d,Ipomoea cairica (L.) Sweet,ipomoea_cairica_l_sweet,normalized_variant,2026-06-02T16:45:51+00:00
-1cfabcce-ba61-5d92-93a2-c3aefcf98ce2,c36de55f-3310-570a-891a-15894bb4aa9e,Acanthus ilicifolius L.,acanthus_ilicifolius_l,normalized_variant,2026-06-02T16:45:51+00:00
-c2577709-15da-5443-8ca8-7add0562912a,c477b8f8-e78f-5e79-a309-76b5966d0a24,Capsicum annuum L.,capsicum_annuum_l,normalized_variant,2026-06-02T16:45:51+00:00
-c41e44fd-cb30-5945-b601-d8f120cfda2f,c48c03d1-51ad-5322-944b-ed223e9f78d7,Momordica charantia L.,momordica_charantia_l,normalized_variant,2026-06-02T16:45:51+00:00
-e881813a-3315-5184-a9b2-1a2aedb820b6,c5e8388a-e6b8-5723-9997-d1c5eb953650,Ipomoea quamoclit L.,ipomoea_quamoclit_l,normalized_variant,2026-06-02T16:45:51+00:00
-9edeafb3-c509-5a49-bf90-14132e24f416,c5e8388a-e6b8-5723-9997-d1c5eb953650,Quamoclit pennata Bojer,quamoclit_pennata_bojer,synonym_variant,2026-06-02T16:45:51+00:00
-d224be60-0edc-5352-8f8b-3bdde89d502a,c636f177-e5e0-5352-83b4-ccdfc563bca5,Phyllanthus urinaria L.,phyllanthus_urinaria_l,normalized_variant,2026-06-02T16:45:52+00:00
-43ec9152-30aa-55da-803c-9fccf0e6a336,c71707ad-fcee-5f35-b1e4-4779442a7b24,Alstonia scholaris (L.) R.Br.,alstonia_scholaris_l_r_br,normalized_variant,2026-06-02T16:45:51+00:00
-058155f1-633b-52dd-b174-5e4af70d1472,c76ae9b4-c2de-5883-9293-15f5db2744a7,Carthamus tinctorius L.,carthamus_tinctorius_l,normalized_variant,2026-06-02T16:45:51+00:00
-4fdcd991-b177-5580-9d11-8fea012f9f23,c7ef913c-280f-5985-b8e1-601f099c7dc7,Jasminum officinale L.,jasminum_officinale_l,normalized_variant,2026-06-02T16:45:51+00:00
-234b961c-2247-557c-ae29-4e7edf2b1e8a,c815c0cf-090e-5fa0-b957-b2770e62e524,Rheum palmatum L.,rheum_palmatum_l,normalized_variant,2026-06-02T16:45:52+00:00
-a091f860-fc64-580e-9f1a-6f47824c8031,c87a5f74-dd81-5606-a617-8873959671c7,Euphorbia neriifolia L.,euphorbia_neriifolia_l,normalized_variant,2026-06-02T16:45:51+00:00
-c28c64f4-4491-52b0-a81e-27b35f89300f,c8d17433-cf8f-508e-ad1e-4803a952dedd,Solanum melongena L.,solanum_melongena_l,normalized_variant,2026-06-02T16:45:52+00:00
-d48e697a-6be2-5e48-8a61-04061d48d4ec,c90ffab9-7215-58c7-8513-105a858dc38a,Trichosanthes tricuspidata Lour.,trichosanthes_tricuspidata_lour,normalized_variant,2026-06-02T16:45:52+00:00
-536e09fc-63f5-5b57-9188-2d38615f240f,c928714c-d471-5533-93b1-1c0f34957757,Cyperus iria L.,cyperus_iria_l,normalized_variant,2026-06-02T16:45:51+00:00
-772e5704-c9af-5227-a3b4-0e00d9b16b2e,c997f3c0-853a-5034-8081-990481d76fe7,Oldenlandia corymbosa L.,oldenlandia_corymbosa_l,normalized_variant,2026-06-02T16:45:52+00:00
-91b57fcf-eb54-58a4-ac86-7a5ad4657935,ca433a22-3b85-5dc9-b54a-44721d79e65c,Kaempferia rotunda L.,kaempferia_rotunda_l,normalized_variant,2026-06-02T16:45:51+00:00
-e779dd82-df29-5892-b387-12d121a4895e,cba6c5c3-2c6c-5aec-94e9-fdab46eadc46,Cyclea barbata Miers,cyclea_barbata_miers,normalized_variant,2026-06-02T16:45:51+00:00
-9caf25f6-474b-58f0-8bc6-a3019235d467,ccac8e33-3c4b-5c4e-8b23-4f7bf959444d,Mesosphaerum pectinatum (L.) Kuntze,mesosphaerum_pectinatum_l_kuntze,normalized_variant,2026-06-02T16:45:51+00:00
-1281b796-6e7f-5ece-914d-02f222debea0,ccac8e33-3c4b-5c4e-8b23-4f7bf959444d,Hyptis pectinata (L.) Poit.,hyptis_pectinata_l_poit,synonym_variant,2026-06-02T16:45:51+00:00
-e3a39640-c9b1-5cad-9ad0-ff3b656c256f,ccb63bb3-cf7e-5c58-b0ed-13b75135b29e,Centella asiatica (L.) Urb.,centella_asiatica_l_urb,normalized_variant,2026-06-02T16:45:51+00:00
-b91d725c-648b-512c-a58e-a05cfdb04cd0,cd41e282-4b71-56ac-9087-3b576ab6d986,Casuarina equisetifolia L.,casuarina_equisetifolia_l,normalized_variant,2026-06-02T16:45:51+00:00
-4f51b834-2739-5e08-a0c8-2150c19b5a00,cdba6e11-56c1-5dcf-ba63-d851de67acbd,Zanthoxylum rhetsa (Roxb.) DC.,zanthoxylum_rhetsa_roxb_dc,normalized_variant,2026-06-02T16:45:52+00:00
-5cf286ec-7be1-5f9b-83de-711b4eda64f1,cdba6e11-56c1-5dcf-ba63-d851de67acbd,Fagara rhetsa Roxb.,fagara_rhetsa_roxb,synonym_variant,2026-06-02T16:45:52+00:00
-bf186c32-b6ba-50d9-b8d5-3f9afe85c72c,cdc786c3-8bca-5b99-8e5a-e341e9f5ef1b,Homalomena occulta (Lour.) Schott,homalomena_occulta_lour_schott,normalized_variant,2026-06-02T16:45:51+00:00
-f1bf10f4-6162-5ea6-860d-83933b9a42c6,cdf464f9-5873-571c-8320-913fbea42519,Artemisia lactiflora Wall. ex DC.,artemisia_lactiflora_wall_ex_dc,normalized_variant,2026-06-02T16:45:51+00:00
-067706a4-6407-52d0-ab80-7699eedcec63,cedd05e3-437d-50b7-ae97-6e1710d40d98,Plumbago zeylanica L.,plumbago_zeylanica_l,normalized_variant,2026-06-02T16:45:52+00:00
-e7f4ac9f-3aa4-5adb-976c-48b0aac03536,cef21d69-6e29-58b2-8104-783ff9c32245,Breynia androgyna (L.) Chakrab. & N.P.Balakr.,breynia_androgyna_l_chakrab_n_p_balakr,normalized_variant,2026-06-02T16:45:51+00:00
-fd239e81-336d-5e14-bad4-11d0819a346c,cef21d69-6e29-58b2-8104-783ff9c32245,Sauropus androgynus (L.) Merr.,sauropus_androgynus_l_merr,synonym_variant,2026-06-02T16:45:51+00:00
-4d912a33-bb90-5a0a-8c9f-b755687e665d,cfed09a3-069d-5efb-b082-9a7538b5b248,Murraya paniculata (L.) Jacq.,murraya_paniculata_l_jacq,normalized_variant,2026-06-02T16:45:52+00:00
-4657b821-8ab0-5d51-9cbc-3376280e2f8f,d0f987f7-f9dc-532c-9741-c085c58d4025,Manihot esculenta Crantz,manihot_esculenta_crantz,normalized_variant,2026-06-02T16:45:51+00:00
-f2ff879f-15c8-5848-b8dd-ef7e34b307a6,d0f987f7-f9dc-532c-9741-c085c58d4025,Manihot utilissima Pohl,manihot_utilissima_pohl,synonym_variant,2026-06-02T16:45:51+00:00
-b0074f03-1739-5bf5-8e29-971f498c85e3,d1033b03-538e-5d47-90cd-78bf85e65b59,Apium graveolens L.,apium_graveolens_l,normalized_variant,2026-06-02T16:45:51+00:00
-7f50fe00-585b-5602-9705-25629250a0e7,d13b40db-3994-536d-bda5-609a23191cdc,Hyptis brevipes Poit.,hyptis_brevipes_poit,normalized_variant,2026-06-02T16:45:51+00:00
-98c6a44a-98c2-5a95-97ad-ffee8ed918e5,d1ebcc6d-9f4f-5e67-b9dd-ad478bf17856,Pogostemon cablin (Blanco) Benth.,pogostemon_cablin_blanco_benth,normalized_variant,2026-06-02T16:45:52+00:00
-a12c4617-729a-50f0-9b2a-7f920b0f2c6f,d209b533-9d00-58a5-814a-157a9c443927,Talinum fruticosum (L.) Juss.,talinum_fruticosum_l_juss,normalized_variant,2026-06-02T16:45:52+00:00
-b906bd8f-409a-59d6-8f7b-0bf74ee2df78,d209b533-9d00-58a5-814a-157a9c443927,Talinum triangulare (Jacq.) Willd.,talinum_triangulare_jacq_willd,synonym_variant,2026-06-02T16:45:52+00:00
-0227d380-10c1-5f43-9808-5e0c6fc6bac6,d49b4a6d-6192-5ec2-9232-c44907129f7e,Annona squamosa L.,annona_squamosa_l,normalized_variant,2026-06-02T16:45:51+00:00
-0a7e2bdd-219a-51d1-b445-252abd2390fb,d50930be-8d33-56fb-9350-c39eb62194b3,Elettaria cardamomum (L.) Maton,elettaria_cardamomum_l_maton,normalized_variant,2026-06-02T16:45:51+00:00
-fb7fd9c4-28fd-548c-8a1d-f55ba1bebb8e,d55956d8-bdcf-5dc2-b8d6-a66971537a43,Sida rhombifolia L.,sida_rhombifolia_l,normalized_variant,2026-06-02T16:45:52+00:00
-07afaf6d-74cb-5c0c-b28d-27286f573305,d6b5780b-2e88-5490-a0d6-b85d9b58f11b,Portulaca grandiflora Hook.,portulaca_grandiflora_hook,normalized_variant,2026-06-02T16:45:52+00:00
-e21e1e6c-d3d9-5137-b693-21c31898b162,d735cf31-61e2-5cd7-b833-25f2766538c8,Styphnolobium japonicum (L.) Schott,styphnolobium_japonicum_l_schott,normalized_variant,2026-06-02T16:45:52+00:00
-e512bf57-a781-53c9-a655-904b05eb773b,d760489a-d188-585e-a821-aa4510eb9fd5,Selaginella doederleinii Hieron.,selaginella_doederleinii_hieron,normalized_variant,2026-06-02T16:45:52+00:00
-4028e7bc-1a1a-57da-bfc0-a10327ce8e9f,d7f775bf-b93b-59cf-a097-2dbdb1445a3f,Piper retrofractum Vahl,piper_retrofractum_vahl,normalized_variant,2026-06-02T16:45:52+00:00
-3771df55-b6cb-5eff-9323-0d982d58f61e,d95dc1a7-a51a-5e58-a778-0a4890fc7f2f,Ginkgo biloba L.,ginkgo_biloba_l,normalized_variant,2026-06-02T16:45:51+00:00
-f94a10cc-4556-5184-8ffa-eb57d556bf65,d9e1507f-5df9-56b9-ba5b-65a64a377b99,Mirabilis jalapa L.,mirabilis_jalapa_l,normalized_variant,2026-06-02T16:45:51+00:00
-4c87bf73-084a-596c-831f-273dc4e5a5ba,d9ed2164-9d0a-5d2d-8772-4e187f4412e9,Carapichea ipecacuanha (Brot.) L.Andersson,carapichea_ipecacuanha_brot_l_andersson,normalized_variant,2026-06-02T16:45:51+00:00
-6dd94ba0-fa2a-5e00-b5bf-a1f4746828a5,d9ed2164-9d0a-5d2d-8772-4e187f4412e9,Cephaelis ipecacuanha (Brot.) A.Rich.,cephaelis_ipecacuanha_brot_a_rich,synonym_variant,2026-06-02T16:45:51+00:00
-02aca0da-4e59-57f0-98cd-b55cc4406e53,da452b1d-917d-58e3-907f-b4c98c1dae7a,Meistera aculeata (Roxb.) Škorničk. & M.F.Newman,meistera_aculeata_roxb_korni_k_m_f_newman,normalized_variant,2026-06-02T16:45:51+00:00
-cbb35708-70fc-5514-8cbd-96ece64fb2ad,da452b1d-917d-58e3-907f-b4c98c1dae7a,Amomum aculeatum Roxb.,amomum_aculeatum_roxb,synonym_variant,2026-06-02T16:45:51+00:00
-ddb23763-c73f-5817-aff1-33f81ab16677,da5da99d-7f62-5242-a5fd-afb5ec6d2975,Cassia javanica L.,cassia_javanica_l,normalized_variant,2026-06-02T16:45:51+00:00
-cd3175ec-1007-5ff6-a743-0c5dfe3b9af0,da6b2d83-f414-59d2-8402-00bbcb1014ce,Duranta erecta L.,duranta_erecta_l,normalized_variant,2026-06-02T16:45:51+00:00
-f87bfbc6-ed84-52b2-ad1a-6628b5c70988,da6b2d83-f414-59d2-8402-00bbcb1014ce,Duranta repens L.,duranta_repens_l,synonym_variant,2026-06-02T16:45:51+00:00
-561be320-cee9-5388-9201-08b8116d4c13,dab798a1-d486-5853-bc20-b3be0cbb2ba3,Alpinia galanga (L.) Willd.,alpinia_galanga_l_willd,normalized_variant,2026-06-02T16:45:51+00:00
-6b53f9c3-7ec8-5d00-a0d4-2e5f3ca4f687,db80ff24-2d40-53cb-b3c8-ca93c541a328,Digitalis purpurea L.,digitalis_purpurea_l,normalized_variant,2026-06-02T16:45:51+00:00
-e8068b8c-806d-55f0-87c9-500c06de0803,dbd102ec-bc98-5c24-ab80-073046e3ef96,Ouret lanata (L.) Kuntze,ouret_lanata_l_kuntze,normalized_variant,2026-06-02T16:45:52+00:00
-74332731-9644-5ad0-aff1-13b593586cb4,dbd102ec-bc98-5c24-ab80-073046e3ef96,Aerva lanata (L.) Juss. ex Schult.,aerva_lanata_l_juss_ex_schult,synonym_variant,2026-06-02T16:45:52+00:00
-180dcd32-2895-5af9-ac64-cff13ad08980,dc120051-3ff1-5033-88eb-9505b5efef08,Lansium domesticum Corrêa,lansium_domesticum_corr_a,normalized_variant,2026-06-02T16:45:51+00:00
-a5509981-f037-5614-bd97-1676aacb1ae5,dca2217e-d4f2-53cb-b082-24c58c20abd4,Melastoma malabathricum L.,melastoma_malabathricum_l,normalized_variant,2026-06-02T16:45:51+00:00
-a536fe07-21d3-5b6e-89f4-0294ddaed8ad,dce3b814-68cd-5df4-a8e0-83ff4a2abee4,Ganoderma lucidum (Curtis) P.Karst.,ganoderma_lucidum_curtis_p_karst,normalized_variant,2026-06-02T16:45:51+00:00
-343061f1-cf38-548b-91e2-fc53c47f67f0,de878003-fcd3-50c1-849b-f0c460a3ed1f,Emilia sonchifolia (L.) DC. ex Wight,emilia_sonchifolia_l_dc_ex_wight,normalized_variant,2026-06-02T16:45:51+00:00
-49744e4b-810e-56ed-86b1-d00168737b33,ded4fc69-7c4a-5751-a164-4eb8c860b841,Sophora tomentosa L.,sophora_tomentosa_l,normalized_variant,2026-06-02T16:45:52+00:00
-0cf5622d-4ee4-500b-9bf6-dbfa82fa80a2,df4a70cf-3d5a-5bd8-a16d-51507153f867,Beilschmiedia madang (Blume) Blume,beilschmiedia_madang_blume_blume,normalized_variant,2026-06-02T16:45:51+00:00
-a0a70693-091c-5107-8f3c-b723c90dda14,df5a936f-4a6e-59ca-8195-401acc899c82,Ficus carica L.,ficus_carica_l,normalized_variant,2026-06-02T16:45:51+00:00
-88bef5d0-abb8-5422-9446-0c5e82c5098d,df9a1e4a-d71d-5ef9-a844-a00179cede85,Platycodon grandiflorus (Jacq.) A.DC.,platycodon_grandiflorus_jacq_a_dc,normalized_variant,2026-06-02T16:45:52+00:00
-87179010-c133-5e1e-9f58-700ecea6b46c,dfbae356-a5e3-5106-91d5-ddd248dda4b5,Phaseolus vulgaris L.,phaseolus_vulgaris_l,normalized_variant,2026-06-02T16:45:52+00:00
-4590abbb-ebf9-5711-992c-959fe8e1392c,e0d2a967-720d-5cf1-a709-4fad8be84402,Tectona grandis L.f.,tectona_grandis_l_f,normalized_variant,2026-06-02T16:45:52+00:00
-3d888586-38d4-572c-8104-f9006d1ec52d,e0eebf3a-d8a8-5f9e-83f0-e1ce7c13d71a,Solanum lycopersicum L.,solanum_lycopersicum_l,normalized_variant,2026-06-02T16:45:52+00:00
-e777916a-75a2-5054-8d30-a82940adf1e8,e0f458e4-5fb7-501d-b992-b06f066c5d03,Daucus carota L.,daucus_carota_l,normalized_variant,2026-06-02T16:45:51+00:00
-cd29a8b3-37f5-54bd-b801-c309aa5f627d,e104fc82-a836-50c5-9dbb-5546e38ee23e,Nigella sativa L.,nigella_sativa_l,normalized_variant,2026-06-02T16:45:52+00:00
-e66da091-b19d-5192-9c6f-c330c83c25a7,e10b66d9-86ce-5518-aaa2-6c822b89ac70,Sonchus arvensis L.,sonchus_arvensis_l,normalized_variant,2026-06-02T16:45:52+00:00
-007e856d-29b9-5f17-ba88-b0c82db2c9f4,e1f56081-6106-5129-a3e1-580e132bf3cb,Sesbania grandiflora (L.) Poir.,sesbania_grandiflora_l_poir,normalized_variant,2026-06-02T16:45:52+00:00
-c33e9f9f-e122-5f35-91b2-3fe4fb5bdc37,e23840c2-b967-5246-b462-80e00e73ae5e,Celosia argentea L.,celosia_argentea_l,normalized_variant,2026-06-02T16:45:51+00:00
-21b511b4-4a8f-50c4-b797-5eb9fc744f5b,e28caa16-d112-57d2-b6db-4430329784da,Cucumis sativus L.,cucumis_sativus_l,normalized_variant,2026-06-02T16:45:51+00:00
-8b6caf47-9325-5299-83c9-04d7d74f176a,e2d3573c-a835-5b22-8d7e-72a6ec69a84a,Nelumbo nucifera Gaertn.,nelumbo_nucifera_gaertn,normalized_variant,2026-06-02T16:45:52+00:00
-86c47f09-3b31-514f-9c4e-920fd794911c,e2f235f8-aa8d-549d-964b-2a798387e331,Goniothalamus macrophyllus (Blume) Hook.f. & Thomson,goniothalamus_macrophyllus_blume_hook_f_thomson,normalized_variant,2026-06-02T16:45:51+00:00
-4dcfbe6c-6ebd-5282-acb7-942d909ce633,e2fd167b-5007-5c8d-8437-43d5e9d869eb,Citrus × aurantium L.,citrus_aurantium_l,normalized_variant,2026-06-02T16:45:51+00:00
-8f518872-8976-55af-b972-557e56b61b68,e342c05d-fcd6-5b98-9137-607e65c8aa78,Cinnamomum burmanni (Nees & T.Nees) Blume,cinnamomum_burmanni_nees_t_nees_blume,normalized_variant,2026-06-02T16:45:51+00:00
-fc2e1151-39ef-5809-b80e-34f9fa72c7f9,e38ca312-df7f-5ddf-9572-393117818bbc,Anredera cordifolia (Ten.) Steenis,anredera_cordifolia_ten_steenis,normalized_variant,2026-06-02T16:45:51+00:00
-5fbe4f82-54f2-5c94-8b50-daecf13fa723,e3a656be-2df9-5711-bd5b-5df103800e84,Hibiscus rosa-sinensis L.,hibiscus_rosa_sinensis_l,normalized_variant,2026-06-02T16:45:51+00:00
-a7a20ef3-e56a-51b1-86d0-25d9be09175a,e45c8eb1-1c30-5dfc-ba7a-31b6a43105dd,Ageratum houstonianum Mill.,ageratum_houstonianum_mill,normalized_variant,2026-06-02T16:45:51+00:00
-5dedecda-ea1b-5ce1-a9c2-38d0d44f79b1,e46de574-b105-5cbd-aaa5-038b9a4ea3b4,Tridax procumbens L.,tridax_procumbens_l,normalized_variant,2026-06-02T16:45:52+00:00
-1944373c-0abe-5f62-8db1-0670279e061d,e4eecaca-2f71-5c22-87d6-b1a4dbfaa645,Eleutherine bulbosa (Mill.) Urb.,eleutherine_bulbosa_mill_urb,normalized_variant,2026-06-02T16:45:51+00:00
-b18f9e61-adb7-5917-bfdf-982a17d3e628,e4eecaca-2f71-5c22-87d6-b1a4dbfaa645,Eleutherine americana (Aubl.) Merr. ex K.Heyne,eleutherine_americana_aubl_merr_ex_k_heyne,synonym_variant,2026-06-02T16:45:51+00:00
-9eb0790f-01fd-5f8b-b6ee-0ef7d42a4610,e87d4350-ce5a-50bc-a2fa-2fe7824ed070,Peperomia pellucida (L.) Kunth,peperomia_pellucida_l_kunth,normalized_variant,2026-06-02T16:45:52+00:00
-2586ed4b-fbba-5628-b6af-a60e3769ccb7,e95872e0-c0b5-5fe2-815a-34da82188a6c,Euphorbia hirta L.,euphorbia_hirta_l,normalized_variant,2026-06-02T16:45:51+00:00
-75ca530e-ec24-55c4-b588-18f131dae481,e96e6944-2ec3-5239-bb61-4888dfedf10a,Euphorbia pulcherrima Willd. ex Klotzsch,euphorbia_pulcherrima_willd_ex_klotzsch,normalized_variant,2026-06-02T16:45:51+00:00
-d616ec27-dc32-51d0-9642-0373b74d8c39,ea103730-c4b4-58c4-b58e-e30f9d5ba61a,Zephyranthes candida Herb.,zephyranthes_candida_herb,normalized_variant,2026-06-02T16:45:52+00:00
-8a781231-88f9-5029-a5f3-cd7c23a1e3d6,ea95036d-02a7-5466-8a8b-d74310f109ff,Strychnos ignatii Bergius,strychnos_ignatii_bergius,normalized_variant,2026-06-02T16:45:52+00:00
-082c3bbb-3cff-592a-bd15-8822088b124f,ec2ec3e2-8ba4-5570-96eb-b0106295f3b9,Excoecaria cochinchinensis Lour.,excoecaria_cochinchinensis_lour,normalized_variant,2026-06-02T16:45:51+00:00
-993f0b1c-6dfa-56a4-8beb-b4d742b5bbf7,ed7000e9-64c8-5ec0-bee7-cd4303ae7e49,Zea mays L.,zea_mays_l,normalized_variant,2026-06-02T16:45:52+00:00
-f6856169-934a-5465-b80c-e26ece687e26,edeb27f1-aaf8-55a0-a01c-cebc494034b1,Senna alexandrina var. alexandrina,senna_alexandrina_var_alexandrina,normalized_variant,2026-06-02T16:45:52+00:00
-c93c6f43-bae1-5fb5-96b4-2c94cf438b62,edeb27f1-aaf8-55a0-a01c-cebc494034b1,Cassia angustifolia Vahl,cassia_angustifolia_vahl,synonym_variant,2026-06-02T16:45:52+00:00
-111c96d9-15b9-5092-ac58-db2130a90767,ee58b85b-9803-5888-a95d-b826f6e063c1,Hibiscus sabdariffa L.,hibiscus_sabdariffa_l,normalized_variant,2026-06-02T16:45:51+00:00
-4d3fee94-e706-555a-b986-31cbe87a8044,eeb880ea-6aaa-5182-9d2e-667691adabe1,Zingiber purpureum Roscoe,zingiber_purpureum_roscoe,normalized_variant,2026-06-02T16:45:52+00:00
-62c99c90-b9d4-52b2-bb33-94ac4b7f1721,eeb880ea-6aaa-5182-9d2e-667691adabe1,Zingiber cassumunar Roxb.,zingiber_cassumunar_roxb,synonym_variant,2026-06-02T16:45:52+00:00
-ab1d3f52-15b6-5d5d-bebc-0eab946ada39,f0f8b0f9-18fc-5e3d-85c5-8216285aea27,Cymbopogon nardus (L.) Rendle,cymbopogon_nardus_l_rendle,normalized_variant,2026-06-02T16:45:51+00:00
-017517b5-4e29-545a-a044-c2db96d33c93,f16ce650-01b2-5d6d-ac4c-bcb37111e677,Cassytha filiformis L.,cassytha_filiformis_l,normalized_variant,2026-06-02T16:45:51+00:00
-7e467305-5492-514b-9318-d0aad9feac70,f1eae43b-78d9-5406-80e6-bec031f01e77,Caesalpinia major Brenan,caesalpinia_major_brenan,normalized_variant,2026-06-02T16:45:51+00:00
-b6434f17-ca82-5f15-99e2-c7fc733f01b1,f1ef47b5-d5f2-5b42-9c6b-157b895b1928,Pongamia pinnata (L.) Pierre,pongamia_pinnata_l_pierre,normalized_variant,2026-06-02T16:45:52+00:00
-9dfc1009-ca90-5dc3-958d-521affa802aa,f20a6769-8cdb-57b2-a977-cf1f180c97bf,Solanum nigrum L.,solanum_nigrum_l,normalized_variant,2026-06-02T16:45:52+00:00
-f039e152-ad15-5239-a933-bb3cfa62ccf4,f2880fa9-8ead-51f1-ac51-57becfb05448,Ocimum tenuiflorum L.,ocimum_tenuiflorum_l,normalized_variant,2026-06-02T16:45:52+00:00
-a734fff7-449c-52cd-8289-c7466d26561f,f2880fa9-8ead-51f1-ac51-57becfb05448,Ocimum sanctum L.,ocimum_sanctum_l,synonym_variant,2026-06-02T16:45:52+00:00
-93c2b184-d45d-539a-acfb-65ed4bc0da75,f2a5f8f4-943c-5649-9571-21911257ce21,Mimusops elengi L.,mimusops_elengi_l,normalized_variant,2026-06-02T16:45:51+00:00
-dd273dfc-81bd-53c2-ab11-4f2e7c17942f,f31e3be3-f1ba-502c-9c13-862c80eabddc,Datura stramonium var. tatula (L.) Torr.,datura_stramonium_var_tatula_l_torr,normalized_variant,2026-06-02T16:45:51+00:00
-f3566f5f-e69e-58a2-b813-e08e78c5ffd3,f31e3be3-f1ba-502c-9c13-862c80eabddc,Datura tatula L.,datura_tatula_l,synonym_variant,2026-06-02T16:45:51+00:00
-4a0e9fa0-1dd3-51f1-9371-8a4876be7926,f3a26e3e-8cf5-52bb-8fb9-74f887a6cd7a,Curcuma mangga Valeton & Zijp,curcuma_mangga_valeton_zijp,normalized_variant,2026-06-02T16:45:51+00:00
-a344bf16-4d5b-5f25-874b-8b09ae488001,f3a47d42-1aa2-52d3-863b-8f801b909e39,Stephania japonica (Thunb.) Miers,stephania_japonica_thunb_miers,normalized_variant,2026-06-02T16:45:52+00:00
-5517c42d-2866-5d37-bb40-23824ef125db,f3c4a5dd-8030-5798-b24d-9f1c41a9d151,Camellia sinensis (L.) Kuntze,camellia_sinensis_l_kuntze,normalized_variant,2026-06-02T16:45:51+00:00
-70b13745-7275-5c23-9566-db4cbdf24982,f3c4a5dd-8030-5798-b24d-9f1c41a9d151,Thea sinensis L.,thea_sinensis_l,synonym_variant,2026-06-02T16:45:51+00:00
-84122388-085d-51e5-b38f-9b6194e05c00,f3fb6e71-7123-57be-a9ce-b92a0a9d6433,Ruta angustifolia Pers.,ruta_angustifolia_pers,normalized_variant,2026-06-02T16:45:52+00:00
-6cf267e5-0e2b-585c-8387-0f77df96655c,f4acff8d-05f4-511b-b9e2-646dac5eec7c,Intsia bijuga (Colebr.) Kuntze,intsia_bijuga_colebr_kuntze,normalized_variant,2026-06-02T16:45:51+00:00
-fb2e51f6-7371-5b94-b4e7-c069fd0c7016,f4b81201-b781-50fb-b2ab-9be58e892f39,Magnolia champaca (L.) Baill. ex Pierre,magnolia_champaca_l_baill_ex_pierre,normalized_variant,2026-06-02T16:45:51+00:00
-f141dae5-69fa-5ae9-892d-7efa975fb35b,f4b81201-b781-50fb-b2ab-9be58e892f39,Michelia champaca L.,michelia_champaca_l,synonym_variant,2026-06-02T16:45:51+00:00
-e396f077-6dba-51a6-bbd4-557e22249489,f580fbea-c00f-5e4e-be19-3ba6641cb1fa,Caesalpinia pulcherrima (L.) Sw.,caesalpinia_pulcherrima_l_sw,normalized_variant,2026-06-02T16:45:51+00:00
-09e28edc-7473-5d9a-98e3-fcbeffa67be1,f8427ff7-b24c-5cb0-8f07-e7ab5ab3f9ef,Calotropis gigantea (L.) W.T.Aiton,calotropis_gigantea_l_w_t_aiton,normalized_variant,2026-06-02T16:45:51+00:00
-526c5cc7-cbe0-5ffd-815a-f97cacb21ef6,f979493f-43ed-5b94-a3f0-9c62fb0b2f9e,Citrus maxima (Burm.) Merr.,citrus_maxima_burm_merr,normalized_variant,2026-06-02T16:45:51+00:00
-2356a7b9-4d56-54cc-9d44-d848acbcf392,f9d33b87-1b71-5095-8772-5eca6e3c8715,Asparagus cochinchinensis (Lour.) Merr.,asparagus_cochinchinensis_lour_merr,normalized_variant,2026-06-02T16:45:51+00:00
-d873109a-02d7-5aa6-a0a1-371680dfea06,fa097dca-198a-5c8e-a5d8-9e9487875075,Iris domestica (L.) Goldblatt & Mabb.,iris_domestica_l_goldblatt_mabb,normalized_variant,2026-06-02T16:45:51+00:00
-88cf6f72-e9ac-52c5-8ed3-77dac238b4fb,fa097dca-198a-5c8e-a5d8-9e9487875075,Belamcanda chinensis (L.) DC.,belamcanda_chinensis_l_dc,synonym_variant,2026-06-02T16:45:51+00:00
-3c15a9e8-18bd-5f76-a958-842ac116ac37,fa92b4f4-2a20-5ced-8684-f9680dded225,Phyllanthus amarus Schumach. & Thonn.,phyllanthus_amarus_schumach_thonn,normalized_variant,2026-06-02T16:45:52+00:00
-69149e99-ff9e-537e-b311-006b512a41f9,fad237ac-de9a-5ea0-8719-6c78a09130c0,Tagetes erecta L.,tagetes_erecta_l,normalized_variant,2026-06-02T16:45:52+00:00
-4c3bfbbe-bdec-5a05-b832-7b8c684fb9ce,fb02788b-a2d7-5935-8a5a-487082c8f634,Ageratum conyzoides L.,ageratum_conyzoides_l,normalized_variant,2026-06-02T16:45:51+00:00
-f89da1df-e033-5886-a165-cc1e2d47edf2,fb653648-7594-5f5f-a4d3-efaad919ac0f,Dysoxylum acutangulum Miq.,dysoxylum_acutangulum_miq,normalized_variant,2026-06-02T16:45:51+00:00
-0a031206-6ab4-5b35-9c0b-eb0ddb03f982,fba910fb-ae83-59f9-b550-5786ef2a2f81,Orthosiphon aristatus var. aristatus,orthosiphon_aristatus_var_aristatus,normalized_variant,2026-06-02T16:45:52+00:00
-1b02a007-5ad8-5b2e-9b8b-abba64c2b177,fba910fb-ae83-59f9-b550-5786ef2a2f81,Orthosiphon stamineus Benth.,orthosiphon_stamineus_benth,synonym_variant,2026-06-02T16:45:52+00:00
-f35e7b18-e4b8-54a4-8872-9a7c2828f60e,fbee525b-bdd7-509d-a45c-6c106896c456,Alpinia officinarum Hance,alpinia_officinarum_hance,normalized_variant,2026-06-02T16:45:51+00:00
-2e11b3d1-4f97-5826-87a0-8bdd5f577b19,fbf093e8-9305-52ea-8d99-0c7aef404821,Indigofera tinctoria L.,indigofera_tinctoria_l,normalized_variant,2026-06-02T16:45:51+00:00
-043499e4-63c0-523b-b0e1-2e86227addd9,fcdef5f2-39d2-51ff-94f1-2285c31e98d2,Canna indica L.,canna_indica_l,normalized_variant,2026-06-02T16:45:51+00:00
-2ab50d53-9db7-562b-b759-dd3bee448995,fcdef5f2-39d2-51ff-94f1-2285c31e98d2,Canna edulis Ker Gawl.,canna_edulis_ker_gawl,synonym_variant,2026-06-02T16:45:51+00:00
-3d3df6b9-2f44-5d30-be1d-df292d5a1777,fd3502a4-775b-5aa2-99ec-914e733b3ba9,Artocarpus altilis (Parkinson) Fosberg,artocarpus_altilis_parkinson_fosberg,normalized_variant,2026-06-02T16:45:51+00:00
-2364b3d2-54bd-5c6e-8b28-888efbc391c0,fd3502a4-775b-5aa2-99ec-914e733b3ba9,Artocarpus communis J.R.Forst. & G.Forst.,artocarpus_communis_j_r_forst_g_forst,synonym_variant,2026-06-02T16:45:51+00:00
-dfd2869a-dcd5-5ad4-a7f0-3d0c8c62f6fb,fe116ca4-8edf-538b-b133-0c866d590d09,Pandanus amaryllifolius Roxb. ex Lindl.,pandanus_amaryllifolius_roxb_ex_lindl,normalized_variant,2026-06-02T16:45:52+00:00
-e2e8f7a1-98fe-51c6-9b22-b39d0a9814e9,fe122d47-2481-578c-b6d4-7cf88c9a528b,Agathis dammara (Lamb.) Rich. & A.Rich.,agathis_dammara_lamb_rich_a_rich,normalized_variant,2026-06-02T16:45:51+00:00
-f4a5a1dd-d545-5d3a-a2ae-4ff1872c28ad,ff08b84e-971a-5b0a-932c-bf1b9792e416,Terminalia catappa L.,terminalia_catappa_l,normalized_variant,2026-06-02T16:45:52+00:00
-203a1b17-1dc5-51bc-97b9-96ed557feeb4,ff80e7c6-fd8d-53e1-846b-528f01e4363b,Glochidion rubrum Blume,glochidion_rubrum_blume,normalized_variant,2026-06-02T16:45:51+00:00
+a07d334a-ee31-56da-8b4c-7d8b3f4ebb1e,00b03b5a-621c-5e2d-8b32-64177d61e42c,Momordica cochinchinensis (Lour.) Spreng.,momordica_cochinchinensis_lour_spreng,normalized_variant,2026-07-12T20:10:41+00:00
+a96bafa9-938a-5db9-bde6-c2fc2c363ce0,0187160f-7aa7-596a-bb72-ae602e1dfc96,Garcinia dulcis (Roxb.) Kurz,garcinia_dulcis_roxb_kurz,normalized_variant,2026-07-12T20:10:41+00:00
+67d69254-22b7-5c7d-828e-511beefba721,01a5cbee-6a28-5eef-bcd5-ed97d8b74360,Cinnamomum verum J.Presl,cinnamomum_verum_j_presl,normalized_variant,2026-07-12T20:10:40+00:00
+8770ca28-c513-54fa-89a7-a13e3e72fa3c,01a5cbee-6a28-5eef-bcd5-ed97d8b74360,Cinnamomum zeylanicum Blume,cinnamomum_zeylanicum_blume,synonym_variant,2026-07-12T20:10:40+00:00
+255f5d7e-96d7-568b-b994-867db8e1a2b2,01b98e33-42b7-5498-b139-6169251a3c96,Ficus variegata Blume,ficus_variegata_blume,normalized_variant,2026-07-12T20:10:41+00:00
+001aa846-c62e-5308-879f-09683af9d846,01f6e126-03d2-5370-84d4-64f8fcf12f1d,Boesenbergia rotunda (L.) Mansf.,boesenbergia_rotunda_l_mansf,normalized_variant,2026-07-12T20:10:40+00:00
+dc30efb8-8daf-50e4-a95c-a4ec6ca659e5,01f6e126-03d2-5370-84d4-64f8fcf12f1d,Boesenbergia pandurata (Roxb.) Schltr.,boesenbergia_pandurata_roxb_schltr,synonym_variant,2026-07-12T20:10:40+00:00
+20330aa4-c52a-5aa5-9136-b57f42a4f4e2,021f486c-9a50-5cc2-ae22-bdb5f380427f,Nicotiana tabacum L.,nicotiana_tabacum_l,normalized_variant,2026-07-12T20:10:41+00:00
+30f0ad38-0af2-5d30-b946-6810aa1e732a,02cd7868-fe4e-5d13-b363-ac922c7b456d,Ficus septica Burm.fil.,ficus_septica_burm_fil,normalized_variant,2026-07-12T20:10:41+00:00
+13334bc4-07bd-58cb-acc3-8ade6ca37ee0,02d24d5c-8f1d-5e92-bdf2-858d44eab0d4,Canarium indicum L.,canarium_indicum_l,normalized_variant,2026-07-12T20:10:40+00:00
+81164a7b-4afc-551f-88c1-817365007a73,02d24d5c-8f1d-5e92-bdf2-858d44eab0d4,Canarium commune L.,canarium_commune_l,synonym_variant,2026-07-12T20:10:40+00:00
+317e9839-b676-5307-93d9-5efd9c482d4e,03a91385-273b-50f6-aba7-43ad7c10f881,Pangium edule Reinw.,pangium_edule_reinw,normalized_variant,2026-07-12T20:10:41+00:00
+5ae21a8f-9a4c-5211-8316-cc9273a3089d,0403012d-3f06-52b1-9448-8cd2550103b7,Callicarpa candicans (Burm.f.) Hochr.,callicarpa_candicans_burm_f_hochr,normalized_variant,2026-07-12T20:10:40+00:00
+6633ab8f-40f1-55c9-a701-84ac78a7f8f9,04aaf9c0-d503-5693-b9d2-afdb9178d95f,Solanum torvum Sw.,solanum_torvum_sw,normalized_variant,2026-07-12T20:10:41+00:00
+2ef9d046-21a4-502f-b6a9-f36812292f32,05eb3d4c-41fd-573b-b118-1aebf42d6303,Artemisia vulgaris L.,artemisia_vulgaris_l,normalized_variant,2026-07-12T20:10:40+00:00
+8e95db1a-7935-5692-b5b4-8a88fcbf3607,06609fc6-66b3-5fe9-914f-90888f85a556,Alternanthera philoxeroides (Mart.) Griseb.,alternanthera_philoxeroides_mart_griseb,normalized_variant,2026-07-12T20:10:40+00:00
+58f2a953-28ea-5d0d-bfb0-1a0d3c07aed4,0763450f-c107-54d8-97c7-7208bf30e774,Rhinacanthus nasutus (L.) Kuntze,rhinacanthus_nasutus_l_kuntze,normalized_variant,2026-07-12T20:10:41+00:00
+9bc4a868-ea09-5c1a-8c87-4e9efd14a185,07bd77ec-8d26-5198-80b6-747f38900216,Achyranthes aspera L.,achyranthes_aspera_l,normalized_variant,2026-07-12T20:10:40+00:00
+5d041133-a548-578c-a87d-ba833311fc59,0833026e-d05d-51b3-8fbc-444d151b65ec,Persea americana Mill.,persea_americana_mill,normalized_variant,2026-07-12T20:10:41+00:00
+63a196d0-5d1d-59cf-84bb-a7f8e92b47b1,0833026e-d05d-51b3-8fbc-444d151b65ec,Persea gratissima C.F.Gaertn.,persea_gratissima_c_f_gaertn,synonym_variant,2026-07-12T20:10:41+00:00
+96d15ebd-6e90-521c-a1ad-b897bde54132,083318e1-aca9-5fb6-a100-0b626f2a3fbc,Sterculia foetida L.,sterculia_foetida_l,normalized_variant,2026-07-12T20:10:41+00:00
+aa43761d-753d-5781-9ea9-2fcef0e4fe4b,0854a2b6-6971-5c6e-bcbd-f3cecb691b95,Ocimum basilicum L.,ocimum_basilicum_l,normalized_variant,2026-07-12T20:10:41+00:00
+17602d14-5c81-5dd3-9695-df70f565db8b,086bc03b-81e5-5777-9c8d-c881b3b83e58,Scutellaria discolor Wall. ex Benth.,scutellaria_discolor_wall_ex_benth,normalized_variant,2026-07-12T20:10:41+00:00
+9e6021f3-74a9-5b1c-a2b7-60b4dd1bfff1,0875a0b5-de0e-5867-8e57-12e402b318e9,Tarenaya houtteana (Schltdl.) Soares Neto & Roalson,tarenaya_houtteana_schltdl_soares_neto_roalson,normalized_variant,2026-07-12T20:10:41+00:00
+18b4c53c-5584-58dc-af29-557e3c394a6b,0875a0b5-de0e-5867-8e57-12e402b318e9,Cleome spinosa L.,cleome_spinosa_l,synonym_variant,2026-07-12T20:10:41+00:00
+faedadce-9cc9-5d1e-8911-40ad41b4c487,08d4e2df-6381-5469-8311-e7ad2b60a0a7,Phyllanthus niruri L.,phyllanthus_niruri_l,normalized_variant,2026-07-12T20:10:41+00:00
+d85efa42-36f9-589d-952e-7df3e1c29540,08d62596-c5d1-5a2e-91ea-e210c5235e5a,Glycine max (L.) Merr.,glycine_max_l_merr,normalized_variant,2026-07-12T20:10:41+00:00
+72e22821-c255-595b-8e0f-3be2df6294cb,08f944e4-e577-5111-93c9-66049e72e970,Bauhinia purpurea L.,bauhinia_purpurea_l,normalized_variant,2026-07-12T20:10:40+00:00
+6a432c0e-ba69-5ac2-a30d-766463587a2e,09aafced-6936-5299-a535-62d23edad055,Echinacea purpurea (L.) Moench,echinacea_purpurea_l_moench,normalized_variant,2026-07-12T20:10:41+00:00
+8d8fb150-3f6a-510c-bf53-0e03c640277c,09c167fb-5cb9-50ec-8087-eee2f9ca2c18,Rivina humilis L.,rivina_humilis_l,normalized_variant,2026-07-12T20:10:41+00:00
+99888632-2905-5717-93ca-17c7c4c416da,0a48507f-8423-5e6e-a8b8-b74fd385a9c8,Luffa aegyptiaca Mill.,luffa_aegyptiaca_mill,normalized_variant,2026-07-12T20:10:41+00:00
+5325b029-d090-504e-924e-0e57edfc464d,0a48507f-8423-5e6e-a8b8-b74fd385a9c8,Luffa cylindrica (L.) M.Roem.,luffa_cylindrica_l_m_roem,synonym_variant,2026-07-12T20:10:41+00:00
+8eae155f-f9d5-5ec5-84dc-4db245f23f8e,0ab2659c-3ebf-550f-851f-291b95753a80,Aegle marmelos (L.) Corrêa,aegle_marmelos_l_corr_a,normalized_variant,2026-07-12T20:10:40+00:00
+62fa6101-d133-53b2-9566-2c86cb716617,0af385cb-6b6d-5aa9-a698-0125883e7279,Pandanus conoideus Lam.,pandanus_conoideus_lam,normalized_variant,2026-07-12T20:10:41+00:00
+caf12d15-77f6-5f73-8ec5-2084b4b19688,0b49e5e5-a40e-5f47-9641-b946c776811f,Paederia foetida L.,paederia_foetida_l,normalized_variant,2026-07-12T20:10:41+00:00
+a19c93da-06a8-5bca-8931-f7063e2c4eed,0b49e5e5-a40e-5f47-9641-b946c776811f,Paederia scandens (Lour.) Merr.,paederia_scandens_lour_merr,synonym_variant,2026-07-12T20:10:41+00:00
+a42478b4-bfa5-5144-ab06-246bdf02b662,0b821a53-15d0-51ac-ab9f-bbf033aba403,Vigna radiata (L.) R.Wilczek,vigna_radiata_l_r_wilczek,normalized_variant,2026-07-12T20:10:42+00:00
+39a8c8c7-40c8-5749-92c1-57965499d080,0b821a53-15d0-51ac-ab9f-bbf033aba403,Phaseolus radiatus L.,phaseolus_radiatus_l,synonym_variant,2026-07-12T20:10:42+00:00
+610f907a-4004-5368-a8d7-610d05af99a6,0b96eb85-e853-5640-887c-a1eebeaee223,Senna sophera (L.) Roxb.,senna_sophera_l_roxb,normalized_variant,2026-07-12T20:10:41+00:00
+878f65b3-c6e6-5265-9c36-2b26428d850e,0d529a87-cc65-51fd-b1f3-d8634d747517,Glycine max subsp. soja (Siebold & Zucc.) H.Ohashi,glycine_max_subsp_soja_siebold_zucc_h_ohashi,normalized_variant,2026-07-12T20:10:41+00:00
+6f6fd71a-8a10-5450-9948-6e695eacbc30,0d529a87-cc65-51fd-b1f3-d8634d747517,Glycine soja Siebold & Zucc.,glycine_soja_siebold_zucc,synonym_variant,2026-07-12T20:10:41+00:00
+71a3c6cd-de72-5952-bc0c-90cfd9eecd2c,0d5f6e9d-7447-5837-a4f1-44e4eb507a22,Santalum album L.,santalum_album_l,normalized_variant,2026-07-12T20:10:41+00:00
+6f564e79-19df-5d1d-a439-cfdecfe8346e,0d6adc23-9d12-5626-bfa7-0f66658f0f35,Physalis peruviana L.,physalis_peruviana_l,normalized_variant,2026-07-12T20:10:41+00:00
+cd22d34e-e4d4-530f-9088-b153628174d7,0de0e5d0-e509-544b-b284-628244ac66dd,Curcuma heyneana Valeton & Zijp,curcuma_heyneana_valeton_zijp,normalized_variant,2026-07-12T20:10:40+00:00
+55ace97d-1817-59cd-8fa7-b6e9089c9e80,0deb1f2c-bbab-5e68-9908-855a3cf03ab0,Premna corymbosa Rottler,premna_corymbosa_rottler,normalized_variant,2026-07-12T20:10:41+00:00
+9487d670-f03c-580e-ac29-3ddbe84a7983,0e01015a-24e4-5ef5-a0f0-8fba3f9065ea,Leonurus sibiricus L.,leonurus_sibiricus_l,normalized_variant,2026-07-12T20:10:41+00:00
+069bde7c-38c2-5601-85f2-76733876e77a,0e748d0a-af8c-5fbb-9bd0-228b3e989f08,Malus sylvestris Mill.,malus_sylvestris_mill,normalized_variant,2026-07-12T20:10:41+00:00
+4b4df545-a1e9-5122-b85d-8ba401dfcecb,0e9b2ea8-ea18-5726-9710-30d9dc11e306,Euchresta horsfieldii (Lesch.) Benn.,euchresta_horsfieldii_lesch_benn,normalized_variant,2026-07-12T20:10:41+00:00
+562a89bb-ac44-5342-93b9-007f40913284,0fdd9619-aff6-5f46-9b47-f3cb8909fee3,Cerbera manghas L.,cerbera_manghas_l,normalized_variant,2026-07-12T20:10:40+00:00
+0dde08d1-d8ef-5a8e-b6c1-a281fc82d1eb,1024dd44-90dc-51ce-a131-07032689a3dc,Morinda citrifolia L.,morinda_citrifolia_l,normalized_variant,2026-07-12T20:10:41+00:00
+4dccbaa7-b72e-504f-bc46-d14776c0b504,1059063f-370b-514f-9fe0-798361a65895,Ficus pumila L.,ficus_pumila_l,normalized_variant,2026-07-12T20:10:41+00:00
+a3008233-c245-5010-9891-8d13845de13b,1062b492-225b-59c1-8d18-a9ce2be88d47,Trigastrotheca pentaphylla (L.) Thulin,trigastrotheca_pentaphylla_l_thulin,normalized_variant,2026-07-12T20:10:41+00:00
+86d988b5-220e-55eb-bcb7-64852cab497a,1062b492-225b-59c1-8d18-a9ce2be88d47,Mollugo pentaphylla L.,mollugo_pentaphylla_l,synonym_variant,2026-07-12T20:10:41+00:00
+ad581ef1-84eb-554d-af26-64f1db2e2c01,10e0f3db-b4c4-5905-8698-f70b0bc2a5a6,Litsea cubeba (Lour.) Pers.,litsea_cubeba_lour_pers,normalized_variant,2026-07-12T20:10:41+00:00
+13a6179c-bedb-541c-815e-ba39113e19a4,11397f99-feaa-557c-8b82-e7b07741a2fc,Pterocarpus indicus Willd.,pterocarpus_indicus_willd,normalized_variant,2026-07-12T20:10:41+00:00
+dc56f5e3-c595-560e-bf1a-9f5b831dd14d,1284cd35-3323-5d6c-a448-3164847fc7b5,Artemisia cina O.C.Berg & Schmidt,artemisia_cina_o_c_berg_schmidt,normalized_variant,2026-07-12T20:10:40+00:00
+5bd8f90b-54c1-5bcc-bf6a-9df3e780e1e9,12e10725-0fd3-505a-9fe2-75a96247a29c,Morus alba L.,morus_alba_l,normalized_variant,2026-07-12T20:10:41+00:00
+8a9c9028-e809-5777-9858-9841220ac333,12efbb3b-294b-590a-9a72-6b074dd9cf2e,Pontederia crassipes Mart.,pontederia_crassipes_mart,normalized_variant,2026-07-12T20:10:41+00:00
+1585be4e-45ea-5df3-8fed-2b3a6641e49b,12efbb3b-294b-590a-9a72-6b074dd9cf2e,Eichhornia crassipes (Mart.) Solms,eichhornia_crassipes_mart_solms,synonym_variant,2026-07-12T20:10:41+00:00
+d19f4052-fef5-504a-ba90-7d05dd304ab3,138e60b9-7feb-552a-9256-e60cbe794341,Ipomoea batatas (L.) Lam.,ipomoea_batatas_l_lam,normalized_variant,2026-07-12T20:10:41+00:00
+99cffb5b-1d56-56cc-8010-6b5afd30a007,13cbe641-e59d-5c2b-acd3-e781409ef45e,Melia azedarach L.,melia_azedarach_l,normalized_variant,2026-07-12T20:10:41+00:00
+b153923a-16be-5006-828c-113974495d4b,155a3638-b4de-5556-809a-4cc137946db6,Allium fistulosum L.,allium_fistulosum_l,normalized_variant,2026-07-12T20:10:40+00:00
+6c6324bf-2cc7-5b32-9408-c193b46728de,1650f96d-00e3-5d68-9e06-358134624a4d,Senna alata (L.) Roxb.,senna_alata_l_roxb,normalized_variant,2026-07-12T20:10:41+00:00
+c6ce59a9-979e-58b0-833f-a3e51857e8eb,1650f96d-00e3-5d68-9e06-358134624a4d,Cassia alata L.,cassia_alata_l,synonym_variant,2026-07-12T20:10:41+00:00
+7ac7505b-c83d-51e3-811a-300d8aa82863,1748e875-bf72-591b-b49e-8c73cecacafb,Strobilanthes crispa (L.) Blume,strobilanthes_crispa_l_blume,normalized_variant,2026-07-12T20:10:41+00:00
+b4fd9aa9-81b9-56cb-88e8-117370951190,17a85e11-bc48-5804-8ade-253f4ed45c96,Stephania venosa (Blume) Spreng.,stephania_venosa_blume_spreng,normalized_variant,2026-07-12T20:10:41+00:00
+73453394-5dd4-5d5b-af5c-203078e5ff15,19c8dda5-5f76-5531-90e5-9a444be5bed8,Rhodomyrtus tomentosa (Aiton) Hassk.,rhodomyrtus_tomentosa_aiton_hassk,normalized_variant,2026-07-12T20:10:41+00:00
+5b2dd22d-021b-5eb7-a24d-3158c644e6f8,1a2a2f3c-2693-533b-afe1-5b18300a0e89,Passiflora foetida L.,passiflora_foetida_l,normalized_variant,2026-07-12T20:10:41+00:00
+7b340654-07c4-5516-9958-61ac3b2d3bd8,1ae12ba1-d08e-5629-9c80-09f65b518712,Dioscorea hispida Dennst.,dioscorea_hispida_dennst,normalized_variant,2026-07-12T20:10:41+00:00
+839518bc-9491-5ccc-8654-fafb366e909e,1af125da-671a-5be8-90a7-62ed68844d69,Urena lobata L.,urena_lobata_l,normalized_variant,2026-07-12T20:10:42+00:00
+07dc1721-f337-5e1b-a946-6ea7adaad500,1b485499-c7c1-5c44-9b4a-6032715e827f,Gossypium herbaceum L.,gossypium_herbaceum_l,normalized_variant,2026-07-12T20:10:41+00:00
+eb4d65a6-116c-5132-8f2c-40d17b69aab8,1b5fd7ac-4941-56c4-af2f-d6735f37c9e6,Areca catechu L.,areca_catechu_l,normalized_variant,2026-07-12T20:10:40+00:00
+e3998fef-8e48-54f4-a6b2-bcac2a870731,1b772f2d-9216-5927-84d5-8b0cb86c71bd,Mesua ferrea L.,mesua_ferrea_l,normalized_variant,2026-07-12T20:10:41+00:00
+8a7bd093-ddd1-5827-a11b-4afae2a29fa5,1b81f96c-cdb9-5515-b718-acb4eeef7663,Madhuca longifolia var. latifolia (Roxb.) A.Chev.,madhuca_longifolia_var_latifolia_roxb_a_chev,normalized_variant,2026-07-12T20:10:41+00:00
+5fdf61f4-df5e-54f4-a46a-92d61fe4ca43,1b81f96c-cdb9-5515-b718-acb4eeef7663,Madhuca indica J.F.Gmel.,madhuca_indica_j_f_gmel,synonym_variant,2026-07-12T20:10:41+00:00
+191e5bc0-d096-554c-9cfb-97994a776bb3,1bcd3718-4829-5558-a1d2-12b0bc8061de,Helicteres isora L.,helicteres_isora_l,normalized_variant,2026-07-12T20:10:41+00:00
+ba9212d8-368e-5d89-9f8c-d4193bd5cb2a,1bcdf520-e8fa-59d3-8fca-e17d63ba226e,Arachis hypogaea L.,arachis_hypogaea_l,normalized_variant,2026-07-12T20:10:40+00:00
+d9d3ca73-d840-5515-a968-71d580d32f53,1c0845b4-f8f7-5635-8668-3cb4cb68d12d,Trigonella foenum-graecum L.,trigonella_foenum_graecum_l,normalized_variant,2026-07-12T20:10:41+00:00
+4a1dde76-7174-5cd3-813b-a9065a2e0102,1c9107e3-ade0-5135-a35a-7ec88f15668a,Thymus vulgaris L.,thymus_vulgaris_l,normalized_variant,2026-07-12T20:10:41+00:00
+73be9b11-e10f-5d70-9af6-33a1acee6b27,1ccee74c-af2c-5c42-8b0c-0e5bb9d8ac44,Taxus wallichiana Zucc.,taxus_wallichiana_zucc,normalized_variant,2026-07-12T20:10:41+00:00
+4559d448-404e-53bc-b4c9-08a78caddbd6,1ccee74c-af2c-5c42-8b0c-0e5bb9d8ac44,Taxus sumatrana (Miq.) de Laub.,taxus_sumatrana_miq_de_laub,synonym_variant,2026-07-12T20:10:41+00:00
+155d9ef4-4e43-509c-a605-9b79fcfd7291,1d20c0c6-2414-5066-9946-432679cbc06b,Hydrocotyle sibthorpioides Lam.,hydrocotyle_sibthorpioides_lam,normalized_variant,2026-07-12T20:10:41+00:00
+e95211ca-55df-5b47-af70-630426493605,1d3870dd-d01f-5067-a9f3-16e92df541c1,Lantana trifolia L.,lantana_trifolia_l,normalized_variant,2026-07-12T20:10:41+00:00
+f23e45f3-9889-5662-bc6e-e7ac1b808ced,1e1b00de-1138-50ee-bd98-d20ad26bcb0a,Coix lacryma-jobi L.,coix_lacryma_jobi_l,normalized_variant,2026-07-12T20:10:40+00:00
+b899d82d-6493-557b-98d9-5136c488d6a9,1ea07dd2-99fd-5ef6-b7c1-88e614a6f857,Brachypterum robustum (Roxb. ex DC.) Dalzell & A.Gibson,brachypterum_robustum_roxb_ex_dc_dalzell_a_gibson,normalized_variant,2026-07-12T20:10:40+00:00
+dce6066d-421b-5a94-be93-72576b50a644,1ea07dd2-99fd-5ef6-b7c1-88e614a6f857,Derris robusta (Roxb. ex DC.) Benth.,derris_robusta_roxb_ex_dc_benth,synonym_variant,2026-07-12T20:10:40+00:00
+577a6617-a5a1-5cb2-a59c-2f7380cd1c1e,1fb5f087-89eb-5ae7-97d2-06a0db481291,Colocasia esculenta (L.) Schott,colocasia_esculenta_l_schott,normalized_variant,2026-07-12T20:10:40+00:00
+02fc0104-e45f-5319-aadc-ca8a06d58cdc,210454fe-79b0-5771-b056-96a7bdcaeecb,Ayapana triplinervis (Vahl) R.M.King & H.Rob.,ayapana_triplinervis_vahl_r_m_king_h_rob,normalized_variant,2026-07-12T20:10:40+00:00
+631b735b-043e-5753-afae-0b14a6fd41ac,210454fe-79b0-5771-b056-96a7bdcaeecb,Eupatorium triplinerve Vahl,eupatorium_triplinerve_vahl,synonym_variant,2026-07-12T20:10:40+00:00
+7cda6547-d189-5079-b0b4-64c5c0e9e7dc,22873982-8873-5dc2-89b5-eea30788b71b,Cassia fistula L.,cassia_fistula_l,normalized_variant,2026-07-12T20:10:40+00:00
+4edb9f35-67ae-575e-ae9b-c8a9a73abcc7,23188d80-167e-54a9-853a-d9df68f52164,Manilkara zapota (L.) P.Royen,manilkara_zapota_l_p_royen,normalized_variant,2026-07-12T20:10:41+00:00
+bd24dc90-1bbb-5c67-9e3c-326d8486813a,235b9383-49fe-5229-83a5-8c3b6c086a74,Terminalia bellirica (Gaertn.) Roxb.,terminalia_bellirica_gaertn_roxb,normalized_variant,2026-07-12T20:10:41+00:00
+1623ce75-6f0c-5cba-8e11-567495a18d36,250e95f2-a8c5-53da-a24a-59f3a3c616d3,Cannabis sativa L.,cannabis_sativa_l,normalized_variant,2026-07-12T20:10:40+00:00
+1c46fc92-5b46-5675-a5b9-cdba81e105c2,26023f6b-046f-5f38-871b-4862f4a180ad,Ludwigia octovalvis (Jacq.) P.H.Raven,ludwigia_octovalvis_jacq_p_h_raven,normalized_variant,2026-07-12T20:10:41+00:00
+c41e2a80-be3a-5089-ac63-cf8c00c51fbe,2699fc0b-ba70-5421-87fb-e4f9698879d8,Turnera ulmifolia L.,turnera_ulmifolia_l,normalized_variant,2026-07-12T20:10:41+00:00
+847d89f4-9592-5aa6-bc73-849679552c33,26c2c50b-d350-5022-b5ca-80fa9a0a5093,Jatropha gossypiifolia L.,jatropha_gossypiifolia_l,normalized_variant,2026-07-12T20:10:41+00:00
+2e1ac580-1c7b-5aba-826c-d209711a9b42,26cff3ce-c413-5a62-9884-dcc59e0d3f8e,Pluchea indica (L.) Less.,pluchea_indica_l_less,normalized_variant,2026-07-12T20:10:41+00:00
+1c6b9026-ea6a-5deb-b8e2-33e2233a01b6,2772c6e1-69e9-5a24-9abc-33fd1944a2bf,Vitex trifolia L.,vitex_trifolia_l,normalized_variant,2026-07-12T20:10:42+00:00
+cb075ef0-8e7c-5a52-88e0-93c262146ef4,2878ff7d-24d4-53f0-b0bc-e1da962af77d,Abelmoschus moschatus (L.) Medik.,abelmoschus_moschatus_l_medik,normalized_variant,2026-07-12T20:10:40+00:00
+3ba2cb78-25c0-5402-a18d-3e6295c3907c,2a236817-2e70-5939-8218-889a20421369,Phaseolus mungo Wall.,phaseolus_mungo_wall,normalized_variant,2026-07-12T20:10:41+00:00
+a005e86a-19a0-5367-8e4e-f8ebfbfdf0ab,2a2bb525-2b32-5550-a721-51d0ea347405,Brassica oleracea L.,brassica_oleracea_l,normalized_variant,2026-07-12T20:10:40+00:00
+45d4f54c-c838-5fee-a33c-f5d96659ce6a,2c44d835-2866-547f-8a65-df652a779b8f,Eryngium foetidum L.,eryngium_foetidum_l,normalized_variant,2026-07-12T20:10:41+00:00
+dc5aadd1-84fc-54f8-9a2d-503d2accb285,2c8ed17e-222f-5997-bf2b-d540cfb59dd8,Nerium oleander L.,nerium_oleander_l,normalized_variant,2026-07-12T20:10:41+00:00
+f175ff5b-80f7-5c85-8628-34228731a474,2d8555e8-ced4-5bfa-b79d-fbc8d61eb517,Euphorbia antiquorum L.,euphorbia_antiquorum_l,normalized_variant,2026-07-12T20:10:41+00:00
+2ae99b03-8853-5802-acd5-8d8ab63a4cc1,2de7a6a7-1e52-50a0-9374-06507220488f,Jatropha curcas L.,jatropha_curcas_l,normalized_variant,2026-07-12T20:10:41+00:00
+8b6e0eb0-f3d0-5ef5-af23-7f5bbdc3b5b2,2dfd454c-52a5-521c-8bf4-9edda2dcbc03,Orthosiphon aristatus (Blume) Miq.,orthosiphon_aristatus_blume_miq,normalized_variant,2026-07-12T20:10:41+00:00
+97057c13-3ffe-5147-a406-46e739bdbe56,2e6c474a-aac5-5924-9a70-0491d31e0845,Derris trifoliata Lour.,derris_trifoliata_lour,normalized_variant,2026-07-12T20:10:41+00:00
+bf56672e-6f6e-5d81-9d72-d47798425e37,2e7b23b2-8822-5f8b-b469-fcc4ef6912b5,Mentha arvensis L.,mentha_arvensis_l,normalized_variant,2026-07-12T20:10:41+00:00
+f852dd41-cf61-5ccb-a363-119e41830c63,2f234e16-e122-5d0d-a323-251811aec856,Bidens pilosa L.,bidens_pilosa_l,normalized_variant,2026-07-12T20:10:40+00:00
+f356b045-0ccc-509e-8a3e-9897d36bd7db,2f8e7caa-b19a-5c2e-80c3-186717458772,Citrus medica L.,citrus_medica_l,normalized_variant,2026-07-12T20:10:40+00:00
+a4003b86-93b7-561a-8a8d-ee1cb62ec626,2fee1eb3-ad8b-5238-9643-b53bb462b835,Magnolia × alba (DC.) Figlar,magnolia_alba_dc_figlar,normalized_variant,2026-07-12T20:10:41+00:00
+1053f165-0d78-5081-9c63-2eda3ecd21c8,2fee1eb3-ad8b-5238-9643-b53bb462b835,Michelia × alba DC.,michelia_alba_dc,synonym_variant,2026-07-12T20:10:41+00:00
+528b570c-373d-5f20-85c7-2be41c43818a,30e55351-849a-53ad-b6f0-be441a42cd1d,Vanilla planifolia Andrews,vanilla_planifolia_andrews,normalized_variant,2026-07-12T20:10:42+00:00
+aa3b97f4-3656-509d-bf20-2d0d70594d68,31918c3a-d147-522b-bc26-c09505d4920e,Uncaria gambir (W.Hunter) Roxb.,uncaria_gambir_w_hunter_roxb,normalized_variant,2026-07-12T20:10:41+00:00
+717681cf-24ca-5fc2-901b-dd016782661a,31c70734-4d61-5fc1-b0ba-49f7e87cec76,Excoecaria agallocha L.,excoecaria_agallocha_l,normalized_variant,2026-07-12T20:10:41+00:00
+c256e1d6-e110-58f8-b034-e5063647f7fd,3201baaf-b192-5961-90f7-0fce9a80b844,Glycyrrhiza glabra L.,glycyrrhiza_glabra_l,normalized_variant,2026-07-12T20:10:41+00:00
+d3157222-1e60-54d3-bee6-e2c7a509bbac,32a1daf2-c2b2-52ba-8062-a83d1d95d4cd,Amaranthus tricolor L.,amaranthus_tricolor_l,normalized_variant,2026-07-12T20:10:40+00:00
+48eb3a1d-8ae5-513e-bcb7-b748db38ecef,32db5868-6422-5fc4-aadb-90479c36369d,Foeniculum vulgare Mill.,foeniculum_vulgare_mill,normalized_variant,2026-07-12T20:10:41+00:00
+871bd9fc-884a-5d05-a5d4-d473562d55e5,3304f9d4-5c15-5113-aab5-ce58dcbbdab4,Plumeria rubra L.,plumeria_rubra_l,normalized_variant,2026-07-12T20:10:41+00:00
+0ded0938-7323-5d8d-b4e2-d2ec8c15800b,3304f9d4-5c15-5113-aab5-ce58dcbbdab4,Plumeria acutifolia Poir.,plumeria_acutifolia_poir,synonym_variant,2026-07-12T20:10:41+00:00
+dbe2f093-f933-51f8-9459-052772969339,330ce16f-69c4-5527-9724-517e85fb5fa3,Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg.,hevea_brasiliensis_willd_ex_a_juss_m_ll_arg,normalized_variant,2026-07-12T20:10:41+00:00
+23960790-4de7-5551-b9a3-791d9625a5ee,3323e797-d9a6-5d8f-9ff3-b51aa13fb671,Angelica keiskei (Miq.) Koidz.,angelica_keiskei_miq_koidz,normalized_variant,2026-07-12T20:10:40+00:00
+93834954-9bf1-5466-b9c4-1bc08e335ea4,3361f727-f4d6-50fc-a01c-d4a812b9ccb0,Symphytum officinale L.,symphytum_officinale_l,normalized_variant,2026-07-12T20:10:41+00:00
+f384d0d8-c7ef-5297-ad16-0cdb78ac6c0e,33687568-e6d9-5ba7-9ad3-60fc052a5b54,Sapindus rarak DC.,sapindus_rarak_dc,normalized_variant,2026-07-12T20:10:41+00:00
+1a22190f-20a6-5ae5-9540-b344357dcbaa,33b527b3-6d04-503c-9f82-5ead3fd9421a,Selenicereus undatus (Haw.) D.R.Hunt,selenicereus_undatus_haw_d_r_hunt,normalized_variant,2026-07-12T20:10:41+00:00
+ff467ed4-ba8c-508d-a5ab-1eb544ab6791,33b527b3-6d04-503c-9f82-5ead3fd9421a,Hylocereus undatus (Haw.) Britton & Rose,hylocereus_undatus_haw_britton_rose,synonym_variant,2026-07-12T20:10:41+00:00
+018312af-baeb-5a23-b3cb-49ba3e7cf3ed,34b09199-8c78-5a37-8a5b-3cb788f67cfd,Cananga odorata (Lam.) Hook.f. & Thomson,cananga_odorata_lam_hook_f_thomson,normalized_variant,2026-07-12T20:10:40+00:00
+f8133d35-7f6e-5c7f-bbfd-69c35a09f43b,359a7bcf-85d3-5fb3-9ee7-d2c9f3fb6995,Rauvolfia verticillata (Lour.) Baill.,rauvolfia_verticillata_lour_baill,normalized_variant,2026-07-12T20:10:41+00:00
+699c7f09-baf9-5d88-b2d8-1d317dd70e09,35b7c4bb-1cc9-593f-b325-1a73b927e4e5,Cycas revoluta Thunb.,cycas_revoluta_thunb,normalized_variant,2026-07-12T20:10:40+00:00
+75d24a65-058f-586a-ad96-5a1403b1bb35,36977bfa-3568-57fa-8f9e-3bb7eb534b7a,Annona mucosa Jacq.,annona_mucosa_jacq,normalized_variant,2026-07-12T20:10:40+00:00
+258a29c9-6ee3-5b1b-ba36-9ad6c9ff289b,36977bfa-3568-57fa-8f9e-3bb7eb534b7a,Rollinia mucosa (Jacq.) Baill.,rollinia_mucosa_jacq_baill,synonym_variant,2026-07-12T20:10:40+00:00
+4e4e0cf7-7032-58db-9482-4913eec30378,374810f3-4865-56b1-ac16-96ceb109ffc1,Amaranthus spinosus L.,amaranthus_spinosus_l,normalized_variant,2026-07-12T20:10:40+00:00
+c9ceae4f-e618-5fae-aad9-95fcc0832418,37f8783d-72d2-5ce3-bca1-091d2c989bed,Crocus sativus L.,crocus_sativus_l,normalized_variant,2026-07-12T20:10:40+00:00
+906e5b35-31bb-5dce-a722-55402791037f,384a8fa5-2563-55d9-92d8-bf83d7683747,Oryza sativa L.,oryza_sativa_l,normalized_variant,2026-07-12T20:10:41+00:00
+35b03d59-e53c-5be4-9ec8-de3ba4a3820b,386644c3-5fe3-5bec-8bda-75381acb1968,Cyanthillium cinereum (L.) H.Rob.,cyanthillium_cinereum_l_h_rob,normalized_variant,2026-07-12T20:10:40+00:00
+783a76d9-9bfb-5b02-ac3a-58547e234ee6,386644c3-5fe3-5bec-8bda-75381acb1968,Vernonia cinerea (L.) Less.,vernonia_cinerea_l_less,synonym_variant,2026-07-12T20:10:40+00:00
+e9ac446b-7715-582c-96a6-5ee8420b97ed,38c13651-8c9c-5efd-b033-4c39ce9f8eb3,Styrax benzoin Dryand.,styrax_benzoin_dryand,normalized_variant,2026-07-12T20:10:41+00:00
+5b727837-8bd5-5817-8f6a-3d8ca96ce30a,39b0f416-813e-574b-9bba-b17700bedfc0,Vitex negundo L.,vitex_negundo_l,normalized_variant,2026-07-12T20:10:42+00:00
+3232aa6e-26e9-501a-80ee-0e95a77ff92a,3ad6c6b1-055a-5a9d-b6b5-186af5047d29,Cibotium barometz (L.) J.Sm.,cibotium_barometz_l_j_sm,normalized_variant,2026-07-12T20:10:40+00:00
+6001222e-d2cc-5674-9682-4d2cab99ff7c,3b2caea6-c831-588d-877f-aed509f9c5ea,Ixora chinensis Lam.,ixora_chinensis_lam,normalized_variant,2026-07-12T20:10:41+00:00
+d93fa9aa-7e54-59cb-bde0-3f8ede8b7b6e,3b466569-a754-56af-82cc-36c30a5176de,Mesosphaerum suaveolens (L.) Kuntze,mesosphaerum_suaveolens_l_kuntze,normalized_variant,2026-07-12T20:10:41+00:00
+97dc0b51-45f3-5871-afb4-51069af97c67,3b466569-a754-56af-82cc-36c30a5176de,Hyptis suaveolens (L.) Poit.,hyptis_suaveolens_l_poit,synonym_variant,2026-07-12T20:10:41+00:00
+7ed0a484-ca9b-5d57-8c91-b3e86b731ff2,3bab8320-ea92-5df7-b615-64c0ada00ffc,Antiaris toxicaria (Pers.) Lesch.,antiaris_toxicaria_pers_lesch,normalized_variant,2026-07-12T20:10:40+00:00
+bcadff26-451c-545f-9d3d-2c43e2481054,3bb4096c-5221-52e0-87d1-92eb1bddbf58,Rauvolfia reflexa Koord. & Valeton,rauvolfia_reflexa_koord_valeton,normalized_variant,2026-07-12T20:10:41+00:00
+97a222a3-03c7-50f2-ac9f-688d93ec89a6,3d1bc6a8-1345-590c-bbd6-4306c57beba8,Zingiber zerumbet (L.) Roscoe ex Sm.,zingiber_zerumbet_l_roscoe_ex_sm,normalized_variant,2026-07-12T20:10:42+00:00
+591ba80e-b239-56a1-b1af-f2933b6954aa,3d49d23c-a77d-5fd3-b332-ae97463c9d3f,Lantana camara L.,lantana_camara_l,normalized_variant,2026-07-12T20:10:41+00:00
+b4bcc6d8-56c8-5179-8eb8-1dda58fd27e7,3d51888b-eef3-525b-af81-afb633da55a5,Coleus amboinicus Lour.,coleus_amboinicus_lour,normalized_variant,2026-07-12T20:10:40+00:00
+6c0b6629-ce37-55e8-9a4c-3af1c1e0573f,3dc649e5-7589-5f91-af16-75dba017f3cc,Acaciella glauca (L.) L.Rico,acaciella_glauca_l_l_rico,normalized_variant,2026-07-12T20:10:40+00:00
+306a6f10-cb9b-5012-875e-703542d16fdc,3dc649e5-7589-5f91-af16-75dba017f3cc,Leucaena glauca (L.) Benth.,leucaena_glauca_l_benth,synonym_variant,2026-07-12T20:10:40+00:00
+eab4de5f-32a4-54dc-94c1-ebf36b81a4b6,3e52c52d-17a9-51ab-92bd-9f3ea0d5defe,Euphorbia milii Des Moul.,euphorbia_milii_des_moul,normalized_variant,2026-07-12T20:10:41+00:00
+f8a55747-d572-5723-9a9a-bc438f6cec3f,3f362466-dfe7-5b86-9cfc-49cf8e0b065b,Metroxylon sagu Rottb.,metroxylon_sagu_rottb,normalized_variant,2026-07-12T20:10:41+00:00
+eaef3108-21f4-50f4-9e1e-0fc1fb817fc3,409c5ae5-226b-5cb5-b859-1339e1ebac3e,Ophiopogon japonicus (Thunb.) Ker Gawl.,ophiopogon_japonicus_thunb_ker_gawl,normalized_variant,2026-07-12T20:10:41+00:00
+7825282b-e48b-5108-bfde-20e1b8968608,40c99cba-3dd7-5394-a0cb-7d64d74b3249,Erigeron sumatrensis Retz.,erigeron_sumatrensis_retz,normalized_variant,2026-07-12T20:10:41+00:00
+c2053af3-262d-59fa-a5ec-62993226bd5e,4120fdb7-c842-5c5c-a7bc-50a5e991e1b5,Hellenia speciosa (J.Koenig) S.R.Dutta,hellenia_speciosa_j_koenig_s_r_dutta,normalized_variant,2026-07-12T20:10:41+00:00
+337184f3-2a28-5300-8212-7465297ae47f,4120fdb7-c842-5c5c-a7bc-50a5e991e1b5,Costus speciosus (J.Koenig) Sm.,costus_speciosus_j_koenig_sm,synonym_variant,2026-07-12T20:10:41+00:00
+53458d88-f009-5e0c-a6ba-120339f187d5,41a118d6-4ccc-5bac-9050-58c4fdec73a0,Moringa oleifera Lam.,moringa_oleifera_lam,normalized_variant,2026-07-12T20:10:41+00:00
+cea6861b-6b3c-546a-a73a-9c48e36ae4de,41a118d6-4ccc-5bac-9050-58c4fdec73a0,Moringa pterygosperma Gaertn.,moringa_pterygosperma_gaertn,synonym_variant,2026-07-12T20:10:41+00:00
+17c476f9-a3ad-5ba3-a5c9-b52afa967e63,42ac1560-b9da-5db9-ae25-b8b1c210ee67,Averrhoa carambola L.,averrhoa_carambola_l,normalized_variant,2026-07-12T20:10:40+00:00
+bc082231-0cc6-5081-b260-2d7b0b05aa19,464a8b20-f93a-5478-82c7-3a67094c61b8,Elephantopus scaber L.,elephantopus_scaber_l,normalized_variant,2026-07-12T20:10:41+00:00
+529563c3-b940-5779-946f-b8ca3e058f09,47068472-28d1-594c-92b7-9bd7d8eddb2c,Brucea javanica (L.) Merr.,brucea_javanica_l_merr,normalized_variant,2026-07-12T20:10:40+00:00
+83281b96-affe-56fe-ba66-ea3d00b0ef5f,4817afd9-0ab7-5252-ad35-920771f21a52,Curcuma zanthorrhiza Roxb.,curcuma_zanthorrhiza_roxb,normalized_variant,2026-07-12T20:10:40+00:00
+8ef59b9e-c7a7-5c02-8b02-a13114c5dc15,487e4400-6e4b-50cb-ac7a-43765a7c817e,Hura crepitans L.,hura_crepitans_l,normalized_variant,2026-07-12T20:10:41+00:00
+75a1761b-1aeb-503a-98f9-6796725ef5a7,48be323a-ce4b-5e52-8b16-e44e37d5ea1f,"Equisetum debile Roxb. ex Wall., 1829",equisetum_debile_roxb_ex_wall_1829,normalized_variant,2026-07-12T20:10:41+00:00
+50b7c352-9061-502d-b348-394663185fc0,49061609-9ae6-568a-a985-cd7300ccd76b,Allium sativum L.,allium_sativum_l,normalized_variant,2026-07-12T20:10:40+00:00
+8049559a-c553-5aba-bc52-00644740962c,493a8c4b-3b61-511b-9d08-555347344dec,Solanum tuberosum L.,solanum_tuberosum_l,normalized_variant,2026-07-12T20:10:41+00:00
+59d4abcb-47d1-5629-8edb-074df71ac337,49867f51-dd80-51c0-98ed-db93c19f61ff,Cissampelos pareira L.,cissampelos_pareira_l,normalized_variant,2026-07-12T20:10:40+00:00
+ab769be4-f82e-5ece-968a-73e16ccc2b4b,49918304-230f-5233-bd85-90bf15b3ba90,Valeriana officinalis L.,valeriana_officinalis_l,normalized_variant,2026-07-12T20:10:42+00:00
+7ddb7cd1-342d-58bc-8692-242284a7c465,4ac4ff2c-f5ca-5521-9d94-9fa1af9c1600,Trema orientale (L.) Blume,trema_orientale_l_blume,normalized_variant,2026-07-12T20:10:41+00:00
+8962c876-b760-5da1-b855-d3628bd79bab,4ac4ff2c-f5ca-5521-9d94-9fa1af9c1600,Trema orientalis (L.) Blume,trema_orientalis_l_blume,synonym_variant,2026-07-12T20:10:41+00:00
+12facb0b-ea17-5f57-8542-c7ceeb21b887,4c6f2854-9619-511c-80ff-7cff5279ed3d,Gynandropsis gynandra (L.) Briq.,gynandropsis_gynandra_l_briq,normalized_variant,2026-07-12T20:10:41+00:00
+14f05051-8304-5cc4-8d4a-97f7aa40673e,4d0c97db-babe-5698-990e-272c77766616,Rosa × damascena Mill.,rosa_damascena_mill,normalized_variant,2026-07-12T20:10:41+00:00
+bb92b13e-a28c-5b58-85a4-0c3da30196a3,4e11acfe-b176-580d-973f-c9d1965471a7,Saccharum officinarum L.,saccharum_officinarum_l,normalized_variant,2026-07-12T20:10:41+00:00
+8bc5fcf7-b8e7-5c78-8720-6ce2db06916e,4e3afe00-209c-5830-a758-05993aeaa1db,Sechium edule (Jacq.) Sw.,sechium_edule_jacq_sw,normalized_variant,2026-07-12T20:10:41+00:00
+49cc04ce-1d8d-52bf-be0b-a25764097f7a,4e8f99ab-f088-5520-b1bb-41309509d188,Citrus × aurantiifolia (Christm.) Swingle,citrus_aurantiifolia_christm_swingle,normalized_variant,2026-07-12T20:10:40+00:00
+7ddfd36f-0421-5243-be89-723f4f21099e,4ed81395-0e1a-5cd3-93c1-c2966697151b,Atropa belladonna L.,atropa_belladonna_l,normalized_variant,2026-07-12T20:10:40+00:00
+845e0db4-ef89-58e2-b82f-44a7457ef33a,4f38415e-40f7-5caf-8b56-2f68ffc8759f,Senna occidentalis (L.) Link,senna_occidentalis_l_link,normalized_variant,2026-07-12T20:10:41+00:00
+f2b8620e-0403-507b-a4c7-f27a7839aea4,4f38415e-40f7-5caf-8b56-2f68ffc8759f,Cassia occidentalis L.,cassia_occidentalis_l,synonym_variant,2026-07-12T20:10:41+00:00
+b2167262-2855-5232-8c9f-2cf74e6491c3,519e2ff2-26db-549c-a1c7-52252728e7b3,Bixa orellana L.,bixa_orellana_l,normalized_variant,2026-07-12T20:10:40+00:00
+ffdf2172-9153-5c92-93e5-7cba2651ab52,51ce85c0-1fb6-5326-be73-5cec5c1deaf7,Alocasia macrorrhizos (L.) G.Don,alocasia_macrorrhizos_l_g_don,normalized_variant,2026-07-12T20:10:40+00:00
+c7f8062c-7f30-5917-b327-121ab87d9812,51ce85c0-1fb6-5326-be73-5cec5c1deaf7,Alocasia macrorrhiza (L.) Schott,alocasia_macrorrhiza_l_schott,synonym_variant,2026-07-12T20:10:40+00:00
+191f03b7-447f-5250-9932-f7295d8acf31,5225fa66-a924-501a-a8c1-769f715257c5,Smilax china L.,smilax_china_l,normalized_variant,2026-07-12T20:10:41+00:00
+b307d1ce-5c5b-50a8-b4a8-eaa69bc75931,52a7672d-0c4c-5b2b-b48e-9f2575e878f6,Combretum indicum (L.) De Filipps,combretum_indicum_l_de_filipps,normalized_variant,2026-07-12T20:10:40+00:00
+ea75adf1-41cc-550a-9ef0-e843026035d7,52a7672d-0c4c-5b2b-b48e-9f2575e878f6,Quisqualis indica L.,quisqualis_indica_l,synonym_variant,2026-07-12T20:10:40+00:00
+6b885a26-57c4-5418-b15c-f92eb5c01473,5313be9b-a3c2-54f6-849f-079a6e2e8399,Albizia chinensis (Osbeck) Merr.,albizia_chinensis_osbeck_merr,normalized_variant,2026-07-12T20:10:40+00:00
+4c632867-39b3-5f99-b9de-63b3f0eb0e0a,5343796e-9023-5f92-8580-dc6b478d26db,Jasminum sambac (L.) Aiton,jasminum_sambac_l_aiton,normalized_variant,2026-07-12T20:10:41+00:00
+3c40cb1c-8388-58f9-a824-69c8ad054951,54746c5d-fb8c-5195-b443-14da8110e9b1,Piper nigrum L.,piper_nigrum_l,normalized_variant,2026-07-12T20:10:41+00:00
+45199617-ee7a-5014-b09f-c2790bffad75,54cc67d1-1c55-5c27-b4a9-4186a3674aa9,Clinacanthus nutans (Burm.fil.) Lindau,clinacanthus_nutans_burm_fil_lindau,normalized_variant,2026-07-12T20:10:40+00:00
+7ca2be4c-8637-5082-acb1-a5748b74cde9,55e70f6c-6df3-532b-adc0-d87815e57185,Salvia splendens Sellow ex Nees,salvia_splendens_sellow_ex_nees,normalized_variant,2026-07-12T20:10:41+00:00
+2f2f75ca-01b0-5ae5-a382-586df95447ca,55fc8aa4-40f3-5d50-9054-6e06a06472c2,Andrographis paniculata (Burm.fil.) Nees,andrographis_paniculata_burm_fil_nees,normalized_variant,2026-07-12T20:10:40+00:00
+db958114-e9dd-5529-8954-229f10f927bd,57107070-218d-5477-9a27-7721ad168b32,Melaleuca leucadendra (L.) L.,melaleuca_leucadendra_l_l,normalized_variant,2026-07-12T20:10:41+00:00
+afd89a7f-8418-53ed-bfa3-ef729dc8cfe1,579381b9-b5da-5774-b06f-e52561ae8eaf,Aglaia odorata Lour.,aglaia_odorata_lour,normalized_variant,2026-07-12T20:10:40+00:00
+91a2e665-afda-5c79-8dec-67453cdc4846,57d2d54f-84f3-59be-9ca9-69a67d0358ce,Jatropha multifida L.,jatropha_multifida_l,normalized_variant,2026-07-12T20:10:41+00:00
+0194cab7-8a42-5930-af37-def6b97ed5a6,5887dc73-2753-58a3-90d1-cfd0921ecfb6,Aleurites moluccanus (L.) Willd.,aleurites_moluccanus_l_willd,normalized_variant,2026-07-12T20:10:40+00:00
+fb735f48-d93a-56f2-9e23-4b1d33c4fe5b,58ab169b-6803-57eb-8600-8faca5d6c4f9,Embelia ribes Burm.fil.,embelia_ribes_burm_fil,normalized_variant,2026-07-12T20:10:41+00:00
+1f23c56a-93d3-5179-9a37-4cecaa5d9421,59015732-a77d-5cb8-9e12-fedf9538b23d,Curcuma longa L.,curcuma_longa_l,normalized_variant,2026-07-12T20:10:40+00:00
+f9507685-e66a-505b-a558-a3f6b960ccb1,59015732-a77d-5cb8-9e12-fedf9538b23d,Curcuma domestica Valeton,curcuma_domestica_valeton,synonym_variant,2026-07-12T20:10:40+00:00
+319c9843-1c2b-5e9d-b31d-518be15697b5,59015732-a77d-5cb8-9e12-fedf9538b23d,Curcuma soloensis Valeton,curcuma_soloensis_valeton,synonym_variant,2026-07-12T20:10:40+00:00
+4d4fd6e2-5320-5377-8c10-58ce5728e1d1,597cf274-1fec-5e5e-b246-f6dac07ff42c,Punica granatum L.,punica_granatum_l,normalized_variant,2026-07-12T20:10:41+00:00
+ba4c94f5-7344-5a1d-8a3a-3aa7cd48cfe8,598ec78f-d280-5fcc-b8bb-c2acc0957374,Allium cepa L.,allium_cepa_l,normalized_variant,2026-07-12T20:10:40+00:00
+d3862fa5-2f4e-51d6-aeba-177a88df31d7,5a3930a7-ae33-584f-af26-62dca7e0cbc4,Rauvolfia sumatrana Jack,rauvolfia_sumatrana_jack,normalized_variant,2026-07-12T20:10:41+00:00
+da3871f5-66cb-5392-86b1-4c5cd7d3fc29,5aa6f8c5-c5f3-5854-a460-9f5272cf71bf,Anacardium occidentale L.,anacardium_occidentale_l,normalized_variant,2026-07-12T20:10:40+00:00
+453bebf5-66af-5646-bc67-16293429050b,5c16f5bb-04f9-5b3f-86e7-d8ebc29a98f6,Curcuma xanthorrhiza D.Dietr.,curcuma_xanthorrhiza_d_dietr,normalized_variant,2026-07-12T20:10:40+00:00
+acb18f35-26af-5040-98b1-58b96e685f92,5c8a5aab-e1e3-5032-a898-c4fa1d924427,Rumex nepalensis Spreng.,rumex_nepalensis_spreng,normalized_variant,2026-07-12T20:10:41+00:00
+511de3ac-c6ac-57f2-ae09-f73167b0137b,5c9f1cc4-c8de-5a0f-8e07-5352e809cb44,Litsea glutinosa (Lour.) C.B.Rob.,litsea_glutinosa_lour_c_b_rob,normalized_variant,2026-07-12T20:10:41+00:00
+b6aa3307-9ba9-52b5-8480-136cc1350361,5d2b2b62-753a-541f-b4c1-5a326efe466b,Mikania micrantha Kunth,mikania_micrantha_kunth,normalized_variant,2026-07-12T20:10:41+00:00
+5794e8f9-4be2-5ac5-b12c-8b1d78a6c7fc,5d414b86-69c4-514b-8352-d224a773e57c,Strychnos lucida R.Br.,strychnos_lucida_r_br,normalized_variant,2026-07-12T20:10:41+00:00
+063dfd48-c9fd-5c04-9f6b-db1ffa6889b5,5d414b86-69c4-514b-8352-d224a773e57c,Strychnos ligustrina Blume,strychnos_ligustrina_blume,synonym_variant,2026-07-12T20:10:41+00:00
+48df6fe7-f836-5a00-984c-503e3b2355fe,5d67c795-3425-54f6-8891-7a33c0cb7db5,Mallotus philippensis (Lam.) Müll.Arg.,mallotus_philippensis_lam_m_ll_arg,normalized_variant,2026-07-12T20:10:41+00:00
+0116724e-876d-525c-bec6-a68fc88a5038,5eb02004-fb3d-5f01-bf78-7973d0270dc3,Heliotropium indicum L.,heliotropium_indicum_l,normalized_variant,2026-07-12T20:10:41+00:00
+08a76a90-8603-5d59-9b5e-b3c832a41511,5f7a5eb0-dcad-5888-b76a-028366a7ef50,Basella alba L.,basella_alba_l,normalized_variant,2026-07-12T20:10:40+00:00
+542dceb0-e226-5d98-9eab-2a2789ea9aa5,5f7a5eb0-dcad-5888-b76a-028366a7ef50,Basella rubra L.,basella_rubra_l,synonym_variant,2026-07-12T20:10:40+00:00
+25188145-ce20-5903-a502-b8f866c13027,5fabf325-0264-5d5d-98e7-cc5e7da0aae3,Taraxacum officinale Weber ex F.H.Wigg.,taraxacum_officinale_weber_ex_f_h_wigg,normalized_variant,2026-07-12T20:10:41+00:00
+219521be-2f8f-597a-b9b8-5a11db49ce05,5fe22218-bb94-5a44-ab78-0c539e0db194,Elateriospermum tapos Blume,elateriospermum_tapos_blume,normalized_variant,2026-07-12T20:10:41+00:00
+42a2a1c2-69ec-5bb8-b676-8570241c74e6,605c6515-9636-5f72-91e7-51ae0bffb870,Eurycoma longifolia Jack,eurycoma_longifolia_jack,normalized_variant,2026-07-12T20:10:41+00:00
+ca7b8ad4-e8e3-5d5a-9ec8-846d49c2a82c,61951194-1031-5191-89f5-060538998d44,Peltophorum pterocarpum (DC.) Backer ex K.Heyne,peltophorum_pterocarpum_dc_backer_ex_k_heyne,normalized_variant,2026-07-12T20:10:41+00:00
+36c8fc88-5259-592d-ba13-9562da65a527,61a98913-6049-5212-8482-2dc81251b4dd,Allium chinense G.Don,allium_chinense_g_don,normalized_variant,2026-07-12T20:10:40+00:00
+8b5ed7af-1f7a-580e-82aa-66de13da6e07,61b44b71-407e-54b8-b729-fb3d55072a55,Plumbago indica L.,plumbago_indica_l,normalized_variant,2026-07-12T20:10:41+00:00
+2f14888b-f5bd-5451-a62d-19fae41ef945,634226d4-f9b6-57db-a052-b9b3c502f6de,Malus domestica (Suckow) Borkh.,malus_domestica_suckow_borkh,normalized_variant,2026-07-12T20:10:41+00:00
+133012d5-7d92-5b25-a922-3d97277b2914,634226d4-f9b6-57db-a052-b9b3c502f6de,Pyrus malus L.,pyrus_malus_l,synonym_variant,2026-07-12T20:10:41+00:00
+c4307ec1-6026-5273-a90b-85742011ffb7,6430846a-210a-5559-ad72-673cc5b2c8a1,Citrus hystrix DC.,citrus_hystrix_dc,normalized_variant,2026-07-12T20:10:40+00:00
+a16481c0-3272-5eea-a751-5fbe41370882,6454f497-44e8-5eb0-a1c6-7c8d7bef9675,Scurrula fusca (Blume) G.Don,scurrula_fusca_blume_g_don,normalized_variant,2026-07-12T20:10:41+00:00
+b2e8f6b1-774d-5bce-b3b2-cd53f216da26,647a87a3-9ba6-534b-ae14-830baef2165b,Blumea lacera (Burm.fil.) DC.,blumea_lacera_burm_fil_dc,normalized_variant,2026-07-12T20:10:40+00:00
+1c795e07-7f9e-5b99-ac34-1664080ff46b,64b5a549-24de-577d-9328-9b6740919dae,Euphorbia prostrata Aiton,euphorbia_prostrata_aiton,normalized_variant,2026-07-12T20:10:41+00:00
+61712627-7acd-5c2c-967e-5370487ac824,64cfc45f-fbb2-5a5b-86fb-d615de3e8503,Phyllanthus emblica L.,phyllanthus_emblica_l,normalized_variant,2026-07-12T20:10:41+00:00
+603bd33e-9551-5af1-97cf-2e7473c35407,64e34a76-a01e-5d45-93f8-dee2689066da,Citrullus lanatus (Thunb.) Matsum. & Nakai,citrullus_lanatus_thunb_matsum_nakai,normalized_variant,2026-07-12T20:10:40+00:00
+51add4d5-4527-5c60-8bf3-a2883600175e,64e34a76-a01e-5d45-93f8-dee2689066da,Citrullus vulgaris Schrad.,citrullus_vulgaris_schrad,synonym_variant,2026-07-12T20:10:40+00:00
+a0002511-144e-55e9-95a0-d49c38e0ad68,65a5ff2b-a821-5ce0-bb10-b6b87d46b0bc,Sesamum indicum L.,sesamum_indicum_l,normalized_variant,2026-07-12T20:10:41+00:00
+91026ad4-9ce7-5238-b1db-3acf5a67655c,65b1e648-401f-546b-85a4-5442833dc81d,Triphasia trifolia (Burm.fil.) P.Wilson,triphasia_trifolia_burm_fil_p_wilson,normalized_variant,2026-07-12T20:10:41+00:00
+290fbb9c-3817-5644-af8f-b421e16380a1,6694cd48-83fb-5b92-8cf3-9c48441702b5,Oxalis corniculata L.,oxalis_corniculata_l,normalized_variant,2026-07-12T20:10:41+00:00
+a40ab8f6-bae4-50a9-a73d-b05fc6cc567b,674a9d0b-5355-5725-8acb-0809c5ed85c0,Grona triflora (L.) H.Ohashi & K.Ohashi,grona_triflora_l_h_ohashi_k_ohashi,normalized_variant,2026-07-12T20:10:41+00:00
+394966a8-7802-57d6-ba5f-d0481c93136e,674a9d0b-5355-5725-8acb-0809c5ed85c0,Desmodium triflorum (L.) DC.,desmodium_triflorum_l_dc,synonym_variant,2026-07-12T20:10:41+00:00
+c6e92125-1126-593e-8207-70ac6fa86d73,67c180dd-0ad4-5c37-a707-0a7cf8911681,Plantago major L.,plantago_major_l,normalized_variant,2026-07-12T20:10:41+00:00
+74a53f7b-5c90-5c7e-91e7-109e298b6cb1,68bc505a-dbef-5fd9-b3d6-720259fa5662,Luvunga sarmentosa (Blume) Kurz,luvunga_sarmentosa_blume_kurz,normalized_variant,2026-07-12T20:10:41+00:00
+cd9c547d-c0b1-5363-998d-b59ac8da342d,69684683-53c8-5f13-b185-c057f8a77459,Derris elliptica (Wall.) Benth.,derris_elliptica_wall_benth,normalized_variant,2026-07-12T20:10:41+00:00
+4e893dda-efe0-58ab-b2e6-91eb7bd19414,699f9cd1-c9d0-503a-9ec8-eeeb1fcc31a1,Scutellaria indica L.,scutellaria_indica_l,normalized_variant,2026-07-12T20:10:41+00:00
+58024334-0837-54aa-b4d4-9e78a1df6e50,69b1b6e9-e3f5-5cd1-a05d-a0167a49efb0,Urceola laevigata (Juss.) D.J.Middleton & Livsh.,urceola_laevigata_juss_d_j_middleton_livsh,normalized_variant,2026-07-12T20:10:41+00:00
+14662714-84c4-5fc4-87aa-706f0ca66aa6,69b1b6e9-e3f5-5cd1-a05d-a0167a49efb0,Parameria laevigata (Juss.) Moldenke,parameria_laevigata_juss_moldenke,synonym_variant,2026-07-12T20:10:41+00:00
+57e699ba-f8cb-5e9e-9658-3d5fe6682379,6a811452-0eb3-5bdf-8f21-fb79b6b73361,Zingiber officinale Roscoe,zingiber_officinale_roscoe,normalized_variant,2026-07-12T20:10:42+00:00
+7b3cf048-c236-5e0e-b7e9-6456a405a128,6ac5c230-db02-5815-824d-f9ade8f45627,Annona muricata L.,annona_muricata_l,normalized_variant,2026-07-12T20:10:40+00:00
+fb9ea546-8e7b-54ea-9d23-aebfe15accb4,6b7427f2-8c69-5cc5-a343-9008168c36be,Clitoria ternatea L.,clitoria_ternatea_l,normalized_variant,2026-07-12T20:10:40+00:00
+e0290b47-d74b-575c-852a-122d87da7a05,6ba5abd6-8df7-5851-a12a-24a1c6423478,Blumea balsamifera (L.) DC.,blumea_balsamifera_l_dc,normalized_variant,2026-07-12T20:10:40+00:00
+2ab29ee4-924e-5424-a67f-c41c3972b4dc,6c5de1a3-c72b-5431-a43a-432773e9ded2,Cyperus brevifolius (Rottb.) Hassk.,cyperus_brevifolius_rottb_hassk,normalized_variant,2026-07-12T20:10:40+00:00
+f0dfb96c-eba7-5ff9-9000-91b0dc95ab04,6c5de1a3-c72b-5431-a43a-432773e9ded2,Kyllinga brevifolia Rottb.,kyllinga_brevifolia_rottb,synonym_variant,2026-07-12T20:10:40+00:00
+e96a61ae-474e-52b6-9e8c-67c2625b2598,6c6ccc77-d2e7-5843-b6ae-355e75208af6,Ipomoea aquatica Forssk.,ipomoea_aquatica_forssk,normalized_variant,2026-07-12T20:10:41+00:00
+7a26d168-6382-5024-9289-41b111dc7da8,6c6ccc77-d2e7-5843-b6ae-355e75208af6,Ipomoea reptans Poir.,ipomoea_reptans_poir,synonym_variant,2026-07-12T20:10:41+00:00
+e52801b2-7ac5-5ac1-ac2d-3efd61d39203,6c9ccae8-4a53-529c-a4b2-a4158bd84c35,Euphorbia tithymaloides L.,euphorbia_tithymaloides_l,normalized_variant,2026-07-12T20:10:41+00:00
+c17d58b1-d5ea-5211-953d-62a4e69e96ca,6c9ccae8-4a53-529c-a4b2-a4158bd84c35,Pedilanthus tithymaloides (L.) Poit.,pedilanthus_tithymaloides_l_poit,synonym_variant,2026-07-12T20:10:41+00:00
+d3281007-375a-5bda-b8e1-7b2d58a83b53,6ce361f3-5493-50d8-976f-54699df3da9c,Azadirachta indica A.Juss.,azadirachta_indica_a_juss,normalized_variant,2026-07-12T20:10:40+00:00
+cfdaf934-7783-56df-a90d-48916d5a3b85,6d1f4293-f882-5cac-a61d-4ea98eb5b46d,Bougainvillea glabra Choisy,bougainvillea_glabra_choisy,normalized_variant,2026-07-12T20:10:40+00:00
+512c3fde-511e-57b3-8ce2-c4fa26cd2dce,6e03fa79-16e8-5066-9e39-8ce174b861b3,Cyperus rotundus L.,cyperus_rotundus_l,normalized_variant,2026-07-12T20:10:40+00:00
+03eee75b-8f17-593d-8df2-e2e5ce3df7df,6e707a05-39e3-5c8e-96a6-9638f12793d7,Phyllodium pulchellum (L.) Desv.,phyllodium_pulchellum_l_desv,normalized_variant,2026-07-12T20:10:41+00:00
+24fda78c-4f9e-541b-8d31-c68d69fd2ccc,6f4f9e7e-24cb-5095-9378-79f2a270e8c2,Guazuma ulmifolia Lam.,guazuma_ulmifolia_lam,normalized_variant,2026-07-12T20:10:41+00:00
+f816853a-bfb0-5e0d-8c58-04456f6edefd,6f8e4fe7-5fe6-5f20-a6b5-11d27f3bdb1b,Abelmoschus manihot (L.) Medik.,abelmoschus_manihot_l_medik,normalized_variant,2026-07-12T20:10:40+00:00
+d0b0a644-3a3a-5284-872e-a06b43018f1d,70582189-28a1-5b4f-bf99-2821bd13bf96,"Clerodendrum serratum Spreng., 1825",clerodendrum_serratum_spreng_1825,normalized_variant,2026-07-12T20:10:40+00:00
+52b6f10e-ec13-5dd1-986f-557429d03412,711ab4df-f760-5b91-9d28-87fc5c2896b4,Parkia speciosa Hassk.,parkia_speciosa_hassk,normalized_variant,2026-07-12T20:10:41+00:00
+61dc73ec-878f-5c4e-8ef5-b29a605a4484,71609b4d-5377-5741-843f-bff0537a8517,Syzygium cumini (L.) Skeels,syzygium_cumini_l_skeels,normalized_variant,2026-07-12T20:10:41+00:00
+166c91bb-fd76-5dd9-a0a2-e092398c96b1,71933f11-9b73-577d-bd74-94f4c0b48786,Ticanto crista (L.) R.Clark & Gagnon,ticanto_crista_l_r_clark_gagnon,normalized_variant,2026-07-12T20:10:41+00:00
+51531f43-95e2-503d-980b-01030bbeb221,71933f11-9b73-577d-bd74-94f4c0b48786,Caesalpinia crista L.,caesalpinia_crista_l,synonym_variant,2026-07-12T20:10:41+00:00
+aa36348d-5d31-5bd8-aef7-c1308a4dc787,72a69b6a-2a5a-57f6-8aed-609d5e8737b8,Pachyrhizus erosus (L.) Urb.,pachyrhizus_erosus_l_urb,normalized_variant,2026-07-12T20:10:41+00:00
+0c94f913-6141-5d7b-bcb8-915db2accd16,72a69b6a-2a5a-57f6-8aed-609d5e8737b8,Pachyrrhizus erosus (L.) Urb.,pachyrrhizus_erosus_l_urb,synonym_variant,2026-07-12T20:10:41+00:00
+976ea052-0e52-56d4-ad4f-be72fad45e4f,72b079c0-13e1-57e2-a299-7782302b5168,Phyllanthus reticulatus Poir.,phyllanthus_reticulatus_poir,normalized_variant,2026-07-12T20:10:41+00:00
+f2eba34e-38b0-5572-8899-c57b96f6d755,72eebe7d-5ce5-53a1-9ff5-cc2b5b9be20e,Barleria lupulina Lindl.,barleria_lupulina_lindl,normalized_variant,2026-07-12T20:10:40+00:00
+f17d72c0-6a20-5010-aab7-3d355c27923e,731dfbce-b15e-50d2-b73f-8e1081d094b4,Clausena excavata Burm.fil.,clausena_excavata_burm_fil,normalized_variant,2026-07-12T20:10:40+00:00
+1123ea42-1ab5-5398-8196-b493c81d2dd2,74cf8bf9-c5b5-53b6-8968-02edb671e993,Woodfordia fruticosa (L.) Kurz,woodfordia_fruticosa_l_kurz,normalized_variant,2026-07-12T20:10:42+00:00
+36b3b577-9725-5412-8914-0cb05831b1d7,74f37006-adf8-5307-8e65-834602250a2b,Lactuca indica L.,lactuca_indica_l,normalized_variant,2026-07-12T20:10:41+00:00
+48b804bb-1a7a-5516-b0dd-2469db333594,75a36dd4-e72a-5c23-83e3-9f6e9a874e12,Jatropha podagrica Hook.,jatropha_podagrica_hook,normalized_variant,2026-07-12T20:10:41+00:00
+4db92939-a950-54f7-9180-13eb915d1ab2,75d26f1b-3c84-5de4-879a-6e1c41c2b5e8,Baeckea frutescens L.,baeckea_frutescens_l,normalized_variant,2026-07-12T20:10:40+00:00
+711de2e4-0d5c-5383-bb42-601d72662663,7600935c-c8c6-5fb1-a6da-ffba4d239d7c,Talipariti tiliaceum (L.) Fryxell,talipariti_tiliaceum_l_fryxell,normalized_variant,2026-07-12T20:10:41+00:00
+669717a2-075c-5f8b-b501-a69584507175,7600935c-c8c6-5fb1-a6da-ffba4d239d7c,Hibiscus tiliaceus L.,hibiscus_tiliaceus_l,synonym_variant,2026-07-12T20:10:41+00:00
+e6147b5e-adc0-5be7-837d-ed7532290f01,7633d19c-d864-5ac9-9eaa-acde77f9419e,Tinospora glabra (Burm.fil.) Merr.,tinospora_glabra_burm_fil_merr,normalized_variant,2026-07-12T20:10:41+00:00
+3117df52-d791-5031-af61-239ab50543dc,76d675cb-5968-5870-ad50-5d7c01adfadb,Curcuma aeruginosa Roxb.,curcuma_aeruginosa_roxb,normalized_variant,2026-07-12T20:10:40+00:00
+e9fe34dd-1d41-55ff-b598-7ce1d4c2afb3,7711a112-0b0f-54fd-b1fb-5648b924022d,Biancaea sappan (L.) Tod.,biancaea_sappan_l_tod,normalized_variant,2026-07-12T20:10:40+00:00
+fa74605a-911e-53be-be7d-2da70725197b,7711a112-0b0f-54fd-b1fb-5648b924022d,Caesalpinia sappan L.,caesalpinia_sappan_l,synonym_variant,2026-07-12T20:10:40+00:00
+75d0e53c-9162-5bec-8517-d24befe3eeda,771fe3e7-05ef-5d92-b819-e057630d41ed,Ricinus communis L.,ricinus_communis_l,normalized_variant,2026-07-12T20:10:41+00:00
+967a0a96-74d3-5f18-909d-472c100ca0b8,7744bbdc-f810-5223-bd61-9bff46cc14b6,Strychnos nux-vomica L.,strychnos_nux_vomica_l,normalized_variant,2026-07-12T20:10:41+00:00
+9a01786f-62d0-5d2a-a02b-d7b3f6b3065b,781384f7-6a6e-5882-9779-912b8b2ff2e8,Euphorbia tirucalli L.,euphorbia_tirucalli_l,normalized_variant,2026-07-12T20:10:41+00:00
+e586a7e3-7cd0-505b-9e9c-201d8e69ea06,781883a9-0ea0-5cf4-a8af-bf097de258df,Oroxylum indicum (L.) Kurz,oroxylum_indicum_l_kurz,normalized_variant,2026-07-12T20:10:41+00:00
+a0a43bb7-f537-506d-ab36-4b090b812d16,7878f28d-f36f-5ec7-92c3-5dac16717f41,Ceiba pentandra (L.) Gaertn.,ceiba_pentandra_l_gaertn,normalized_variant,2026-07-12T20:10:40+00:00
+9823b413-9754-598b-974a-05273d3dea91,788f054d-0118-5597-b286-4b2e7545cc70,Dryobalanops aromatica C.F.Gaertn.,dryobalanops_aromatica_c_f_gaertn,normalized_variant,2026-07-12T20:10:41+00:00
+988e19b1-44f6-57b7-968a-11bba007b978,788f4b29-9c7d-593f-aaf6-ad890fc330d2,Averrhoa bilimbi L.,averrhoa_bilimbi_l,normalized_variant,2026-07-12T20:10:40+00:00
+489bcf48-c899-5b28-b255-26457a69d5f7,7a2474e0-42e9-5f23-8696-92e68750f96c,Tinospora crispa (L.) Miers ex Hook.fil. & Thomson,tinospora_crispa_l_miers_ex_hook_fil_thomson,normalized_variant,2026-07-12T20:10:41+00:00
+26ccc26d-f9ea-5604-8730-1871193c503f,7a2474e0-42e9-5f23-8696-92e68750f96c,Tinospora tuberculata (Lam.) Beumée ex K.Heyne,tinospora_tuberculata_lam_beum_e_ex_k_heyne,synonym_variant,2026-07-12T20:10:41+00:00
+7f067039-9b51-54ad-87b3-814fe23717d2,7a405d0a-78cf-5dd4-8ce9-267395c76a4b,Taraxacum mongolicum Hand.-Mazz.,taraxacum_mongolicum_hand_mazz,normalized_variant,2026-07-12T20:10:41+00:00
+51215835-92ae-59b8-b1ef-96841ee167a0,7ac2cebc-918e-51ad-b944-ce5654c6214f,Acalypha hispida Burm.f.,acalypha_hispida_burm_f,normalized_variant,2026-07-12T20:10:40+00:00
+a6626c0c-e0cf-5ee8-8be6-80b21490a88b,7be87475-a2e9-515c-a7dc-e445c191f31c,Rauvolfia serpentina (L.) Benth. ex Kurz,rauvolfia_serpentina_l_benth_ex_kurz,normalized_variant,2026-07-12T20:10:41+00:00
+dd09399b-6e8d-576a-9c27-5f65d575033a,7c03fa34-7db4-58f6-8198-9b1f52eeaa9d,Benincasa hispida (Thunb.) Cogn.,benincasa_hispida_thunb_cogn,normalized_variant,2026-07-12T20:10:40+00:00
+6b3c1e72-246f-56e8-bfec-ce88af9c4bfa,7cdd19c7-1dd8-59ef-a038-f1f1ff6f5e06,Zinnia elegans Jacq.,zinnia_elegans_jacq,normalized_variant,2026-07-12T20:10:42+00:00
+c8c154c3-3158-5748-8c97-89f09b536c93,7cdfdfc7-d2a7-5273-9acc-c946f0675d70,Gnetum gnemon L.,gnetum_gnemon_l,normalized_variant,2026-07-12T20:10:41+00:00
+4220bcd0-1bcc-5d12-8835-7469b27383a2,7cee7592-10e3-5324-b5ce-1318bc740be8,Raphanus sativus L.,raphanus_sativus_l,normalized_variant,2026-07-12T20:10:41+00:00
+7b56ff0e-a8f3-5551-9d99-d3cc0f5b2281,7d0a454f-bec7-586f-b48c-14615ac6719e,"Vetiveria zizanioides Stapf, 1906",vetiveria_zizanioides_stapf_1906,normalized_variant,2026-07-12T20:10:42+00:00
+91b20965-f9f0-5b49-88a6-674e4cb7f9cd,7d7ebb22-8f6f-5dae-9896-950f608446f0,Annona reticulata L.,annona_reticulata_l,normalized_variant,2026-07-12T20:10:40+00:00
+a00e6dc1-4f10-53cb-be6e-8feef18e87d3,7dfad6a0-2853-5338-8754-f6fd7988441c,Helianthus annuus L.,helianthus_annuus_l,normalized_variant,2026-07-12T20:10:41+00:00
+982ed1ae-1280-5a5e-9da2-affd0d655261,7e2ffc29-5568-5fb0-9f4f-f231cf105fc5,Sandoricum koetjape (Burm.fil.) Merr.,sandoricum_koetjape_burm_fil_merr,normalized_variant,2026-07-12T20:10:41+00:00
+e3019666-adbe-5fc3-ac49-830f6a8e5b40,7ee52f33-7a42-594b-b302-6547e6ec3605,Piper cubeba L.fil.,piper_cubeba_l_fil,normalized_variant,2026-07-12T20:10:41+00:00
+887aeba6-d2b9-5af0-b6d1-69b9c5eaf966,7f4c8e0a-c709-544e-9a77-0e56a65a59f1,"Spilanthes acmella A.Chev., 1920",spilanthes_acmella_a_chev_1920,normalized_variant,2026-07-12T20:10:41+00:00
+b5886292-a745-5594-b8a6-977d1d709c3e,7f57093a-346a-5265-aed1-fa50040d7337,Calophyllum inophyllum L.,calophyllum_inophyllum_l,normalized_variant,2026-07-12T20:10:40+00:00
+3eb59d84-063b-55c6-a86e-9e0ea5e05d69,7ffe905a-6be3-5a37-b786-240f09cde9ff,Ximenia americana L.,ximenia_americana_l,normalized_variant,2026-07-12T20:10:42+00:00
+10f7ed5f-6e93-5baf-906f-838ad55e1026,8101f5c7-5621-50fe-8fe9-6598bb83289b,Eupatorium riparium Sch.Bip. ex Schnittsp.,eupatorium_riparium_sch_bip_ex_schnittsp,normalized_variant,2026-07-12T20:10:41+00:00
+c9b5bb51-eb99-5f06-93b2-4a0bd66bfb87,811b405a-cfcb-53e5-9cde-8c12bfa8a430,Bidens bipinnata L.,bidens_bipinnata_l,normalized_variant,2026-07-12T20:10:40+00:00
+e1f54a7b-5a09-5c4f-9732-f48371faadc9,82633059-85b7-5cd5-a16a-442a54ac58fb,Catharanthus roseus (L.) G.Don,catharanthus_roseus_l_g_don,normalized_variant,2026-07-12T20:10:40+00:00
+a570dbe9-36da-5b2e-bd5c-3dec8c30ca96,82633059-85b7-5cd5-a16a-442a54ac58fb,Vinca rosea L.,vinca_rosea_l,synonym_variant,2026-07-12T20:10:40+00:00
+857cbe06-abc9-5f60-a8dc-b891f1e9d308,829e9934-423f-5671-aa41-a0eae1ca0edd,Leptospermum polygalifolium subsp. polygalifolium,leptospermum_polygalifolium_subsp_polygalifolium,normalized_variant,2026-07-12T20:10:41+00:00
+90090162-caab-5042-ba3a-90f2b8078e21,829e9934-423f-5671-aa41-a0eae1ca0edd,Leptospermum flavescens J.E.Sm.,leptospermum_flavescens_j_e_sm,synonym_variant,2026-07-12T20:10:41+00:00
+967f5998-73e3-5984-9c6a-7e9cc530fcb4,829f7361-4d8b-5b77-a66e-c7fbbdc882d1,Elaeocarpus grandiflorus Sm.,elaeocarpus_grandiflorus_sm,normalized_variant,2026-07-12T20:10:41+00:00
+ac9efa08-288c-5759-bbfc-1589a121d4f0,8325ae47-c6c7-5e7b-89b1-01cbafa627bd,Stachytarpheta jamaicensis (L.) Vahl,stachytarpheta_jamaicensis_l_vahl,normalized_variant,2026-07-12T20:10:41+00:00
+a2e80140-053a-5ed8-94f2-948397d6db24,838a29ec-5c90-5977-a20f-a83c06a3cd05,Mentha × piperita L.,mentha_piperita_l,normalized_variant,2026-07-12T20:10:41+00:00
+47b8b7eb-4a03-547b-a287-01054591b18a,83e99fa4-c3fe-58c3-acfc-3dc32e8a98ce,Capsicum frutescens L.,capsicum_frutescens_l,normalized_variant,2026-07-12T20:10:40+00:00
+c9065413-3fac-5b91-9d37-2119614889e7,83fe12fb-950c-57d4-915f-c88ba29ff609,Erythrina variegata L.,erythrina_variegata_l,normalized_variant,2026-07-12T20:10:41+00:00
+bb2aa83b-4904-5d1d-acb5-63ac29327fcf,8447134c-5f74-5311-a017-ac9f7dc2a1c7,Zingiber zerumbet subsp. zerumbet,zingiber_zerumbet_subsp_zerumbet,normalized_variant,2026-07-12T20:10:42+00:00
+70668f80-3896-5782-9a57-d05673f1140e,8447134c-5f74-5311-a017-ac9f7dc2a1c7,Zingiber aromaticum Valeton,zingiber_aromaticum_valeton,synonym_variant,2026-07-12T20:10:42+00:00
+8f3f6a6e-f180-5bb4-88fe-db0fd0f75b1c,84e53409-96f3-539a-846e-608c8ece266d,Ananas comosus (L.) Merr.,ananas_comosus_l_merr,normalized_variant,2026-07-12T20:10:40+00:00
+52646783-356a-58df-a5f5-8ab8e1610bb6,851a20d6-2464-551e-a5f0-73043b151cea,Hippobroma longiflora (L.) G.Don,hippobroma_longiflora_l_g_don,normalized_variant,2026-07-12T20:10:41+00:00
+754f88b4-c1fc-50a0-a9ce-1dc9451ee94f,851a20d6-2464-551e-a5f0-73043b151cea,Isotoma longiflora (L.) C.Presl,isotoma_longiflora_l_c_presl,synonym_variant,2026-07-12T20:10:41+00:00
+8ec88758-9081-5d94-aad3-5469165c413a,851a20d6-2464-551e-a5f0-73043b151cea,Laurentia longiflora (L.) Peterm.,laurentia_longiflora_l_peterm,synonym_variant,2026-07-12T20:10:41+00:00
+f6137609-ee81-5e65-a555-5aa6585805a8,8619da7b-e7a2-581d-87f5-91a04ad2a5ea,Durio zibethinus Murray,durio_zibethinus_murray,normalized_variant,2026-07-12T20:10:41+00:00
+56602fa6-9140-592b-8c95-d77e6110fbcb,87759e97-b16c-5114-80ef-4de17173d5f1,Mussaenda pubescens Dryand.,mussaenda_pubescens_dryand,normalized_variant,2026-07-12T20:10:41+00:00
+836941cc-8973-50e3-9ccf-fa015a83bc95,87cd29ae-d99e-541c-a507-8da019a172c2,Borassus flabellifer L.,borassus_flabellifer_l,normalized_variant,2026-07-12T20:10:40+00:00
+071d3ae9-4103-53ef-9329-e21ba8dfca90,8825f002-dab2-5d23-98c8-1b20750fe904,Abrus precatorius L.,abrus_precatorius_l,normalized_variant,2026-07-12T20:10:40+00:00
+a427819a-bb7e-5d70-80ca-478295b9fe94,88bde05d-d188-5163-9a87-6504dc0b798a,Phyllanthus acidus (L.) Skeels,phyllanthus_acidus_l_skeels,normalized_variant,2026-07-12T20:10:41+00:00
+047d4e63-d05f-5f73-99ce-cc394cfc7a8a,89220866-d3ce-5b46-9121-9465f28032c3,Scaevola taccada (Gaertn.) Roxb.,scaevola_taccada_gaertn_roxb,normalized_variant,2026-07-12T20:10:41+00:00
+01e22829-dfec-5f56-b215-29d3a7582dd5,89220866-d3ce-5b46-9121-9465f28032c3,Scaevola frutescens K.Krause,scaevola_frutescens_k_krause,synonym_variant,2026-07-12T20:10:41+00:00
+dd20fe4c-fbbf-5c4e-b64c-5df0a9411bc5,8a0bed64-546e-57fd-94c4-b0197c56b630,Datura metel L.,datura_metel_l,normalized_variant,2026-07-12T20:10:40+00:00
+aafa314d-6b9e-5310-8217-b4ca322e191d,8a0f723a-c943-582a-bd4e-b1e4d513e515,Artemisia abrotanum L.,artemisia_abrotanum_l,normalized_variant,2026-07-12T20:10:40+00:00
+df342581-9022-5db6-8df7-bb315bd416b0,8a5d12ef-f854-592b-abd2-c211b33aa1b4,Solidago virgaurea L.,solidago_virgaurea_l,normalized_variant,2026-07-12T20:10:41+00:00
+a9133fa0-d5ba-57a0-be3c-56ee1bce6088,8bf9b08c-1def-591a-9bcc-ca4b6255e877,Sesbania sesban (L.) Merr.,sesbania_sesban_l_merr,normalized_variant,2026-07-12T20:10:41+00:00
+c49b0532-be34-5441-925c-b2692ae54149,8d6c4982-26c0-563e-a2ce-ff55e50ac988,Euphorbia heterophylla L.,euphorbia_heterophylla_l,normalized_variant,2026-07-12T20:10:41+00:00
+69b50455-5efb-58ed-9d82-abfe6ad5059f,8e2c89d3-8430-57e0-a9c8-81cde6a7533b,Ficus microcarpa L.fil.,ficus_microcarpa_l_fil,normalized_variant,2026-07-12T20:10:41+00:00
+234d7432-9896-5b22-ba8b-81edd6bb76c8,8e4e6851-0342-5695-a2e3-3ee680b9ef18,Cocos nucifera L.,cocos_nucifera_l,normalized_variant,2026-07-12T20:10:40+00:00
+24dd3067-5c43-564d-a752-57ce229e44d5,8f16e81c-7ebd-555f-8d79-d84936d26814,Lepidium sativum L.,lepidium_sativum_l,normalized_variant,2026-07-12T20:10:41+00:00
+8e437edc-ed07-540b-8a42-c7beaa3fdff9,8fea13cf-25bc-5755-a26d-71f02d38d627,Kaempferia galanga L.,kaempferia_galanga_l,normalized_variant,2026-07-12T20:10:41+00:00
+e9313554-74a8-5386-a78a-88f46ac2a058,9045151f-c55b-5859-b030-a23b9e4e07d3,Curcuma zedoaria (Christm.) Roscoe,curcuma_zedoaria_christm_roscoe,normalized_variant,2026-07-12T20:10:40+00:00
+bfbc9c41-be94-51ff-a570-6f8967b72d81,90a8d5d1-8291-559e-8452-3ee469ab365e,Croton tiglium L.,croton_tiglium_l,normalized_variant,2026-07-12T20:10:40+00:00
+a150e826-6b37-5a03-806b-3a4e0a9c0866,90bc8715-c8d3-5086-8b8b-d2266b129400,Acalypha indica L.,acalypha_indica_l,normalized_variant,2026-07-12T20:10:40+00:00
+49bb17bc-59a8-5c2b-8c38-80a05d939ac6,9115ff6d-2c26-5736-9485-983331b197e8,Swietenia mahagoni (L.) Jacq.,swietenia_mahagoni_l_jacq,normalized_variant,2026-07-12T20:10:41+00:00
+a9c9cdfb-059b-52b4-b06d-653ec234249f,91e50387-da73-5973-a338-1120dc8db1d2,Portulaca oleracea L.,portulaca_oleracea_l,normalized_variant,2026-07-12T20:10:41+00:00
+1b5c91f5-6ace-5f02-a7c3-8c8a0036622b,91ebe95b-6b76-5ffc-8817-2d010bf5f11a,Cajanus cajan (L.) Huth,cajanus_cajan_l_huth,normalized_variant,2026-07-12T20:10:40+00:00
+83101432-3237-5fb9-963d-dfee9368506a,930a2ff9-23f1-5624-8ded-c87b3da62f54,Nymphaea lotus L.,nymphaea_lotus_l,normalized_variant,2026-07-12T20:10:41+00:00
+81b17a63-5bc6-50e0-946e-4315425c8380,935d1b37-a8f3-5901-9b26-69c29cac395d,Datura stramonium L.,datura_stramonium_l,normalized_variant,2026-07-12T20:10:40+00:00
+ff0ca649-f635-516d-8c3e-8a0389fa5a8a,95a3e866-7522-5b42-96e2-d2bd01752c9f,Arcangelisia flava (L.) Merr.,arcangelisia_flava_l_merr,normalized_variant,2026-07-12T20:10:40+00:00
+9a565746-bf0b-5ded-bd0d-d7de488265ca,95d88163-75bb-500d-be47-1e702671e6e4,Lagerstroemia indica L.,lagerstroemia_indica_l,normalized_variant,2026-07-12T20:10:41+00:00
+6ea6afe6-1e98-5ea2-8edc-4c29f8cb79e3,964b15f4-d55b-59d7-ad36-610d622f6970,Hedychium coronarium J.Koenig,hedychium_coronarium_j_koenig,normalized_variant,2026-07-12T20:10:41+00:00
+f4ec04ca-0d4a-553a-8469-d4bdb1f25971,9674dd5e-2438-56d0-b94d-eeac8311aecc,Abutilon indicum (L.) Sweet,abutilon_indicum_l_sweet,normalized_variant,2026-07-12T20:10:40+00:00
+b06a09bf-3cb8-53eb-b401-3cfebbc983e4,96801dd1-e4f3-538e-84d6-092f1f2558f2,Artocarpus heterophyllus Lam.,artocarpus_heterophyllus_lam,normalized_variant,2026-07-12T20:10:40+00:00
+d5d2f41b-4459-5c28-aa2e-e184b397fa31,969303e7-289f-5d47-904f-940d1d4aec07,Gardenia jasminoides J.Ellis,gardenia_jasminoides_j_ellis,normalized_variant,2026-07-12T20:10:41+00:00
+79d934db-5109-5c81-825e-f22a1ed4115e,971c31b9-b4ea-5684-b3c4-d4ad4f0a1d89,Impatiens balsamina L.,impatiens_balsamina_l,normalized_variant,2026-07-12T20:10:41+00:00
+97737ce3-a157-58f1-8fae-4968e90c0923,994b9afb-da3a-5f8f-b70f-9594b0fc13b7,Erythrina subumbrans (Hassk.) Merr.,erythrina_subumbrans_hassk_merr,normalized_variant,2026-07-12T20:10:41+00:00
+859b8786-efca-5f62-bfaf-7efd41c19a8e,994b9afb-da3a-5f8f-b70f-9594b0fc13b7,Erythrina lithosperma Blume ex Miq.,erythrina_lithosperma_blume_ex_miq,synonym_variant,2026-07-12T20:10:41+00:00
+063a1269-05ad-5f11-8b9f-b32db9716f31,99607ef4-ad69-5040-8dd3-7161d4b593e4,Aucuba japonica Thunb.,aucuba_japonica_thunb,normalized_variant,2026-07-12T20:10:40+00:00
+a791ab2d-506b-5159-9d21-010a2ce49f57,9a824a48-25db-561a-9282-b60925c14356,Crinum asiaticum L.,crinum_asiaticum_l,normalized_variant,2026-07-12T20:10:40+00:00
+0f43d2bc-809b-5fa6-a0c0-7dda62c7077a,9ad40163-ef4f-50b8-8b5c-139a286a011a,Alternanthera sessilis (L.) R.Br. ex DC.,alternanthera_sessilis_l_r_br_ex_dc,normalized_variant,2026-07-12T20:10:40+00:00
+db6d104f-1600-5668-b206-ba554caecd1c,9b600c0d-c81c-5ef5-8513-a56c9b80a832,Pimpinella anisum L.,pimpinella_anisum_l,normalized_variant,2026-07-12T20:10:41+00:00
+70b39b10-9ede-5cfd-b267-55835e5e1593,9b87c084-8e97-5763-83ac-abc8eee074b3,Barleria prionitis L.,barleria_prionitis_l,normalized_variant,2026-07-12T20:10:40+00:00
+cd50c5e8-e6f5-54e8-af44-06adcc4c2f10,9c6c6d9c-c72a-5da6-b688-ece5e74c3643,Kalanchoe pinnata (Lam.) Pers.,kalanchoe_pinnata_lam_pers,normalized_variant,2026-07-12T20:10:41+00:00
+007677be-d315-5ced-8a8a-eefdd81f634a,9c6c6d9c-c72a-5da6-b688-ece5e74c3643,Bryophyllum pinnatum (Lam.) Oken,bryophyllum_pinnatum_lam_oken,synonym_variant,2026-07-12T20:10:41+00:00
+7ed2ae8e-b07f-52ff-926f-f50fdf025874,9d009ca4-cdb4-55f7-a4ca-c7d0d2d16c33,Asclepias curassavica L.,asclepias_curassavica_l,normalized_variant,2026-07-12T20:10:40+00:00
+b106c510-6713-5c81-846b-b9a64822fbc8,9e9a1f4f-c829-528a-96de-3acf3c32258e,Phaleria macrocarpa (Scheff.) Boerl.,phaleria_macrocarpa_scheff_boerl,normalized_variant,2026-07-12T20:10:41+00:00
+40538eda-d859-51df-a8e6-f8d4bfee1d6b,9f113392-c9da-5edd-af63-a1f323c112e5,Gloriosa superba L.,gloriosa_superba_l,normalized_variant,2026-07-12T20:10:41+00:00
+41f897ca-ca52-5f79-ad1f-976b8ee2d320,9f42f190-4be1-5d33-a0d2-e30e29beee87,Hydrangea macrophylla (Thunb.) Ser.,hydrangea_macrophylla_thunb_ser,normalized_variant,2026-07-12T20:10:41+00:00
+ab3137a3-3b9e-57a4-9862-5c9eefaec40e,a02fd890-c756-5c36-8d4f-67efa3fea396,Carica papaya L.,carica_papaya_l,normalized_variant,2026-07-12T20:10:40+00:00
+87911429-4eb8-5c49-bf1c-08b50f979169,a038eb28-ecbe-55b0-b796-8eb2e256b0c8,Cola acuminata (P.Beauv.) Schott & Endl.,cola_acuminata_p_beauv_schott_endl,normalized_variant,2026-07-12T20:10:40+00:00
+112bc6ac-b455-541a-b993-53e2af44eb64,a04c7a3f-65dd-56b6-bc49-46249c2d09c2,Abrus fruticulosus Wall. ex Wight & Arn.,abrus_fruticulosus_wall_ex_wight_arn,normalized_variant,2026-07-12T20:10:40+00:00
+9541b41d-f19d-5709-90fa-74671a717abf,a276ec76-a93d-5ff6-b99a-cca2b39a11a1,Papaver somniferum L.,papaver_somniferum_l,normalized_variant,2026-07-12T20:10:41+00:00
+9d6684f0-c98d-5863-8dce-0ea0b1741b42,a3293ad0-b880-5634-800e-f65c14f8b0c7,Cascabela thevetia (L.) Lippold,cascabela_thevetia_l_lippold,normalized_variant,2026-07-12T20:10:40+00:00
+e0ae419f-7d04-5889-8cf1-0790860ae469,a3293ad0-b880-5634-800e-f65c14f8b0c7,Thevetia peruviana (Pers.) K.Schum.,thevetia_peruviana_pers_k_schum,synonym_variant,2026-07-12T20:10:40+00:00
+47d3c798-f90d-5f5e-a661-01dde61b6a62,a33157d7-c480-539e-8eb6-454efef0afb0,Allamanda cathartica L.,allamanda_cathartica_l,normalized_variant,2026-07-12T20:10:40+00:00
+a0284151-ffdc-5d2e-b258-191a3966f9fe,a4e16489-9744-56f2-9699-ba98f75a9674,Cucurbita moschata (Duchesne) Duchesne ex Poir.,cucurbita_moschata_duchesne_duchesne_ex_poir,normalized_variant,2026-07-12T20:10:40+00:00
+705c377f-5143-518d-8b36-54120181dd43,a561d36a-7306-5e13-ba1f-4fb504a27db3,Grona styracifolia (Osbeck) H.Ohashi & K.Ohashi,grona_styracifolia_osbeck_h_ohashi_k_ohashi,normalized_variant,2026-07-12T20:10:41+00:00
+23033300-f3ab-524b-885d-22bc8b794a0f,a561d36a-7306-5e13-ba1f-4fb504a27db3,Desmodium styracifolium (Osbeck) Merr.,desmodium_styracifolium_osbeck_merr,synonym_variant,2026-07-12T20:10:41+00:00
+ef8934d7-96e1-54b8-bc51-91fdfbf0b554,a61ad6fb-bf3a-5493-9caa-a36e5cef7ba3,Senna tora (L.) Roxb.,senna_tora_l_roxb,normalized_variant,2026-07-12T20:10:41+00:00
+ffd702f5-284a-5d2b-a7bc-4b12392cb269,a61ad6fb-bf3a-5493-9caa-a36e5cef7ba3,Cassia tora L.,cassia_tora_l,synonym_variant,2026-07-12T20:10:41+00:00
+037a0157-7277-5824-9f28-edb33b29ff23,a628cf0c-a603-596e-8b61-a08c6b9751b4,Allium tuberosum Rottler ex Spreng.,allium_tuberosum_rottler_ex_spreng,normalized_variant,2026-07-12T20:10:40+00:00
+3952ffe0-5bf4-5057-a127-c20da3e208e7,a65d370e-3d44-5656-866f-1ae48465e869,Pueraria montana (Lour.) Merr.,pueraria_montana_lour_merr,normalized_variant,2026-07-12T20:10:41+00:00
+2dd7c48d-a2d5-5198-a2bf-5e0e936d5788,a75162a9-c39e-589f-8028-487e95132947,Talinum paniculatum (Jacq.) Gaertn.,talinum_paniculatum_jacq_gaertn,normalized_variant,2026-07-12T20:10:41+00:00
+e1c687bb-dfd2-594e-a563-529271ef1f6d,a75c93bd-bf17-5642-b2a7-8cefcad530a6,Senna siamea (Lam.) H.S.Irwin & Barneby,senna_siamea_lam_h_s_irwin_barneby,normalized_variant,2026-07-12T20:10:41+00:00
+4246d5cc-fea3-561e-b1b6-e4f648d01816,a75c93bd-bf17-5642-b2a7-8cefcad530a6,Cassia siamea Lam.,cassia_siamea_lam,synonym_variant,2026-07-12T20:10:41+00:00
+e832653f-9325-50fe-a5a8-b7663dafbd04,a7ca7808-93e2-5eb6-8399-d6e2bac310fb,Quassia amara L.,quassia_amara_l,normalized_variant,2026-07-12T20:10:41+00:00
+7fef0b10-127d-5ffb-9fb2-2dfeb500f1d7,a8f8e31e-bd14-538c-b537-9b743c9e28cf,Millingtonia hortensis L.fil.,millingtonia_hortensis_l_fil,normalized_variant,2026-07-12T20:10:41+00:00
+b5429073-f43e-5ef9-b780-3738d861282b,a92ff767-3d00-527f-97aa-c6d17c9dd1fb,Acorus calamus L.,acorus_calamus_l,normalized_variant,2026-07-12T20:10:40+00:00
+3b1ac12a-6d2c-5654-b362-774b8ee9a691,aa19c5ca-0e00-5de6-9341-d71848a7f4f1,Senna alexandrina Mill.,senna_alexandrina_mill,normalized_variant,2026-07-12T20:10:41+00:00
+8d2615b1-f9de-5082-930c-5bdf34b04810,aa19c5ca-0e00-5de6-9341-d71848a7f4f1,Cassia senna L.,cassia_senna_l,synonym_variant,2026-07-12T20:10:41+00:00
+dd43ae48-bfb8-5beb-a0b5-c51a4890ac2d,aa32cf2d-fa8f-5d3b-9765-2fa4c2faa075,Piper betle L.,piper_betle_l,normalized_variant,2026-07-12T20:10:41+00:00
+e6308bc5-bef1-5e85-ad25-efa518d4341c,ab1a582f-7122-5534-984a-eb378be4064d,Broussonetia papyrifera (L.) L'Hér. ex Vent.,broussonetia_papyrifera_l_l_h_r_ex_vent,normalized_variant,2026-07-12T20:10:40+00:00
+045f2440-79e6-598b-bb77-b34cfbeba2ca,ab1a582f-7122-5534-984a-eb378be4064d,Morus australis Poir.,morus_australis_poir,synonym_variant,2026-07-12T20:10:40+00:00
+be1afa3e-737e-5eac-ab43-b96f547d7377,ac804791-0638-5b18-aa76-e712c711b543,Psophocarpus tetragonolobus (L.) DC.,psophocarpus_tetragonolobus_l_dc,normalized_variant,2026-07-12T20:10:41+00:00
+2f90719c-3d16-58a6-a316-b13afbdf9bb5,acdb42a9-0e68-5041-8fd3-e292abf7654c,Melochia corchorifolia L.,melochia_corchorifolia_l,normalized_variant,2026-07-12T20:10:41+00:00
+ee6815b7-3bd4-5fba-aadc-8f146a3c85a9,ace8788d-0e5e-527f-bdfd-fd2b3354a299,Mimosa pudica L.,mimosa_pudica_l,normalized_variant,2026-07-12T20:10:41+00:00
+67993551-a2cf-5149-9622-c2f94dbce2d7,ad0d237e-aaf8-5065-8ab3-247ff6ff46f3,Smilax zeylanica L.,smilax_zeylanica_l,normalized_variant,2026-07-12T20:10:41+00:00
+8feba39d-659a-568a-9132-154a65f08883,af283b6d-64da-5b43-8832-6fe17728a4c7,Aloe vera (L.) Burm.f.,aloe_vera_l_burm_f,normalized_variant,2026-07-12T20:10:40+00:00
+54f8f5f7-a34b-5a63-949c-eb3d11acb691,af84e4bf-4bc0-5884-9ee7-8cac190e32cc,Physalis angulata L.,physalis_angulata_l,normalized_variant,2026-07-12T20:10:41+00:00
+a4c0b142-75de-5181-b7ac-56f3ceaa522f,af84e4bf-4bc0-5884-9ee7-8cac190e32cc,Physalis minima L.,physalis_minima_l,synonym_variant,2026-07-12T20:10:41+00:00
+2b678cd0-355e-533d-9427-5a6408d9f1dd,afc8d2f6-c66c-59e7-831c-adbebb9154c7,Tamarindus indica L.,tamarindus_indica_l,normalized_variant,2026-07-12T20:10:41+00:00
+43e2a916-4079-5c86-91b1-582b043e7414,b001be0a-cf2a-5c90-8458-8d2dda31cfee,Myristica fragrans Houtt.,myristica_fragrans_houtt,normalized_variant,2026-07-12T20:10:41+00:00
+ba76da2e-01c6-57be-8744-e4031dbf4702,b0a0c70f-340e-52bf-b3e5-69f51b35041a,Coffea arabica L.,coffea_arabica_l,normalized_variant,2026-07-12T20:10:40+00:00
+73a90cad-fe7d-500a-a756-8b7b7fccd58d,b124e8f3-a469-54ed-9c7f-56a3428efd5e,Eclipta alba (L.) Hassk.,eclipta_alba_l_hassk,normalized_variant,2026-07-12T20:10:41+00:00
+845d3847-725b-5c98-8cd9-36c555d786e7,b129d6bc-81bd-5af4-9355-122b4cc9158e,Gynura japonica (Thunb.) Juel,gynura_japonica_thunb_juel,normalized_variant,2026-07-12T20:10:41+00:00
+96ecf154-a9a8-5787-8cf5-e3022690a514,b129d6bc-81bd-5af4-9355-122b4cc9158e,Gynura segetum (Lour.) Merr.,gynura_segetum_lour_merr,synonym_variant,2026-07-12T20:10:41+00:00
+ee6b6c48-9240-5514-974b-394ed2ed0f04,b1af4455-a1f3-58ae-801d-d017fe5c8104,Gaultheria procumbens L.,gaultheria_procumbens_l,normalized_variant,2026-07-12T20:10:41+00:00
+93920060-8b14-53e2-b1d7-0d634467d3de,b252fed9-4162-50ae-b814-b7993e23f234,Garcinia mangostana L.,garcinia_mangostana_l,normalized_variant,2026-07-12T20:10:41+00:00
+f30bf89e-5e80-5877-a299-141a59c377a0,b2a8b027-a1d7-5809-9821-2bd49821225c,Kalanchoe daigremontiana Raym.-Hamet & H.Perrier,kalanchoe_daigremontiana_raym_hamet_h_perrier,normalized_variant,2026-07-12T20:10:41+00:00
+ad56d11c-cfac-52b5-bb3d-4bfae1ec9ec1,b3ebb426-4906-5f75-bf37-67dcc7c397cb,Coffea canephora Pierre ex A.Froehner,coffea_canephora_pierre_ex_a_froehner,normalized_variant,2026-07-12T20:10:40+00:00
+09e2c6f4-84a8-552f-8b37-56e8cb008b99,b3ebb426-4906-5f75-bf37-67dcc7c397cb,Coffea robusta L.Linden,coffea_robusta_l_linden,synonym_variant,2026-07-12T20:10:40+00:00
+f0f22d33-1856-5ec7-b499-7d377c3f4d26,b471cdb7-ada5-5fcb-859a-108c931b97df,Nephelium lappaceum L.,nephelium_lappaceum_l,normalized_variant,2026-07-12T20:10:41+00:00
+d57b5051-d4cf-5541-9de7-59100ff068ff,b4f1aadb-7863-540b-9820-81c380e2afa7,Drymaria cordata (L.) Willd. ex Schult.,drymaria_cordata_l_willd_ex_schult,normalized_variant,2026-07-12T20:10:41+00:00
+3ec5d23a-fbad-54c8-b4a5-7fc3b4ea8fa9,b4f914bd-179e-5bf8-9553-0db2340c6449,Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.,tabernaemontana_divaricata_l_r_br_ex_roem_schult,normalized_variant,2026-07-12T20:10:41+00:00
+cc76e94c-2f09-5401-87cb-0c5b6402f499,b4f914bd-179e-5bf8-9553-0db2340c6449,Ervatamia divaricata (L.) Burkill,ervatamia_divaricata_l_burkill,synonym_variant,2026-07-12T20:10:41+00:00
+0dd4ad88-2a00-5712-a036-910f4830dc4d,b4fb8750-4e5c-5516-952d-5ff434462a91,Elaeocarpus sphaericus (Gaertn.) Ettingsh.,elaeocarpus_sphaericus_gaertn_ettingsh,normalized_variant,2026-07-12T20:10:41+00:00
+4bcd76cf-f38b-55c3-9ccf-0cf2fc6105f0,b4fb8750-4e5c-5516-952d-5ff434462a91,Elaeocarpus ganitrus Roxb.,elaeocarpus_ganitrus_roxb,synonym_variant,2026-07-12T20:10:41+00:00
+3ddfa2a2-bf7b-5570-82f7-c1fa14b3e22f,b5fa32ed-8242-5d7a-8f12-a410f41c6f22,Rosa chinensis Jacq.,rosa_chinensis_jacq,normalized_variant,2026-07-12T20:10:41+00:00
+0dfe2b19-0547-5809-82e4-870a3a204af6,b617fcd7-3563-571f-a0fb-5d3a4fb91e58,Lagerstroemia speciosa (L.) Pers.,lagerstroemia_speciosa_l_pers,normalized_variant,2026-07-12T20:10:41+00:00
+867cd46f-ed04-5220-a9ec-35ffcd0d7e30,b7960d0e-3148-54e8-aff0-a567bd9e6aba,Lawsonia inermis L.,lawsonia_inermis_l,normalized_variant,2026-07-12T20:10:41+00:00
+b5131062-5b76-5dcf-87ba-2464a3c80223,b7a31c34-5fd0-5114-8b4e-3a5f3d6c61ed,Leonurus japonicus Houtt.,leonurus_japonicus_houtt,normalized_variant,2026-07-12T20:10:41+00:00
+3667356d-7769-5ed9-a869-b3932cf2b189,b7a31c34-5fd0-5114-8b4e-3a5f3d6c61ed,Leonurus heterophyllus Sweet,leonurus_heterophyllus_sweet,synonym_variant,2026-07-12T20:10:41+00:00
+4145aacd-fcc1-58ce-9d62-c1eaf0dc716c,b7c3acc3-f7ce-593a-a0ff-309e34a3b4bd,Musa × paradisiaca L.,musa_paradisiaca_l,normalized_variant,2026-07-12T20:10:41+00:00
+6856c66a-0b2f-5161-8d1a-61ff3ce41190,b7c3acc3-f7ce-593a-a0ff-309e34a3b4bd,Musa × sapientum L.,musa_sapientum_l,synonym_variant,2026-07-12T20:10:41+00:00
+3089bc26-72f4-5eae-8e6b-8e45bf4375ee,b84d8af0-5c5a-5f21-954d-57b0f85c1ebb,Psidium guajava L.,psidium_guajava_l,normalized_variant,2026-07-12T20:10:41+00:00
+9b9f645b-e974-578c-a2a5-ea29e5201398,b84f723c-bf5d-53b2-810e-e058fb04d17a,Entada phaseoloides (L.) Merr.,entada_phaseoloides_l_merr,normalized_variant,2026-07-12T20:10:41+00:00
+28a5a330-8448-56cf-8884-02607bb1524a,b84f723c-bf5d-53b2-810e-e058fb04d17a,Entada scandens (L.) Benth.,entada_scandens_l_benth,synonym_variant,2026-07-12T20:10:41+00:00
+ef3c91e3-a74e-544a-ba93-bd0c68f593cc,b86d52ec-bc9f-5cc2-846d-93c37bcd3157,Coriandrum sativum L.,coriandrum_sativum_l,normalized_variant,2026-07-12T20:10:40+00:00
+aacb938b-6b76-5a31-94f7-ca77b3550830,b89b9db2-bd4f-597f-aed6-3b7accfe029a,Platycladus orientalis (L.) Franco,platycladus_orientalis_l_franco,normalized_variant,2026-07-12T20:10:41+00:00
+8b7e584e-9e14-5621-82e0-ab72353aa6d1,b8f9bf63-1cd0-5aa4-8301-d1e7cc6f12b6,Cinnamomum camphora (L.) J.Presl,cinnamomum_camphora_l_j_presl,normalized_variant,2026-07-12T20:10:40+00:00
+756ae71c-72ff-53b6-8e0b-304209f27b62,b9c139c7-7a56-5adc-8b88-a7b6f3aca3d1,Tabernaemontana corymbosa Roxb. ex Wall.,tabernaemontana_corymbosa_roxb_ex_wall,normalized_variant,2026-07-12T20:10:41+00:00
+488ab956-9479-5a7e-855a-10fc39550f8b,ba15f02b-7677-5c68-a4e0-e60c86c86885,Ruellia tuberosa L.,ruellia_tuberosa_l,normalized_variant,2026-07-12T20:10:41+00:00
+8cc53da2-f40d-5b2d-bac5-07e59b675f9e,ba321e5b-4b13-5b40-b65d-1b0a56d04401,Abelmoschus moschatus subsp. moschatus,abelmoschus_moschatus_subsp_moschatus,normalized_variant,2026-07-12T20:10:40+00:00
+527476c2-8f25-5967-952f-e5293c692abb,ba321e5b-4b13-5b40-b65d-1b0a56d04401,Hibiscus abelmoschus L.,hibiscus_abelmoschus_l,synonym_variant,2026-07-12T20:10:40+00:00
+9f27f633-4b06-5afb-be60-01f1614fcac4,ba372c6c-7637-50b2-9292-b386e3c357ad,Imperata cylindrica (L.) Raeusch.,imperata_cylindrica_l_raeusch,normalized_variant,2026-07-12T20:10:41+00:00
+45f9b946-d0f6-5fe1-91ba-e725080746dd,ba699fda-df4b-5c26-9542-d45cfe38b634,Stachytarpheta mutabilis (Jacq.) Vahl,stachytarpheta_mutabilis_jacq_vahl,normalized_variant,2026-07-12T20:10:41+00:00
+717e99a9-e58d-586f-a2c4-62f43deb6f7b,ba6f8bcf-da27-5ee3-a273-ca5732c909ee,Gomphrena globosa L.,gomphrena_globosa_l,normalized_variant,2026-07-12T20:10:41+00:00
+628042f7-9169-501a-a268-b9ebe4eacd02,bac11d3d-45c1-5f6b-93ee-b5b7d6658bc4,Cymbopogon citratus (DC.) Stapf,cymbopogon_citratus_dc_stapf,normalized_variant,2026-07-12T20:10:40+00:00
+69f7e814-796e-54cb-8b0a-db27a203cce0,bb82a777-82c9-583b-8645-739ddbc45870,Tabernaemontana sphaerocarpa Blume,tabernaemontana_sphaerocarpa_blume,normalized_variant,2026-07-12T20:10:41+00:00
+adde3558-10c2-561a-942e-f892b10ba9e9,bb8b2142-b2b1-5a7b-89d6-5c8d3583ae97,Viola odorata L.,viola_odorata_l,normalized_variant,2026-07-12T20:10:42+00:00
+1ca3b89c-4072-51e7-97cb-ba771d9d6b08,bce825c0-1611-5e87-b0eb-760dc1815b3e,Eucalyptus globulus Labill.,eucalyptus_globulus_labill,normalized_variant,2026-07-12T20:10:41+00:00
+c9fa742d-d195-54a4-b2ac-e419791f9b2e,bdde9185-f5f6-5777-863d-aaf59a3898a1,"Desmodium gangeticum Puri, 1951",desmodium_gangeticum_puri_1951,normalized_variant,2026-07-12T20:10:41+00:00
+9bd4544d-1643-5700-9711-2ba945094dd7,beeec76b-4163-5a33-9b6a-086fce655b15,Leucaena leucocephala (Lam.) de Wit,leucaena_leucocephala_lam_de_wit,normalized_variant,2026-07-12T20:10:41+00:00
+73664a30-57d4-5ada-85dd-f2ec87f59587,bf076fde-a7e0-5586-9966-87c36b88bdcd,Cuminum cyminum L.,cuminum_cyminum_l,normalized_variant,2026-07-12T20:10:40+00:00
+02b133d2-c750-595a-9e93-50e7de008d41,bf4b6a7d-ba5d-53fc-a018-9dd0771ef45f,"Eugenia aromatica Kuntze, 1891",eugenia_aromatica_kuntze_1891,normalized_variant,2026-07-12T20:10:41+00:00
+da3a512d-0ecb-5361-aa72-0a7805cfbfd3,bf88e032-efd2-53ef-9486-8606e3a946ee,Solanum violaceum Ortega,solanum_violaceum_ortega,normalized_variant,2026-07-12T20:10:41+00:00
+1c054514-7a86-5940-998e-b5b96e00fbe0,bf88e032-efd2-53ef-9486-8606e3a946ee,Solanum indicum L.,solanum_indicum_l,synonym_variant,2026-07-12T20:10:41+00:00
+60d6f1ac-760e-5988-8a8e-1dd2aabbc876,c00d0164-dddc-5ed9-bc85-4b338009881f,Nyctanthes arbor-tristis L.,nyctanthes_arbor_tristis_l,normalized_variant,2026-07-12T20:10:41+00:00
+215f4198-2ca9-5c02-b421-ccad01b2d25c,c0c1e6e4-9495-5d5f-bcda-b643b048c5a2,Hibiscus mutabilis L.,hibiscus_mutabilis_l,normalized_variant,2026-07-12T20:10:41+00:00
+68cfc959-c5c1-5ad4-b49c-8271fdbc1ab0,c0cdcd8e-d792-5bcc-8007-2d34bf929138,Eclipta prostrata (L.) L.,eclipta_prostrata_l_l,normalized_variant,2026-07-12T20:10:41+00:00
+e39be79e-20d9-566e-8599-93dbaf2cf75b,c0f39a76-7f69-5795-bfc8-58f810afd725,Ipomoea pes-caprae (L.) R.Br.,ipomoea_pes_caprae_l_r_br,normalized_variant,2026-07-12T20:10:41+00:00
+4f48dddf-f4f0-5cdd-9de7-5055b233e4c1,c1304035-b586-5c1d-a353-4d5defbc4d29,Syzygium aromaticum (L.) Merr. & L.M.Perry,syzygium_aromaticum_l_merr_l_m_perry,normalized_variant,2026-07-12T20:10:41+00:00
+5e9d8742-3111-5975-b655-68bb470fc248,c1304035-b586-5c1d-a353-4d5defbc4d29,Eugenia caryophyllata Thunb.,eugenia_caryophyllata_thunb,synonym_variant,2026-07-12T20:10:41+00:00
+50fb9034-2877-5c09-be7c-62cacdcf3cf9,c313a183-c8a3-507e-97a2-9270ce035010,Celosia argentea f. cristata (L.) Schinz,celosia_argentea_f_cristata_l_schinz,normalized_variant,2026-07-12T20:10:40+00:00
+027b156a-4909-524c-94e2-481b6fc20ba9,c313a183-c8a3-507e-97a2-9270ce035010,Celosia cristata L.,celosia_cristata_l,synonym_variant,2026-07-12T20:10:40+00:00
+99581485-deeb-5d4a-9d0e-526eccc75519,c36925b7-9b60-52f2-a761-475471c5965d,Ipomoea cairica (L.) Sweet,ipomoea_cairica_l_sweet,normalized_variant,2026-07-12T20:10:41+00:00
+1cfabcce-ba61-5d92-93a2-c3aefcf98ce2,c36de55f-3310-570a-891a-15894bb4aa9e,Acanthus ilicifolius L.,acanthus_ilicifolius_l,normalized_variant,2026-07-12T20:10:40+00:00
+a021bc1d-c102-588c-85fd-026a60a76884,c432814f-e895-5728-81c7-941d172da254,Macropiper methysticum (G.Forst.) Hook. & Arn.,macropiper_methysticum_g_forst_hook_arn,normalized_variant,2026-07-12T20:10:41+00:00
+f34aabbe-374b-5726-97a5-90b09e21f1d7,c432814f-e895-5728-81c7-941d172da254,Piper methysticum G.Forst.,piper_methysticum_g_forst,synonym_variant,2026-07-12T20:10:41+00:00
+c2577709-15da-5443-8ca8-7add0562912a,c477b8f8-e78f-5e79-a309-76b5966d0a24,Capsicum annuum L.,capsicum_annuum_l,normalized_variant,2026-07-12T20:10:40+00:00
+c41e44fd-cb30-5945-b601-d8f120cfda2f,c48c03d1-51ad-5322-944b-ed223e9f78d7,Momordica charantia L.,momordica_charantia_l,normalized_variant,2026-07-12T20:10:41+00:00
+e881813a-3315-5184-a9b2-1a2aedb820b6,c5e8388a-e6b8-5723-9997-d1c5eb953650,Ipomoea quamoclit L.,ipomoea_quamoclit_l,normalized_variant,2026-07-12T20:10:41+00:00
+9edeafb3-c509-5a49-bf90-14132e24f416,c5e8388a-e6b8-5723-9997-d1c5eb953650,Quamoclit pennata Bojer,quamoclit_pennata_bojer,synonym_variant,2026-07-12T20:10:41+00:00
+d224be60-0edc-5352-8f8b-3bdde89d502a,c636f177-e5e0-5352-83b4-ccdfc563bca5,Phyllanthus urinaria L.,phyllanthus_urinaria_l,normalized_variant,2026-07-12T20:10:41+00:00
+43ec9152-30aa-55da-803c-9fccf0e6a336,c71707ad-fcee-5f35-b1e4-4779442a7b24,Alstonia scholaris (L.) R.Br.,alstonia_scholaris_l_r_br,normalized_variant,2026-07-12T20:10:40+00:00
+058155f1-633b-52dd-b174-5e4af70d1472,c76ae9b4-c2de-5883-9293-15f5db2744a7,Carthamus tinctorius L.,carthamus_tinctorius_l,normalized_variant,2026-07-12T20:10:40+00:00
+4fdcd991-b177-5580-9d11-8fea012f9f23,c7ef913c-280f-5985-b8e1-601f099c7dc7,Jasminum officinale L.,jasminum_officinale_l,normalized_variant,2026-07-12T20:10:41+00:00
+234b961c-2247-557c-ae29-4e7edf2b1e8a,c815c0cf-090e-5fa0-b957-b2770e62e524,Rheum palmatum L.,rheum_palmatum_l,normalized_variant,2026-07-12T20:10:41+00:00
+a091f860-fc64-580e-9f1a-6f47824c8031,c87a5f74-dd81-5606-a617-8873959671c7,Euphorbia neriifolia L.,euphorbia_neriifolia_l,normalized_variant,2026-07-12T20:10:41+00:00
+733f2a57-b218-591f-87e3-be3eb451e7da,c87f1664-aa22-5226-a25a-57af532c71dd,Brachypterum scandens (Roxb.) Miq.,brachypterum_scandens_roxb_miq,normalized_variant,2026-07-12T20:10:40+00:00
+90e60d90-8168-50ce-923a-c84c94df2124,c87f1664-aa22-5226-a25a-57af532c71dd,Derris scandens (Roxb.) Benth.,derris_scandens_roxb_benth,synonym_variant,2026-07-12T20:10:40+00:00
+c28c64f4-4491-52b0-a81e-27b35f89300f,c8d17433-cf8f-508e-ad1e-4803a952dedd,Solanum melongena L.,solanum_melongena_l,normalized_variant,2026-07-12T20:10:41+00:00
+d48e697a-6be2-5e48-8a61-04061d48d4ec,c90ffab9-7215-58c7-8513-105a858dc38a,Trichosanthes tricuspidata Lour.,trichosanthes_tricuspidata_lour,normalized_variant,2026-07-12T20:10:41+00:00
+536e09fc-63f5-5b57-9188-2d38615f240f,c928714c-d471-5533-93b1-1c0f34957757,Cyperus iria L.,cyperus_iria_l,normalized_variant,2026-07-12T20:10:40+00:00
+772e5704-c9af-5227-a3b4-0e00d9b16b2e,c997f3c0-853a-5034-8081-990481d76fe7,Oldenlandia corymbosa L.,oldenlandia_corymbosa_l,normalized_variant,2026-07-12T20:10:41+00:00
+f0e63062-13d2-58e9-b427-42ec930f4346,c997f3c0-853a-5034-8081-990481d76fe7,Hedyotis corymbosa (L.) Lam.,hedyotis_corymbosa_l_lam,synonym_variant,2026-07-12T20:10:41+00:00
+91b57fcf-eb54-58a4-ac86-7a5ad4657935,ca433a22-3b85-5dc9-b54a-44721d79e65c,Kaempferia rotunda L.,kaempferia_rotunda_l,normalized_variant,2026-07-12T20:10:41+00:00
+e779dd82-df29-5892-b387-12d121a4895e,cba6c5c3-2c6c-5aec-94e9-fdab46eadc46,Cyclea barbata Miers,cyclea_barbata_miers,normalized_variant,2026-07-12T20:10:40+00:00
+9caf25f6-474b-58f0-8bc6-a3019235d467,ccac8e33-3c4b-5c4e-8b23-4f7bf959444d,Mesosphaerum pectinatum (L.) Kuntze,mesosphaerum_pectinatum_l_kuntze,normalized_variant,2026-07-12T20:10:41+00:00
+1281b796-6e7f-5ece-914d-02f222debea0,ccac8e33-3c4b-5c4e-8b23-4f7bf959444d,Hyptis pectinata (L.) Poit.,hyptis_pectinata_l_poit,synonym_variant,2026-07-12T20:10:41+00:00
+e3a39640-c9b1-5cad-9ad0-ff3b656c256f,ccb63bb3-cf7e-5c58-b0ed-13b75135b29e,Centella asiatica (L.) Urb.,centella_asiatica_l_urb,normalized_variant,2026-07-12T20:10:40+00:00
+b91d725c-648b-512c-a58e-a05cfdb04cd0,cd41e282-4b71-56ac-9087-3b576ab6d986,Casuarina equisetifolia L.,casuarina_equisetifolia_l,normalized_variant,2026-07-12T20:10:40+00:00
+4f51b834-2739-5e08-a0c8-2150c19b5a00,cdba6e11-56c1-5dcf-ba63-d851de67acbd,Zanthoxylum rhetsa (Roxb.) DC.,zanthoxylum_rhetsa_roxb_dc,normalized_variant,2026-07-12T20:10:42+00:00
+5cf286ec-7be1-5f9b-83de-711b4eda64f1,cdba6e11-56c1-5dcf-ba63-d851de67acbd,Fagara rhetsa Roxb.,fagara_rhetsa_roxb,synonym_variant,2026-07-12T20:10:42+00:00
+bf186c32-b6ba-50d9-b8d5-3f9afe85c72c,cdc786c3-8bca-5b99-8e5a-e341e9f5ef1b,Homalomena occulta (Lour.) Schott,homalomena_occulta_lour_schott,normalized_variant,2026-07-12T20:10:41+00:00
+f1bf10f4-6162-5ea6-860d-83933b9a42c6,cdf464f9-5873-571c-8320-913fbea42519,Artemisia lactiflora Wall. ex DC.,artemisia_lactiflora_wall_ex_dc,normalized_variant,2026-07-12T20:10:40+00:00
+067706a4-6407-52d0-ab80-7699eedcec63,cedd05e3-437d-50b7-ae97-6e1710d40d98,Plumbago zeylanica L.,plumbago_zeylanica_l,normalized_variant,2026-07-12T20:10:41+00:00
+e7f4ac9f-3aa4-5adb-976c-48b0aac03536,cef21d69-6e29-58b2-8104-783ff9c32245,Breynia androgyna (L.) Chakrab. & N.P.Balakr.,breynia_androgyna_l_chakrab_n_p_balakr,normalized_variant,2026-07-12T20:10:40+00:00
+fd239e81-336d-5e14-bad4-11d0819a346c,cef21d69-6e29-58b2-8104-783ff9c32245,Sauropus androgynus (L.) Merr.,sauropus_androgynus_l_merr,synonym_variant,2026-07-12T20:10:40+00:00
+4d912a33-bb90-5a0a-8c9f-b755687e665d,cfed09a3-069d-5efb-b082-9a7538b5b248,Murraya paniculata (L.) Jacq.,murraya_paniculata_l_jacq,normalized_variant,2026-07-12T20:10:41+00:00
+4657b821-8ab0-5d51-9cbc-3376280e2f8f,d0f987f7-f9dc-532c-9741-c085c58d4025,Manihot esculenta Crantz,manihot_esculenta_crantz,normalized_variant,2026-07-12T20:10:41+00:00
+f2ff879f-15c8-5848-b8dd-ef7e34b307a6,d0f987f7-f9dc-532c-9741-c085c58d4025,Manihot utilissima Pohl,manihot_utilissima_pohl,synonym_variant,2026-07-12T20:10:41+00:00
+b0074f03-1739-5bf5-8e29-971f498c85e3,d1033b03-538e-5d47-90cd-78bf85e65b59,Apium graveolens L.,apium_graveolens_l,normalized_variant,2026-07-12T20:10:40+00:00
+7f50fe00-585b-5602-9705-25629250a0e7,d13b40db-3994-536d-bda5-609a23191cdc,Hyptis brevipes Poit.,hyptis_brevipes_poit,normalized_variant,2026-07-12T20:10:41+00:00
+98c6a44a-98c2-5a95-97ad-ffee8ed918e5,d1ebcc6d-9f4f-5e67-b9dd-ad478bf17856,Pogostemon cablin (Blanco) Benth.,pogostemon_cablin_blanco_benth,normalized_variant,2026-07-12T20:10:41+00:00
+a12c4617-729a-50f0-9b2a-7f920b0f2c6f,d209b533-9d00-58a5-814a-157a9c443927,Talinum fruticosum (L.) Juss.,talinum_fruticosum_l_juss,normalized_variant,2026-07-12T20:10:41+00:00
+b906bd8f-409a-59d6-8f7b-0bf74ee2df78,d209b533-9d00-58a5-814a-157a9c443927,Talinum triangulare (Jacq.) Willd.,talinum_triangulare_jacq_willd,synonym_variant,2026-07-12T20:10:41+00:00
+0227d380-10c1-5f43-9808-5e0c6fc6bac6,d49b4a6d-6192-5ec2-9232-c44907129f7e,Annona squamosa L.,annona_squamosa_l,normalized_variant,2026-07-12T20:10:40+00:00
+0a7e2bdd-219a-51d1-b445-252abd2390fb,d50930be-8d33-56fb-9350-c39eb62194b3,Elettaria cardamomum (L.) Maton,elettaria_cardamomum_l_maton,normalized_variant,2026-07-12T20:10:41+00:00
+fb7fd9c4-28fd-548c-8a1d-f55ba1bebb8e,d55956d8-bdcf-5dc2-b8d6-a66971537a43,Sida rhombifolia L.,sida_rhombifolia_l,normalized_variant,2026-07-12T20:10:41+00:00
+07afaf6d-74cb-5c0c-b28d-27286f573305,d6b5780b-2e88-5490-a0d6-b85d9b58f11b,Portulaca grandiflora Hook.,portulaca_grandiflora_hook,normalized_variant,2026-07-12T20:10:41+00:00
+e21e1e6c-d3d9-5137-b693-21c31898b162,d735cf31-61e2-5cd7-b833-25f2766538c8,Styphnolobium japonicum (L.) Schott,styphnolobium_japonicum_l_schott,normalized_variant,2026-07-12T20:10:41+00:00
+e512bf57-a781-53c9-a655-904b05eb773b,d760489a-d188-585e-a821-aa4510eb9fd5,Selaginella doederleinii Hieron.,selaginella_doederleinii_hieron,normalized_variant,2026-07-12T20:10:41+00:00
+4028e7bc-1a1a-57da-bfc0-a10327ce8e9f,d7f775bf-b93b-59cf-a097-2dbdb1445a3f,Piper retrofractum Vahl,piper_retrofractum_vahl,normalized_variant,2026-07-12T20:10:41+00:00
+3771df55-b6cb-5eff-9323-0d982d58f61e,d95dc1a7-a51a-5e58-a778-0a4890fc7f2f,Ginkgo biloba L.,ginkgo_biloba_l,normalized_variant,2026-07-12T20:10:41+00:00
+f94a10cc-4556-5184-8ffa-eb57d556bf65,d9e1507f-5df9-56b9-ba5b-65a64a377b99,Mirabilis jalapa L.,mirabilis_jalapa_l,normalized_variant,2026-07-12T20:10:41+00:00
+4c87bf73-084a-596c-831f-273dc4e5a5ba,d9ed2164-9d0a-5d2d-8772-4e187f4412e9,Carapichea ipecacuanha (Brot.) L.Andersson,carapichea_ipecacuanha_brot_l_andersson,normalized_variant,2026-07-12T20:10:40+00:00
+6dd94ba0-fa2a-5e00-b5bf-a1f4746828a5,d9ed2164-9d0a-5d2d-8772-4e187f4412e9,Cephaelis ipecacuanha (Brot.) A.Rich.,cephaelis_ipecacuanha_brot_a_rich,synonym_variant,2026-07-12T20:10:40+00:00
+02aca0da-4e59-57f0-98cd-b55cc4406e53,da452b1d-917d-58e3-907f-b4c98c1dae7a,Meistera aculeata (Roxb.) Škorničk. & M.F.Newman,meistera_aculeata_roxb_korni_k_m_f_newman,normalized_variant,2026-07-12T20:10:41+00:00
+cbb35708-70fc-5514-8cbd-96ece64fb2ad,da452b1d-917d-58e3-907f-b4c98c1dae7a,Amomum aculeatum Roxb.,amomum_aculeatum_roxb,synonym_variant,2026-07-12T20:10:41+00:00
+ddb23763-c73f-5817-aff1-33f81ab16677,da5da99d-7f62-5242-a5fd-afb5ec6d2975,Cassia javanica L.,cassia_javanica_l,normalized_variant,2026-07-12T20:10:40+00:00
+cd3175ec-1007-5ff6-a743-0c5dfe3b9af0,da6b2d83-f414-59d2-8402-00bbcb1014ce,Duranta erecta L.,duranta_erecta_l,normalized_variant,2026-07-12T20:10:41+00:00
+f87bfbc6-ed84-52b2-ad1a-6628b5c70988,da6b2d83-f414-59d2-8402-00bbcb1014ce,Duranta repens L.,duranta_repens_l,synonym_variant,2026-07-12T20:10:41+00:00
+561be320-cee9-5388-9201-08b8116d4c13,dab798a1-d486-5853-bc20-b3be0cbb2ba3,Alpinia galanga (L.) Willd.,alpinia_galanga_l_willd,normalized_variant,2026-07-12T20:10:40+00:00
+6b53f9c3-7ec8-5d00-a0d4-2e5f3ca4f687,db80ff24-2d40-53cb-b3c8-ca93c541a328,Digitalis purpurea L.,digitalis_purpurea_l,normalized_variant,2026-07-12T20:10:41+00:00
+e8068b8c-806d-55f0-87c9-500c06de0803,dbd102ec-bc98-5c24-ab80-073046e3ef96,Ouret lanata (L.) Kuntze,ouret_lanata_l_kuntze,normalized_variant,2026-07-12T20:10:41+00:00
+74332731-9644-5ad0-aff1-13b593586cb4,dbd102ec-bc98-5c24-ab80-073046e3ef96,Aerva lanata (L.) Juss. ex Schult.,aerva_lanata_l_juss_ex_schult,synonym_variant,2026-07-12T20:10:41+00:00
+180dcd32-2895-5af9-ac64-cff13ad08980,dc120051-3ff1-5033-88eb-9505b5efef08,Lansium domesticum Corrêa,lansium_domesticum_corr_a,normalized_variant,2026-07-12T20:10:41+00:00
+a5509981-f037-5614-bd97-1676aacb1ae5,dca2217e-d4f2-53cb-b082-24c58c20abd4,Melastoma malabathricum L.,melastoma_malabathricum_l,normalized_variant,2026-07-12T20:10:41+00:00
+343061f1-cf38-548b-91e2-fc53c47f67f0,de878003-fcd3-50c1-849b-f0c460a3ed1f,Emilia sonchifolia (L.) DC. ex Wight,emilia_sonchifolia_l_dc_ex_wight,normalized_variant,2026-07-12T20:10:41+00:00
+ffd071a7-e266-5334-a53a-94e1e1f62cac,de9351a4-4896-52e1-b1f5-cef9806ea92c,Neolitsea cassia (L.) Kosterm.,neolitsea_cassia_l_kosterm,normalized_variant,2026-07-12T20:10:41+00:00
+4b039f15-36b5-5537-8350-1d7f8c826322,de9351a4-4896-52e1-b1f5-cef9806ea92c,Cinnamomum cassia (L.) J.Presl,cinnamomum_cassia_l_j_presl,synonym_variant,2026-07-12T20:10:41+00:00
+49744e4b-810e-56ed-86b1-d00168737b33,ded4fc69-7c4a-5751-a164-4eb8c860b841,Sophora tomentosa L.,sophora_tomentosa_l,normalized_variant,2026-07-12T20:10:41+00:00
+0cf5622d-4ee4-500b-9bf6-dbfa82fa80a2,df4a70cf-3d5a-5bd8-a16d-51507153f867,Beilschmiedia madang (Blume) Blume,beilschmiedia_madang_blume_blume,normalized_variant,2026-07-12T20:10:40+00:00
+a0a70693-091c-5107-8f3c-b723c90dda14,df5a936f-4a6e-59ca-8195-401acc899c82,Ficus carica L.,ficus_carica_l,normalized_variant,2026-07-12T20:10:41+00:00
+88bef5d0-abb8-5422-9446-0c5e82c5098d,df9a1e4a-d71d-5ef9-a844-a00179cede85,Platycodon grandiflorus (Jacq.) A.DC.,platycodon_grandiflorus_jacq_a_dc,normalized_variant,2026-07-12T20:10:41+00:00
+87179010-c133-5e1e-9f58-700ecea6b46c,dfbae356-a5e3-5106-91d5-ddd248dda4b5,Phaseolus vulgaris L.,phaseolus_vulgaris_l,normalized_variant,2026-07-12T20:10:41+00:00
+4590abbb-ebf9-5711-992c-959fe8e1392c,e0d2a967-720d-5cf1-a709-4fad8be84402,Tectona grandis L.f.,tectona_grandis_l_f,normalized_variant,2026-07-12T20:10:41+00:00
+3d888586-38d4-572c-8104-f9006d1ec52d,e0eebf3a-d8a8-5f9e-83f0-e1ce7c13d71a,Solanum lycopersicum L.,solanum_lycopersicum_l,normalized_variant,2026-07-12T20:10:41+00:00
+e777916a-75a2-5054-8d30-a82940adf1e8,e0f458e4-5fb7-501d-b992-b06f066c5d03,Daucus carota L.,daucus_carota_l,normalized_variant,2026-07-12T20:10:40+00:00
+cd29a8b3-37f5-54bd-b801-c309aa5f627d,e104fc82-a836-50c5-9dbb-5546e38ee23e,Nigella sativa L.,nigella_sativa_l,normalized_variant,2026-07-12T20:10:41+00:00
+e66da091-b19d-5192-9c6f-c330c83c25a7,e10b66d9-86ce-5518-aaa2-6c822b89ac70,Sonchus arvensis L.,sonchus_arvensis_l,normalized_variant,2026-07-12T20:10:41+00:00
+007e856d-29b9-5f17-ba88-b0c82db2c9f4,e1f56081-6106-5129-a3e1-580e132bf3cb,Sesbania grandiflora (L.) Poir.,sesbania_grandiflora_l_poir,normalized_variant,2026-07-12T20:10:41+00:00
+c33e9f9f-e122-5f35-91b2-3fe4fb5bdc37,e23840c2-b967-5246-b462-80e00e73ae5e,Celosia argentea L.,celosia_argentea_l,normalized_variant,2026-07-12T20:10:40+00:00
+21b511b4-4a8f-50c4-b797-5eb9fc744f5b,e28caa16-d112-57d2-b6db-4430329784da,Cucumis sativus L.,cucumis_sativus_l,normalized_variant,2026-07-12T20:10:40+00:00
+8b6caf47-9325-5299-83c9-04d7d74f176a,e2d3573c-a835-5b22-8d7e-72a6ec69a84a,Nelumbo nucifera Gaertn.,nelumbo_nucifera_gaertn,normalized_variant,2026-07-12T20:10:41+00:00
+86c47f09-3b31-514f-9c4e-920fd794911c,e2f235f8-aa8d-549d-964b-2a798387e331,Goniothalamus macrophyllus (Blume) Hook.f. & Thomson,goniothalamus_macrophyllus_blume_hook_f_thomson,normalized_variant,2026-07-12T20:10:41+00:00
+4dcfbe6c-6ebd-5282-acb7-942d909ce633,e2fd167b-5007-5c8d-8437-43d5e9d869eb,Citrus × aurantium L.,citrus_aurantium_l,normalized_variant,2026-07-12T20:10:40+00:00
+35344748-3e6d-57fe-9b42-6e98ee9f865e,e2fd167b-5007-5c8d-8437-43d5e9d869eb,Citrus ×nobilis Lour.,citrus_nobilis_lour,synonym_variant,2026-07-12T20:10:40+00:00
+8f518872-8976-55af-b972-557e56b61b68,e342c05d-fcd6-5b98-9137-607e65c8aa78,Cinnamomum burmanni (Nees & T.Nees) Blume,cinnamomum_burmanni_nees_t_nees_blume,normalized_variant,2026-07-12T20:10:40+00:00
+fc2e1151-39ef-5809-b80e-34f9fa72c7f9,e38ca312-df7f-5ddf-9572-393117818bbc,Anredera cordifolia (Ten.) Steenis,anredera_cordifolia_ten_steenis,normalized_variant,2026-07-12T20:10:40+00:00
+5fbe4f82-54f2-5c94-8b50-daecf13fa723,e3a656be-2df9-5711-bd5b-5df103800e84,Hibiscus rosa-sinensis L.,hibiscus_rosa_sinensis_l,normalized_variant,2026-07-12T20:10:41+00:00
+a7a20ef3-e56a-51b1-86d0-25d9be09175a,e45c8eb1-1c30-5dfc-ba7a-31b6a43105dd,Ageratum houstonianum Mill.,ageratum_houstonianum_mill,normalized_variant,2026-07-12T20:10:40+00:00
+5dedecda-ea1b-5ce1-a9c2-38d0d44f79b1,e46de574-b105-5cbd-aaa5-038b9a4ea3b4,Tridax procumbens L.,tridax_procumbens_l,normalized_variant,2026-07-12T20:10:41+00:00
+1944373c-0abe-5f62-8db1-0670279e061d,e4eecaca-2f71-5c22-87d6-b1a4dbfaa645,Eleutherine bulbosa (Mill.) Urb.,eleutherine_bulbosa_mill_urb,normalized_variant,2026-07-12T20:10:41+00:00
+b18f9e61-adb7-5917-bfdf-982a17d3e628,e4eecaca-2f71-5c22-87d6-b1a4dbfaa645,Eleutherine americana (Aubl.) Merr. ex K.Heyne,eleutherine_americana_aubl_merr_ex_k_heyne,synonym_variant,2026-07-12T20:10:41+00:00
+9eb0790f-01fd-5f8b-b6ee-0ef7d42a4610,e87d4350-ce5a-50bc-a2fa-2fe7824ed070,Peperomia pellucida (L.) Kunth,peperomia_pellucida_l_kunth,normalized_variant,2026-07-12T20:10:41+00:00
+2586ed4b-fbba-5628-b6af-a60e3769ccb7,e95872e0-c0b5-5fe2-815a-34da82188a6c,Euphorbia hirta L.,euphorbia_hirta_l,normalized_variant,2026-07-12T20:10:41+00:00
+75ca530e-ec24-55c4-b588-18f131dae481,e96e6944-2ec3-5239-bb61-4888dfedf10a,Euphorbia pulcherrima Willd. ex Klotzsch,euphorbia_pulcherrima_willd_ex_klotzsch,normalized_variant,2026-07-12T20:10:41+00:00
+d616ec27-dc32-51d0-9642-0373b74d8c39,ea103730-c4b4-58c4-b58e-e30f9d5ba61a,Zephyranthes candida Herb.,zephyranthes_candida_herb,normalized_variant,2026-07-12T20:10:42+00:00
+8a781231-88f9-5029-a5f3-cd7c23a1e3d6,ea95036d-02a7-5466-8a8b-d74310f109ff,Strychnos ignatii Bergius,strychnos_ignatii_bergius,normalized_variant,2026-07-12T20:10:41+00:00
+082c3bbb-3cff-592a-bd15-8822088b124f,ec2ec3e2-8ba4-5570-96eb-b0106295f3b9,Excoecaria cochinchinensis Lour.,excoecaria_cochinchinensis_lour,normalized_variant,2026-07-12T20:10:41+00:00
+993f0b1c-6dfa-56a4-8beb-b4d742b5bbf7,ed7000e9-64c8-5ec0-bee7-cd4303ae7e49,Zea mays L.,zea_mays_l,normalized_variant,2026-07-12T20:10:42+00:00
+f6856169-934a-5465-b80c-e26ece687e26,edeb27f1-aaf8-55a0-a01c-cebc494034b1,Senna alexandrina var. alexandrina,senna_alexandrina_var_alexandrina,normalized_variant,2026-07-12T20:10:41+00:00
+c93c6f43-bae1-5fb5-96b4-2c94cf438b62,edeb27f1-aaf8-55a0-a01c-cebc494034b1,Cassia angustifolia Vahl,cassia_angustifolia_vahl,synonym_variant,2026-07-12T20:10:41+00:00
+111c96d9-15b9-5092-ac58-db2130a90767,ee58b85b-9803-5888-a95d-b826f6e063c1,Hibiscus sabdariffa L.,hibiscus_sabdariffa_l,normalized_variant,2026-07-12T20:10:41+00:00
+4d3fee94-e706-555a-b986-31cbe87a8044,eeb880ea-6aaa-5182-9d2e-667691adabe1,Zingiber purpureum Roscoe,zingiber_purpureum_roscoe,normalized_variant,2026-07-12T20:10:42+00:00
+62c99c90-b9d4-52b2-bb33-94ac4b7f1721,eeb880ea-6aaa-5182-9d2e-667691adabe1,Zingiber cassumunar Roxb.,zingiber_cassumunar_roxb,synonym_variant,2026-07-12T20:10:42+00:00
+ab1d3f52-15b6-5d5d-bebc-0eab946ada39,f0f8b0f9-18fc-5e3d-85c5-8216285aea27,Cymbopogon nardus (L.) Rendle,cymbopogon_nardus_l_rendle,normalized_variant,2026-07-12T20:10:40+00:00
+017517b5-4e29-545a-a044-c2db96d33c93,f16ce650-01b2-5d6d-ac4c-bcb37111e677,Cassytha filiformis L.,cassytha_filiformis_l,normalized_variant,2026-07-12T20:10:40+00:00
+7e467305-5492-514b-9318-d0aad9feac70,f1eae43b-78d9-5406-80e6-bec031f01e77,Caesalpinia major Brenan,caesalpinia_major_brenan,normalized_variant,2026-07-12T20:10:40+00:00
+b6434f17-ca82-5f15-99e2-c7fc733f01b1,f1ef47b5-d5f2-5b42-9c6b-157b895b1928,Pongamia pinnata (L.) Pierre,pongamia_pinnata_l_pierre,normalized_variant,2026-07-12T20:10:41+00:00
+9dfc1009-ca90-5dc3-958d-521affa802aa,f20a6769-8cdb-57b2-a977-cf1f180c97bf,Solanum nigrum L.,solanum_nigrum_l,normalized_variant,2026-07-12T20:10:41+00:00
+f039e152-ad15-5239-a933-bb3cfa62ccf4,f2880fa9-8ead-51f1-ac51-57becfb05448,Ocimum tenuiflorum L.,ocimum_tenuiflorum_l,normalized_variant,2026-07-12T20:10:41+00:00
+a734fff7-449c-52cd-8289-c7466d26561f,f2880fa9-8ead-51f1-ac51-57becfb05448,Ocimum sanctum L.,ocimum_sanctum_l,synonym_variant,2026-07-12T20:10:41+00:00
+93c2b184-d45d-539a-acfb-65ed4bc0da75,f2a5f8f4-943c-5649-9571-21911257ce21,Mimusops elengi L.,mimusops_elengi_l,normalized_variant,2026-07-12T20:10:41+00:00
+dd273dfc-81bd-53c2-ab11-4f2e7c17942f,f31e3be3-f1ba-502c-9c13-862c80eabddc,Datura stramonium var. tatula (L.) Torr.,datura_stramonium_var_tatula_l_torr,normalized_variant,2026-07-12T20:10:40+00:00
+f3566f5f-e69e-58a2-b813-e08e78c5ffd3,f31e3be3-f1ba-502c-9c13-862c80eabddc,Datura tatula L.,datura_tatula_l,synonym_variant,2026-07-12T20:10:40+00:00
+4a0e9fa0-1dd3-51f1-9371-8a4876be7926,f3a26e3e-8cf5-52bb-8fb9-74f887a6cd7a,Curcuma mangga Valeton & Zijp,curcuma_mangga_valeton_zijp,normalized_variant,2026-07-12T20:10:40+00:00
+a344bf16-4d5b-5f25-874b-8b09ae488001,f3a47d42-1aa2-52d3-863b-8f801b909e39,Stephania japonica (Thunb.) Miers,stephania_japonica_thunb_miers,normalized_variant,2026-07-12T20:10:41+00:00
+5517c42d-2866-5d37-bb40-23824ef125db,f3c4a5dd-8030-5798-b24d-9f1c41a9d151,Camellia sinensis (L.) Kuntze,camellia_sinensis_l_kuntze,normalized_variant,2026-07-12T20:10:40+00:00
+70b13745-7275-5c23-9566-db4cbdf24982,f3c4a5dd-8030-5798-b24d-9f1c41a9d151,Thea sinensis L.,thea_sinensis_l,synonym_variant,2026-07-12T20:10:40+00:00
+84122388-085d-51e5-b38f-9b6194e05c00,f3fb6e71-7123-57be-a9ce-b92a0a9d6433,Ruta angustifolia Pers.,ruta_angustifolia_pers,normalized_variant,2026-07-12T20:10:41+00:00
+6cf267e5-0e2b-585c-8387-0f77df96655c,f4acff8d-05f4-511b-b9e2-646dac5eec7c,Intsia bijuga (Colebr.) Kuntze,intsia_bijuga_colebr_kuntze,normalized_variant,2026-07-12T20:10:41+00:00
+fb2e51f6-7371-5b94-b4e7-c069fd0c7016,f4b81201-b781-50fb-b2ab-9be58e892f39,Magnolia champaca (L.) Baill. ex Pierre,magnolia_champaca_l_baill_ex_pierre,normalized_variant,2026-07-12T20:10:41+00:00
+f141dae5-69fa-5ae9-892d-7efa975fb35b,f4b81201-b781-50fb-b2ab-9be58e892f39,Michelia champaca L.,michelia_champaca_l,synonym_variant,2026-07-12T20:10:41+00:00
+e396f077-6dba-51a6-bbd4-557e22249489,f580fbea-c00f-5e4e-be19-3ba6641cb1fa,Caesalpinia pulcherrima (L.) Sw.,caesalpinia_pulcherrima_l_sw,normalized_variant,2026-07-12T20:10:40+00:00
+09e28edc-7473-5d9a-98e3-fcbeffa67be1,f8427ff7-b24c-5cb0-8f07-e7ab5ab3f9ef,Calotropis gigantea (L.) W.T.Aiton,calotropis_gigantea_l_w_t_aiton,normalized_variant,2026-07-12T20:10:40+00:00
+526c5cc7-cbe0-5ffd-815a-f97cacb21ef6,f979493f-43ed-5b94-a3f0-9c62fb0b2f9e,Citrus maxima (Burm.) Merr.,citrus_maxima_burm_merr,normalized_variant,2026-07-12T20:10:40+00:00
+2356a7b9-4d56-54cc-9d44-d848acbcf392,f9d33b87-1b71-5095-8772-5eca6e3c8715,Asparagus cochinchinensis (Lour.) Merr.,asparagus_cochinchinensis_lour_merr,normalized_variant,2026-07-12T20:10:40+00:00
+d873109a-02d7-5aa6-a0a1-371680dfea06,fa097dca-198a-5c8e-a5d8-9e9487875075,Iris domestica (L.) Goldblatt & Mabb.,iris_domestica_l_goldblatt_mabb,normalized_variant,2026-07-12T20:10:41+00:00
+88cf6f72-e9ac-52c5-8ed3-77dac238b4fb,fa097dca-198a-5c8e-a5d8-9e9487875075,Belamcanda chinensis (L.) DC.,belamcanda_chinensis_l_dc,synonym_variant,2026-07-12T20:10:41+00:00
+3c15a9e8-18bd-5f76-a958-842ac116ac37,fa92b4f4-2a20-5ced-8684-f9680dded225,Phyllanthus amarus Schumach. & Thonn.,phyllanthus_amarus_schumach_thonn,normalized_variant,2026-07-12T20:10:41+00:00
+69149e99-ff9e-537e-b311-006b512a41f9,fad237ac-de9a-5ea0-8719-6c78a09130c0,Tagetes erecta L.,tagetes_erecta_l,normalized_variant,2026-07-12T20:10:41+00:00
+4c3bfbbe-bdec-5a05-b832-7b8c684fb9ce,fb02788b-a2d7-5935-8a5a-487082c8f634,Ageratum conyzoides L.,ageratum_conyzoides_l,normalized_variant,2026-07-12T20:10:40+00:00
+f89da1df-e033-5886-a165-cc1e2d47edf2,fb653648-7594-5f5f-a4d3-efaad919ac0f,Dysoxylum acutangulum Miq.,dysoxylum_acutangulum_miq,normalized_variant,2026-07-12T20:10:41+00:00
+0a031206-6ab4-5b35-9c0b-eb0ddb03f982,fba910fb-ae83-59f9-b550-5786ef2a2f81,Orthosiphon aristatus var. aristatus,orthosiphon_aristatus_var_aristatus,normalized_variant,2026-07-12T20:10:41+00:00
+1c6db679-73d6-508b-b494-8de8314c8a99,fba910fb-ae83-59f9-b550-5786ef2a2f81,"Orthosiphon spicatus (Thunb.) Backer, Bakh.f. & Steenis",orthosiphon_spicatus_thunb_backer_bakh_f_steenis,synonym_variant,2026-07-12T20:10:41+00:00
+1b02a007-5ad8-5b2e-9b8b-abba64c2b177,fba910fb-ae83-59f9-b550-5786ef2a2f81,Orthosiphon stamineus Benth.,orthosiphon_stamineus_benth,synonym_variant,2026-07-12T20:10:41+00:00
+f35e7b18-e4b8-54a4-8872-9a7c2828f60e,fbee525b-bdd7-509d-a45c-6c106896c456,Alpinia officinarum Hance,alpinia_officinarum_hance,normalized_variant,2026-07-12T20:10:40+00:00
+2e11b3d1-4f97-5826-87a0-8bdd5f577b19,fbf093e8-9305-52ea-8d99-0c7aef404821,Indigofera tinctoria L.,indigofera_tinctoria_l,normalized_variant,2026-07-12T20:10:41+00:00
+043499e4-63c0-523b-b0e1-2e86227addd9,fcdef5f2-39d2-51ff-94f1-2285c31e98d2,Canna indica L.,canna_indica_l,normalized_variant,2026-07-12T20:10:40+00:00
+2ab50d53-9db7-562b-b759-dd3bee448995,fcdef5f2-39d2-51ff-94f1-2285c31e98d2,Canna edulis Ker Gawl.,canna_edulis_ker_gawl,synonym_variant,2026-07-12T20:10:40+00:00
+3d3df6b9-2f44-5d30-be1d-df292d5a1777,fd3502a4-775b-5aa2-99ec-914e733b3ba9,Artocarpus altilis (Parkinson) Fosberg,artocarpus_altilis_parkinson_fosberg,normalized_variant,2026-07-12T20:10:40+00:00
+2364b3d2-54bd-5c6e-8b28-888efbc391c0,fd3502a4-775b-5aa2-99ec-914e733b3ba9,Artocarpus communis J.R.Forst. & G.Forst.,artocarpus_communis_j_r_forst_g_forst,synonym_variant,2026-07-12T20:10:40+00:00
+dfd2869a-dcd5-5ad4-a7f0-3d0c8c62f6fb,fe116ca4-8edf-538b-b133-0c866d590d09,Pandanus amaryllifolius Roxb. ex Lindl.,pandanus_amaryllifolius_roxb_ex_lindl,normalized_variant,2026-07-12T20:10:41+00:00
+e2e8f7a1-98fe-51c6-9b22-b39d0a9814e9,fe122d47-2481-578c-b6d4-7cf88c9a528b,Agathis dammara (Lamb.) Rich. & A.Rich.,agathis_dammara_lamb_rich_a_rich,normalized_variant,2026-07-12T20:10:40+00:00
+f4a5a1dd-d545-5d3a-a2ae-4ff1872c28ad,ff08b84e-971a-5b0a-932c-bf1b9792e416,Terminalia catappa L.,terminalia_catappa_l,normalized_variant,2026-07-12T20:10:41+00:00
+203a1b17-1dc5-51bc-97b9-96ed557feeb4,ff80e7c6-fd8d-53e1-846b-528f01e4363b,Glochidion rubrum Blume,glochidion_rubrum_blume,normalized_variant,2026-07-12T20:10:41+00:00

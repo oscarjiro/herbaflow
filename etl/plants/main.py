@@ -23,6 +23,7 @@ STAGE_KEYS = [
     "normalize_taxonomy",
     "match_gbif",
     "build_canonical_part1",
+    "resolve_manual_reviews",
     "build_canonical_part2",
     "validate",
     "export",
@@ -99,6 +100,12 @@ def build_cmd(step_key: str, cfg: dict) -> list[str]:
             "--source-name",
             src["name"],
         ]
+    elif step_key == "resolve_manual_reviews":
+        # Fold the curator's manual review decisions (manual_review_decisions.csv)
+        # into manually_accepted_review_plants.csv so build_canonical_part2 can
+        # merge them. The script self-configures from settings.yml; it no-ops
+        # gracefully when no decisions file is present.
+        pass
     elif step_key == "build_canonical_part2":
         cmd += [
             "--input",

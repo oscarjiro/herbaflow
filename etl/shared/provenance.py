@@ -14,6 +14,8 @@ stdlib-only (no pandas) so it is importable from any step or the backend twin.
 """
 from __future__ import annotations
 
+from urllib.parse import quote
+
 
 def _clean(value: object) -> str:
     return str(value or "").strip()
@@ -65,6 +67,22 @@ def opentargets_evidence_url(ensembl_id: object, efo_id: object) -> str | None:
 def knapsack_metabolite_url(c_id: object) -> str | None:
     cid = _clean(c_id)
     return f"http://www.knapsackfamily.com/knapsack_core/information.php?word={cid}" if cid else None
+
+
+def knapsack_organism_url(organism: object) -> str | None:
+    """KNApSAcK organism (species) result page listing all metabolites of a species.
+
+    This is the authoritative source page for a plant-compound evidence link: the
+    KNApSAcK organism search groups every compound recorded for that organism. The
+    organism/species name is URL-encoded (``quote`` percent-encodes spaces and
+    Unicode) and passed to the ``result.php?sname=organism&word=`` search endpoint.
+    """
+    name = _clean(organism)
+    return (
+        f"https://www.knapsackfamily.com/knapsack_core/result.php?sname=organism&word={quote(name)}"
+        if name
+        else None
+    )
 
 
 _DISEASE_ONTOLOGY = {

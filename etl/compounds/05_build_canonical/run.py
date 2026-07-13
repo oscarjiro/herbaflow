@@ -71,7 +71,12 @@ from compounds.utils import (
     compound_id_from_key as make_compound_id,
 )
 from shared.identity import plant_compound_id
-from shared.provenance import chembl_compound_url, knapsack_metabolite_url, pubchem_compound_url
+from shared.provenance import (
+    chembl_compound_url,
+    knapsack_metabolite_url,
+    knapsack_organism_url,
+    pubchem_compound_url,
+)
 from shared.utils import ETL_ROOT, ensure_dir, make_run_id, normalize_whitespace
 from shared.utils import load_settings as shared_load_settings
 
@@ -151,6 +156,7 @@ ENRICH_RESULT_COLUMNS = [
     "enrichment_confidence",
     "enrichment_status",
     "match_strategy",
+    "evidence_type",
     "match_reason",
     "match_rank",
     "match_count",
@@ -233,6 +239,9 @@ COMPOUNDS_COLUMNS = [
     "canonical_status",
     "canonical_strategy",
     "canonical_reason",
+    "match_strategy",
+    "evidence_type",
+    "enrichment_confidence",
     "evidence_count",
     "plant_count",
 ]
@@ -729,7 +738,6 @@ def support_profile(
     candidate: Dict[str, str], member_rows: List[Dict[str, Any]]
 ) -> Tuple[float, str]:
     enr_status = normalize_whitespace(candidate.get("enrichment_status", "")).lower()
-    conf = parse_float(candidate.get("enrichment_confidence", "")) or 0.0
 
     inchi = candidate_inchi(candidate)
     pubchem_cid = candidate_pubchem(candidate)
@@ -828,66 +836,66 @@ def support_profile(
     return score, ";".join(reasons)
 
 
+def identity_view_for_candidate(
+    candidate: Dict[str, str], member_rows: List[Dict[str, Any]]
+) -> Dict[str, str]:
+    """Merge enrichment structure fields with the raw candidate identity.
+
+    The corroboration gate in enrichment (04) leaves the structure fields
+    (inchi_key / pubchem_cid / chembl_id / molecular_formula / names) BLANK when a
+    resolved structure is rejected, so an uncorroborated compound must fall back to
+    its raw KNApSAcK identity — CAS, then name+formula, then name, then formula —
+    never a wrong InChIKey. This builds the dict that ``compound_canonical_key``
+    (shared.identity) cascades over: the enrichment structure wins when present
+    (accepted), otherwise the member-consensus CAS/name/formula drive the key. No
+    structure is ever invented.
+    """
+    view = dict(candidate)
+    view["representative_cas_id"] = candidate_cas(candidate, member_rows)
+    view["representative_formula"] = candidate_formula(candidate, member_rows)
+    view["representative_name"] = most_common_nonempty(
+        r.get("normalized_metabolite_name") or r.get("metabolite") or ""
+        for r in member_rows
+    )
+    return view
+
+
 def decide_canonical_status(
     candidate: Dict[str, str], member_rows: List[Dict[str, Any]], settings: Settings
 ) -> Dict[str, Any]:
     enr_status = normalize_whitespace(candidate.get("enrichment_status", "")).lower()
     conf = parse_float(candidate.get("enrichment_confidence", "")) or 0.0
-    canonical_key, canonical_strategy = canonical_identity_for_candidate(candidate)
+    canonical_key, canonical_strategy = canonical_identity_for_candidate(
+        identity_view_for_candidate(candidate, member_rows)
+    )
     score, score_reason = support_profile(candidate, member_rows)
 
+    # A structure id (inchi_key/pubchem/chembl) is only ever present when enrichment
+    # ACCEPTED it under the corroboration gate, so "has a structure" == "structure
+    # was corroborated". Everything else is a name_formula/name/cas/formula identity
+    # and is shipped honestly as provisional (never salvaged into a fake structure,
+    # never dropped for lacking one). No arbitrary score/string tiebreak.
     strong_identity = canonical_strategy in {"inchi_key", "pubchem_cid", "chembl_id"}
-    medium_identity = canonical_strategy in {"cas_id", "name_formula"}
-    weak_identity = canonical_strategy in {"name", "formula"}
     source_priority = f"{enr_status}:{canonical_strategy}"
-
-    canonical_status = "review"
-    canonical_reason = "insufficient_identity_support"
 
     if not canonical_key:
         canonical_status = "unresolved"
         canonical_reason = "missing_canonical_key"
+    elif (
+        strong_identity
+        and enr_status == "matched"
+        and conf >= settings.high_confidence_threshold
+    ):
+        canonical_status = "accepted"
+        canonical_reason = "structurally_corroborated"
+    elif strong_identity:
+        # Structure present but not a high-confidence match: defensive path — the
+        # 04 gate should make this rare. Keep it, but do not claim it as accepted.
+        canonical_status = "provisional"
+        canonical_reason = "structure_present_uncorroborated"
     else:
-        if (
-            strong_identity
-            and conf >= max(settings.high_confidence_threshold, 0.80)
-            and score >= 0.55
-        ):
-            canonical_status = "accepted"
-            canonical_reason = "strong_identity_high_confidence"
-        elif strong_identity and conf >= 0.55 and score >= 0.45:
-            canonical_status = "provisional"
-            canonical_reason = f"{enr_status}_strong_identity_salvage"
-        elif (
-            medium_identity
-            and conf >= settings.medium_confidence_threshold
-            and score >= 0.55
-        ):
-            canonical_status = "provisional"
-            canonical_reason = f"{enr_status}_supportive_chemistry"
-        elif weak_identity and conf >= 0.80 and score >= 0.72:
-            canonical_status = "provisional"
-            canonical_reason = f"{enr_status}_weak_identity_but_consistent"
-        elif (
-            enr_status in {"ambiguous", "conflict"}
-            and score >= 0.42
-            and (strong_identity or medium_identity)
-        ):
-            canonical_status = "provisional"
-            canonical_reason = f"{enr_status}_deterministic_salvage"
-        elif (
-            enr_status == "review"
-            and score >= 0.45
-            and (strong_identity or medium_identity)
-        ):
-            canonical_status = "provisional"
-            canonical_reason = "review_salvageable_identity"
-        elif score < 0.30:
-            canonical_status = "unresolved"
-            canonical_reason = "too_weak_or_contradictory"
-        else:
-            canonical_status = "review"
-            canonical_reason = f"{enr_status}_not_strong_enough"
+        canonical_status = "provisional"
+        canonical_reason = f"{canonical_strategy or 'weak'}_identity_no_structure"
 
     return {
         "canonical_key": canonical_key,
@@ -1498,6 +1506,13 @@ def build_canonical_tables(
                 "canonical_reason": combined_group_reason(
                     best_entry, entries_sorted, selected_status
                 ),
+                "match_strategy": normalize_whitespace(
+                    best_candidate.get("match_strategy", "")
+                ),
+                "evidence_type": normalize_whitespace(
+                    best_candidate.get("evidence_type", "")
+                ),
+                "enrichment_confidence": f"{best_conf:.4f}",
                 "evidence_count": str(evidence_count),
                 "plant_count": str(plant_count),
             }
@@ -1539,6 +1554,7 @@ def build_canonical_tables(
             if not canonical_plant_id:
                 continue
             raw_compound_id = normalize_whitespace(member.get("c_id", ""))
+            organism = normalize_whitespace(member.get("organism", ""))
             bridge_key = (canonical_plant_id, compound_id)
             if bridge_key in bridge_seen:
                 continue
@@ -1553,8 +1569,13 @@ def build_canonical_tables(
                     "source_name": normalize_whitespace(
                         member.get("source_name", source_name)
                     ),
+                    # A plant-compound edge's authoritative source is the KNApSAcK
+                    # organism page (it groups every metabolite of that species).
+                    # Fall back to the per-metabolite page, then the base URL, when
+                    # the organism string is absent.
                     "source_url": (
-                        knapsack_metabolite_url(raw_compound_id)
+                        knapsack_organism_url(organism)
+                        or knapsack_metabolite_url(raw_compound_id)
                         or normalize_whitespace(member.get("source_url", settings.source_url))
                     ),
                     "retrieved_at": normalize_whitespace(

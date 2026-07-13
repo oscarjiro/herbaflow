@@ -13,7 +13,7 @@ knapsack/ → plants/ → compounds/ → diseases/ → disease_targets/
 | Module | Stages | Purpose | Key Outputs |
 |---|---|---|---|
 | `knapsack/` | 1 | Scrape KNApSAcK Indonesia | plants.csv, plants_compounds.csv |
-| `plants/` | 6 | Canonicalize plant taxonomy via GBIF | plants.csv, plant_aliases.csv |
+| `plants/` | 7 | Canonicalize plant taxonomy via GBIF | plants.csv, plant_aliases.csv |
 | `compounds/` | 7 | Canonicalize metabolites via PubChem/ChEMBL | compounds.csv, plant_compounds.csv |
 | `diseases/` | 5 | Map diseases to DO/MeSH ontologies | diseases.csv, disease_aliases.csv |
 | `disease_targets/` | 5 | Fetch protein targets via Open Targets API | targets.csv, target_aliases.csv, disease_targets.csv |
@@ -26,7 +26,7 @@ etl/
 │   ├── settings.yml    # Cross-pipeline logging and runtime defaults
 │   └── utils.py        # ETL_ROOT, load_settings, shared helpers
 ├── knapsack/           # Scraper — single main.py
-├── plants/             # 6-stage plant taxonomy pipeline
+├── plants/             # 7-stage plant taxonomy pipeline
 ├── compounds/          # 7-stage compound canonicalization pipeline
 ├── diseases/           # 5-stage disease ontology pipeline
 ├── disease_targets/    # 5-stage target association pipeline (Open Targets API)
@@ -73,8 +73,7 @@ Run a single stage: `python etl/{module}/main.py --start 3 --end 3`
 
 - All Python files: `snake_case`
 - Stage directories: `NN_step_name/` (number-prefixed for ordering)
-- Step scripts: `run.py` (one per stage). Exception: `04_build_canonical/` in plants uses `run_part1.py` + `run_part2.py` (two substeps)
-- Manual operator tools: descriptive name, e.g. `resolve_manual_reviews.py`
+- Step scripts: `run.py` (one per stage). Exception: `04_build_canonical/` in plants uses `run_part1.py` + `run_part2.py` (two substeps) plus `resolve_manual_reviews.py`, an ordered stage that runs between them
 
 ## Settings Schema
 
@@ -159,9 +158,8 @@ No script uses CWD-relative paths or hardcoded absolute paths.
 
 ## Do Not Touch
 
-- `out/` directories — written by pipeline scripts only
+- `out/` directories — written by pipeline scripts only (exception: `plants/04_build_canonical/out/manual_review_decisions.csv` is a curator-authored input, read by the resolve stage)
 - `.venv/` under `etl/`
-- `plants/04_build_canonical/resolve_manual_reviews.py` — manual operator tool, not part of the automated pipeline
 
 ## Python Dependencies
 

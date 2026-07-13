@@ -1,479 +1,492 @@
 plant_id,raw_plant_id,canonical_key,canonical_scientific_name,family_name,source_name,source_url,retrieved_at
-ba321e5b-4b13-5b40-b65d-1b0a56d04401,258,gbif:10045372,Abelmoschus moschatus subsp. moschatus,Malvaceae,KNApSAcK World,https://www.gbif.org/species/10045372,2026-06-02T16:45:51+00:00
-33b527b3-6d04-503c-9f82-5ead3fd9421a,267,gbif:10334868,Selenicereus undatus (Haw.) D.R.Hunt,Cactaceae,KNApSAcK World,https://www.gbif.org/species/10334868,2026-06-02T16:45:52+00:00
-a561d36a-7306-5e13-ba1f-4fb504a27db3,179,gbif:10722283,Grona styracifolia (Osbeck) H.Ohashi & K.Ohashi,Fabaceae,KNApSAcK World,https://www.gbif.org/species/10722283,2026-06-02T16:45:51+00:00
-48be323a-ce4b-5e52-8b16-e44e37d5ea1f,203,gbif:10769463,"Equisetum debile Roxb. ex Wall., 1829",Equisetaceae,KNApSAcK World,https://www.gbif.org/species/10769463,2026-06-02T16:45:51+00:00
-dbd102ec-bc98-5c24-ab80-073046e3ef96,12,gbif:10974033,Ouret lanata (L.) Kuntze,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/10974033,2026-06-02T16:45:52+00:00
-da452b1d-917d-58e3-907f-b4c98c1dae7a,34,gbif:11037528,Meistera aculeata (Roxb.) Škorničk. & M.F.Newman,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/11037528,2026-06-02T16:45:51+00:00
-f1eae43b-78d9-5406-80e6-bec031f01e77,84,gbif:11131378,Caesalpinia major Brenan,Fabaceae,KNApSAcK World,https://www.gbif.org/species/11131378,2026-06-02T16:45:51+00:00
-bdde9185-f5f6-5777-863d-aaf59a3898a1,177,gbif:11440699,"Desmodium gangeticum Puri, 1951",Fabaceae,KNApSAcK World,https://www.gbif.org/species/11440699,2026-06-02T16:45:51+00:00
-b22d8f89-38be-5419-b05c-3f000999a611,419,gbif:2546050,Fabisporus sanguineus (L.) Zmitr.,Polyporaceae,KNApSAcK World,https://www.gbif.org/species/2546050,2026-06-02T16:45:51+00:00
-dce3b814-68cd-5df4-a8e0-83ff4a2abee4,234,gbif:2549730,Ganoderma lucidum (Curtis) P.Karst.,Polyporaceae,KNApSAcK World,https://www.gbif.org/species/2549730,2026-06-02T16:45:51+00:00
-7cdfdfc7-d2a7-5273-9acc-c946f0675d70,245,gbif:2653133,Gnetum gnemon L.,Gnetaceae,KNApSAcK World,https://www.gbif.org/species/2653133,2026-06-02T16:45:51+00:00
-35b7c4bb-1cc9-593f-b325-1a73b927e4e5,163,gbif:2683217,Cycas revoluta Thunb.,Cycadaceae,KNApSAcK World,https://www.gbif.org/species/2683217,2026-06-02T16:45:51+00:00
-b89b9db2-bd4f-597f-aed6-3b7accfe029a,402,gbif:2684855,Platycladus orientalis (L.) Franco,Cupressaceae,KNApSAcK World,https://www.gbif.org/species/2684855,2026-06-02T16:45:52+00:00
-d95dc1a7-a51a-5e58-a778-0a4890fc7f2f,239,gbif:2687885,Ginkgo biloba L.,Ginkgoaceae,KNApSAcK World,https://www.gbif.org/species/2687885,2026-06-02T16:45:51+00:00
-384a8fa5-2563-55d9-92d8-bf83d7683747,365,gbif:2703459,Oryza sativa L.,Poaceae,KNApSAcK World,https://www.gbif.org/species/2703459,2026-06-02T16:45:52+00:00
-4e11acfe-b176-580d-973f-c9d1965471a7,441,gbif:2703912,Saccharum officinarum L.,Poaceae,KNApSAcK World,https://www.gbif.org/species/2703912,2026-06-02T16:45:52+00:00
-f0f8b0f9-18fc-5e3d-85c5-8216285aea27,166,gbif:2705267,Cymbopogon nardus (L.) Rendle,Poaceae,KNApSAcK World,https://www.gbif.org/species/2705267,2026-06-02T16:45:51+00:00
-bac11d3d-45c1-5f6b-93ee-b5b7d6658bc4,165,gbif:2705275,Cymbopogon citratus (DC.) Stapf,Poaceae,KNApSAcK World,https://www.gbif.org/species/2705275,2026-06-02T16:45:51+00:00
-1e1b00de-1138-50ee-bd98-d20ad26bcb0a,141,gbif:2706301,Coix lacryma-jobi L.,Poaceae,KNApSAcK World,https://www.gbif.org/species/2706301,2026-06-02T16:45:51+00:00
-6e03fa79-16e8-5066-9e39-8ce174b861b3,168,gbif:2714818,Cyperus rotundus L.,Cyperaceae,KNApSAcK World,https://www.gbif.org/species/2714818,2026-06-02T16:45:51+00:00
-c928714c-d471-5533-93b1-1c0f34957757,167,gbif:2715729,Cyperus iria L.,Cyperaceae,KNApSAcK World,https://www.gbif.org/species/2715729,2026-06-02T16:45:51+00:00
-3f362466-dfe7-5b86-9cfc-49cf8e0b065b,329,gbif:2733781,Metroxylon sagu Rottb.,Arecaceae,KNApSAcK World,https://www.gbif.org/species/2733781,2026-06-02T16:45:51+00:00
-87cd29ae-d99e-541c-a507-8da019a172c2,78,gbif:2733934,Borassus flabellifer L.,Arecaceae,KNApSAcK World,https://www.gbif.org/species/2733934,2026-06-02T16:45:51+00:00
-8e4e6851-0342-5695-a2e3-3ee680b9ef18,137,gbif:2735117,Cocos nucifera L.,Arecaceae,KNApSAcK World,https://www.gbif.org/species/2735117,2026-06-02T16:45:51+00:00
-1b5fd7ac-4941-56c4-af2f-d6735f37c9e6,47,gbif:2736531,Areca catechu L.,Arecaceae,KNApSAcK World,https://www.gbif.org/species/2736531,2026-06-02T16:45:51+00:00
-9f113392-c9da-5edd-af63-a1f323c112e5,241,gbif:2740024,Gloriosa superba L.,Colchicaceae,KNApSAcK World,https://www.gbif.org/species/2740024,2026-06-02T16:45:51+00:00
-37f8783d-72d2-5ce3-bca1-091d2c989bed,149,gbif:2747430,Crocus sativus L.,Iridaceae,KNApSAcK World,https://www.gbif.org/species/2747430,2026-06-02T16:45:51+00:00
-e4eecaca-2f71-5c22-87d6-b1a4dbfaa645,199,gbif:2749556,Eleutherine bulbosa (Mill.) Urb.,Iridaceae,KNApSAcK World,https://www.gbif.org/species/2749556,2026-06-02T16:45:51+00:00
-1ae12ba1-d08e-5629-9c80-09f65b518712,182,gbif:2755784,Dioscorea hispida Dennst.,Dioscoreaceae,KNApSAcK World,https://www.gbif.org/species/2755784,2026-06-02T16:45:51+00:00
-3d1bc6a8-1345-590c-bbd6-4306c57beba8,534,gbif:2757108,Zingiber zerumbet (L.) Roscoe ex Sm.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757108,2026-06-02T16:45:52+00:00
-eeb880ea-6aaa-5182-9d2e-667691adabe1,532,gbif:2757204,Zingiber purpureum Roscoe,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757204,2026-06-02T16:45:52+00:00
-6a811452-0eb3-5bdf-8f21-fb79b6b73361,533,gbif:2757280,Zingiber officinale Roscoe,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757280,2026-06-02T16:45:52+00:00
-9045151f-c55b-5859-b030-a23b9e4e07d3,162,gbif:2757545,Curcuma zedoaria (Christm.) Roscoe,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757545,2026-06-02T16:45:51+00:00
-4817afd9-0ab7-5252-ad35-920771f21a52,161,gbif:2757547,Curcuma zanthorrhiza Roxb.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757547,2026-06-02T16:45:51+00:00
-0de0e5d0-e509-544b-b284-628244ac66dd,156,gbif:2757572,Curcuma heyneana Valeton & Zijp,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757572,2026-06-02T16:45:51+00:00
-59015732-a77d-5cb8-9e12-fedf9538b23d,157,gbif:2757624,Curcuma longa L.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757624,2026-06-02T16:45:51+00:00
-76d675cb-5968-5870-ad50-5d7c01adfadb,154,gbif:2757635,Curcuma aeruginosa Roxb.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757635,2026-06-02T16:45:51+00:00
-f3a26e3e-8cf5-52bb-8fb9-74f887a6cd7a,158,gbif:2757639,Curcuma mangga Valeton & Zijp,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757639,2026-06-02T16:45:51+00:00
-01f6e126-03d2-5370-84d4-64f8fcf12f1d,77,gbif:2758480,Boesenbergia rotunda (L.) Mansf.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2758480,2026-06-02T16:45:51+00:00
-d50930be-8d33-56fb-9350-c39eb62194b3,198,gbif:2759871,Elettaria cardamomum (L.) Maton,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2759871,2026-06-02T16:45:51+00:00
-b7c3acc3-f7ce-593a-a0ff-309e34a3b4bd,346,gbif:2762752,Musa × paradisiaca L.,Musaceae,KNApSAcK World,https://www.gbif.org/species/2762752,2026-06-02T16:45:52+00:00
-12efbb3b-294b-590a-9a72-6b074dd9cf2e,193,gbif:2765942,Pontederia crassipes Mart.,Pontederiaceae,KNApSAcK World,https://www.gbif.org/species/2765942,2026-06-02T16:45:52+00:00
-f9d33b87-1b71-5095-8772-5eca6e3c8715,56,gbif:2768772,Asparagus cochinchinensis (Lour.) Merr.,Asparagaceae,KNApSAcK World,https://www.gbif.org/species/2768772,2026-06-02T16:45:51+00:00
-409c5ae5-226b-5cb5-b859-1339e1ebac3e,360,gbif:2774158,Ophiopogon japonicus (Thunb.) Ker Gawl.,Asparagaceae,KNApSAcK World,https://www.gbif.org/species/2774158,2026-06-02T16:45:52+00:00
-af283b6d-64da-5b43-8832-6fe17728a4c7,26,gbif:2777724,Aloe vera (L.) Burm.f.,Asphodelaceae,KNApSAcK World,https://www.gbif.org/species/2777724,2026-06-02T16:45:51+00:00
-30e55351-849a-53ad-b6f0-be441a42cd1d,518,gbif:2803398,Vanilla planifolia Andrews,Orchidaceae,KNApSAcK World,https://www.gbif.org/species/2803398,2026-06-02T16:45:52+00:00
-9a824a48-25db-561a-9282-b60925c14356,148,gbif:2853796,Crinum asiaticum L.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2853796,2026-06-02T16:45:51+00:00
-a628cf0c-a603-596e-8b61-a08c6b9751b4,24,gbif:2856297,Allium tuberosum Rottler ex Spreng.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2856297,2026-06-02T16:45:51+00:00
-61a98913-6049-5212-8482-2dc81251b4dd,21,gbif:2856307,Allium chinense G.Don,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2856307,2026-06-02T16:45:51+00:00
-155a3638-b4de-5556-809a-4cc137946db6,22,gbif:2856504,Allium fistulosum L.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2856504,2026-06-02T16:45:51+00:00
-49061609-9ae6-568a-a985-cd7300ccd76b,23,gbif:2856681,Allium sativum L.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2856681,2026-06-02T16:45:51+00:00
-598ec78f-d280-5fcc-b8bb-c2acc0957374,20,gbif:2857697,Allium cepa L.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2857697,2026-06-02T16:45:51+00:00
-ea103730-c4b4-58c4-b58e-e30f9d5ba61a,530,gbif:2859976,Zephyranthes candida Herb.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2859976,2026-06-02T16:45:52+00:00
-cdc786c3-8bca-5b99-8e5a-e341e9f5ef1b,263,gbif:2868708,Homalomena occulta (Lour.) Schott,Araceae,KNApSAcK World,https://www.gbif.org/species/2868708,2026-06-02T16:45:51+00:00
-a92ff767-3d00-527f-97aa-c6d17c9dd1fb,10,gbif:2873769,Acorus calamus L.,Acoraceae,KNApSAcK World,https://www.gbif.org/species/2873769,2026-06-02T16:45:51+00:00
-1a2a2f3c-2693-533b-afe1-5b18300a0e89,376,gbif:2874211,Passiflora foetida L.,Passifloraceae,KNApSAcK World,https://www.gbif.org/species/2874211,2026-06-02T16:45:52+00:00
-a02fd890-c756-5c36-8d4f-67efa3fea396,98,gbif:2874484,Carica papaya L.,Caricaceae,KNApSAcK World,https://www.gbif.org/species/2874484,2026-06-02T16:45:51+00:00
-7c03fa34-7db4-58f6-8198-9b1f52eeaa9d,70,gbif:2874524,Benincasa hispida (Thunb.) Cogn.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874524,2026-06-02T16:45:51+00:00
-e28caa16-d112-57d2-b6db-4430329784da,151,gbif:2874569,Cucumis sativus L.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874569,2026-06-02T16:45:51+00:00
-00b03b5a-621c-5e2d-8b32-64177d61e42c,339,gbif:2874580,Momordica cochinchinensis (Lour.) Spreng.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874580,2026-06-02T16:45:51+00:00
-c48c03d1-51ad-5322-944b-ed223e9f78d7,338,gbif:2874581,Momordica charantia L.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874581,2026-06-02T16:45:51+00:00
-4e3afe00-209c-5830-a758-05993aeaa1db,451,gbif:2874612,Sechium edule (Jacq.) Sw.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874612,2026-06-02T16:45:52+00:00
-64e34a76-a01e-5d45-93f8-dee2689066da,124,gbif:2874621,Citrullus lanatus (Thunb.) Matsum. & Nakai,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874621,2026-06-02T16:45:51+00:00
-2699fc0b-ba70-5421-87fb-e4f9698879d8,513,gbif:2874852,Turnera ulmifolia L.,Turneraceae,KNApSAcK World,https://www.gbif.org/species/2874852,2026-06-02T16:45:52+00:00
-519e2ff2-26db-549c-a1c7-52252728e7b3,73,gbif:2874863,Bixa orellana L.,Bixaceae,KNApSAcK World,https://www.gbif.org/species/2874863,2026-06-02T16:45:51+00:00
-930a2ff9-23f1-5624-8ded-c87b3da62f54,356,gbif:2882429,Nymphaea lotus L.,Nymphaeaceae,KNApSAcK World,https://www.gbif.org/species/2882429,2026-06-02T16:45:52+00:00
-e2d3573c-a835-5b22-8d7e-72a6ec69a84a,350,gbif:2882449,Nelumbo nucifera Gaertn.,Nelumbonaceae,KNApSAcK World,https://www.gbif.org/species/2882449,2026-06-02T16:45:52+00:00
-b1af4455-a1f3-58ae-801d-d017fe5c8104,238,gbif:2882753,Gaultheria procumbens L.,Ericaceae,KNApSAcK World,https://www.gbif.org/species/2882753,2026-06-02T16:45:51+00:00
-1b81f96c-cdb9-5515-b718-acb4eeef7663,315,gbif:2883352,Madhuca longifolia var. latifolia (Roxb.) A.Chev.,Sapotaceae,KNApSAcK World,https://www.gbif.org/species/2883352,2026-06-02T16:45:51+00:00
-f2a5f8f4-943c-5649-9571-21911257ce21,335,gbif:2883768,Mimusops elengi L.,Sapotaceae,KNApSAcK World,https://www.gbif.org/species/2883768,2026-06-02T16:45:51+00:00
-23188d80-167e-54a9-853a-d9df68f52164,320,gbif:2885158,Manilkara zapota (L.) P.Royen,Sapotaceae,KNApSAcK World,https://www.gbif.org/species/2885158,2026-06-02T16:45:51+00:00
-a276ec76-a93d-5ff6-b99a-cca2b39a11a1,373,gbif:2888439,Papaver somniferum L.,Papaveraceae,KNApSAcK World,https://www.gbif.org/species/2888439,2026-06-02T16:45:52+00:00
-49918304-230f-5233-bd85-90bf15b3ba90,517,gbif:2888763,Valeriana officinalis L.,Caprifoliaceae,KNApSAcK World,https://www.gbif.org/species/2888763,2026-06-02T16:45:52+00:00
-c815c0cf-090e-5fa0-b957-b2770e62e524,430,gbif:2888864,Rheum palmatum L.,Polygonaceae,KNApSAcK World,https://www.gbif.org/species/2888864,2026-06-02T16:45:52+00:00
-0d5f6e9d-7447-5837-a4f1-44e4eb507a22,444,gbif:2889785,Santalum album L.,Santalaceae,KNApSAcK World,https://www.gbif.org/species/2889785,2026-06-02T16:45:52+00:00
-7ffe905a-6be3-5a37-b786-240f09cde9ff,528,gbif:2889811,Ximenia americana L.,Ximeniaceae,KNApSAcK World,https://www.gbif.org/species/2889811,2026-06-02T16:45:52+00:00
-788f4b29-9c7d-593f-aaf6-ad890fc330d2,59,gbif:2891640,Averrhoa bilimbi L.,Oxalidaceae,KNApSAcK World,https://www.gbif.org/species/2891640,2026-06-02T16:45:51+00:00
-42ac1560-b9da-5db9-ae25-b8b1c210ee67,60,gbif:2891641,Averrhoa carambola L.,Oxalidaceae,KNApSAcK World,https://www.gbif.org/species/2891641,2026-06-02T16:45:51+00:00
-971c31b9-b4ea-5684-b3c4-d4ad4f0a1d89,271,gbif:2891773,Impatiens balsamina L.,Balsaminaceae,KNApSAcK World,https://www.gbif.org/species/2891773,2026-06-02T16:45:51+00:00
-cd41e282-4b71-56ac-9087-3b576ab6d986,109,gbif:2891930,Casuarina equisetifolia L.,Casuarinaceae,KNApSAcK World,https://www.gbif.org/species/2891930,2026-06-02T16:45:51+00:00
-87759e97-b16c-5114-80ef-4de17173d5f1,348,gbif:2892558,Mussaenda pubescens Dryand.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2892558,2026-06-02T16:45:52+00:00
-b0a0c70f-340e-52bf-b3e5-69f51b35041a,138,gbif:2895345,Coffea arabica L.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2895345,2026-06-02T16:45:51+00:00
-b3ebb426-4906-5f75-bf37-67dcc7c397cb,140,gbif:2895528,Coffea canephora Pierre ex A.Froehner,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2895528,2026-06-02T16:45:51+00:00
-3b2caea6-c831-588d-877f-aed509f9c5ea,282,gbif:2905600,Ixora chinensis Lam.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2905600,2026-06-02T16:45:51+00:00
-0b49e5e5-a40e-5f47-9641-b946c776811f,368,gbif:2909527,Paederia foetida L.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2909527,2026-06-02T16:45:52+00:00
-c997f3c0-853a-5034-8081-990481d76fe7,359,gbif:2911970,Oldenlandia corymbosa L.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2911970,2026-06-02T16:45:52+00:00
-d9ed2164-9d0a-5d2d-8772-4e187f4412e9,115,gbif:2921359,Carapichea ipecacuanha (Brot.) L.Andersson,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2921359,2026-06-02T16:45:51+00:00
-3d49d23c-a77d-5fd3-b332-ae97463c9d3f,300,gbif:2925303,Lantana camara L.,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925303,2026-06-02T16:45:51+00:00
-1d3870dd-d01f-5067-a9f3-16e92df541c1,301,gbif:2925321,Lantana trifolia L.,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925321,2026-06-02T16:45:51+00:00
-ba699fda-df4b-5c26-9542-d45cfe38b634,473,gbif:2925462,Stachytarpheta mutabilis (Jacq.) Vahl,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925462,2026-06-02T16:45:52+00:00
-8325ae47-c6c7-5e7b-89b1-01cbafa627bd,472,gbif:2925463,Stachytarpheta jamaicensis (L.) Vahl,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925463,2026-06-02T16:45:52+00:00
-2772c6e1-69e9-5a24-9abc-33fd1944a2bf,525,gbif:2925561,Vitex trifolia L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2925561,2026-06-02T16:45:52+00:00
-39b0f416-813e-574b-9bba-b17700bedfc0,524,gbif:2925564,Vitex negundo L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2925564,2026-06-02T16:45:52+00:00
-e0d2a967-720d-5cf1-a709-4fad8be84402,499,gbif:2925649,Tectona grandis L.f.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2925649,2026-06-02T16:45:52+00:00
-da6b2d83-f414-59d2-8402-00bbcb1014ce,185,gbif:2925655,Duranta erecta L.,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925655,2026-06-02T16:45:51+00:00
-5eb02004-fb3d-5f01-bf78-7973d0270dc3,256,gbif:2925788,Heliotropium indicum L.,Heliotropiaceae,KNApSAcK World,https://www.gbif.org/species/2925788,2026-06-02T16:45:51+00:00
-d1ebcc6d-9f4f-5e67-b9dd-ad478bf17856,409,gbif:2926672,Pogostemon cablin (Blanco) Benth.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2926672,2026-06-02T16:45:52+00:00
-0854a2b6-6971-5c6e-bcbd-f3cecb691b95,357,gbif:2927096,Ocimum basilicum L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2927096,2026-06-02T16:45:52+00:00
-f2880fa9-8ead-51f1-ac51-57becfb05448,358,gbif:2927100,Ocimum tenuiflorum L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2927100,2026-06-02T16:45:52+00:00
-2e7b23b2-8822-5f8b-b469-fcc4ef6912b5,326,gbif:2927192,Mentha arvensis L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2927192,2026-06-02T16:45:51+00:00
-6c6ccc77-d2e7-5843-b6ae-355e75208af6,275,gbif:2928525,Ipomoea aquatica Forssk.,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/2928525,2026-06-02T16:45:51+00:00
-c36925b7-9b60-52f2-a761-475471c5965d,277,gbif:2928531,Ipomoea cairica (L.) Sweet,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/2928531,2026-06-02T16:45:51+00:00
-138e60b9-7feb-552a-9256-e60cbe794341,276,gbif:2928551,Ipomoea batatas (L.) Lam.,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/2928551,2026-06-02T16:45:51+00:00
-c5e8388a-e6b8-5723-9997-d1c5eb953650,421,gbif:2928562,Ipomoea quamoclit L.,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/2928562,2026-06-02T16:45:51+00:00
-8a0bed64-546e-57fd-94c4-b0197c56b630,169,gbif:2928747,Datura metel L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2928747,2026-06-02T16:45:51+00:00
-935d1b37-a8f3-5901-9b26-69c29cac395d,170,gbif:2928751,Datura stramonium L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2928751,2026-06-02T16:45:51+00:00
-f31e3be3-f1ba-502c-9c13-862c80eabddc,171,gbif:2928753,Datura stramonium var. tatula (L.) Torr.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2928753,2026-06-02T16:45:51+00:00
-021f486c-9a50-5cc2-ae22-bdb5f380427f,353,gbif:2928774,Nicotiana tabacum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2928774,2026-06-02T16:45:52+00:00
-e0eebf3a-d8a8-5f9e-83f0-e1ce7c13d71a,463,gbif:2930137,Solanum lycopersicum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2930137,2026-06-02T16:45:52+00:00
-493a8c4b-3b61-511b-9d08-555347344dec,467,gbif:2930262,Solanum tuberosum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2930262,2026-06-02T16:45:52+00:00
-c8d17433-cf8f-508e-ad1e-4803a952dedd,464,gbif:2930617,Solanum melongena L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2930617,2026-06-02T16:45:52+00:00
-04aaf9c0-d503-5693-b9d2-afdb9178d95f,466,gbif:2932389,Solanum torvum Sw.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2932389,2026-06-02T16:45:52+00:00
-c477b8f8-e78f-5e79-a309-76b5966d0a24,96,gbif:2932944,Capsicum annuum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2932944,2026-06-02T16:45:51+00:00
-ac804791-0638-5b18-aa76-e712c711b543,415,gbif:2944683,Psophocarpus tetragonolobus (L.) DC.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2944683,2026-06-02T16:45:52+00:00
-6b7427f2-8c69-5cc5-a343-9008168c36be,136,gbif:2946519,Clitoria ternatea L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2946519,2026-06-02T16:45:51+00:00
-1ea07dd2-99fd-5ef6-b7c1-88e614a6f857,174,gbif:2947483,Brachypterum robustum (Roxb. ex DC.) Dalzell & A.Gibson,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2947483,2026-06-02T16:45:51+00:00
-0e9b2ea8-ea18-5726-9710-30d9dc11e306,211,gbif:2951871,Euchresta horsfieldii (Lesch.) Benn.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2951871,2026-06-02T16:45:51+00:00
-61951194-1031-5191-89f5-060538998d44,378,gbif:2952775,Peltophorum pterocarpum (DC.) Backer ex K.Heyne,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2952775,2026-06-02T16:45:52+00:00
-08f944e4-e577-5111-93c9-66049e72e970,66,gbif:2953871,Bauhinia purpurea L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2953871,2026-06-02T16:45:51+00:00
-a75c93bd-bf17-5642-b2a7-8cefcad530a6,106,gbif:2956905,Senna siamea (Lam.) H.S.Irwin & Barneby,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2956905,2026-06-02T16:45:52+00:00
-1650f96d-00e3-5d68-9e06-358134624a4d,453,gbif:2956947,Senna alata (L.) Roxb.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2956947,2026-06-02T16:45:52+00:00
-0b96eb85-e853-5640-887c-a1eebeaee223,454,gbif:2957379,Senna sophera (L.) Roxb.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2957379,2026-06-02T16:45:52+00:00
-a61ad6fb-bf3a-5493-9caa-a36e5cef7ba3,455,gbif:2957728,Senna tora (L.) Roxb.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2957728,2026-06-02T16:45:52+00:00
-4f38415e-40f7-5caf-8b56-2f68ffc8759f,104,gbif:2957966,Senna occidentalis (L.) Link,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2957966,2026-06-02T16:45:52+00:00
-aa19c5ca-0e00-5de6-9341-d71848a7f4f1,105,gbif:2958032,Senna alexandrina Mill.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2958032,2026-06-02T16:45:52+00:00
-f580fbea-c00f-5e4e-be19-3ba6641cb1fa,85,gbif:2958715,Caesalpinia pulcherrima (L.) Sw.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2958715,2026-06-02T16:45:51+00:00
-7711a112-0b0f-54fd-b1fb-5648b924022d,86,gbif:2958871,Biancaea sappan (L.) Tod.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2958871,2026-06-02T16:45:51+00:00
-ded4fc69-7c4a-5751-a164-4eb8c860b841,470,gbif:2958970,Sophora tomentosa L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2958970,2026-06-02T16:45:52+00:00
-f4acff8d-05f4-511b-b9e2-646dac5eec7c,274,gbif:2963211,Intsia bijuga (Colebr.) Kuntze,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2963211,2026-06-02T16:45:51+00:00
-d735cf31-61e2-5cd7-b833-25f2766538c8,482,gbif:2963569,Styphnolobium japonicum (L.) Schott,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2963569,2026-06-02T16:45:52+00:00
-3201baaf-b192-5961-90f7-0fce9a80b844,244,gbif:2965732,Glycyrrhiza glabra L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2965732,2026-06-02T16:45:51+00:00
-f1ef47b5-d5f2-5b42-9c6b-157b895b1928,410,gbif:2965911,Pongamia pinnata (L.) Pierre,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2965911,2026-06-02T16:45:52+00:00
-ace8788d-0e5e-527f-bdfd-fd2b3354a299,334,gbif:2969284,Mimosa pudica L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2969284,2026-06-02T16:45:51+00:00
-beeec76b-4163-5a33-9b6a-086fce655b15,309,gbif:2970418,Leucaena leucocephala (Lam.) de Wit,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2970418,2026-06-02T16:45:51+00:00
-8bf9b08c-1def-591a-9bcc-ca4b6255e877,458,gbif:2970648,Sesbania sesban (L.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2970648,2026-06-02T16:45:52+00:00
-fbf093e8-9305-52ea-8d99-0c7aef404821,273,gbif:2972043,Indigofera tinctoria L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2972043,2026-06-02T16:45:51+00:00
-5313be9b-a3c2-54f6-849f-079a6e2e8399,17,gbif:2973197,Albizia chinensis (Osbeck) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2973197,2026-06-02T16:45:51+00:00
-72a69b6a-2a5a-57f6-8aed-609d5e8737b8,367,gbif:2974683,Pachyrhizus erosus (L.) Urb.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2974683,2026-06-02T16:45:52+00:00
-afc8d2f6-c66c-59e7-831c-adbebb9154c7,495,gbif:2975768,Tamarindus indica L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2975768,2026-06-02T16:45:52+00:00
-b84f723c-bf5d-53b2-810e-e058fb04d17a,202,gbif:2976244,Entada phaseoloides (L.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2976244,2026-06-02T16:45:51+00:00
-a65d370e-3d44-5656-866f-1ae48465e869,417,gbif:2977636,Pueraria montana (Lour.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2977636,2026-06-02T16:45:52+00:00
-0b821a53-15d0-51ac-ab9f-bbf033aba403,521,gbif:2982380,Vigna radiata (L.) R.Wilczek,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2982380,2026-06-02T16:45:52+00:00
-4ac4ff2c-f5ca-5521-9d94-9fa1af9c1600,508,gbif:2984508,Trema orientale (L.) Blume,Cannabaceae,KNApSAcK World,https://www.gbif.org/species/2984508,2026-06-02T16:45:52+00:00
-96801dd1-e4f3-538e-84d6-092f1f2558f2,54,gbif:2984565,Artocarpus heterophyllus Lam.,Moraceae,KNApSAcK World,https://www.gbif.org/species/2984565,2026-06-02T16:45:51+00:00
-fd3502a4-775b-5aa2-99ec-914e733b3ba9,53,gbif:2984573,Artocarpus altilis (Parkinson) Fosberg,Moraceae,KNApSAcK World,https://www.gbif.org/species/2984573,2026-06-02T16:45:51+00:00
-9c6c6d9c-c72a-5da6-b688-ece5e74c3643,294,gbif:2985930,Kalanchoe pinnata (Lam.) Pers.,Crassulaceae,KNApSAcK World,https://www.gbif.org/species/2985930,2026-06-02T16:45:51+00:00
-b2a8b027-a1d7-5809-9821-2bd49821225c,293,gbif:2985936,Kalanchoe daigremontiana Raym.-Hamet & H.Perrier,Crassulaceae,KNApSAcK World,https://www.gbif.org/species/2985936,2026-06-02T16:45:51+00:00
-9f42f190-4be1-5d33-a0d2-e30e29beee87,265,gbif:2985994,Hydrangea macrophylla (Thunb.) Ser.,Hydrangeaceae,KNApSAcK World,https://www.gbif.org/species/2985994,2026-06-02T16:45:51+00:00
-0e748d0a-af8c-5fbb-9bd0-228b3e989f08,317,gbif:3001509,Malus sylvestris Mill.,Rosaceae,KNApSAcK World,https://www.gbif.org/species/3001509,2026-06-02T16:45:51+00:00
-b5fa32ed-8242-5d7a-8f12-a410f41c6f22,436,gbif:3005039,Rosa chinensis Jacq.,Rosaceae,KNApSAcK World,https://www.gbif.org/species/3005039,2026-06-02T16:45:52+00:00
-99607ef4-ad69-5040-8dd3-7161d4b593e4,58,gbif:3033077,Aucuba japonica Thunb.,Garryaceae,KNApSAcK World,https://www.gbif.org/species/3033077,2026-06-02T16:45:51+00:00
-49867f51-dd80-51c0-98ed-db93c19f61ff,123,gbif:3033937,Cissampelos pareira L.,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/3033937,2026-06-02T16:45:51+00:00
-10e0f3db-b4c4-5905-8698-f70b0bc2a5a6,310,gbif:3033977,Litsea cubeba (Lour.) Pers.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033977,2026-06-02T16:45:51+00:00
-e342c05d-fcd6-5b98-9137-607e65c8aa78,118,gbif:3033985,Cinnamomum burmanni (Nees & T.Nees) Blume,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033985,2026-06-02T16:45:51+00:00
-01a5cbee-6a28-5eef-bcd5-ed97d8b74360,121,gbif:3033987,Cinnamomum verum J.Presl,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033987,2026-06-02T16:45:51+00:00
-b8f9bf63-1cd0-5aa4-8301-d1e7cc6f12b6,119,gbif:3033991,Cinnamomum camphora (L.) J.Presl,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033991,2026-06-02T16:45:51+00:00
-f16ce650-01b2-5d6d-ac4c-bcb37111e677,108,gbif:3033999,Cassytha filiformis L.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033999,2026-06-02T16:45:51+00:00
-0833026e-d05d-51b3-8fbc-444d151b65ec,380,gbif:3034046,Persea americana Mill.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3034046,2026-06-02T16:45:52+00:00
-ccb63bb3-cf7e-5c58-b0ed-13b75135b29e,114,gbif:3034128,Centella asiatica (L.) Urb.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034128,2026-06-02T16:45:51+00:00
-2c44d835-2866-547f-8a65-df652a779b8f,206,gbif:3034425,Eryngium foetidum L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034425,2026-06-02T16:45:51+00:00
-e0f458e4-5fb7-501d-b992-b06f066c5d03,172,gbif:3034742,Daucus carota L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034742,2026-06-02T16:45:51+00:00
-bf076fde-a7e0-5586-9966-87c36b88bdcd,153,gbif:3034775,Cuminum cyminum L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034775,2026-06-02T16:45:51+00:00
-b86d52ec-bc9f-5cc2-846d-93c37bcd3157,146,gbif:3034871,Coriandrum sativum L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034871,2026-06-02T16:45:51+00:00
-32db5868-6422-5fc4-aadb-90479c36369d,233,gbif:3034922,Foeniculum vulgare Mill.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034922,2026-06-02T16:45:51+00:00
-2a2bb525-2b32-5550-a721-51d0ea347405,80,gbif:3042845,Brassica oleracea L.,Brassicaceae,KNApSAcK World,https://www.gbif.org/species/3042845,2026-06-02T16:45:51+00:00
-41a118d6-4ccc-5bac-9050-58c4fdec73a0,342,gbif:3054181,Moringa oleifera Lam.,Moringaceae,KNApSAcK World,https://www.gbif.org/species/3054181,2026-06-02T16:45:52+00:00
-4c6f2854-9619-511c-80ff-7cff5279ed3d,250,gbif:3054227,Gynandropsis gynandra (L.) Briq.,Cleomaceae,KNApSAcK World,https://www.gbif.org/species/3054227,2026-06-02T16:45:51+00:00
-90bc8715-c8d3-5086-8b8b-d2266b129400,7,gbif:3056259,Acalypha indica L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3056259,2026-06-02T16:45:51+00:00
-7ac2cebc-918e-51ad-b944-ce5654c6214f,6,gbif:3056375,Acalypha hispida Burm.f.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3056375,2026-06-02T16:45:51+00:00
-90a8d5d1-8291-559e-8452-3ee469ab365e,150,gbif:3057656,Croton tiglium L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3057656,2026-06-02T16:45:51+00:00
-d0f987f7-f9dc-532c-9741-c085c58d4025,318,gbif:3060998,Manihot esculenta Crantz,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3060998,2026-06-02T16:45:51+00:00
-8d6c4982-26c0-563e-a2ce-ff55e50ac988,217,gbif:3064495,Euphorbia heterophylla L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3064495,2026-06-02T16:45:51+00:00
-c87a5f74-dd81-5606-a617-8873959671c7,220,gbif:3064865,Euphorbia neriifolia L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3064865,2026-06-02T16:45:51+00:00
-e96e6944-2ec3-5239-bb61-4888dfedf10a,222,gbif:3066465,Euphorbia pulcherrima Willd. ex Klotzsch,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3066465,2026-06-02T16:45:51+00:00
-3e52c52d-17a9-51ab-92bd-9f3ea0d5defe,219,gbif:3067157,Euphorbia milii Des Moul.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3067157,2026-06-02T16:45:51+00:00
-64b5a549-24de-577d-9328-9b6740919dae,221,gbif:3067891,Euphorbia prostrata Aiton,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3067891,2026-06-02T16:45:51+00:00
-e95872e0-c0b5-5fe2-815a-34da82188a6c,218,gbif:3068937,Euphorbia hirta L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3068937,2026-06-02T16:45:51+00:00
-6c9ccae8-4a53-529c-a4b2-a4158bd84c35,377,gbif:3069168,Euphorbia tithymaloides L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3069168,2026-06-02T16:45:51+00:00
-781384f7-6a6e-5882-9779-912b8b2ff2e8,223,gbif:3069353,Euphorbia tirucalli L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3069353,2026-06-02T16:45:51+00:00
-2d8555e8-ced4-5bfa-b79d-fbc8d61eb517,216,gbif:3069535,Euphorbia antiquorum L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3069535,2026-06-02T16:45:51+00:00
-330ce16f-69c4-5527-9724-517e85fb5fa3,257,gbif:3071171,Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3071171,2026-06-02T16:45:51+00:00
-5fe22218-bb94-5a44-ab78-0c539e0db194,196,gbif:3071462,Elateriospermum tapos Blume,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3071462,2026-06-02T16:45:51+00:00
-31c70734-4d61-5fc1-b0ba-49f7e87cec76,225,gbif:3071702,Excoecaria agallocha L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3071702,2026-06-02T16:45:51+00:00
-ec2ec3e2-8ba4-5570-96eb-b0106295f3b9,226,gbif:3071716,Excoecaria cochinchinensis Lour.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3071716,2026-06-02T16:45:51+00:00
-26c2c50b-d350-5022-b5ca-80fa9a0a5093,287,gbif:3072900,Jatropha gossypiifolia L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3072900,2026-06-02T16:45:51+00:00
-2de7a6a7-1e52-50a0-9374-06507220488f,285,gbif:3072953,Jatropha curcas L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3072953,2026-06-02T16:45:51+00:00
-57d2d54f-84f3-59be-9ca9-69a67d0358ce,288,gbif:3072985,Jatropha multifida L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3072985,2026-06-02T16:45:51+00:00
-75a36dd4-e72a-5c23-83e3-9f6e9a874e12,289,gbif:3073016,Jatropha podagrica Hook.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3073016,2026-06-02T16:45:51+00:00
-ff80e7c6-fd8d-53e1-846b-528f01e4363b,240,gbif:3080882,Glochidion rubrum Blume,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/3080882,2026-06-02T16:45:51+00:00
-cedd05e3-437d-50b7-ae97-6e1710d40d98,406,gbif:3082282,Plumbago zeylanica L.,Plumbaginaceae,KNApSAcK World,https://www.gbif.org/species/3082282,2026-06-02T16:45:52+00:00
-61b44b71-407e-54b8-b729-fb3d55072a55,405,gbif:3082286,Plumbago indica L.,Plumbaginaceae,KNApSAcK World,https://www.gbif.org/species/3082286,2026-06-02T16:45:52+00:00
-5f7a5eb0-dcad-5888-b76a-028366a7ef50,65,gbif:3083504,Basella alba L.,Basellaceae,KNApSAcK World,https://www.gbif.org/species/3083504,2026-06-02T16:45:51+00:00
-e38ca312-df7f-5ddf-9572-393117818bbc,42,gbif:3083508,Anredera cordifolia (Ten.) Steenis,Basellaceae,KNApSAcK World,https://www.gbif.org/species/3083508,2026-06-02T16:45:51+00:00
-09c167fb-5cb9-50ec-8087-eee2f9ca2c18,434,gbif:3084027,Rivina humilis L.,Phytolaccaceae,KNApSAcK World,https://www.gbif.org/species/3084027,2026-06-02T16:45:52+00:00
-d209b533-9d00-58a5-814a-157a9c443927,494,gbif:3084670,Talinum fruticosum (L.) Juss.,Talinaceae,KNApSAcK World,https://www.gbif.org/species/3084670,2026-06-02T16:45:52+00:00
-a75162a9-c39e-589f-8028-487e95132947,493,gbif:3084672,Talinum paniculatum (Jacq.) Gaertn.,Talinaceae,KNApSAcK World,https://www.gbif.org/species/3084672,2026-06-02T16:45:52+00:00
-d6b5780b-2e88-5490-a0d6-b85d9b58f11b,411,gbif:3084700,Portulaca grandiflora Hook.,Portulacaceae,KNApSAcK World,https://www.gbif.org/species/3084700,2026-06-02T16:45:52+00:00
-91e50387-da73-5973-a338-1120dc8db1d2,412,gbif:3084719,Portulaca oleracea L.,Portulacaceae,KNApSAcK World,https://www.gbif.org/species/3084719,2026-06-02T16:45:52+00:00
-ba6f8bcf-da27-5ee3-a273-ca5732c909ee,246,gbif:3084908,Gomphrena globosa L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3084908,2026-06-02T16:45:51+00:00
-06609fc6-66b3-5fe9-914f-90888f85a556,30,gbif:3084923,Alternanthera philoxeroides (Mart.) Griseb.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3084923,2026-06-02T16:45:51+00:00
-9ad40163-ef4f-50b8-8b5c-139a286a011a,31,gbif:3084939,Alternanthera sessilis (L.) R.Br. ex DC.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3084939,2026-06-02T16:45:51+00:00
-07bd77ec-8d26-5198-80b6-747f38900216,9,gbif:3085168,Achyranthes aspera L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3085168,2026-06-02T16:45:51+00:00
-e23840c2-b967-5246-b462-80e00e73ae5e,112,gbif:3085191,Celosia argentea L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3085191,2026-06-02T16:45:51+00:00
-d9e1507f-5df9-56b9-ba5b-65a64a377b99,336,gbif:3086240,Mirabilis jalapa L.,Nyctaginaceae,KNApSAcK World,https://www.gbif.org/species/3086240,2026-06-02T16:45:51+00:00
-d7f775bf-b93b-59cf-a097-2dbdb1445a3f,400,gbif:3086342,Piper retrofractum Vahl,Piperaceae,KNApSAcK World,https://www.gbif.org/species/3086342,2026-06-02T16:45:52+00:00
-54746c5d-fb8c-5195-b443-14da8110e9b1,399,gbif:3086357,Piper nigrum L.,Piperaceae,KNApSAcK World,https://www.gbif.org/species/3086357,2026-06-02T16:45:52+00:00
-e87d4350-ce5a-50bc-a2fa-2fe7824ed070,379,gbif:3086412,Peperomia pellucida (L.) Kunth,Piperaceae,KNApSAcK World,https://www.gbif.org/species/3086412,2026-06-02T16:45:52+00:00
-fad237ac-de9a-5ea0-8719-6c78a09130c0,492,gbif:3088488,Tagetes erecta L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3088488,2026-06-02T16:45:52+00:00
-e10b66d9-86ce-5518-aaa2-6c822b89ac70,469,gbif:3105813,Sonchus arvensis L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3105813,2026-06-02T16:45:52+00:00
-7cdd19c7-1dd8-59ef-a038-f1f1ff6f5e06,535,gbif:3111754,Zinnia elegans Jacq.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3111754,2026-06-02T16:45:52+00:00
-1284cd35-3323-5d6c-a448-3164847fc7b5,49,gbif:3120942,Artemisia cina O.C.Berg & Schmidt,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3120942,2026-06-02T16:45:51+00:00
-05eb3d4c-41fd-573b-b118-1aebf42d6303,51,gbif:3120946,Artemisia vulgaris L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3120946,2026-06-02T16:45:51+00:00
-cdf464f9-5873-571c-8320-913fbea42519,50,gbif:3121137,Artemisia lactiflora Wall. ex DC.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3121137,2026-06-02T16:45:51+00:00
-26cff3ce-c413-5a62-9884-dcc59e0d3f8e,404,gbif:3132728,Pluchea indica (L.) Less.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3132728,2026-06-02T16:45:52+00:00
-c76ae9b4-c2de-5883-9293-15f5db2744a7,99,gbif:3138327,Carthamus tinctorius L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3138327,2026-06-02T16:45:51+00:00
-b129d6bc-81bd-5af4-9355-122b4cc9158e,251,gbif:3139807,Gynura japonica (Thunb.) Juel,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3139807,2026-06-02T16:45:51+00:00
-74f37006-adf8-5307-8e65-834602250a2b,296,gbif:3140510,Lactuca indica L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3140510,2026-06-02T16:45:51+00:00
-210454fe-79b0-5771-b056-96a7bdcaeecb,215,gbif:3142644,Ayapana triplinervis (Vahl) R.M.King & H.Rob.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3142644,2026-06-02T16:45:51+00:00
-40c99cba-3dd7-5394-a0cb-7d64d74b3249,204,gbif:3146683,Erigeron sumatrensis Retz.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3146683,2026-06-02T16:45:51+00:00
-e46de574-b105-5cbd-aaa5-038b9a4ea3b4,510,gbif:3149462,Tridax procumbens L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3149462,2026-06-02T16:45:52+00:00
-09aafced-6936-5299-a535-62d23edad055,189,gbif:3150935,Echinacea purpurea (L.) Moench,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3150935,2026-06-02T16:45:51+00:00
-acdb42a9-0e68-5041-8fd3-e292abf7654c,325,gbif:3152125,Melochia corchorifolia L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152125,2026-06-02T16:45:51+00:00
-6f4f9e7e-24cb-5095-9378-79f2a270e8c2,249,gbif:3152195,Guazuma ulmifolia Lam.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152195,2026-06-02T16:45:51+00:00
-8619da7b-e7a2-581d-87f5-91a04ad2a5ea,187,gbif:3152230,Durio zibethinus Murray,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152230,2026-06-02T16:45:51+00:00
-1af125da-671a-5be8-90a7-62ed68844d69,516,gbif:3152253,Urena lobata L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152253,2026-06-02T16:45:52+00:00
-c0c1e6e4-9495-5d5f-bcda-b643b048c5a2,259,gbif:3152555,Hibiscus mutabilis L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152555,2026-06-02T16:45:51+00:00
-e3a656be-2df9-5711-bd5b-5df103800e84,260,gbif:3152559,Hibiscus rosa-sinensis L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152559,2026-06-02T16:45:51+00:00
-ee58b85b-9803-5888-a95d-b826f6e063c1,261,gbif:3152582,Hibiscus sabdariffa L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152582,2026-06-02T16:45:51+00:00
-9674dd5e-2438-56d0-b94d-eeac8311aecc,5,gbif:3152634,Abutilon indicum (L.) Sweet,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152634,2026-06-02T16:45:51+00:00
-1b485499-c7c1-5c44-9b4a-6032715e827f,248,gbif:3152658,Gossypium herbaceum L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152658,2026-06-02T16:45:51+00:00
-6f8e4fe7-5fe6-5f20-a6b5-11d27f3bdb1b,1,gbif:3152706,Abelmoschus manihot (L.) Medik.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152706,2026-06-02T16:45:51+00:00
-f4b81201-b781-50fb-b2ab-9be58e892f39,331,gbif:3153099,Magnolia champaca (L.) Baill. ex Pierre,Magnoliaceae,KNApSAcK World,https://www.gbif.org/species/3153099,2026-06-02T16:45:51+00:00
-e2f235f8-aa8d-549d-964b-2a798387e331,247,gbif:3154616,Goniothalamus macrophyllus (Blume) Hook.f. & Thomson,Annonaceae,KNApSAcK World,https://www.gbif.org/species/3154616,2026-06-02T16:45:51+00:00
-df9a1e4a-d71d-5ef9-a844-a00179cede85,403,gbif:3164340,Platycodon grandiflorus (Jacq.) A.DC.,Campanulaceae,KNApSAcK World,https://www.gbif.org/species/3164340,2026-06-02T16:45:52+00:00
-851a20d6-2464-551e-a5f0-73043b151cea,281,gbif:3168943,Hippobroma longiflora (L.) G.Don,Campanulaceae,KNApSAcK World,https://www.gbif.org/species/3168943,2026-06-02T16:45:51+00:00
-b4f914bd-179e-5bf8-9553-0db2340c6449,205,gbif:3169625,Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169625,2026-06-02T16:45:52+00:00
-a3293ad0-b880-5634-800e-f65c14f8b0c7,503,gbif:3169652,Cascabela thevetia (L.) Lippold,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169652,2026-06-02T16:45:51+00:00
-3304f9d4-5c15-5113-aab5-ce58dcbbdab4,408,gbif:3169674,Plumeria rubra L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169674,2026-06-02T16:45:52+00:00
-2c8ed17e-222f-5997-bf2b-d540cfb59dd8,352,gbif:3169756,Nerium oleander L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169756,2026-06-02T16:45:52+00:00
-7be87475-a2e9-515c-a7dc-e445c191f31c,426,gbif:3169787,Rauvolfia serpentina (L.) Benth. ex Kurz,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169787,2026-06-02T16:45:52+00:00
-82633059-85b7-5cd5-a16a-442a54ac58fb,110,gbif:3169830,Catharanthus roseus (L.) G.Don,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169830,2026-06-02T16:45:51+00:00
-a33157d7-c480-539e-8eb6-454efef0afb0,19,gbif:3169836,Allamanda cathartica L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169836,2026-06-02T16:45:51+00:00
-9d009ca4-cdb4-55f7-a4ca-c7d0d2d16c33,55,gbif:3170241,Asclepias curassavica L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3170241,2026-06-02T16:45:51+00:00
-c7ef913c-280f-5985-b8e1-601f099c7dc7,283,gbif:3172261,Jasminum officinale L.,Oleaceae,KNApSAcK World,https://www.gbif.org/species/3172261,2026-06-02T16:45:51+00:00
-65a5ff2b-a821-5ce0-bb10-b6b87d46b0bc,456,gbif:3172622,Sesamum indicum L.,Pedaliaceae,KNApSAcK World,https://www.gbif.org/species/3172622,2026-06-02T16:45:52+00:00
-72eebe7d-5ce5-53a1-9ff5-cc2b5b9be20e,63,gbif:3173126,Barleria lupulina Lindl.,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3173126,2026-06-02T16:45:51+00:00
-9b87c084-8e97-5763-83ac-abc8eee074b3,64,gbif:3173129,Barleria prionitis L.,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3173129,2026-06-02T16:45:51+00:00
-55fc8aa4-40f3-5d50-9054-6e06a06472c2,37,gbif:3173178,Andrographis paniculata (Burm.fil.) Nees,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3173178,2026-06-02T16:45:51+00:00
-bce825c0-1611-5e87-b0eb-760dc1815b3e,210,gbif:3176787,Eucalyptus globulus Labill.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3176787,2026-06-02T16:45:51+00:00
-19c8dda5-5f76-5531-90e5-9a444be5bed8,432,gbif:3179997,Rhodomyrtus tomentosa (Aiton) Hassk.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3179997,2026-06-02T16:45:52+00:00
-c1304035-b586-5c1d-a353-4d5defbc4d29,487,gbif:3183002,Syzygium aromaticum (L.) Merr. & L.M.Perry,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3183002,2026-06-02T16:45:52+00:00
-71609b4d-5377-5741-843f-bff0537a8517,488,gbif:3183840,Syzygium cumini (L.) Skeels,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3183840,2026-06-02T16:45:52+00:00
-75d26f1b-3c84-5de4-879a-6e1c41c2b5e8,62,gbif:3187799,Baeckea frutescens L.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3187799,2026-06-02T16:45:51+00:00
-dca2217e-d4f2-53cb-b082-24c58c20abd4,323,gbif:3188511,Melastoma malabathricum L.,Melastomataceae,KNApSAcK World,https://www.gbif.org/species/3188511,2026-06-02T16:45:51+00:00
-b617fcd7-3563-571f-a0fb-5d3a4fb91e58,298,gbif:3188724,Lagerstroemia speciosa (L.) Pers.,Lythraceae,KNApSAcK World,https://www.gbif.org/species/3188724,2026-06-02T16:45:51+00:00
-95d88163-75bb-500d-be47-1e702671e6e4,297,gbif:3188725,Lagerstroemia indica L.,Lythraceae,KNApSAcK World,https://www.gbif.org/species/3188725,2026-06-02T16:45:51+00:00
-235b9383-49fe-5229-83a5-8c3b6c086a74,500,gbif:3189390,Terminalia bellirica (Gaertn.) Roxb.,Combretaceae,KNApSAcK World,https://www.gbif.org/species/3189390,2026-06-02T16:45:52+00:00
-ff08b84e-971a-5b0a-932c-bf1b9792e416,501,gbif:3189394,Terminalia catappa L.,Combretaceae,KNApSAcK World,https://www.gbif.org/species/3189394,2026-06-02T16:45:52+00:00
-0187160f-7aa7-596a-bb72-ae602e1dfc96,235,gbif:3189565,Garcinia dulcis (Roxb.) Kurz,Clusiaceae,KNApSAcK World,https://www.gbif.org/species/3189565,2026-06-02T16:45:51+00:00
-b252fed9-4162-50ae-b814-b7993e23f234,236,gbif:3189571,Garcinia mangostana L.,Clusiaceae,KNApSAcK World,https://www.gbif.org/species/3189571,2026-06-02T16:45:51+00:00
-f3c4a5dd-8030-5798-b24d-9f1c41a9d151,91,gbif:3189635,Camellia sinensis (L.) Kuntze,Theaceae,KNApSAcK World,https://www.gbif.org/species/3189635,2026-06-02T16:45:51+00:00
-788f054d-0118-5597-b286-4b2e7545cc70,184,gbif:3189690,Dryobalanops aromatica C.F.Gaertn.,Dipterocarpaceae,KNApSAcK World,https://www.gbif.org/species/3189690,2026-06-02T16:45:51+00:00
-67c180dd-0ad4-5c37-a707-0a7cf8911681,401,gbif:3189767,Plantago major L.,Plantaginaceae,KNApSAcK World,https://www.gbif.org/species/3189767,2026-06-02T16:45:52+00:00
-2f8e7caa-b19a-5c2e-80c3-186717458772,129,gbif:3190157,Citrus medica L.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3190157,2026-06-02T16:45:51+00:00
-f979493f-43ed-5b94-a3f0-9c62fb0b2f9e,128,gbif:3190160,Citrus maxima (Burm.) Merr.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3190160,2026-06-02T16:45:51+00:00
-4e8f99ab-f088-5520-b1bb-41309509d188,125,gbif:3190164,Citrus × aurantiifolia (Christm.) Swingle,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3190164,2026-06-02T16:45:51+00:00
-65b1e648-401f-546b-85a4-5442833dc81d,512,gbif:3190406,Triphasia trifolia (Burm.fil.) P.Wilson,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3190406,2026-06-02T16:45:52+00:00
-6ce361f3-5493-50d8-976f-54699df3da9c,61,gbif:3190474,Azadirachta indica A.Juss.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/3190474,2026-06-02T16:45:51+00:00
-dc120051-3ff1-5033-88eb-9505b5efef08,299,gbif:3190478,Lansium domesticum Corrêa,Meliaceae,KNApSAcK World,https://www.gbif.org/species/3190478,2026-06-02T16:45:51+00:00
-9115ff6d-2c26-5736-9485-983331b197e8,484,gbif:3190485,Swietenia mahagoni (L.) Jacq.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/3190485,2026-06-02T16:45:52+00:00
-a7ca7808-93e2-5eb6-8399-d6e2bac310fb,422,gbif:3190647,Quassia amara L.,Simaroubaceae,KNApSAcK World,https://www.gbif.org/species/3190647,2026-06-02T16:45:52+00:00
-f8427ff7-b24c-5cb0-8f07-e7ab5ab3f9ef,90,gbif:3579089,Calotropis gigantea (L.) W.T.Aiton,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3579089,2026-06-02T16:45:51+00:00
-359a7bcf-85d3-5fb3-9ee7-d2c9f3fb6995,428,gbif:3616228,Rauvolfia verticillata (Lour.) Baill.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3616228,2026-06-02T16:45:52+00:00
-5a3930a7-ae33-584f-af26-62dca7e0cbc4,427,gbif:3616339,Rauvolfia sumatrana Jack,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3616339,2026-06-02T16:45:52+00:00
-3bb4096c-5221-52e0-87d1-92eb1bddbf58,425,gbif:3616839,Rauvolfia reflexa Koord. & Valeton,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3616839,2026-06-02T16:45:52+00:00
-bb82a777-82c9-583b-8645-739ddbc45870,491,gbif:3621871,Tabernaemontana sphaerocarpa Blume,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3621871,2026-06-02T16:45:52+00:00
-c00d0164-dddc-5ed9-bc85-4b338009881f,355,gbif:3683008,Nyctanthes arbor-tristis L.,Oleaceae,KNApSAcK World,https://www.gbif.org/species/3683008,2026-06-02T16:45:52+00:00
-605c6515-9636-5f72-91e7-51ae0bffb870,224,gbif:3709190,Eurycoma longifolia Jack,Simaroubaceae,KNApSAcK World,https://www.gbif.org/species/3709190,2026-06-02T16:45:51+00:00
-54cc67d1-1c55-5c27-b4a9-4186a3674aa9,135,gbif:3774284,Clinacanthus nutans (Burm.fil.) Lindau,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3774284,2026-06-02T16:45:51+00:00
-1748e875-bf72-591b-b49e-8c73cecacafb,477,gbif:3781433,Strobilanthes crispa (L.) Blume,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3781433,2026-06-02T16:45:52+00:00
-3dc649e5-7589-5f91-af16-75dba017f3cc,308,gbif:3794870,Acaciella glauca (L.) L.Rico,Fabaceae,KNApSAcK World,https://www.gbif.org/species/3794870,2026-06-02T16:45:51+00:00
-4ed81395-0e1a-5cd3-93c1-c2966697151b,57,gbif:3802655,Atropa belladonna L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/3802655,2026-06-02T16:45:51+00:00
-cba6c5c3-2c6c-5aec-94e9-fdab46eadc46,164,gbif:3830078,Cyclea barbata Miers,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/3830078,2026-06-02T16:45:51+00:00
-95a3e866-7522-5b42-96e2-d2bd01752c9f,46,gbif:3830318,Arcangelisia flava (L.) Merr.,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/3830318,2026-06-02T16:45:51+00:00
-7633d19c-d864-5ac9-9eaa-acde77f9419e,506,gbif:3830649,Tinospora glabra (Burm.fil.) Merr.,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/3830649,2026-06-02T16:45:52+00:00
-f3fb6e71-7123-57be-a9ce-b92a0a9d6433,440,gbif:3832875,Ruta angustifolia Pers.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3832875,2026-06-02T16:45:52+00:00
-68bc505a-dbef-5fd9-b3d6-720259fa5662,314,gbif:3834748,Luvunga sarmentosa (Blume) Kurz,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3834748,2026-06-02T16:45:51+00:00
-cdba6e11-56c1-5dcf-ba63-d851de67acbd,227,gbif:3834800,Zanthoxylum rhetsa (Roxb.) DC.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3834800,2026-06-02T16:45:52+00:00
-7e2ffc29-5568-5fb0-9f4f-f231cf105fc5,443,gbif:3850843,Sandoricum koetjape (Burm.fil.) Merr.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/3850843,2026-06-02T16:45:52+00:00
-3b466569-a754-56af-82cc-36c30a5176de,270,gbif:3889017,Mesosphaerum suaveolens (L.) Kuntze,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/3889017,2026-06-02T16:45:51+00:00
-ccac8e33-3c4b-5c4e-8b23-4f7bf959444d,269,gbif:3889976,Mesosphaerum pectinatum (L.) Kuntze,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/3889976,2026-06-02T16:45:51+00:00
-2fee1eb3-ad8b-5238-9643-b53bb462b835,330,gbif:3987892,Magnolia × alba (DC.) Figlar,Magnoliaceae,KNApSAcK World,https://www.gbif.org/species/3987892,2026-06-02T16:45:51+00:00
-5c16f5bb-04f9-5b3f-86e7-d8ebc29a98f6,160,gbif:3990387,Curcuma xanthorrhiza D.Dietr.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/3990387,2026-06-02T16:45:51+00:00
-6454f497-44e8-5eb0-a1c6-7c8d7bef9675,448,gbif:4001481,Scurrula fusca (Blume) G.Don,Loranthaceae,KNApSAcK World,https://www.gbif.org/species/4001481,2026-06-02T16:45:52+00:00
-df4a70cf-3d5a-5bd8-a16d-51507153f867,68,gbif:4176422,Beilschmiedia madang (Blume) Blume,Lauraceae,KNApSAcK World,https://www.gbif.org/species/4176422,2026-06-02T16:45:51+00:00
-aa32cf2d-fa8f-5d3b-9765-2fa4c2faa075,396,gbif:4187904,Piper betle L.,Piperaceae,KNApSAcK World,https://www.gbif.org/species/4187904,2026-06-02T16:45:52+00:00
-3ad6c6b1-055a-5a9d-b6b5-186af5047d29,117,gbif:4195539,Cibotium barometz (L.) J.Sm.,Cibotiaceae,KNApSAcK World,https://www.gbif.org/species/4195539,2026-06-02T16:45:51+00:00
-5887dc73-2753-58a3-90d1-cfd0921ecfb6,18,gbif:4930679,Aleurites moluccanus (L.) Willd.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/4930679,2026-06-02T16:45:51+00:00
-0347985e-e707-5b9a-90af-2fd1bef87b49,526,gbif:5241445,Volvariella volvacea (Bull.) Singer,Pluteaceae,KNApSAcK World,https://www.gbif.org/species/5241445,2026-06-02T16:45:52+00:00
-fe122d47-2481-578c-b6d4-7cf88c9a528b,13,gbif:5284442,Agathis dammara (Lamb.) Rich. & A.Rich.,Araucariaceae,KNApSAcK World,https://www.gbif.org/species/5284442,2026-06-02T16:45:51+00:00
-1ccee74c-af2c-5c42-8b0c-0e5bb9d8ac44,498,gbif:5284540,Taxus wallichiana Zucc.,Taxaceae,KNApSAcK World,https://www.gbif.org/species/5284540,2026-06-02T16:45:52+00:00
-84e53409-96f3-539a-846e-608c8ece266d,36,gbif:5288819,Ananas comosus (L.) Merr.,Bromeliaceae,KNApSAcK World,https://www.gbif.org/species/5288819,2026-06-02T16:45:51+00:00
-ed7000e9-64c8-5ec0-bee7-cd4303ae7e49,529,gbif:5290052,Zea mays L.,Poaceae,KNApSAcK World,https://www.gbif.org/species/5290052,2026-06-02T16:45:52+00:00
-ad0d237e-aaf8-5065-8ab3-247ff6ff46f3,461,gbif:5295128,Smilax zeylanica L.,Smilacaceae,KNApSAcK World,https://www.gbif.org/species/5295128,2026-06-02T16:45:52+00:00
-5225fa66-a924-501a-a8c1-769f715257c5,460,gbif:5295472,Smilax china L.,Smilacaceae,KNApSAcK World,https://www.gbif.org/species/5295472,2026-06-02T16:45:52+00:00
-fa097dca-198a-5c8e-a5d8-9e9487875075,69,gbif:5298546,Iris domestica (L.) Goldblatt & Mabb.,Iridaceae,KNApSAcK World,https://www.gbif.org/species/5298546,2026-06-02T16:45:51+00:00
-ca433a22-3b85-5dc9-b54a-44721d79e65c,292,gbif:5301445,Kaempferia rotunda L.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/5301445,2026-06-02T16:45:51+00:00
-8fea13cf-25bc-5755-a26d-71f02d38d627,291,gbif:5301451,Kaempferia galanga L.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/5301451,2026-06-02T16:45:51+00:00
-fbee525b-bdd7-509d-a45c-6c106896c456,28,gbif:5302199,Alpinia officinarum Hance,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/5302199,2026-06-02T16:45:51+00:00
-dab798a1-d486-5853-bc20-b3be0cbb2ba3,27,gbif:5302225,Alpinia galanga (L.) Willd.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/5302225,2026-06-02T16:45:51+00:00
-0af385cb-6b6d-5aa9-a698-0125883e7279,371,gbif:5328074,Pandanus conoideus Lam.,Pandanaceae,KNApSAcK World,https://www.gbif.org/species/5328074,2026-06-02T16:45:52+00:00
-51ce85c0-1fb6-5326-be73-5cec5c1deaf7,25,gbif:5329904,Alocasia macrorrhizos (L.) G.Don,Araceae,KNApSAcK World,https://www.gbif.org/species/5329904,2026-06-02T16:45:51+00:00
-1fb5f087-89eb-5ae7-97d2-06a0db481291,145,gbif:5330776,Colocasia esculenta (L.) Schott,Araceae,KNApSAcK World,https://www.gbif.org/species/5330776,2026-06-02T16:45:51+00:00
-bb8b2142-b2b1-5a7b-89d6-5c8d3583ae97,523,gbif:5331181,Viola odorata L.,Violaceae,KNApSAcK World,https://www.gbif.org/species/5331181,2026-06-02T16:45:52+00:00
-969303e7-289f-5d47-904f-940d1d4aec07,237,gbif:5335125,Gardenia jasminoides J.Ellis,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/5335125,2026-06-02T16:45:51+00:00
-31918c3a-d147-522b-bc26-c09505d4920e,515,gbif:5338190,Uncaria gambir (W.Hunter) Roxb.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/5338190,2026-06-02T16:45:52+00:00
-1024dd44-90dc-51ce-a131-07032689a3dc,340,gbif:5339879,Morinda citrifolia L.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/5339879,2026-06-02T16:45:52+00:00
-3d51888b-eef3-525b-af81-afb633da55a5,143,gbif:5341313,Coleus amboinicus Lour.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/5341313,2026-06-02T16:45:51+00:00
-0e01015a-24e4-5ef5-a0f0-8fba3f9065ea,305,gbif:5341392,Leonurus sibiricus L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/5341392,2026-06-02T16:45:51+00:00
-1c9107e3-ade0-5135-a35a-7ec88f15668a,504,gbif:5341442,Thymus vulgaris L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/5341442,2026-06-02T16:45:52+00:00
-0d6adc23-9d12-5626-bfa7-0f66658f0f35,394,gbif:5341784,Physalis peruviana L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/5341784,2026-06-02T16:45:52+00:00
-af84e4bf-4bc0-5884-9ee7-8cac190e32cc,393,gbif:5341792,Physalis angulata L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/5341792,2026-06-02T16:45:52+00:00
-a04c7a3f-65dd-56b6-bc49-46249c2d09c2,3,gbif:5348700,Abrus fruticulosus Wall. ex Wight & Arn.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5348700,2026-06-02T16:45:51+00:00
-8825f002-dab2-5d23-98c8-1b20750fe904,4,gbif:5348711,Abrus precatorius L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5348711,2026-06-02T16:45:51+00:00
-711ab4df-f760-5b91-9d28-87fc5c2896b4,375,gbif:5348811,Parkia speciosa Hassk.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5348811,2026-06-02T16:45:52+00:00
-11397f99-feaa-557c-8b82-e7b07741a2fc,416,gbif:5349242,Pterocarpus indicus Willd.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5349242,2026-06-02T16:45:52+00:00
-83fe12fb-950c-57d4-915f-c88ba29ff609,209,gbif:5349581,Erythrina variegata L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5349581,2026-06-02T16:45:51+00:00
-994b9afb-da3a-5f8f-b70f-9594b0fc13b7,208,gbif:5349636,Erythrina subumbrans (Hassk.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5349636,2026-06-02T16:45:51+00:00
-69684683-53c8-5f13-b185-c057f8a77459,173,gbif:5350305,Derris elliptica (Wall.) Benth.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5350305,2026-06-02T16:45:51+00:00
-2e6c474a-aac5-5924-9a70-0491d31e0845,176,gbif:5350336,Derris trifoliata Lour.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5350336,2026-06-02T16:45:51+00:00
-dfbae356-a5e3-5106-91d5-ddd248dda4b5,385,gbif:5350452,Phaseolus vulgaris L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5350452,2026-06-02T16:45:52+00:00
-1bcdf520-e8fa-59d3-8fca-e17d63ba226e,45,gbif:5353770,Arachis hypogaea L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5353770,2026-06-02T16:45:51+00:00
-22873982-8873-5dc2-89b5-eea30788b71b,102,gbif:5357108,Cassia fistula L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5357108,2026-06-02T16:45:51+00:00
-da5da99d-7f62-5242-a5fd-afb5ec6d2975,103,gbif:5357125,Cassia javanica L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5357125,2026-06-02T16:45:51+00:00
-08d62596-c5d1-5a2e-91ea-e210c5235e5a,242,gbif:5359660,Glycine max (L.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5359660,2026-06-02T16:45:51+00:00
-0d529a87-cc65-51fd-b1f3-d8634d747517,243,gbif:5359662,Glycine max subsp. soja (Siebold & Zucc.) H.Ohashi,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5359662,2026-06-02T16:45:51+00:00
-1c0845b4-f8f7-5635-8668-3cb4cb68d12d,511,gbif:5360475,Trigonella foenum-graecum L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5360475,2026-06-02T16:45:52+00:00
-250e95f2-a8c5-53da-a24a-59f3a3c616d3,94,gbif:5361880,Cannabis sativa L.,Cannabaceae,KNApSAcK World,https://www.gbif.org/species/5361880,2026-06-02T16:45:51+00:00
-12e10725-0fd3-505a-9fe2-75a96247a29c,343,gbif:5361889,Morus alba L.,Moraceae,KNApSAcK World,https://www.gbif.org/species/5361889,2026-06-02T16:45:52+00:00
-df5a936f-4a6e-59ca-8195-401acc899c82,228,gbif:5361909,Ficus carica L.,Moraceae,KNApSAcK World,https://www.gbif.org/species/5361909,2026-06-02T16:45:51+00:00
-1059063f-370b-514f-9fe0-798361a65895,230,gbif:5361930,Ficus pumila L.,Moraceae,KNApSAcK World,https://www.gbif.org/species/5361930,2026-06-02T16:45:51+00:00
-ab1a582f-7122-5534-984a-eb378be4064d,344,gbif:5361944,Broussonetia papyrifera (L.) L'Hér. ex Vent.,Moraceae,KNApSAcK World,https://www.gbif.org/species/5361944,2026-06-02T16:45:51+00:00
-38c13651-8c9c-5efd-b033-4c39ce9f8eb3,483,gbif:5371679,Styrax benzoin Dryand.,Styracaceae,KNApSAcK World,https://www.gbif.org/species/5371679,2026-06-02T16:45:52+00:00
-e104fc82-a836-50c5-9dbb-5546e38ee23e,354,gbif:5371700,Nigella sativa L.,Ranunculaceae,KNApSAcK World,https://www.gbif.org/species/5371700,2026-06-02T16:45:52+00:00
-d1033b03-538e-5d47-90cd-78bf85e65b59,44,gbif:5371879,Apium graveolens L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/5371879,2026-06-02T16:45:51+00:00
-8f16e81c-7ebd-555f-8d79-d84936d26814,306,gbif:5376565,Lepidium sativum L.,Brassicaceae,KNApSAcK World,https://www.gbif.org/species/5376565,2026-06-02T16:45:51+00:00
-5d67c795-3425-54f6-8891-7a33c0cb7db5,316,gbif:5378605,Mallotus philippensis (Lam.) Müll.Arg.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/5378605,2026-06-02T16:45:51+00:00
-487e4400-6e4b-50cb-ac7a-43765a7c817e,264,gbif:5380015,Hura crepitans L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/5380015,2026-06-02T16:45:51+00:00
-771fe3e7-05ef-5d92-b819-e057630d41ed,433,gbif:5380041,Ricinus communis L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/5380041,2026-06-02T16:45:52+00:00
-88bde05d-d188-5163-9a87-6504dc0b798a,386,gbif:5381567,Phyllanthus acidus (L.) Skeels,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5381567,2026-06-02T16:45:52+00:00
-64cfc45f-fbb2-5a5b-86fb-d615de3e8503,388,gbif:5381660,Phyllanthus emblica L.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5381660,2026-06-02T16:45:52+00:00
-08d4e2df-6381-5469-8311-e7ad2b60a0a7,389,gbif:5381945,Phyllanthus niruri L.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5381945,2026-06-02T16:45:52+00:00
-72b079c0-13e1-57e2-a299-7782302b5168,390,gbif:5382478,Phyllanthus reticulatus Poir.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5382478,2026-06-02T16:45:52+00:00
-fa92b4f4-2a20-5ced-8684-f9680dded225,387,gbif:5382589,Phyllanthus amarus Schumach. & Thonn.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5382589,2026-06-02T16:45:52+00:00
-c636f177-e5e0-5352-83b4-ccdfc563bca5,391,gbif:5382780,Phyllanthus urinaria L.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5382780,2026-06-02T16:45:52+00:00
-32a1daf2-c2b2-52ba-8062-a83d1d95d4cd,33,gbif:5384397,Amaranthus tricolor L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/5384397,2026-06-02T16:45:51+00:00
-374810f3-4865-56b1-ac16-96ceb109ffc1,32,gbif:5384401,Amaranthus spinosus L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/5384401,2026-06-02T16:45:51+00:00
-b4f1aadb-7863-540b-9820-81c380e2afa7,183,gbif:5384509,Drymaria cordata (L.) Willd. ex Schult.,Caryophyllaceae,KNApSAcK World,https://www.gbif.org/species/5384509,2026-06-02T16:45:51+00:00
-6d1f4293-f882-5cac-a61d-4ea98eb5b46d,79,gbif:5384862,Bougainvillea glabra Choisy,Nyctaginaceae,KNApSAcK World,https://www.gbif.org/species/5384862,2026-06-02T16:45:51+00:00
-c0cdcd8e-d792-5bcc-8007-2d34bf929138,192,gbif:5384950,Eclipta prostrata (L.) L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5384950,2026-06-02T16:45:51+00:00
-b124e8f3-a469-54ed-9c7f-56a3428efd5e,191,gbif:5384955,Eclipta alba (L.) Hassk.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5384955,2026-06-02T16:45:51+00:00
-811b405a-cfcb-53e5-9cde-8c12bfa8a430,71,gbif:5389402,Bidens bipinnata L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5389402,2026-06-02T16:45:51+00:00
-2f234e16-e122-5d0d-a323-251811aec856,72,gbif:5391845,Bidens pilosa L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5391845,2026-06-02T16:45:51+00:00
-5fabf325-0264-5d5d-98e7-cc5e7da0aae3,497,gbif:5394163,Taraxacum officinale Weber ex F.H.Wigg.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5394163,2026-06-02T16:45:52+00:00
-7a405d0a-78cf-5dd4-8ce9-267395c76a4b,496,gbif:5394645,Taraxacum mongolicum Hand.-Mazz.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5394645,2026-06-02T16:45:52+00:00
-647a87a3-9ba6-534b-ae14-830baef2165b,75,gbif:5395639,Blumea lacera (Burm.fil.) DC.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5395639,2026-06-02T16:45:51+00:00
-6ba5abd6-8df7-5851-a12a-24a1c6423478,74,gbif:5395786,Blumea balsamifera (L.) DC.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5395786,2026-06-02T16:45:51+00:00
-464a8b20-f93a-5478-82c7-3a67094c61b8,197,gbif:5395925,Elephantopus scaber L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5395925,2026-06-02T16:45:51+00:00
-5d2b2b62-753a-541f-b4c1-5a326efe466b,332,gbif:5398421,Mikania micrantha Kunth,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5398421,2026-06-02T16:45:51+00:00
-fb02788b-a2d7-5935-8a5a-487082c8f634,14,gbif:5401673,Ageratum conyzoides L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5401673,2026-06-02T16:45:51+00:00
-e45c8eb1-1c30-5dfc-ba7a-31b6a43105dd,15,gbif:5401760,Ageratum houstonianum Mill.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5401760,2026-06-02T16:45:51+00:00
-083318e1-aca9-5fb6-a100-0b626f2a3fbc,476,gbif:5406675,Sterculia foetida L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5406675,2026-06-02T16:45:52+00:00
-a038eb28-ecbe-55b0-b796-8eb2e256b0c8,142,gbif:5406685,Cola acuminata (P.Beauv.) Schott & Endl.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5406685,2026-06-02T16:45:51+00:00
-7878f28d-f36f-5ec7-92c3-5dac16717f41,111,gbif:5406697,Ceiba pentandra (L.) Gaertn.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5406697,2026-06-02T16:45:51+00:00
-d55956d8-bdcf-5dc2-b8d6-a66971537a43,459,gbif:5406735,Sida rhombifolia L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5406735,2026-06-02T16:45:52+00:00
-b001be0a-cf2a-5c90-8458-8d2dda31cfee,349,gbif:5406817,Myristica fragrans Houtt.,Myristicaceae,KNApSAcK World,https://www.gbif.org/species/5406817,2026-06-02T16:45:52+00:00
-d49b4a6d-6192-5ec2-9232-c44907129f7e,41,gbif:5407099,Annona squamosa L.,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407099,2026-06-02T16:45:51+00:00
-7d7ebb22-8f6f-5dae-9896-950f608446f0,40,gbif:5407123,Annona reticulata L.,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407123,2026-06-02T16:45:51+00:00
-6ac5c230-db02-5815-824d-f9ade8f45627,39,gbif:5407273,Annona muricata L.,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407273,2026-06-02T16:45:51+00:00
-36977bfa-3568-57fa-8f9e-3bb7eb534b7a,435,gbif:5407571,Annona mucosa Jacq.,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407571,2026-06-02T16:45:51+00:00
-34b09199-8c78-5a37-8a5b-3cb788f67cfd,92,gbif:5407583,Cananga odorata (Lam.) Hook.f. & Thomson,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407583,2026-06-02T16:45:51+00:00
-7744bbdc-f810-5223-bd61-9bff46cc14b6,481,gbif:5414399,Strychnos nux-vomica L.,Loganiaceae,KNApSAcK World,https://www.gbif.org/species/5414399,2026-06-02T16:45:52+00:00
-c71707ad-fcee-5f35-b1e4-4779442a7b24,29,gbif:5414410,Alstonia scholaris (L.) R.Br.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/5414410,2026-06-02T16:45:51+00:00
-db80ff24-2d40-53cb-b3c8-ca93c541a328,181,gbif:5414995,Digitalis purpurea L.,Plantaginaceae,KNApSAcK World,https://www.gbif.org/species/5414995,2026-06-02T16:45:51+00:00
-ba15f02b-7677-5c68-a4e0-e60c86c86885,438,gbif:5415418,Ruellia tuberosa L.,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/5415418,2026-06-02T16:45:52+00:00
-57107070-218d-5477-9a27-7721ad168b32,321,gbif:5415976,Melaleuca leucadendra (L.) L.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/5415976,2026-06-02T16:45:51+00:00
-b84d8af0-5c5a-5f21-954d-57b0f85c1ebb,414,gbif:5420380,Psidium guajava L.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/5420380,2026-06-02T16:45:52+00:00
-597cf274-1fec-5e5e-b246-f6dac07ff42c,418,gbif:5420901,Punica granatum L.,Lythraceae,KNApSAcK World,https://www.gbif.org/species/5420901,2026-06-02T16:45:52+00:00
-b7960d0e-3148-54e8-aff0-a567bd9e6aba,303,gbif:5420912,Lawsonia inermis L.,Lythraceae,KNApSAcK World,https://www.gbif.org/species/5420912,2026-06-02T16:45:51+00:00
-26023f6b-046f-5f38-871b-4862f4a180ad,312,gbif:5420987,Ludwigia octovalvis (Jacq.) P.H.Raven,Onagraceae,KNApSAcK World,https://www.gbif.org/species/5420987,2026-06-02T16:45:51+00:00
-b471cdb7-ada5-5fcb-859a-108c931b97df,351,gbif:5421126,Nephelium lappaceum L.,Sapindaceae,KNApSAcK World,https://www.gbif.org/species/5421126,2026-06-02T16:45:52+00:00
-0ab2659c-3ebf-550f-851f-291b95753a80,11,gbif:5421195,Aegle marmelos (L.) Corrêa,Rutaceae,KNApSAcK World,https://www.gbif.org/species/5421195,2026-06-02T16:45:51+00:00
-5aa6f8c5-c5f3-5854-a460-9f5272cf71bf,35,gbif:5421368,Anacardium occidentale L.,Anacardiaceae,KNApSAcK World,https://www.gbif.org/species/5421368,2026-06-02T16:45:51+00:00
-9e9a1f4f-c829-528a-96de-3acf3c32258e,382,gbif:5524327,Phaleria macrocarpa (Scheff.) Boerl.,Thymelaeaceae,KNApSAcK World,https://www.gbif.org/species/5524327,2026-06-02T16:45:52+00:00
-1bcd3718-4829-5558-a1d2-12b0bc8061de,255,gbif:5546922,Helicteres isora L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5546922,2026-06-02T16:45:51+00:00
-47068472-28d1-594c-92b7-9bd7d8eddb2c,81,gbif:5555210,Brucea javanica (L.) Merr.,Simaroubaceae,KNApSAcK World,https://www.gbif.org/species/5555210,2026-06-02T16:45:51+00:00
-17a85e11-bc48-5804-8ade-253f4ed45c96,475,gbif:5592725,Stephania venosa (Blume) Spreng.,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/5592725,2026-06-02T16:45:52+00:00
-579381b9-b5da-5774-b06f-e52561ae8eaf,16,gbif:5597349,Aglaia odorata Lour.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/5597349,2026-06-02T16:45:51+00:00
-74cf8bf9-c5b5-53b6-8968-02edb671e993,527,gbif:5635525,Woodfordia fruticosa (L.) Kurz,Lythraceae,KNApSAcK World,https://www.gbif.org/species/5635525,2026-06-02T16:45:52+00:00
-5d414b86-69c4-514b-8352-d224a773e57c,480,gbif:5645531,Strychnos lucida R.Br.,Loganiaceae,KNApSAcK World,https://www.gbif.org/species/5645531,2026-06-02T16:45:52+00:00
-ea95036d-02a7-5466-8a8b-d74310f109ff,478,gbif:5645763,Strychnos ignatii Bergius,Loganiaceae,KNApSAcK World,https://www.gbif.org/species/5645763,2026-06-02T16:45:52+00:00
-731dfbce-b15e-50d2-b73f-8e1081d094b4,131,gbif:5834596,Clausena excavata Burm.fil.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/5834596,2026-06-02T16:45:51+00:00
-13cbe641-e59d-5c2b-acd3-e781409ef45e,324,gbif:5914287,Melia azedarach L.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/5914287,2026-06-02T16:45:51+00:00
-3323e797-d9a6-5d8f-9ff3-b51aa13fb671,38,gbif:6026372,Angelica keiskei (Miq.) Koidz.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/6026372,2026-06-02T16:45:51+00:00
-89220866-d3ce-5b46-9121-9465f28032c3,447,gbif:6358362,Scaevola taccada (Gaertn.) Roxb.,Goodeniaceae,KNApSAcK World,https://www.gbif.org/species/6358362,2026-06-02T16:45:52+00:00
-c36de55f-3310-570a-891a-15894bb4aa9e,8,gbif:6359819,Acanthus ilicifolius L.,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/6359819,2026-06-02T16:45:51+00:00
-b7a31c34-5fd0-5114-8b4e-3a5f3d6c61ed,304,gbif:6410563,Leonurus japonicus Houtt.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/6410563,2026-06-02T16:45:51+00:00
-0403012d-3f06-52b1-9448-8cd2550103b7,88,gbif:6412107,Callicarpa candicans (Burm.f.) Hochr.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/6412107,2026-06-02T16:45:51+00:00
-c313a183-c8a3-507e-97a2-9270ce035010,113,gbif:6429520,Celosia argentea f. cristata (L.) Schinz,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/6429520,2026-06-02T16:45:51+00:00
-6430846a-210a-5559-ad72-673cc5b2c8a1,127,gbif:6433679,Citrus hystrix DC.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/6433679,2026-06-02T16:45:51+00:00
-386644c3-5fe3-5bec-8bda-75381acb1968,519,gbif:6445734,Cyanthillium cinereum (L.) H.Rob.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/6445734,2026-06-02T16:45:51+00:00
-8a5d12ef-f854-592b-abd2-c211b33aa1b4,468,gbif:6446462,Solidago virgaurea L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/6446462,2026-06-02T16:45:52+00:00
-7600935c-c8c6-5fb1-a6da-ffba4d239d7c,262,gbif:7115794,Talipariti tiliaceum (L.) Fryxell,Malvaceae,KNApSAcK World,https://www.gbif.org/species/7115794,2026-06-02T16:45:52+00:00
-0fdd9619-aff6-5f46-9b47-f3cb8909fee3,116,gbif:7155766,Cerbera manghas L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/7155766,2026-06-02T16:45:51+00:00
-829e9934-423f-5671-aa41-a0eae1ca0edd,307,gbif:7223950,Leptospermum polygalifolium subsp. polygalifolium,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/7223950,2026-06-02T16:45:51+00:00
-3bab8320-ea92-5df7-b615-64c0ada00ffc,43,gbif:7262663,Antiaris toxicaria (Pers.) Lesch.,Moraceae,KNApSAcK World,https://www.gbif.org/species/7262663,2026-06-02T16:45:51+00:00
-0763450f-c107-54d8-97c7-7208bf30e774,431,gbif:7263230,Rhinacanthus nasutus (L.) Kuntze,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/7263230,2026-06-02T16:45:52+00:00
-33687568-e6d9-5ba7-9ad3-60fc052a5b54,445,gbif:7264721,Sapindus rarak DC.,Sapindaceae,KNApSAcK World,https://www.gbif.org/species/7264721,2026-06-02T16:45:52+00:00
-f3a47d42-1aa2-52d3-863b-8f801b909e39,474,gbif:7268792,Stephania japonica (Thunb.) Miers,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/7268792,2026-06-02T16:45:52+00:00
-fb653648-7594-5f5f-a4d3-efaad919ac0f,188,gbif:7271367,Dysoxylum acutangulum Miq.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/7271367,2026-06-02T16:45:51+00:00
-5c8a5aab-e1e3-5032-a898-c4fa1d924427,439,gbif:7291884,Rumex nepalensis Spreng.,Polygonaceae,KNApSAcK World,https://www.gbif.org/species/7291884,2026-06-02T16:45:52+00:00
-edeb27f1-aaf8-55a0-a01c-cebc494034b1,101,gbif:7302622,Senna alexandrina var. alexandrina,Fabaceae,KNApSAcK World,https://www.gbif.org/species/7302622,2026-06-02T16:45:52+00:00
-5c9f1cc4-c8de-5a0f-8e07-5352e809cb44,311,gbif:7304140,Litsea glutinosa (Lour.) C.B.Rob.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/7304140,2026-06-02T16:45:51+00:00
-d13b40db-3994-536d-bda5-609a23191cdc,268,gbif:7306536,Hyptis brevipes Poit.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7306536,2026-06-02T16:45:51+00:00
-2dfd454c-52a5-521c-8bf4-9edda2dcbc03,362,gbif:7308026,Orthosiphon aristatus (Blume) Miq.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7308026,2026-06-02T16:45:52+00:00
-fba910fb-ae83-59f9-b550-5786ef2a2f81,364,gbif:7308027,Orthosiphon aristatus var. aristatus,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7308027,2026-06-02T16:45:52+00:00
-699f9cd1-c9d0-503a-9ec8-eeeb1fcc31a1,450,gbif:7308714,Scutellaria indica L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7308714,2026-06-02T16:45:52+00:00
-c90ffab9-7215-58c7-8513-105a858dc38a,509,gbif:7317567,Trichosanthes tricuspidata Lour.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/7317567,2026-06-02T16:45:52+00:00
-d760489a-d188-585e-a821-aa4510eb9fd5,452,gbif:7329850,Selaginella doederleinii Hieron.,Selaginellaceae,KNApSAcK World,https://www.gbif.org/species/7329850,2026-06-02T16:45:52+00:00
-1b772f2d-9216-5927-84d5-8b0cb86c71bd,328,gbif:7330039,Mesua ferrea L.,Calophyllaceae,KNApSAcK World,https://www.gbif.org/species/7330039,2026-06-02T16:45:51+00:00
-58ab169b-6803-57eb-8600-8faca5d6c4f9,200,gbif:7330952,Embelia ribes Burm.fil.,Primulaceae,KNApSAcK World,https://www.gbif.org/species/7330952,2026-06-02T16:45:51+00:00
-7d0a454f-bec7-586f-b48c-14615ac6719e,520,gbif:7352653,"Vetiveria zizanioides Stapf, 1906",Poaceae,KNApSAcK World,https://www.gbif.org/species/7352653,2026-06-02T16:45:52+00:00
-7f4c8e0a-c709-544e-9a77-0e56a65a59f1,471,gbif:7367845,"Spilanthes acmella A.Chev., 1920",Asteraceae,KNApSAcK World,https://www.gbif.org/species/7367845,2026-06-02T16:45:52+00:00
-de878003-fcd3-50c1-849b-f0c460a3ed1f,201,gbif:7376217,Emilia sonchifolia (L.) DC. ex Wight,Asteraceae,KNApSAcK World,https://www.gbif.org/species/7376217,2026-06-02T16:45:51+00:00
-4d0c97db-babe-5698-990e-272c77766616,437,gbif:7390572,Rosa × damascena Mill.,Rosaceae,KNApSAcK World,https://www.gbif.org/species/7390572,2026-06-02T16:45:52+00:00
-a4e16489-9744-56f2-9699-ba98f75a9674,152,gbif:7393329,Cucurbita moschata (Duchesne) Duchesne ex Poir.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/7393329,2026-06-02T16:45:51+00:00
-781883a9-0ea0-5cf4-a8af-bf097de258df,361,gbif:7414934,Oroxylum indicum (L.) Kurz,Bignoniaceae,KNApSAcK World,https://www.gbif.org/species/7414934,2026-06-02T16:45:52+00:00
-8e2c89d3-8430-57e0-a9c8-81cde6a7533b,229,gbif:7467639,Ficus microcarpa L.fil.,Moraceae,KNApSAcK World,https://www.gbif.org/species/7467639,2026-06-02T16:45:51+00:00
-3361f727-f4d6-50fc-a01c-d4a812b9ccb0,485,gbif:7558421,Symphytum officinale L.,Boraginaceae,KNApSAcK World,https://www.gbif.org/species/7558421,2026-06-02T16:45:52+00:00
-4120fdb7-c842-5c5c-a7bc-50a5e991e1b5,147,gbif:7584507,Hellenia speciosa (J.Koenig) S.R.Dutta,Costaceae,KNApSAcK World,https://www.gbif.org/species/7584507,2026-06-02T16:45:51+00:00
-91ebe95b-6b76-5ffc-8817-2d010bf5f11a,87,gbif:7587087,Cajanus cajan (L.) Huth,Fabaceae,KNApSAcK World,https://www.gbif.org/species/7587087,2026-06-02T16:45:51+00:00
-5343796e-9023-5f92-8580-dc6b478d26db,284,gbif:7587215,Jasminum sambac (L.) Aiton,Oleaceae,KNApSAcK World,https://www.gbif.org/species/7587215,2026-06-02T16:45:51+00:00
-7ee52f33-7a42-594b-b302-6547e6ec3605,397,gbif:7606629,Piper cubeba L.fil.,Piperaceae,KNApSAcK World,https://www.gbif.org/species/7606629,2026-06-02T16:45:52+00:00
-a8f8e31e-bd14-538c-b537-9b743c9e28cf,333,gbif:7629955,Millingtonia hortensis L.fil.,Bignoniaceae,KNApSAcK World,https://www.gbif.org/species/7629955,2026-06-02T16:45:51+00:00
-7cee7592-10e3-5324-b5ce-1318bc740be8,424,gbif:7678610,Raphanus sativus L.,Brassicaceae,KNApSAcK World,https://www.gbif.org/species/7678610,2026-06-02T16:45:52+00:00
-8101f5c7-5621-50fe-8fe9-6598bb83289b,214,gbif:7694888,Eupatorium riparium Sch.Bip. ex Schnittsp.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/7694888,2026-06-02T16:45:51+00:00
-0deb1f2c-bbab-5e68-9908-855a3cf03ab0,413,gbif:7713954,Premna corymbosa Rottler,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7713954,2026-06-02T16:45:52+00:00
-02cd7868-fe4e-5d13-b363-ac922c7b456d,231,gbif:7852448,Ficus septica Burm.fil.,Moraceae,KNApSAcK World,https://www.gbif.org/species/7852448,2026-06-02T16:45:51+00:00
-964b15f4-d55b-59d7-ad36-610d622f6970,252,gbif:7883492,Hedychium coronarium J.Koenig,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/7883492,2026-06-02T16:45:51+00:00
-086bc03b-81e5-5777-9c8d-c881b3b83e58,449,gbif:7996273,Scutellaria discolor Wall. ex Benth.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7996273,2026-06-02T16:45:52+00:00
-c0f39a76-7f69-5795-bfc8-58f810afd725,278,gbif:7999386,Ipomoea pes-caprae (L.) R.Br.,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/7999386,2026-06-02T16:45:51+00:00
-fcdef5f2-39d2-51ff-94f1-2285c31e98d2,95,gbif:8034409,Canna indica L.,Cannaceae,KNApSAcK World,https://www.gbif.org/species/8034409,2026-06-02T16:45:51+00:00
-8a0f723a-c943-582a-bd4e-b1e4d513e515,48,gbif:8042568,Artemisia abrotanum L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/8042568,2026-06-02T16:45:51+00:00
-bf4b6a7d-ba5d-53fc-a018-9dd0771ef45f,212,gbif:8052532,"Eugenia aromatica Kuntze, 1891",Myrtaceae,KNApSAcK World,https://www.gbif.org/species/8052532,2026-06-02T16:45:51+00:00
-e2fd167b-5007-5c8d-8437-43d5e9d869eb,126,gbif:8077391,Citrus × aurantium L.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/8077391,2026-06-02T16:45:51+00:00
-9b600c0d-c81c-5ef5-8513-a56c9b80a832,395,gbif:8080300,Pimpinella anisum L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/8080300,2026-06-02T16:45:52+00:00
-b9c139c7-7a56-5adc-8b88-a7b6f3aca3d1,489,gbif:8172343,Tabernaemontana corymbosa Roxb. ex Wall.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/8172343,2026-06-02T16:45:52+00:00
-cfed09a3-069d-5efb-b082-9a7538b5b248,345,gbif:8190743,Murraya paniculata (L.) Jacq.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/8190743,2026-06-02T16:45:52+00:00
-55e70f6c-6df3-532b-adc0-d87815e57185,442,gbif:8249932,Salvia splendens Sellow ex Nees,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/8249932,2026-06-02T16:45:52+00:00
-e1f56081-6106-5129-a3e1-580e132bf3cb,457,gbif:8281950,Sesbania grandiflora (L.) Poir.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/8281950,2026-06-02T16:45:52+00:00
-7a2474e0-42e9-5f23-8696-92e68750f96c,505,gbif:8298918,Tinospora crispa (L.) Miers ex Hook.fil. & Thomson,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/8298918,2026-06-02T16:45:52+00:00
-2a236817-2e70-5939-8218-889a20421369,383,gbif:8305376,Phaseolus mungo Wall.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/8305376,2026-06-02T16:45:52+00:00
-2878ff7d-24d4-53f0-b0bc-e1da962af77d,2,gbif:8312665,Abelmoschus moschatus (L.) Medik.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/8312665,2026-06-02T16:45:51+00:00
-70582189-28a1-5b4f-bf99-2821bd13bf96,134,gbif:8355397,"Clerodendrum serratum Spreng., 1825",Lamiaceae,KNApSAcK World,https://www.gbif.org/species/8355397,2026-06-02T16:45:51+00:00
-829f7361-4d8b-5b77-a66e-c7fbbdc882d1,195,gbif:8368501,Elaeocarpus grandiflorus Sm.,Elaeocarpaceae,KNApSAcK World,https://www.gbif.org/species/8368501,2026-06-02T16:45:51+00:00
-83e99fa4-c3fe-58c3-acfc-3dc32e8a98ce,97,gbif:8403992,Capsicum frutescens L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/8403992,2026-06-02T16:45:51+00:00
-1d20c0c6-2414-5066-9946-432679cbc06b,266,gbif:8418338,Hydrocotyle sibthorpioides Lam.,Araliaceae,KNApSAcK World,https://www.gbif.org/species/8418338,2026-06-02T16:45:51+00:00
-ba372c6c-7637-50b2-9292-b386e3c357ad,272,gbif:8424006,Imperata cylindrica (L.) Raeusch.,Poaceae,KNApSAcK World,https://www.gbif.org/species/8424006,2026-06-02T16:45:51+00:00
-6694cd48-83fb-5b92-8cf3-9c48441702b5,366,gbif:8427624,Oxalis corniculata L.,Oxalidaceae,KNApSAcK World,https://www.gbif.org/species/8427624,2026-06-02T16:45:52+00:00
-838a29ec-5c90-5977-a20f-a83c06a3cd05,327,gbif:8707933,Mentha × piperita L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/8707933,2026-06-02T16:45:51+00:00
-f20a6769-8cdb-57b2-a977-cf1f180c97bf,465,gbif:9150405,Solanum nigrum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/9150405,2026-06-02T16:45:52+00:00
-cef21d69-6e29-58b2-8104-783ff9c32245,446,gbif:9197670,Breynia androgyna (L.) Chakrab. & N.P.Balakr.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/9197670,2026-06-02T16:45:51+00:00
-7dfad6a0-2853-5338-8754-f6fd7988441c,254,gbif:9206251,Helianthus annuus L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/9206251,2026-06-02T16:45:51+00:00
-fe116ca4-8edf-538b-b133-0c866d590d09,370,gbif:9296315,Pandanus amaryllifolius Roxb. ex Lindl.,Pandanaceae,KNApSAcK World,https://www.gbif.org/species/9296315,2026-06-02T16:45:52+00:00
-1062b492-225b-59c1-8d18-a9ce2be88d47,337,gbif:9381433,Trigastrotheca pentaphylla (L.) Thulin,Molluginaceae,KNApSAcK World,https://www.gbif.org/species/9381433,2026-06-02T16:45:52+00:00
-7f57093a-346a-5265-aed1-fa50040d7337,89,gbif:9531830,Calophyllum inophyllum L.,Calophyllaceae,KNApSAcK World,https://www.gbif.org/species/9531830,2026-06-02T16:45:51+00:00
-03a91385-273b-50f6-aba7-43ad7c10f881,372,gbif:9796769,Pangium edule Reinw.,Achariaceae,KNApSAcK World,https://www.gbif.org/species/9796769,2026-06-02T16:45:52+00:00
-69b1b6e9-e3f5-5cd1-a05d-a0167a49efb0,374,gbif:9827170,Urceola laevigata (Juss.) D.J.Middleton & Livsh.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/9827170,2026-06-02T16:45:52+00:00
+ba321e5b-4b13-5b40-b65d-1b0a56d04401,258,gbif:10045372,Abelmoschus moschatus subsp. moschatus,Malvaceae,KNApSAcK World,https://www.gbif.org/species/10045372,2026-07-12T20:10:40+00:00
+33b527b3-6d04-503c-9f82-5ead3fd9421a,267,gbif:10334868,Selenicereus undatus (Haw.) D.R.Hunt,Cactaceae,KNApSAcK World,https://www.gbif.org/species/10334868,2026-07-12T20:10:41+00:00
+a561d36a-7306-5e13-ba1f-4fb504a27db3,179,gbif:10722283,Grona styracifolia (Osbeck) H.Ohashi & K.Ohashi,Fabaceae,KNApSAcK World,https://www.gbif.org/species/10722283,2026-07-12T20:10:41+00:00
+48be323a-ce4b-5e52-8b16-e44e37d5ea1f,203,gbif:10769463,"Equisetum debile Roxb. ex Wall., 1829",Equisetaceae,KNApSAcK World,https://www.gbif.org/species/10769463,2026-07-12T20:10:41+00:00
+c87f1664-aa22-5226-a25a-57af532c71dd,175,gbif:10779326,Brachypterum scandens (Roxb.) Miq.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/10779326,2026-07-12T20:10:40+00:00
+674a9d0b-5355-5725-8acb-0809c5ed85c0,180,gbif:10833216,Grona triflora (L.) H.Ohashi & K.Ohashi,Fabaceae,KNApSAcK World,https://www.gbif.org/species/10833216,2026-07-12T20:10:41+00:00
+dbd102ec-bc98-5c24-ab80-073046e3ef96,12,gbif:10974033,Ouret lanata (L.) Kuntze,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/10974033,2026-07-12T20:10:41+00:00
+b4fb8750-4e5c-5516-952d-5ff434462a91,194,gbif:10988361,Elaeocarpus sphaericus (Gaertn.) Ettingsh.,Elaeocarpaceae,KNApSAcK World,https://www.gbif.org/species/10988361,2026-07-12T20:10:41+00:00
+da452b1d-917d-58e3-907f-b4c98c1dae7a,34,gbif:11037528,Meistera aculeata (Roxb.) Škorničk. & M.F.Newman,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/11037528,2026-07-12T20:10:41+00:00
+f1eae43b-78d9-5406-80e6-bec031f01e77,84,gbif:11131378,Caesalpinia major Brenan,Fabaceae,KNApSAcK World,https://www.gbif.org/species/11131378,2026-07-12T20:10:40+00:00
+bdde9185-f5f6-5777-863d-aaf59a3898a1,177,gbif:11440699,"Desmodium gangeticum Puri, 1951",Fabaceae,KNApSAcK World,https://www.gbif.org/species/11440699,2026-07-12T20:10:41+00:00
+71933f11-9b73-577d-bd74-94f4c0b48786,83,gbif:11973078,Ticanto crista (L.) R.Clark & Gagnon,Fabaceae,KNApSAcK World,https://www.gbif.org/species/11973078,2026-07-12T20:10:41+00:00
+0875a0b5-de0e-5867-8e57-12e402b318e9,132,gbif:12187916,Tarenaya houtteana (Schltdl.) Soares Neto & Roalson,Cleomaceae,KNApSAcK World,https://www.gbif.org/species/12187916,2026-07-12T20:10:41+00:00
+52a7672d-0c4c-5b2b-b48e-9f2575e878f6,423,gbif:12203608,Combretum indicum (L.) De Filipps,Combretaceae,KNApSAcK World,https://www.gbif.org/species/12203608,2026-07-12T20:10:40+00:00
+7cdfdfc7-d2a7-5273-9acc-c946f0675d70,245,gbif:2653133,Gnetum gnemon L.,Gnetaceae,KNApSAcK World,https://www.gbif.org/species/2653133,2026-07-12T20:10:41+00:00
+35b7c4bb-1cc9-593f-b325-1a73b927e4e5,163,gbif:2683217,Cycas revoluta Thunb.,Cycadaceae,KNApSAcK World,https://www.gbif.org/species/2683217,2026-07-12T20:10:40+00:00
+b89b9db2-bd4f-597f-aed6-3b7accfe029a,402,gbif:2684855,Platycladus orientalis (L.) Franco,Cupressaceae,KNApSAcK World,https://www.gbif.org/species/2684855,2026-07-12T20:10:41+00:00
+d95dc1a7-a51a-5e58-a778-0a4890fc7f2f,239,gbif:2687885,Ginkgo biloba L.,Ginkgoaceae,KNApSAcK World,https://www.gbif.org/species/2687885,2026-07-12T20:10:41+00:00
+384a8fa5-2563-55d9-92d8-bf83d7683747,365,gbif:2703459,Oryza sativa L.,Poaceae,KNApSAcK World,https://www.gbif.org/species/2703459,2026-07-12T20:10:41+00:00
+4e11acfe-b176-580d-973f-c9d1965471a7,441,gbif:2703912,Saccharum officinarum L.,Poaceae,KNApSAcK World,https://www.gbif.org/species/2703912,2026-07-12T20:10:41+00:00
+f0f8b0f9-18fc-5e3d-85c5-8216285aea27,166,gbif:2705267,Cymbopogon nardus (L.) Rendle,Poaceae,KNApSAcK World,https://www.gbif.org/species/2705267,2026-07-12T20:10:40+00:00
+bac11d3d-45c1-5f6b-93ee-b5b7d6658bc4,165,gbif:2705275,Cymbopogon citratus (DC.) Stapf,Poaceae,KNApSAcK World,https://www.gbif.org/species/2705275,2026-07-12T20:10:40+00:00
+1e1b00de-1138-50ee-bd98-d20ad26bcb0a,141,gbif:2706301,Coix lacryma-jobi L.,Poaceae,KNApSAcK World,https://www.gbif.org/species/2706301,2026-07-12T20:10:40+00:00
+6e03fa79-16e8-5066-9e39-8ce174b861b3,168,gbif:2714818,Cyperus rotundus L.,Cyperaceae,KNApSAcK World,https://www.gbif.org/species/2714818,2026-07-12T20:10:40+00:00
+c928714c-d471-5533-93b1-1c0f34957757,167,gbif:2715729,Cyperus iria L.,Cyperaceae,KNApSAcK World,https://www.gbif.org/species/2715729,2026-07-12T20:10:40+00:00
+6c5de1a3-c72b-5431-a43a-432773e9ded2,295,gbif:2718767,Cyperus brevifolius (Rottb.) Hassk.,Cyperaceae,KNApSAcK World,https://www.gbif.org/species/2718767,2026-07-12T20:10:40+00:00
+3f362466-dfe7-5b86-9cfc-49cf8e0b065b,329,gbif:2733781,Metroxylon sagu Rottb.,Arecaceae,KNApSAcK World,https://www.gbif.org/species/2733781,2026-07-12T20:10:41+00:00
+87cd29ae-d99e-541c-a507-8da019a172c2,78,gbif:2733934,Borassus flabellifer L.,Arecaceae,KNApSAcK World,https://www.gbif.org/species/2733934,2026-07-12T20:10:40+00:00
+8e4e6851-0342-5695-a2e3-3ee680b9ef18,137,gbif:2735117,Cocos nucifera L.,Arecaceae,KNApSAcK World,https://www.gbif.org/species/2735117,2026-07-12T20:10:40+00:00
+1b5fd7ac-4941-56c4-af2f-d6735f37c9e6,47,gbif:2736531,Areca catechu L.,Arecaceae,KNApSAcK World,https://www.gbif.org/species/2736531,2026-07-12T20:10:40+00:00
+9f113392-c9da-5edd-af63-a1f323c112e5,241,gbif:2740024,Gloriosa superba L.,Colchicaceae,KNApSAcK World,https://www.gbif.org/species/2740024,2026-07-12T20:10:41+00:00
+37f8783d-72d2-5ce3-bca1-091d2c989bed,149,gbif:2747430,Crocus sativus L.,Iridaceae,KNApSAcK World,https://www.gbif.org/species/2747430,2026-07-12T20:10:40+00:00
+e4eecaca-2f71-5c22-87d6-b1a4dbfaa645,199,gbif:2749556,Eleutherine bulbosa (Mill.) Urb.,Iridaceae,KNApSAcK World,https://www.gbif.org/species/2749556,2026-07-12T20:10:41+00:00
+1ae12ba1-d08e-5629-9c80-09f65b518712,182,gbif:2755784,Dioscorea hispida Dennst.,Dioscoreaceae,KNApSAcK World,https://www.gbif.org/species/2755784,2026-07-12T20:10:41+00:00
+3d1bc6a8-1345-590c-bbd6-4306c57beba8,534,gbif:2757108,Zingiber zerumbet (L.) Roscoe ex Sm.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757108,2026-07-12T20:10:42+00:00
+eeb880ea-6aaa-5182-9d2e-667691adabe1,532,gbif:2757204,Zingiber purpureum Roscoe,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757204,2026-07-12T20:10:42+00:00
+6a811452-0eb3-5bdf-8f21-fb79b6b73361,533,gbif:2757280,Zingiber officinale Roscoe,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757280,2026-07-12T20:10:42+00:00
+9045151f-c55b-5859-b030-a23b9e4e07d3,162,gbif:2757545,Curcuma zedoaria (Christm.) Roscoe,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757545,2026-07-12T20:10:40+00:00
+4817afd9-0ab7-5252-ad35-920771f21a52,161,gbif:2757547,Curcuma zanthorrhiza Roxb.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757547,2026-07-12T20:10:40+00:00
+0de0e5d0-e509-544b-b284-628244ac66dd,156,gbif:2757572,Curcuma heyneana Valeton & Zijp,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757572,2026-07-12T20:10:40+00:00
+59015732-a77d-5cb8-9e12-fedf9538b23d,157,gbif:2757624,Curcuma longa L.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757624,2026-07-12T20:10:40+00:00
+76d675cb-5968-5870-ad50-5d7c01adfadb,154,gbif:2757635,Curcuma aeruginosa Roxb.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757635,2026-07-12T20:10:40+00:00
+f3a26e3e-8cf5-52bb-8fb9-74f887a6cd7a,158,gbif:2757639,Curcuma mangga Valeton & Zijp,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2757639,2026-07-12T20:10:40+00:00
+01f6e126-03d2-5370-84d4-64f8fcf12f1d,76,gbif:2758480,Boesenbergia rotunda (L.) Mansf.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2758480,2026-07-12T20:10:40+00:00
+d50930be-8d33-56fb-9350-c39eb62194b3,198,gbif:2759871,Elettaria cardamomum (L.) Maton,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/2759871,2026-07-12T20:10:41+00:00
+b7c3acc3-f7ce-593a-a0ff-309e34a3b4bd,346,gbif:2762752,Musa × paradisiaca L.,Musaceae,KNApSAcK World,https://www.gbif.org/species/2762752,2026-07-12T20:10:41+00:00
+12efbb3b-294b-590a-9a72-6b074dd9cf2e,193,gbif:2765942,Pontederia crassipes Mart.,Pontederiaceae,KNApSAcK World,https://www.gbif.org/species/2765942,2026-07-12T20:10:41+00:00
+f9d33b87-1b71-5095-8772-5eca6e3c8715,56,gbif:2768772,Asparagus cochinchinensis (Lour.) Merr.,Asparagaceae,KNApSAcK World,https://www.gbif.org/species/2768772,2026-07-12T20:10:40+00:00
+409c5ae5-226b-5cb5-b859-1339e1ebac3e,360,gbif:2774158,Ophiopogon japonicus (Thunb.) Ker Gawl.,Asparagaceae,KNApSAcK World,https://www.gbif.org/species/2774158,2026-07-12T20:10:41+00:00
+af283b6d-64da-5b43-8832-6fe17728a4c7,26,gbif:2777724,Aloe vera (L.) Burm.f.,Asphodelaceae,KNApSAcK World,https://www.gbif.org/species/2777724,2026-07-12T20:10:40+00:00
+30e55351-849a-53ad-b6f0-be441a42cd1d,518,gbif:2803398,Vanilla planifolia Andrews,Orchidaceae,KNApSAcK World,https://www.gbif.org/species/2803398,2026-07-12T20:10:42+00:00
+9a824a48-25db-561a-9282-b60925c14356,148,gbif:2853796,Crinum asiaticum L.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2853796,2026-07-12T20:10:40+00:00
+a628cf0c-a603-596e-8b61-a08c6b9751b4,24,gbif:2856297,Allium tuberosum Rottler ex Spreng.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2856297,2026-07-12T20:10:40+00:00
+61a98913-6049-5212-8482-2dc81251b4dd,21,gbif:2856307,Allium chinense G.Don,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2856307,2026-07-12T20:10:40+00:00
+155a3638-b4de-5556-809a-4cc137946db6,22,gbif:2856504,Allium fistulosum L.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2856504,2026-07-12T20:10:40+00:00
+49061609-9ae6-568a-a985-cd7300ccd76b,23,gbif:2856681,Allium sativum L.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2856681,2026-07-12T20:10:40+00:00
+598ec78f-d280-5fcc-b8bb-c2acc0957374,20,gbif:2857697,Allium cepa L.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2857697,2026-07-12T20:10:40+00:00
+ea103730-c4b4-58c4-b58e-e30f9d5ba61a,530,gbif:2859976,Zephyranthes candida Herb.,Amaryllidaceae,KNApSAcK World,https://www.gbif.org/species/2859976,2026-07-12T20:10:42+00:00
+cdc786c3-8bca-5b99-8e5a-e341e9f5ef1b,263,gbif:2868708,Homalomena occulta (Lour.) Schott,Araceae,KNApSAcK World,https://www.gbif.org/species/2868708,2026-07-12T20:10:41+00:00
+a92ff767-3d00-527f-97aa-c6d17c9dd1fb,10,gbif:2873769,Acorus calamus L.,Acoraceae,KNApSAcK World,https://www.gbif.org/species/2873769,2026-07-12T20:10:40+00:00
+1a2a2f3c-2693-533b-afe1-5b18300a0e89,376,gbif:2874211,Passiflora foetida L.,Passifloraceae,KNApSAcK World,https://www.gbif.org/species/2874211,2026-07-12T20:10:41+00:00
+a02fd890-c756-5c36-8d4f-67efa3fea396,98,gbif:2874484,Carica papaya L.,Caricaceae,KNApSAcK World,https://www.gbif.org/species/2874484,2026-07-12T20:10:40+00:00
+7c03fa34-7db4-58f6-8198-9b1f52eeaa9d,70,gbif:2874524,Benincasa hispida (Thunb.) Cogn.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874524,2026-07-12T20:10:40+00:00
+e28caa16-d112-57d2-b6db-4430329784da,151,gbif:2874569,Cucumis sativus L.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874569,2026-07-12T20:10:40+00:00
+00b03b5a-621c-5e2d-8b32-64177d61e42c,339,gbif:2874580,Momordica cochinchinensis (Lour.) Spreng.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874580,2026-07-12T20:10:41+00:00
+c48c03d1-51ad-5322-944b-ed223e9f78d7,338,gbif:2874581,Momordica charantia L.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874581,2026-07-12T20:10:41+00:00
+0a48507f-8423-5e6e-a8b8-b74fd385a9c8,313,gbif:2874599,Luffa aegyptiaca Mill.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874599,2026-07-12T20:10:41+00:00
+4e3afe00-209c-5830-a758-05993aeaa1db,451,gbif:2874612,Sechium edule (Jacq.) Sw.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874612,2026-07-12T20:10:41+00:00
+64e34a76-a01e-5d45-93f8-dee2689066da,124,gbif:2874621,Citrullus lanatus (Thunb.) Matsum. & Nakai,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/2874621,2026-07-12T20:10:40+00:00
+2699fc0b-ba70-5421-87fb-e4f9698879d8,513,gbif:2874852,Turnera ulmifolia L.,Turneraceae,KNApSAcK World,https://www.gbif.org/species/2874852,2026-07-12T20:10:41+00:00
+519e2ff2-26db-549c-a1c7-52252728e7b3,73,gbif:2874863,Bixa orellana L.,Bixaceae,KNApSAcK World,https://www.gbif.org/species/2874863,2026-07-12T20:10:40+00:00
+930a2ff9-23f1-5624-8ded-c87b3da62f54,356,gbif:2882429,Nymphaea lotus L.,Nymphaeaceae,KNApSAcK World,https://www.gbif.org/species/2882429,2026-07-12T20:10:41+00:00
+e2d3573c-a835-5b22-8d7e-72a6ec69a84a,350,gbif:2882449,Nelumbo nucifera Gaertn.,Nelumbonaceae,KNApSAcK World,https://www.gbif.org/species/2882449,2026-07-12T20:10:41+00:00
+b1af4455-a1f3-58ae-801d-d017fe5c8104,238,gbif:2882753,Gaultheria procumbens L.,Ericaceae,KNApSAcK World,https://www.gbif.org/species/2882753,2026-07-12T20:10:41+00:00
+1b81f96c-cdb9-5515-b718-acb4eeef7663,315,gbif:2883352,Madhuca longifolia var. latifolia (Roxb.) A.Chev.,Sapotaceae,KNApSAcK World,https://www.gbif.org/species/2883352,2026-07-12T20:10:41+00:00
+f2a5f8f4-943c-5649-9571-21911257ce21,335,gbif:2883768,Mimusops elengi L.,Sapotaceae,KNApSAcK World,https://www.gbif.org/species/2883768,2026-07-12T20:10:41+00:00
+23188d80-167e-54a9-853a-d9df68f52164,320,gbif:2885158,Manilkara zapota (L.) P.Royen,Sapotaceae,KNApSAcK World,https://www.gbif.org/species/2885158,2026-07-12T20:10:41+00:00
+a276ec76-a93d-5ff6-b99a-cca2b39a11a1,373,gbif:2888439,Papaver somniferum L.,Papaveraceae,KNApSAcK World,https://www.gbif.org/species/2888439,2026-07-12T20:10:41+00:00
+49918304-230f-5233-bd85-90bf15b3ba90,517,gbif:2888763,Valeriana officinalis L.,Caprifoliaceae,KNApSAcK World,https://www.gbif.org/species/2888763,2026-07-12T20:10:42+00:00
+c815c0cf-090e-5fa0-b957-b2770e62e524,430,gbif:2888864,Rheum palmatum L.,Polygonaceae,KNApSAcK World,https://www.gbif.org/species/2888864,2026-07-12T20:10:41+00:00
+0d5f6e9d-7447-5837-a4f1-44e4eb507a22,444,gbif:2889785,Santalum album L.,Santalaceae,KNApSAcK World,https://www.gbif.org/species/2889785,2026-07-12T20:10:41+00:00
+7ffe905a-6be3-5a37-b786-240f09cde9ff,528,gbif:2889811,Ximenia americana L.,Ximeniaceae,KNApSAcK World,https://www.gbif.org/species/2889811,2026-07-12T20:10:42+00:00
+788f4b29-9c7d-593f-aaf6-ad890fc330d2,59,gbif:2891640,Averrhoa bilimbi L.,Oxalidaceae,KNApSAcK World,https://www.gbif.org/species/2891640,2026-07-12T20:10:40+00:00
+42ac1560-b9da-5db9-ae25-b8b1c210ee67,60,gbif:2891641,Averrhoa carambola L.,Oxalidaceae,KNApSAcK World,https://www.gbif.org/species/2891641,2026-07-12T20:10:40+00:00
+971c31b9-b4ea-5684-b3c4-d4ad4f0a1d89,271,gbif:2891773,Impatiens balsamina L.,Balsaminaceae,KNApSAcK World,https://www.gbif.org/species/2891773,2026-07-12T20:10:41+00:00
+cd41e282-4b71-56ac-9087-3b576ab6d986,109,gbif:2891930,Casuarina equisetifolia L.,Casuarinaceae,KNApSAcK World,https://www.gbif.org/species/2891930,2026-07-12T20:10:40+00:00
+87759e97-b16c-5114-80ef-4de17173d5f1,348,gbif:2892558,Mussaenda pubescens Dryand.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2892558,2026-07-12T20:10:41+00:00
+b0a0c70f-340e-52bf-b3e5-69f51b35041a,138,gbif:2895345,Coffea arabica L.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2895345,2026-07-12T20:10:40+00:00
+b3ebb426-4906-5f75-bf37-67dcc7c397cb,140,gbif:2895528,Coffea canephora Pierre ex A.Froehner,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2895528,2026-07-12T20:10:40+00:00
+3b2caea6-c831-588d-877f-aed509f9c5ea,282,gbif:2905600,Ixora chinensis Lam.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2905600,2026-07-12T20:10:41+00:00
+0b49e5e5-a40e-5f47-9641-b946c776811f,369,gbif:2909527,Paederia foetida L.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2909527,2026-07-12T20:10:41+00:00
+c997f3c0-853a-5034-8081-990481d76fe7,253,gbif:2911970,Oldenlandia corymbosa L.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2911970,2026-07-12T20:10:41+00:00
+d9ed2164-9d0a-5d2d-8772-4e187f4412e9,115,gbif:2921359,Carapichea ipecacuanha (Brot.) L.Andersson,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/2921359,2026-07-12T20:10:40+00:00
+3d49d23c-a77d-5fd3-b332-ae97463c9d3f,300,gbif:2925303,Lantana camara L.,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925303,2026-07-12T20:10:41+00:00
+1d3870dd-d01f-5067-a9f3-16e92df541c1,301,gbif:2925321,Lantana trifolia L.,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925321,2026-07-12T20:10:41+00:00
+ba699fda-df4b-5c26-9542-d45cfe38b634,473,gbif:2925462,Stachytarpheta mutabilis (Jacq.) Vahl,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925462,2026-07-12T20:10:41+00:00
+8325ae47-c6c7-5e7b-89b1-01cbafa627bd,472,gbif:2925463,Stachytarpheta jamaicensis (L.) Vahl,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925463,2026-07-12T20:10:41+00:00
+2772c6e1-69e9-5a24-9abc-33fd1944a2bf,525,gbif:2925561,Vitex trifolia L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2925561,2026-07-12T20:10:42+00:00
+39b0f416-813e-574b-9bba-b17700bedfc0,524,gbif:2925564,Vitex negundo L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2925564,2026-07-12T20:10:42+00:00
+e0d2a967-720d-5cf1-a709-4fad8be84402,499,gbif:2925649,Tectona grandis L.f.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2925649,2026-07-12T20:10:41+00:00
+da6b2d83-f414-59d2-8402-00bbcb1014ce,185,gbif:2925655,Duranta erecta L.,Verbenaceae,KNApSAcK World,https://www.gbif.org/species/2925655,2026-07-12T20:10:41+00:00
+5eb02004-fb3d-5f01-bf78-7973d0270dc3,256,gbif:2925788,Heliotropium indicum L.,Heliotropiaceae,KNApSAcK World,https://www.gbif.org/species/2925788,2026-07-12T20:10:41+00:00
+d1ebcc6d-9f4f-5e67-b9dd-ad478bf17856,409,gbif:2926672,Pogostemon cablin (Blanco) Benth.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2926672,2026-07-12T20:10:41+00:00
+0854a2b6-6971-5c6e-bcbd-f3cecb691b95,357,gbif:2927096,Ocimum basilicum L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2927096,2026-07-12T20:10:41+00:00
+f2880fa9-8ead-51f1-ac51-57becfb05448,358,gbif:2927100,Ocimum tenuiflorum L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2927100,2026-07-12T20:10:41+00:00
+2e7b23b2-8822-5f8b-b469-fcc4ef6912b5,326,gbif:2927192,Mentha arvensis L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/2927192,2026-07-12T20:10:41+00:00
+6c6ccc77-d2e7-5843-b6ae-355e75208af6,275,gbif:2928525,Ipomoea aquatica Forssk.,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/2928525,2026-07-12T20:10:41+00:00
+c36925b7-9b60-52f2-a761-475471c5965d,277,gbif:2928531,Ipomoea cairica (L.) Sweet,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/2928531,2026-07-12T20:10:41+00:00
+138e60b9-7feb-552a-9256-e60cbe794341,276,gbif:2928551,Ipomoea batatas (L.) Lam.,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/2928551,2026-07-12T20:10:41+00:00
+c5e8388a-e6b8-5723-9997-d1c5eb953650,421,gbif:2928562,Ipomoea quamoclit L.,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/2928562,2026-07-12T20:10:41+00:00
+8a0bed64-546e-57fd-94c4-b0197c56b630,169,gbif:2928747,Datura metel L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2928747,2026-07-12T20:10:40+00:00
+935d1b37-a8f3-5901-9b26-69c29cac395d,170,gbif:2928751,Datura stramonium L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2928751,2026-07-12T20:10:40+00:00
+f31e3be3-f1ba-502c-9c13-862c80eabddc,171,gbif:2928753,Datura stramonium var. tatula (L.) Torr.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2928753,2026-07-12T20:10:40+00:00
+021f486c-9a50-5cc2-ae22-bdb5f380427f,353,gbif:2928774,Nicotiana tabacum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2928774,2026-07-12T20:10:41+00:00
+bf88e032-efd2-53ef-9486-8606e3a946ee,462,gbif:2929848,Solanum violaceum Ortega,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2929848,2026-07-12T20:10:41+00:00
+e0eebf3a-d8a8-5f9e-83f0-e1ce7c13d71a,463,gbif:2930137,Solanum lycopersicum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2930137,2026-07-12T20:10:41+00:00
+493a8c4b-3b61-511b-9d08-555347344dec,467,gbif:2930262,Solanum tuberosum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2930262,2026-07-12T20:10:41+00:00
+c8d17433-cf8f-508e-ad1e-4803a952dedd,464,gbif:2930617,Solanum melongena L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2930617,2026-07-12T20:10:41+00:00
+04aaf9c0-d503-5693-b9d2-afdb9178d95f,466,gbif:2932389,Solanum torvum Sw.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2932389,2026-07-12T20:10:41+00:00
+c477b8f8-e78f-5e79-a309-76b5966d0a24,96,gbif:2932944,Capsicum annuum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/2932944,2026-07-12T20:10:40+00:00
+ac804791-0638-5b18-aa76-e712c711b543,415,gbif:2944683,Psophocarpus tetragonolobus (L.) DC.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2944683,2026-07-12T20:10:41+00:00
+6b7427f2-8c69-5cc5-a343-9008168c36be,136,gbif:2946519,Clitoria ternatea L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2946519,2026-07-12T20:10:40+00:00
+1ea07dd2-99fd-5ef6-b7c1-88e614a6f857,174,gbif:2947483,Brachypterum robustum (Roxb. ex DC.) Dalzell & A.Gibson,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2947483,2026-07-12T20:10:40+00:00
+6e707a05-39e3-5c8e-96a6-9638f12793d7,178,gbif:2948568,Phyllodium pulchellum (L.) Desv.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2948568,2026-07-12T20:10:41+00:00
+0e9b2ea8-ea18-5726-9710-30d9dc11e306,211,gbif:2951871,Euchresta horsfieldii (Lesch.) Benn.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2951871,2026-07-12T20:10:41+00:00
+61951194-1031-5191-89f5-060538998d44,378,gbif:2952775,Peltophorum pterocarpum (DC.) Backer ex K.Heyne,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2952775,2026-07-12T20:10:41+00:00
+08f944e4-e577-5111-93c9-66049e72e970,66,gbif:2953871,Bauhinia purpurea L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2953871,2026-07-12T20:10:40+00:00
+a75c93bd-bf17-5642-b2a7-8cefcad530a6,106,gbif:2956905,Senna siamea (Lam.) H.S.Irwin & Barneby,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2956905,2026-07-12T20:10:41+00:00
+1650f96d-00e3-5d68-9e06-358134624a4d,100,gbif:2956947,Senna alata (L.) Roxb.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2956947,2026-07-12T20:10:41+00:00
+0b96eb85-e853-5640-887c-a1eebeaee223,454,gbif:2957379,Senna sophera (L.) Roxb.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2957379,2026-07-12T20:10:41+00:00
+a61ad6fb-bf3a-5493-9caa-a36e5cef7ba3,107,gbif:2957728,Senna tora (L.) Roxb.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2957728,2026-07-12T20:10:41+00:00
+4f38415e-40f7-5caf-8b56-2f68ffc8759f,104,gbif:2957966,Senna occidentalis (L.) Link,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2957966,2026-07-12T20:10:41+00:00
+aa19c5ca-0e00-5de6-9341-d71848a7f4f1,105,gbif:2958032,Senna alexandrina Mill.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2958032,2026-07-12T20:10:41+00:00
+f580fbea-c00f-5e4e-be19-3ba6641cb1fa,85,gbif:2958715,Caesalpinia pulcherrima (L.) Sw.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2958715,2026-07-12T20:10:40+00:00
+7711a112-0b0f-54fd-b1fb-5648b924022d,86,gbif:2958871,Biancaea sappan (L.) Tod.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2958871,2026-07-12T20:10:40+00:00
+ded4fc69-7c4a-5751-a164-4eb8c860b841,470,gbif:2958970,Sophora tomentosa L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2958970,2026-07-12T20:10:41+00:00
+f4acff8d-05f4-511b-b9e2-646dac5eec7c,274,gbif:2963211,Intsia bijuga (Colebr.) Kuntze,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2963211,2026-07-12T20:10:41+00:00
+d735cf31-61e2-5cd7-b833-25f2766538c8,482,gbif:2963569,Styphnolobium japonicum (L.) Schott,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2963569,2026-07-12T20:10:41+00:00
+3201baaf-b192-5961-90f7-0fce9a80b844,244,gbif:2965732,Glycyrrhiza glabra L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2965732,2026-07-12T20:10:41+00:00
+f1ef47b5-d5f2-5b42-9c6b-157b895b1928,410,gbif:2965911,Pongamia pinnata (L.) Pierre,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2965911,2026-07-12T20:10:41+00:00
+ace8788d-0e5e-527f-bdfd-fd2b3354a299,334,gbif:2969284,Mimosa pudica L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2969284,2026-07-12T20:10:41+00:00
+beeec76b-4163-5a33-9b6a-086fce655b15,309,gbif:2970418,Leucaena leucocephala (Lam.) de Wit,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2970418,2026-07-12T20:10:41+00:00
+8bf9b08c-1def-591a-9bcc-ca4b6255e877,458,gbif:2970648,Sesbania sesban (L.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2970648,2026-07-12T20:10:41+00:00
+fbf093e8-9305-52ea-8d99-0c7aef404821,273,gbif:2972043,Indigofera tinctoria L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2972043,2026-07-12T20:10:41+00:00
+5313be9b-a3c2-54f6-849f-079a6e2e8399,17,gbif:2973197,Albizia chinensis (Osbeck) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2973197,2026-07-12T20:10:40+00:00
+72a69b6a-2a5a-57f6-8aed-609d5e8737b8,367,gbif:2974683,Pachyrhizus erosus (L.) Urb.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2974683,2026-07-12T20:10:41+00:00
+afc8d2f6-c66c-59e7-831c-adbebb9154c7,495,gbif:2975768,Tamarindus indica L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2975768,2026-07-12T20:10:41+00:00
+b84f723c-bf5d-53b2-810e-e058fb04d17a,202,gbif:2976244,Entada phaseoloides (L.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2976244,2026-07-12T20:10:41+00:00
+a65d370e-3d44-5656-866f-1ae48465e869,417,gbif:2977636,Pueraria montana (Lour.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2977636,2026-07-12T20:10:41+00:00
+0b821a53-15d0-51ac-ab9f-bbf033aba403,384,gbif:2982380,Vigna radiata (L.) R.Wilczek,Fabaceae,KNApSAcK World,https://www.gbif.org/species/2982380,2026-07-12T20:10:42+00:00
+4ac4ff2c-f5ca-5521-9d94-9fa1af9c1600,508,gbif:2984508,Trema orientale (L.) Blume,Cannabaceae,KNApSAcK World,https://www.gbif.org/species/2984508,2026-07-12T20:10:41+00:00
+96801dd1-e4f3-538e-84d6-092f1f2558f2,54,gbif:2984565,Artocarpus heterophyllus Lam.,Moraceae,KNApSAcK World,https://www.gbif.org/species/2984565,2026-07-12T20:10:40+00:00
+fd3502a4-775b-5aa2-99ec-914e733b3ba9,53,gbif:2984573,Artocarpus altilis (Parkinson) Fosberg,Moraceae,KNApSAcK World,https://www.gbif.org/species/2984573,2026-07-12T20:10:40+00:00
+9c6c6d9c-c72a-5da6-b688-ece5e74c3643,294,gbif:2985930,Kalanchoe pinnata (Lam.) Pers.,Crassulaceae,KNApSAcK World,https://www.gbif.org/species/2985930,2026-07-12T20:10:41+00:00
+b2a8b027-a1d7-5809-9821-2bd49821225c,293,gbif:2985936,Kalanchoe daigremontiana Raym.-Hamet & H.Perrier,Crassulaceae,KNApSAcK World,https://www.gbif.org/species/2985936,2026-07-12T20:10:41+00:00
+9f42f190-4be1-5d33-a0d2-e30e29beee87,265,gbif:2985994,Hydrangea macrophylla (Thunb.) Ser.,Hydrangeaceae,KNApSAcK World,https://www.gbif.org/species/2985994,2026-07-12T20:10:41+00:00
+634226d4-f9b6-57db-a052-b9b3c502f6de,420,gbif:3001244,Malus domestica (Suckow) Borkh.,Rosaceae,KNApSAcK World,https://www.gbif.org/species/3001244,2026-07-12T20:10:41+00:00
+0e748d0a-af8c-5fbb-9bd0-228b3e989f08,317,gbif:3001509,Malus sylvestris Mill.,Rosaceae,KNApSAcK World,https://www.gbif.org/species/3001509,2026-07-12T20:10:41+00:00
+b5fa32ed-8242-5d7a-8f12-a410f41c6f22,436,gbif:3005039,Rosa chinensis Jacq.,Rosaceae,KNApSAcK World,https://www.gbif.org/species/3005039,2026-07-12T20:10:41+00:00
+99607ef4-ad69-5040-8dd3-7161d4b593e4,58,gbif:3033077,Aucuba japonica Thunb.,Garryaceae,KNApSAcK World,https://www.gbif.org/species/3033077,2026-07-12T20:10:40+00:00
+49867f51-dd80-51c0-98ed-db93c19f61ff,123,gbif:3033937,Cissampelos pareira L.,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/3033937,2026-07-12T20:10:40+00:00
+10e0f3db-b4c4-5905-8698-f70b0bc2a5a6,310,gbif:3033977,Litsea cubeba (Lour.) Pers.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033977,2026-07-12T20:10:41+00:00
+e342c05d-fcd6-5b98-9137-607e65c8aa78,118,gbif:3033985,Cinnamomum burmanni (Nees & T.Nees) Blume,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033985,2026-07-12T20:10:40+00:00
+01a5cbee-6a28-5eef-bcd5-ed97d8b74360,121,gbif:3033987,Cinnamomum verum J.Presl,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033987,2026-07-12T20:10:40+00:00
+b8f9bf63-1cd0-5aa4-8301-d1e7cc6f12b6,119,gbif:3033991,Cinnamomum camphora (L.) J.Presl,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033991,2026-07-12T20:10:40+00:00
+f16ce650-01b2-5d6d-ac4c-bcb37111e677,108,gbif:3033999,Cassytha filiformis L.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3033999,2026-07-12T20:10:40+00:00
+0833026e-d05d-51b3-8fbc-444d151b65ec,380,gbif:3034046,Persea americana Mill.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/3034046,2026-07-12T20:10:41+00:00
+ccb63bb3-cf7e-5c58-b0ed-13b75135b29e,114,gbif:3034128,Centella asiatica (L.) Urb.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034128,2026-07-12T20:10:40+00:00
+2c44d835-2866-547f-8a65-df652a779b8f,206,gbif:3034425,Eryngium foetidum L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034425,2026-07-12T20:10:41+00:00
+e0f458e4-5fb7-501d-b992-b06f066c5d03,172,gbif:3034742,Daucus carota L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034742,2026-07-12T20:10:40+00:00
+bf076fde-a7e0-5586-9966-87c36b88bdcd,153,gbif:3034775,Cuminum cyminum L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034775,2026-07-12T20:10:40+00:00
+b86d52ec-bc9f-5cc2-846d-93c37bcd3157,146,gbif:3034871,Coriandrum sativum L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034871,2026-07-12T20:10:40+00:00
+32db5868-6422-5fc4-aadb-90479c36369d,233,gbif:3034922,Foeniculum vulgare Mill.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/3034922,2026-07-12T20:10:41+00:00
+2a2bb525-2b32-5550-a721-51d0ea347405,80,gbif:3042845,Brassica oleracea L.,Brassicaceae,KNApSAcK World,https://www.gbif.org/species/3042845,2026-07-12T20:10:40+00:00
+41a118d6-4ccc-5bac-9050-58c4fdec73a0,342,gbif:3054181,Moringa oleifera Lam.,Moringaceae,KNApSAcK World,https://www.gbif.org/species/3054181,2026-07-12T20:10:41+00:00
+4c6f2854-9619-511c-80ff-7cff5279ed3d,250,gbif:3054227,Gynandropsis gynandra (L.) Briq.,Cleomaceae,KNApSAcK World,https://www.gbif.org/species/3054227,2026-07-12T20:10:41+00:00
+90bc8715-c8d3-5086-8b8b-d2266b129400,7,gbif:3056259,Acalypha indica L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3056259,2026-07-12T20:10:40+00:00
+7ac2cebc-918e-51ad-b944-ce5654c6214f,6,gbif:3056375,Acalypha hispida Burm.f.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3056375,2026-07-12T20:10:40+00:00
+90a8d5d1-8291-559e-8452-3ee469ab365e,150,gbif:3057656,Croton tiglium L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3057656,2026-07-12T20:10:40+00:00
+d0f987f7-f9dc-532c-9741-c085c58d4025,318,gbif:3060998,Manihot esculenta Crantz,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3060998,2026-07-12T20:10:41+00:00
+8d6c4982-26c0-563e-a2ce-ff55e50ac988,217,gbif:3064495,Euphorbia heterophylla L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3064495,2026-07-12T20:10:41+00:00
+c87a5f74-dd81-5606-a617-8873959671c7,220,gbif:3064865,Euphorbia neriifolia L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3064865,2026-07-12T20:10:41+00:00
+e96e6944-2ec3-5239-bb61-4888dfedf10a,222,gbif:3066465,Euphorbia pulcherrima Willd. ex Klotzsch,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3066465,2026-07-12T20:10:41+00:00
+3e52c52d-17a9-51ab-92bd-9f3ea0d5defe,219,gbif:3067157,Euphorbia milii Des Moul.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3067157,2026-07-12T20:10:41+00:00
+64b5a549-24de-577d-9328-9b6740919dae,221,gbif:3067891,Euphorbia prostrata Aiton,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3067891,2026-07-12T20:10:41+00:00
+e95872e0-c0b5-5fe2-815a-34da82188a6c,218,gbif:3068937,Euphorbia hirta L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3068937,2026-07-12T20:10:41+00:00
+6c9ccae8-4a53-529c-a4b2-a4158bd84c35,377,gbif:3069168,Euphorbia tithymaloides L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3069168,2026-07-12T20:10:41+00:00
+781384f7-6a6e-5882-9779-912b8b2ff2e8,223,gbif:3069353,Euphorbia tirucalli L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3069353,2026-07-12T20:10:41+00:00
+2d8555e8-ced4-5bfa-b79d-fbc8d61eb517,216,gbif:3069535,Euphorbia antiquorum L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3069535,2026-07-12T20:10:41+00:00
+330ce16f-69c4-5527-9724-517e85fb5fa3,257,gbif:3071171,Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3071171,2026-07-12T20:10:41+00:00
+5fe22218-bb94-5a44-ab78-0c539e0db194,196,gbif:3071462,Elateriospermum tapos Blume,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3071462,2026-07-12T20:10:41+00:00
+31c70734-4d61-5fc1-b0ba-49f7e87cec76,225,gbif:3071702,Excoecaria agallocha L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3071702,2026-07-12T20:10:41+00:00
+ec2ec3e2-8ba4-5570-96eb-b0106295f3b9,226,gbif:3071716,Excoecaria cochinchinensis Lour.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3071716,2026-07-12T20:10:41+00:00
+26c2c50b-d350-5022-b5ca-80fa9a0a5093,287,gbif:3072900,Jatropha gossypiifolia L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3072900,2026-07-12T20:10:41+00:00
+2de7a6a7-1e52-50a0-9374-06507220488f,285,gbif:3072953,Jatropha curcas L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3072953,2026-07-12T20:10:41+00:00
+57d2d54f-84f3-59be-9ca9-69a67d0358ce,288,gbif:3072985,Jatropha multifida L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3072985,2026-07-12T20:10:41+00:00
+75a36dd4-e72a-5c23-83e3-9f6e9a874e12,289,gbif:3073016,Jatropha podagrica Hook.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/3073016,2026-07-12T20:10:41+00:00
+ff80e7c6-fd8d-53e1-846b-528f01e4363b,240,gbif:3080882,Glochidion rubrum Blume,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/3080882,2026-07-12T20:10:41+00:00
+cedd05e3-437d-50b7-ae97-6e1710d40d98,406,gbif:3082282,Plumbago zeylanica L.,Plumbaginaceae,KNApSAcK World,https://www.gbif.org/species/3082282,2026-07-12T20:10:41+00:00
+61b44b71-407e-54b8-b729-fb3d55072a55,405,gbif:3082286,Plumbago indica L.,Plumbaginaceae,KNApSAcK World,https://www.gbif.org/species/3082286,2026-07-12T20:10:41+00:00
+5f7a5eb0-dcad-5888-b76a-028366a7ef50,65,gbif:3083504,Basella alba L.,Basellaceae,KNApSAcK World,https://www.gbif.org/species/3083504,2026-07-12T20:10:40+00:00
+e38ca312-df7f-5ddf-9572-393117818bbc,42,gbif:3083508,Anredera cordifolia (Ten.) Steenis,Basellaceae,KNApSAcK World,https://www.gbif.org/species/3083508,2026-07-12T20:10:40+00:00
+09c167fb-5cb9-50ec-8087-eee2f9ca2c18,434,gbif:3084027,Rivina humilis L.,Phytolaccaceae,KNApSAcK World,https://www.gbif.org/species/3084027,2026-07-12T20:10:41+00:00
+d209b533-9d00-58a5-814a-157a9c443927,494,gbif:3084670,Talinum fruticosum (L.) Juss.,Talinaceae,KNApSAcK World,https://www.gbif.org/species/3084670,2026-07-12T20:10:41+00:00
+a75162a9-c39e-589f-8028-487e95132947,493,gbif:3084672,Talinum paniculatum (Jacq.) Gaertn.,Talinaceae,KNApSAcK World,https://www.gbif.org/species/3084672,2026-07-12T20:10:41+00:00
+d6b5780b-2e88-5490-a0d6-b85d9b58f11b,411,gbif:3084700,Portulaca grandiflora Hook.,Portulacaceae,KNApSAcK World,https://www.gbif.org/species/3084700,2026-07-12T20:10:41+00:00
+91e50387-da73-5973-a338-1120dc8db1d2,412,gbif:3084719,Portulaca oleracea L.,Portulacaceae,KNApSAcK World,https://www.gbif.org/species/3084719,2026-07-12T20:10:41+00:00
+ba6f8bcf-da27-5ee3-a273-ca5732c909ee,246,gbif:3084908,Gomphrena globosa L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3084908,2026-07-12T20:10:41+00:00
+06609fc6-66b3-5fe9-914f-90888f85a556,30,gbif:3084923,Alternanthera philoxeroides (Mart.) Griseb.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3084923,2026-07-12T20:10:40+00:00
+9ad40163-ef4f-50b8-8b5c-139a286a011a,31,gbif:3084939,Alternanthera sessilis (L.) R.Br. ex DC.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3084939,2026-07-12T20:10:40+00:00
+07bd77ec-8d26-5198-80b6-747f38900216,9,gbif:3085168,Achyranthes aspera L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3085168,2026-07-12T20:10:40+00:00
+e23840c2-b967-5246-b462-80e00e73ae5e,112,gbif:3085191,Celosia argentea L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/3085191,2026-07-12T20:10:40+00:00
+d9e1507f-5df9-56b9-ba5b-65a64a377b99,336,gbif:3086240,Mirabilis jalapa L.,Nyctaginaceae,KNApSAcK World,https://www.gbif.org/species/3086240,2026-07-12T20:10:41+00:00
+d7f775bf-b93b-59cf-a097-2dbdb1445a3f,400,gbif:3086342,Piper retrofractum Vahl,Piperaceae,KNApSAcK World,https://www.gbif.org/species/3086342,2026-07-12T20:10:41+00:00
+54746c5d-fb8c-5195-b443-14da8110e9b1,399,gbif:3086357,Piper nigrum L.,Piperaceae,KNApSAcK World,https://www.gbif.org/species/3086357,2026-07-12T20:10:41+00:00
+e87d4350-ce5a-50bc-a2fa-2fe7824ed070,379,gbif:3086412,Peperomia pellucida (L.) Kunth,Piperaceae,KNApSAcK World,https://www.gbif.org/species/3086412,2026-07-12T20:10:41+00:00
+fad237ac-de9a-5ea0-8719-6c78a09130c0,492,gbif:3088488,Tagetes erecta L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3088488,2026-07-12T20:10:41+00:00
+e10b66d9-86ce-5518-aaa2-6c822b89ac70,469,gbif:3105813,Sonchus arvensis L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3105813,2026-07-12T20:10:41+00:00
+7cdd19c7-1dd8-59ef-a038-f1f1ff6f5e06,535,gbif:3111754,Zinnia elegans Jacq.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3111754,2026-07-12T20:10:42+00:00
+1284cd35-3323-5d6c-a448-3164847fc7b5,49,gbif:3120942,Artemisia cina O.C.Berg & Schmidt,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3120942,2026-07-12T20:10:40+00:00
+05eb3d4c-41fd-573b-b118-1aebf42d6303,51,gbif:3120946,Artemisia vulgaris L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3120946,2026-07-12T20:10:40+00:00
+cdf464f9-5873-571c-8320-913fbea42519,50,gbif:3121137,Artemisia lactiflora Wall. ex DC.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3121137,2026-07-12T20:10:40+00:00
+26cff3ce-c413-5a62-9884-dcc59e0d3f8e,404,gbif:3132728,Pluchea indica (L.) Less.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3132728,2026-07-12T20:10:41+00:00
+c76ae9b4-c2de-5883-9293-15f5db2744a7,99,gbif:3138327,Carthamus tinctorius L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3138327,2026-07-12T20:10:40+00:00
+b129d6bc-81bd-5af4-9355-122b4cc9158e,251,gbif:3139807,Gynura japonica (Thunb.) Juel,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3139807,2026-07-12T20:10:41+00:00
+74f37006-adf8-5307-8e65-834602250a2b,296,gbif:3140510,Lactuca indica L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3140510,2026-07-12T20:10:41+00:00
+210454fe-79b0-5771-b056-96a7bdcaeecb,215,gbif:3142644,Ayapana triplinervis (Vahl) R.M.King & H.Rob.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3142644,2026-07-12T20:10:40+00:00
+40c99cba-3dd7-5394-a0cb-7d64d74b3249,204,gbif:3146683,Erigeron sumatrensis Retz.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3146683,2026-07-12T20:10:41+00:00
+e46de574-b105-5cbd-aaa5-038b9a4ea3b4,510,gbif:3149462,Tridax procumbens L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3149462,2026-07-12T20:10:41+00:00
+09aafced-6936-5299-a535-62d23edad055,189,gbif:3150935,Echinacea purpurea (L.) Moench,Asteraceae,KNApSAcK World,https://www.gbif.org/species/3150935,2026-07-12T20:10:41+00:00
+acdb42a9-0e68-5041-8fd3-e292abf7654c,325,gbif:3152125,Melochia corchorifolia L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152125,2026-07-12T20:10:41+00:00
+6f4f9e7e-24cb-5095-9378-79f2a270e8c2,249,gbif:3152195,Guazuma ulmifolia Lam.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152195,2026-07-12T20:10:41+00:00
+8619da7b-e7a2-581d-87f5-91a04ad2a5ea,187,gbif:3152230,Durio zibethinus Murray,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152230,2026-07-12T20:10:41+00:00
+1af125da-671a-5be8-90a7-62ed68844d69,516,gbif:3152253,Urena lobata L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152253,2026-07-12T20:10:42+00:00
+c0c1e6e4-9495-5d5f-bcda-b643b048c5a2,259,gbif:3152555,Hibiscus mutabilis L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152555,2026-07-12T20:10:41+00:00
+e3a656be-2df9-5711-bd5b-5df103800e84,260,gbif:3152559,Hibiscus rosa-sinensis L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152559,2026-07-12T20:10:41+00:00
+ee58b85b-9803-5888-a95d-b826f6e063c1,261,gbif:3152582,Hibiscus sabdariffa L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152582,2026-07-12T20:10:41+00:00
+9674dd5e-2438-56d0-b94d-eeac8311aecc,5,gbif:3152634,Abutilon indicum (L.) Sweet,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152634,2026-07-12T20:10:40+00:00
+1b485499-c7c1-5c44-9b4a-6032715e827f,248,gbif:3152658,Gossypium herbaceum L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152658,2026-07-12T20:10:41+00:00
+6f8e4fe7-5fe6-5f20-a6b5-11d27f3bdb1b,1,gbif:3152706,Abelmoschus manihot (L.) Medik.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/3152706,2026-07-12T20:10:40+00:00
+f4b81201-b781-50fb-b2ab-9be58e892f39,331,gbif:3153099,Magnolia champaca (L.) Baill. ex Pierre,Magnoliaceae,KNApSAcK World,https://www.gbif.org/species/3153099,2026-07-12T20:10:41+00:00
+e2f235f8-aa8d-549d-964b-2a798387e331,247,gbif:3154616,Goniothalamus macrophyllus (Blume) Hook.f. & Thomson,Annonaceae,KNApSAcK World,https://www.gbif.org/species/3154616,2026-07-12T20:10:41+00:00
+df9a1e4a-d71d-5ef9-a844-a00179cede85,403,gbif:3164340,Platycodon grandiflorus (Jacq.) A.DC.,Campanulaceae,KNApSAcK World,https://www.gbif.org/species/3164340,2026-07-12T20:10:41+00:00
+851a20d6-2464-551e-a5f0-73043b151cea,302,gbif:3168943,Hippobroma longiflora (L.) G.Don,Campanulaceae,KNApSAcK World,https://www.gbif.org/species/3168943,2026-07-12T20:10:41+00:00
+b4f914bd-179e-5bf8-9553-0db2340c6449,205,gbif:3169625,Tabernaemontana divaricata (L.) R.Br. ex Roem. & Schult.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169625,2026-07-12T20:10:41+00:00
+a3293ad0-b880-5634-800e-f65c14f8b0c7,503,gbif:3169652,Cascabela thevetia (L.) Lippold,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169652,2026-07-12T20:10:40+00:00
+3304f9d4-5c15-5113-aab5-ce58dcbbdab4,407,gbif:3169674,Plumeria rubra L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169674,2026-07-12T20:10:41+00:00
+2c8ed17e-222f-5997-bf2b-d540cfb59dd8,352,gbif:3169756,Nerium oleander L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169756,2026-07-12T20:10:41+00:00
+7be87475-a2e9-515c-a7dc-e445c191f31c,426,gbif:3169787,Rauvolfia serpentina (L.) Benth. ex Kurz,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169787,2026-07-12T20:10:41+00:00
+82633059-85b7-5cd5-a16a-442a54ac58fb,110,gbif:3169830,Catharanthus roseus (L.) G.Don,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169830,2026-07-12T20:10:40+00:00
+a33157d7-c480-539e-8eb6-454efef0afb0,19,gbif:3169836,Allamanda cathartica L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3169836,2026-07-12T20:10:40+00:00
+9d009ca4-cdb4-55f7-a4ca-c7d0d2d16c33,55,gbif:3170241,Asclepias curassavica L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3170241,2026-07-12T20:10:40+00:00
+c7ef913c-280f-5985-b8e1-601f099c7dc7,283,gbif:3172261,Jasminum officinale L.,Oleaceae,KNApSAcK World,https://www.gbif.org/species/3172261,2026-07-12T20:10:41+00:00
+65a5ff2b-a821-5ce0-bb10-b6b87d46b0bc,456,gbif:3172622,Sesamum indicum L.,Pedaliaceae,KNApSAcK World,https://www.gbif.org/species/3172622,2026-07-12T20:10:41+00:00
+72eebe7d-5ce5-53a1-9ff5-cc2b5b9be20e,63,gbif:3173126,Barleria lupulina Lindl.,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3173126,2026-07-12T20:10:40+00:00
+9b87c084-8e97-5763-83ac-abc8eee074b3,64,gbif:3173129,Barleria prionitis L.,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3173129,2026-07-12T20:10:40+00:00
+55fc8aa4-40f3-5d50-9054-6e06a06472c2,37,gbif:3173178,Andrographis paniculata (Burm.fil.) Nees,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3173178,2026-07-12T20:10:40+00:00
+bce825c0-1611-5e87-b0eb-760dc1815b3e,210,gbif:3176787,Eucalyptus globulus Labill.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3176787,2026-07-12T20:10:41+00:00
+19c8dda5-5f76-5531-90e5-9a444be5bed8,432,gbif:3179997,Rhodomyrtus tomentosa (Aiton) Hassk.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3179997,2026-07-12T20:10:41+00:00
+c1304035-b586-5c1d-a353-4d5defbc4d29,213,gbif:3183002,Syzygium aromaticum (L.) Merr. & L.M.Perry,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3183002,2026-07-12T20:10:41+00:00
+71609b4d-5377-5741-843f-bff0537a8517,488,gbif:3183840,Syzygium cumini (L.) Skeels,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3183840,2026-07-12T20:10:41+00:00
+75d26f1b-3c84-5de4-879a-6e1c41c2b5e8,62,gbif:3187799,Baeckea frutescens L.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/3187799,2026-07-12T20:10:40+00:00
+dca2217e-d4f2-53cb-b082-24c58c20abd4,323,gbif:3188511,Melastoma malabathricum L.,Melastomataceae,KNApSAcK World,https://www.gbif.org/species/3188511,2026-07-12T20:10:41+00:00
+b617fcd7-3563-571f-a0fb-5d3a4fb91e58,298,gbif:3188724,Lagerstroemia speciosa (L.) Pers.,Lythraceae,KNApSAcK World,https://www.gbif.org/species/3188724,2026-07-12T20:10:41+00:00
+95d88163-75bb-500d-be47-1e702671e6e4,297,gbif:3188725,Lagerstroemia indica L.,Lythraceae,KNApSAcK World,https://www.gbif.org/species/3188725,2026-07-12T20:10:41+00:00
+235b9383-49fe-5229-83a5-8c3b6c086a74,500,gbif:3189390,Terminalia bellirica (Gaertn.) Roxb.,Combretaceae,KNApSAcK World,https://www.gbif.org/species/3189390,2026-07-12T20:10:41+00:00
+ff08b84e-971a-5b0a-932c-bf1b9792e416,501,gbif:3189394,Terminalia catappa L.,Combretaceae,KNApSAcK World,https://www.gbif.org/species/3189394,2026-07-12T20:10:41+00:00
+0187160f-7aa7-596a-bb72-ae602e1dfc96,235,gbif:3189565,Garcinia dulcis (Roxb.) Kurz,Clusiaceae,KNApSAcK World,https://www.gbif.org/species/3189565,2026-07-12T20:10:41+00:00
+b252fed9-4162-50ae-b814-b7993e23f234,236,gbif:3189571,Garcinia mangostana L.,Clusiaceae,KNApSAcK World,https://www.gbif.org/species/3189571,2026-07-12T20:10:41+00:00
+f3c4a5dd-8030-5798-b24d-9f1c41a9d151,91,gbif:3189635,Camellia sinensis (L.) Kuntze,Theaceae,KNApSAcK World,https://www.gbif.org/species/3189635,2026-07-12T20:10:40+00:00
+788f054d-0118-5597-b286-4b2e7545cc70,184,gbif:3189690,Dryobalanops aromatica C.F.Gaertn.,Dipterocarpaceae,KNApSAcK World,https://www.gbif.org/species/3189690,2026-07-12T20:10:41+00:00
+67c180dd-0ad4-5c37-a707-0a7cf8911681,401,gbif:3189767,Plantago major L.,Plantaginaceae,KNApSAcK World,https://www.gbif.org/species/3189767,2026-07-12T20:10:41+00:00
+2f8e7caa-b19a-5c2e-80c3-186717458772,129,gbif:3190157,Citrus medica L.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3190157,2026-07-12T20:10:40+00:00
+f979493f-43ed-5b94-a3f0-9c62fb0b2f9e,128,gbif:3190160,Citrus maxima (Burm.) Merr.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3190160,2026-07-12T20:10:40+00:00
+4e8f99ab-f088-5520-b1bb-41309509d188,125,gbif:3190164,Citrus × aurantiifolia (Christm.) Swingle,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3190164,2026-07-12T20:10:40+00:00
+65b1e648-401f-546b-85a4-5442833dc81d,512,gbif:3190406,Triphasia trifolia (Burm.fil.) P.Wilson,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3190406,2026-07-12T20:10:41+00:00
+6ce361f3-5493-50d8-976f-54699df3da9c,61,gbif:3190474,Azadirachta indica A.Juss.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/3190474,2026-07-12T20:10:40+00:00
+dc120051-3ff1-5033-88eb-9505b5efef08,299,gbif:3190478,Lansium domesticum Corrêa,Meliaceae,KNApSAcK World,https://www.gbif.org/species/3190478,2026-07-12T20:10:41+00:00
+9115ff6d-2c26-5736-9485-983331b197e8,484,gbif:3190485,Swietenia mahagoni (L.) Jacq.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/3190485,2026-07-12T20:10:41+00:00
+a7ca7808-93e2-5eb6-8399-d6e2bac310fb,422,gbif:3190647,Quassia amara L.,Simaroubaceae,KNApSAcK World,https://www.gbif.org/species/3190647,2026-07-12T20:10:41+00:00
+01b98e33-42b7-5498-b139-6169251a3c96,232,gbif:3234563,Ficus variegata Blume,Moraceae,KNApSAcK World,https://www.gbif.org/species/3234563,2026-07-12T20:10:41+00:00
+f8427ff7-b24c-5cb0-8f07-e7ab5ab3f9ef,90,gbif:3579089,Calotropis gigantea (L.) W.T.Aiton,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3579089,2026-07-12T20:10:40+00:00
+359a7bcf-85d3-5fb3-9ee7-d2c9f3fb6995,428,gbif:3616228,Rauvolfia verticillata (Lour.) Baill.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3616228,2026-07-12T20:10:41+00:00
+5a3930a7-ae33-584f-af26-62dca7e0cbc4,427,gbif:3616339,Rauvolfia sumatrana Jack,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3616339,2026-07-12T20:10:41+00:00
+3bb4096c-5221-52e0-87d1-92eb1bddbf58,425,gbif:3616839,Rauvolfia reflexa Koord. & Valeton,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3616839,2026-07-12T20:10:41+00:00
+bb82a777-82c9-583b-8645-739ddbc45870,491,gbif:3621871,Tabernaemontana sphaerocarpa Blume,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/3621871,2026-07-12T20:10:41+00:00
+c00d0164-dddc-5ed9-bc85-4b338009881f,355,gbif:3683008,Nyctanthes arbor-tristis L.,Oleaceae,KNApSAcK World,https://www.gbif.org/species/3683008,2026-07-12T20:10:41+00:00
+605c6515-9636-5f72-91e7-51ae0bffb870,224,gbif:3709190,Eurycoma longifolia Jack,Simaroubaceae,KNApSAcK World,https://www.gbif.org/species/3709190,2026-07-12T20:10:41+00:00
+54cc67d1-1c55-5c27-b4a9-4186a3674aa9,135,gbif:3774284,Clinacanthus nutans (Burm.fil.) Lindau,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3774284,2026-07-12T20:10:40+00:00
+1748e875-bf72-591b-b49e-8c73cecacafb,477,gbif:3781433,Strobilanthes crispa (L.) Blume,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/3781433,2026-07-12T20:10:41+00:00
+3dc649e5-7589-5f91-af16-75dba017f3cc,308,gbif:3794870,Acaciella glauca (L.) L.Rico,Fabaceae,KNApSAcK World,https://www.gbif.org/species/3794870,2026-07-12T20:10:40+00:00
+4ed81395-0e1a-5cd3-93c1-c2966697151b,57,gbif:3802655,Atropa belladonna L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/3802655,2026-07-12T20:10:40+00:00
+cba6c5c3-2c6c-5aec-94e9-fdab46eadc46,164,gbif:3830078,Cyclea barbata Miers,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/3830078,2026-07-12T20:10:40+00:00
+95a3e866-7522-5b42-96e2-d2bd01752c9f,46,gbif:3830318,Arcangelisia flava (L.) Merr.,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/3830318,2026-07-12T20:10:40+00:00
+7633d19c-d864-5ac9-9eaa-acde77f9419e,506,gbif:3830649,Tinospora glabra (Burm.fil.) Merr.,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/3830649,2026-07-12T20:10:41+00:00
+f3fb6e71-7123-57be-a9ce-b92a0a9d6433,440,gbif:3832875,Ruta angustifolia Pers.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3832875,2026-07-12T20:10:41+00:00
+68bc505a-dbef-5fd9-b3d6-720259fa5662,314,gbif:3834748,Luvunga sarmentosa (Blume) Kurz,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3834748,2026-07-12T20:10:41+00:00
+cdba6e11-56c1-5dcf-ba63-d851de67acbd,227,gbif:3834800,Zanthoxylum rhetsa (Roxb.) DC.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/3834800,2026-07-12T20:10:42+00:00
+7e2ffc29-5568-5fb0-9f4f-f231cf105fc5,443,gbif:3850843,Sandoricum koetjape (Burm.fil.) Merr.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/3850843,2026-07-12T20:10:41+00:00
+3b466569-a754-56af-82cc-36c30a5176de,270,gbif:3889017,Mesosphaerum suaveolens (L.) Kuntze,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/3889017,2026-07-12T20:10:41+00:00
+ccac8e33-3c4b-5c4e-8b23-4f7bf959444d,269,gbif:3889976,Mesosphaerum pectinatum (L.) Kuntze,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/3889976,2026-07-12T20:10:41+00:00
+2fee1eb3-ad8b-5238-9643-b53bb462b835,330,gbif:3987892,Magnolia × alba (DC.) Figlar,Magnoliaceae,KNApSAcK World,https://www.gbif.org/species/3987892,2026-07-12T20:10:41+00:00
+5c16f5bb-04f9-5b3f-86e7-d8ebc29a98f6,160,gbif:3990387,Curcuma xanthorrhiza D.Dietr.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/3990387,2026-07-12T20:10:40+00:00
+6454f497-44e8-5eb0-a1c6-7c8d7bef9675,448,gbif:4001481,Scurrula fusca (Blume) G.Don,Loranthaceae,KNApSAcK World,https://www.gbif.org/species/4001481,2026-07-12T20:10:41+00:00
+df4a70cf-3d5a-5bd8-a16d-51507153f867,68,gbif:4176422,Beilschmiedia madang (Blume) Blume,Lauraceae,KNApSAcK World,https://www.gbif.org/species/4176422,2026-07-12T20:10:40+00:00
+de9351a4-4896-52e1-b1f5-cef9806ea92c,120,gbif:4180148,Neolitsea cassia (L.) Kosterm.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/4180148,2026-07-12T20:10:41+00:00
+c432814f-e895-5728-81c7-941d172da254,398,gbif:4186474,Macropiper methysticum (G.Forst.) Hook. & Arn.,Piperaceae,KNApSAcK World,https://www.gbif.org/species/4186474,2026-07-12T20:10:41+00:00
+aa32cf2d-fa8f-5d3b-9765-2fa4c2faa075,396,gbif:4187904,Piper betle L.,Piperaceae,KNApSAcK World,https://www.gbif.org/species/4187904,2026-07-12T20:10:41+00:00
+3ad6c6b1-055a-5a9d-b6b5-186af5047d29,117,gbif:4195539,Cibotium barometz (L.) J.Sm.,Cibotiaceae,KNApSAcK World,https://www.gbif.org/species/4195539,2026-07-12T20:10:40+00:00
+5887dc73-2753-58a3-90d1-cfd0921ecfb6,18,gbif:4930679,Aleurites moluccanus (L.) Willd.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/4930679,2026-07-12T20:10:40+00:00
+fe122d47-2481-578c-b6d4-7cf88c9a528b,13,gbif:5284442,Agathis dammara (Lamb.) Rich. & A.Rich.,Araucariaceae,KNApSAcK World,https://www.gbif.org/species/5284442,2026-07-12T20:10:40+00:00
+1ccee74c-af2c-5c42-8b0c-0e5bb9d8ac44,498,gbif:5284540,Taxus wallichiana Zucc.,Taxaceae,KNApSAcK World,https://www.gbif.org/species/5284540,2026-07-12T20:10:41+00:00
+84e53409-96f3-539a-846e-608c8ece266d,36,gbif:5288819,Ananas comosus (L.) Merr.,Bromeliaceae,KNApSAcK World,https://www.gbif.org/species/5288819,2026-07-12T20:10:40+00:00
+ed7000e9-64c8-5ec0-bee7-cd4303ae7e49,529,gbif:5290052,Zea mays L.,Poaceae,KNApSAcK World,https://www.gbif.org/species/5290052,2026-07-12T20:10:42+00:00
+ad0d237e-aaf8-5065-8ab3-247ff6ff46f3,461,gbif:5295128,Smilax zeylanica L.,Smilacaceae,KNApSAcK World,https://www.gbif.org/species/5295128,2026-07-12T20:10:41+00:00
+5225fa66-a924-501a-a8c1-769f715257c5,460,gbif:5295472,Smilax china L.,Smilacaceae,KNApSAcK World,https://www.gbif.org/species/5295472,2026-07-12T20:10:41+00:00
+fa097dca-198a-5c8e-a5d8-9e9487875075,69,gbif:5298546,Iris domestica (L.) Goldblatt & Mabb.,Iridaceae,KNApSAcK World,https://www.gbif.org/species/5298546,2026-07-12T20:10:41+00:00
+ca433a22-3b85-5dc9-b54a-44721d79e65c,292,gbif:5301445,Kaempferia rotunda L.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/5301445,2026-07-12T20:10:41+00:00
+8fea13cf-25bc-5755-a26d-71f02d38d627,291,gbif:5301451,Kaempferia galanga L.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/5301451,2026-07-12T20:10:41+00:00
+fbee525b-bdd7-509d-a45c-6c106896c456,28,gbif:5302199,Alpinia officinarum Hance,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/5302199,2026-07-12T20:10:40+00:00
+dab798a1-d486-5853-bc20-b3be0cbb2ba3,27,gbif:5302225,Alpinia galanga (L.) Willd.,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/5302225,2026-07-12T20:10:40+00:00
+0af385cb-6b6d-5aa9-a698-0125883e7279,371,gbif:5328074,Pandanus conoideus Lam.,Pandanaceae,KNApSAcK World,https://www.gbif.org/species/5328074,2026-07-12T20:10:41+00:00
+51ce85c0-1fb6-5326-be73-5cec5c1deaf7,25,gbif:5329904,Alocasia macrorrhizos (L.) G.Don,Araceae,KNApSAcK World,https://www.gbif.org/species/5329904,2026-07-12T20:10:40+00:00
+1fb5f087-89eb-5ae7-97d2-06a0db481291,145,gbif:5330776,Colocasia esculenta (L.) Schott,Araceae,KNApSAcK World,https://www.gbif.org/species/5330776,2026-07-12T20:10:40+00:00
+bb8b2142-b2b1-5a7b-89d6-5c8d3583ae97,523,gbif:5331181,Viola odorata L.,Violaceae,KNApSAcK World,https://www.gbif.org/species/5331181,2026-07-12T20:10:42+00:00
+969303e7-289f-5d47-904f-940d1d4aec07,237,gbif:5335125,Gardenia jasminoides J.Ellis,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/5335125,2026-07-12T20:10:41+00:00
+31918c3a-d147-522b-bc26-c09505d4920e,515,gbif:5338190,Uncaria gambir (W.Hunter) Roxb.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/5338190,2026-07-12T20:10:41+00:00
+1024dd44-90dc-51ce-a131-07032689a3dc,340,gbif:5339879,Morinda citrifolia L.,Rubiaceae,KNApSAcK World,https://www.gbif.org/species/5339879,2026-07-12T20:10:41+00:00
+3d51888b-eef3-525b-af81-afb633da55a5,143,gbif:5341313,Coleus amboinicus Lour.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/5341313,2026-07-12T20:10:40+00:00
+0e01015a-24e4-5ef5-a0f0-8fba3f9065ea,305,gbif:5341392,Leonurus sibiricus L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/5341392,2026-07-12T20:10:41+00:00
+1c9107e3-ade0-5135-a35a-7ec88f15668a,504,gbif:5341442,Thymus vulgaris L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/5341442,2026-07-12T20:10:41+00:00
+0d6adc23-9d12-5626-bfa7-0f66658f0f35,394,gbif:5341784,Physalis peruviana L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/5341784,2026-07-12T20:10:41+00:00
+af84e4bf-4bc0-5884-9ee7-8cac190e32cc,393,gbif:5341792,Physalis angulata L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/5341792,2026-07-12T20:10:41+00:00
+a04c7a3f-65dd-56b6-bc49-46249c2d09c2,3,gbif:5348700,Abrus fruticulosus Wall. ex Wight & Arn.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5348700,2026-07-12T20:10:40+00:00
+8825f002-dab2-5d23-98c8-1b20750fe904,4,gbif:5348711,Abrus precatorius L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5348711,2026-07-12T20:10:40+00:00
+711ab4df-f760-5b91-9d28-87fc5c2896b4,375,gbif:5348811,Parkia speciosa Hassk.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5348811,2026-07-12T20:10:41+00:00
+11397f99-feaa-557c-8b82-e7b07741a2fc,416,gbif:5349242,Pterocarpus indicus Willd.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5349242,2026-07-12T20:10:41+00:00
+83fe12fb-950c-57d4-915f-c88ba29ff609,209,gbif:5349581,Erythrina variegata L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5349581,2026-07-12T20:10:41+00:00
+994b9afb-da3a-5f8f-b70f-9594b0fc13b7,208,gbif:5349636,Erythrina subumbrans (Hassk.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5349636,2026-07-12T20:10:41+00:00
+69684683-53c8-5f13-b185-c057f8a77459,173,gbif:5350305,Derris elliptica (Wall.) Benth.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5350305,2026-07-12T20:10:40+00:00
+2e6c474a-aac5-5924-9a70-0491d31e0845,176,gbif:5350336,Derris trifoliata Lour.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5350336,2026-07-12T20:10:41+00:00
+dfbae356-a5e3-5106-91d5-ddd248dda4b5,385,gbif:5350452,Phaseolus vulgaris L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5350452,2026-07-12T20:10:41+00:00
+1bcdf520-e8fa-59d3-8fca-e17d63ba226e,45,gbif:5353770,Arachis hypogaea L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5353770,2026-07-12T20:10:40+00:00
+22873982-8873-5dc2-89b5-eea30788b71b,102,gbif:5357108,Cassia fistula L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5357108,2026-07-12T20:10:40+00:00
+da5da99d-7f62-5242-a5fd-afb5ec6d2975,103,gbif:5357125,Cassia javanica L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5357125,2026-07-12T20:10:40+00:00
+08d62596-c5d1-5a2e-91ea-e210c5235e5a,242,gbif:5359660,Glycine max (L.) Merr.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5359660,2026-07-12T20:10:41+00:00
+0d529a87-cc65-51fd-b1f3-d8634d747517,243,gbif:5359662,Glycine max subsp. soja (Siebold & Zucc.) H.Ohashi,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5359662,2026-07-12T20:10:41+00:00
+1c0845b4-f8f7-5635-8668-3cb4cb68d12d,511,gbif:5360475,Trigonella foenum-graecum L.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/5360475,2026-07-12T20:10:41+00:00
+250e95f2-a8c5-53da-a24a-59f3a3c616d3,94,gbif:5361880,Cannabis sativa L.,Cannabaceae,KNApSAcK World,https://www.gbif.org/species/5361880,2026-07-12T20:10:40+00:00
+12e10725-0fd3-505a-9fe2-75a96247a29c,343,gbif:5361889,Morus alba L.,Moraceae,KNApSAcK World,https://www.gbif.org/species/5361889,2026-07-12T20:10:41+00:00
+df5a936f-4a6e-59ca-8195-401acc899c82,228,gbif:5361909,Ficus carica L.,Moraceae,KNApSAcK World,https://www.gbif.org/species/5361909,2026-07-12T20:10:41+00:00
+1059063f-370b-514f-9fe0-798361a65895,230,gbif:5361930,Ficus pumila L.,Moraceae,KNApSAcK World,https://www.gbif.org/species/5361930,2026-07-12T20:10:41+00:00
+ab1a582f-7122-5534-984a-eb378be4064d,344,gbif:5361944,Broussonetia papyrifera (L.) L'Hér. ex Vent.,Moraceae,KNApSAcK World,https://www.gbif.org/species/5361944,2026-07-12T20:10:40+00:00
+38c13651-8c9c-5efd-b033-4c39ce9f8eb3,483,gbif:5371679,Styrax benzoin Dryand.,Styracaceae,KNApSAcK World,https://www.gbif.org/species/5371679,2026-07-12T20:10:41+00:00
+e104fc82-a836-50c5-9dbb-5546e38ee23e,354,gbif:5371700,Nigella sativa L.,Ranunculaceae,KNApSAcK World,https://www.gbif.org/species/5371700,2026-07-12T20:10:41+00:00
+d1033b03-538e-5d47-90cd-78bf85e65b59,44,gbif:5371879,Apium graveolens L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/5371879,2026-07-12T20:10:40+00:00
+8f16e81c-7ebd-555f-8d79-d84936d26814,306,gbif:5376565,Lepidium sativum L.,Brassicaceae,KNApSAcK World,https://www.gbif.org/species/5376565,2026-07-12T20:10:41+00:00
+5d67c795-3425-54f6-8891-7a33c0cb7db5,316,gbif:5378605,Mallotus philippensis (Lam.) Müll.Arg.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/5378605,2026-07-12T20:10:41+00:00
+487e4400-6e4b-50cb-ac7a-43765a7c817e,264,gbif:5380015,Hura crepitans L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/5380015,2026-07-12T20:10:41+00:00
+771fe3e7-05ef-5d92-b819-e057630d41ed,433,gbif:5380041,Ricinus communis L.,Euphorbiaceae,KNApSAcK World,https://www.gbif.org/species/5380041,2026-07-12T20:10:41+00:00
+88bde05d-d188-5163-9a87-6504dc0b798a,386,gbif:5381567,Phyllanthus acidus (L.) Skeels,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5381567,2026-07-12T20:10:41+00:00
+64cfc45f-fbb2-5a5b-86fb-d615de3e8503,388,gbif:5381660,Phyllanthus emblica L.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5381660,2026-07-12T20:10:41+00:00
+08d4e2df-6381-5469-8311-e7ad2b60a0a7,389,gbif:5381945,Phyllanthus niruri L.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5381945,2026-07-12T20:10:41+00:00
+72b079c0-13e1-57e2-a299-7782302b5168,390,gbif:5382478,Phyllanthus reticulatus Poir.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5382478,2026-07-12T20:10:41+00:00
+fa92b4f4-2a20-5ced-8684-f9680dded225,387,gbif:5382589,Phyllanthus amarus Schumach. & Thonn.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5382589,2026-07-12T20:10:41+00:00
+c636f177-e5e0-5352-83b4-ccdfc563bca5,391,gbif:5382780,Phyllanthus urinaria L.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/5382780,2026-07-12T20:10:41+00:00
+32a1daf2-c2b2-52ba-8062-a83d1d95d4cd,33,gbif:5384397,Amaranthus tricolor L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/5384397,2026-07-12T20:10:40+00:00
+374810f3-4865-56b1-ac16-96ceb109ffc1,32,gbif:5384401,Amaranthus spinosus L.,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/5384401,2026-07-12T20:10:40+00:00
+b4f1aadb-7863-540b-9820-81c380e2afa7,183,gbif:5384509,Drymaria cordata (L.) Willd. ex Schult.,Caryophyllaceae,KNApSAcK World,https://www.gbif.org/species/5384509,2026-07-12T20:10:41+00:00
+6d1f4293-f882-5cac-a61d-4ea98eb5b46d,79,gbif:5384862,Bougainvillea glabra Choisy,Nyctaginaceae,KNApSAcK World,https://www.gbif.org/species/5384862,2026-07-12T20:10:40+00:00
+c0cdcd8e-d792-5bcc-8007-2d34bf929138,192,gbif:5384950,Eclipta prostrata (L.) L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5384950,2026-07-12T20:10:41+00:00
+b124e8f3-a469-54ed-9c7f-56a3428efd5e,191,gbif:5384955,Eclipta alba (L.) Hassk.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5384955,2026-07-12T20:10:41+00:00
+811b405a-cfcb-53e5-9cde-8c12bfa8a430,71,gbif:5389402,Bidens bipinnata L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5389402,2026-07-12T20:10:40+00:00
+2f234e16-e122-5d0d-a323-251811aec856,72,gbif:5391845,Bidens pilosa L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5391845,2026-07-12T20:10:40+00:00
+5fabf325-0264-5d5d-98e7-cc5e7da0aae3,497,gbif:5394163,Taraxacum officinale Weber ex F.H.Wigg.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5394163,2026-07-12T20:10:41+00:00
+7a405d0a-78cf-5dd4-8ce9-267395c76a4b,496,gbif:5394645,Taraxacum mongolicum Hand.-Mazz.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5394645,2026-07-12T20:10:41+00:00
+647a87a3-9ba6-534b-ae14-830baef2165b,75,gbif:5395639,Blumea lacera (Burm.fil.) DC.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5395639,2026-07-12T20:10:40+00:00
+6ba5abd6-8df7-5851-a12a-24a1c6423478,74,gbif:5395786,Blumea balsamifera (L.) DC.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5395786,2026-07-12T20:10:40+00:00
+464a8b20-f93a-5478-82c7-3a67094c61b8,197,gbif:5395925,Elephantopus scaber L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5395925,2026-07-12T20:10:41+00:00
+5d2b2b62-753a-541f-b4c1-5a326efe466b,332,gbif:5398421,Mikania micrantha Kunth,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5398421,2026-07-12T20:10:41+00:00
+fb02788b-a2d7-5935-8a5a-487082c8f634,14,gbif:5401673,Ageratum conyzoides L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5401673,2026-07-12T20:10:40+00:00
+e45c8eb1-1c30-5dfc-ba7a-31b6a43105dd,15,gbif:5401760,Ageratum houstonianum Mill.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/5401760,2026-07-12T20:10:40+00:00
+083318e1-aca9-5fb6-a100-0b626f2a3fbc,476,gbif:5406675,Sterculia foetida L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5406675,2026-07-12T20:10:41+00:00
+a038eb28-ecbe-55b0-b796-8eb2e256b0c8,142,gbif:5406685,Cola acuminata (P.Beauv.) Schott & Endl.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5406685,2026-07-12T20:10:40+00:00
+7878f28d-f36f-5ec7-92c3-5dac16717f41,111,gbif:5406697,Ceiba pentandra (L.) Gaertn.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5406697,2026-07-12T20:10:40+00:00
+d55956d8-bdcf-5dc2-b8d6-a66971537a43,459,gbif:5406735,Sida rhombifolia L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5406735,2026-07-12T20:10:41+00:00
+b001be0a-cf2a-5c90-8458-8d2dda31cfee,349,gbif:5406817,Myristica fragrans Houtt.,Myristicaceae,KNApSAcK World,https://www.gbif.org/species/5406817,2026-07-12T20:10:41+00:00
+d49b4a6d-6192-5ec2-9232-c44907129f7e,41,gbif:5407099,Annona squamosa L.,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407099,2026-07-12T20:10:40+00:00
+7d7ebb22-8f6f-5dae-9896-950f608446f0,40,gbif:5407123,Annona reticulata L.,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407123,2026-07-12T20:10:40+00:00
+6ac5c230-db02-5815-824d-f9ade8f45627,39,gbif:5407273,Annona muricata L.,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407273,2026-07-12T20:10:40+00:00
+36977bfa-3568-57fa-8f9e-3bb7eb534b7a,435,gbif:5407571,Annona mucosa Jacq.,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407571,2026-07-12T20:10:40+00:00
+34b09199-8c78-5a37-8a5b-3cb788f67cfd,92,gbif:5407583,Cananga odorata (Lam.) Hook.f. & Thomson,Annonaceae,KNApSAcK World,https://www.gbif.org/species/5407583,2026-07-12T20:10:40+00:00
+7744bbdc-f810-5223-bd61-9bff46cc14b6,481,gbif:5414399,Strychnos nux-vomica L.,Loganiaceae,KNApSAcK World,https://www.gbif.org/species/5414399,2026-07-12T20:10:41+00:00
+c71707ad-fcee-5f35-b1e4-4779442a7b24,29,gbif:5414410,Alstonia scholaris (L.) R.Br.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/5414410,2026-07-12T20:10:40+00:00
+db80ff24-2d40-53cb-b3c8-ca93c541a328,181,gbif:5414995,Digitalis purpurea L.,Plantaginaceae,KNApSAcK World,https://www.gbif.org/species/5414995,2026-07-12T20:10:41+00:00
+ba15f02b-7677-5c68-a4e0-e60c86c86885,438,gbif:5415418,Ruellia tuberosa L.,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/5415418,2026-07-12T20:10:41+00:00
+57107070-218d-5477-9a27-7721ad168b32,321,gbif:5415976,Melaleuca leucadendra (L.) L.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/5415976,2026-07-12T20:10:41+00:00
+b84d8af0-5c5a-5f21-954d-57b0f85c1ebb,414,gbif:5420380,Psidium guajava L.,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/5420380,2026-07-12T20:10:41+00:00
+597cf274-1fec-5e5e-b246-f6dac07ff42c,418,gbif:5420901,Punica granatum L.,Lythraceae,KNApSAcK World,https://www.gbif.org/species/5420901,2026-07-12T20:10:41+00:00
+b7960d0e-3148-54e8-aff0-a567bd9e6aba,303,gbif:5420912,Lawsonia inermis L.,Lythraceae,KNApSAcK World,https://www.gbif.org/species/5420912,2026-07-12T20:10:41+00:00
+26023f6b-046f-5f38-871b-4862f4a180ad,312,gbif:5420987,Ludwigia octovalvis (Jacq.) P.H.Raven,Onagraceae,KNApSAcK World,https://www.gbif.org/species/5420987,2026-07-12T20:10:41+00:00
+b471cdb7-ada5-5fcb-859a-108c931b97df,351,gbif:5421126,Nephelium lappaceum L.,Sapindaceae,KNApSAcK World,https://www.gbif.org/species/5421126,2026-07-12T20:10:41+00:00
+0ab2659c-3ebf-550f-851f-291b95753a80,11,gbif:5421195,Aegle marmelos (L.) Corrêa,Rutaceae,KNApSAcK World,https://www.gbif.org/species/5421195,2026-07-12T20:10:40+00:00
+02d24d5c-8f1d-5e92-bdf2-858d44eab0d4,93,gbif:5421345,Canarium indicum L.,Burseraceae,KNApSAcK World,https://www.gbif.org/species/5421345,2026-07-12T20:10:40+00:00
+5aa6f8c5-c5f3-5854-a460-9f5272cf71bf,35,gbif:5421368,Anacardium occidentale L.,Anacardiaceae,KNApSAcK World,https://www.gbif.org/species/5421368,2026-07-12T20:10:40+00:00
+9e9a1f4f-c829-528a-96de-3acf3c32258e,382,gbif:5524327,Phaleria macrocarpa (Scheff.) Boerl.,Thymelaeaceae,KNApSAcK World,https://www.gbif.org/species/5524327,2026-07-12T20:10:41+00:00
+1bcd3718-4829-5558-a1d2-12b0bc8061de,255,gbif:5546922,Helicteres isora L.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/5546922,2026-07-12T20:10:41+00:00
+47068472-28d1-594c-92b7-9bd7d8eddb2c,81,gbif:5555210,Brucea javanica (L.) Merr.,Simaroubaceae,KNApSAcK World,https://www.gbif.org/species/5555210,2026-07-12T20:10:40+00:00
+17a85e11-bc48-5804-8ade-253f4ed45c96,475,gbif:5592725,Stephania venosa (Blume) Spreng.,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/5592725,2026-07-12T20:10:41+00:00
+579381b9-b5da-5774-b06f-e52561ae8eaf,16,gbif:5597349,Aglaia odorata Lour.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/5597349,2026-07-12T20:10:40+00:00
+74cf8bf9-c5b5-53b6-8968-02edb671e993,527,gbif:5635525,Woodfordia fruticosa (L.) Kurz,Lythraceae,KNApSAcK World,https://www.gbif.org/species/5635525,2026-07-12T20:10:42+00:00
+5d414b86-69c4-514b-8352-d224a773e57c,479,gbif:5645531,Strychnos lucida R.Br.,Loganiaceae,KNApSAcK World,https://www.gbif.org/species/5645531,2026-07-12T20:10:41+00:00
+ea95036d-02a7-5466-8a8b-d74310f109ff,478,gbif:5645763,Strychnos ignatii Bergius,Loganiaceae,KNApSAcK World,https://www.gbif.org/species/5645763,2026-07-12T20:10:41+00:00
+731dfbce-b15e-50d2-b73f-8e1081d094b4,131,gbif:5834596,Clausena excavata Burm.fil.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/5834596,2026-07-12T20:10:40+00:00
+13cbe641-e59d-5c2b-acd3-e781409ef45e,324,gbif:5914287,Melia azedarach L.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/5914287,2026-07-12T20:10:41+00:00
+3323e797-d9a6-5d8f-9ff3-b51aa13fb671,38,gbif:6026372,Angelica keiskei (Miq.) Koidz.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/6026372,2026-07-12T20:10:40+00:00
+89220866-d3ce-5b46-9121-9465f28032c3,447,gbif:6358362,Scaevola taccada (Gaertn.) Roxb.,Goodeniaceae,KNApSAcK World,https://www.gbif.org/species/6358362,2026-07-12T20:10:41+00:00
+c36de55f-3310-570a-891a-15894bb4aa9e,8,gbif:6359819,Acanthus ilicifolius L.,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/6359819,2026-07-12T20:10:40+00:00
+b7a31c34-5fd0-5114-8b4e-3a5f3d6c61ed,304,gbif:6410563,Leonurus japonicus Houtt.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/6410563,2026-07-12T20:10:41+00:00
+0403012d-3f06-52b1-9448-8cd2550103b7,88,gbif:6412107,Callicarpa candicans (Burm.f.) Hochr.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/6412107,2026-07-12T20:10:40+00:00
+c313a183-c8a3-507e-97a2-9270ce035010,113,gbif:6429520,Celosia argentea f. cristata (L.) Schinz,Amaranthaceae,KNApSAcK World,https://www.gbif.org/species/6429520,2026-07-12T20:10:40+00:00
+6430846a-210a-5559-ad72-673cc5b2c8a1,127,gbif:6433679,Citrus hystrix DC.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/6433679,2026-07-12T20:10:40+00:00
+386644c3-5fe3-5bec-8bda-75381acb1968,519,gbif:6445734,Cyanthillium cinereum (L.) H.Rob.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/6445734,2026-07-12T20:10:40+00:00
+8a5d12ef-f854-592b-abd2-c211b33aa1b4,468,gbif:6446462,Solidago virgaurea L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/6446462,2026-07-12T20:10:41+00:00
+8447134c-5f74-5311-a017-ac9f7dc2a1c7,531,gbif:7069512,Zingiber zerumbet subsp. zerumbet,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/7069512,2026-07-12T20:10:42+00:00
+7600935c-c8c6-5fb1-a6da-ffba4d239d7c,262,gbif:7115794,Talipariti tiliaceum (L.) Fryxell,Malvaceae,KNApSAcK World,https://www.gbif.org/species/7115794,2026-07-12T20:10:41+00:00
+0fdd9619-aff6-5f46-9b47-f3cb8909fee3,116,gbif:7155766,Cerbera manghas L.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/7155766,2026-07-12T20:10:40+00:00
+829e9934-423f-5671-aa41-a0eae1ca0edd,307,gbif:7223950,Leptospermum polygalifolium subsp. polygalifolium,Myrtaceae,KNApSAcK World,https://www.gbif.org/species/7223950,2026-07-12T20:10:41+00:00
+3bab8320-ea92-5df7-b615-64c0ada00ffc,43,gbif:7262663,Antiaris toxicaria (Pers.) Lesch.,Moraceae,KNApSAcK World,https://www.gbif.org/species/7262663,2026-07-12T20:10:40+00:00
+0763450f-c107-54d8-97c7-7208bf30e774,431,gbif:7263230,Rhinacanthus nasutus (L.) Kuntze,Acanthaceae,KNApSAcK World,https://www.gbif.org/species/7263230,2026-07-12T20:10:41+00:00
+33687568-e6d9-5ba7-9ad3-60fc052a5b54,445,gbif:7264721,Sapindus rarak DC.,Sapindaceae,KNApSAcK World,https://www.gbif.org/species/7264721,2026-07-12T20:10:41+00:00
+f3a47d42-1aa2-52d3-863b-8f801b909e39,474,gbif:7268792,Stephania japonica (Thunb.) Miers,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/7268792,2026-07-12T20:10:41+00:00
+fb653648-7594-5f5f-a4d3-efaad919ac0f,188,gbif:7271367,Dysoxylum acutangulum Miq.,Meliaceae,KNApSAcK World,https://www.gbif.org/species/7271367,2026-07-12T20:10:41+00:00
+5c8a5aab-e1e3-5032-a898-c4fa1d924427,439,gbif:7291884,Rumex nepalensis Spreng.,Polygonaceae,KNApSAcK World,https://www.gbif.org/species/7291884,2026-07-12T20:10:41+00:00
+edeb27f1-aaf8-55a0-a01c-cebc494034b1,101,gbif:7302622,Senna alexandrina var. alexandrina,Fabaceae,KNApSAcK World,https://www.gbif.org/species/7302622,2026-07-12T20:10:41+00:00
+5c9f1cc4-c8de-5a0f-8e07-5352e809cb44,311,gbif:7304140,Litsea glutinosa (Lour.) C.B.Rob.,Lauraceae,KNApSAcK World,https://www.gbif.org/species/7304140,2026-07-12T20:10:41+00:00
+d13b40db-3994-536d-bda5-609a23191cdc,268,gbif:7306536,Hyptis brevipes Poit.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7306536,2026-07-12T20:10:41+00:00
+2dfd454c-52a5-521c-8bf4-9edda2dcbc03,362,gbif:7308026,Orthosiphon aristatus (Blume) Miq.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7308026,2026-07-12T20:10:41+00:00
+fba910fb-ae83-59f9-b550-5786ef2a2f81,363,gbif:7308027,Orthosiphon aristatus var. aristatus,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7308027,2026-07-12T20:10:41+00:00
+699f9cd1-c9d0-503a-9ec8-eeeb1fcc31a1,450,gbif:7308714,Scutellaria indica L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7308714,2026-07-12T20:10:41+00:00
+c90ffab9-7215-58c7-8513-105a858dc38a,509,gbif:7317567,Trichosanthes tricuspidata Lour.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/7317567,2026-07-12T20:10:41+00:00
+d760489a-d188-585e-a821-aa4510eb9fd5,452,gbif:7329850,Selaginella doederleinii Hieron.,Selaginellaceae,KNApSAcK World,https://www.gbif.org/species/7329850,2026-07-12T20:10:41+00:00
+1b772f2d-9216-5927-84d5-8b0cb86c71bd,328,gbif:7330039,Mesua ferrea L.,Calophyllaceae,KNApSAcK World,https://www.gbif.org/species/7330039,2026-07-12T20:10:41+00:00
+58ab169b-6803-57eb-8600-8faca5d6c4f9,200,gbif:7330952,Embelia ribes Burm.fil.,Primulaceae,KNApSAcK World,https://www.gbif.org/species/7330952,2026-07-12T20:10:41+00:00
+7d0a454f-bec7-586f-b48c-14615ac6719e,520,gbif:7352653,"Vetiveria zizanioides Stapf, 1906",Poaceae,KNApSAcK World,https://www.gbif.org/species/7352653,2026-07-12T20:10:42+00:00
+7f4c8e0a-c709-544e-9a77-0e56a65a59f1,471,gbif:7367845,"Spilanthes acmella A.Chev., 1920",Asteraceae,KNApSAcK World,https://www.gbif.org/species/7367845,2026-07-12T20:10:41+00:00
+de878003-fcd3-50c1-849b-f0c460a3ed1f,201,gbif:7376217,Emilia sonchifolia (L.) DC. ex Wight,Asteraceae,KNApSAcK World,https://www.gbif.org/species/7376217,2026-07-12T20:10:41+00:00
+4d0c97db-babe-5698-990e-272c77766616,437,gbif:7390572,Rosa × damascena Mill.,Rosaceae,KNApSAcK World,https://www.gbif.org/species/7390572,2026-07-12T20:10:41+00:00
+a4e16489-9744-56f2-9699-ba98f75a9674,152,gbif:7393329,Cucurbita moschata (Duchesne) Duchesne ex Poir.,Cucurbitaceae,KNApSAcK World,https://www.gbif.org/species/7393329,2026-07-12T20:10:40+00:00
+781883a9-0ea0-5cf4-a8af-bf097de258df,361,gbif:7414934,Oroxylum indicum (L.) Kurz,Bignoniaceae,KNApSAcK World,https://www.gbif.org/species/7414934,2026-07-12T20:10:41+00:00
+8e2c89d3-8430-57e0-a9c8-81cde6a7533b,229,gbif:7467639,Ficus microcarpa L.fil.,Moraceae,KNApSAcK World,https://www.gbif.org/species/7467639,2026-07-12T20:10:41+00:00
+3361f727-f4d6-50fc-a01c-d4a812b9ccb0,485,gbif:7558421,Symphytum officinale L.,Boraginaceae,KNApSAcK World,https://www.gbif.org/species/7558421,2026-07-12T20:10:41+00:00
+4120fdb7-c842-5c5c-a7bc-50a5e991e1b5,147,gbif:7584507,Hellenia speciosa (J.Koenig) S.R.Dutta,Costaceae,KNApSAcK World,https://www.gbif.org/species/7584507,2026-07-12T20:10:41+00:00
+91ebe95b-6b76-5ffc-8817-2d010bf5f11a,87,gbif:7587087,Cajanus cajan (L.) Huth,Fabaceae,KNApSAcK World,https://www.gbif.org/species/7587087,2026-07-12T20:10:40+00:00
+5343796e-9023-5f92-8580-dc6b478d26db,284,gbif:7587215,Jasminum sambac (L.) Aiton,Oleaceae,KNApSAcK World,https://www.gbif.org/species/7587215,2026-07-12T20:10:41+00:00
+7ee52f33-7a42-594b-b302-6547e6ec3605,397,gbif:7606629,Piper cubeba L.fil.,Piperaceae,KNApSAcK World,https://www.gbif.org/species/7606629,2026-07-12T20:10:41+00:00
+a8f8e31e-bd14-538c-b537-9b743c9e28cf,333,gbif:7629955,Millingtonia hortensis L.fil.,Bignoniaceae,KNApSAcK World,https://www.gbif.org/species/7629955,2026-07-12T20:10:41+00:00
+7cee7592-10e3-5324-b5ce-1318bc740be8,424,gbif:7678610,Raphanus sativus L.,Brassicaceae,KNApSAcK World,https://www.gbif.org/species/7678610,2026-07-12T20:10:41+00:00
+8101f5c7-5621-50fe-8fe9-6598bb83289b,214,gbif:7694888,Eupatorium riparium Sch.Bip. ex Schnittsp.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/7694888,2026-07-12T20:10:41+00:00
+0deb1f2c-bbab-5e68-9908-855a3cf03ab0,413,gbif:7713954,Premna corymbosa Rottler,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7713954,2026-07-12T20:10:41+00:00
+02cd7868-fe4e-5d13-b363-ac922c7b456d,231,gbif:7852448,Ficus septica Burm.fil.,Moraceae,KNApSAcK World,https://www.gbif.org/species/7852448,2026-07-12T20:10:41+00:00
+964b15f4-d55b-59d7-ad36-610d622f6970,252,gbif:7883492,Hedychium coronarium J.Koenig,Zingiberaceae,KNApSAcK World,https://www.gbif.org/species/7883492,2026-07-12T20:10:41+00:00
+086bc03b-81e5-5777-9c8d-c881b3b83e58,449,gbif:7996273,Scutellaria discolor Wall. ex Benth.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/7996273,2026-07-12T20:10:41+00:00
+c0f39a76-7f69-5795-bfc8-58f810afd725,278,gbif:7999386,Ipomoea pes-caprae (L.) R.Br.,Convolvulaceae,KNApSAcK World,https://www.gbif.org/species/7999386,2026-07-12T20:10:41+00:00
+fcdef5f2-39d2-51ff-94f1-2285c31e98d2,95,gbif:8034409,Canna indica L.,Cannaceae,KNApSAcK World,https://www.gbif.org/species/8034409,2026-07-12T20:10:40+00:00
+8a0f723a-c943-582a-bd4e-b1e4d513e515,48,gbif:8042568,Artemisia abrotanum L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/8042568,2026-07-12T20:10:40+00:00
+bf4b6a7d-ba5d-53fc-a018-9dd0771ef45f,212,gbif:8052532,"Eugenia aromatica Kuntze, 1891",Myrtaceae,KNApSAcK World,https://www.gbif.org/species/8052532,2026-07-12T20:10:41+00:00
+e2fd167b-5007-5c8d-8437-43d5e9d869eb,130,gbif:8077391,Citrus ×aurantium L.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/8077391,2026-07-12T20:10:40+00:00
+9b600c0d-c81c-5ef5-8513-a56c9b80a832,395,gbif:8080300,Pimpinella anisum L.,Apiaceae,KNApSAcK World,https://www.gbif.org/species/8080300,2026-07-12T20:10:41+00:00
+b9c139c7-7a56-5adc-8b88-a7b6f3aca3d1,489,gbif:8172343,Tabernaemontana corymbosa Roxb. ex Wall.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/8172343,2026-07-12T20:10:41+00:00
+cfed09a3-069d-5efb-b082-9a7538b5b248,345,gbif:8190743,Murraya paniculata (L.) Jacq.,Rutaceae,KNApSAcK World,https://www.gbif.org/species/8190743,2026-07-12T20:10:41+00:00
+55e70f6c-6df3-532b-adc0-d87815e57185,442,gbif:8249932,Salvia splendens Sellow ex Nees,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/8249932,2026-07-12T20:10:41+00:00
+e1f56081-6106-5129-a3e1-580e132bf3cb,457,gbif:8281950,Sesbania grandiflora (L.) Poir.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/8281950,2026-07-12T20:10:41+00:00
+7a2474e0-42e9-5f23-8696-92e68750f96c,505,gbif:8298918,Tinospora crispa (L.) Miers ex Hook.fil. & Thomson,Menispermaceae,KNApSAcK World,https://www.gbif.org/species/8298918,2026-07-12T20:10:41+00:00
+2a236817-2e70-5939-8218-889a20421369,383,gbif:8305376,Phaseolus mungo Wall.,Fabaceae,KNApSAcK World,https://www.gbif.org/species/8305376,2026-07-12T20:10:41+00:00
+2878ff7d-24d4-53f0-b0bc-e1da962af77d,2,gbif:8312665,Abelmoschus moschatus (L.) Medik.,Malvaceae,KNApSAcK World,https://www.gbif.org/species/8312665,2026-07-12T20:10:40+00:00
+70582189-28a1-5b4f-bf99-2821bd13bf96,133,gbif:8355397,"Clerodendrum serratum Spreng., 1825",Lamiaceae,KNApSAcK World,https://www.gbif.org/species/8355397,2026-07-12T20:10:40+00:00
+829f7361-4d8b-5b77-a66e-c7fbbdc882d1,195,gbif:8368501,Elaeocarpus grandiflorus Sm.,Elaeocarpaceae,KNApSAcK World,https://www.gbif.org/species/8368501,2026-07-12T20:10:41+00:00
+83e99fa4-c3fe-58c3-acfc-3dc32e8a98ce,97,gbif:8403992,Capsicum frutescens L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/8403992,2026-07-12T20:10:40+00:00
+1d20c0c6-2414-5066-9946-432679cbc06b,266,gbif:8418338,Hydrocotyle sibthorpioides Lam.,Araliaceae,KNApSAcK World,https://www.gbif.org/species/8418338,2026-07-12T20:10:41+00:00
+ba372c6c-7637-50b2-9292-b386e3c357ad,272,gbif:8424006,Imperata cylindrica (L.) Raeusch.,Poaceae,KNApSAcK World,https://www.gbif.org/species/8424006,2026-07-12T20:10:41+00:00
+6694cd48-83fb-5b92-8cf3-9c48441702b5,366,gbif:8427624,Oxalis corniculata L.,Oxalidaceae,KNApSAcK World,https://www.gbif.org/species/8427624,2026-07-12T20:10:41+00:00
+838a29ec-5c90-5977-a20f-a83c06a3cd05,327,gbif:8707933,Mentha × piperita L.,Lamiaceae,KNApSAcK World,https://www.gbif.org/species/8707933,2026-07-12T20:10:41+00:00
+f20a6769-8cdb-57b2-a977-cf1f180c97bf,465,gbif:9150405,Solanum nigrum L.,Solanaceae,KNApSAcK World,https://www.gbif.org/species/9150405,2026-07-12T20:10:41+00:00
+cef21d69-6e29-58b2-8104-783ff9c32245,446,gbif:9197670,Breynia androgyna (L.) Chakrab. & N.P.Balakr.,Phyllanthaceae,KNApSAcK World,https://www.gbif.org/species/9197670,2026-07-12T20:10:40+00:00
+7dfad6a0-2853-5338-8754-f6fd7988441c,254,gbif:9206251,Helianthus annuus L.,Asteraceae,KNApSAcK World,https://www.gbif.org/species/9206251,2026-07-12T20:10:41+00:00
+fe116ca4-8edf-538b-b133-0c866d590d09,370,gbif:9296315,Pandanus amaryllifolius Roxb. ex Lindl.,Pandanaceae,KNApSAcK World,https://www.gbif.org/species/9296315,2026-07-12T20:10:41+00:00
+1062b492-225b-59c1-8d18-a9ce2be88d47,337,gbif:9381433,Trigastrotheca pentaphylla (L.) Thulin,Molluginaceae,KNApSAcK World,https://www.gbif.org/species/9381433,2026-07-12T20:10:41+00:00
+7f57093a-346a-5265-aed1-fa50040d7337,89,gbif:9531830,Calophyllum inophyllum L.,Calophyllaceae,KNApSAcK World,https://www.gbif.org/species/9531830,2026-07-12T20:10:40+00:00
+03a91385-273b-50f6-aba7-43ad7c10f881,372,gbif:9796769,Pangium edule Reinw.,Achariaceae,KNApSAcK World,https://www.gbif.org/species/9796769,2026-07-12T20:10:41+00:00
+69b1b6e9-e3f5-5cd1-a05d-a0167a49efb0,374,gbif:9827170,Urceola laevigata (Juss.) D.J.Middleton & Livsh.,Apocynaceae,KNApSAcK World,https://www.gbif.org/species/9827170,2026-07-12T20:10:41+00:00

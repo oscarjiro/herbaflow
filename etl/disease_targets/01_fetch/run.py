@@ -2,7 +2,9 @@
 01_fetch/run.py — Fetch disease-target associations from Open Targets Platform.
 
 For each canonical disease:
-  1. Resolve EFO ID via OT search (using disease_name)
+  1. Resolve the Open Targets disease id via OT search, then accept the hit only
+     if its dbXRefs cross-reference the seed's curated ontology id (DOID/MeSH).
+     A disease with no cross-referenced hit is rejected to the review path.
   2. Paginate associatedTargets query
   3. Cache raw JSON per disease
   4. Write flat raw_associations.csv
@@ -34,13 +36,24 @@ from shared.utils import (
 # GraphQL queries
 # ---------------------------------------------------------------------------
 
+# `dbXRefs` is a documented field on the Open Targets GraphQL `Disease` type
+# (`dbXRefs: [String!]!`, cross-references to external disease ontologies). Its
+# entries are CURIEs such as "DOID:3393" or "MESH:D000544" (uppercase prefix,
+# colon-delimited) — verified live against the OT API v4 schema. We pull it inline
+# on each search hit via an inline fragment on the Disease object so we can confirm
+# the top free-text match actually corresponds to the seed's curated ontology id.
 SEARCH_QUERY = """
 query SearchDisease($queryString: String!) {
-  search(queryString: $queryString, entityNames: ["disease"], page: {index: 0, size: 5}) {
+  search(queryString: $queryString, entityNames: ["disease"], page: {index: 0, size: 10}) {
     hits {
       id
       name
       entity
+      object {
+        ... on Disease {
+          dbXRefs
+        }
+      }
     }
   }
 }
@@ -101,17 +114,79 @@ def _gql(endpoint: str, query: str, variables: dict, cfg: dict, log) -> dict | N
     return None
 
 
-def resolve_efo_id(disease_name: str, endpoint: str, cfg: dict, log) -> str | None:
+def ontology_curie(ontology_id: str | None) -> str:
+    """Convert a seed ontology id to an Open Targets dbXRefs CURIE.
+
+    The `diseases.csv` seed carries ids like ``DOID_3393`` or ``mesh_D000544``;
+    Open Targets `dbXRefs` uses the CURIE form ``DOID:3393`` / ``MESH:D000544``
+    (uppercase prefix, colon-delimited). Returns "" if there is no usable id.
+    """
+    raw = clean_str(ontology_id)
+    if not raw or "_" not in raw:
+        return ""
+    prefix, _, local = raw.partition("_")
+    if not prefix or not local:
+        return ""
+    return f"{prefix.upper()}:{local}"
+
+
+def select_xref_hit(hits: list[dict], expected_curie: str) -> dict | None:
+    """Return the first search hit whose `dbXRefs` contains ``expected_curie``.
+
+    Matching is case-insensitive on the full CURIE. Returns None if no hit
+    cross-references the seed's curated ontology id — the caller then rejects
+    the disease to the review/error path rather than trusting the top hit.
+    """
+    if not expected_curie:
+        return None
+    wanted = expected_curie.upper()
+    for hit in hits:
+        obj = hit.get("object") or {}
+        xrefs = {str(x).upper() for x in (obj.get("dbXRefs") or [])}
+        if wanted in xrefs:
+            return hit
+    return None
+
+
+def resolve_disease_id(
+    disease_name: str, ontology_id: str | None, endpoint: str, cfg: dict, log
+) -> tuple[str | None, str]:
+    """Resolve a seed disease to an Open Targets disease id, xref-validated.
+
+    Runs the free-text OT search, then accepts a hit only if its `dbXRefs`
+    include the seed's curated ontology id (DOID/MeSH). This guards against the
+    old behaviour of blindly trusting the top hit, which could silently resolve
+    to a narrower or wrong disease. Returns ``(ot_id, "matched")`` on success,
+    or ``(None, reason)`` so the caller can route the disease to review.
+    """
+    expected_curie = ontology_curie(ontology_id)
+    if not expected_curie:
+        log.error("  No usable seed ontology id for '%s' (got %r) — cannot xref-validate",
+                  disease_name, ontology_id)
+        return None, "no_seed_ontology_id"
+
     data = _gql(endpoint, SEARCH_QUERY, {"queryString": disease_name}, cfg, log)
     if not data:
-        return None
+        return None, "search_failed"
     hits = data.get("search", {}).get("hits", [])
     if not hits:
         log.warning("No OT search hits for: %s", disease_name)
-        return None
-    efo_id = hits[0]["id"]
-    log.info("  EFO: %s -> %s (%s)", disease_name, efo_id, hits[0].get("name", ""))
-    return efo_id
+        return None, "no_hits"
+
+    match = select_xref_hit(hits, expected_curie)
+    if match is None:
+        top = hits[0]
+        log.error(
+            "  XREF MISMATCH for '%s': no hit cross-references %s "
+            "(top hit was %s '%s') — rejected to review",
+            disease_name, expected_curie, top.get("id"), top.get("name", ""),
+        )
+        return None, f"no_xref_match:{expected_curie}"
+
+    ot_id = match["id"]
+    log.info("  OT: %s -> %s (%s) [xref %s]",
+             disease_name, ot_id, match.get("name", ""), expected_curie)
+    return ot_id, "matched"
 
 
 def fetch_associations(efo_id: str, endpoint: str, cfg: dict, log) -> list[dict]:
@@ -234,10 +309,14 @@ def run(cfg: dict, args) -> int:
             continue
 
         log.info("Fetching: %s", search_name)
-        efo_id = resolve_efo_id(search_name, endpoint, cfg, log)
+        efo_id, reason = resolve_disease_id(
+            search_name, disease_row.get("ontology_id"), endpoint, cfg, log
+        )
         if not efo_id:
-            log.error("Could not resolve EFO ID for: %s", search_name)
-            unresolved.append({"disease_key": disease_key, "disease_name": search_name})
+            log.error("Could not resolve OT disease id for '%s' (%s)", search_name, reason)
+            unresolved.append(
+                {"disease_key": disease_key, "disease_name": search_name, "reason": reason}
+            )
             continue
 
         associations = fetch_associations(efo_id, endpoint, cfg, log)

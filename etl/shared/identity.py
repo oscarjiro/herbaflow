@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import re
 import uuid
+from collections import defaultdict
+from typing import Dict
 
 # --- Namespaces: uuid5(NAMESPACE_DNS, "herbaflow.{table}") ---
 PLANT_NS = uuid.uuid5(uuid.NAMESPACE_DNS, "herbaflow.plants")
@@ -61,6 +63,99 @@ def fold_isoform(accession: str) -> str:
 
 def _norm(value: object) -> str:
     return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+# --- Molecular-formula normalization (Hill notation) ---
+#
+# Used to corroborate a resolved structure against the raw source formula: a
+# correct identity resolution preserves the molecular formula. Kept here as the
+# single canonical home so enrichment (compounds/04) and any future validation
+# rule compare formulas the same way.
+
+_FORMULA_ELEMENT_RE = re.compile(r"([A-Z][a-z]?)(\d*)")
+_FORMULA_ALLOWED_RE = re.compile(r"^[A-Za-z0-9()]+$")
+# Any of these means a multi-component (salt/hydrate/mixture) or charged formula,
+# which is deliberately treated as non-comparable so it never matches a desalted
+# formula. Desalting is a separate concern.
+_FORMULA_REJECT_CHARS = (".", "·", "•", "+", "-", ",", "*", ";", "/")
+
+
+def _parse_formula(text: str) -> Dict[str, int]:
+    """Parse a clean formula (parentheses allowed) into {element: count}.
+
+    Returns {} for anything unparseable (unbalanced parentheses, a lowercase
+    lead, stray symbols) so the caller falls back to "not comparable".
+    """
+    stack: list[Dict[str, int]] = [defaultdict(int)]
+    i, n = 0, len(text)
+    while i < n:
+        ch = text[i]
+        if ch == "(":
+            stack.append(defaultdict(int))
+            i += 1
+        elif ch == ")":
+            i += 1
+            j = i
+            while j < n and text[j].isdigit():
+                j += 1
+            mult = int(text[i:j]) if j > i else 1
+            i = j
+            if len(stack) < 2:
+                return {}
+            group = stack.pop()
+            for el, cnt in group.items():
+                stack[-1][el] += cnt * mult
+        else:
+            match = _FORMULA_ELEMENT_RE.match(text, i)
+            if match is None or not match.group(1):
+                return {}
+            element = match.group(1)
+            count = int(match.group(2)) if match.group(2) else 1
+            stack[-1][element] += count
+            i = match.end()
+    if len(stack) != 1:
+        return {}
+    return dict(stack[0])
+
+
+def _to_hill(counts: Dict[str, int]) -> str:
+    def fmt(el: str) -> str:
+        c = counts[el]
+        return el if c == 1 else f"{el}{c}"
+
+    if "C" in counts:
+        order = ["C"] + (["H"] if "H" in counts else [])
+        order += sorted(k for k in counts if k not in ("C", "H"))
+    else:
+        order = sorted(counts)
+    return "".join(fmt(el) for el in order)
+
+
+def hill_formula(formula: object) -> str:
+    """Normalize a single-component molecular formula to Hill notation.
+
+    Hill order is carbon first, hydrogen second, then remaining elements
+    alphabetically (e.g. ``C9H8O4``). Returns ``""`` for empty, multi-component
+    (salt/hydrate/mixture), charged, or unparseable input, so those never
+    compare equal to a plain neutral formula.
+    """
+    text = re.sub(r"\s+", "", str(formula or ""))
+    if not text:
+        return ""
+    if any(sep in text for sep in _FORMULA_REJECT_CHARS):
+        return ""
+    if not _FORMULA_ALLOWED_RE.match(text):
+        return ""
+    counts = _parse_formula(text)
+    if not counts:
+        return ""
+    return _to_hill(counts)
+
+
+def formula_matches(a: object, b: object) -> bool:
+    """True only when both formulas are comparable and equal in Hill notation."""
+    ha = hill_formula(a)
+    return bool(ha) and ha == hill_formula(b)
 
 
 def compound_canonical_key(candidate: dict) -> str:

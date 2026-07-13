@@ -133,6 +133,17 @@ One canonical row per chemical entity.
 - `compounds_pubchem_cid_idx` (btree, `pubchem_cid`)
 - `compounds_chembl_id_idx` (btree, `chembl_id`)
 
+**ETL-export audit columns (not loaded to the DB):** the compound ETL's exported
+`compounds.csv` additionally carries `canonical_status` / `canonical_strategy` /
+`canonical_reason`, `evidence_count` / `plant_count`, and the identity-evidence
+provenance `match_strategy` / `evidence_type` / `enrichment_confidence`. The last
+three make a weak identity visibly weak: `canonical_strategy = inchi_key` (or
+`pubchem_cid`/`chembl_id`) only when the resolved structure was corroborated
+(molecular formula preserved); otherwise the compound falls back to a
+`cas_id` / `name_formula` / `name` identity and `enrichment_confidence` is low.
+These columns stay in the CSV/audit bundle for traceability and are not columns of
+the `compounds` table.
+
 ---
 
 ### `plant_compounds`
@@ -144,7 +155,7 @@ Pair-grain junction. Answers: which compounds were found in which plants?
 | `plant_compound_id` | uuid PK | NO | UUID v5 from `{plant_id}:{compound_id}` |
 | `plant_id` | uuid FK → `plants` | NO | |
 | `compound_id` | uuid FK → `compounds` | NO | |
-| `source_url` | text | YES | Per-row deep link; authoritative |
+| `source_url` | text | YES | Per-row deep link to the KNApSAcK organism (species) page `result.php?sname=organism&word=<species>`, which groups every metabolite recorded for that organism; authoritative provenance for the plant→compound edge |
 | `retrieved_at` | timestamptz | YES | |
 
 **Constraints:**

@@ -121,6 +121,7 @@ MEMBER_OUTPUT_COLUMNS = [
     "c_id",
     "cas_id",
     "metabolite",
+    "organism",
     "normalized_metabolite_name",
     "normalized_metabolite_key",
     "normalized_cas_id",
@@ -536,11 +537,20 @@ def build_candidate_signature(
 def confidence_adjustment(
     strategy: str, members: List[Dict[str, Any]]
 ) -> Tuple[float, str]:
-    """Adjust base confidence based on evidence consistency and support."""
+    """Adjust base confidence based on evidence support and review flags.
+
+    Clusters are keyed on CAS+name+formula (see ``build_candidate_signature``), so
+    every member of a cluster shares those key fields by construction. This step
+    therefore does NOT attempt intra-cluster ambiguity resolution or apply any
+    "conflicting field" penalty: such a penalty would test the very field the
+    cluster is keyed on and could never fire (measured: 0 penalised clusters). Only
+    the two signals that actually vary within a cluster are used: a small support
+    bonus for multi-member evidence, and a penalty when a non-CAS cluster carries a
+    normalization-review member.
+    """
     base = members[0]["candidate_confidence_base"] if members else 0.0
     support_bonus = min(0.08, 0.02 * max(0, len(members) - 1))
     review_penalty = 0.0
-    conflict_penalty = 0.0
 
     statuses = [
         normalize_whitespace(m.get("normalization_status", "")).lower() for m in members
@@ -552,53 +562,12 @@ def confidence_adjustment(
     }:
         review_penalty = 0.05
 
-    distinct_name_keys = {
-        normalize_whitespace(m.get("normalized_metabolite_key", ""))
-        for m in members
-        if normalize_whitespace(m.get("normalized_metabolite_key", ""))
-    }
-    distinct_cas_keys = {
-        normalize_whitespace(m.get("normalized_cas_key", ""))
-        for m in members
-        if normalize_whitespace(m.get("normalized_cas_key", ""))
-    }
-    distinct_formula_keys = {
-        normalize_whitespace(m.get("normalized_formula_key", ""))
-        for m in members
-        if normalize_whitespace(m.get("normalized_formula_key", ""))
-    }
-
-    if strategy.startswith("cas_exact"):
-        if len(distinct_cas_keys) > 1:
-            conflict_penalty += 0.30
-        if len(distinct_name_keys) > 2:
-            conflict_penalty += 0.10
-    elif strategy in {"name_formula_mw", "name_formula", "name_mw", "name_only"}:
-        if len(distinct_name_keys) > 1:
-            conflict_penalty += 0.20
-        if len(distinct_formula_keys) > 1:
-            conflict_penalty += 0.15
-        if len(distinct_cas_keys) > 1:
-            conflict_penalty += 0.10
-    elif strategy in {"formula_mw", "formula_only"}:
-        if len(distinct_formula_keys) > 1:
-            conflict_penalty += 0.20
-        if len(distinct_name_keys) > 1:
-            conflict_penalty += 0.10
-    else:
-        if len(distinct_name_keys) > 1:
-            conflict_penalty += 0.10
-        if len(distinct_cas_keys) > 1:
-            conflict_penalty += 0.10
-
-    score = max(0.0, min(1.0, base + support_bonus - review_penalty - conflict_penalty))
+    score = max(0.0, min(1.0, base + support_bonus - review_penalty))
     reason_parts = []
     if support_bonus:
         reason_parts.append(f"support_bonus={support_bonus:.2f}")
     if review_penalty:
         reason_parts.append(f"review_penalty={review_penalty:.2f}")
-    if conflict_penalty:
-        reason_parts.append(f"conflict_penalty={conflict_penalty:.2f}")
     return score, ";".join(reason_parts)
 
 
@@ -608,46 +577,19 @@ def decide_candidate_status(
     members: List[Dict[str, Any]],
     min_ready_confidence: float,
 ) -> Tuple[str, str]:
+    """Decide ready/review for a candidate cluster.
+
+    Dedup clusters by CAS+name+formula and does NOT attempt ambiguity resolution:
+    members of a cluster share the keyed fields by construction, so the old
+    "multiple distinct <keyed field>" conflict tests could never fire (measured: 0
+    ambiguous clusters across 12,593) and were removed. Real identity ambiguity is
+    resolved downstream in enrichment (04), where a structure is accepted only with
+    corroboration. Here we only flag low-confidence or review-carrying clusters.
+    """
     statuses = [
         normalize_whitespace(m.get("normalization_status", "")).lower() for m in members
     ]
-    distinct_name_keys = {
-        normalize_whitespace(m.get("normalized_metabolite_key", ""))
-        for m in members
-        if normalize_whitespace(m.get("normalized_metabolite_key", ""))
-    }
-    distinct_cas_keys = {
-        normalize_whitespace(m.get("normalized_cas_key", ""))
-        for m in members
-        if normalize_whitespace(m.get("normalized_cas_key", ""))
-    }
-    distinct_formula_keys = {
-        normalize_whitespace(m.get("normalized_formula_key", ""))
-        for m in members
-        if normalize_whitespace(m.get("normalized_formula_key", ""))
-    }
 
-    conflict = False
-    conflict_reasons: List[str] = []
-
-    if strategy.startswith("cas_exact") and len(distinct_cas_keys) > 1:
-        conflict = True
-        conflict_reasons.append("multiple_cas_keys")
-    if (
-        strategy in {"name_formula_mw", "name_formula", "name_mw", "name_only"}
-        and len(distinct_name_keys) > 1
-    ):
-        conflict = True
-        conflict_reasons.append("multiple_name_keys")
-    if strategy in {"formula_mw", "formula_only"} and len(distinct_formula_keys) > 1:
-        conflict = True
-        conflict_reasons.append("multiple_formula_keys")
-    if strategy == "source_compound_key" and len(members) > 1:
-        conflict = True
-        conflict_reasons.append("multiple_source_records_only")
-
-    if conflict:
-        return "ambiguous", ";".join(conflict_reasons)
     if confidence < min_ready_confidence:
         return "review", f"confidence_below_threshold_{min_ready_confidence:.2f}"
     if any(status == "review" for status in statuses) and strategy in {
@@ -863,6 +805,7 @@ def build_candidate_records(
                     "c_id": normalize_whitespace(member.get("c_id", "")),
                     "cas_id": normalize_whitespace(member.get("cas_id", "")),
                     "metabolite": normalize_whitespace(member.get("metabolite", "")),
+                    "organism": normalize_whitespace(member.get("organism", "")),
                     "normalized_metabolite_name": normalize_whitespace(
                         member.get("normalized_metabolite_name", "")
                     ),

@@ -1,14 +1,14 @@
 {
   "module": "compounds",
   "step": "03_dedupe_candidates",
-  "run_id": "compounds_20260602_131158",
+  "run_id": "compounds_20260713_004200",
   "normalized_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\compounds_normalized.csv",
   "review_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\compound_review.csv",
   "mapping_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\plant_mapping_resolution.csv",
   "output_candidates_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidates.csv",
   "output_members_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidate_members.csv",
   "output_review_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidate_review.csv",
-  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\logs\\dedupe_compound_candidates_compounds_20260602_131158.log",
+  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\logs\\dedupe_compound_candidates_compounds_20260713_004200.log",
   "input_row_count": 21922,
   "candidate_cluster_count": 12593,
   "candidate_member_row_count": 21922,
@@ -17,15 +17,15 @@
   "review_clusters": 0,
   "merged_clusters": 2514,
   "ambiguous_clusters": 0,
-  "normalized_ready_rows": 20978,
-  "normalized_review_rows": 944,
+  "normalized_ready_rows": 20620,
+  "normalized_review_rows": 1302,
   "mapping_meta": {
     "loaded": true,
     "mapping_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\02_normalize\\out\\plant_mapping_resolution.csv",
     "row_count": 21922,
-    "mapped_rows": 478,
+    "mapped_rows": 491,
     "raw_column": "source_plant_raw_id",
     "canonical_column": "canonical_plant_id"
   },
-  "generated_at": "2026-06-02T13:12:04+00:00"
+  "generated_at": "2026-07-13T00:42:02+00:00"
 }

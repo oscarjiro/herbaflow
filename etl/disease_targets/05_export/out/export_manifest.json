@@ -1,11 +1,11 @@
 {
-  "run_id": "export_20260608_064150",
+  "run_id": "export_20260712_201017",
   "batch_id": "DT001",
   "source": "OpenTargets",
   "source_url": "https://api.platform.opentargets.org/api/v4/graphql",
-  "targets": 8033,
-  "target_aliases": 24068,
-  "disease_targets": 15504,
+  "targets": 8389,
+  "target_aliases": 25139,
+  "disease_targets": 16726,
   "diseases_covered": 10,
-  "exported_at": "2026-06-08T06:41:50+00:00"
+  "exported_at": "2026-07-12T20:10:17+00:00"
 }

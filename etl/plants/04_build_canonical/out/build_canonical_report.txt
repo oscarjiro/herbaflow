@@ -1,14 +1,14 @@
 04_BUILD_CANONICAL (PART 1) REPORT
 =================================
 input_rows=535
-accepted_rows=503
-review_rows=30
-rejected_rows=2
+accepted_rows=501
+review_rows=31
+rejected_rows=3
 
 Decision counts:
-accepted=503
-review=30
-rejected=2
+accepted=501
+review=31
+rejected=3
 
 Rules:
 - accepted: match_type in ['EXACT', 'VARIANT'] and confidence >= 90 and taxonomic_status in ['ACCEPTED', 'SYNONYM']
@@ -48,13 +48,14 @@ Manual review results (input_name, matched_name, ACCEPTED/REJECTED):
 18. Kyllinga brevifolia, Cyperaceae, UNREVIEWED
 19. Laurentia longiflora, Campanulaceae, UNREVIEWED
 20. Luffa cylindrica, Cucurbitaceae, UNREVIEWED
-21. Orthosiphon spicatus, Lamiaceae, UNREVIEWED
-22. Phaseolus radiatus, Vigna Savi, UNREVIEWED
-23. Piper methysticum, Piperaceae, UNREVIEWED
-24. Pyrus malus, Malus Mill., UNREVIEWED
-25. Quisqualis indica, Combretum Loefl., UNREVIEWED
-26. Rauwolfia serpentina, Rauvolfia serpentina (L.) Benth. ex Kurz, UNREVIEWED
-27. Solanum indicum, Solanum L., UNREVIEWED
-28. Strychnos ligustrina, Strychnos L., UNREVIEWED
-29. Uncaria ferrea, Uncaria Schreb., UNREVIEWED
-30. Zingiber aromaticum, Zingiber Mill., UNREVIEWED
+21. Melaleuca leucadendron, Melaleuca L., UNREVIEWED
+22. Orthosiphon spicatus, Lamiaceae, UNREVIEWED
+23. Phaseolus radiatus, Vigna Savi, UNREVIEWED
+24. Piper methysticum, Piperaceae, UNREVIEWED
+25. Pyrus malus, Malus Mill., UNREVIEWED
+26. Quisqualis indica, Combretum Loefl., UNREVIEWED
+27. Rauwolfia serpentina, Rauvolfia serpentina (L.) Benth. ex Kurz, UNREVIEWED
+28. Solanum indicum, Solanum L., UNREVIEWED
+29. Strychnos ligustrina, Strychnos L., UNREVIEWED
+30. Uncaria ferrea, Uncaria Schreb., UNREVIEWED
+31. Zingiber aromaticum, Zingiber Mill., UNREVIEWED

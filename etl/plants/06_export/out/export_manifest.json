@@ -1,7 +1,7 @@
 {
   "dry_run": false,
   "emit_sql": false,
-  "generated_at": "2026-06-02T16:45:54.155886+00:00",
+  "generated_at": "2026-07-12T20:10:43.816698+00:00",
   "input_dir": "C:\\code\\web\\herbaflow\\etl\\plants\\05_validate\\out",
   "outputs": {
     "plant_aliases_csv": "C:\\code\\web\\herbaflow\\etl\\plants\\06_export\\out\\plant_aliases.csv",
@@ -10,10 +10,10 @@
     "plants_sql": ""
   },
   "row_counts": {
-    "aliases_input_rows": 556,
-    "aliases_output_rows": 556,
-    "plants_input_rows": 478,
-    "plants_output_rows": 478
+    "aliases_input_rows": 589,
+    "aliases_output_rows": 589,
+    "plants_input_rows": 491,
+    "plants_output_rows": 491
   },
   "schema": {
     "plant_aliases_columns": [

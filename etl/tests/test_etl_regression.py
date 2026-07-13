@@ -145,7 +145,9 @@ def test_plants_loaded_export_columns_have_no_dead_columns():
 
 def test_compounds_loaded_export_columns_have_no_dead_columns():
     import pathlib
-    dead = {"source_batch_id", "confidence", "evidence_type",
+    # evidence_type is intentionally NOT dead: it is a first-class compound
+    # identity-evidence column surfaced on compounds.csv.
+    dead = {"source_batch_id", "confidence",
             "source_plant_raw_id", "source_compound_raw_id"}
     text = pathlib.Path("etl/compounds/07_export/run.py").read_text(encoding="utf-8")
     for const in ("COMPOUNDS_COLUMNS", "ALIASES_COLUMNS", "PLANT_COMPOUNDS_COLUMNS"):
