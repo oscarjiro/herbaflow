@@ -1,4 +1,5 @@
 import argparse
+import concurrent.futures
 import csv
 import os
 import re
@@ -12,6 +13,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
 from requests.adapters import HTTPAdapter
+from shared.provenance import knapsack_metabolite_url
 from shared.utils import ETL_ROOT, ensure_dir, load_settings, setup_logging
 from urllib3.util.retry import Retry
 
@@ -30,25 +32,28 @@ OUTPUT_DIR = None
 PLANTS_CSV = None
 COMPOUNDS_CSV = None
 FAILED_PAGES_LOG = None
+PAGES_DIR = None
 log = None
 REQUEST_DELAY = None
 TIMEOUT = None
 MAX_RETRIES = None
 HEADERS = None
+STRUCTURE_WORKERS = None
 
 
 def init_runtime():
     """Build paths, logger, and scraper settings, populating the module-level
     runtime globals. Called from main() — NOT at import — so importing this
     module performs no config read, directory creation, or logging setup."""
-    global _cfg, OUTPUT_DIR, PLANTS_CSV, COMPOUNDS_CSV, FAILED_PAGES_LOG
-    global log, REQUEST_DELAY, TIMEOUT, MAX_RETRIES, HEADERS
+    global _cfg, OUTPUT_DIR, PLANTS_CSV, COMPOUNDS_CSV, FAILED_PAGES_LOG, PAGES_DIR
+    global log, REQUEST_DELAY, TIMEOUT, MAX_RETRIES, HEADERS, STRUCTURE_WORKERS
 
     _cfg = load_settings("knapsack")
     OUTPUT_DIR = ETL_ROOT / _cfg["paths"]["output_dir"]
     PLANTS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_file"]
     COMPOUNDS_CSV = OUTPUT_DIR / _cfg["paths"]["plants_compounds_file"]
     FAILED_PAGES_LOG = OUTPUT_DIR / _cfg["paths"]["failed_pages_log"]
+    PAGES_DIR = ETL_ROOT / _cfg["paths"]["knapsack_pages_dir"]
 
     ensure_dir(OUTPUT_DIR)
 
@@ -57,6 +62,7 @@ def init_runtime():
     REQUEST_DELAY = _cfg["scraper"]["request_delay_seconds"]
     TIMEOUT = _cfg["scraper"]["timeout_seconds"]
     MAX_RETRIES = _cfg["scraper"]["max_retries"]
+    STRUCTURE_WORKERS = _cfg["scraper"]["structure_workers"]
 
     HEADERS = {
         "User-Agent": _cfg["scraper"]["user_agent"]
@@ -408,6 +414,97 @@ def scrape_detail_page(session: requests.Session, detail_url: str, plant_id: int
 
 
 # =========================================================
+# STRUCTURE (PHASE 2): InChIKey / SMILES / Formula from the metabolite page
+# =========================================================
+def parse_structure_page(html: str) -> dict:
+    """Parse a KNApSAcK metabolite page for InChIKey / SMILES / Formula.
+
+    Fields are `<tr><th class="inf">Label</th><td>Value</td></tr>` rows in
+    `<table class="d3">`. Missing fields come back as "" (never an error).
+    """
+    out = {"knapsack_inchikey": "", "knapsack_smiles": "", "knapsack_formula": ""}
+    soup = BeautifulSoup(html or "", "html.parser")
+    label_to_key = {
+        "inchikey": "knapsack_inchikey",
+        "smiles": "knapsack_smiles",
+        "formula": "knapsack_formula",
+    }
+    for th in soup.find_all("th", class_="inf"):
+        label = th.get_text(strip=True).lower()
+        key = label_to_key.get(label)
+        if not key:
+            continue  # skips 'inchicode', 'cas rn', etc.
+        td = th.find_next_sibling("td")
+        if td is not None:
+            out[key] = td.get_text(strip=True)
+    return out
+
+
+def fetch_page_html(session: requests.Session, cid: str) -> str:
+    """Return metabolite-page HTML, from the on-disk cache when present."""
+    cache_path = PAGES_DIR / f"{cid}.html"
+    if cache_path.exists() and cache_path.stat().st_size > 200:
+        return cache_path.read_text(encoding="utf-8", errors="replace")
+    url = knapsack_metabolite_url(cid)
+    if not url:
+        return ""
+    try:
+        resp = session.get(url, timeout=TIMEOUT)
+        resp.raise_for_status()
+        html = resp.text
+        if len(html) > 200:
+            cache_path.write_text(html, encoding="utf-8")
+        return html
+    except Exception as e:  # noqa: BLE001
+        log.error("Structure fetch failed for %s: %s", cid, e)
+        return ""
+
+
+def fetch_structures(c_ids: list[str]) -> dict[str, dict]:
+    """Concurrently fetch + parse structure for each unique c_id (cache-backed)."""
+    PAGES_DIR.mkdir(parents=True, exist_ok=True)
+    results: dict[str, dict] = {}
+
+    def _one(cid: str) -> tuple[str, dict]:
+        session = make_session()  # requests.Session is not thread-safe; one per task
+        return cid, parse_structure_page(fetch_page_html(session, cid))
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=STRUCTURE_WORKERS) as ex:
+        for i, (cid, struct) in enumerate(ex.map(_one, c_ids), start=1):
+            results[cid] = struct
+            if i % 200 == 0:
+                log.info("structure %d/%d", i, len(c_ids))
+    return results
+
+
+def attach_structures() -> None:
+    """Phase 2: fetch each unique c_id's metabolite page and append the 3
+    structure columns to plants_compounds.csv without dropping any existing
+    column (the header is read, not hardcoded)."""
+    with open(COMPOUNDS_CSV, encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        fieldnames = list(reader.fieldnames)
+        rows = list(reader)
+
+    c_ids = sorted({r["c_id"].strip() for r in rows if r.get("c_id", "").strip()})
+    log.info("Phase 2: fetching structure for %d unique c_ids", len(c_ids))
+    structures = fetch_structures(c_ids)
+
+    structure_cols = ["knapsack_inchikey", "knapsack_smiles", "knapsack_formula"]
+    fields = fieldnames + [c for c in structure_cols if c not in fieldnames]
+    blank_structure = {c: "" for c in structure_cols}
+
+    with open(COMPOUNDS_CSV, "w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
+        writer.writeheader()
+        for r in rows:
+            r.update(structures.get(r.get("c_id", "").strip(), blank_structure))
+            writer.writerow(r)
+
+    log.info("Phase 2 complete: structure columns written to %s", COMPOUNDS_CSV.name)
+
+
+# =========================================================
 # MAIN
 # =========================================================
 def main():
@@ -483,6 +580,8 @@ def main():
 
     log.info("Done. Results saved to %s", COMPOUNDS_CSV)
     log.info("Failed pages log: %s", FAILED_PAGES_LOG)
+
+    attach_structures()
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ paths:
   plants_compounds_file: plants_compounds.csv
   failed_pages_log: failed_pages.txt
   scraper_log: scraper.log
+  knapsack_pages_dir: knapsack/out/pages
 
 export:
   format: csv
@@ -22,3 +23,4 @@ scraper:
   max_retries: 3
   timeout_seconds: 30
   user_agent: "indonesian-medicinal-plants-etl/1.0"
+  structure_workers: 6
