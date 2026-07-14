@@ -42,7 +42,6 @@ import { DataTable } from "@/components/ui/DataTable";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
 import { ExpandableListCell } from "@/components/ui/ExpandableListCell";
 import { ExternalLink } from "@/components/ui/ExternalLink";
-import { SourceIconLink } from "@/components/ui/SourceIconLink";
 import { AlreadyInRunNote } from "./AlreadyInRunNote";
 import { EntityAddControl } from "./EntityAddControl";
 import { ParamPanel } from "./ParamPanel";
@@ -354,22 +353,21 @@ export function Stage3View({ data }: { data: AnalysisRead }) {
     {
       id: "compound",
       header: "Compound",
-      cell: ({ row }) => (
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5",
-            row.original.coverage === 0 && "[color:var(--hf-fg-3)]",
-          )}
-        >
-          <span>{row.original.compound}</span>
-          {row.original.source_url && (
-            <SourceIconLink
-              href={row.original.source_url}
-              label={`Open source for ${row.original.compound}`}
-            />
-          )}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const { compound, source_url, coverage } = row.original;
+        const dim = coverage === 0 ? "text-hf-fg-3" : undefined;
+        return source_url ? (
+          <ExternalLink
+            href={source_url}
+            label={`Open source for ${compound}`}
+            className={cn("font-normal", dim)}
+          >
+            {compound}
+          </ExternalLink>
+        ) : (
+          <span className={cn(dim)}>{compound}</span>
+        );
+      },
     },
     {
       id: "coverage",

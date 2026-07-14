@@ -12,14 +12,17 @@ interface ExternalLinkProps {
   /** Accessible label override; falls back to the text content. */
   label?: string;
   className?: string;
+  /** Stop click bubbling — use when the link sits inside another clickable row. */
+  stopPropagation?: boolean;
 }
 
-function ExternalLink({ href, children, label, className }: ExternalLinkProps) {
+function ExternalLink({ href, children, label, className, stopPropagation }: ExternalLinkProps) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
+      onClick={stopPropagation ? (event) => event.stopPropagation() : undefined}
       aria-label={label ? `${label} (opens in new tab)` : undefined}
       className={cn(
         "text-hf-fg-1 inline-flex items-center gap-[3px]",

@@ -20,7 +20,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Check, Copy, ExternalLink, Search, X } from "lucide-react";
+import { Check, Copy, ExternalLink as ExternalLinkIcon, Search, X } from "lucide-react";
 import { validateTargets } from "../../api/sdk.gen";
 import type { ResolvedTarget, ValidateTargetsResponse } from "../../api/types.gen";
 import type { Problem } from "../../lib/problem";
@@ -28,7 +28,7 @@ import { notifyError, notifySuccess } from "../../lib/toast";
 import { parseStpCsv, type StpRow } from "../../lib/stp";
 import { distinctInputs } from "../../lib/validateInputs";
 import { Button } from "@/components/ui/button";
-import { SourceIconLink } from "@/components/ui/SourceIconLink";
+import { ExternalLink } from "@/components/ui/ExternalLink";
 import { StatefulButton } from "@/components/ui/StatefulButton";
 import {
   Dialog,
@@ -248,13 +248,17 @@ export function StpDialog({
                         </td>
                         <td className="px-2 py-2 align-middle">
                           <span className="flex min-w-0 items-center gap-1.5">
-                            <span className="truncate">{label}</span>
-                            {c.source_url && (
-                              <SourceIconLink
+                            {c.source_url ? (
+                              <ExternalLink
                                 href={c.source_url}
                                 label={`Open source for ${label}`}
+                                className="min-w-0 truncate"
                                 stopPropagation
-                              />
+                              >
+                                {label}
+                              </ExternalLink>
+                            ) : (
+                              <span className="truncate">{label}</span>
                             )}
                           </span>
                         </td>
@@ -304,7 +308,7 @@ export function StpDialog({
               </Button>
               <Button asChild variant="secondary" size="sm">
                 <a href={STP_URL} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink aria-hidden="true" className="size-4" />
+                  <ExternalLinkIcon aria-hidden="true" className="size-4" />
                   Open SwissTargetPrediction
                 </a>
               </Button>

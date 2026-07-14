@@ -221,7 +221,7 @@ describe("Stage3View", () => {
     const { container } = wrap(<Stage3View data={makeRun()} />);
     const coverage = container.querySelector(".coverage-table") as HTMLElement;
     const curcuminLink = within(coverage).getByRole("link", {
-      name: "Open source for Curcumin",
+      name: /Open source for Curcumin/,
     });
 
     expect(curcuminLink).toHaveAttribute(
@@ -230,7 +230,7 @@ describe("Stage3View", () => {
     );
     expect(curcuminLink.querySelector("svg")).not.toBeNull();
     expect(
-      within(coverage).queryByRole("link", { name: "Open source for Berberine" }),
+      within(coverage).queryByRole("link", { name: /Open source for Berberine/ }),
     ).not.toBeInTheDocument();
   });
 

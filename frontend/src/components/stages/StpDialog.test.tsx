@@ -165,10 +165,10 @@ test("links STP compounds to their source URL when available", async () => {
 
   await openDialog();
 
-  const sourceLink = screen.getByRole("link", { name: "Open source for Quercetin" });
+  const sourceLink = screen.getByRole("link", { name: /Open source for Quercetin/ });
   expect(sourceLink).toHaveAttribute("href", "https://pubchem.ncbi.nlm.nih.gov/compound/5280343");
   expect(sourceLink.querySelector("svg")).not.toBeNull();
-  expect(screen.queryByRole("link", { name: "Open source for Curcumin" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: /Open source for Curcumin/ })).not.toBeInTheDocument();
 });
 
 test("filters the least-covered compound list by name", async () => {
