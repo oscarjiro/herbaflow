@@ -30,7 +30,7 @@ SETTLED = frozenset(
 
 
 class _FakeChembl:
-    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence):
+    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         # A hit for any non-empty InChIKey; none otherwise.
         return [ChemblHit("P04637", 6.5, "IC50")] if ik else []
 
@@ -207,7 +207,7 @@ async def test_replace_for_compound_roundtrips_discovery_params(
 
 
 class _RaiseChembl:
-    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence):
+    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         raise AssertionError("ChEMBL must not be called when the compound's edges are reused")
 
 

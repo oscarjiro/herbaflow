@@ -76,7 +76,10 @@ async def compute(
             per_compound[cid] = {"coverage": 0}
         else:
             chembl_hits = await chembl.targets_for_inchikey(
-                ik, min_pchembl=min_pchembl, min_confidence=min_confidence
+                ik,
+                min_pchembl=min_pchembl,
+                min_confidence=min_confidence,
+                connectivity_key=c.get("connectivity_key"),
             )
             pubchem_accs = await pubchem.active_targets_for_inchikey(ik)
 
@@ -205,6 +208,7 @@ async def run(
         {
             "compound_id": str(r.compound_id),
             "inchi_key": r.inchi_key,
+            "connectivity_key": r.connectivity_key,
             "canonical_name": r.canonical_name,
         }
         for r in rows

@@ -148,6 +148,111 @@ async def test_zero_qualifying_activities_returns_empty(httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_connectivity_fallback_recovers_on_exact_miss(httpx_mock):
+    # Exact standard-key lookup misses (our stored tautomer differs from ChEMBL's, e.g. curcumin
+    # enol vs keto)... the connectivity (startswith skeleton) lookup then recovers the molecule.
+    httpx_mock.add_response(url=_MOLECULE_RE, json={"molecules": [], "page_meta": {"next": None}})
+    httpx_mock.add_response(url=_MOLECULE_RE, json=_MOLECULE_HIT)
+    httpx_mock.add_response(
+        url=_ACTIVITY_RE,
+        json={
+            "activities": [
+                {
+                    "pchembl_value": "6.5",
+                    "standard_type": "IC50",
+                    "target_organism": "Homo sapiens",
+                    "target_tax_id": 9606,
+                    "target_chembl_id": "CHEMBL_T1",
+                    "assay_chembl_id": "CHEMBL_A1",
+                }
+            ],
+            "page_meta": {"next": None},
+        },
+    )
+    httpx_mock.add_response(
+        url=_ASSAY_RE,
+        json={
+            "assays": [{"assay_chembl_id": "CHEMBL_A1", "confidence_score": 9}],
+            "page_meta": {"next": None},
+        },
+    )
+    httpx_mock.add_response(
+        url=_TARGET_RE,
+        json={
+            "targets": [
+                {
+                    "target_chembl_id": "CHEMBL_T1",
+                    "target_type": "SINGLE PROTEIN",
+                    "tax_id": 9606,
+                    "organism": "Homo sapiens",
+                    "target_components": [{"accession": "P04637"}],
+                }
+            ],
+            "page_meta": {"next": None},
+        },
+    )
+
+    async with httpx.AsyncClient() as c:
+        hits = await ChemblClient(c).targets_for_inchikey(
+            "ZIUSSTSXXLLKKK-KOBPDPAPSA-N",
+            min_pchembl=5.0,
+            min_confidence=7,
+            connectivity_key="VFLDPWHFBUODDF",
+        )
+
+    assert {h.uniprot_accession for h in hits} == {"P04637"}
+    mol_urls = [str(r.url) for r in httpx_mock.get_requests() if "/data/molecule" in str(r.url)]
+    # Exact query fired first (full key), then the connectivity startswith fallback.
+    assert any("standard_inchi_key=ZIUSSTSXXLLKKK" in u for u in mol_urls)
+    assert any("standard_inchi_key__startswith=VFLDPWHFBUODDF" in u for u in mol_urls)
+
+
+@pytest.mark.asyncio
+async def test_no_connectivity_fallback_when_exact_hits(httpx_mock):
+    # An exact molecule hit must NOT trigger the connectivity fallback (a precise match is
+    # never widened to the whole skeleton).
+    httpx_mock.add_response(url=_MOLECULE_RE, json=_MOLECULE_HIT)
+    httpx_mock.add_response(url=_ACTIVITY_RE, json={"activities": [], "page_meta": {"next": None}})
+    async with httpx.AsyncClient() as c:
+        await ChemblClient(c).targets_for_inchikey(
+            "AAA", min_pchembl=5.0, min_confidence=7, connectivity_key="SKELETON1234AB"
+        )
+    mol_urls = [str(r.url) for r in httpx_mock.get_requests() if "/data/molecule" in str(r.url)]
+    assert len(mol_urls) == 1
+    assert "startswith" not in mol_urls[0]
+
+
+@pytest.mark.asyncio
+async def test_connectivity_fallback_caps_molecule_ids(httpx_mock):
+    # A common skeleton can match many ChEMBL molecules; the fallback is capped so the
+    # downstream activity query never balloons.
+    from urllib.parse import parse_qs, urlparse
+
+    from app.integrations.chembl import _CONNECTIVITY_ID_CAP
+
+    httpx_mock.add_response(url=_MOLECULE_RE, json={"molecules": [], "page_meta": {"next": None}})
+    httpx_mock.add_response(
+        url=_MOLECULE_RE,
+        json={
+            "molecules": [
+                {"molecule_chembl_id": f"CHEMBL_M{i}"} for i in range(_CONNECTIVITY_ID_CAP + 10)
+            ],
+            "page_meta": {"next": None},
+        },
+    )
+    httpx_mock.add_response(url=_ACTIVITY_RE, json={"activities": [], "page_meta": {"next": None}})
+
+    async with httpx.AsyncClient() as c:
+        await ChemblClient(c).targets_for_inchikey(
+            "AAA", min_pchembl=5.0, min_confidence=7, connectivity_key="SKEL1234567890"
+        )
+
+    act_req = next(r for r in httpx_mock.get_requests() if "/data/activity" in str(r.url))
+    ids = parse_qs(urlparse(str(act_req.url)).query)["molecule_chembl_id__in"][0].split(",")
+    assert len(ids) == _CONNECTIVITY_ID_CAP
+
+
+@pytest.mark.asyncio
 async def test_outage_raises_service_unavailable(httpx_mock):
     # attempts=3 consumes exactly three 503s on the first (/molecule) call.
     httpx_mock.add_response(url=_MOLECULE_RE, status_code=503)

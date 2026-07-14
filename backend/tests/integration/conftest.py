@@ -30,6 +30,7 @@ _APPLY = [
     "20260615000001_analysis_run_idempotency_key.sql",
     "20260620000001_analysis_run_progress.sql",
     "20260702000001_wave3_schema_trim.sql",
+    "20260714000001_compound_connectivity_key_and_validation_status.sql",
 ]
 
 

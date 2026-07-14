@@ -38,6 +38,9 @@ _ACTIVITY_TYPES = {"IC50", "Ki", "Kd", "EC50"}
 _HUMAN_NAME = "Homo sapiens"
 _HUMAN_TAX = 9606
 _SINGLE_PROTEIN = "SINGLE PROTEIN"
+# Cap molecules pulled by a connectivity (skeleton) fallback, so a common skeleton cannot
+# balloon the downstream ``molecule_chembl_id__in`` activity query.
+_CONNECTIVITY_ID_CAP = 25
 _SEM = asyncio.Semaphore(10)
 
 
@@ -57,16 +60,27 @@ class ChemblClient:
         self._client = client
 
     async def targets_for_inchikey(
-        self, inchikey: str, *, min_pchembl: float, min_confidence: int
+        self,
+        inchikey: str,
+        *,
+        min_pchembl: float,
+        min_confidence: int,
+        connectivity_key: str | None = None,
     ) -> list[ChemblHit]:
         """All measured single-protein human targets for a compound, filtered.
 
         Resolves the InChIKey to its ``molecule_chembl_id`` via ``/molecule``, then joins
         ``/activity`` (pchembl, type), ``/assay`` (confidence) and ``/target`` (UniProt
         accession). Raises ServiceUnavailableError on outage (load-bearing).
+
+        ``connectivity_key`` (the 14-char tautomer-canonical skeleton) enables a fallback:
+        when the exact standard-InChIKey match finds no molecule (e.g. our stored key is a
+        different tautomer than ChEMBL's — curcumin's enol vs ChEMBL's keto), the compound is
+        re-looked-up by InChIKey connectivity. The fallback fires ONLY when the exact match is
+        empty, so a precise hit is never widened.
         """
         try:
-            molecule_ids = await self._molecule_ids(inchikey)
+            molecule_ids = await self._molecule_ids(inchikey, connectivity_key=connectivity_key)
             if not molecule_ids:
                 logger.info("ChEMBL %s: not in ChEMBL (no molecule record)", inchikey)
                 return []
@@ -89,25 +103,58 @@ class ChemblClient:
         logger.info("ChEMBL %s: %d measured human target(s)", inchikey, len(hits))
         return list(hits.values())
 
-    async def _molecule_ids(self, inchikey: str) -> list[str]:
+    async def _molecule_ids(
+        self, inchikey: str, *, connectivity_key: str | None = None
+    ) -> list[str]:
         """Resolve an InChIKey to its ChEMBL ``molecule_chembl_id``(s).
 
         The InChIKey filter is valid on ``/molecule`` (unlike ``/activity``). A standard
-        InChIKey is structure-specific, so this is normally 1 id; salts/parents may add a
-        few, hence a list fed to ``molecule_chembl_id__in``.
+        InChIKey is structure-specific, so the exact query is normally 1 id; salts/parents may
+        add a few, hence a list fed to ``molecule_chembl_id__in``.
+
+        When the exact query is empty and a ``connectivity_key`` (14-char skeleton) is given,
+        fall back to an InChIKey-connectivity match (``standard_inchi_key__startswith``), which
+        returns every tautomer/stereoisomer/salt of the skeleton. This recovers compounds whose
+        stored key is a different tautomer than ChEMBL's (curcumin). Capped at
+        ``_CONNECTIVITY_ID_CAP`` molecules to bound the downstream activity query for common
+        skeletons. Fallback usage is logged (it is a looser, chemotype-level match).
         """
+        exact = await self._molecule_ids_for_filter(
+            {"molecule_structures__standard_inchi_key": inchikey}
+        )
+        if exact or not connectivity_key:
+            return exact
+
+        fallback = await self._molecule_ids_for_filter(
+            {"molecule_structures__standard_inchi_key__startswith": connectivity_key},
+            cap=_CONNECTIVITY_ID_CAP,
+        )
+        if fallback:
+            logger.info(
+                "ChEMBL %s: exact miss, recovered %d molecule(s) by connectivity %s",
+                inchikey,
+                len(fallback),
+                connectivity_key,
+            )
+        return fallback
+
+    async def _molecule_ids_for_filter(
+        self, params: dict[str, str], *, cap: int | None = None
+    ) -> list[str]:
+        """Collect molecule_chembl_ids for a /molecule filter. ``cap`` stops pagination
+        early once that many ids are gathered, so a common skeleton's connectivity match
+        never pages through the whole result set."""
         ids: list[str] = []
         async for mol in self._paginate(
             "/molecule",
             "molecules",
-            {
-                "molecule_structures__standard_inchi_key": inchikey,
-                "only": "molecule_chembl_id",
-            },
+            {**params, "only": "molecule_chembl_id"},
         ):
             mid = mol.get("molecule_chembl_id")
             if mid:
                 ids.append(mid)
+                if cap is not None and len(ids) >= cap:
+                    break
         return ids
 
     async def _candidate_activities(

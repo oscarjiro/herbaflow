@@ -49,7 +49,7 @@ SETTLED = frozenset(
 class _FakeChembl:
     """ChEMBL returns TP53 + EGFR for any compound with an inchi_key (manual_compounds path)."""
 
-    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence):
+    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         if not ik:
             return []
         return [ChemblHit("P04637", 6.5, "IC50"), ChemblHit("P00533", 6.5, "IC50")]

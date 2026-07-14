@@ -45,7 +45,7 @@ SETTLED = frozenset(
 
 
 class _FakeChembl:
-    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence):
+    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         if not ik:
             return []
         return [ChemblHit("P04637", 6.5, "IC50"), ChemblHit("P00533", 6.5, "IC50")]

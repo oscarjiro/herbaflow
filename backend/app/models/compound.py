@@ -18,6 +18,7 @@ class Compound(Base):
     compound_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     canonical_name: Mapped[str | None] = mapped_column(String)
     inchi_key: Mapped[str | None] = mapped_column(String)
+    connectivity_key: Mapped[str | None] = mapped_column(String)
     smiles: Mapped[str | None] = mapped_column(String)
     cas_id: Mapped[str | None] = mapped_column(String)
     pubchem_cid: Mapped[str | None] = mapped_column(String)

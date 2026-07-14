@@ -12,7 +12,7 @@ class FakeChembl:
     def __init__(self, table):
         self.table = table
 
-    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence):
+    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         from app.integrations.chembl import ChemblHit
 
         return [ChemblHit(a, p, "IC50") for a, p in self.table.get(ik, [])]

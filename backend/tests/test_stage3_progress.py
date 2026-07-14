@@ -16,7 +16,7 @@ class _FakeReporter:
 
 
 class _Chembl:
-    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence):
+    async def targets_for_inchikey(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         return []
 
 
