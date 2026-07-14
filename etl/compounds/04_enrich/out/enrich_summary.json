@@ -1,29 +1,29 @@
 {
   "ambiguous_rows": 0,
   "cache_root": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\cache",
-  "candidate_cache_hits": 0,
-  "candidate_cache_misses": 12593,
+  "candidate_cache_hits": 20,
+  "candidate_cache_misses": 12572,
   "candidate_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidates.csv",
-  "candidates_processed": 12593,
+  "candidates_processed": 12592,
   "conflict_rows": 0,
-  "generated_at": "2026-07-13T00:42:57.498040+00:00",
-  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\logs\\enrich_compounds_compounds_20260713_004202.log",
-  "matched_rows": 9773,
+  "generated_at": "2026-07-13T21:09:11.396691+00:00",
+  "log_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\logs\\enrich_compounds_compounds_20260713_204115.log",
+  "matched_rows": 12552,
   "member_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidate_members.csv",
-  "member_map_rows": 21922,
+  "member_map_rows": 21931,
   "module": "compounds",
   "output_cache_index_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_cache.csv",
   "output_member_map_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_member_map.csv",
   "output_results_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_results.csv",
   "output_review_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_review.csv",
   "review_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidate_review.csv",
-  "review_rows": 2815,
-  "run_id": "compounds_20260713_004202",
+  "review_rows": 36,
+  "run_id": "compounds_20260713_204115",
   "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
   "source_usage": {
-    "chembl_requests": 54342,
-    "pubchem_requests": 54342
+    "chembl_requests": 588,
+    "pubchem_requests": 588
   },
   "step": "04_enrich",
-  "unresolved_rows": 5
+  "unresolved_rows": 4
 }

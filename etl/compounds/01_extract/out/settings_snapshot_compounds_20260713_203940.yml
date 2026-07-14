@@ -1,0 +1,72 @@
+module:
+    name: compounds
+
+project:
+    project_root: ".."
+
+source:
+    name: KNApSAcK World
+    url: https://www.knapsackfamily.com/KNApSAcK_World/
+    batch_id: auto
+
+paths:
+    raw:
+        plants_compounds_csv: knapsack/out/plants_compounds.csv
+    plant_etl:
+        canonical_plants_csv: plants/06_export/out/plants.csv
+        plant_aliases_csv: plants/06_export/out/plant_aliases.csv
+    step_dirs:
+        extract_out: compounds/01_extract/out
+        normalize_out: compounds/02_normalize/out
+        dedupe_candidates_out: compounds/03_dedupe_candidates/out
+        enrich_out: compounds/04_enrich/out
+        build_canonical_out: compounds/05_build_canonical/out
+        validate_out: compounds/06_validate/out
+        export_out: compounds/07_export/out
+
+validation:
+    enabled: true
+    thresholds:
+        min_compound_confidence_to_auto_accept: 0.70
+
+export:
+    format: csv
+
+enrichment:
+    enabled: true
+
+    # Per-candidate request budget: the maximum number of PubChem+ChEMBL requests
+    # a single candidate may issue while searching for a corroborated identity.
+    # Corroborated candidates early-exit well under this (~3-4 requests), so this
+    # only trims wasted fetches on candidates headed for rejection (which would
+    # otherwise exhaust every CAS/name term across both sources). 0 disables the cap.
+    max_requests_per_candidate: 8
+
+    pubchem:
+        enabled: true
+        base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
+        source_name: PubChem
+        timeout_seconds: 30
+        max_retries: 4
+        request_delay_seconds: 0.3
+        cache_responses: true
+
+    chembl:
+        enabled: true
+        base_url: https://www.ebi.ac.uk/chembl/api/data
+        source_name: ChEMBL
+        timeout_seconds: 30
+        max_retries: 4
+        request_delay_seconds: 0.3
+        cache_responses: true
+
+matching:
+    # Matching thresholds.
+    high_confidence_threshold: 0.90
+    medium_confidence_threshold: 0.70
+
+sql_export:
+    enabled: false
+    schema: public
+    quote_identifiers: false
+
