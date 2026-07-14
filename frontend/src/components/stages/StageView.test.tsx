@@ -249,6 +249,40 @@ describe("StageView empty-but-addable", () => {
   });
 });
 
+// A terminal analytical stage (6-8) that produces zero items is a valid result, not a
+// dead-end: the run must stay completable, so the body renders and Approve stays enabled.
+describe("StageView terminal-empty (stages 6-8)", () => {
+  function terminalRun(stage: number): AnalysisRead {
+    return {
+      analysis_id: "a1",
+      status: `stage_${stage}_awaiting_approval`,
+      current_stage: stage,
+      stage_results: { [String(stage)]: { count: 0 } },
+      stage_state: {},
+    } as unknown as AnalysisRead;
+  }
+
+  it("renders the body (not the dead-end) and keeps Approve enabled when stage 8 is empty", () => {
+    wrap(
+      <StageView
+        data={terminalRun(8)}
+        stage={8}
+        title="Enrichment"
+        kicker="08"
+        onApprove={noop}
+        approvePending={false}
+        canAddWhenEmpty={false}
+      >
+        <div>ENRICHMENT BODY</div>
+      </StageView>,
+    );
+    expect(screen.getByText("ENRICHMENT BODY")).toBeInTheDocument();
+    expect(screen.queryByText("No results at this step.")).not.toBeInTheDocument();
+    expect(screen.queryByText(/no results yet/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /approve & continue/i })).not.toBeDisabled();
+  });
+});
+
 // ── failed run (e.g. reaper-killed, or a stage crash) ───────────────────────
 
 const failedRun = {

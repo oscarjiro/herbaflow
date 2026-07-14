@@ -7,6 +7,7 @@ import { RunFailedNotice } from "@/components/stages/RunFailedNotice";
 import { StageRunningSkeleton } from "@/components/stages/StageRunningSkeleton";
 import { useStaleState } from "@/hooks/useStaleState";
 import { isRunBusy } from "@/lib/runStatus";
+import { emptyIsValidResult } from "@/lib/stageAddability";
 
 type StageResult = { count?: number } | undefined;
 
@@ -37,7 +38,11 @@ export function StageView({
   const result = data.stage_results?.[String(stage)] as StageResult;
   const hasResult = result != null;
   const isEmpty = hasResult && (result?.count ?? 0) === 0;
-  const isDeadEnd = isEmpty && !canAddWhenEmpty;
+  // Terminal analytical stages (6-8) can legitimately produce zero items; that is a real result,
+  // not a dead-end. Keep Approve enabled so the run can still complete, and let the stage render
+  // its own no-results panel instead of the generic dead-end block.
+  const emptyResult = emptyIsValidResult(stage);
+  const isDeadEnd = isEmpty && !canAddWhenEmpty && !emptyResult;
   // A failed run has no results for the stage it died on (or any later stage). Show
   // the failure + re-run affordance instead of a blank stage body. reset-from points
   // at the stage that actually failed (current_stage), not the stage being viewed.
@@ -120,7 +125,7 @@ export function StageView({
         </div>
       ) : (
         <>
-          {isEmpty && (
+          {isEmpty && !emptyResult && (
             <div
               role="status"
               className="border-hf-border bg-hf-surface text-hf-fg-2 rounded-[var(--radius-lg)] border p-4 text-sm"
@@ -146,7 +151,7 @@ export function StageView({
               stage={stage}
               status={data.status}
               currentStage={data.current_stage}
-              disabled={(result?.count ?? 0) === 0 || anyStale}
+              disabled={(isEmpty && !emptyResult) || anyStale}
               disabledReason={
                 anyStale ? "Run the updated step before continuing." : "Add an item to continue."
               }

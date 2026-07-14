@@ -19,3 +19,16 @@ export function canAddWhenEmpty(stage: number, run: AnalysisRead): boolean {
       return false;
   }
 }
+
+/**
+ * Whether an *empty* stage is a legitimate terminal result (approve stays enabled, the stage
+ * renders its own no-results panel) rather than a dead-end. The final analytical stages can
+ * honestly produce zero items: the protein network (6) may have no edges, hub ranking (7) no
+ * hubs, and functional enrichment (8) no terms passing the significance threshold. A zero here
+ * is a real scientific outcome, not a blocker, so the run must still be completable. Earlier
+ * stages keep dead-end behavior: an empty overlap or filtered-out compound set has no basis to
+ * continue and should stop the run.
+ */
+export function emptyIsValidResult(stage: number): boolean {
+  return stage === 6 || stage === 7 || stage === 8;
+}
