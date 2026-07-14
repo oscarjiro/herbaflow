@@ -115,7 +115,7 @@ One canonical row per chemical entity.
 | `hbond_donors` | integer | YES | |
 | `hbond_acceptors` | integer | YES | |
 | `rotatable_bonds` | integer | YES | |
-| `np_likeness_score` | double precision | YES | Natural product-likeness score (RDKit); ≥ 0.5 triggers NP exception in ADME filtering |
+| `np_likeness_score` | double precision | YES | Natural product-likeness score (RDKit); a compound scoring at or above the `np_exception_threshold` ADME parameter (default 0) bypasses the ADME rules |
 | `num_ro5_violations` | integer | YES | Count of Lipinski Rule of Five violations; CHECK 0–4 |
 | `is_pains_positive` | boolean | NO | DEFAULT `false`; PAINS flag (Baell & Holloway 2010); reporting only, not a filter |
 | `source_name` | text | YES | Upstream database that anchored the compound's canonical structure/identity (`KNApSAcK World`, `PubChem`; NULL for name-only rows). Surfaced by Stage 1 as the per-run contributing-source list; display/provenance only, never identity |
@@ -774,7 +774,7 @@ statistical background, method constant, not configuration).
 | Parameter | Type | Default | Bounds / enum | Notes |
 |---|---|---|---|---|
 | `significance_threshold` | number | 0.05 | >0, ≤1 (rec. 0.01–0.1) | Corrected-p significance cutoff for enriched terms (applies to whichever correction method is selected) |
-| `min_term_size` | integer | 5 | ≥1, ≤500 (rec. 3–20) | Minimum gene-set size; filtered client-side from g:Profiler results |
+| `min_term_size` | integer | 5 | ≥1 (rec. 3–10) | Minimum gene-set size; filtered client-side from g:Profiler results |
 | `correction` | string | `fdr` | enum {`fdr`, `g_SCS`, `bonferroni`} | Multiple-testing correction method; default BH-FDR; `g_SCS` = g:Profiler's adaptive threshold |
 | `sources` | array | `["GO:BP","GO:MF","GO:CC","KEGG"]` | enum items {`GO:BP`,`GO:MF`,`GO:CC`,`KEGG`,`REAC`,`WP`} | Annotation vocabularies exposed in the shared ParamPanel as a checkbox-backed multi-select; Reactome = `REAC`, WikiPathways = `WP` |
 | `no_iea` | boolean | false | — | Exclude GO terms supported only by electronic (IEA) annotation |
