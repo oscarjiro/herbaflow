@@ -56,8 +56,7 @@
           "properties": {
             "1": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
               { "name": "KNApSAcK", "url": "http://www.knapsackfamily.com/" },
-              { "name": "PubChem", "url": "https://pubchem.ncbi.nlm.nih.gov/" },
-              { "name": "ChEMBL", "url": "https://www.ebi.ac.uk/chembl/" }
+              { "name": "PubChem", "url": "https://pubchem.ncbi.nlm.nih.gov/" }
             ]},
             "2": { "type": "array", "items": { "$ref": "#/$defs/stage_source_object" }, "default": [
               { "name": "RDKit (MW/logP/HBD/HBA/TPSA/RotB/NP-score/PAINS)", "url": "https://www.rdkit.org/" }

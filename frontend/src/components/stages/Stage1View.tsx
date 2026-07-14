@@ -47,6 +47,8 @@ type Stage1Data = {
   count?: number;
   compounds?: Stage1Compound[];
   per_plant?: Record<string, string[]>;
+  /** Upstream databases that actually anchored this run's compounds (backend-emitted). */
+  contributing_sources?: string[] | null;
   state?: string;
 };
 
@@ -258,7 +260,11 @@ export function Stage1View({ data }: { data: AnalysisRead }) {
     <section className="flex flex-col gap-6">
       {/* Context + sources */}
       <StageEntityContext data={data} side="plant" />
-      <StageDataSources stage={1} userProvided={isUserProvided} />
+      <StageDataSources
+        stage={1}
+        userProvided={isUserProvided}
+        contributingSources={stage1.contributing_sources}
+      />
 
       <ProvidedByYouBadge show={isUserProvided} />
 

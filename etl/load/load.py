@@ -124,7 +124,7 @@ def load_compounds(cur, upsert=False):
         "tpsa", "logp", "hbond_donors", "hbond_acceptors",
         "rotatable_bonds", "np_likeness_score", "num_ro5_violations",
         "is_pains_positive", "validation_status",
-        "source_url", "retrieved_at",
+        "source_name", "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into compounds (
@@ -133,7 +133,7 @@ def load_compounds(cur, upsert=False):
             tpsa, logp, hbond_donors, hbond_acceptors,
             rotatable_bonds, np_likeness_score, num_ro5_violations,
             is_pains_positive, validation_status,
-            source_url, retrieved_at
+            source_name, source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
@@ -148,7 +148,7 @@ def load_compounds(cur, upsert=False):
         _f(r.get("np_likeness_score")), _i(r.get("num_ro5_violations")),
         str(r.get("is_pains_positive", "")).lower() == "true",
         _validation_status(r.get("evidence_type")),
-        r.get("source_url"), _ts(r.get("retrieved_at")),
+        _blank_to_none(r.get("source_name")), r.get("source_url"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)
     print(len(data))

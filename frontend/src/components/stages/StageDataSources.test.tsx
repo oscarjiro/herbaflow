@@ -69,3 +69,27 @@ it("renders nothing for Stage 5 (overlap has no external data sources)", () => {
   const { container } = render(<StageDataSources stage={5} userProvided={false} />);
   expect(container).toBeEmptyDOMElement();
 });
+
+it("filters Stage 1 to only the sources that contributed this run", () => {
+  render(<StageDataSources stage={1} contributingSources={["KNApSAcK"]} />);
+  expect(screen.getByText(/KNApSAcK/)).toBeInTheDocument();
+  expect(screen.queryByText(/PubChem/)).not.toBeInTheDocument();
+});
+
+it("renders nothing when no source contributed this run", () => {
+  const { container } = render(<StageDataSources stage={1} contributingSources={[]} />);
+  expect(container).toBeEmptyDOMElement();
+});
+
+it("shows the full static list when contributingSources is null (legacy run)", () => {
+  render(<StageDataSources stage={1} contributingSources={null} />);
+  expect(screen.getByText(/KNApSAcK/)).toBeInTheDocument();
+  expect(screen.getByText(/PubChem/)).toBeInTheDocument();
+});
+
+it("ignores contributingSources for a user-provided stage", () => {
+  // A manual Stage 1 has no computed provenance; the user-provided source list wins.
+  render(<StageDataSources stage={1} userProvided contributingSources={["KNApSAcK"]} />);
+  expect(screen.getByText(/PubChem/)).toBeInTheDocument();
+  expect(screen.queryByText(/KNApSAcK/)).not.toBeInTheDocument();
+});

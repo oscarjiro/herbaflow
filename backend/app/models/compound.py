@@ -34,5 +34,6 @@ class Compound(Base):
     num_ro5_violations: Mapped[int | None] = mapped_column(Integer)
     is_pains_positive: Mapped[bool] = mapped_column(Boolean, nullable=False)
     validation_status: Mapped[str] = mapped_column(String, nullable=False)
+    source_name: Mapped[str | None] = mapped_column(String)
     source_url: Mapped[str | None] = mapped_column(String)
     retrieved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -113,7 +113,6 @@ def test_stage_source_labels_use_public_tool_names():
     assert [s["name"] for s in contracts.stage_sources(1)] == [
         "KNApSAcK",
         "PubChem",
-        "ChEMBL",
     ]
     assert [s["name"] for s in contracts.stage_sources(2)] == [
         "RDKit (MW/logP/HBD/HBA/TPSA/RotB/NP-score/PAINS)"

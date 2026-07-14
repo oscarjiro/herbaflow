@@ -4,14 +4,27 @@ import { Eyebrow } from "@/components/ui/editorial";
 export function StageDataSources({
   stage,
   userProvided = false,
+  contributingSources,
 }: {
   stage: number;
   userProvided?: boolean;
+  /**
+   * Names of the data sources that actually contributed to this run's stage result (emitted by
+   * the backend, e.g. Stage 1's `contributing_sources`). When provided, the static source list is
+   * filtered to just these, so a source that contributed nothing this run is not shown. Omit (or
+   * pass null/undefined) to fall back to the full static list — the behavior for stages that do
+   * not emit per-run provenance and for legacy runs.
+   */
+  contributingSources?: string[] | null;
 }) {
-  const sources =
+  const staticSources =
     userProvided && USER_PROVIDED_SOURCES[stage]
       ? USER_PROVIDED_SOURCES[stage]
       : STAGE_SOURCES[stage];
+  const sources =
+    contributingSources != null && !userProvided
+      ? (staticSources ?? []).filter((s) => contributingSources.includes(s.name))
+      : staticSources;
   if (!sources || sources.length === 0) return null;
   return (
     <div

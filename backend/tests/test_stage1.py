@@ -37,6 +37,47 @@ def test_select_compounds_no_manual_bucket() -> None:
     assert "manual" not in out["per_plant"]
 
 
+def test_contributing_sources_maps_and_dedupes_in_first_seen_order() -> None:
+    """The per-run source list = distinct upstream databases that anchored the run's compounds,
+    mapped to their contract display name, in first-seen order."""
+    p = uuid.uuid4()
+    rows = [
+        stage1.CompoundRow(
+            plant_id=p, compound_id=uuid.uuid4(), canonical_name="a", source_name="KNApSAcK World"
+        ),
+        stage1.CompoundRow(
+            plant_id=p, compound_id=uuid.uuid4(), canonical_name="b", source_name="PubChem"
+        ),
+        stage1.CompoundRow(
+            plant_id=p, compound_id=uuid.uuid4(), canonical_name="c", source_name="KNApSAcK World"
+        ),
+    ]
+    out = stage1.select_compounds(rows)
+    assert out["contributing_sources"] == ["KNApSAcK", "PubChem"]
+
+
+def test_contributing_sources_skips_unknown_and_empty_source_names() -> None:
+    """Name-only rows (no source_name) and any unmapped source contribute nothing to the panel."""
+    p = uuid.uuid4()
+    rows = [
+        stage1.CompoundRow(
+            plant_id=p, compound_id=uuid.uuid4(), canonical_name="a", source_name="KNApSAcK World"
+        ),
+        stage1.CompoundRow(
+            plant_id=p, compound_id=uuid.uuid4(), canonical_name="b", source_name=None
+        ),
+        stage1.CompoundRow(
+            plant_id=p, compound_id=uuid.uuid4(), canonical_name="c", source_name=""
+        ),
+    ]
+    out = stage1.select_compounds(rows)
+    assert out["contributing_sources"] == ["KNApSAcK"]
+
+
+def test_contributing_sources_empty_when_no_rows() -> None:
+    assert stage1.select_compounds([])["contributing_sources"] == []
+
+
 def test_select_compounds_carries_structure_fields() -> None:
     p, c1 = uuid.uuid4(), uuid.uuid4()
     out = stage1.select_compounds(

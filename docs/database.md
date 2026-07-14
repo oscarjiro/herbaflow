@@ -118,6 +118,7 @@ One canonical row per chemical entity.
 | `np_likeness_score` | double precision | YES | Natural product-likeness score (RDKit); ≥ 0.5 triggers NP exception in ADME filtering |
 | `num_ro5_violations` | integer | YES | Count of Lipinski Rule of Five violations; CHECK 0–4 |
 | `is_pains_positive` | boolean | NO | DEFAULT `false`; PAINS flag (Baell & Holloway 2010); reporting only, not a filter |
+| `source_name` | text | YES | Upstream database that anchored the compound's canonical structure/identity (`KNApSAcK World`, `PubChem`; NULL for name-only rows). Surfaced by Stage 1 as the per-run contributing-source list; display/provenance only, never identity |
 | `source_url` | text | YES | Per-row deep link; authoritative |
 | `retrieved_at` | timestamptz | YES | |
 | `validation_status` | text | NO | DEFAULT `externally_validated`; `externally_validated` = structure corroborated against an external source (DB/PubChem/ChEMBL); `structure_only` = RDKit-derived identity from a manually entered SMILES with no external match (descriptors null until ADME runs); `unvalidated` = ETL structure-anchored row that failed corroboration (name-only, no resolved structure) |
@@ -433,7 +434,8 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
   "computed_ids": ["<uuid>", ...],   // the raw runner output before edit-layer application
   "count": <int>,                    // effective count (excludes "user-removed"); 0 hard-stops the run
   "state": "<stage_state>",          // "computed" | "user_provided" | "not_applicable"
-  "per_plant": { "<plant_id>": ["<compound_id>", ...], ... }  // Stage 1 only
+  "per_plant": { "<plant_id>": ["<compound_id>", ...], ... },  // Stage 1 only
+  "contributing_sources": ["KNApSAcK", "PubChem"]  // Stage 1 only; per-run data-source list
 }
 ```
 
@@ -457,6 +459,11 @@ Keyed by stage number string (e.g. `"1"`, `"2"`).
   the rest of the contract, even though the ORM field is `Compound.inchi_key`.
 - The `POST /compounds/validate` response `ResolvedCompound` objects carry `pubchem_cid` when the
   canonical compound row has one, matching the Stage 1 identity carry.
+- `stage_results["1"].contributing_sources` is the distinct list of upstream databases that actually
+  anchored this run's compounds (mapped from `compounds.source_name` to the contract data-source
+  display name, first-seen order). The frontend filters the static Stage-1 source list to these, so a
+  source that contributed nothing this run (e.g. ChEMBL) is not shown. Absent on legacy pre-column
+  runs and on `user_provided` Stage 1, where the FE falls back to the full static list.
 - The `POST /compounds/validate` response `FailedInput` objects carry an optional 1-based **`line`**
   field on compound failures (parity with `resolve_targets` which already reported line indices;
   Software Lock §4.5 per-line reason). No schema change — the `line` field is in the response body
