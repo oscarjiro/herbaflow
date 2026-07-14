@@ -84,6 +84,7 @@ ACCEPTED_ENRICH = dict(
     candidate_status="ready",
     pubchem_cid="2244",
     inchi_key="BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+    connectivity_key="BSYNRYMUTXBXSQ",
     molecular_formula="C9H8O4",
     molecular_weight="180.16",
     preferred_name="aspirin",
@@ -244,6 +245,7 @@ def test_build_surfaces_provenance_and_organism_source_url(tmp_path):
     assert row["enrichment_confidence"] == "0.9700"
     assert row["canonical_status"] == "accepted"
     assert row["canonical_strategy"] == "inchi_key"
+    assert row["connectivity_key"] == "BSYNRYMUTXBXSQ"
 
     assert len(bridge_out) == 1
     assert bridge_out[0]["source_url"] == knapsack_organism_url("Curcuma longa")
@@ -251,8 +253,51 @@ def test_build_surfaces_provenance_and_organism_source_url(tmp_path):
 
 def test_compounds_columns_surface_provenance_in_all_stages():
     for cols in (build.COMPOUNDS_COLUMNS, validate.COMPOUNDS_COLUMNS, export.COMPOUNDS_COLUMNS):
-        for c in ("match_strategy", "evidence_type", "enrichment_confidence"):
+        for c in ("match_strategy", "evidence_type", "enrichment_confidence", "connectivity_key"):
             assert c in cols
+
+
+def test_build_leaves_connectivity_key_blank_when_structure_rejected(tmp_path):
+    rejected = dict(ACCEPTED_ENRICH)
+    rejected.update(
+        inchi_key="",
+        connectivity_key="",
+        pubchem_cid="",
+        molecular_formula="",
+        enrichment_confidence="0.3000",
+        enrichment_status="review",
+        match_strategy="rejected_name_only",
+        evidence_type="name_only",
+    )
+    _write_csv(tmp_path / "enrich.csv", build.ENRICH_RESULT_COLUMNS, [_row(build.ENRICH_RESULT_COLUMNS, **rejected)])
+    member_cols = list(build.CANDIDATE_MEMBER_COLUMNS) + ["organism"]
+    _write_csv(
+        tmp_path / "members.csv",
+        member_cols,
+        [
+            _row(
+                member_cols,
+                compound_candidate_member_id="m1",
+                compound_candidate_id="cand1",
+                canonical_plant_id="plant-1",
+                c_id="C0001",
+                normalized_metabolite_name="aspirin",
+                normalized_cas_id="50-78-2",
+                normalized_formula="C9H8O4",
+                organism="Curcuma longa",
+                normalization_status="ready",
+            )
+        ],
+    )
+    _write_csv(tmp_path / "member_map.csv", build.ENRICH_MEMBER_MAP_COLUMNS, [])
+    _write_csv(tmp_path / "enrich_review.csv", build.ENRICH_REVIEW_COLUMNS, [])
+
+    settings = _settings(tmp_path)
+    logger = logging.getLogger("test.build")
+    compounds_out, _aliases, _bridge_out, *_ = build.build_canonical_tables(settings, logger)
+
+    assert len(compounds_out) == 1
+    assert compounds_out[0]["connectivity_key"] == ""
 
 
 # --- 06 formula-consistency guard ------------------------------------------

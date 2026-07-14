@@ -74,6 +74,7 @@ from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 from shared.identity import formula_matches
+from shared.provenance import knapsack_metabolite_url
 from shared.utils import ETL_ROOT, ensure_dir, make_run_id, normalize_whitespace
 from shared.utils import load_settings as shared_load_settings
 
@@ -83,13 +84,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))  # 04_enrich/
 from properties import (  # noqa: E402
     chembl_detail_by_inchikey,
     check_pains,
+    connectivity_key,
     np_likeness,
     rdkit_descriptors,
+    standard_inchikey,
 )
 
 # Bump when the identity-acceptance logic changes so stale per-candidate caches
 # (out/cache/candidates/) are recomputed while the raw HTTP cache stays valid.
-ENRICH_LOGIC_VERSION = "2026-07-13-knapsack-anchor"
+ENRICH_LOGIC_VERSION = "2026-07-14-dualkey-standard-inchikey-taut100"
 
 # KNApSAcK source structures, keyed by ``c_id`` -> (inchikey, smiles, formula).
 # Populated once in main() from the scraper output. Empty until the source-first
@@ -181,6 +184,7 @@ RESULT_COLUMNS = [
     "pubchem_cid",
     "chembl_id",
     "inchi_key",
+    "connectivity_key",
     "smiles",
     "molecular_formula",
     "molecular_weight",
@@ -1944,6 +1948,7 @@ def candidate_result_from_hit(
             "pubchem_cid": "",
             "chembl_id": "",
             "inchi_key": "",
+            "connectivity_key": "",
             "smiles": "",
             "molecular_formula": "",
             "molecular_weight": "",
@@ -1992,6 +1997,7 @@ def candidate_result_from_hit(
         "pubchem_cid": best.pubchem_cid,
         "chembl_id": best.chembl_id,
         "inchi_key": best.inchi_key,
+        "connectivity_key": connectivity_key(best.smiles),
         "smiles": best.smiles,
         "molecular_formula": best.molecular_formula,
         "molecular_weight": best.molecular_weight,
@@ -2218,6 +2224,19 @@ def build_knapsack_anchor_result(
     smiles = normalize_whitespace(smiles)
     molecular_formula = normalize_whitespace(molecular_formula)
 
+    # Identity = RDKit STANDARD InChIKey recomputed from the scraped SMILES — the honest
+    # standard hash of the structure we hold. KNApSAcK's published key is often non-standard
+    # (``...NA-N``) and never matches PubChem/ChEMBL; the standard key does. Fall back to
+    # KNApSAcK's published key only when the SMILES is unparseable. ``connectivity_key`` is the
+    # tautomer-canonical skeleton used for cross-DB connectivity matching downstream (Stage 3).
+    knapsack_inchikey = inchi_key
+    std_inchikey = standard_inchikey(smiles) if smiles else ""
+    inchi_key = std_inchikey or knapsack_inchikey
+    conn_key = connectivity_key(smiles) if smiles else ""
+    recompute_disagreement = bool(
+        std_inchikey and knapsack_inchikey and std_inchikey != knapsack_inchikey
+    )
+
     descriptors = rdkit_descriptors(smiles) if smiles else None
     descriptors = descriptors or {}
     chembl_cache_dir = settings.cache_root / "http" / "chembl"
@@ -2236,6 +2255,8 @@ def build_knapsack_anchor_result(
     )
 
     reasons = [f"knapsack_source_confirmed;c_id={matched_cid};formula_confirmed"]
+    if recompute_disagreement:
+        reasons.append("knapsack_inchikey_recompute_disagreement")
     external_keys = _cached_external_inchikeys(candidate, terms, settings, logger)
     if external_keys and inchi_key.upper() not in external_keys:
         reasons.append("knapsack_vs_external_disagreement")
@@ -2254,6 +2275,7 @@ def build_knapsack_anchor_result(
         "pubchem_cid": "",
         "chembl_id": "",
         "inchi_key": inchi_key,
+        "connectivity_key": conn_key,
         "smiles": smiles,
         "molecular_formula": molecular_formula,
         "molecular_weight": descriptors.get("molecular_weight", ""),
@@ -2268,7 +2290,7 @@ def build_knapsack_anchor_result(
         "iupac_name": "",
         "preferred_name": candidate.get("representative_name", ""),
         "source_name": settings.source_name,
-        "source_url": candidate.get("source_url", "") or settings.source_url,
+        "source_url": knapsack_metabolite_url(matched_cid) or settings.source_url,
         "source_batch_id": run_id,
         "retrieved_at": run_id,
         "enrichment_confidence": "0.9700",

@@ -81,6 +81,7 @@ COMPOUNDS_COLUMNS = [
     "canonical_key",
     "canonical_name",
     "inchi_key",
+    "connectivity_key",
     "smiles",
     "cas_id",
     "pubchem_cid",

@@ -70,6 +70,70 @@ def rdkit_descriptors(smiles: str) -> Optional[Dict[str, str]]:
 
 
 # ---------------------------------------------------------------------------
+# Standard InChIKey + connectivity key (cross-DB matching)
+# ---------------------------------------------------------------------------
+
+
+def standard_inchikey(smiles: str) -> str:
+    """RDKit **standard** InChIKey from SMILES. Returns "" on unparseable SMILES.
+
+    KNApSAcK publishes some non-standard InChIKeys (``...NA-N``) that never match
+    PubChem/ChEMBL (which store standard keys). Recomputing the standard key from the
+    scraped SMILES yields the correct, matchable identity for the structure we hold.
+    """
+    try:
+        from rdkit import Chem
+        from rdkit.Chem import inchi as rdinchi
+    except ImportError:
+        log.warning("RDKit not importable — cannot compute standard InChIKey.")
+        return ""
+
+    mol = Chem.MolFromSmiles(smiles or "")
+    if mol is None:
+        return ""
+    try:
+        return rdinchi.MolToInchiKey(mol)
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def connectivity_key(smiles: str) -> str:
+    """First InChIKey block (14 chars) of the **tautomer-canonical** form of SMILES.
+
+    Used ONLY for cross-database (ChEMBL/PubChem) connectivity matching, never as
+    identity. Curcumin's enol (KNApSAcK) and keto (ChEMBL) tautomers hash to different
+    standard keys but canonicalize to the same skeleton, so a connectivity match on this
+    key recovers the compound in ChEMBL where an exact-key match misses. Uses RDKit's
+    default TautomerEnumerator (bounded max transforms, so it always terminates).
+    Returns "" on failure; falls back to the plain standard first block.
+    """
+    try:
+        from rdkit import Chem
+        from rdkit.Chem import inchi as rdinchi
+        from rdkit.Chem.MolStandardize import rdMolStandardize
+    except ImportError:
+        return ""
+
+    mol = Chem.MolFromSmiles(smiles or "")
+    if mol is None:
+        return ""
+    try:
+        enumerator = rdMolStandardize.TautomerEnumerator()
+        # Bound enumeration for tractability across the full compound set: some polyphenols
+        # enumerate hundreds of tautomers (~20x slower). A 100-tautomer cap yields an identical
+        # canonical skeleton for realistic natural products (verified on curcumin + heavy
+        # polyphenols) while bounding the worst case to a few ms.
+        enumerator.SetMaxTautomers(100)
+        canon = enumerator.Canonicalize(mol)
+        return rdinchi.MolToInchiKey(canon)[:14]
+    except Exception:  # noqa: BLE001
+        try:
+            return rdinchi.MolToInchiKey(mol)[:14]
+        except Exception:  # noqa: BLE001
+            return ""
+
+
+# ---------------------------------------------------------------------------
 # RDKit NP-likeness score
 # ---------------------------------------------------------------------------
 

@@ -218,9 +218,36 @@ def test_charged_knapsack_formula_corroborates(tmp_path, monkeypatch):
         _candidate("C15H11O6+"), _members(), None, _settings(tmp_path), LOG
     )
     assert result["match_strategy"] == "knapsack_source_confirmed"
-    assert result["inchi_key"] == "PELLETIER-KEYXXXXXXXXXX-N"
+    # Identity is the RDKit STANDARD InChIKey recomputed from the scraped SMILES, not
+    # KNApSAcK's published key. Here KNApSAcK's key is a placeholder that disagrees with the
+    # recomputed one, so the disagreement is flagged and the standard key wins.
+    assert result["inchi_key"] == "WVIICGIFSIBFOG-UHFFFAOYSA-N"
+    assert result["connectivity_key"] == "WVIICGIFSIBFOG"
+    assert "knapsack_inchikey_recompute_disagreement" in result["match_reason"]
     assert result["molecular_formula"] == "C15H11O6+"  # stored as published
     assert calls["pubchem"] == 0
+
+
+def test_knapsack_connectivity_key_reconciles_curcumin_tautomer(tmp_path, monkeypatch):
+    # Curcumin's KNApSAcK enol tautomer hashes to a different standard InChIKey than
+    # ChEMBL's keto form, but both share one tautomer-canonical skeleton. The stored
+    # connectivity_key must be that skeleton (VFLDPWHFBUODDF) so Stage 3 can recover the
+    # ChEMBL record an exact-key match would miss.
+    enol = "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O)c(OC)c2)ccc1O"
+    monkeypatch.setattr(
+        enrich,
+        "structure_by_cid",
+        {"C001": ("ZIUSSTSXXLLKKK-KOBPDPAPSA-N", enol, "C21H20O6")},
+    )
+    _stub_adme(monkeypatch)
+    _spy_search(monkeypatch)
+
+    result, *_ = enrich.enrich_candidate(
+        _candidate("C21H20O6"), _members(), None, _settings(tmp_path), LOG
+    )
+    assert result["match_strategy"] == "knapsack_source_confirmed"
+    assert result["inchi_key"] == "ZIUSSTSXXLLKKK-KOBPDPAPSA-N"  # standard enol key
+    assert result["connectivity_key"] == "VFLDPWHFBUODDF"  # ChEMBL-matching skeleton
 
 
 # --- Fall-through path ------------------------------------------------------

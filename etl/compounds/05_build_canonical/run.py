@@ -144,6 +144,7 @@ ENRICH_RESULT_COLUMNS = [
     "pubchem_cid",
     "chembl_id",
     "inchi_key",
+    "connectivity_key",
     "smiles",
     "molecular_formula",
     "molecular_weight",
@@ -218,6 +219,7 @@ COMPOUNDS_COLUMNS = [
     "canonical_key",
     "canonical_name",
     "inchi_key",
+    "connectivity_key",
     "smiles",
     "cas_id",
     "pubchem_cid",
@@ -1477,6 +1479,9 @@ def build_canonical_tables(
                 "canonical_key": canonical_key,
                 "canonical_name": canonical_name,
                 "inchi_key": inchi_key,
+                "connectivity_key": normalize_whitespace(
+                    best_candidate.get("connectivity_key", "")
+                ),
                 "smiles": smiles,
                 "cas_id": cas_id,
                 "pubchem_cid": pubchem_cid,
