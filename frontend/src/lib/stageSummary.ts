@@ -49,7 +49,7 @@ export function doneSub(stage: number, data: AnalysisRead): string {
     case 5:
       return `${n} shared`;
     case 6:
-      return `${n} edges`;
+      return `${n} nodes`;
     case 7:
       return `${n} hubs`;
     case 8:
