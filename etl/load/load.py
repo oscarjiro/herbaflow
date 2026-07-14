@@ -83,6 +83,17 @@ def _gbif_key(canonical_key: str | None) -> str | None:
     return ck[5:] if ck.startswith("gbif:") else None
 
 
+# Evidence types that clear the corroboration gate in 04_enrich (structure agrees with the
+# raw KNApSAcK formula). Only these map to 'externally_validated'; every other value
+# (rejected / no-structure / weak) is 'unvalidated'. 'structure_only' is NOT emitted here —
+# it is reserved for the backend manual-entry path (app/services/input_validation.py).
+_CORROBORATED_EVIDENCE = {"knapsack+formula", "cas+formula", "name+formula", "cross_source+formula"}
+
+
+def _validation_status(evidence_type) -> str:
+    return "externally_validated" if (evidence_type or "").strip() in _CORROBORATED_EVIDENCE else "unvalidated"
+
+
 def load_plants(cur, upsert=False):
     print("Loading plants...", end=" ", flush=True)
     rows = read_csv(PLANTS_CSV)
@@ -108,26 +119,27 @@ def load_compounds(cur, upsert=False):
     print("Loading compounds...", end=" ", flush=True)
     rows = read_csv(COMPOUNDS_CSV)
     conflict = _conflict("compound_id", [
-        "canonical_name", "inchi_key", "smiles",
+        "canonical_name", "inchi_key", "connectivity_key", "smiles",
         "cas_id", "pubchem_cid", "chembl_id", "molecular_formula", "molecular_weight",
         "tpsa", "logp", "hbond_donors", "hbond_acceptors",
         "rotatable_bonds", "np_likeness_score", "num_ro5_violations",
-        "is_pains_positive",
+        "is_pains_positive", "validation_status",
         "source_url", "retrieved_at",
     ], upsert)
     sql = f"""
         insert into compounds (
-            compound_id, canonical_name, inchi_key, smiles,
+            compound_id, canonical_name, inchi_key, connectivity_key, smiles,
             cas_id, pubchem_cid, chembl_id, molecular_formula, molecular_weight,
             tpsa, logp, hbond_donors, hbond_acceptors,
             rotatable_bonds, np_likeness_score, num_ro5_violations,
-            is_pains_positive,
+            is_pains_positive, validation_status,
             source_url, retrieved_at
         ) values %s {conflict}
     """
     data = [(
         r["compound_id"], r.get("canonical_name"),
-        _blank_to_none(r.get("inchi_key")), r.get("smiles"), r.get("cas_id"),
+        _blank_to_none(r.get("inchi_key")), _blank_to_none(r.get("connectivity_key")),
+        r.get("smiles"), r.get("cas_id"),
         r.get("pubchem_cid"), r.get("chembl_id"), r.get("molecular_formula"),
         _f(r.get("molecular_weight")),
         _f(r.get("tpsa")), _f(r.get("logp")),
@@ -135,6 +147,7 @@ def load_compounds(cur, upsert=False):
         _i(r.get("rotatable_bonds")),
         _f(r.get("np_likeness_score")), _i(r.get("num_ro5_violations")),
         str(r.get("is_pains_positive", "")).lower() == "true",
+        _validation_status(r.get("evidence_type")),
         r.get("source_url"), _ts(r.get("retrieved_at")),
     ) for r in rows]
     psycopg2.extras.execute_values(cur, sql, data, page_size=500)

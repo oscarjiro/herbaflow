@@ -54,3 +54,19 @@ def test_conflict_do_update():
         "on conflict (plant_id) do update set "
         "gbif_key = excluded.gbif_key, source_url = excluded.source_url"
     )
+
+
+def test_validation_status_corroborated_is_externally_validated():
+    mod = _load_module()
+    for ev in ("knapsack+formula", "cas+formula", "name+formula", "cross_source+formula"):
+        assert mod._validation_status(ev) == "externally_validated"
+    # tolerant of surrounding whitespace
+    assert mod._validation_status("  knapsack+formula  ") == "externally_validated"
+
+
+def test_validation_status_uncorroborated_is_unvalidated():
+    mod = _load_module()
+    for ev in ("name_only", "formula_only", "mw_only", "ambiguous", "weak", "none", "", None):
+        assert mod._validation_status(ev) == "unvalidated"
+    # the loader never emits the manual-entry-only value
+    assert mod._validation_status("name_only") != "structure_only"

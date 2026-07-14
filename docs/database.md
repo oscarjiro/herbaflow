@@ -103,6 +103,7 @@ One canonical row per chemical entity.
 | `compound_id` | uuid PK | NO | UUID v5 from the canonical key computed at ingest |
 | `canonical_name` | text | YES | |
 | `inchi_key` | text | YES | UNIQUE, NULLABLE — some biologics/inorganics (e.g. antibodies, enzymes, metal complexes) have no computable InChIKey |
+| `connectivity_key` | text | YES | Tautomer-canonical InChIKey skeleton (first 14 chars); cross-database (ChEMBL/PubChem) connectivity matching only, never identity |
 | `smiles` | text | YES | Canonical or isomeric SMILES |
 | `cas_id` | text | YES | |
 | `pubchem_cid` | text | YES | |
@@ -119,17 +120,18 @@ One canonical row per chemical entity.
 | `is_pains_positive` | boolean | NO | DEFAULT `false`; PAINS flag (Baell & Holloway 2010); reporting only, not a filter |
 | `source_url` | text | YES | Per-row deep link; authoritative |
 | `retrieved_at` | timestamptz | YES | |
-| `validation_status` | text | NO | DEFAULT `externally_validated`; `externally_validated` = backed by DB/PubChem (and all ETL rows); `structure_only` = RDKit-derived identity from a manually entered SMILES with no external match (descriptors null until ADME runs) |
+| `validation_status` | text | NO | DEFAULT `externally_validated`; `externally_validated` = structure corroborated against an external source (DB/PubChem/ChEMBL); `structure_only` = RDKit-derived identity from a manually entered SMILES with no external match (descriptors null until ADME runs); `unvalidated` = ETL structure-anchored row that failed corroboration (name-only, no resolved structure) |
 
 **Constraints:**
 - PK: `compounds_pkey` on `compound_id`
 - UNIQUE: `compounds_inchi_key_key` on `inchi_key`
 - CHECK `compounds_num_ro5_violations_check`: `num_ro5_violations IS NULL OR (num_ro5_violations >= 0 AND num_ro5_violations <= 4)`
-- CHECK `compounds_validation_status_check`: `validation_status IN ('externally_validated', 'structure_only')`
+- CHECK `compounds_validation_status_check`: `validation_status IN ('externally_validated', 'structure_only', 'unvalidated')`
 
 **Indexes:**
 - `compounds_pkey` (unique, btree, `compound_id`)
 - `compounds_inchi_key_idx` (btree, `inchi_key`)
+- `compounds_connectivity_key_idx` (btree, `connectivity_key`)
 - `compounds_pubchem_cid_idx` (btree, `pubchem_cid`)
 - `compounds_chembl_id_idx` (btree, `chembl_id`)
 
