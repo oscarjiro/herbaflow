@@ -184,6 +184,19 @@ def test_strip_does_not_mutate_source_dict() -> None:
     assert original_six["network_image"] == "BASE64DATA"
 
 
+def test_has_network_image_flag_true_when_image_present() -> None:
+    source: dict = {"6": {"node_count": 5, "network_image": "BASE64DATA"}}
+    read = _read_with_stage_results(source)
+    assert read.stage_results["6"]["has_network_image"] is True
+
+
+def test_has_network_image_flag_false_when_image_empty() -> None:
+    source: dict = {"6": {"node_count": 5, "network_image": ""}}
+    read = _read_with_stage_results(source)
+    assert "network_image" not in read.stage_results["6"]
+    assert read.stage_results["6"]["has_network_image"] is False
+
+
 def test_no_stage6_key_passes_through() -> None:
     source: dict = {"5": {"overlap_count": 10}}
     read = _read_with_stage_results(source)

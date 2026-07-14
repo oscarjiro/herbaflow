@@ -401,6 +401,31 @@ export type GetAnalysisResponses = {
 
 export type GetAnalysisResponse = GetAnalysisResponses[keyof GetAnalysisResponses];
 
+export type GetStage6ImageData = {
+    body?: never;
+    path: {
+        analysis_id: string;
+    };
+    query?: never;
+    url: '/analyses/{analysis_id}/stage6-image.png';
+};
+
+export type GetStage6ImageErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetStage6ImageError = GetStage6ImageErrors[keyof GetStage6ImageErrors];
+
+export type GetStage6ImageResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type AdvanceAnalysisData = {
     body?: never;
     path: {

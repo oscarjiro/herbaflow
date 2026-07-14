@@ -35,7 +35,7 @@ import { humanizeValue } from "../../contract/labels";
 import { uniprotUrl } from "../../lib/externalUrls";
 import { formatCount } from "../../lib/format";
 import { METRIC_INFO } from "../../lib/metricInfo";
-import { exportArtifactUrl } from "../../lib/exportUrl";
+import { stage6ImageUrl } from "../../lib/exportUrl";
 import type cytoscape from "cytoscape";
 import { useChartColors } from "@/lib/chartTheme";
 import { NetworkGraph } from "@/components/charts/NetworkGraph";
@@ -76,6 +76,8 @@ type Stage6Computed = {
   capped: { applied: boolean; max_proteins: number; ranked_by: string };
   count: number;
   flags?: string[];
+  /** True once STRING's server-rendered PNG is stored (base64 stripped from this poll payload). */
+  has_network_image?: boolean;
 };
 
 type Stage6Blocked = {
@@ -431,31 +433,33 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
                 elements={network.elements}
                 stylesheet={stylesheet}
                 actions={
-                  <Button variant="secondary" size="sm" asChild>
-                    <a
-                      href={exportArtifactUrl(data.analysis_id, "stage6_ppi_network.png")}
-                      download="stage6_ppi_network.png"
-                      aria-label="Download STRING image"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                  computed?.has_network_image ? (
+                    <Button variant="secondary" size="sm" asChild>
+                      <a
+                        href={stage6ImageUrl(data.analysis_id)}
+                        download="stage6_ppi_network.png"
+                        aria-label="Download STRING image"
                       >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                      </svg>
-                      Download STRING image
-                    </a>
-                  </Button>
+                        <svg
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Download STRING image
+                      </a>
+                    </Button>
+                  ) : undefined
                 }
                 nodeTooltip={(d) => `Protein: ${String(d.label ?? "")} · Degree: ${d.degree ?? 0}`}
                 tray={

@@ -40,6 +40,7 @@ function makeComputedResult() {
     capped: { applied: false, max_proteins: 2000, ranked_by: "opentargets_score" },
     count: 2,
     flags: [],
+    has_network_image: true,
   };
 }
 
@@ -311,11 +312,18 @@ describe("Stage6View — interactive network graph", () => {
     ).toBeTruthy();
   });
 
-  it("renders the Download STRING image button with an href ending in stage6_ppi_network.png", () => {
+  it("renders the Download STRING image button pointing at the non-export-gated endpoint", () => {
     wrap(<Stage6View data={makeCompleteNetworkData()} />);
     const btn = screen.getByRole("link", { name: /download string image/i });
     expect(btn).toBeInTheDocument();
-    expect(btn.getAttribute("href")).toMatch(/stage6_ppi_network\.png$/);
+    // Served the moment Stage 6 finishes, not via the complete-only /export/ path.
+    expect(btn.getAttribute("href")).toMatch(/\/analyses\/a1\/stage6-image\.png$/);
+    expect(btn.getAttribute("download")).toBe("stage6_ppi_network.png");
+  });
+
+  it("hides the Download STRING image button when no STRING image was stored", () => {
+    wrap(<Stage6View data={makeData({ ...makeComputedResult(), has_network_image: false })} />);
+    expect(screen.queryByRole("link", { name: /download string image/i })).toBeNull();
   });
 
   it("places the Download STRING image button next to the chart Download PNG button", () => {

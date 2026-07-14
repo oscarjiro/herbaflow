@@ -159,11 +159,14 @@ class AnalysisRead(BaseModel):
     def _strip_network_image(cls, v: dict[str, Any]) -> dict[str, Any]:
         """The stored STRING PPI image (``stage_results["6"].network_image``) is a large base64
         PNG that only the export needs (it reads the ORM row directly). Drop it from the
-        status-poll payload so repeated polls stay lean. Copies only the touched levels so the
-        source ORM dict is never mutated."""
+        status-poll payload so repeated polls stay lean, but leave a light ``has_network_image``
+        boolean so the frontend can show the (non-export-gated) download link the moment the image
+        exists. Copies only the touched levels so the source ORM dict is never mutated."""
         six = v.get("6")
         if isinstance(six, dict) and "network_image" in six:
-            v = {**v, "6": {k: val for k, val in six.items() if k != "network_image"}}
+            stripped = {k: val for k, val in six.items() if k != "network_image"}
+            stripped["has_network_image"] = bool(six.get("network_image"))
+            v = {**v, "6": stripped}
         return v
 
     progress: ProgressRead | None = None
