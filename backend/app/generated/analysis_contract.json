@@ -125,7 +125,7 @@
               "description": "Rotatable-bond ceiling. Molecular flexibility: too flexible lowers oral bioavailability (Veber)." },
             "apply_veber": { "type": "boolean", "default": true,
               "description": "Apply Veber's rules (rotatable bonds + TPSA) on top of Lipinski's four." },
-            "np_exception_threshold": { "type": "number", "minimum": -5, "maximum": 5, "default": 0.5,
+            "np_exception_threshold": { "type": "number", "minimum": -5, "maximum": 5, "default": 0,
               "recommended_min": -1, "recommended_max": 2,
               "description": "Natural-product-likeness score (Ertl, approx [-5,+5]) at or above which a compound bypasses the rules, protecting genuine plant compounds." },
             "apply_np_exception": { "type": "boolean", "default": true,

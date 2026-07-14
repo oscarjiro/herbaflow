@@ -70,7 +70,7 @@ def test_adme_defaults_match_methodology_lock() -> None:
         "max_tpsa": 140,
         "max_rotatable_bonds": 10,
         "apply_veber": True,
-        "np_exception_threshold": 0.5,
+        "np_exception_threshold": 0,
         "apply_np_exception": True,
         "max_violations": 1,
         "skip_adme": False,

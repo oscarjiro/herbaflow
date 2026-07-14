@@ -16,7 +16,7 @@ const ADME_FROZEN = {
   max_tpsa: 140,
   max_rotatable_bonds: 10,
   apply_veber: true,
-  np_exception_threshold: 0.5,
+  np_exception_threshold: 0,
   apply_np_exception: true,
   max_violations: 1,
   skip_adme: false,

@@ -688,7 +688,7 @@ Current `adme` parameters (all sourced from `shared/contracts/analysis.json`):
 | `max_tpsa` | number | 140 | ≥0, ≤500 | 90–140 | TPSA ceiling (Å²); Veber criterion |
 | `max_rotatable_bonds` | integer | 10 | ≥0, ≤50 | 7–10 | Rotatable-bond ceiling; Veber criterion |
 | `apply_veber` | boolean | true | — | — | Enable Veber (TPSA + rotatable bonds) gate |
-| `np_exception_threshold` | number | 0.5 | ≥−5, ≤5 | −1–2 | Ertl NP-likeness score at/above which NP bypass fires |
+| `np_exception_threshold` | number | 0 | ≥−5, ≤5 | −1–2 | Ertl NP-likeness score at/above which NP bypass fires |
 | `apply_np_exception` | boolean | true | — | — | Enable NP-likeness exception; off = strict (no NP rescue) |
 | `max_violations` | integer | 1 | ≥0, ≤4 | 0–2 | Max Lipinski criteria a compound may break and still pass |
 | `skip_adme` | boolean | false | — | — | Bypass ADME entirely; all compounds pass as "unscreened" |
