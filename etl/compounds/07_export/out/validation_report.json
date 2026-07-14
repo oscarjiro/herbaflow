@@ -1,7 +1,7 @@
 {
   "critical_error_count": 0,
   "critical_errors": [],
-  "generated_at": "2026-07-13T21:11:04.657285+00:00",
+  "generated_at": "2026-07-14T11:56:15.570857+00:00",
   "inputs": {
     "build_canonical_summary.json": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\build_canonical_summary.json",
     "compound_aliases.csv": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compound_aliases.csv",
@@ -11,48 +11,47 @@
     "plant_compound_review.csv": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\plant_compound_review.csv",
     "plant_compounds.csv": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\plant_compounds.csv"
   },
-  "issue_count": 31,
+  "issue_count": 23,
   "issue_type_counts": {
     "invalid_cas_format": 15,
-    "invalid_inchikey_format": 8,
     "nonpositive_molecular_weight": 8
   },
   "module": "compounds",
   "pass": true,
-  "run_id": "compounds_20260713_211103",
+  "run_id": "compounds_20260714_115613",
   "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
   "severity_counts": {
-    "warning": 31
+    "warning": 23
   },
   "step": "06_validate",
   "summary_snapshot": {
     "accepted_candidate_count": 12552,
-    "accepted_compounds": 12304,
-    "alias_row_count": 38110,
+    "accepted_compounds": 12175,
+    "alias_row_count": 38088,
     "candidate_input_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidates.csv",
     "candidate_map_row_count": 12592,
     "candidate_member_rows": 21931,
     "candidate_members_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\03_dedupe_candidates\\out\\compound_candidate_members.csv",
     "candidate_rows": 12592,
-    "canonical_compound_count": 12344,
+    "canonical_compound_count": 12215,
     "compound_review_row_count": 0,
     "enrich_member_map_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_member_map.csv",
     "enrich_results_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_results.csv",
     "enrich_review_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\04_enrich\\out\\compound_enrichment_review.csv",
-    "generated_at": "2026-07-13T21:11:02.167278+00:00",
-    "merged_group_count": 2563,
+    "generated_at": "2026-07-14T11:56:12.595345+00:00",
+    "merged_group_count": 2657,
     "module": "compounds",
     "output_aliases_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compound_aliases.csv",
     "output_bridge_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\plant_compounds.csv",
     "output_candidate_map_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compound_candidate_map.csv",
     "output_compounds_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
     "output_review_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compound_review.csv",
-    "plant_compound_row_count": 20460,
+    "plant_compound_row_count": 20351,
     "plant_review_row_count": 1145,
     "provisional_candidate_count": 40,
     "provisional_compounds": 40,
     "review_candidate_count": 0,
-    "run_id": "compounds_20260713_211102",
+    "run_id": "compounds_20260714_115612",
     "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
     "step": "05_build_canonical",
     "unmapped_plant_rows": 1145,
@@ -62,10 +61,10 @@
     "compound_aliases.csv": {
       "critical_error_count": 0,
       "issue_count": 0,
-      "row_count": 38110,
+      "row_count": 38088,
       "table_name": "compound_aliases.csv",
-      "unique_id_count": 38110,
-      "unique_secondary_count": 38110,
+      "unique_id_count": 38088,
+      "unique_secondary_count": 38088,
       "warning_count": 0
     },
     "compound_candidate_map.csv": {
@@ -88,12 +87,12 @@
     },
     "compounds.csv": {
       "critical_error_count": 0,
-      "issue_count": 31,
-      "row_count": 12344,
+      "issue_count": 23,
+      "row_count": 12215,
       "table_name": "compounds.csv",
-      "unique_id_count": 12344,
-      "unique_secondary_count": 12344,
-      "warning_count": 31
+      "unique_id_count": 12215,
+      "unique_secondary_count": 12215,
+      "warning_count": 23
     },
     "plant_compound_review.csv": {
       "critical_error_count": 0,
@@ -107,14 +106,14 @@
     "plant_compounds.csv": {
       "critical_error_count": 0,
       "issue_count": 0,
-      "row_count": 20460,
+      "row_count": 20351,
       "table_name": "plant_compounds.csv",
-      "unique_id_count": 20460,
-      "unique_secondary_count": 20460,
+      "unique_id_count": 20351,
+      "unique_secondary_count": 20351,
       "warning_count": 0
     }
   },
-  "warning_count": 31,
+  "warning_count": 23,
   "warnings": [
     {
       "details": {},
@@ -182,17 +181,9 @@
     },
     {
       "details": {},
-      "issue_reason": "inchi_key='-UQBIAGWOJDEOMN-OBEKGFCVSA-N'",
-      "issue_type": "invalid_inchikey_format",
-      "row_identifier": "0f7b9cfa-1f32-54a4-8057-ff8a2d24b22f",
-      "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
-      "table_name": "compounds.csv"
-    },
-    {
-      "details": {},
       "issue_reason": "cas_id='84897-03-2'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "7f87f67b-59d2-5725-b291-26f533c89b1b",
+      "row_identifier": "75dc2e98-19eb-5375-9756-4a0d3f3b7366",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -200,15 +191,7 @@
       "details": {},
       "issue_reason": "cas_id='4802-01-0'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "15bd1bea-391d-5831-b410-74f41b44671a",
-      "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
-      "table_name": "compounds.csv"
-    },
-    {
-      "details": {},
-      "issue_reason": "inchi_key='BWWWDMOADQCOJ-UHFFFAOYSA-N'",
-      "issue_type": "invalid_inchikey_format",
-      "row_identifier": "8afed401-9ba2-5902-afaa-2d4c063d0bc4",
+      "row_identifier": "1e63b468-9b6b-50b5-869e-845c1049b70a",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -224,7 +207,7 @@
       "details": {},
       "issue_reason": "cas_id='194-23-6'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "6bddadea-10a8-5579-ab04-9521c8d5b2e7",
+      "row_identifier": "0e0479e8-2883-5ac0-b1a0-ddad5728e335",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -240,23 +223,7 @@
       "details": {},
       "issue_reason": "cas_id='147977-00-3'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "2441b75f-df99-5a54-bb3f-d0d950393a7e",
-      "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
-      "table_name": "compounds.csv"
-    },
-    {
-      "details": {},
-      "issue_reason": "inchi_key='IHLOJAKTQQLDU-UHFFFAOYSA-N'",
-      "issue_type": "invalid_inchikey_format",
-      "row_identifier": "96047f40-59cb-5eda-8416-074aa392d267",
-      "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
-      "table_name": "compounds.csv"
-    },
-    {
-      "details": {},
-      "issue_reason": "inchi_key='IZDLUWRENVVJW-ALCCZGGFSA-N'",
-      "issue_type": "invalid_inchikey_format",
-      "row_identifier": "1599d5fa-adb4-5321-88b4-4c9a841676c5",
+      "row_identifier": "8d812de1-2ad6-5868-b488-5743682ede98",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -272,7 +239,7 @@
       "details": {},
       "issue_reason": "cas_id='66957-75-7'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "0e925f8e-110c-5678-bc00-4b5d4f8c4bb8",
+      "row_identifier": "29a9adaf-a175-5279-8346-768bf191279f",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -288,23 +255,7 @@
       "details": {},
       "issue_reason": "cas_id='103947-71-6'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "c033670d-5856-5dac-8089-e25d1ffe22ee",
-      "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
-      "table_name": "compounds.csv"
-    },
-    {
-      "details": {},
-      "issue_reason": "inchi_key='RQUZRZEYPSZEY-WRMYNCHHSA-N'",
-      "issue_type": "invalid_inchikey_format",
-      "row_identifier": "92706923-a413-531b-9203-6bb2979d6e85",
-      "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
-      "table_name": "compounds.csv"
-    },
-    {
-      "details": {},
-      "issue_reason": "inchi_key='VMCYBCRYZSVDR-UHFFFAOYSA-N'",
-      "issue_type": "invalid_inchikey_format",
-      "row_identifier": "de4559af-0ec4-5085-a57d-acca7c0ceabc",
+      "row_identifier": "b2a1b985-ec6e-5afc-86b0-a439dfdcca86",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -312,7 +263,7 @@
       "details": {},
       "issue_reason": "cas_id='714361-22-6'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "c5f3751e-815d-59cf-bebf-c978875d1762",
+      "row_identifier": "7cca34be-a038-5f6c-acb7-aa4d41402013",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -320,15 +271,7 @@
       "details": {},
       "issue_reason": "cas_id='62929-65-7'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "fc5069dd-7782-50ea-ad8c-b8ab9bfcd188",
-      "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
-      "table_name": "compounds.csv"
-    },
-    {
-      "details": {},
-      "issue_reason": "inchi_key='vWXVTHDQAOAENP-UHFFFAOYSA-N'",
-      "issue_type": "invalid_inchikey_format",
-      "row_identifier": "6fe14ecf-cbc4-56ea-8c00-af4f2caf8f53",
+      "row_identifier": "8d8ef2d1-3e7a-538c-97cb-9981c0cfdbbe",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -336,7 +279,7 @@
       "details": {},
       "issue_reason": "cas_id='126321-89-1'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "b54cbf05-f8ba-58ef-a100-1f6e697194db",
+      "row_identifier": "e8d73939-0ea4-55d7-a646-e860148f58ae",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     },
@@ -352,15 +295,7 @@
       "details": {},
       "issue_reason": "cas_id='1035606-13-2'",
       "issue_type": "invalid_cas_format",
-      "row_identifier": "64634e39-5436-560e-b2a3-63a2f3feb3ba",
-      "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
-      "table_name": "compounds.csv"
-    },
-    {
-      "details": {},
-      "issue_reason": "inchi_key='ZZCBYANKCZVLL-UHFFFAOYSA-N'",
-      "issue_type": "invalid_inchikey_format",
-      "row_identifier": "898cb716-f01e-520a-b77b-4fe6c78ef9c0",
+      "row_identifier": "bd79a2e0-2c4c-5a2a-a225-4ca00ab94f0d",
       "source_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\05_build_canonical\\out\\compounds.csv",
       "table_name": "compounds.csv"
     }

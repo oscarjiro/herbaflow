@@ -1,7 +1,7 @@
 table_name,row_count,unique_id_count,unique_secondary_count,issue_count,critical_error_count,warning_count
-compounds.csv,12344,12344,12344,31,0,31
-compound_aliases.csv,38110,38110,38110,0,0,0
+compounds.csv,12215,12215,12215,23,0,23
+compound_aliases.csv,38088,38088,38088,0,0,0
 compound_candidate_map.csv,12592,12592,12592,0,0,0
 compound_review.csv,0,0,0,0,0,0
-plant_compounds.csv,20460,20460,20460,0,0,0
+plant_compounds.csv,20351,20351,20351,0,0,0
 plant_compound_review.csv,1145,1145,1145,0,0,0

@@ -11,7 +11,7 @@
       ],
       "kind": "core",
       "path": "C:\\code\\web\\herbaflow\\etl\\compounds\\07_export\\out\\compound_aliases.csv",
-      "row_count": 38110
+      "row_count": 38088
     },
     "compound_candidate_map.csv": {
       "columns": [
@@ -74,6 +74,7 @@
         "canonical_key",
         "canonical_name",
         "inchi_key",
+        "connectivity_key",
         "smiles",
         "cas_id",
         "pubchem_cid",
@@ -103,7 +104,7 @@
       ],
       "kind": "core",
       "path": "C:\\code\\web\\herbaflow\\etl\\compounds\\07_export\\out\\compounds.csv",
-      "row_count": 12344
+      "row_count": 12215
     },
     "plant_compound_review.csv": {
       "columns": [
@@ -139,7 +140,7 @@
       ],
       "kind": "core",
       "path": "C:\\code\\web\\herbaflow\\etl\\compounds\\07_export\\out\\plant_compounds.csv",
-      "row_count": 20460
+      "row_count": 20351
     },
     "validation_counts.csv": {
       "columns": [
@@ -162,12 +163,12 @@
       "row_count": 1
     }
   },
-  "generated_at": "2026-07-13T21:11:06.558869+00:00",
+  "generated_at": "2026-07-14T11:56:17.690517+00:00",
   "include_audit_exports": true,
   "include_validation_artifacts": true,
   "module": "compounds",
   "note": "export_pass_through_only",
-  "run_id": "compounds_20260713_211106",
+  "run_id": "compounds_20260714_115617",
   "settings_file": "C:\\code\\web\\herbaflow\\etl\\compounds\\settings.yml",
   "source_validated_dir": "C:\\code\\web\\herbaflow\\etl\\compounds\\06_validate\\out",
   "sql_enabled": false,
@@ -176,12 +177,12 @@
   "sql_schema": "public",
   "step": "07_export",
   "summary": {
-    "compound_aliases_row_count": 38110,
+    "compound_aliases_row_count": 38088,
     "compound_candidate_map_row_count": 12592,
     "compound_review_row_count": 0,
-    "compounds_row_count": 12344,
+    "compounds_row_count": 12215,
     "plant_compound_review_row_count": 1145,
-    "plant_compounds_row_count": 20460,
+    "plant_compounds_row_count": 20351,
     "validation_counts_present": true,
     "validation_report_present": true
   }
