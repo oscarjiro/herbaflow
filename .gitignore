@@ -3,6 +3,7 @@
 # =========================
 .DS_Store
 Thumbs.db
+*.stackdump
 
 # =========================
 # EDITORS / IDEs
@@ -14,52 +15,27 @@ Thumbs.db
 *.swo
 
 # =========================
+# ENV / SECRETS
+# =========================
+.env
+.env.*
+*.env
+*.local
+
+# =========================
 # PYTHON
 # =========================
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
+.eggs/
 
-# =========================
-# VIRTUAL ENVIRONMENTS (anywhere in repo)
-# =========================
+# virtual environments (anywhere in repo)
 .venv/
 venv/
 env/
 ENV/
-
-# =========================
-# PYTHON BUILD / PACKAGING
-# =========================
-*.egg-info/
-.eggs/
-
-# =========================
-# TESTING / COVERAGE
-# =========================
-.pytest_cache/
-.coverage
-htmlcov/
-
-# =========================
-# TYPE CHECKING / LINTING
-# =========================
-.mypy_cache/
-.ruff_cache/
-
-# =========================
-# LINTING / FORMATTING TOOLS
-# =========================
-.trunk/
-
-# =========================
-# ENV / SECRETS
-# =========================
-.env
-.env.*
-.env.local
-*.env
-*.local
 
 # =========================
 # NODE / FRONTEND (React + Vite)
@@ -68,80 +44,86 @@ node_modules/
 dist/
 build/
 .cache/
+frontend/.tanstack/
+*.tsbuildinfo
+
+# =========================
+# CACHES / TOOL OUTPUT
+# =========================
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.trunk/
+temp/
 
 # =========================
 # LOGS
 # =========================
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-*.log
 
 # =========================
-# TEMP FILES
-# =========================
-temp/
-
-# =========================
-# DATABASE / LOCAL FILES
-# =========================
-*.sqlite3
-*.db
-.learn/
-
-# =========================
-# ETL PIPELINE OUTPUTS
-# =========================
-etl/**/cache/
-
-# =========================
-# DESIGN SYSTEM ARTIFACTS
-# =========================
-docs/design-system/uploads/
-docs/design-system/screenshots/
-
-# =========================
-# CRASH DUMPS
-# =========================
-*.stackdump
-
-# =========================
-# PLAYWRIGHT / E2E TEST ARTIFACTS
+# TEST ARTIFACTS
 # =========================
 frontend/test-results/
 frontend/playwright-report/
 
 # =========================
-# TANSTACK ROUTER CACHE
+# LOCAL DATABASES
 # =========================
-frontend/.tanstack/
+*.sqlite3
+*.db
 
 # =========================
-# TS INCREMENTAL BUILD CACHE
+# ETL — scraped source pages and HTTP caches
+# Raw KNApSAcK page captures; large (~83 MB) and re-fetchable.
+# Kept on disk: they are the recovery source for compound structure backfill.
 # =========================
-*.tsbuildinfo
+etl/**/cache/
+etl/**/out/pages/
 
 # =========================
-# TOOLING
+# DESIGN SYSTEM — working artifacts (the system itself IS tracked)
 # =========================
-.superpowers/
-.claude/
-.serena/
-.playwright-mcp/
-.rebuild/
-.codex/
-.agents/
-_*/
-CLAUDE.md
-AGENTS.md
-*.local.md
+docs/design-system/uploads/
+docs/design-system/screenshots/
 
-# scratch schema-equivalence work (not part of the baseline)
-supabase/_baseline_work/
-
-# GD-2 golden-dataset fixtures + report derive from unpublished thesis data (do not commit)
+# =========================
+# UNPUBLISHED RESEARCH DATA
+# Golden-dataset fixtures derive from unpublished thesis data; tests skip when absent.
+# =========================
 backend/tests/scientific/fixtures/gd2_*.json
 docs/validation/golden-hito-pancreatic/
 
+# =========================
+# AGENT / ASSISTANT TOOLING
+# Personal overrides (*.local.md) stay private; the shared CLAUDE.md / AGENTS.md
+# instruction files ARE tracked.
+# =========================
+.claude/
+.codex/
+.agents/
+.serena/
+.superpowers/
+.playwright-mcp/
+.rebuild/
+*.local.md
+
+# =========================
+# SCRATCH / LEGACY
+# `_*/` covers the retired _backend/ and _frontend/ trees and scratch work dirs.
+# `learn/` is a personal practice sandbox.
+# =========================
+_*/
+.learn/
+learn/
+
+# =========================
+# DEPLOYMENT
+# =========================
 .vercel
