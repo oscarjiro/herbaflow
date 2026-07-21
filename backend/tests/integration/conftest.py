@@ -2,6 +2,10 @@
 
 Applies only the entity, junction, and operational baseline migrations (not cron/RLS,
 which need extensions/roles a vanilla image lacks and which the slice does not exercise).
+
+Every migration on disk must be listed in either ``_APPLY`` or ``_SKIP``. ``test_migration_lists``
+enforces that, so a new migration cannot silently go unapplied here: forgetting one previously
+left the test schema behind the ORM and failed the suite with an undefined-column error.
 """
 
 from __future__ import annotations
@@ -31,6 +35,18 @@ _APPLY = [
     "20260620000001_analysis_run_progress.sql",
     "20260702000001_wave3_schema_trim.sql",
     "20260714000001_compound_connectivity_key_and_validation_status.sql",
+    "20260714000002_compound_source_name.sql",
+]
+
+# Deliberately NOT applied. Each needs extensions, roles, or seed/production data that a vanilla
+# Postgres image does not have, and none of them shape a table the slice reads.
+_SKIP = [
+    "20260608000001_baseline_extensions_functions.sql",  # extensions a vanilla image lacks
+    "20260608000003_baseline_aliases.sql",  # alias tables the slice does not exercise
+    "20260608000006_baseline_constraints_indexes_rls.sql",  # RLS needs roles
+    "20260608000007_baseline_cron.sql",  # pg_cron
+    "20260610000001_seed_target_sources.sql",  # seed data
+    "20260706000001_null_biologic_smiles.sql",  # data fix against production rows
 ]
 
 
