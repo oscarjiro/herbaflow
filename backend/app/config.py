@@ -17,7 +17,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=_ENV_FILE, extra="ignore")
     app_name: str = "herbaflow"
     database_url: str = ""
-    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    cors_origins: str = (
+        "http://localhost:5173,http://127.0.0.1:5173,https://herbaflow-oscarjiro.vercel.app"
+    )
     frontend_url: str = ""
     db_pool_size: int = 5
     db_max_overflow: int = 10
