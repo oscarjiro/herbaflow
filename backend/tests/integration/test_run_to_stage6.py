@@ -225,7 +225,7 @@ async def test_zero_overlap_auto_fails(client, engine, monkeypatch):
     _patch_stage_clients(monkeypatch, _FakeString([]))
 
     # ChEMBL returns only P04637 (TP53) for this scenario.
-    async def _only_tp53(self, ik, *, min_pchembl, min_confidence):
+    async def _only_tp53(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         return [ChemblHit("P04637", 6.5, "IC50")] if ik else []
 
     monkeypatch.setattr(_FakeChembl, "targets_for_inchikey", _only_tp53)
@@ -272,7 +272,7 @@ async def test_large_overlap_is_never_capped_or_blocked(client, engine, monkeypa
     genes = [f"G{i:04d}" for i in range(n)]
 
     # ChEMBL returns all 60 accessions; UniProt resolves each to its gene (matches pre-seed).
-    async def _all_accs(self, ik, *, min_pchembl, min_confidence):
+    async def _all_accs(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         return [ChemblHit(a, 6.5, "IC50") for a in accs] if ik else []
 
     async def _resolve_all(self, acc):
@@ -375,7 +375,7 @@ async def test_stage4_edit_reaches_stage5_overlap(client, engine, monkeypatch):
     c, ids = client
 
     # ChEMBL returns all three accessions; UniProt resolves AKT1 too.
-    async def _three(self, ik, *, min_pchembl, min_confidence):
+    async def _three(self, ik, *, min_pchembl, min_confidence, connectivity_key=None):
         if not ik:
             return []
         return [

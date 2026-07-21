@@ -91,9 +91,15 @@ async def test_guided_pauses_then_advances(client) -> None:
 @pytest.mark.asyncio
 async def test_zero_compounds_fails(client) -> None:
     c, ids = client
+    # Explicitly auto: an empty Stage 1 hard-stops. The contract default is guided, which parks at
+    # the Stage-1 checkpoint instead of failing, so the mode has to be stated to test this path.
     resp = await c.post(
         "/analyses",
-        json={"plant_ids": [str(ids["plant_empty"])], "disease_id": str(ids["disease"])},
+        json={
+            "plant_ids": [str(ids["plant_empty"])],
+            "disease_id": str(ids["disease"]),
+            "mode": "auto",
+        },
     )
     run_id = resp.json()["analysis_id"]
     final = None
