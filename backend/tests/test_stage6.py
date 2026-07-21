@@ -23,30 +23,6 @@ def _overlap(n, base_score=0.5):
     }
 
 
-# STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
-# re-enable. select_inputs + compute_blocked_or_inputs (the cap-select + blocked-marker helpers)
-# are commented out in stage6.py, so these tests are disabled. Restore them with the helpers.
-#
-# def test_select_under_cap_uses_all():
-#     rows, capped = stage6.select_inputs(_overlap(5), max_proteins=2000, allow_top_n_cap=False)
-#     assert {r["gene_symbol"] for r in rows} == {f"G{i}" for i in range(5)}
-#     assert capped["applied"] is False
-#
-#
-# def test_over_cap_without_optin_is_blocked():
-#     out = stage6.compute_blocked_or_inputs(_overlap(3), max_proteins=2, allow_top_n_cap=False)
-#     assert out["blocked"] is True
-#     assert out["reason"] == "overlap_too_large"
-#     assert out["overlap_count"] == 3 and out["max_proteins"] == 2
-#
-#
-# def test_over_cap_with_optin_takes_top_n_by_score():
-#     rows, capped = stage6.select_inputs(_overlap(3), max_proteins=2, allow_top_n_cap=True)
-#     # highest opentargets_score first: G2 (0.502), G1 (0.501)
-#     assert {r["gene_symbol"] for r in rows} == {"G2", "G1"}
-#     assert capped["applied"] is True and capped["ranked_by"] == "opentargets_score"
-
-
 def test_build_result_parses_edges_and_nodes():
     rows = [
         {"gene_symbol": "G0", "target_id": "t0", "uniprot_accession": "P0"},
@@ -59,7 +35,6 @@ def test_build_result_parses_edges_and_nodes():
         edges,
         min_confidence=0.4,
         network_type="functional",
-        capped={"applied": False, "max_proteins": 2000, "ranked_by": "opentargets_score"},
     )
     assert out["state"] == "computed"
     assert out["edge_count"] == 1 and out["node_count"] == 3
@@ -85,14 +60,12 @@ def test_nodes_carry_target_id_and_accession():
             },
         ]
     }
-    # STR-1 (2026-07-06): caps disabled — build over ALL distinct mappable rows (no cap path).
     rows = distinct_gene_symbol_rows(stage5["overlap"])
     result = stage6.build_result(
         rows,
         [StringEdge("AKT1", "TNF", 0.9)],
         min_confidence=0.4,
         network_type="functional",
-        capped={"applied": False, "max_proteins": None, "ranked_by": "opentargets_score"},
     )
     by_gene = {n["gene_symbol"]: n for n in result["nodes"]}
     assert by_gene["AKT1"]["target_id"] == "t1"
@@ -103,14 +76,12 @@ def test_nodes_carry_target_id_and_accession():
 
 
 class _FakeRun:
-    def __init__(self, overlap, *, max_proteins=2000, allow_top_n_cap=False):
+    def __init__(self, overlap):
         self.stage_results = {"5": overlap}
         self.parameters = {
             "ppi": {
                 "min_confidence": 0.4,
                 "network_type": "functional",
-                "max_proteins": max_proteins,
-                "allow_top_n_cap": allow_top_n_cap,
             }
         }
 
@@ -164,15 +135,14 @@ async def test_run_omits_image_key_when_fetch_returns_none():
 
 
 @pytest.mark.asyncio
-async def test_run_ignores_cap_and_sends_all_symbols():
-    """STR-1 (2026-07-06): a >cap overlap with opt-in off is NO LONGER blocked.
+async def test_run_sends_every_overlap_symbol_to_string():
+    """There is no protein-count cap: every overlap gene symbol reaches STRING.
 
-    STRING imposes no identifier cap; the self-imposed cap is disabled (reversible), so a small
-    ``max_proteins`` param is inert: the stage builds the network over EVERY overlap gene symbol
-    (never returns a blocked marker) and passes all of them to the STRING call.
+    STRING imposes no maximum identifier count when the species is set, and this stage always
+    sends 9606, so the network is always built over the full overlap and is never blocked.
     """
     client = _StubStringClient(edges=[StringEdge("G0", "G1", 0.6)], image=b"png")
-    run = _FakeRun(_overlap(3), max_proteins=2, allow_top_n_cap=False)
+    run = _FakeRun(_overlap(3))
 
     result = await stage6.run(None, run, client=client)
 
@@ -180,8 +150,8 @@ async def test_run_ignores_cap_and_sends_all_symbols():
     assert "blocked" not in result
     assert result["state"] == "computed"
     assert result["node_count"] == 3
-    assert result["capped"]["applied"] is False
-    # STRING received ALL three overlap gene symbols (not a top-2 capped subset).
+    assert "capped" not in result
+    # STRING received ALL three overlap gene symbols.
     assert client.network_args is not None
     assert set(client.network_args[0]) == {"G0", "G1", "G2"}
     assert client.image_args is not None

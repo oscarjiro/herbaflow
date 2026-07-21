@@ -177,9 +177,8 @@ export const DISEASE_TARGETS_NUMERIC_PARAMS = ["min_score"] as const;
 // ---------------------------------------------------------------------------
 // PPI (Stage 6 — STRING network) parameter metadata — derived from the contract.
 //
-// Two of the four ppi params are enum-bounded (min_confidence numeric enum,
-// network_type string enum) and render as <select>; max_proteins is a plain
-// numeric input; allow_top_n_cap is a checkbox.
+// Both ppi params are enum-bounded (min_confidence numeric enum, network_type
+// string enum) and render as <select>.
 // ---------------------------------------------------------------------------
 
 const ppiProps = contract.$defs.pipeline_parameters.properties.ppi.properties;
@@ -211,16 +210,9 @@ function ppiEntry(key: keyof typeof ppiProps): AdmeParamMeta {
 
 export const PPI_PARAMS = {
   min_confidence: ppiEntry("min_confidence"),
-  max_proteins: ppiEntry("max_proteins"),
-  allow_top_n_cap: ppiEntry("allow_top_n_cap"),
   network_type: ppiEntry("network_type"),
 } satisfies Record<string, AdmeParamMeta>;
 
-// STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
-// re-enable. The max_proteins + allow_top_n_cap controls are hidden from the Stage 6 param panel
-// (the params stay defined in the contract but are inert). Restore the original arrays to re-enable.
-// export const PPI_NUMERIC_PARAMS = ["max_proteins"] as const;
-// export const PPI_BOOLEAN_PARAMS = ["allow_top_n_cap"] as const;
 export const PPI_NUMERIC_PARAMS = [] as const;
 export const PPI_BOOLEAN_PARAMS = [] as const;
 export const PPI_SELECT_PARAMS = ["min_confidence", "network_type"] as const;

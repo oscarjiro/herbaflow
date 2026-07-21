@@ -260,11 +260,11 @@ async def test_zero_overlap_auto_fails(client, engine, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_large_overlap_is_never_capped_or_blocked(client, engine, monkeypatch):
-    """STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible.
+    """A large overlap builds the full STRING network; there is no protein-count cap.
 
-    A real 60-target overlap builds the full STRING network in auto mode (no blocked marker), and a
-    Redo with a small ``max_proteins`` param is inert (the self-imposed cap is disabled): the stage
-    still computes all 60 nodes. Previously this overlap blocked at ``max_proteins=50``.
+    STRING imposes no maximum identifier count when the species is set, and Stage 6 always sends
+    9606, so a 60-target overlap computes all 60 nodes and never produces a blocked marker. A Redo
+    on the stage recomputes the same full network.
     """
     c, ids = client
     n = 60
@@ -317,12 +317,11 @@ async def test_large_overlap_is_never_capped_or_blocked(client, engine, monkeypa
     assert state["stage_results"]["6"]["state"] == "computed"
     assert state["stage_results"]["6"]["node_count"] == n
 
-    # STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible. Redo S6 with
-    # a small max_proteins (50) — the cap is disabled, so 60 > 50 does NOT block: the stage
-    # recomputes the full 60-node network, never a blocked/overflow marker.
+    # Redo Stage 6 at a higher confidence floor: the full 60-node network is rebuilt, and no
+    # blocked/overflow marker is ever produced regardless of overlap size.
     reset = await c.post(
         f"/analyses/{run_id}/reset-from/6",
-        json={"parameters": {"6": {"max_proteins": 50}}},
+        json={"parameters": {"6": {"min_confidence": 0.7}}},
     )
     assert reset.status_code == 202
     state = await _poll(c, run_id)
@@ -331,7 +330,7 @@ async def test_large_overlap_is_never_capped_or_blocked(client, engine, monkeypa
     assert "blocked" not in s6
     assert s6["state"] == "computed"
     assert s6["node_count"] == n
-    assert s6["capped"]["applied"] is False
+    assert "capped" not in s6
 
 
 @pytest.mark.asyncio

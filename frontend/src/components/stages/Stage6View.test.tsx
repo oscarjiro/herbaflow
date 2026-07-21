@@ -37,28 +37,14 @@ function makeComputedResult() {
     min_confidence: 0.4,
     network_type: "functional",
     unmapped: [],
-    capped: { applied: false, max_proteins: 2000, ranked_by: "opentargets_score" },
     count: 2,
     flags: [],
     has_network_image: true,
   };
 }
 
-// STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
-// re-enable. Stage 6 no longer emits a blocked marker, so the blocked fixture + its tests are gone.
-// function makeBlockedResult() {
-//   return {
-//     blocked: true,
-//     reason: "overlap_too_large",
-//     overlap_count: 60,
-//     max_proteins: 50,
-//   };
-// }
-
 const PPI_PARAM_VALUES = {
   min_confidence: 0.4,
-  max_proteins: 2000,
-  allow_top_n_cap: false,
   network_type: "functional",
 };
 
@@ -214,9 +200,8 @@ describe("Stage6View — computed network", () => {
   it("renders the ppi param panel including the network_type select and a Redo button", async () => {
     wrap(<Stage6View data={makeData(makeComputedResult())} />);
     await openPpiPanel();
-    // Only the two enum selects (min_confidence + network_type) are present.
-    // STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
-    // re-enable. The max_proteins + allow_top_n_cap controls are hidden, so assert their absence.
+    // Only the two enum selects (min_confidence + network_type) are present: there is no
+    // protein-count cap, so no numeric or checkbox control exists in this group.
     expect(screen.queryByLabelText("Max proteins in network")).toBeNull();
     expect(screen.queryByLabelText("Cap network to top-ranked proteins")).toBeNull();
     expect(screen.getByLabelText("Minimum confidence")).toBeInTheDocument();

@@ -391,20 +391,15 @@ compound-target and disease-target sets (pure computation; no external source, n
 
 **Results view (computed):** Summary **cards** lead (node count, edge count, `min_confidence`,
 `network_type`, unmapped count); an **edge-list table** lists each STRING interaction (source,
-target, confidence 0–1), paginated, with **CSV export**. A "capped" note appears when the top-N cap
-was applied.
+target, confidence 0–1), paginated, with **CSV export**.
 
-**Overlap-too-large (blocked):** when `stage_results["6"].blocked` is true, the edge table is
-replaced by a prompt explaining the overlap (`overlap_count`) exceeds the STRING ceiling
-(`max_proteins`), with an **"Enable top-N & Redo"** action (Redo with `allow_top_n_cap: true`) and a
-hint to narrow the inputs upstream. A guided run parks here; an auto run hard-fails (AD-6).
-The blocked approval reason is "Overlap too large. Enable the top-N cap and Redo, or narrow the inputs."
-A computed network with no nodes blocks approval with "No PPI nodes. Adjust the parameters and Redo, or narrow the inputs."
+There is no protein-count cap, so the stage has no blocked state: STRING imposes no maximum
+identifier count when the species is set, and Stage 6 always sends 9606. A computed network with no
+nodes blocks approval with "No PPI nodes. Adjust the parameters and Redo, or narrow the inputs."
 
-**Param panel + Redo:** the `ppi` group is exposed via the generic `ParamPanel` — `max_proteins`
-(numeric), `allow_top_n_cap` (checkbox), and `min_confidence` / `network_type` as **enum selects**
-(`ParamPanel` was extended with generic `selectKeys` support for this). Redo submits
-`POST /analyses/{id}/reset-from/6`.
+**Param panel + Redo:** the `ppi` group is exposed via the generic `ParamPanel` — `min_confidence`
+and `network_type`, both as **enum selects** (`ParamPanel` was extended with generic `selectKeys`
+support for this). Redo submits `POST /analyses/{id}/reset-from/6`.
 
 **Footer:** attributes the network to STRING (human only, species 9606). Graph *visualisation* is
 deferred to the Phase-5 design pass — the edge list is the current surface.

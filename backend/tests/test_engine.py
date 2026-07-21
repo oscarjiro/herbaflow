@@ -317,25 +317,6 @@ def _runners_with_empty_stage6(stage1_count=2, stage2_count=2, stage3_count=1, s
     return {**base, 6: stage6_empty}
 
 
-# STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
-# re-enable. Stage 6 no longer emits a blocked-overflow marker and the engine's AD-6 blocked branch
-# is commented out, so this helper + its two regression tests are disabled. Restore to re-enable.
-#
-# def _runners_with_blocked_stage6(stage1_count=2, stage2_count=2, stage3_count=1, stage4_count=1):
-#     """Like _runners() but Stage 6 returns the blocked-overflow marker."""
-#     base = _runners(stage1_count, stage2_count, stage3_count, stage4_count)
-#
-#     async def stage6_blocked(r):
-#         return {
-#             "blocked": True,
-#             "reason": "overlap_too_large",
-#             "overlap_count": 600,
-#             "max_proteins": 400,
-#         }
-#
-#     return {**base, 6: stage6_blocked}
-
-
 @pytest.mark.asyncio
 async def test_auto_completes_when_stage6_empty_network() -> None:
     """Auto run: valid Stage-5 overlap + 0-edge/0-node Stage-6 => complete (not failed)."""

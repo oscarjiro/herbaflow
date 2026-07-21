@@ -95,8 +95,6 @@ const LABELS: Record<string, string> = {
   // Disease targets (Stage 4)
   min_score: "Minimum score",
   // PPI network (Stage 6)
-  max_proteins: "Max proteins in network",
-  allow_top_n_cap: "Cap network to top-ranked proteins",
   min_confidence: "Minimum confidence",
   network_type: "Network type",
   // Hub genes (Stage 7)

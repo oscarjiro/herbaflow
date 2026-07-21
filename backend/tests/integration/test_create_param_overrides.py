@@ -40,8 +40,6 @@ async def test_valid_overrides_reflected_in_stored_params(client) -> None:
     assert stored_params["hub_genes"] == contracts.hub_genes_defaults()
     # The touched groups keep all non-overridden keys at their defaults too.
     ppi_defaults = contracts.ppi_defaults()
-    assert stored_params["ppi"]["max_proteins"] == ppi_defaults["max_proteins"]
-    assert stored_params["ppi"]["allow_top_n_cap"] == ppi_defaults["allow_top_n_cap"]
     assert stored_params["ppi"]["network_type"] == ppi_defaults["network_type"]
 
 

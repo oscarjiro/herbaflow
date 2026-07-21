@@ -26,7 +26,7 @@ FastAPI + SQLAlchemy 2.0 async + Pydantic v2, run with **uv**. Layered: Routers 
 > `stages/stage2.py` ADME gate, `stages/stage3.py` compound→target ChEMBL∪PubChem BioAssay,
 > `stages/stage4.py` disease→target filtered DB read of seeded `disease_targets`,
 > `stages/stage5.py` overlap (pure S3∩S4 set intersection on `target_id`; no params, no statistics),
-> `stages/stage6.py` STRING PPI network (`ppi` params; self-imposed `max_proteins` cap + blocked-overflow marker DISABLED/inert, reversible),
+> `stages/stage6.py` STRING PPI network (`ppi` params; no protein-count cap, never blocked),
 > `stages/stage7.py` hub-gene ranking (MCC ranking via networkx + four classic centralities reported; `hub_genes` param;
 >   reads `stage_results["6"]`; pure, no DB/API),
 > `stages/stage8.py` functional enrichment (`enrichment` params; query = Stage-5 overlap, background =
@@ -121,13 +121,9 @@ FastAPI + SQLAlchemy 2.0 async + Pydantic v2, run with **uv**. Layered: Routers 
   no statistics, no external API** (OV-1); keeps the two descriptive side-counts (`compound_target_count`/
   `disease_target_count`). 0-overlap is a terminal hard-stop in BOTH modes (OV-4, engine-driven).
 - Stage 6 (PPI network): `app/pipeline/stages/stage6.py` — STRING network over the overlap's mappable
-  gene symbols (`ppi` param group: `min_confidence`/`max_proteins`/`allow_top_n_cap`/`network_type`).
-  The self-imposed `max_proteins` cap and the `{"blocked": true, reason: "overlap_too_large"}`
-  overflow marker are DISABLED (reversible): the stage builds on ALL distinct mappable overlap gene
-  symbols and never emits a blocked result, so `max_proteins`/`allow_top_n_cap` stay defined in the
-  contract but are inert (`capped.applied` is always false). The former cap-select + blocked path
-  (top-N by disease score, driving the guided-park / auto-fail recovery via Redo with
-  `allow_top_n_cap`) is kept commented in `stage6.py` and the engine; restore it to re-enable.
+  gene symbols (`ppi` param group: `min_confidence`/`network_type`). There is NO protein-count cap:
+  STRING imposes no maximum identifier count when the species is set, and the stage always sends
+  9606, so it builds on ALL distinct mappable overlap gene symbols and never emits a blocked result.
   Constructs its own `httpx.AsyncClient` (mirrors `stage3.run`), injectable for tests. After building
   the result it also calls `StringClient.fetch_network_image` (same client, shared throttle) and
   persists the PNG base64 at `stage_results["6"]["network_image"]` (key OMITTED on failure; the image

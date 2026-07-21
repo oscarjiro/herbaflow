@@ -65,8 +65,6 @@ def test_ppi_defaults_match_contract():
     d = contracts.ppi_defaults()
     assert d == {
         "min_confidence": 0.4,
-        "max_proteins": 2000,
-        "allow_top_n_cap": False,
         "network_type": "functional",
     }
     assert "community_resolution" not in contracts.pipeline_param_bounds("ppi")
@@ -77,12 +75,8 @@ def test_ppi_param_bounds_match_contract():
     assert b["min_confidence"]["default"] == 0.4
     assert b["min_confidence"]["enum"] == [0.15, 0.4, 0.7, 0.9]
     assert b["min_confidence"]["description"]
-    assert b["max_proteins"]["default"] == 2000
-    assert b["max_proteins"]["minimum"] == 50
-    assert b["max_proteins"]["maximum"] == 2000
-    assert b["max_proteins"]["recommended_min"] == 200
-    assert b["max_proteins"]["recommended_max"] == 2000
-    assert b["allow_top_n_cap"]["default"] is False
+    assert "max_proteins" not in b
+    assert "allow_top_n_cap" not in b
     assert b["network_type"]["default"] == "functional"
     assert b["network_type"]["enum"] == ["functional", "physical"]
     assert b["network_type"]["description"]

@@ -3,17 +3,12 @@
  * Stage-5 overlap targets.
  *
  * Unlike Stage 5, Stage 6 IS param-bearing (the `ppi` group: min_confidence,
- * max_proteins, allow_top_n_cap, network_type) and has a special **blocked**
- * ("overlap too large") state.
+ * network_type). There is no protein-count cap: STRING imposes no maximum identifier
+ * count when the species is set, and the stage always sends 9606.
  *
- * Two states of `stage_results["6"]`:
- *  - blocked  → `{ blocked:true, reason:"overlap_too_large", overlap_count, max_proteins }`
- *    Render an "overlap too large" prompt instead of the network table, with an
- *    "Enable top-N & Redo" affordance (Redo that flips `allow_top_n_cap: true`) and
- *    a hint to narrow the inputs upstream. Still render the param panel + ApprovalBar
- *    (guided parks here).
- *  - computed → summary cards (node/edge counts, min_confidence, network_type, unmapped),
- *    an edge-list table (source, target, confidence) + CSV of the edges.
+ * `stage_results["6"]` is always computed → summary cards (node/edge counts,
+ * min_confidence, network_type, unmapped), an edge-list table (source, target,
+ * confidence) + CSV of the edges.
  *
  * Always: the ppi param panel (Redo via reset-from/6 with only the changed `ppi`
  * values — incl. the two enum selects) and the StageDataSources footer.
@@ -39,9 +34,6 @@ import { stage6ImageUrl } from "../../lib/exportUrl";
 import type cytoscape from "cytoscape";
 import { useChartColors } from "@/lib/chartTheme";
 import { NetworkGraph } from "@/components/charts/NetworkGraph";
-// STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
-// re-enable. Badge was only used by the "overlap too large" blocked prompt (removed below).
-// import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CsvDownloadButton } from "@/components/ui/CsvDownloadButton";
@@ -73,21 +65,13 @@ type Stage6Computed = {
   min_confidence: number;
   network_type: string;
   unmapped: string[];
-  capped: { applied: boolean; max_proteins: number; ranked_by: string };
   count: number;
   flags?: string[];
   /** True once STRING's server-rendered PNG is stored (base64 stripped from this poll payload). */
   has_network_image?: boolean;
 };
 
-type Stage6Blocked = {
-  blocked: true;
-  reason: string;
-  overlap_count: number;
-  max_proteins: number;
-};
-
-type Stage6Result = Stage6Computed | Stage6Blocked;
+type Stage6Result = Stage6Computed;
 
 type Stage7Hub = {
   rank?: number;
@@ -101,10 +85,6 @@ type PpiParams = Record<string, number | boolean | string>;
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function isBlocked(r: Stage6Result): r is Stage6Blocked {
-  return (r as Stage6Blocked).blocked === true;
-}
 
 export const S6_CSV_HEADER = "source,target,confidence";
 
@@ -252,7 +232,7 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
 
   const redo = useParamRedo<PpiParams>(data.analysis_id, 6);
 
-  const computed = stage6 && !isBlocked(stage6) ? stage6 : undefined;
+  const computed = stage6;
   const edges = useMemo(() => computed?.edges ?? [], [computed]);
   const csvRows = useMemo(() => buildS6CsvRows(edges), [edges]);
 
@@ -280,10 +260,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
   );
 
   if (!stage6) return null;
-
-  // STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore to
-  // re-enable. Stage 6 no longer emits a blocked marker, so the blocked binding + prompt are gone.
-  // const blocked = isBlocked(stage6) ? stage6 : undefined;
 
   function renderGeneLink(gene: string) {
     const accession = accessionByNodeKey.get(gene);
@@ -334,42 +310,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
     <section className="flex flex-col gap-6">
       <StageDataSources stage={6} />
 
-      {/* STR-1 (2026-07-06): STRING imposes no identifier cap; caps disabled, reversible — restore
-          to re-enable. The "overlap too large" blocked prompt can no longer occur (Stage 6 never
-          emits a blocked marker), so the branch is removed. Restore the block below — and the
-          `blocked` binding + Badge import above — to re-enable the cap.
-
-        {blocked ? (
-          // ----- Overlap-too-large prompt -----
-          <Card role="status">
-            <CardContent className="flex flex-col gap-4 pt-6">
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive">Overlap too large</Badge>
-              </div>
-              <p className="text-sm">
-                The overlap of {blocked.overlap_count} proteins exceeds the STRING ceiling of{" "}
-                {blocked.max_proteins}. Building a network this large is unreliable, so it was not
-                queried.
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Either enable the top-N cap to proceed on the {blocked.max_proteins} highest-ranked
-                proteins, or narrow the inputs upstream (raise the Stage 3 / Stage 4 thresholds, or
-                tighten the overlap) and re-run.
-              </p>
-              <div>
-                <Button
-                  type="button"
-                  disabled={redo.isPending || isRunBusy(data.status)}
-                  onClick={() => redo.mutate({ allow_top_n_cap: true })}
-                  aria-label="Enable top-N cap and Redo"
-                >
-                  Enable top-N &amp; Redo
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-      */}
       {computed && (
         <>
           {/* Summary cards */}
@@ -408,13 +348,6 @@ export function Stage6View({ data }: { data: AnalysisRead }) {
               info={METRIC_INFO.s6.unmapped}
             />
           </div>
-
-          {computed.capped.applied && (
-            <p className="text-muted-foreground text-sm" role="status">
-              Capped to the top {computed.capped.max_proteins} proteins by{" "}
-              {computed.capped.ranked_by}.
-            </p>
-          )}
 
           {computed.edge_count === 0 && (
             <p className="text-muted-foreground text-sm" role="status">

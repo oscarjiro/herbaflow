@@ -594,22 +594,15 @@ Computed result:
   "node_count": <int>, "edge_count": <int>,
   "min_confidence": <float>, "network_type": "functional|physical",
   "unmapped": [],
-  "capped": {"applied": <bool>, "max_proteins": <int>, "ranked_by": "opentargets_score"},
   "count": <int>,                  // = node_count
   "flags": [ /* "sparse_or_empty_network" */ ]
 }
 ```
 
-**Self-imposed protein cap (disabled, reversible).** The `max_proteins` ceiling and the
-overlap-too-large blocked-overflow marker are currently off. Stage 6 builds the network on every
-distinct mappable overlap gene symbol and never emits a `blocked` result, so `capped.applied` is
-always `false`. The `max_proteins` / `allow_top_n_cap` parameters stay defined in the contract but
-are inert. The former behavior (kept commented in `stage6.py` and the engine for reversibility) was:
-a run whose overlap exceeded `max_proteins` with `allow_top_n_cap` off produced a
-`{"blocked": true, "reason": "overlap_too_large", ...}` marker; a guided run parked at the Stage-6
-checkpoint and an auto run hard-failed, recoverable by redoing with `allow_top_n_cap: true` or a
-higher `max_proteins`. Community/module detection is deferred (future work). Stage 6 delivers the
-PPI-source network only.
+**No protein-count cap.** Stage 6 builds the network on every distinct mappable overlap gene symbol.
+STRING imposes no maximum identifier count when the species is set, and this stage always sends
+9606, so there is nothing to cap against and the stage never emits a `blocked` result.
+Community/module detection is deferred (future work). Stage 6 delivers the PPI-source network only.
 
 **Hub-genes stage** (Stage 7 — `parameters.hub_genes`).
 
@@ -735,8 +728,6 @@ and render as selects in the UI:
 | Parameter | Type | Default | Bounds / enum | Notes |
 |---|---|---|---|---|
 | `min_confidence` | number | 0.4 | enum {0.15, 0.4, 0.7, 0.9} | STRING edge-confidence floor → `required_score = round(× 1000)` |
-| `max_proteins` | integer | 2000 | ≥50, ≤2000 (rec. 200–2000) | Self-imposed STRING ceiling. Currently inert: the cap is disabled, so Stage 6 uses every mappable overlap protein regardless of this value |
-| `allow_top_n_cap` | boolean | false | — | Opt-in to proceed on the top-N overlap targets (by disease score) when over the ceiling. Inert while the cap is disabled |
 | `network_type` | string | functional | enum {functional, physical} | STRING network: all association evidence vs binding-only |
 
 `min_confidence` carries no hard `minimum`/`maximum` (the UI restricts it to the tiers; the backend
