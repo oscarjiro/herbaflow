@@ -42,7 +42,15 @@
   --hf-surface-2:     var(--hf-neutral-100);
   --hf-border:        rgba(26, 26, 26, 0.08);
   --hf-border-strong: rgba(26, 26, 26, 0.18);
-  --hf-border-focus:  var(--hf-fg-1);
+  --hf-bg-raised:     #fffdfa6b;              /* raised panel wash over the page bg */
+  --hf-dot:           rgba(26, 26, 26, 0.08); /* dotted-grid and separator dots */
+
+  /* Accent — resolves to ink in light and to paper in dark. The UI reads
+     monochrome, so this is an alias, not a colour of its own. */
+  --hf-accent: var(--hf-fg-1);
+
+  /* Control chrome */
+  --hf-switch-track-off: var(--hf-neutral-300);
 
   /* Foreground */
   --hf-fg-1: var(--hf-neutral-900);
@@ -60,12 +68,27 @@
   --hf-info:         #5C7A8F;
   --hf-info-soft:    #D2DDE5;
 
-  /* Glass (used SPARINGLY for floating overlays on viz) */
-  --hf-glass-bg:        rgba(255, 255, 255, 0.62);
-  --hf-glass-bg-strong: rgba(255, 255, 255, 0.82);
-  --hf-glass-border:    rgba(255, 255, 255, 0.7);
+  /* ---------- Glass ----------------------------------------------------
+     The shipped app builds glass from a tint plus a shine, layered over a
+     backdrop filter, rather than from one flat translucent fill. `tint` is
+     the body wash; `tint-clear` is the lighter variant used where content
+     must stay legible through the surface; `shine` and `shine-2` drive the
+     specular edge. Tiers are applied through the .hf-glass classes.
+     --------------------------------------------------------------------- */
+  --hf-glass-tint:              rgba(255, 255, 255, 0.10);
+  --hf-glass-tint-strong:       rgba(255, 255, 255, 0.20);
+  --hf-glass-tint-clear:        rgba(255, 255, 255, 0.07);
+  --hf-glass-tint-clear-strong: rgba(255, 255, 255, 0.10);
+  --hf-glass-shine:             rgba(255, 255, 255, 1);
+  --hf-glass-shine-2:           rgba(255, 255, 255, 1);
   --hf-glass-shadow:    0 1px 1px rgba(26, 26, 26, 0.04),
                         0 12px 32px -8px rgba(26, 26, 26, 0.10);
+
+  /* Legacy flat-glass fills. Superseded by the tint/shine pair above and kept
+     only because the older mockup pages in pages/ still reference them. Do not
+     use these in new work. */
+  --hf-glass-bg-strong: rgba(255, 255, 255, 0.82);
+  --hf-glass-border:    rgba(255, 255, 255, 0.7);
 
   /* ========= TYPOGRAPHY ========= */
 
@@ -137,6 +160,73 @@
   --duration-1: 120ms;
   --duration-2: 220ms;
   --duration-3: 380ms;
+}
+
+/* =====================================================================
+   Dark theme
+   ---------------------------------------------------------------------
+   The shipped app switches themes by putting a `dark` class on <html>,
+   not by media query, so the user's choice wins over the OS setting:
+
+     <html class="dark">
+
+   In the app this is declared as a Tailwind v4 custom variant:
+     @custom-variant dark (&:where(.dark, .dark *));
+
+   Only the tokens whose value actually changes are re-declared. Type,
+   spacing, radii, and motion are theme-independent. Dark is not an
+   inversion: the neutrals stay warm, and the accents lift in lightness so
+   they hold contrast against a dark ground instead of going muddy.
+   ===================================================================== */
+.dark {
+  /* Surfaces */
+  --hf-bg:        #14130f;
+  --hf-surface:   #1c1a15;
+  --hf-surface-2: #232019;
+  --hf-bg-raised: #1d1b16a6;
+
+  /* Foreground */
+  --hf-fg-1: #f2eee6;
+  --hf-fg-2: #cfc8bc;
+  --hf-fg-3: #a39c8e;
+  --hf-fg-4: #7c7568;
+
+  /* Borders and dots */
+  --hf-border:        rgba(247, 245, 242, 0.10);
+  --hf-border-strong: rgba(247, 245, 242, 0.18);
+  --hf-dot:           rgba(247, 245, 242, 0.06);
+
+  /* Data-viz accents — lifted for contrast on a dark ground */
+  --hf-sage:            #a6b89a;
+  --hf-sage-deep:       #8aa07e;
+  --hf-sage-soft:       #313a2c;
+  --hf-sage-faint:      #21271d;
+  --hf-terracotta:      #cb8b72;
+  --hf-terracotta-soft: #3a2a23;
+
+  /* Status */
+  --hf-success:      #86a180;
+  --hf-success-soft: #25301f;
+  --hf-warning:      #cda45a;
+  --hf-warning-soft: #322813;
+  --hf-danger:       #c67d6f;
+  --hf-danger-soft:  #36211c;
+  --hf-info:         #7e9db0;
+  --hf-info-soft:    #1e2a31;
+
+  /* Control chrome */
+  --hf-switch-track-off: #38332b;
+
+  /* Glass — tints invert to a paper wash; shine drops well below opaque so
+     the specular edge reads as light catching glass, not as a white line. */
+  --hf-glass-tint:              rgba(247, 245, 242, 0.02);
+  --hf-glass-tint-strong:       rgba(247, 245, 242, 0.05);
+  --hf-glass-tint-clear:        rgba(247, 245, 242, 0.04);
+  --hf-glass-tint-clear-strong: rgba(247, 245, 242, 0.06);
+  --hf-glass-shine:             rgba(247, 245, 242, 0.35);
+  --hf-glass-shine-2:           rgba(247, 245, 242, 0.20);
+  --hf-glass-shadow:            0 16px 40px -18px rgba(0, 0, 0, 0.75),
+                                0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 /* ---------- Type pairing: Clinical (Fraunces + IBM Plex) ------------ */

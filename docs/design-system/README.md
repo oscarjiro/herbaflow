@@ -1,24 +1,31 @@
 # Herbaflow — Design System
 
-> Network‑pharmacology workflow software for herbal medicine discovery.
 > Editorial, scientific, restrained. Built for a mixed audience of computational and wet‑lab researchers.
+
+> [!IMPORTANT]
+> **Scope: visual style only.** This system is the authority on colour, type, spacing, glass, and
+> editorial voice. It is **not** a source of truth for the science, the pipeline, or the data. For
+> what the platform actually computes, read the root [`README.md`](../../README.md) and
+> [`docs/`](../).
+>
+> **It is a reference, not the shipped stylesheet.** The application does not link
+> `colors_and_type.css` or `components.css`. It is built with Tailwind v4, and the live tokens are
+> defined in [`frontend/src/index.css`](../../frontend/src/index.css). When the two disagree, the
+> frontend wins and this system should be corrected to match.
 
 ---
 
 ## 1. Product context
 
-**What it is.** Herbaflow integrates and automates the currently fragmented network‑pharmacology workflow that researchers use to discover the medicinal potential of herbal plants — with a starting focus on **Indonesian materia medica**. Instead of stitching together a dozen lookup tools, exports and scripts, a user moves through a single continuous, reviewable pipeline.
+**What it is.** Herbaflow integrates and automates the fragmented network‑pharmacology workflow that researchers use to investigate the medicinal potential of herbal plants, with a starting focus on **Indonesian materia medica**. Instead of stitching together a dozen lookup tools, exports and scripts, a user moves through a single continuous, reviewable pipeline.
 
-**The workflow (six steps).**
+The pipeline runs in eight stages, from compound collection through drug‑likeness screening, target identification, overlap, protein interaction network, hub ranking, and functional enrichment. The authoritative description lives in the root [`README.md`](../../README.md); it is deliberately not restated here, so this file can never drift into contradicting it.
 
-1. **Plant &amp; disease selection** — pick herbal sources and the target indication.
-2. **Compound screening &amp; target prediction** — OB / DL filters, STITCH + SwissTargetPrediction.
-3. **Targets overlap** — Venn intersection between disease‑associated and compound‑associated targets.
-4. **PPI network construction** — STRING database, confidence ≥ 0.7.
-5. **Hub analysis** — degree, betweenness, cluster identification.
-6. **Enrichment analysis** — GO / KEGG pathway enrichment, publishable figure.
+Design‑relevant consequences of that shape:
 
-Headline numbers: **500+ Indonesian plants · 11,000+ metabolites · 10+ curated diseases.**
+- **Eight stages means eight result surfaces**, each needing a table, a parameter panel, and usually a figure. Layout has to stay legible when repeated eight times.
+- **Every stage is inspectable and re‑runnable**, so parameter controls are primary UI, not settings buried in a menu.
+- **Stages can be empty or not applicable**, so empty and disabled states are first‑class, not edge cases.
 
 **What makes it different.**
 
@@ -54,7 +61,6 @@ assets/
   herbaflow-glyph.svg      ← glyph-only mark (favicons, avatars, app icons)
   herbaflow-glyph.png      ← raster fallback
   ascii-dna.js             ← <ascii-dna> web component (background sweep)
-  source-*.png             ← original brand sheet & screen references
 
 pages/
   Landing.html             ← marketing / entry page with ASCII DNA hero
@@ -152,6 +158,10 @@ Never write ASCII boxes, ASCII bullets, or ASCII art that mimics imagery a real 
 
 ## 7. Known limitations
 
-- Static reference databases (plants, diseases, metabolites, targets). The UI flags result counts and last‑indexed dates so users can judge coverage.
-- Molecular docking is not yet automated. The “Docking” step shows a deliberate empty state with manual export instructions instead of pretending to run it.
-- This is a solo thesis project — the system is scoped to landing, analysis, about, and the in‑product primitives. No auth, billing, or dashboards.
+- **The mockups in `pages/` predate the shipped frontend.** They were the design target, and the
+  application has moved since. Treat them as indicative of intent, not as a description of the
+  current UI. The tokens in `colors_and_type.css` are kept in sync; the mockup markup is not.
+- Static reference databases. The UI surfaces result counts so users can judge coverage.
+- Molecular docking is not run in‑app. Results export in a form other docking tools can consume.
+- Solo thesis project, so the system is scoped to landing, analysis, about, and the in‑product
+  primitives. No auth, billing, or dashboards.
